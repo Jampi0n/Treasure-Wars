@@ -3,10 +3,11 @@ package PathUnit
 import Path
 import TimerUtils
 import Vectors
+import HashMap
 
 public class PathUnit 
 
-    static group pathUnits = CreateGroup()
+    static HashMap<unit,PathUnit> unitToPathUnit = new HashMap<unit,PathUnit>
     unit assocUnit
     Path currentPath
     int currentSubPath
@@ -14,32 +15,33 @@ public class PathUnit
 
     //prepares a unit to be able to use paths
     construct(unit u)
-        if(pathUnits.contains(u))
+        if(unitToPathUnit.has(u))
             print("Warning! - "+u.getName()+" is already a PathUnit.")
             destroy(this)
         else
             this.assocUnit = u
             this.nextUpdate = getTimer()
             this.nextUpdate.setData(this castTo int)
-            this.nextUpdate.start(0., function updateMovementStatic)
+            this.nextUpdate.start(GetRandomReal(0, 0.05), function updateMovementStatic)
             this.currentPath = null
             this.currentSubPath = 0
+            unitToPathUnit.put(this.assocUnit, this)
 
     ondestroy
         nextUpdate.pause()
         nextUpdate.release()
-        pathUnits.removeUnit(this.assocUnit)
+        unitToPathUnit.remove(this.assocUnit)
 
     function setPath(Path p)
         this.currentPath = p
 
     function getNextUpdate() returns real
-        return GetRandomReal(0.8, 0.9)
+        return GetRandomReal(0.8, 1.1)
 
 
 
     function updateMovement()
-        
+        //print("updateMovement "+this.assocUnit.getName() + " " +this.assocUnit.getHandleId().toString() )
         if(assocUnit==null)
             destroy(this)
             return
@@ -47,23 +49,40 @@ public class PathUnit
         if(currentPath==null)
             return
        
+        //print("continue")
 
         vec2 v0 = vec2(assocUnit.getX(), assocUnit.getY())
         vec2 v1
         vec2 v2
         real minDistance = -1
         int newSubPath = -1
-        for i=0 to this.currentPath.getSubPathCount()-1
+        print(this.currentPath.getSubPathCount()-2)
+        for i=0 to this.currentPath.getSubPathCount()-2
 
             v1 = vec2(this.currentPath.getSubPathX(i), this.currentPath.getSubPathY(i))
+            //print("v1="+v1.toString())
             v2 = vec2(this.currentPath.getSubPathX(i+1), this.currentPath.getSubPathY(i+1))
-            real distance = v0.distanceToSegmentSq(v1, v2)
+            //print("v2="+v2.toString())
+            real distance = v0.distanceToSegmentSq(v1, v2).pow(0.5)
+            //print("distance="+distance.toString())
+            //print("minDistance="+minDistance.toString())
             if(distance <= minDistance+200 or minDistance==-1)
                 minDistance = distance
                 newSubPath = i
         int newOrder = 0
-        string currentOrder = this.assocUnit.getCurrentOrder().toString()
+        string currentOrder =  OrderId2String(this.assocUnit.getCurrentOrder())
+    
+        print(minDistance)
+        print("path: "+this.currentSubPath.toString()+" -> "+newSubPath.toString())
+        print(currentOrder)
+
         
+
+        //order:
+            //0 = do nothing
+            //1 = move back
+            //2 = continue move
+
         if(currentOrder == "move")
             if(minDistance<200)
                 newOrder = 2
@@ -77,20 +96,30 @@ public class PathUnit
             else
                 newOrder = 2
         
+        print("newOrder ="+newOrder.toString())
+        v2 = vec2(this.currentPath.getSubPathX(newSubPath+1), this.currentPath.getSubPathY(newSubPath+1))
+
         if(this.currentSubPath!=newSubPath)
             newOrder = 0
-            v2 = vec2(this.currentPath.getSubPathX(newSubPath),this.currentPath.getSubPathY(newSubPath))
             this.assocUnit.issuePointOrder("attack",v2)
-        this.currentSubPath = newSubPath
-        group nearby = CreateGroup()
+            this.currentSubPath = newSubPath
+        
         if(newOrder!=0)
+            group nearby = CreateGroup()
             nearby.enumUnitsInRange(v0, 500)
-            v2 = vec2(this.currentPath.getSubPathX(newSubPath),this.currentPath.getSubPathY(newSubPath))
             
             while(nearby.hasNext())
                 unit n = nearby.next()
-                //reference PathUnit from unit !!!
-                if(pathUnits.contains(n) and )
+                if(unitToPathUnit.has(n))
+                    PathUnit nearbyPathUnit = unitToPathUnit.get(n)
+                    if(nearbyPathUnit.currentPath == this.currentPath)
+                        if(newOrder==1)
+                            n.issuePointOrder("move", v2)
+                        else
+                            n.issuePointOrder("attack", v2)
+                        nearbyPathUnit.nextUpdate.start(this.getNextUpdate(), function updateMovementStatic)
+            nearby.destr()
+                                
 
     static function updateMovementStatic()
         timer t = GetExpiredTimer()

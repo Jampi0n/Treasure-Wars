@@ -19,13 +19,13 @@ public class Path
         this.pathCount = 0
 
     //adds a new point(x,y) to a path
-    function addPoint(real x, real y)
-        this.pathTable.saveReal( this.pathCount * 2, x)
-        this.pathTable.saveReal( this.pathCount * 2 + 1, y)
+    function addPoint(vec2 pos)
+        this.pathTable.saveReal( this.pathCount * 2, pos.x)
+        this.pathTable.saveReal( this.pathCount * 2 + 1, pos.y)
         this.pathCount++
 
     function getSubPathCount() returns int
-        return this.getSubPathCount()
+        return this.pathCount
 
     function getSubPathX(int index) returns real
         return this.pathTable.loadReal( index * 2 )
