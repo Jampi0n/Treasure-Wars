@@ -1,4 +1,25 @@
 package Main
 
+import Path
+import PathUnit
+
+function testCreateUnits()
+	Path p1 = new Path()
+	p1.addPoint(gg_rct_Start.getCenter())
+	p1.addPoint(gg_rct_Corner0.getCenter())
+	p1.addPoint(gg_rct_Corner1.getCenter())
+	p1.addPoint(gg_rct_Corner2.getCenter())
+	p1.addPoint(gg_rct_Corner3.getCenter())
+	p1.addPoint(gg_rct_Finish.getCenter())
+
+
+	for i=0 to 0
+		unit u =createUnit(Player(11), 'hfoo', gg_rct_Start.getCenter() , angle(0) )
+		u.issuePointOrder("attack", gg_rct_Corner0.getCenter())
+		PathUnit pU = new PathUnit(u)
+		pU.setPath(p1)
+
+
 init
 	print("Hello World")
+	testCreateUnits()
