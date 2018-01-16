@@ -1,0 +1,101 @@
+package PathUnit
+
+import Path
+import TimerUtils
+import Vectors
+
+public class PathUnit 
+
+    static group pathUnits = CreateGroup()
+    unit assocUnit
+    Path currentPath
+    int currentSubPath
+    timer nextUpdate
+
+    //prepares a unit to be able to use paths
+    construct(unit u)
+        if(pathUnits.contains(u))
+            print("Warning! - "+u.getName()+" is already a PathUnit.")
+            destroy(this)
+        else
+            this.assocUnit = u
+            this.nextUpdate = getTimer()
+            this.nextUpdate.setData(this castTo int)
+            this.nextUpdate.start(0., function updateMovementStatic)
+            this.currentPath = null
+            this.currentSubPath = 0
+
+    ondestroy
+        nextUpdate.pause()
+        nextUpdate.release()
+        pathUnits.removeUnit(this.assocUnit)
+
+    function setPath(Path p)
+        this.currentPath = p
+
+    function getNextUpdate() returns real
+        return GetRandomReal(0.8, 0.9)
+
+
+
+    function updateMovement()
+        
+        if(assocUnit==null)
+            destroy(this)
+            return
+        nextUpdate.start(this.getNextUpdate(), function updateMovementStatic)
+        if(currentPath==null)
+            return
+       
+
+        vec2 v0 = vec2(assocUnit.getX(), assocUnit.getY())
+        vec2 v1
+        vec2 v2
+        real minDistance = -1
+        int newSubPath = -1
+        for i=0 to this.currentPath.getSubPathCount()-1
+
+            v1 = vec2(this.currentPath.getSubPathX(i), this.currentPath.getSubPathY(i))
+            v2 = vec2(this.currentPath.getSubPathX(i+1), this.currentPath.getSubPathY(i+1))
+            real distance = v0.distanceToSegmentSq(v1, v2)
+            if(distance <= minDistance+200 or minDistance==-1)
+                minDistance = distance
+                newSubPath = i
+        int newOrder = 0
+        string currentOrder = this.assocUnit.getCurrentOrder().toString()
+        
+        if(currentOrder == "move")
+            if(minDistance<200)
+                newOrder = 2
+        if(currentOrder=="attack")
+            if(minDistance>600)
+                newOrder = 1
+        if(currentOrder!="attack")
+            if(minDistance>400)
+                if(currentOrder!="move")
+                    newOrder = 1
+            else
+                newOrder = 2
+        
+        if(this.currentSubPath!=newSubPath)
+            newOrder = 0
+            v2 = vec2(this.currentPath.getSubPathX(newSubPath),this.currentPath.getSubPathY(newSubPath))
+            this.assocUnit.issuePointOrder("attack",v2)
+        this.currentSubPath = newSubPath
+        group nearby = CreateGroup()
+        if(newOrder!=0)
+            nearby.enumUnitsInRange(v0, 500)
+            v2 = vec2(this.currentPath.getSubPathX(newSubPath),this.currentPath.getSubPathY(newSubPath))
+            
+            while(nearby.hasNext())
+                unit n = nearby.next()
+                //reference PathUnit from unit !!!
+                if(pathUnits.contains(n) and )
+
+    static function updateMovementStatic()
+        timer t = GetExpiredTimer()
+        PathUnit u = (t.getData() castTo PathUnit)
+        u.updateMovement()
+
+        
+init

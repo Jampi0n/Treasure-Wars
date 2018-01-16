@@ -1,0 +1,77 @@
+package PlayerControl
+
+import Player
+import HashMap
+import DummyRecycler
+import LinkedList
+
+/*
+* This package handles players
+*
+*
+*/
+
+enum Team
+    TEAM1
+    TEAM2
+    NEUTRAL
+
+public function player.getPlayer() returns GeneralPlayer
+    return GeneralPlayer.idToPlayer[this.getId()]
+
+public class GeneralPlayer
+    player assocPlayer
+    int playerId
+    
+    static LinkedList<GeneralPlayer> allPlayers = new LinkedList<GeneralPlayer>()
+    static GeneralPlayer array idToPlayer
+    Team team
+
+    construct(player p, Team t)
+        this.assocPlayer = p
+        this.playerId = p.getId()
+        this.team = t
+        idToPlayer[this.playerId] = this
+        allPlayers.add(this)
+    
+    function toString() returns string
+        return "Player = "+assocPlayer.getName()
+        
+
+public class HeroPlayer extends GeneralPlayer
+    
+    static LinkedList<HeroPlayer> heroPlayers = new LinkedList<HeroPlayer>()
+
+    construct(player p, Team t)
+        super(p, t)
+        heroPlayers.add(this)
+        
+
+public class AIHero extends HeroPlayer
+
+    construct(player p, Team t)
+        super(p, t)
+
+
+public class UserHero extends HeroPlayer
+
+    construct(player p, Team t)
+        super(p, t)
+
+
+public class UnusedHero extends GeneralPlayer
+
+    construct(player p, Team t)
+        super(p, t)
+
+
+public class ArmyPlayer extends GeneralPlayer
+
+    construct(player p, Team t)
+        super(p, t)
+
+        
+public class NeutralPlayer extends GeneralPlayer
+
+    construct(player p, Team t)
+        super(p, t)

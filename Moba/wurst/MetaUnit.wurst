@@ -1,0 +1,36 @@
+package MetaUnit
+
+import UnitIndexer
+import HashMap
+
+//this class contains information every unit has
+//it is automatically created for every unit in the map
+public class MetaUnit
+
+    //data structure to get the meta unit that belongs to a unit
+    static HashMap<unit,MetaUnit> toMetaUnit = new HashMap<unit,MetaUnit>()
+    //unit associated with the meta unit
+    unit assocUnit
+    //the index of the unit
+    int index
+
+    //automatically called onIndex
+    construct(unit u)
+        this.assocUnit = u
+        this.index = assocUnit.getUserData()
+        print("construct: "+this.assocUnit.getName()+" "+index.toString())
+        toMetaUnit.put(u,this)
+
+    //automatically called onDeindex
+    ondestroy
+        print("ondestroyx: "+this.assocUnit.getName()+" "+index.toString()) 
+        toMetaUnit.remove(this.assocUnit)
+
+    //returns the Meta unit that belongs to a unit
+    static function getMetaUnit(unit u) returns MetaUnit
+        return toMetaUnit.get(u)
+    
+
+init
+    onUnitIndex(()->new MetaUnit(getIndexedUnit()))
+    onUnitDeindex(()->destroy MetaUnit.getMetaUnit(getDeindexedUnit()))

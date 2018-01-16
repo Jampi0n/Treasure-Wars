@@ -1,0 +1,82 @@
+package HeroControl
+
+import Trigger
+import PlayerControl
+import InstantDummyCaster
+import HashMap
+import GameTimer
+import LinkedList
+
+class Hero
+
+    static constant assistDuration = 10.
+
+    HeroPlayer owner
+    unit hero
+    static trigger onDamageTrigger = CreateTrigger()
+    static trigger onDeathTrigger = CreateTrigger()
+    static Hero array heroes
+    static HashMap<unit,Hero> unitToHero = new HashMap<unit,Hero>
+    HashMap<HeroPlayer,real> assistMap = new HashMap<HeroPlayer,real>
+
+    static function classInit()
+        onDamageTrigger.addAction(function onDamageStatic)
+        onDeathTrigger.addAction(function onDeathStatic)
+
+    construct(HeroPlayer p, int unitId, vec2 pos, angle facing )
+        this.hero = createUnit(p.assocPlayer, unitId, pos, facing)
+        this.owner = p
+        unitToHero.put(this.hero, this)
+        onDamageTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DAMAGED)
+        onDeathTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DEATH)
+
+
+
+    //handles assists
+    function addAssistDuration(HeroPlayer p)
+        assistMap.put(p,getElapsedGameTime() + assistDuration)
+
+    function onDamage()
+        GeneralPlayer damageSource
+        damageSource = GetEventDamageSource().getOwner().getPlayer()
+        if( damageSource instanceof HeroPlayer and damageSource.team!=this.owner.team)
+            this.addAssistDuration(damageSource castTo HeroPlayer)
+
+    static function onDamageStatic()
+        unitToHero.get( GetTriggerUnit()).onDamage()
+
+    //handles death
+    function onDeath()
+        LLIterator<HeroPlayer> iter = HeroPlayer.heroPlayers.iterator()
+        while(iter.hasNext())
+            HeroPlayer assistant = iter.next()
+            if(assistMap.get(assistant) > getElapsedGameTime() )
+                print("assist:"+assistant.toString())
+
+
+    static function onDeathStatic()
+        unitToHero.get( GetTriggerUnit()).onDeath()
+
+    //kills the Hero without specifying the killer
+    function killHero()
+        this.hero.kill()
+    
+    //kills the Hero, the killer is specified
+    function killHero(unit killer)
+        this.hero.setHP(1)
+        killer.damageTarget(this.hero, 10)
+
+    //kills the Hero. If the killing player is a HeroPlayer,
+    //the corresponding Hero is the killer
+    //else the Hero is killed wihtout a killer.
+    function killHero(GeneralPlayer killer)
+        if(killer instanceof HeroPlayer)
+            this.killHero(heroes[(killer castTo HeroPlayer).playerId].hero)
+        else
+            this.killHero()
+
+    function toString() returns string
+        return "Hero "+ this.owner.assocPlayer.getName() +"="+this.hero.getName()
+        
+init
+    Hero.classInit()
