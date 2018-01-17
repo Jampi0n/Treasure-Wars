@@ -1,11 +1,12 @@
 package HeroControl
 
-import Trigger
 import PlayerControl
-import InstantDummyCaster
 import HashMap
 import GameTimer
 import LinkedList
+
+function integer.getHero() returns Hero
+    return Hero.heroes[this]
 
 class Hero
 
@@ -13,33 +14,40 @@ class Hero
 
     HeroPlayer owner
     unit hero
-    static trigger onDamageTrigger = CreateTrigger()
-    static trigger onDeathTrigger = CreateTrigger()
-    static Hero array heroes
-    static HashMap<unit,Hero> unitToHero = new HashMap<unit,Hero>
+    private static trigger onDamageTrigger = CreateTrigger()
+    private static trigger onDeathTrigger = CreateTrigger()
+    protected static Hero array heroes
+    private static HashMap<unit,Hero> unitToHero = new HashMap<unit,Hero>
     HashMap<HeroPlayer,real> assistMap = new HashMap<HeroPlayer,real>
+
+    
 
     static function classInit()
         onDamageTrigger.addAction(function onDamageStatic)
         onDeathTrigger.addAction(function onDeathStatic)
 
     construct(HeroPlayer p, int unitId, vec2 pos, angle facing )
-        this.hero = createUnit(p.assocPlayer, unitId, pos, facing)
+        this.hero = createUnit(p.getPlayer(), unitId, pos, facing)
         this.owner = p
         unitToHero.put(this.hero, this)
         onDamageTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DAMAGED)
         onDeathTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DEATH)
-
-
+    
+    construct(unit u)
+        this.hero = u
+        this.owner = u.getOwner().getCPlayer() castTo HeroPlayer
+        unitToHero.put(this.hero, this)
+        onDamageTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DAMAGED)
+        onDeathTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DEATH)
 
     //handles assists
     function addAssistDuration(HeroPlayer p)
         assistMap.put(p,getElapsedGameTime() + assistDuration)
 
     function onDamage()
-        GeneralPlayer damageSource
-        damageSource = GetEventDamageSource().getOwner().getPlayer()
-        if( damageSource instanceof HeroPlayer and damageSource.team!=this.owner.team)
+        CPlayer damageSource
+        damageSource = GetEventDamageSource().getOwner().getCPlayer()
+        if( damageSource instanceof HeroPlayer and damageSource.getTeam()!=this.owner.getTeam())
             this.addAssistDuration(damageSource castTo HeroPlayer)
 
     static function onDamageStatic()
@@ -69,14 +77,14 @@ class Hero
     //kills the Hero. If the killing player is a HeroPlayer,
     //the corresponding Hero is the killer
     //else the Hero is killed wihtout a killer.
-    function killHero(GeneralPlayer killer)
+    function killHero(CPlayer killer)
         if(killer instanceof HeroPlayer)
-            this.killHero(heroes[(killer castTo HeroPlayer).playerId].hero)
+            this.killHero(heroes[(killer castTo HeroPlayer).getId()].hero)
         else
             this.killHero()
 
     function toString() returns string
-        return "Hero "+ this.owner.assocPlayer.getName() +"="+this.hero.getName()
+        return "Hero "+ this.owner.getPlayer().getName() +"="+this.hero.getName()
         
 init
-    Hero.classInit()
+    
