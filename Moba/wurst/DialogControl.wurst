@@ -1,0 +1,36 @@
+package DialogControl
+
+import LinkedList
+
+
+
+
+
+
+
+class DialogButton
+    private dialog dialogHandle
+    private button buttonHandle
+    private string text
+    private trigger clicked
+
+    construct(dialog d, string t, code cb)
+        this.dialogHandle = d
+        this.text = t
+        this.clicked = CreateTrigger()
+        this.buttonHandle = DialogAddButton(this.dialogHandle, this.text, 0 )
+        this.clicked.addAction(cb)
+
+
+public class DialogBox
+
+    private dialog dialogHandle
+    private LinkedList<DialogButton> buttons
+
+    construct()
+        this.dialogHandle = DialogCreate()
+        this.buttons = new LinkedList<DialogButton>()
+    
+    function addButton(string text, code cb)
+        buttons.add(new DialogButton(this.dialogHandle, text, cb))
+        
