@@ -2,6 +2,8 @@ package Main
 
 import Path
 import PathUnit
+import ClosureTimers
+import DialogBox
 
 function testCreateUnits()
 	Path p1 = new Path()
@@ -13,13 +15,28 @@ function testCreateUnits()
 	p1.addPoint(gg_rct_Finish.getCenter())
 
 
-	for i=0 to 0
+	for i=0 to -1
 		unit u =createUnit(Player(11), 'hfoo', gg_rct_Start.getCenter() , angle(0) )
 		u.issuePointOrder("attack", gg_rct_Corner0.getCenter())
 		PathUnit pU = new PathUnit(u)
 		pU.setPath(p1)
 
 
+function showDialog()
+	DialogBox db = new DialogBox("Pick Mode")
+	db.addButton("All Random", 0, ()-> begin
+		print("all random")
+	end )
+	db.addButton("All Pick", 0, ()-> begin
+		print("all pick")
+		TriggerSleepAction(3)
+		print("all pick again")
+	end )
+
+	db.display(players[0], true)
+
 init
 	print("Hello World")
 	testCreateUnits()
+	doAfter(0,  ()-> showDialog() )
+
