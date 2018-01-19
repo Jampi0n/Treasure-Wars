@@ -3,61 +3,96 @@ package HeroControl
 import PlayerControl
 import HashMap
 import GameTimer
-import LinkedList
+import HeroType
+import Upgrades
+import Stats
+
 
 function integer.getHero() returns Hero
     return Hero.heroes[this]
 
-class Hero
+public class Hero
 
     static constant assistDuration = 10.
 
-    HeroPlayer owner
-    unit hero
-    private static trigger onDamageTrigger = CreateTrigger()
-    private static trigger onDeathTrigger = CreateTrigger()
+    private CPlayer owner
+    private HeroType heroType
+    private unit hero
+    private integer level
+    private static constant onDamageTrigger = CreateTrigger()
+    private static constant onDeathTrigger = CreateTrigger()
+    private static constant onLevelUpTrigger = CreateTrigger()
     protected static Hero array heroes
-    private static HashMap<unit,Hero> unitToHero = new HashMap<unit,Hero>
-    HashMap<HeroPlayer,real> assistMap = new HashMap<HeroPlayer,real>
+    private static constant unitToHero = new HashMap<unit,Hero>
+    private static constant assistMap = new HashMap<CPlayer,real>
 
-    
-
-    static function classInit()
+    protected static function classInit()
         onDamageTrigger.addAction(function onDamageStatic)
         onDeathTrigger.addAction(function onDeathStatic)
+        onLevelUpTrigger.addAction(function onLevelUpStatic)
 
-    construct(HeroPlayer p, int unitId, vec2 pos, angle facing )
+    function setup()
+        unitToHero.put(this.hero, this)
+        onDamageTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DAMAGED)
+        onDeathTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DEATH)
+        onLevelUpTrigger.registerUnitEvent(this.hero, EVENT_UNIT_HERO_LEVEL)
+        this.heroType = HeroType.getHeroType(this.hero.getTypeId())
+        print("setup completed: "+this.hero.getName())
+
+    construct(CPlayer p, int unitId, vec2 pos, angle facing )
         this.hero = createUnit(p.getPlayer(), unitId, pos, facing)
         this.owner = p
-        unitToHero.put(this.hero, this)
-        onDamageTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DAMAGED)
-        onDeathTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DEATH)
+        this.level = 1
+        this.setup()
     
     construct(unit u)
+        print("name = "+u.getName())
+        print(u.getHandleId())
         this.hero = u
-        this.owner = u.getOwner().getCPlayer() castTo HeroPlayer
-        unitToHero.put(this.hero, this)
-        onDamageTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DAMAGED)
-        onDeathTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DEATH)
+        this.level = GetHeroLevel(this.hero)
+        this.owner = u.getOwner().getCPlayer()
+        this.setup()
 
+    //
+    function upgrade()
+        integer lvl = this.level
+        player upgradePlayer = this.owner.getPlayer()
+        SetPlayerTechResearched(upgradePlayer, UPG_AD , this.heroType.calculateStat(Stat.AD, lvl))
+        SetPlayerTechResearched(upgradePlayer, UPG_AR , this.heroType.calculateStat(Stat.AR, lvl))
+        SetPlayerTechResearched(upgradePlayer, UPG_AS , this.heroType.calculateStat(Stat.AS, lvl))
+        SetPlayerTechResearched(upgradePlayer, UPG_HP , this.heroType.calculateStat(Stat.HP, lvl))
+        SetPlayerTechResearched(upgradePlayer, UPG_HR , this.heroType.calculateStat(Stat.HR, lvl))
+        SetPlayerTechResearched(upgradePlayer, UPG_MP , this.heroType.calculateStat(Stat.MP, lvl))
+        SetPlayerTechResearched(upgradePlayer, UPG_MR , this.heroType.calculateStat(Stat.MR, lvl))
+        SetPlayerTechResearched(upgradePlayer, UPG_MS , this.heroType.calculateStat(Stat.MS, lvl))
+        
+    function onLevelUp()
+        this.level = GetHeroLevel(this.hero)
+        print("new level = "+this.level.toString())
+        this.upgrade()
+
+    static function onLevelUpStatic()
+        unitToHero.get( GetTriggerUnit()).onLevelUp()
+    
     //handles assists
-    function addAssistDuration(HeroPlayer p)
+    function addAssistDuration(CPlayer p)
         assistMap.put(p,getElapsedGameTime() + assistDuration)
 
     function onDamage()
+        print("damage")
         CPlayer damageSource
         damageSource = GetEventDamageSource().getOwner().getCPlayer()
-        if( damageSource instanceof HeroPlayer and damageSource.getTeam()!=this.owner.getTeam())
-            this.addAssistDuration(damageSource castTo HeroPlayer)
+        if( damageSource.getTeam()!=this.owner.getTeam())
+            this.addAssistDuration(damageSource)
 
     static function onDamageStatic()
+        print("damage static")
         unitToHero.get( GetTriggerUnit()).onDamage()
 
     //handles death
     function onDeath()
-        LLIterator<HeroPlayer> iter = HeroPlayer.heroPlayers.iterator()
-        while(iter.hasNext())
-            HeroPlayer assistant = iter.next()
+        for i = 0 to 15
+            CPlayer assistant = allCPlayers[i]
             if(assistMap.get(assistant) > getElapsedGameTime() )
                 print("assist:"+assistant.toString())
 
@@ -78,11 +113,13 @@ class Hero
     //the corresponding Hero is the killer
     //else the Hero is killed wihtout a killer.
     function killHero(CPlayer killer)
-        if(killer instanceof HeroPlayer)
-            this.killHero(heroes[(killer castTo HeroPlayer).getId()].hero)
+        if(killer.getPlayerType() == PlayerType.HERO)
+            this.killHero(heroes[(killer).getId()].hero)
         else
             this.killHero()
 
     function toString() returns string
         return "Hero "+ this.owner.getPlayer().getName() +"="+this.hero.getName()
         
+init
+    Hero.classInit()

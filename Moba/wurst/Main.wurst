@@ -3,6 +3,8 @@ package Main
 import Path
 import PathUnit
 import ClosureTimers
+import PlayerControl
+import HeroControl
 import DialogBox
 
 function testCreateUnits()
@@ -23,6 +25,7 @@ function testCreateUnits()
 
 
 function showDialog()
+	/*
 	DialogBox db = new DialogBox("Pick Mode")
 	db.addButton("All Random", 0, ()-> begin
 		print("all random")
@@ -34,9 +37,22 @@ function showDialog()
 	end )
 
 	db.display(players[0], true)
+	*/
+function setupHero()
 
+	new Hero(players[0].getCPlayer(), 'H000', vec2(428.1,647.6) , angle(176.720))
+
+	let dBox = new DialogBox("Extra starting gold?")
+	dBox.addButton("Yes", () -> begin
+		players[0].addGold(500)
+		destroy dBox
+	end)
+	dBox.addButton("No", () -> destroy dBox)
+	dBox.display(players[0], true)
 init
 	print("Hello World")
 	testCreateUnits()
 	doAfter(0,  ()-> showDialog() )
+	doAfter(1,() -> setupHero())
+	
 
