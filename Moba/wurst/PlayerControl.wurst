@@ -1,65 +1,61 @@
 package PlayerControl
 
-import LinkedList
-
 /*
 * This package handles players
 *
 *
 */
 
-CPlayer array allPlayers
+public CPlayer array allCPlayers
 
 function initPlayers()
     for i = 0 to 9
         player p = players[i]
         Team t = i<=5?Team.TEAM1:Team.TEAM2
-        if(p.getController()== MAP_CONTROL_USER and p.getSlotState()==PLAYER_SLOT_STATE_PLAYING )
-            allPlayers[i] = new UserHeroPlayer(p, t)
-        else if(p.getController()==MAP_CONTROL_COMPUTER and p.getSlotState()==PLAYER_SLOT_STATE_PLAYING)
-            allPlayers[i] = new AIHeroPlayer(p, t)
+        if( p.getSlotState()==PLAYER_SLOT_STATE_PLAYING )
+            allCPlayers[i] = new CPlayer(p, t, PlayerType.HERO)
         else
-            allPlayers[i] = new UnusedHeroPlayer(p, t)
-    allPlayers[10] = new ArmyPlayer(players[10], Team.TEAM1)
-    allPlayers[11] = new ArmyPlayer(players[11], Team.TEAM2)
-    allPlayers[12] = new NeutralPlayer(players[12], Team.NEUTRAL_HOSTILE)
+            allCPlayers[i] = new CPlayer(p, t, PlayerType.NONE)
+
+
+    allCPlayers[10] = new CPlayer(players[10], Team.TEAM1, PlayerType.ARMY)
+    allCPlayers[11] = new CPlayer(players[11], Team.TEAM2, PlayerType.ARMY)
+    allCPlayers[12] = new CPlayer(players[12], Team.NEUTRAL_HOSTILE, PlayerType.NEUTRAL)
     for i=13 to 15
-        allPlayers[15] = new NeutralPlayer(players[15], Team.NEUTRAL_PASSIVE)
+        allCPlayers[15] = new CPlayer(players[15], Team.NEUTRAL_PASSIVE, PlayerType.NEUTRAL)
         
 
 
-
-
-
-
-
-
-
-
-
-
-
-enum Team
+public enum Team
     TEAM1
     TEAM2
     NEUTRAL_HOSTILE
     NEUTRAL_PASSIVE
+
+public enum PlayerType
+    HERO
+    NONE
+    ARMY
+    NEUTRAL
 
 public function player.getCPlayer() returns CPlayer
     return CPlayer.idToPlayer[this.getId()]
 
 //player class
 public class CPlayer
+
     private player assocPlayer
     private int playerId
     
     protected static CPlayer array idToPlayer
     private Team team
+    private PlayerType playertype
 
-    construct(player p, Team t)
+    construct(player p, Team t, PlayerType pType)
         this.assocPlayer = p
         this.playerId = p.getId()
         this.team = t
+        this.playertype = pType
         idToPlayer[this.playerId] = this
     
     function toString() returns string
@@ -73,53 +69,9 @@ public class CPlayer
 
     function getTeam() returns Team
         return this.team
-        
-//player 0-9 controlling a hero
-public class HeroPlayer extends CPlayer
-    
-    static LinkedList<HeroPlayer> heroPlayers = new LinkedList<HeroPlayer>()
 
-    construct(player p, Team t)
-        super(p, t)
-        heroPlayers.add(this)
-        
-//player controlled by AI
-public class AIHeroPlayer extends HeroPlayer
-
-    construct(player p, Team t)
-        super(p, t)
-
-// player controlled by users
-public class UserHeroPlayer extends HeroPlayer
-
-    construct(player p, Team t)
-        super(p, t)
-
-    //if a player leaves the game, the hero will be controlled by an AI player
-    function toAI()
-        allPlayers[this.getId()] = new AIHeroPlayer(this.getPlayer(), this.getTeam())
-        destroy(this)
-
-
-// player for empty player slots
-public class UnusedHeroPlayer extends HeroPlayer
-
-    construct(player p, Team t)
-        super(p, t)
-
-
-// player controlling the buildings and wave minions
-public class ArmyPlayer extends CPlayer
-
-    construct(player p, Team t)
-        super(p, t)
-
-// neutral players
-public class NeutralPlayer extends CPlayer
-
-    construct(player p, Team t)
-        super(p, t)
-
+    function getPlayerType() returns PlayerType
+        return this.playertype
 
 init
     initPlayers()

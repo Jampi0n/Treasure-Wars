@@ -1,0 +1,17 @@
+package Stats
+
+public enum Stat
+    HP
+    HR
+    MP
+    MR
+    AD
+    AS
+    AR
+    MS
+
+public function Stat.toInt() returns int
+    return this castTo int
+
+public function Stat.toString() returns string
+    return (this castTo int).toString()

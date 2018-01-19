@@ -34,7 +34,7 @@ public function dialog.destr()
     DialogDestroy(this)
 
 /** Toggles visibility of the dialog for a player. Dialogs are invisible by default
-Dialogs cannot be shown at map initialization */
+Dialogs cannot be shown at map initialization. */
 public function dialog.display(player whichPlayer, boolean flag)
     DialogDisplay(whichPlayer, this, flag)
 
