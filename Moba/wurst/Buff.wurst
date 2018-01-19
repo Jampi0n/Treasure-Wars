@@ -1,0 +1,125 @@
+package Buff
+
+import TimerUtils
+
+/*
+Idea: each unit can have every buff only once
+
+The buff object contains dynamic information and its type
+The type contains static information
+
+Dynamic:
+caster, target, duration
+Static:
+aura based ability and corresponding buff
+
+Reapplying the same buff type does not create a new buff object, but rather increases duration of the previous one
+and updates caster and other dynamic duration.
+
+Buff types can have closures that will be executed in certain situations:
+onApply
+onExpire -> duration runs out
+onDispel -> buff removed before duration runs out: dispel, death, invulnerability, ...
+To detect this: use native buff management of wc3
+The buff abilities must not work on dead or invulnerable units for example.
+onEnd -> buff gone in any way
+
+Different levels of the same buff:
+This should only happen when a hero levels up and has now a stronger spell.
+Therefore one can safely overwrite the old buff.
+Realization:
+1. stats of buffs as dynamic information -> can easily be overwritten
+2. multiple buff types for same buff with different levels -> how is the same buff with a different level removed?
+
+Ability List for a buff. Each ability inside this list should only be used for this buff.
+
+Duration is fixed when the buff is applied -> use one shot timer
+
+
+*/
+
+
+public interface BuffExecuteClosure
+    function run()
+
+class Buff
+
+    private unit caster
+    private unit target
+    private timer expireTimer
+    private BuffExecuteClosure onExpire
+    private BuffExecuteClosure onApply
+    private BuffExecuteClosure onDispel
+    private BuffExecuteClosure onEnd
+    private trigger onPeriodicTrigger
+    private timer periodicTimer
+
+    construct(unit target, unit caster, real duration)
+        this.caster = caster
+        this.target = target
+        this.expireTimer = getTimer()
+        this.expireTimer.setData(this castTo int)
+        this.expireTimer.start(duration, function expireStatic)
+
+    function setOnExpire(BuffExecuteClosure onExpire)
+        if(this.onExpire!=null)
+            print("warning! BuffExecuteClosure should only be set once")
+            return
+        this.onExpire = onExpire
+
+    function setOnApply(BuffExecuteClosure onApply)
+        if(this.onApply!=null)
+            print("warning! BuffExecuteClosure should only be set once")
+            return
+        this.onApply = onApply
+
+    function setOnDispel(BuffExecuteClosure onDispel)
+        if(this.onDispel!=null)
+            print("warning! BuffExecuteClosure should only be set once")
+            return
+        this.onDispel = onDispel
+
+    function setOnEnd(BuffExecuteClosure onEnd)
+        if(this.onEnd!=null)
+            print("warning! BuffExecuteClosure should only be set once")
+            return
+        this.onEnd = onEnd
+
+    function setOnPeriodic(code onPeriodic, real time)
+        if(this.onPeriodicTrigger!=null)
+            print("warning! BuffExecuteClosure should only be set once")
+            return
+        this.onPeriodicTrigger = CreateTrigger()
+        this.onPeriodicTrigger.addAction(onPeriodic)
+        this.periodicTimer = getTimer()
+        this.periodicTimer.setData(this castTo int)
+        this.periodicTimer.start(time, function onPeriodicStatic )
+
+    function onPeriodic()
+        this.onPeriodicTrigger.execute()
+
+    static function onPeriodicStatic()
+        let t = GetExpiredTimer()
+        Buff thisBuff = t.getData() castTo Buff
+        thisBuff.onPeriodic()
+    
+    function expire()
+        this.onExpire.run()
+        destroy this
+
+    static function expireStatic()
+        let t = GetExpiredTimer()
+        Buff thisBuff = t.getData() castTo Buff
+        thisBuff.expire()
+        t.release()
+
+    ondestroy
+        this.expireTimer.release()
+        this.periodicTimer.release()
+        this.onPeriodicTrigger.destr()
+        destroy this.onApply
+        destroy this.onDispel
+        destroy this.onEnd
+        destroy this.onExpire
+
+

@@ -1,0 +1,81 @@
+package BuffConfig
+
+import AbilityObjEditing
+import BuffObjEditing
+import ObjectIdGenerator
+import ObjectIds
+
+/* A custom object id generator is used to avoid collisions.
+The buff id is retrieved with an offset from the ability id, so by creating buffs with the buff id generator
+before creating with this system there would be collisions.*/
+constant BUFF_SYSTEM_GEN = new IdGenerator('AW00')
+
+
+function createBuffAbility(string name, string desc, string icon, string model, boolean positive ) returns integer
+    BuffDefinition bDef
+    let abiltiyId = BUFF_SYSTEM_GEN.next()
+    let buffId = abiltiyId + 16777216  // 'Axxx' -> 'Bxxx'
+    if(positive)
+        let aDef = new AbilityDefinitionUnholyAuracreep(abiltiyId)
+        aDef.setLifeRegenerationIncrease(1, 0)
+        aDef.setMovementSpeedIncrease(1, 0)
+        
+
+        aDef.setBuffs(1, int2fourchar(buffId))
+        aDef.setArtTarget(model)
+        aDef.setAreaofEffect(1, 1)
+        aDef.setTargetsAllowed(1, "self")
+    else
+        let aDef = new AbilityDefinitionAuraSlow(abiltiyId)
+        aDef.setMovementSpeedFactor(1, 0)
+
+        aDef.setBuffs(1, int2fourchar(buffId))
+        aDef.setArtTarget(model)
+        aDef.setAreaofEffect(1, 1)
+        aDef.setTargetsAllowed(1, "self")
+
+
+    bDef = new BuffDefinition(buffId, 'BUau')
+
+    bDef.setIcon(icon)
+    bDef.setTooltipNormal(1, name)
+    bDef.setTooltipNormalExtended(1, desc)
+
+    return abiltiyId
+    
+
+/*function createBuff(string name, string desc, string icon) returns integer
+    BuffDefinition bDef
+    let buffId = BUFF_ID_GEN.next()
+
+    bDef = new BuffDefinition(buffId, 'BUau')
+
+
+    
+    bDef.setIcon(icon)
+    bDef.setTooltipNormal(1, name)
+    bDef.setTooltipNormalExtended(1, desc)
+
+    return buffId
+
+function createAbility(integer buffId, string model, boolean positive ) returns integer
+    AbilityDefinition aDef
+    let abiltiyId = ABIL_ID_GEN.next()
+    if(positive)
+        aDef = new AbilityDefinitionUnholyAuracreep(abiltiyId)
+    else
+        aDef = new AbilityDefinitionAuraSlow(abiltiyId)
+
+
+    aDef.setBuffs(1, int2fourchar(buffId))
+    aDef.setArtTarget(model)
+    
+
+    return abiltiyId*/
+
+
+
+public int abilityCloak = compiletime(createBuffAbility("Cloak", "This is a cloak.", "BTNCloakOfFlames", "Abilities\\Spells\\NightElf\\Immolation\\ImmolationTarget.mdl", true))
+
+
+

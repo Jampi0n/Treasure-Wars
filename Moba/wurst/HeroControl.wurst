@@ -53,6 +53,9 @@ public class Hero
         this.owner = u.getOwner().getCPlayer()
         this.setup()
 
+    function toUnit() returns unit
+        return this.hero
+
     //
     function upgrade()
         integer lvl = this.level

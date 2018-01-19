@@ -5,7 +5,7 @@ import PathUnit
 import ClosureTimers
 import PlayerControl
 import HeroControl
-import DialogBox
+import BuffConfig
 
 function testCreateUnits()
 	Path p1 = new Path()
@@ -40,15 +40,14 @@ function showDialog()
 	*/
 function setupHero()
 
-	new Hero(players[0].getCPlayer(), 'H000', vec2(428.1,647.6) , angle(176.720))
+	let hero1 = new Hero(players[0].getCPlayer(), 'H000', vec2(428.1,647.6) , angle(176.720))
 
-	let dBox = new DialogBox("Extra starting gold?")
-	dBox.addButton("Yes", () -> begin
-		players[0].addGold(500)
-		destroy dBox
-	end)
-	dBox.addButton("No", () -> destroy dBox)
-	dBox.display(players[0], true)
+	print(abilityCloak)
+	print(abilityBuffs[0])
+
+	hero1.toUnit().addAbility(abilityCloak)
+	print(hero1.toUnit().getName())
+
 init
 	print("Hello World")
 	testCreateUnits()
