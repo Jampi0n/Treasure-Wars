@@ -1,6 +1,7 @@
 package Buff
 
 import TimerUtils
+import BuffType
 
 /*
 Idea: each unit can have every buff only once
@@ -17,7 +18,9 @@ Reapplying the same buff type does not create a new buff object, but rather incr
 and updates caster and other dynamic duration.
 
 Buff types can have closures that will be executed in certain situations:
-onApply
+onFirst -> buff is used on a unit that does not have the buff
+onStack -> buff is used on a unit that does have the buff
+onApply -> is used on a unit
 onExpire -> duration runs out
 onDispel -> buff removed before duration runs out: dispel, death, invulnerability, ...
 To detect this: use native buff management of wc3
@@ -39,63 +42,78 @@ Duration is fixed when the buff is applied -> use one shot timer
 */
 
 
-public interface BuffExecuteClosure
-    function run()
-
-class Buff
+public class Buff
 
     private unit caster
     private unit target
+    private BuffType bufftype
     private timer expireTimer
-    private BuffExecuteClosure onExpire
-    private BuffExecuteClosure onApply
-    private BuffExecuteClosure onDispel
-    private BuffExecuteClosure onEnd
+    private trigger onFirst
+    private trigger onStack
+    private trigger onApply
+    private trigger onExpire
+    private trigger onDispel
+    private trigger onEnd
     private trigger onPeriodicTrigger
     private timer periodicTimer
 
-    construct(unit target, unit caster, real duration)
+    static Buff currentBuff 
+
+    construct(unit target, unit caster, real duration, BuffType buffType)
         this.caster = caster
         this.target = target
         this.expireTimer = getTimer()
         this.expireTimer.setData(this castTo int)
         this.expireTimer.start(duration, function expireStatic)
+        this.bufftype = bufftype
 
-    function setOnExpire(BuffExecuteClosure onExpire)
-        if(this.onExpire!=null)
-            print("warning! BuffExecuteClosure should only be set once")
-            return
-        this.onExpire = onExpire
+    function setFirst(code onFirst)
+        if(this.onFirst!=null)
+            this.onFirst = CreateTrigger()
 
-    function setOnApply(BuffExecuteClosure onApply)
+        this.onFirst.addAction(onFirst)
+
+    function setStack(code onStack)
+        if(this.onStack!=null)
+            this.onStack = CreateTrigger()
+
+        this.onStack.addAction(onStack)
+
+    function setOnApply(code onApply)
         if(this.onApply!=null)
-            print("warning! BuffExecuteClosure should only be set once")
-            return
-        this.onApply = onApply
+            this.onApply = CreateTrigger()
 
-    function setOnDispel(BuffExecuteClosure onDispel)
+        this.onApply.addAction(onApply)
+
+    function setOnExpire(code onExpire)
+        if(this.onExpire!=null)
+            this.onExpire = CreateTrigger()
+
+        this.onExpire.addAction(onExpire)
+
+    function setOnDispel(code onDispel)
         if(this.onDispel!=null)
-            print("warning! BuffExecuteClosure should only be set once")
-            return
-        this.onDispel = onDispel
+            this.onDispel = CreateTrigger()
 
-    function setOnEnd(BuffExecuteClosure onEnd)
+        this.onDispel.addAction(onDispel)
+
+    function setOnEnd(code onEnd)
         if(this.onEnd!=null)
-            print("warning! BuffExecuteClosure should only be set once")
-            return
-        this.onEnd = onEnd
+            this.onEnd = CreateTrigger()
+
+        this.onEnd.addAction(onEnd)
 
     function setOnPeriodic(code onPeriodic, real time)
         if(this.onPeriodicTrigger!=null)
-            print("warning! BuffExecuteClosure should only be set once")
-            return
-        this.onPeriodicTrigger = CreateTrigger()
+            this.onPeriodicTrigger = CreateTrigger()
+
         this.onPeriodicTrigger.addAction(onPeriodic)
         this.periodicTimer = getTimer()
-        this.periodicTimer.setData(this castTo int)
-        this.periodicTimer.start(time, function onPeriodicStatic )
+            ..setData(this castTo int)
+            ..start(time, function onPeriodicStatic )
 
     function onPeriodic()
+        currentBuff = this
         this.onPeriodicTrigger.execute()
 
     static function onPeriodicStatic()
@@ -104,8 +122,18 @@ class Buff
         thisBuff.onPeriodic()
     
     function expire()
-        this.onExpire.run()
+        currentBuff = this
+        this.onExpire.execute()
+        this.onEnd.execute()
         destroy this
+
+    function dispel()
+        currentBuff = this
+        this.onDispel.execute()
+        this.onEnd.execute()
+        destroy this
+
+        
 
     static function expireStatic()
         let t = GetExpiredTimer()
@@ -116,10 +144,12 @@ class Buff
     ondestroy
         this.expireTimer.release()
         this.periodicTimer.release()
-        this.onPeriodicTrigger.destr()
-        destroy this.onApply
-        destroy this.onDispel
-        destroy this.onEnd
-        destroy this.onExpire
+        this.onPeriodicTrigger.clearActions()
+        this.onFirst..clearActions()..destr()
+        this.onStack..clearActions()..destr()
+        this.onApply..clearActions()..destr()
+        this.onDispel..clearActions()..destr()
+        this.onEnd..clearActions()..destr()
+        this.onExpire..clearActions()..destr()
 
 

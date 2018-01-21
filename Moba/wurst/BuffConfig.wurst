@@ -20,7 +20,8 @@ function createBuffAbility(string name, string desc, string icon, string model, 
         aDef.setLifeRegenerationIncrease(1, 0)
         aDef.setMovementSpeedIncrease(1, 0)
         
-
+        aDef.setButtonPositionNormalX(0)
+        aDef.setButtonPositionNormalY(-11)
         aDef.setBuffs(1, int2fourchar(buffId))
         aDef.setArtTarget(model)
         aDef.setAreaofEffect(1, 1)
@@ -29,6 +30,8 @@ function createBuffAbility(string name, string desc, string icon, string model, 
         let aDef = new AbilityDefinitionAuraSlow(abiltiyId)
         aDef.setMovementSpeedFactor(1, 0)
 
+        aDef.setButtonPositionNormalX(0)
+        aDef.setButtonPositionNormalY(-11)
         aDef.setBuffs(1, int2fourchar(buffId))
         aDef.setArtTarget(model)
         aDef.setAreaofEffect(1, 1)
@@ -42,40 +45,13 @@ function createBuffAbility(string name, string desc, string icon, string model, 
     bDef.setTooltipNormalExtended(1, desc)
 
     return abiltiyId
-    
-
-/*function createBuff(string name, string desc, string icon) returns integer
-    BuffDefinition bDef
-    let buffId = BUFF_ID_GEN.next()
-
-    bDef = new BuffDefinition(buffId, 'BUau')
 
 
-    
-    bDef.setIcon(icon)
-    bDef.setTooltipNormal(1, name)
-    bDef.setTooltipNormalExtended(1, desc)
-
-    return buffId
-
-function createAbility(integer buffId, string model, boolean positive ) returns integer
-    AbilityDefinition aDef
-    let abiltiyId = ABIL_ID_GEN.next()
-    if(positive)
-        aDef = new AbilityDefinitionUnholyAuracreep(abiltiyId)
-    else
-        aDef = new AbilityDefinitionAuraSlow(abiltiyId)
-
-
-    aDef.setBuffs(1, int2fourchar(buffId))
-    aDef.setArtTarget(model)
-    
-
-    return abiltiyId*/
-
-
-
-public int abilityCloak = compiletime(createBuffAbility("Cloak", "This is a cloak.", "BTNCloakOfFlames", "Abilities\\Spells\\NightElf\\Immolation\\ImmolationTarget.mdl", true))
+@compiltetime
+public int array abilityCloak
+function doInit()
+    abilityCloak[0] = compiletime(createBuffAbility("Cloak", "This is a cloak.", "BTNCloakOfFlames", "Abilities\\Spells\\NightElf\\Immolation\\ImmolationTarget.mdl", true))
+    abilityCloak[1] = compiletime(createBuffAbility("Cloak", "This is a cloak.", "BTNCloakOfFlames", "Abilities\\Spells\\NightElf\\Immolation\\ImmolationTarget.mdl", true))
 
 
 

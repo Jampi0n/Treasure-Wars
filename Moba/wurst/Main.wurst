@@ -42,10 +42,9 @@ function setupHero()
 
 	let hero1 = new Hero(players[0].getCPlayer(), 'H000', vec2(428.1,647.6) , angle(176.720))
 
-	print(abilityCloak)
-	print(abilityBuffs[0])
+	print(abilityCloak[0])
 
-	hero1.toUnit().addAbility(abilityCloak)
+	hero1.toUnit().addAbility(abilityCloak[0])
 	print(hero1.toUnit().getName())
 
 init
