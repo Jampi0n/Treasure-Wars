@@ -41,12 +41,14 @@ Duration is fixed when the buff is applied -> use one shot timer
 
 */
 
+public function unit.hasBuff(BuffType buffType) returns boolean
+    return false
 
 public class Buff
 
     private unit caster
     private unit target
-    private BuffType bufftype
+    private BuffType buffType
     private timer expireTimer
     private trigger onFirst
     private trigger onStack
@@ -57,7 +59,7 @@ public class Buff
     private trigger onPeriodicTrigger
     private timer periodicTimer
 
-    static Buff currentBuff 
+    private static Buff currentBuff 
 
     construct(unit target, unit caster, real duration, BuffType buffType)
         this.caster = caster
@@ -65,81 +67,68 @@ public class Buff
         this.expireTimer = getTimer()
         this.expireTimer.setData(this castTo int)
         this.expireTimer.start(duration, function expireStatic)
-        this.bufftype = bufftype
-
-    function setFirst(code onFirst)
-        if(this.onFirst!=null)
-            this.onFirst = CreateTrigger()
-
-        this.onFirst.addAction(onFirst)
-
-    function setStack(code onStack)
-        if(this.onStack!=null)
-            this.onStack = CreateTrigger()
-
-        this.onStack.addAction(onStack)
-
-    function setOnApply(code onApply)
-        if(this.onApply!=null)
-            this.onApply = CreateTrigger()
-
-        this.onApply.addAction(onApply)
-
-    function setOnExpire(code onExpire)
-        if(this.onExpire!=null)
-            this.onExpire = CreateTrigger()
-
-        this.onExpire.addAction(onExpire)
-
-    function setOnDispel(code onDispel)
-        if(this.onDispel!=null)
-            this.onDispel = CreateTrigger()
-
-        this.onDispel.addAction(onDispel)
-
-    function setOnEnd(code onEnd)
-        if(this.onEnd!=null)
-            this.onEnd = CreateTrigger()
-
-        this.onEnd.addAction(onEnd)
-
-    function setOnPeriodic(code onPeriodic, real time)
-        if(this.onPeriodicTrigger!=null)
-            this.onPeriodicTrigger = CreateTrigger()
-
-        this.onPeriodicTrigger.addAction(onPeriodic)
-        this.periodicTimer = getTimer()
-            ..setData(this castTo int)
-            ..start(time, function onPeriodicStatic )
-
-    function onPeriodic()
+        this.buffType = buffType
+        this.onFirst = buffType.onFirst
+        this.onStack = buffType.onStack
+        this.onApply = buffType.onApply
+        this.onExpire = buffType.onExpire
+        this.onDispel = buffType.onDispel
+        this.onEnd = buffType.onEnd
         currentBuff = this
-        this.onPeriodicTrigger.execute()
+        if(target.hasBuff(this.buffType))
+            if(this.onStack!=null)
+                this.onStack.execute()
+        else
+            if(this.onFirst!=null)
+                this.onFirst.execute()
+        if(this.onApply!=null)
+            this.onApply.execute()
 
-    static function onPeriodicStatic()
+
+    private function onPeriodic()
+        currentBuff = this
+        if(this.onPeriodicTrigger!=null)
+            this.onPeriodicTrigger.execute()
+
+    private static function onPeriodicStatic()
         let t = GetExpiredTimer()
         Buff thisBuff = t.getData() castTo Buff
         thisBuff.onPeriodic()
     
-    function expire()
+    private function expire()
         currentBuff = this
-        this.onExpire.execute()
-        this.onEnd.execute()
+        if(this.onExpire!=null)
+            this.onExpire.execute()
+        if(this.onEnd!=null)
+            this.onEnd.execute()
         destroy this
 
-    function dispel()
+    private function dispel()
         currentBuff = this
-        this.onDispel.execute()
-        this.onEnd.execute()
+        if(this.onDispel!=null)
+            this.onDispel.execute()
+        if(this.onEnd!=null)
+            this.onEnd.execute()
         destroy this
 
-        
-
-    static function expireStatic()
+    private static function expireStatic()
         let t = GetExpiredTimer()
         Buff thisBuff = t.getData() castTo Buff
-        thisBuff.expire()
         t.release()
+        thisBuff.expire()
+        
+
+    function getCaster() returns unit
+        return this.caster
+
+    function getTarget() returns unit
+        return this.target
+
+    function getBuffType() returns BuffType
+        return this.buffType
+
+    static function getTriggerBuff() returns Buff
+        return currentBuff
 
     ondestroy
         this.expireTimer.release()

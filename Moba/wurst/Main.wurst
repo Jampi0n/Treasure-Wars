@@ -5,7 +5,9 @@ import PathUnit
 import ClosureTimers
 import PlayerControl
 import HeroControl
-import BuffConfig
+import BuffObjectGeneration
+import Buff
+import BuffTypeConfig
 
 function testCreateUnits()
 	Path p1 = new Path()
@@ -42,15 +44,22 @@ function setupHero()
 
 	let hero1 = new Hero(players[0].getCPlayer(), 'H000', vec2(428.1,647.6) , angle(176.720))
 
-	print(abilityCloak[0])
+	print(abilityCloak1)
 
-	hero1.toUnit().addAbility(abilityCloak[0])
+	hero1.toUnit().addAbility(abilityCloak1)
 	print(hero1.toUnit().getName())
+
+	doAfter(2,() -> (begin
+		new Buff(hero1.toUnit(), hero1.toUnit(), 5, STUNNED)
+	
+	end) )
 
 init
 	print("Hello World")
 	testCreateUnits()
 	doAfter(0,  ()-> showDialog() )
 	doAfter(1,() -> setupHero())
+
+	
 	
 

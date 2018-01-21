@@ -1,0 +1,64 @@
+package BuffType
+import initlater Buff 
+import InstantDummyCaster
+
+public class BuffType
+
+    /*
+
+    onFirst -> buff is used on a unit that does not have the buff
+    onStack -> buff is used on a unit that does have the buff
+    onApply -> is used on a unit
+    onExpire -> duration runs out
+    onDispel -> buff removed before duration runs out: dispel, death, invulnerability, ...
+    To detect this: use native buff management of wc3
+    The buff abilities must not work on dead or invulnerable units for example.
+    onEnd -> buff gone in any way
+
+    */
+    trigger onFirst
+    trigger onStack
+    trigger onApply
+    trigger onExpire
+    trigger onDispel
+    trigger onEnd
+    trigger onPeriodicTrigger
+
+    private constant int dummyAbilityId
+    private constant int dummyOrderId
+
+    private constant int buffId
+
+    /** This buff is applied by using a dummy caster to cast the ability on the target. */
+    construct(int abilityId, string orderString, int buffId)
+        //onFirst -> cast the spell
+        //onEnd -> dispel the buff
+        this.dummyAbilityId = abilityId
+        this.buffId = buffId
+        this.dummyOrderId = OrderId(orderString)
+        this.onFirst = CreateTrigger()
+            ..addAction(function castDummySpell)
+        this.onEnd = CreateTrigger()
+            ..addAction(function removeDummyBuff)
+
+
+    /** This buff is applied by placing a hidden aura ability on the target. */
+    construct(int auraId, int buffId)
+        this.buffId = buffId
+        //onFirst -> add the aura
+        //onEnd -> remove aura and buff
+
+
+    static function castDummySpell()
+        let currentBuff = Buff.getTriggerBuff()
+        let buffType = currentBuff.getBuffType()
+        let caster = currentBuff.getCaster()
+        let target = currentBuff.getTarget()
+        InstantDummyCaster.castTarget(caster.getOwner(), buffType.dummyAbilityId, 1, buffType.dummyOrderId, target, target.getPos())
+
+
+    static function removeDummyBuff()
+        let currentBuff = Buff.getTriggerBuff()
+        let buffType = currentBuff.getBuffType()
+        let target = currentBuff.getTarget()
+        target.removeAbility(buffType.buffId)
