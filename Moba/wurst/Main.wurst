@@ -44,14 +44,36 @@ function setupHero()
 
 	let hero1 = new Hero(players[0].getCPlayer(), 'H000', vec2(428.1,647.6) , angle(176.720))
 
-	print(abilityCloak1)
-
-	hero1.toUnit().addAbility(abilityCloak1)
-	print(hero1.toUnit().getName())
 
 	doAfter(2,() -> (begin
-		new Buff(hero1.toUnit(), hero1.toUnit(), 5, STUNNED)
-	
+		print("buff 1.")
+		new Buff(hero1.toUnit(), hero1.toUnit(), 30, DISARMED)
+	end) )
+
+	doAfter(2,() -> (begin
+		print("buff 1.")
+		new Buff(hero1.toUnit(), hero1.toUnit(), 3, ENSNARED)
+	end) )
+
+	doAfter(2,() -> (begin
+		print("buff 1.")
+		new Buff(hero1.toUnit(), hero1.toUnit(), 3, ENTANGLED)
+	end) )
+
+	doAfter(4,() -> (begin
+		print("buff 2.")
+		new Buff(hero1.toUnit(), hero1.toUnit(), 30, DISARMED)
+
+	end) )
+
+	doAfter(8,() -> (begin
+		print("buff 2.")
+		new Buff(hero1.toUnit(), hero1.toUnit(), 30, STUNNED)
+	end) )
+
+	doAfter(10,() -> (begin
+		print("buff 2.")
+		new Buff(hero1.toUnit(), hero1.toUnit(), 3, CYCLONED)
 	end) )
 
 init
