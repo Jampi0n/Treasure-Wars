@@ -82,14 +82,12 @@ public class Hero
         assistMap.put(p,getElapsedGameTime() + assistDuration)
 
     function onDamage()
-        print("damage")
         CPlayer damageSource
         damageSource = GetEventDamageSource().getOwner().getCPlayer()
         if( damageSource.getTeam()!=this.owner.getTeam())
             this.addAssistDuration(damageSource)
 
     static function onDamageStatic()
-        print("damage static")
         unitToHero.get( GetTriggerUnit()).onDamage()
 
     //handles death

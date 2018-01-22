@@ -1,6 +1,7 @@
 package BuffType
 import initlater Buff 
 import InstantDummyCaster
+import LinkedList
 
 public class BuffType
 
@@ -27,7 +28,8 @@ public class BuffType
     private constant int dummyAbilityId
     private constant int dummyOrderId
 
-    private constant int buffId
+    private int buffId
+    private LinkedList<int> abilities
 
     /** This buff is applied by using a dummy caster to cast the ability on the target. */
     construct(int abilityId, string orderString, int buffId)
@@ -42,12 +44,35 @@ public class BuffType
             ..addAction(function removeDummyBuff)
 
 
+
     /** This buff is applied by placing a hidden aura ability on the target. */
-    construct(int auraId, int buffId)
-        this.buffId = buffId
+    construct(LinkedList<int> abilities, int buffId)
         //onFirst -> add the aura
         //onEnd -> remove aura and buff
+        this.buffId = buffId
+        this.abilities = abilities
+        this.onFirst = CreateTrigger()
+            ..addAction(function addAuraAbility)
+        this.onEnd = CreateTrigger()
+            ..addAction(function removeAuraAbility)
 
+    /* empty constructor, to be able to use constants */
+    construct()
+
+    function setup(LinkedList<int> abilities, int buffId)
+        //onFirst -> add the aura
+        //onEnd -> remove aura and buff
+        this.buffId = buffId
+        this.abilities = abilities
+        this.onFirst = CreateTrigger()
+            ..addAction(function addAuraAbility)
+        this.onEnd = CreateTrigger()
+            ..addAction(function removeAuraAbility)
+
+    static function printStatus()
+        let currentBuff = Buff.getTriggerBuff()
+        let target = currentBuff.getTarget()
+        print(target.getName()+" has buff "+ currentBuff.getRemaining().toString())
 
     static function castDummySpell()
         let currentBuff = Buff.getTriggerBuff()
@@ -61,4 +86,18 @@ public class BuffType
         let currentBuff = Buff.getTriggerBuff()
         let buffType = currentBuff.getBuffType()
         let target = currentBuff.getTarget()
+        target.removeAbility(buffType.buffId)
+
+
+    static function addAuraAbility()
+        let currentBuff = Buff.getTriggerBuff()
+        let buffType = currentBuff.getBuffType()
+        let target = currentBuff.getTarget()
+        buffType.abilities.forEach( (int abilityId ) -> target.addAbility(abilityId))
+
+    static function removeAuraAbility()
+        let currentBuff = Buff.getTriggerBuff()
+        let buffType = currentBuff.getBuffType()
+        let target = currentBuff.getTarget()
+        buffType.abilities.forEach( (int abilityId ) -> target.removeAbility(abilityId))
         target.removeAbility(buffType.buffId)
