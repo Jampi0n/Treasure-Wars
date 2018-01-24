@@ -53,13 +53,14 @@ public class BuffList extends LinkedList<Buff>
     private static constant unitBuffList = new HashMap<unit, BuffList>
 
     static function onIndex()
-        let newList = new BuffList()
+        BuffList newList = new BuffList()
         unitBuffList.put(getIndexedUnit(), newList)
 
     static function onDeindex()
         let removeList = unitBuffList.get(getDeindexedUnit())
         unitBuffList.remove(getIndexedUnit())
-        destroy removeList
+        if(removeList!=null)
+            destroy removeList
 
     static function getBuffOfType(unit target, BuffType buffType) returns Buff
         let buffList = unitBuffList.get(target)

@@ -1,0 +1,177 @@
+package PathUnit
+
+import Path
+import TimerUtils
+import HashMap
+import GameTimer
+import ClosureTimers
+import UnitIndexer
+
+public class PathUnit 
+
+    static int operations = 0
+    static int instances = 0
+    static HashMap<unit,PathUnit> unitToPathUnit = new HashMap<unit,PathUnit>
+    static group pathUnits = CreateGroup()
+    static real gameTime
+    static trigger onAttackTrigger = CreateTrigger()
+    unit assocUnit
+    Path currentPath
+    int currentSubPath
+    static timer periodicTimer = getTimer()
+    private real nextUpdate
+
+    static function classInit()
+        periodicTimer.startPeriodic(0.05, function updateMovementStatic)
+        doPeriodically(1, (CallbackPeriodic cb) -> (begin
+            print("["+instances.toString()+"]operations: "+operations.toString())
+            operations = 0
+        end))
+        onUnitDeindex(function onRemove)
+        onAttackTrigger.registerAnyUnitEvent(EVENT_PLAYER_UNIT_ATTACKED)
+        onAttackTrigger.addAction(function onAttackStatic)
+
+
+    //prepares a unit to be able to use paths
+    construct(unit u)
+        if(unitToPathUnit.has(u))
+            print("Warning! - "+u.getName()+" is already a PathUnit.")
+            destroy(this)
+        else
+            this.assocUnit = u
+            this.currentPath = null
+            this.currentSubPath = 0
+            unitToPathUnit.put(this.assocUnit, this)
+            pathUnits.addUnit(this.assocUnit)
+            nextUpdate = getElapsedGameTime() + GetRandomReal(0, 0.1)
+            instances++
+
+    static function onRemove()
+        destroy unitToPathUnit.get(getDeindexedUnit())
+
+    ondestroy
+        unitToPathUnit.remove(this.assocUnit)
+        pathUnits.removeUnit(this.assocUnit)
+        instances--
+
+    function setPath(Path p)
+        this.currentPath = p
+
+    function getNextUpdate() returns real
+        return GetRandomReal(0.8, 1.1)
+
+    static function onAttackStatic()
+        PathUnit damageSource = unitToPathUnit.get(GetAttacker())
+        if( damageSource!=null)
+            damageSource.nextUpdate = getElapsedGameTime() + 2.
+
+    function updateMovement()
+        //print("updateMovement "+this.assocUnit.getName() + " " +this.assocUnit.getHandleId().toString() )
+        if(assocUnit==null)
+            destroy(this)
+            return
+        this.nextUpdate = getElapsedGameTime() + this.getNextUpdate()
+
+        if(currentPath==null)
+            return
+       
+        //print("continue")
+
+        vec2 v0 = vec2(assocUnit.getX(), assocUnit.getY())
+        vec2 v1
+        vec2 v2
+        real minDistance = -1
+        int newSubPath = -1
+        //print(this.currentPath.getSubPathCount()-2)
+        for i=0 to this.currentPath.getSubPathCount()-2
+
+            v1 = vec2(this.currentPath.getSubPathX(i), this.currentPath.getSubPathY(i))
+            //print("v1="+v1.toString())
+            v2 = vec2(this.currentPath.getSubPathX(i+1), this.currentPath.getSubPathY(i+1))
+            //print("v2="+v2.toString())
+            real distance = v0.distanceToSegmentSq(v1, v2).pow(0.5)
+            //print("distance="+distance.toString())
+            //print("minDistance="+minDistance.toString())
+            if(distance <= minDistance+200 or minDistance==-1)
+                minDistance = distance
+                newSubPath = i
+        int newOrder = 0
+        string currentOrder =  OrderId2String(this.assocUnit.getCurrentOrder())
+    
+        //print(minDistance)
+        //print("path: "+this.currentSubPath.toString()+" -> "+newSubPath.toString())
+        //print(currentOrder)
+
+        
+
+        //order:
+            //0 = do nothing
+            //1 = move back
+            //2 = continue move
+
+        if(currentOrder == "move")
+            if(minDistance<200)
+                newOrder = 2
+        if(minDistance>600)
+            newOrder = 1
+            print("move back after attacking: "+minDistance.toString())
+            PingMinimap(this.assocUnit.getX(), this.assocUnit.getY(), 5)
+        if(currentOrder!="attack")
+            if(minDistance>400)
+                if(currentOrder!="move")
+                    newOrder = 1
+                    print("move back after doing something else")
+                    PingMinimap(this.assocUnit.getX(), this.assocUnit.getY(), 5)
+            else
+                newOrder = 2
+        
+        //print("newOrder ="+newOrder.toString())
+        v2 = vec2(this.currentPath.getSubPathX(newSubPath+1), this.currentPath.getSubPathY(newSubPath+1))
+        if(newOrder==1 or this.currentSubPath>newSubPath)
+            newOrder = 1
+            //this.currentSubPath = newSubPath
+            this.assocUnit.issuePointOrder("move",v2)
+        else
+            if(this.currentSubPath!=newSubPath)
+                newOrder = 0
+                this.assocUnit.issuePointOrder("attack",v2)
+                this.currentSubPath = newSubPath
+        
+        if(newOrder!=0)
+            group nearby = CreateGroup()
+            nearby.enumUnitsInRange(v0, 500)
+            
+            while(true)
+                unit n = nearby.next()
+                if(n==null)
+                    break
+                nearby.removeUnit(n)
+                if(unitToPathUnit.has(n))
+                    PathUnit nearbyPathUnit = unitToPathUnit.get(n)
+                    if(nearbyPathUnit.currentPath == this.currentPath and nearbyPathUnit.nextUpdate<gameTime)
+                        if(newOrder==1)
+                            n.issuePointOrder("move", v2)
+                            nearbyPathUnit.nextUpdate = getElapsedGameTime() + this.getNextUpdate()
+                        else
+                            n.issuePointOrder("attack", v2)
+                            nearbyPathUnit.nextUpdate = getElapsedGameTime() + this.getNextUpdate()
+                        
+                
+            nearby.destr()
+                                
+    static function updateMovementGroup()
+        var pU = PathUnit.unitToPathUnit.get(GetEnumUnit())
+        if(pU.nextUpdate<gameTime)
+            operations++
+            pU.updateMovement()
+
+    static function updateMovementStatic()
+        gameTime = getElapsedGameTime()
+        ForGroup(pathUnits, function updateMovementGroup)
+
+            
+            
+
+        
+init
+    PathUnit.classInit()
