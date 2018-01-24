@@ -1,15 +1,12 @@
 package Main
 
-import Path
-import PathUnit
 import ClosureTimers
 import PlayerControl
 import HeroControl
-import BuffObjectGeneration
-import Buff
-import BuffTypeConfig
+//import Buff
+//import BuffTypeConfig
 
-function testCreateUnits()
+/*function testCreateUnits()
 	Path p1 = new Path()
 	p1.addPoint(gg_rct_Start.getCenter())
 	p1.addPoint(gg_rct_Corner0.getCenter())
@@ -23,7 +20,7 @@ function testCreateUnits()
 		unit u =createUnit(Player(11), 'hfoo', gg_rct_Start.getCenter() , angle(0) )
 		u.issuePointOrder("attack", gg_rct_Corner0.getCenter())
 		PathUnit pU = new PathUnit(u)
-		pU.setPath(p1)
+		pU.setPath(p1)*/
 
 
 function showDialog()
@@ -42,9 +39,9 @@ function showDialog()
 	*/
 function setupHero()
 
-	let hero1 = new Hero(players[0].getCPlayer(), 'H000', vec2(428.1,647.6) , angle(176.720))
+	let hero1 = new Hero(players[0].getCPlayer(), 'H000', vec2(0,0) , angle(0))
 
-
+	/*
 	doAfter(2,() -> (begin
 		print("buff 1.")
 		new Buff(hero1.toUnit(), hero1.toUnit(), 30, DISARMED)
@@ -74,13 +71,28 @@ function setupHero()
 	doAfter(10,() -> (begin
 		print("buff 2.")
 		new Buff(hero1.toUnit(), hero1.toUnit(), 3, CYCLONED)
-	end) )
+	end) )*/
 
 init
 	print("Hello World")
-	testCreateUnits()
+	//testCreateUnits()
 	doAfter(0,  ()-> showDialog() )
 	doAfter(1,() -> setupHero())
+	
+	SetPlayerAllianceStateBJ(players[0], players[1], bj_ALLIANCE_ALLIED)
+	SetPlayerAllianceStateBJ(players[1], players[0], bj_ALLIANCE_ALLIED)
+
+	//SetPlayerAllianceStateBJ(players[0], players[10], bj_ALLIANCE_ALLIED)
+	//SetPlayerAllianceStateBJ(players[0], players[11], bj_ALLIANCE_ALLIED)
+	
+	SetPlayerAllianceStateBJ(players[1], players[10], bj_ALLIANCE_ALLIED)
+	SetPlayerAllianceStateBJ(players[1], players[11], bj_ALLIANCE_ALLIED)
+
+	//SetPlayerAllianceStateBJ(players[10], players[0], bj_ALLIANCE_ALLIED)
+	//SetPlayerAllianceStateBJ(players[11], players[0], bj_ALLIANCE_ALLIED)
+
+	SetPlayerAllianceStateBJ(players[10], players[1], bj_ALLIANCE_ALLIED)
+	SetPlayerAllianceStateBJ(players[11], players[1], bj_ALLIANCE_ALLIED)
 
 	
 	

@@ -1,0 +1,164 @@
+package Path
+
+import Table
+import LinkedList
+import ClosureTimers
+
+/*
+* This class represents a one-directional path for AI controlled units to follow
+* A path is a constant structure and supposed to be initialized at map init
+* Paths cannot be removed and points cannot be removed
+* Two paths are used per lane to control lane minion movement.
+*/
+
+public constant GREEN_TOP = new Path()
+public constant GREEN_MID = new Path()
+public constant GREEN_BOT = new Path()
+
+public constant BROWN_TOP = new Path()
+public constant BROWN_MID = new Path()
+public constant BROWN_BOT = new Path()
+
+public class Path
+
+    Table pathTable
+    int pathCount
+
+    construct()
+        this.pathTable = new Table()
+        this.pathTable.saveInt(0, 0)
+        this.pathCount = 0
+
+    //adds a new point(x,y) to a path
+    function addPoint(vec2 pos)
+        createUnit(players[0], 'h00G', pos, angle(0))
+        this.pathTable.saveReal( this.pathCount * 2, pos.x)
+        this.pathTable.saveReal( this.pathCount * 2 + 1, pos.y)
+        this.pathCount++
+
+    function getSubPathCount() returns int
+        return this.pathCount
+
+    function getSubPathX(int index) returns real
+        return this.pathTable.loadReal( index * 2 )
+
+    function getSubPathY(int index) returns real
+        return this.pathTable.loadReal( index * 2 + 1 )
+
+class Point
+    vec2 point
+
+    construct(vec2 point)
+        this.point = point
+
+    construct(real x, real y)
+        this.point = vec2(x, y)
+
+
+/** adds n points between the two points to the list. The second point is not added.*/
+function addMultiplePoints(LinkedList<Point> pointList, vec2 pos1, vec2 pos2, int n)
+    let startX = pos1.x
+    let startY = pos1.y
+    let deltaX = (pos2.x - pos1.x)/(n)
+    let deltaY = (pos2.y - pos1.y)/(n)
+
+
+    for i = 0 to n-1
+        let point = new Point(startX + i*deltaX, startY + i*deltaY)
+        pointList.add( point )
+
+    
+
+
+function createPaths()
+    let smallCount = 3
+    let bigCount = 6
+    let bigCountMid = 5
+
+    //top
+    var pointList = new LinkedList<Point> 
+    addMultiplePoints(pointList, gg_rct_GreenCastle.getCenter(), gg_rct_GreenTop.getCenter(), smallCount)
+    addMultiplePoints(pointList, gg_rct_GreenTop.getCenter(), gg_rct_CornerTop.getCenter(), bigCount)
+    addMultiplePoints(pointList, gg_rct_CornerTop.getCenter(), gg_rct_BrownTop.getCenter(), bigCount)
+    addMultiplePoints(pointList, gg_rct_BrownTop.getCenter(), gg_rct_BrownCastle.getCenter(), smallCount)
+    pointList.add(new Point(gg_rct_BrownCastle.getCenter()))
+
+    var greenIter = pointList.staticItr()
+    var brownIter = pointList.staticBackItr()
+
+    var i = 0
+
+    while(greenIter.hasNext())
+        i++
+        let point = greenIter.next().point
+        GREEN_TOP.addPoint(point)
+
+    i=0
+
+    while(brownIter.hasNext())
+        i++
+        let point = brownIter.next().point
+        BROWN_TOP.addPoint(point)
+
+    destroy pointList
+
+
+    //mid
+    pointList = new LinkedList<Point> 
+    addMultiplePoints(pointList, gg_rct_GreenCastle.getCenter(), gg_rct_GreenMid.getCenter(), smallCount)
+    addMultiplePoints(pointList, gg_rct_GreenMid.getCenter(), gg_rct_CenterMid.getCenter(), bigCountMid)
+    addMultiplePoints(pointList, gg_rct_CenterMid.getCenter(), gg_rct_BrownMid.getCenter(), bigCountMid)
+    addMultiplePoints(pointList, gg_rct_BrownMid.getCenter(), gg_rct_BrownCastle.getCenter(), smallCount)
+    pointList.add(new Point(gg_rct_BrownCastle.getCenter()))
+
+    greenIter = pointList.staticItr()
+    brownIter = pointList.staticBackItr()
+
+    i = 0
+
+    while(greenIter.hasNext())
+        i++
+        let point = greenIter.next().point
+        GREEN_MID.addPoint(point)
+
+    i=0
+
+    while(brownIter.hasNext())
+        i++
+        let point = brownIter.next().point
+        BROWN_MID.addPoint(point)
+
+    destroy pointList
+
+    //bot
+    pointList = new LinkedList<Point> 
+    addMultiplePoints(pointList, gg_rct_GreenCastle.getCenter(), gg_rct_GreenBot.getCenter(), smallCount)
+    addMultiplePoints(pointList, gg_rct_GreenBot.getCenter(), gg_rct_CornerBot.getCenter(), bigCount)
+    addMultiplePoints(pointList, gg_rct_CornerBot.getCenter(), gg_rct_BrownBot.getCenter(), bigCount)
+    addMultiplePoints(pointList, gg_rct_BrownBot.getCenter(), gg_rct_BrownCastle.getCenter(), smallCount)
+    pointList.add(new Point(gg_rct_BrownCastle.getCenter()))
+
+    greenIter = pointList.staticItr()
+    brownIter = pointList.staticBackItr()
+
+    i = 0
+
+    while(greenIter.hasNext())
+        i++
+        let point = greenIter.next().point
+        GREEN_BOT.addPoint(point)
+
+    i=0
+
+    while(brownIter.hasNext())
+        i++
+        let point = brownIter.next().point
+        BROWN_BOT.addPoint(point)
+
+    destroy pointList
+
+
+
+init
+    doAfter(4, () ->  createPaths())
+    
