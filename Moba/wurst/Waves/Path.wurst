@@ -160,5 +160,5 @@ function createPaths()
 
 
 init
-    doAfter(4, () ->  createPaths())
+    doAfter(0, () ->  createPaths())
     
