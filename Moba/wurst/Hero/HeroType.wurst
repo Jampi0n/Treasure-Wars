@@ -7,16 +7,24 @@ public constant HERO_MAX_LEVEL = 25
 
 public class HeroType
 
-    private int array[8] statsBase
-    private int array[8] statsMax // in 1/10 to avoid using reals
+    private int array[11] statsBase
+    private int array[11] statsMax
 
     private static constant unitIdToHeroType = new HashMap<integer, HeroType>
+    private int unitId
+
+    static HeroType array heroTypes 
+    static int heroTypeCount = 0
 
     construct(integer id)
         unitIdToHeroType.put(id, this)
-        for i = 0 to 7
+        this.unitId = id
+        for i = 0 to 10
             statsBase[i]=0
             statsMax[i]=0
+
+        heroTypes[heroTypeCount] = this
+        heroTypeCount++
 
     function setBase(Stat stat, integer value)
         this.statsBase[stat.toInt()] = value
@@ -30,9 +38,16 @@ public class HeroType
     function getMax(Stat stat) returns integer
         return this.statsMax[stat.toInt()]
 
+    function setStat(Stat stat, integer min, integer max)
+        this.statsBase[stat.toInt()] = min
+        this.statsMax[stat.toInt()] = max
+
+    function getUnitId() returns integer
+        return this.unitId
+
     /** Calulates the stat of the hero type for a given level */
     function calculateStat(Stat stat, integer level) returns integer
-        let result = getBase(stat) + (this.getMax(stat)*( (level - 1 )/(HERO_MAX_LEVEL - 1) ) ).toInt()
+        let result = getBase(stat) + ( ( this.getMax(stat) - getBase(stat) ) *( (level - 1 )/(HERO_MAX_LEVEL - 1) ) ).toInt()
         //print(stat.toString()+" -> "+result.toString())
         return result
 

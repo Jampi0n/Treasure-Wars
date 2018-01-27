@@ -20,10 +20,11 @@ public class PathUnit
     int currentSubPath
     static timer periodicTimer = getTimer()
     private real nextUpdate
+    private real lastAttack
 
     static function classInit()
         periodicTimer.startPeriodic(0.05, function updateMovementStatic)
-        doPeriodically(1, (CallbackPeriodic cb) -> (begin
+        doPeriodically(0.05, (CallbackPeriodic cb) -> (begin
             print("["+instances.toString()+"]operations: "+operations.toString())
             operations = 0
         end))
@@ -43,11 +44,14 @@ public class PathUnit
             this.currentSubPath = 0
             unitToPathUnit.put(this.assocUnit, this)
             pathUnits.addUnit(this.assocUnit)
-            nextUpdate = getElapsedGameTime() + GetRandomReal(0, 0.1)
+            this.nextUpdate = getElapsedGameTime() + GetRandomReal(0, 0.1)
+            this.lastAttack = 0
             instances++
 
     static function onRemove()
-        destroy unitToPathUnit.get(getDeindexedUnit())
+        let removedPathUnit = unitToPathUnit.get(getDeindexedUnit())
+        if(removedPathUnit!=null)
+            destroy removedPathUnit
 
     ondestroy
         unitToPathUnit.remove(this.assocUnit)
@@ -61,16 +65,25 @@ public class PathUnit
         return GetRandomReal(0.8, 1.1)
 
     static function onAttackStatic()
-        PathUnit damageSource = unitToPathUnit.get(GetAttacker())
-        if( damageSource!=null)
-            damageSource.nextUpdate = getElapsedGameTime() + 2.
+        PathUnit pathUnit = unitToPathUnit.get(GetAttacker())
+        if( pathUnit!=null)
+            pathUnit.lastAttack = getElapsedGameTime()
+        else
+            pathUnit = unitToPathUnit.get(GetTriggerUnit())
+            if( pathUnit!=null and GetAttacker().isType(UNIT_TYPE_STRUCTURE))
+                pathUnit.nextUpdate = getElapsedGameTime()+4
+                if(pathUnit.assocUnit.getCurrentOrder()!=OrderId("attack"))
+                    pathUnit.assocUnit.issuePointOrder("attack", pathUnit.assocUnit.getPos())
+
+        
 
     function updateMovement()
         //print("updateMovement "+this.assocUnit.getName() + " " +this.assocUnit.getHandleId().toString() )
         if(assocUnit==null)
             destroy(this)
             return
-        this.nextUpdate = getElapsedGameTime() + this.getNextUpdate()
+        
+        this.nextUpdate = gameTime + this.getNextUpdate()
 
         if(currentPath==null)
             return
@@ -82,6 +95,7 @@ public class PathUnit
         vec2 v2
         real minDistance = -1
         int newSubPath = -1
+        int moveSubPath
         //print(this.currentPath.getSubPathCount()-2)
         for i=this.currentSubPath to this.currentPath.getSubPathCount()-2
 
@@ -96,20 +110,24 @@ public class PathUnit
                 minDistance = distance
                 newSubPath = i
             //if a subpath is far away, there won't come any close subpathes anymore
-            if(distance>2000)
+            if(distance>2000 or minDistance<100)
                 break
-        int newOrder = 0
-        string currentOrder =  OrderId2String(this.assocUnit.getCurrentOrder())
+        int newOrder
+        //string currentOrder =  OrderId2String(this.assocUnit.getCurrentOrder())
     
         //print(minDistance)
-        //print("path: "+this.currentSubPath.toString()+" -> "+newSubPath.toString())
+        
         //print(currentOrder)
 
         //move two subpathes forward
         if(newSubPath+2<=this.currentPath.getSubPathCount()-1)
-            v2 = vec2(this.currentPath.getSubPathX(newSubPath+2), this.currentPath.getSubPathY(newSubPath+2))
+            moveSubPath = newSubPath+2
         else
-            v2 = vec2(this.currentPath.getSubPathX(newSubPath+1), this.currentPath.getSubPathY(newSubPath+1))
+            moveSubPath = newSubPath+1
+
+        v2 = vec2(this.currentPath.getSubPathX(moveSubPath), this.currentPath.getSubPathY(moveSubPath))
+
+        //print("path: "+this.currentSubPath.toString()+" -> "+newSubPath.toString()+" -> "+moveSubPath.toString())
 
         if(minDistance>600)
             newOrder = 1
@@ -127,6 +145,8 @@ public class PathUnit
         group nearby = CreateGroup()
         nearby.enumUnitsInRange(v0, 500)
         
+        
+
         while(true)
             unit n = nearby.next()
             if(n==null)
@@ -134,13 +154,17 @@ public class PathUnit
             nearby.removeUnit(n)
             if(unitToPathUnit.has(n))
                 PathUnit nearbyPathUnit = unitToPathUnit.get(n)
-                if(nearbyPathUnit.currentPath == this.currentPath and nearbyPathUnit.nextUpdate<gameTime)
+                if(nearbyPathUnit.currentPath == this.currentPath and (nearbyPathUnit.nextUpdate<gameTime or nearbyPathUnit == this) )
                     if(newOrder==1)
                         n.issuePointOrder("move", v2)
-                        nearbyPathUnit.nextUpdate = getElapsedGameTime() + this.getNextUpdate()
+                        nearbyPathUnit.nextUpdate = gameTime + this.getNextUpdate()
                     else
-                        n.issuePointOrder("attack", v2)
-                        nearbyPathUnit.nextUpdate = getElapsedGameTime() + this.getNextUpdate()
+                        if(gameTime-nearbyPathUnit.lastAttack > 2)
+                            n.issuePointOrder("attack", v2)
+                            nearbyPathUnit.nextUpdate = gameTime + this.getNextUpdate()
+                        else
+                            nearbyPathUnit.nextUpdate = gameTime + this.getNextUpdate()
+
                     
             
         nearby.destr()

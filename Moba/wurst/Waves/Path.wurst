@@ -31,7 +31,7 @@ public class Path
 
     //adds a new point(x,y) to a path
     function addPoint(vec2 pos)
-        createUnit(players[0], 'h00G', pos, angle(0))
+        //createUnit(players[0], 'h00G', pos, angle(0))
         this.pathTable.saveReal( this.pathCount * 2, pos.x)
         this.pathTable.saveReal( this.pathCount * 2 + 1, pos.y)
         this.pathCount++
@@ -71,9 +71,9 @@ function addMultiplePoints(LinkedList<Point> pointList, vec2 pos1, vec2 pos2, in
 
 
 function createPaths()
-    let smallCount = 3
-    let bigCount = 6
-    let bigCountMid = 5
+    let smallCount = 5
+    let bigCount = 10
+    let bigCountMid = 8
 
     //top
     var pointList = new LinkedList<Point> 

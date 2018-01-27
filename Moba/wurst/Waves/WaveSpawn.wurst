@@ -8,39 +8,51 @@ function spawnWave()
     unit spawnedUnit
     PathUnit pathUnit
     for i = 0 to 5
-        spawnedUnit = createUnit(players[10], FOOTMAN, gg_rct_GreenCastle.getCenter(), angle(45))
+        spawnedUnit = createUnit(players[10], FOOTMAN, gg_rct_GreenSpawnTop.getCenter(), angle(45))
         pathUnit = new PathUnit(spawnedUnit)
         pathUnit.setPath(GREEN_TOP)
-
-        spawnedUnit = createUnit(players[10], FOOTMAN, gg_rct_GreenCastle.getCenter(), angle(45))
+        
+        spawnedUnit = createUnit(players[10], FOOTMAN, gg_rct_GreenSpawnMid.getCenter(), angle(45))
         pathUnit = new PathUnit(spawnedUnit)
         pathUnit.setPath(GREEN_MID)
 
-        spawnedUnit = createUnit(players[10], FOOTMAN, gg_rct_GreenCastle.getCenter(), angle(45))
+        spawnedUnit = createUnit(players[10], FOOTMAN, gg_rct_GreenSpawnBot.getCenter(), angle(45))
         pathUnit = new PathUnit(spawnedUnit)
         pathUnit.setPath(GREEN_BOT)
 
 
-        spawnedUnit = createUnit(players[11], FOOTMAN, gg_rct_BrownCastle.getCenter(), angle(45))
+        spawnedUnit = createUnit(players[11], FOOTMAN, gg_rct_BrownSpawnTop.getCenter(), angle(45))
         pathUnit = new PathUnit(spawnedUnit)
         pathUnit.setPath(BROWN_TOP)
 
-        spawnedUnit = createUnit(players[11], FOOTMAN, gg_rct_BrownCastle.getCenter(), angle(45))
+        spawnedUnit = createUnit(players[11], FOOTMAN, gg_rct_BrownSpawnMid.getCenter(), angle(45))
         pathUnit = new PathUnit(spawnedUnit)
         pathUnit.setPath(BROWN_MID)
 
-        spawnedUnit = createUnit(players[11], FOOTMAN, gg_rct_BrownCastle.getCenter(), angle(45))
+        spawnedUnit = createUnit(players[11], FOOTMAN, gg_rct_BrownSpawnBot.getCenter(), angle(45))
         pathUnit = new PathUnit(spawnedUnit)
         pathUnit.setPath(BROWN_BOT)
 
+        spawnedUnit = createUnit(players[11], RIFLEMAN, gg_rct_BrownSpawnTop.getCenter(), angle(45))
+        pathUnit = new PathUnit(spawnedUnit)
+        pathUnit.setPath(BROWN_TOP)
+
+        spawnedUnit = createUnit(players[11], RIFLEMAN, gg_rct_BrownSpawnMid.getCenter(), angle(45))
+        pathUnit = new PathUnit(spawnedUnit)
+        pathUnit.setPath(BROWN_MID)
+
+        spawnedUnit = createUnit(players[11], RIFLEMAN, gg_rct_BrownSpawnBot.getCenter(), angle(45))
+        pathUnit = new PathUnit(spawnedUnit)
+        pathUnit.setPath(BROWN_BOT)
+
+    
 
 
 
 
 
 
-
+    
 
 init
-    doAfter(1, () -> spawnWave())
-    doPeriodically(35, (CallbackPeriodic _) -> spawnWave() )
+    doPeriodically(50, (CallbackPeriodic _) -> spawnWave())

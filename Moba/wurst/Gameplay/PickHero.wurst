@@ -1,0 +1,193 @@
+package PickHero
+import TimerUtils
+import PlayerControl
+import HeroControl
+import HeroType
+import ClosureTimers
+
+public PickMode pickMode
+timer chooseModeTimer
+timer pickTimer
+timerdialog timerWindow
+trigger chooseModeTrigger
+trigger onPickTrigger
+region pickRegion
+
+unit array tavern
+unit array patron
+
+HeroType array remainingHeroTypes
+int remainingHeroTypesCount
+
+enum PickMode
+    UNDECIDED
+    ALLRANDOM
+    ALLPICK
+    //...
+    /*
+ban, reverse pick, same heroes
+    */
+
+
+function onModePick()
+    string s = GetEventPlayerChatString()
+    if(s=="-ap")
+        pickMode = PickMode.ALLPICK
+    else
+        pickMode = PickMode.ALLRANDOM
+
+    chooseModeTimer.release()
+    endPickMode()
+
+//creates a random hero for a player
+function createRandomHero(CPlayer cPlayer)
+    var random = GetRandomInt(0, remainingHeroTypesCount-1)
+
+    Hero hero = new Hero(cPlayer, remainingHeroTypes[random].getUnitId() , gg_rct_CenterMid.getCenter(), angle(0))
+
+    if(cPlayer.getTeam()==Team.TEAM1)
+        hero.toUnit().setPos(gg_rct_GreenCastle.getCenter())
+    else
+        hero.toUnit().setPos(gg_rct_BrownCastle.getCenter())
+
+    for i = 0 to 11
+        if(getCPlayer(i).getPlayerType()==PlayerType.HERO)
+            SetPlayerTechMaxAllowed(players[i],  remainingHeroTypes[random].getUnitId(), 0)
+
+    remainingHeroTypes[random] = remainingHeroTypes[remainingHeroTypesCount-1]
+    remainingHeroTypes[remainingHeroTypesCount-1]=null
+    remainingHeroTypesCount--
+
+
+
+function removeHeroType(HeroType herotype)
+    for i = 0 to remainingHeroTypesCount-1
+        if(remainingHeroTypes[i]==herotype)
+            remainingHeroTypes[i] = remainingHeroTypes[remainingHeroTypesCount-1]
+            remainingHeroTypes[remainingHeroTypesCount-1]=null
+            remainingHeroTypesCount--
+            break
+
+    for i = 0 to 11
+        if(getCPlayer(i).getPlayerType()==PlayerType.HERO)
+            SetPlayerTechMaxAllowed(players[i], herotype.getUnitId(), 0)
+        
+
+
+function allRandom()
+    for i = 0 to 11
+        if(getCPlayer(i).getPlayerType()==PlayerType.HERO)
+            createRandomHero(getCPlayer(i))
+
+
+function onPick()
+    unit pickedUnit = GetTriggerUnit()
+    CPlayer cPlayer = pickedUnit.getOwner().getCPlayer()
+    if(cPlayer.getPlayerType()==PlayerType.HERO)
+        if(cPlayer.getHero()==null)
+            print("pick")
+            Hero hero = new Hero(pickedUnit)
+            if(cPlayer.getTeam()==Team.TEAM1)
+                hero.toUnit().setPos(gg_rct_GreenCastle.getCenter())
+            else
+                hero.toUnit().setPos(gg_rct_BrownCastle.getCenter())
+            removeHeroType(hero.getHeroType())
+
+function allPick()
+
+    tavern[0] = createUnit(players[15], 'n002', gg_rct_Tavern0.getCenter(), angle(0) )
+    tavern[0].setColor(PLAYER_COLOR_RED)
+    tavern[1] = createUnit(players[15], 'n003', gg_rct_Tavern1.getCenter(), angle(0) )
+    tavern[1].setColor(PLAYER_COLOR_BLUE)
+    tavern[2] = createUnit(players[15], 'n004', gg_rct_Tavern2.getCenter(), angle(0) )
+    tavern[2].setColor(PLAYER_COLOR_YELLOW)
+    tavern[3] = createUnit(players[15], 'n005', gg_rct_Tavern3.getCenter(), angle(0) )
+    tavern[3].setColor(PLAYER_COLOR_GREEN)
+    for i = 0 to 11
+        if(getCPlayer(i).getPlayerType()==PlayerType.HERO)
+            patron[i] = createUnit(players[i], 'n006', gg_rct_CenterMid.getCenter(), angle(0))
+
+
+    pickRegion = CreateRegion()
+        ..addRect(bj_mapInitialPlayableArea)
+    onPickTrigger = CreateTrigger()
+        ..addAction(function onPick)
+        ..registerEnterRegion(pickRegion, null)
+
+    pickTimer = getTimer()
+        ..start(30, function allPickEnd)
+
+    timerWindow = CreateTimerDialog(pickTimer)
+    TimerDialogSetTitle(timerWindow,"Pick hero:")
+    TimerDialogDisplay(timerWindow, true)
+
+function allPickEnd()
+    GetExpiredTimer().release()
+    DestroyTimerDialog(timerWindow)
+    timerWindow = null
+    pickRegion.destr()
+    for i = 0 to 3
+        tavern[i].remove()
+        tavern[i]=null
+    for i = 0 to 11
+        if(getCPlayer(i).getPlayerType()==PlayerType.HERO)
+            patron[i].remove()
+            patron[i]=null
+            if(getCPlayer(i).getHero()==null)
+                if(GetLocalPlayer()==players[i])
+                    print("|cffffcc00 you have not picked a hero in time. You will get a random one.")
+                createRandomHero(getCPlayer(i))
+
+    onPickTrigger
+        ..clearActions()
+        ..destr()
+
+
+
+function endPickMode()
+    let t = GetExpiredTimer()
+    DestroyTimerDialog(timerWindow)
+    if(t!=null)
+        t.release()
+
+    if(pickMode == PickMode.ALLPICK)
+        print("|cffffcc00All Pick was chosen. You have 30 seconds to pick a Hero!|r")
+        allPick()
+    if(pickMode == PickMode.ALLRANDOM)
+        print("|cffffcc00All Random was chosen. Heroes will be random!|r")
+        allRandom()
+    if(pickMode == PickMode.UNDECIDED)
+        print("|cffffcc00No mode was chosen. Heroes will be random!|r")
+        pickMode = PickMode.ALLRANDOM
+        allRandom()
+
+    chooseModeTrigger
+        ..clearActions()
+        ..destr()
+
+function startPickMode()
+    //copies the array of hero types
+    remainingHeroTypesCount = HeroType.heroTypeCount
+
+    for i = 0 to remainingHeroTypesCount-1
+        remainingHeroTypes[i] = HeroType.heroTypes[i]
+
+    
+
+    pickMode = PickMode.UNDECIDED
+    chooseModeTrigger = CreateTrigger()
+        ..registerPlayerChatEvent(players[adminPlayer], "-ap", true)
+        ..registerPlayerChatEvent(players[adminPlayer], "-ar", true)
+        ..addAction(function onModePick)
+    
+    chooseModeTimer= getTimer()
+        ..start(30, function endPickMode)
+
+    timerWindow = CreateTimerDialog(chooseModeTimer)
+    TimerDialogSetTitle(timerWindow,"Choose pick mode:")
+    TimerDialogDisplay(timerWindow, true)
+
+    print("|cffffcc00"+players[adminPlayer].getName()+" has 30 seconds to pick a mode!|r")
+
+init
+    doAfter(0, ()-> startPickMode())

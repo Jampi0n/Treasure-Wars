@@ -12,19 +12,92 @@ r: 5 6 - 9 - 12 - 15 - 18
 passive: 5 1 - 5 - 9 - 13 - 17
 25 levels
 */
-function mountainKing()
-    new HeroType('H000')
-        ..setMax(Stat.AD, 100)
-        ..setMax(Stat.AR, 100)
-        ..setMax(Stat.AS, 100)
-        ..setMax(Stat.HP, 100)
-        ..setMax(Stat.HR, 100)
-        ..setMax(Stat.MP, 100)
-        ..setMax(Stat.MR, 100)
-        ..setMax(Stat.MS, 100)
+public constant HERO_PALADIN = 'H000'
+public constant HERO_SHAMAN = 'H00H'
+public constant HERO_DEADEYE = 'H00I'
+public constant HERO_PYTHON_WARRIORES = 'H00J'
+public constant HERO_SEA_DRUID = 'H00K'
+
+//base stats ~ 10
+//max stats ~40
+
+function heroPaladin()
+    new HeroType(HERO_PALADIN)
+        ..setStat(Stat.AD, 15, 50)
+        ..setStat(Stat.AR, 10, 40)
+        ..setStat(Stat.AS, 10, 30)
+        ..setStat(Stat.HP, 15, 40)
+        ..setStat(Stat.HR, 10, 30)
+        ..setStat(Stat.MP, 5, 20)
+        ..setStat(Stat.MR, 5, 20)
+        ..setStat(Stat.MS, 0, 30)
+        ..setStat(Stat.STR, 15, 30)
+        ..setStat(Stat.WP, 10, 40)
+        ..setStat(Stat.INT, 5, 20)
+
+function heroShaman()
+    new HeroType(HERO_SHAMAN)
+        ..setStat(Stat.AD, 5, 20)
+        ..setStat(Stat.AR, 5, 15)
+        ..setStat(Stat.AS, 10, 20)
+        ..setStat(Stat.HP, 10, 30)
+        ..setStat(Stat.HR, 10, 20)
+        ..setStat(Stat.MP, 20, 60)
+        ..setStat(Stat.MR, 15, 50)
+        ..setStat(Stat.MS, 10, 40)
+        ..setStat(Stat.STR, 5, 10)
+        ..setStat(Stat.WP, 10, 20)
+        ..setStat(Stat.INT, 15, 50)
+
+function heroDeadeye()
+    new HeroType(HERO_DEADEYE)
+        ..setStat(Stat.AD, 10, 70)
+        ..setStat(Stat.AR, 5, 15)
+        ..setStat(Stat.AS, 0, 40)
+        ..setStat(Stat.HP, 5, 25)
+        ..setStat(Stat.HR, 0, 10)
+        ..setStat(Stat.MP, 10, 25)
+        ..setStat(Stat.MR, 5, 20)
+        ..setStat(Stat.MS, 5, 20)
+        ..setStat(Stat.STR, 10, 40)
+        ..setStat(Stat.WP, 5, 10)
+        ..setStat(Stat.INT, 5, 20)
+
+function heroPythonWarriores()
+    new HeroType(HERO_PYTHON_WARRIORES)
+        ..setStat(Stat.AD, 10, 40)
+        ..setStat(Stat.AR, 10, 25)
+        ..setStat(Stat.AS, 25, 60)
+        ..setStat(Stat.HP, 15, 40)
+        ..setStat(Stat.HR, 20, 50)
+        ..setStat(Stat.MP, 10, 30)
+        ..setStat(Stat.MR, 15, 25)
+        ..setStat(Stat.MS, 20, 60)
+        ..setStat(Stat.STR, 5, 15)
+        ..setStat(Stat.WP, 20, 35)
+        ..setStat(Stat.INT, 5, 40)
+
+
+function heroSeaDruid()
+    new HeroType(HERO_SEA_DRUID)
+        ..setStat(Stat.AD, 20, 35)
+        ..setStat(Stat.AR, 15, 25)
+        ..setStat(Stat.AS, 0, 10)
+        ..setStat(Stat.HP, 20, 60)
+        ..setStat(Stat.HR, 15, 40)
+        ..setStat(Stat.MP, 15, 50)
+        ..setStat(Stat.MR, 10, 40)
+        ..setStat(Stat.MS, 5, 30)
+        ..setStat(Stat.STR, 10, 25)
+        ..setStat(Stat.WP, 5, 30)
+        ..setStat(Stat.INT, 10, 40)
 
 
 
 
 init
-    mountainKing()
+    heroDeadeye()
+    heroPaladin()
+    heroPythonWarriores()
+    heroSeaDruid()
+    heroShaman()
