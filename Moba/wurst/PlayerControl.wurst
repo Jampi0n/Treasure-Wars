@@ -6,24 +6,8 @@ package PlayerControl
 *
 */
 
-public CPlayer array allCPlayers
+public int adminPlayer
 
-function initPlayers()
-    for i = 0 to 9
-        player p = players[i]
-        Team t = i<=5?Team.TEAM1:Team.TEAM2
-        if( p.getSlotState()==PLAYER_SLOT_STATE_PLAYING )
-            allCPlayers[i] = new CPlayer(p, t, PlayerType.HERO)
-        else
-            allCPlayers[i] = new CPlayer(p, t, PlayerType.NONE)
-
-
-    allCPlayers[10] = new CPlayer(players[10], Team.TEAM1, PlayerType.ARMY)
-    allCPlayers[11] = new CPlayer(players[11], Team.TEAM2, PlayerType.ARMY)
-    allCPlayers[12] = new CPlayer(players[12], Team.NEUTRAL_HOSTILE, PlayerType.NEUTRAL)
-    for i=13 to 15
-        allCPlayers[15] = new CPlayer(players[15], Team.NEUTRAL_PASSIVE, PlayerType.NEUTRAL)
-        
 
 
 public enum Team
@@ -40,6 +24,9 @@ public enum PlayerType
 
 public function player.getCPlayer() returns CPlayer
     return CPlayer.idToPlayer[this.getId()]
+
+public function getCPlayer(int id) returns CPlayer
+    return CPlayer.idToPlayer[id]
 
 //player class
 public class CPlayer
@@ -73,5 +60,30 @@ public class CPlayer
     function getPlayerType() returns PlayerType
         return this.playertype
 
+    static function initPlayers()
+        var admin = false
+        for i = 0 to 9
+            player p = players[i]
+            Team t = i<=5?Team.TEAM1:Team.TEAM2
+            if( p.getSlotState()==PLAYER_SLOT_STATE_PLAYING )
+                new CPlayer(p, t, PlayerType.HERO)
+                if(not admin)
+                    admin = true
+                    adminPlayer = i
+            else
+                new CPlayer(p, t, PlayerType.NONE)
+    
+    
+        new CPlayer(players[10], Team.TEAM1, PlayerType.ARMY)
+        new CPlayer(players[11], Team.TEAM2, PlayerType.ARMY)
+        new CPlayer(players[12], Team.NEUTRAL_HOSTILE, PlayerType.NEUTRAL)
+        for i=13 to 15
+            new CPlayer(players[15], Team.NEUTRAL_PASSIVE, PlayerType.NEUTRAL)
+    
+        for i=0 to 11
+            for j=0 to 11
+                if(i!=j and getCPlayer(i).getTeam()==getCPlayer(j).getTeam())
+                    SetPlayerAllianceStateBJ(players[i],players[j], bj_ALLIANCE_ALLIED_VISION)
+
 init
-    initPlayers()
+    CPlayer.initPlayers()

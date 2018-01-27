@@ -9,6 +9,9 @@ public enum Stat
     AS
     AR
     MS
+    STR
+    WP
+    INT
 
 public function Stat.toInt() returns int
     return this castTo int
