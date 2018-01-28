@@ -1,6 +1,7 @@
 package PythonWarriores
 
 import HeroType
+import HeroControl
 import Stats
 import OnAttack
 import BuffType
@@ -9,12 +10,17 @@ import Buff
 import General
 import BuffTypeConfig
 import ClosureTimers
+import OnUnitEnterLeave
 
 public constant HERO_PYTHON_WARRIORES = 'H00J'
 HeroType heroType
 
 constant ENVENOMED_BLADES = new BuffType(false, true)
 constant DODGE = new BuffType(true, true)
+
+constant POISON_SPIT = new BuffType(false, true)
+
+group spitDummies = CreateGroup()
 
 function setupStats()
     heroType
@@ -37,25 +43,42 @@ function onSpellCast()
 
     if(spellId=='A00B') //Dodge
         caster.dispelBuffs(true, true)
-        new Buff(caster, caster, 0.4, UNTARGETABLE, 1)
-        doAfter(0.4, () -> new Buff(caster, caster, 1.5+0.5*level, INVIS, 1))
+        new Buff(caster, caster, (3.+1*level).bonus(caster.getInt(),4), INVIS, 1)
 
     if(spellId=='A00H') //Poison Spit
-        print("poison spit")
         let x = GetSpellTargetX()
         let y = GetSpellTargetY()
-        print(x)
-        print(y)
         let attacker = createUnit(caster.getOwner(), 'u000', caster.getPos(), angle(Atan2(y - caster.getY(), x - caster.getX())))
-        print("test2")
         attacker.setAbilityLevel('A00I', level)
-        attacker.issuePointOrder("attackground", vec2(x,y))
+
+        if(not attacker.issuePointOrder("attackground", vec2(x,y)))
+            print("failed to order attackground")
         attacker.setTimedLife(6)
 
 
 function onAttack()
     if(OnAttack.isActive())
         new Buff(OnAttack.getTarget(), OnAttack.getAttacker(), 5, ENVENOMED_BLADES, OnAttack.getAttacker().getAbilityLevel('A00A'))
+
+//in for group
+function poisonSpitPeriodic()
+    unit poisonSpitDummy = GetEnumUnit()
+    int level = poisonSpitDummy.getTypeId()+1-'n007'
+    player owner =poisonSpitDummy.getOwner()
+    unit hero =  Hero.getHero(owner).toUnit()
+    if(level>3)
+        level = poisonSpitDummy.getTypeId()+4-'n00A'
+
+    group nearby = CreateGroup()
+    nearby.enumUnitsInRange(poisonSpitDummy.getPos(), 175.+25*level)
+
+    while(not nearby.isEmpty())
+        unit target = FirstOfGroup(nearby)
+        nearby.removeUnit(target)
+        if(IsUnitEnemy(target, owner) and not target.isType(UNIT_TYPE_ANCIENT) and not target.isType(UNIT_TYPE_STRUCTURE) and target.isAlive())
+            new Buff(target, hero, 0.5, POISON_SPIT, level)
+
+    nearby.destr()
 
 init
     heroType = new HeroType(HERO_PYTHON_WARRIORES)
@@ -69,13 +92,73 @@ init
     ENVENOMED_BLADES.onPeriodicTrigger = CreateTrigger()
         ..addAction(()-> (begin
         let thisBuff = Buff.getTriggerBuff()
-        thisBuff.getCaster().dealDamage(thisBuff.getTarget(), thisBuff.getLevel()*5., ReductionType.MAGIC)
-        print(thisBuff.getTarget().getName()+" poisoned with level "+thisBuff.getLevel().toString())
+        thisBuff.getCaster().dealDamage(thisBuff.getTarget(), 
+        (5.*thisBuff.getLevel()).bonus(thisBuff.getCaster().getInt(), 20)
+        , ReductionType.MAGIC)
+        print(thisBuff.getTarget().getName()+" poisoned with level "+thisBuff.getLevel().toString()+" dealing"+(5.*thisBuff.getLevel()).bonus(thisBuff.getCaster().getInt(), 20).toString()+" damage.")
     end) )
 
     abilityList = new LinkedList<int>
     ..add('A00C')
     ..add('A00D')
     DODGE.setup(abilityList, 'B008')
+    
+
+    //Poison Spit
+    abilityList = new LinkedList<int>
+    ..add('A00J')
+    ..add('A00K')
+    POISON_SPIT.setup(abilityList, 'B00B')
+    POISON_SPIT.onApply = CreateTrigger()
+
+    //create api, instead of directly using the trigger variable
+    //make trigger variable private 
+    //api automatically creates trigger, if null
+
+    POISON_SPIT.onApply.addAction( () -> (begin
+        let thisBuff = Buff.getTriggerBuff()
+        thisBuff.getCaster().dealDamage(thisBuff.getTarget(), 
+        (1.25*thisBuff.getLevel()).bonus(thisBuff.getCaster().getInt(), 5)
+        , ReductionType.MAGIC)
+    end) )
+
+    onEnter(() -> (begin
+        let spitDummy = getEnterLeaveUnit()
+        int level = spitDummy.getTypeId()+1-'n007'
+        if(level>3)
+            level = spitDummy.getTypeId()+4-'n00A'
+
+        if level >= 1 and level <= 5
+            spitDummies.addUnit(spitDummy)
+
+            real x
+            real y
+            real angle
+            for i = 0 to 9 + level*3
+                angle = i/(10 + level*3)*2*bj_PI
+                x = spitDummy.getX() + (140 + 25*level) * angle.cos()
+                y = spitDummy.getY() + (140 + 25*level) * angle.sin()
+                var e = AddSpecialEffect("Units\\Undead\\PlagueCloud\\PlagueCloudtarget.mdl", x, y)
+                doAfter(5.+level, () -> DestroyEffect(e))
+
+    end) )
+
+    onLeave(() -> (begin
+        let spitDummy = getEnterLeaveUnit()
+        int level = spitDummy.getTypeId()+1-'n007'
+        if(level>3)
+            level = spitDummy.getTypeId()+4-'n00A'
+
+        if level >= 1 and level <= 5
+            
+            spitDummies.removeUnit(spitDummy)
+    end) )
+
+    let spitPeriodicTrigger = CreateTrigger()
+    spitPeriodicTrigger.registerTimerEvent(0.25, true)
+    spitPeriodicTrigger.addAction(() -> (begin
+        ForGroup(spitDummies, function poisonSpitPeriodic)
+    end) )
+
 
     heroType.addOnSpellCastFunc(function onSpellCast)
