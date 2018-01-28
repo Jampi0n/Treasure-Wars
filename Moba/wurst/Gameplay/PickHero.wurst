@@ -100,13 +100,13 @@ function onPick()
     unit pickedUnit = GetTriggerUnit()
     CPlayer cPlayer = pickedUnit.getOwner().getCPlayer()
     if(cPlayer.getPlayerType()==PlayerType.HERO)
-        if(cPlayer.getHero()==null)
+        if(Hero.getHero(cPlayer)==null)
             print("pick")
             if HeroType.getHeroType(pickedUnit.getTypeId()) != null
                 Hero hero = new Hero(pickedUnit)
                 if(cPlayer.getTeam()==Team.TEAM1)
                     //hero.toUnit().setPos(gg_rct_GreenCastle.getCenter())
-                    SetHeroLevel(hero.toUnit(), 5, true)
+                    SetHeroLevel(hero.toUnit(), 15, true)
                 else
                     hero.toUnit().setPos(gg_rct_BrownCastle.getCenter())
                 removeHeroType(hero.getHeroType())
@@ -123,7 +123,7 @@ function allPickEnd()
         if(getCPlayer(i).getPlayerType()==PlayerType.HERO)
             patron[i].remove()
             patron[i]=null
-            if(getCPlayer(i).getHero()==null)
+            if(Hero.getHero(getCPlayer(i))==null)
                 if(GetLocalPlayer()==players[i])
                     print("|cffffcc00 you have not picked a hero in time. You will get a random one.")
                 createRandomHero(getCPlayer(i))
@@ -190,7 +190,7 @@ function startPickMode()
 
 init
     doAfter(0, ()-> startPickMode())
-    doAfter(3, () -> (begin
+    doAfter(0.1, () -> (begin
         pickMode = PickMode.ALLPICK
         endPickMode()
     end))

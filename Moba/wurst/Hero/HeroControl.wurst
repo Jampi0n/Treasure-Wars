@@ -6,10 +6,7 @@ import GameTimer
 import HeroType
 import Upgrades
 import Stats
-
-
-public function CPlayer.getHero() returns Hero
-    return Hero.heroes[this.getId()]
+import ErrorHandling
 
 public class Hero
 
@@ -135,6 +132,18 @@ public class Hero
 
     static function getHero(unit whichUnit) returns Hero
         return unitToHero.get(whichUnit)
+
+    static function getHero(int index) returns Hero
+        if index < 0 or index > 9
+            error("Index does not exist")
+            return null
+        return heroes[index]
+    
+    static function getHero(CPlayer owner) returns Hero
+        return getHero(owner.getId())
+
+    static function getHero(player owner) returns Hero
+        return getHero(owner.getId())
 
         
 init

@@ -55,4 +55,5 @@ function spawnWave()
     
 
 init
+    doAfter(5, () -> spawnWave()) 
     doPeriodically(50, (CallbackPeriodic _) -> spawnWave())

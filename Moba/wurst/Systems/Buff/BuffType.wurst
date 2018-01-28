@@ -108,7 +108,6 @@ public class BuffType
         let buffType = currentBuff.getBuffType()
         let target = currentBuff.getTarget()
         buffType.abilities.forEach( (int abilityId ) -> (begin
-            print(int2fourchar(abilityId))
             target.addAbility(abilityId)
             target.setAbilityLevel(abilityId, currentBuff.getLevel())
         end) )
