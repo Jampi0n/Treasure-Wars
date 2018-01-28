@@ -123,7 +123,7 @@ public class Buff
     private trigger onDispel
     private trigger onEnd
     private trigger onPeriodicTrigger
-    private timer periodicTimer
+    private timer periodicTimer = null
 
     private static Buff currentBuff 
 
@@ -143,9 +143,12 @@ public class Buff
         this.onEnd = buffType.onEnd
         this.onPeriodicTrigger = buffType.onPeriodicTrigger
         if(this.onPeriodicTrigger!=null)
-            periodicTimer = getTimer()
+            this.periodicTimer = getTimer()
                 ..setData(this castTo int)
                 ..startPeriodic(buffType.getPeriodicTime(), function onPeriodicStatic)
+        else
+            this.periodicTimer = null
+
         currentBuff = this
         let oldBuff = BuffList.getBuffOfType(this.target, this.buffType)
 
@@ -164,7 +167,7 @@ public class Buff
             if(this.onFirst!=null)
                 this.onFirst.execute()
 
-        print(this.expireTimer.getRemaining())
+        //print(this.expireTimer.getRemaining())
         
 
     private function onPeriodic()
@@ -227,6 +230,8 @@ public class Buff
 
     ondestroy
         BuffList.getBuffList(this.target).remove(this)
+        if(this.periodicTimer==this.expireTimer)
+            print("WTF!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11")
         this.expireTimer.release()
         if this.periodicTimer != null
             this.periodicTimer.release()

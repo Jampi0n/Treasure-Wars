@@ -10,6 +10,26 @@ public enum ReductionType
     NONE
 
 
+public function unit.getStr() returns int
+    return GetHeroStr(this, true)
+
+public function unit.getWp() returns int
+    return GetHeroAgi(this, true)
+
+public function unit.getInt() returns int
+    return GetHeroInt(this, true)
+
+public function real.factor(int statValue, real atHundred) returns real
+    return this * (atHundred*statValue/100 + 1)
+
+public function int.factor(int statValue, real atHundred) returns real
+    return this.toReal().factor(statValue, atHundred)
+
+public function real.bonus(int statValue, real atHundred) returns real
+    return this + atHundred*statValue/100
+
+public function int.bonus(int statValue, real atHundred) returns real
+    return this.toReal().bonus(statValue, atHundred)
 
 public function unit.dealDamage(unit target, real amount, ReductionType reductionType)
     let damageType = reductionType == ReductionType.PHYSICAL ? DAMAGE_TYPE_NORMAL : DAMAGE_TYPE_UNIVERSAL
