@@ -1,0 +1,25 @@
+package Shaman
+
+import HeroType
+import Stats
+
+public constant HERO_SHAMAN = 'H00H'
+
+function setupStats()
+    new HeroType(HERO_SHAMAN)
+        ..setStat(Stat.AD, 5, 20)
+        ..setStat(Stat.AR, 5, 15)
+        ..setStat(Stat.AS, 10, 20)
+        ..setStat(Stat.HP, 10, 30)
+        ..setStat(Stat.HR, 10, 20)
+        ..setStat(Stat.MP, 20, 60)
+        ..setStat(Stat.MR, 15, 50)
+        ..setStat(Stat.MS, 10, 40)
+        ..setStat(Stat.STR, 5, 10)
+        ..setStat(Stat.WP, 10, 20)
+        ..setStat(Stat.INT, 15, 50)
+
+
+        
+init
+    setupStats()

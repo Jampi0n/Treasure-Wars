@@ -1,0 +1,81 @@
+package PythonWarriores
+
+import HeroType
+import Stats
+import OnAttack
+import BuffType
+import LinkedList
+import Buff
+import General
+import BuffTypeConfig
+import ClosureTimers
+
+public constant HERO_PYTHON_WARRIORES = 'H00J'
+HeroType heroType
+
+constant ENVENOMED_BLADES = new BuffType(false, true)
+constant DODGE = new BuffType(true, true)
+
+function setupStats()
+    heroType
+        ..setStat(Stat.AD, 10, 40)
+        ..setStat(Stat.AR, 10, 25)
+        ..setStat(Stat.AS, 25, 60)
+        ..setStat(Stat.HP, 15, 40)
+        ..setStat(Stat.HR, 20, 50)
+        ..setStat(Stat.MP, 10, 30)
+        ..setStat(Stat.MR, 15, 25)
+        ..setStat(Stat.MS, 20, 60)
+        ..setStat(Stat.STR, 5, 15)
+        ..setStat(Stat.WP, 20, 35)
+        ..setStat(Stat.INT, 5, 40)
+
+function onSpellCast()
+    let spellId = GetSpellAbilityId()
+    var caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+
+    if(spellId=='A00B') //Dodge
+        caster.dispelBuffs(true, true)
+        new Buff(caster, caster, 0.4, UNTARGETABLE, 1)
+        doAfter(0.4, () -> new Buff(caster, caster, 1.5+0.5*level, INVIS, 1))
+
+    if(spellId=='A00H') //Poison Spit
+        print("poison spit")
+        let x = GetSpellTargetX()
+        let y = GetSpellTargetY()
+        print(x)
+        print(y)
+        let attacker = createUnit(caster.getOwner(), 'u000', caster.getPos(), angle(Atan2(y - caster.getY(), x - caster.getX())))
+        print("test2")
+        attacker.setAbilityLevel('A00I', level)
+        attacker.issuePointOrder("attackground", vec2(x,y))
+        attacker.setTimedLife(6)
+
+
+function onAttack()
+    if(OnAttack.isActive())
+        new Buff(OnAttack.getTarget(), OnAttack.getAttacker(), 5, ENVENOMED_BLADES, OnAttack.getAttacker().getAbilityLevel('A00A'))
+
+init
+    heroType = new HeroType(HERO_PYTHON_WARRIORES)
+    heroType.addOnAttackFunc(function onAttack)
+    setupStats()
+
+    var abilityList = new LinkedList<int>
+    ..add('A009')
+    ENVENOMED_BLADES.setup(abilityList, 'B007')
+    ENVENOMED_BLADES.setPeriodicTime(1)
+    ENVENOMED_BLADES.onPeriodicTrigger = CreateTrigger()
+        ..addAction(()-> (begin
+        let thisBuff = Buff.getTriggerBuff()
+        thisBuff.getCaster().dealDamage(thisBuff.getTarget(), thisBuff.getLevel()*5., ReductionType.MAGIC)
+        print(thisBuff.getTarget().getName()+" poisoned with level "+thisBuff.getLevel().toString())
+    end) )
+
+    abilityList = new LinkedList<int>
+    ..add('A00C')
+    ..add('A00D')
+    DODGE.setup(abilityList, 'B008')
+
+    heroType.addOnSpellCastFunc(function onSpellCast)

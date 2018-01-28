@@ -48,23 +48,33 @@ Duration is fixed when the buff is applied -> use one shot timer
 
 /** Keeps track of the buffs a certain unit has.
 */
-public class BuffList extends LinkedList<Buff>
+public class BuffList 
 
     private static constant unitBuffList = new HashMap<unit, BuffList>
+    private LinkedList<Buff> linkedList
+
+    construct()
+        linkedList = new LinkedList<Buff>
 
     static function onIndex()
         BuffList newList = new BuffList()
         unitBuffList.put(getIndexedUnit(), newList)
 
+    function add(Buff newBuff)
+        this.linkedList.add(newBuff)
+
+    function remove(Buff removeBuff)
+        this.linkedList.remove(removeBuff)
+
     static function onDeindex()
         let removeList = unitBuffList.get(getDeindexedUnit())
-        unitBuffList.remove(getIndexedUnit())
+        unitBuffList.remove(getDeindexedUnit())
         if(removeList!=null)
             destroy removeList
 
     static function getBuffOfType(unit target, BuffType buffType) returns Buff
         let buffList = unitBuffList.get(target)
-        let iter = buffList.iterator()
+        let iter = buffList.linkedList.iterator()
         while(iter.hasNext())
             let next = iter.next()
             if(next.getBuffType() == buffType)
@@ -77,7 +87,7 @@ public class BuffList extends LinkedList<Buff>
 
     static function hasBuff(unit target, Buff whichBuff) returns boolean
         let buffList = unitBuffList.get(target)
-        let iter = buffList.iterator()
+        let iter = buffList.linkedList.iterator()
         while(iter.hasNext())
             let next = iter.next()
             if(next == whichBuff)
@@ -88,11 +98,22 @@ public class BuffList extends LinkedList<Buff>
     static function getBuffList(unit target) returns BuffList
         return unitBuffList.get(target)
 
+    function getLinkedList() returns LinkedList<Buff>
+        return this.linkedList
+
+    ondestroy
+        for Buff b in this.linkedList
+            b.dispel()
+
+        destroy linkedList
+
+
 
 public class Buff
 
     private unit caster
     private unit target
+    private int level
     private BuffType buffType
     private timer expireTimer
     private trigger onFirst
@@ -106,9 +127,10 @@ public class Buff
 
     private static Buff currentBuff 
 
-    construct(unit target, unit caster, real duration, BuffType buffType)
+    construct(unit target, unit caster, real duration, BuffType buffType, int level)
         this.caster = caster
         this.target = target
+        this.level = level
         this.expireTimer = getTimer()
             ..setData(this castTo int)
             ..start(duration, function expireStatic)
@@ -123,7 +145,7 @@ public class Buff
         if(this.onPeriodicTrigger!=null)
             periodicTimer = getTimer()
                 ..setData(this castTo int)
-                ..startPeriodic(0.1, function onPeriodicStatic)
+                ..startPeriodic(buffType.getPeriodicTime(), function onPeriodicStatic)
         currentBuff = this
         let oldBuff = BuffList.getBuffOfType(this.target, this.buffType)
 
@@ -163,7 +185,7 @@ public class Buff
             this.onEnd.execute()
         destroy this
 
-    private function dispel()
+    function dispel()
         currentBuff = this
         if(this.onDispel!=null)
             this.onDispel.execute()
@@ -196,6 +218,9 @@ public class Buff
 
     function getRemaining() returns real
         return this.expireTimer.getRemaining()
+
+    function getLevel() returns integer
+        return this.level
 
     static function getTriggerBuff() returns Buff
         return currentBuff

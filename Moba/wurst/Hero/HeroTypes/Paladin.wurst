@@ -1,0 +1,25 @@
+package Paladin
+
+import HeroType
+import Stats
+
+public constant HERO_PALADIN = 'H000'
+
+function setupStats()
+    new HeroType(HERO_PALADIN)
+        ..setStat(Stat.AD, 15, 50)
+        ..setStat(Stat.AR, 10, 40)
+        ..setStat(Stat.AS, 10, 30)
+        ..setStat(Stat.HP, 15, 40)
+        ..setStat(Stat.HR, 10, 30)
+        ..setStat(Stat.MP, 5, 20)
+        ..setStat(Stat.MR, 5, 20)
+        ..setStat(Stat.MS, 0, 30)
+        ..setStat(Stat.STR, 15, 30)
+        ..setStat(Stat.WP, 10, 40)
+        ..setStat(Stat.INT, 5, 20)
+
+
+
+init
+    setupStats()
