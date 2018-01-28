@@ -1,0 +1,45 @@
+package General
+
+import Buff
+
+constant MAGIC_REDUCTION = 0.02
+
+public enum ReductionType
+    PHYSICAL
+    MAGIC
+    NONE
+
+
+
+public function unit.dealDamage(unit target, real amount, ReductionType reductionType)
+    let damageType = reductionType == ReductionType.PHYSICAL ? DAMAGE_TYPE_NORMAL : DAMAGE_TYPE_UNIVERSAL
+    real newAmount
+    if(reductionType == ReductionType.MAGIC and target.isType(UNIT_TYPE_HERO))
+        let wp = GetHeroAgi(target, true)
+        newAmount = amount * (1-( wp*MAGIC_REDUCTION )/( 1 + wp*MAGIC_REDUCTION ))
+    else
+        newAmount = amount
+
+    UnitDamageTarget(this, target, newAmount, false, false, ATTACK_TYPE_NORMAL, damageType, WEAPON_TYPE_WHOKNOWS)
+
+
+public function unit.dispelMagicalBuffs(boolean positive, boolean negative)
+    let buffList = BuffList.getBuffList(this).getLinkedList()
+    for Buff currentBuff in buffList
+        let buffType =currentBuff.getBuffType()
+        if(buffType.isMagical())
+            if(positive and buffType.isPositive()) or (negative and not buffType.isPositive())
+                currentBuff.dispel()
+
+public function unit.dispelPhysicallBuffs(boolean positive, boolean negative)
+    let buffList = BuffList.getBuffList(this).getLinkedList()
+    for Buff currentBuff in buffList
+        let buffType =currentBuff.getBuffType()
+        if(not buffType.isMagical())
+            if(positive and buffType.isPositive()) or (negative and not buffType.isPositive())
+                currentBuff.dispel()
+
+
+public function unit.dispelBuffs(boolean positive, boolean negative)
+    this.dispelMagicalBuffs(positive, negative)
+    this.dispelPhysicallBuffs(positive, negative)

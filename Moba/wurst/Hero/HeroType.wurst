@@ -12,6 +12,8 @@ public class HeroType
 
     private static constant unitIdToHeroType = new HashMap<integer, HeroType>
     private int unitId
+    private trigger onAttackTrigger = CreateTrigger()
+    private trigger onSpellCastTrigger = CreateTrigger()
 
     static HeroType array heroTypes 
     static int heroTypeCount = 0
@@ -44,6 +46,21 @@ public class HeroType
 
     function getUnitId() returns integer
         return this.unitId
+
+    function onSpellCast()
+        this.onSpellCastTrigger.execute()
+
+    function onAttack()
+        this.onAttackTrigger.execute()
+
+    function addOnAttackFunc(code onAttack)
+        onAttackTrigger.addAction(onAttack)    
+
+    function addOnSpellCastFunc(code onSpellCast)
+        onSpellCastTrigger.addAction(onSpellCast)    
+
+    function getOnSpellCastTrigger() returns trigger
+        return this.onSpellCastTrigger
 
     /** Calulates the stat of the hero type for a given level */
     function calculateStat(Stat stat, integer level) returns integer

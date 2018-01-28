@@ -1,0 +1,25 @@
+package DeadEye
+
+import HeroType
+import Stats
+
+public constant HERO_DEADEYE = 'H00I'
+
+function setupStats()
+    new HeroType(HERO_DEADEYE)
+        ..setStat(Stat.AD, 10, 70)
+        ..setStat(Stat.AR, 5, 15)
+        ..setStat(Stat.AS, 0, 40)
+        ..setStat(Stat.HP, 5, 25)
+        ..setStat(Stat.HR, 0, 10)
+        ..setStat(Stat.MP, 10, 25)
+        ..setStat(Stat.MR, 5, 20)
+        ..setStat(Stat.MS, 5, 20)
+        ..setStat(Stat.STR, 10, 40)
+        ..setStat(Stat.WP, 5, 10)
+        ..setStat(Stat.INT, 5, 20)
+
+
+
+init
+    setupStats()

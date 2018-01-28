@@ -1,0 +1,55 @@
+package OnAttack
+
+import DamageDetection
+import HeroType
+
+public class OnAttack
+
+    private static unit target
+    private static unit attacker
+    private static boolean active
+    private static trigger onAttackTrigger = CreateTrigger()
+
+    protected static function onDamage()
+        target = GetTriggerUnit()
+        
+        active = false
+        var attacked = false
+
+        if(target.hasAbility('B005')) //passive
+            target.removeAbility('B005')
+            attacked = true
+        if(target.hasAbility('B006')) //arrow
+            target.removeAbility('B006')
+            attacked = true
+            active = true
+
+        if(attacked)
+            attacker = GetEventDamageSource()
+            onAttackTrigger.execute()
+
+    static function getAttacker() returns unit
+        return attacker
+
+    static function getTarget() returns unit
+        return target   
+
+    static function isActive() returns boolean
+        return active
+
+    static function addOnAttackFunc(code onAttack)
+        onAttackTrigger.addAction(onAttack)    
+
+    protected static function onAttackAbilities()
+        HeroType heroType = HeroType.getHeroType(getAttacker().getTypeId())
+        if(heroType!=null)
+            heroType.onAttack()
+
+
+init
+    addOnDamageFunc(Condition(function OnAttack.onDamage))
+
+    //use hashmap, so onAttack is more efficient
+    //if there are a lot of heroes, if-then-else to find the correct
+    //actions to execute is inefficient
+    OnAttack.addOnAttackFunc(function OnAttack.onAttackAbilities)

@@ -1,0 +1,40 @@
+package BuffTypeConfig
+
+import BuffType
+import LinkedList
+import Buff
+
+
+public constant STUNNED = new BuffType('A000', "creepthunderbolt", 'BPSE', false, true)
+public constant SILENCED = new BuffType('A001', "soulburn", 'B000', false, true)
+public constant CYCLONED = new BuffType('A002', "cyclone", 'B001', false, true)
+public constant ENSNARED = new BuffType('A003', "ensnare", 'B002', false, true)
+public constant ENTANGLED = new BuffType('A004', "entanglingroots", 'B003', false, true)
+public constant INVIS = new BuffType('A00F', "invisibility", 'Binv', true, true)
+
+public constant DISARMED = new BuffType(false, true)
+
+public constant UNTARGETABLE = new BuffType(true, true)
+
+
+
+init
+    var abilityList = new LinkedList<int>
+    ..add('A005')
+    ..add('A006')
+    DISARMED.setup(abilityList, 'B004')
+
+    abilityList = new LinkedList<int>
+    ..add('A00E')
+    UNTARGETABLE.setup(abilityList, 'B009')
+    UNTARGETABLE.onFirst.addAction(()-> (begin
+        let thisBuff = Buff.getTriggerBuff()
+        UnitAddType(thisBuff.getTarget(), UNIT_TYPE_ANCIENT)
+    end) )
+
+    UNTARGETABLE.onEnd.addAction(()-> (begin
+        let thisBuff = Buff.getTriggerBuff()
+        UnitRemoveType(thisBuff.getTarget(), UNIT_TYPE_ANCIENT)
+    end) )
+
+

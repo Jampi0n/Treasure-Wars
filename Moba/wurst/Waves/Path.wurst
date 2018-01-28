@@ -31,7 +31,7 @@ public class Path
 
     //adds a new point(x,y) to a path
     function addPoint(vec2 pos)
-        //createUnit(players[0], 'h00G', pos, angle(0))
+        createUnit(players[0], 'h00G', pos, angle(0))
         this.pathTable.saveReal( this.pathCount * 2, pos.x)
         this.pathTable.saveReal( this.pathCount * 2 + 1, pos.y)
         this.pathCount++
@@ -71,15 +71,17 @@ function addMultiplePoints(LinkedList<Point> pointList, vec2 pos1, vec2 pos2, in
 
 
 function createPaths()
-    let smallCount = 5
-    let bigCount = 10
-    let bigCountMid = 8
+    let smallCount = 2
+    let bigCount = 4
+    let bigCountMid = 2
 
     //top
     var pointList = new LinkedList<Point> 
     addMultiplePoints(pointList, gg_rct_GreenCastle.getCenter(), gg_rct_GreenTop.getCenter(), smallCount)
-    addMultiplePoints(pointList, gg_rct_GreenTop.getCenter(), gg_rct_CornerTop.getCenter(), bigCount)
-    addMultiplePoints(pointList, gg_rct_CornerTop.getCenter(), gg_rct_BrownTop.getCenter(), bigCount)
+    addMultiplePoints(pointList, gg_rct_GreenTop.getCenter(), gg_rct_CornerTopGreen.getCenter(), bigCount)
+    pointList.add(new Point(gg_rct_CornerTopGreen.getCenter()))
+    pointList.add(new Point(gg_rct_CornerTop.getCenter()))
+    addMultiplePoints(pointList, gg_rct_CornerTopBrown.getCenter(), gg_rct_BrownTop.getCenter(), bigCount)
     addMultiplePoints(pointList, gg_rct_BrownTop.getCenter(), gg_rct_BrownCastle.getCenter(), smallCount)
     pointList.add(new Point(gg_rct_BrownCastle.getCenter()))
 
@@ -133,8 +135,10 @@ function createPaths()
     //bot
     pointList = new LinkedList<Point> 
     addMultiplePoints(pointList, gg_rct_GreenCastle.getCenter(), gg_rct_GreenBot.getCenter(), smallCount)
-    addMultiplePoints(pointList, gg_rct_GreenBot.getCenter(), gg_rct_CornerBot.getCenter(), bigCount)
-    addMultiplePoints(pointList, gg_rct_CornerBot.getCenter(), gg_rct_BrownBot.getCenter(), bigCount)
+    addMultiplePoints(pointList, gg_rct_GreenBot.getCenter(), gg_rct_CornerBotGreen.getCenter(), bigCount)
+    pointList.add(new Point(gg_rct_CornerBotGreen.getCenter()))
+    pointList.add(new Point(gg_rct_CornerBot.getCenter()))
+    addMultiplePoints(pointList, gg_rct_CornerBotBrown.getCenter(), gg_rct_BrownBot.getCenter(), bigCount)
     addMultiplePoints(pointList, gg_rct_BrownBot.getCenter(), gg_rct_BrownCastle.getCenter(), smallCount)
     pointList.add(new Point(gg_rct_BrownCastle.getCenter()))
 

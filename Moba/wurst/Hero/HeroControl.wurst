@@ -25,6 +25,8 @@ public class Hero
     protected static Hero array heroes
     private static constant unitToHero = new HashMap<unit,Hero>
     private static constant assistMap = new HashMap<CPlayer,real>
+    private trigger onSpellCastTrigger
+
 
     protected static function classInit()
         onDamageTrigger.addAction(function onDamageStatic)
@@ -38,8 +40,11 @@ public class Hero
         onDeathTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DEATH)
         onLevelUpTrigger.registerUnitEvent(this.hero, EVENT_UNIT_HERO_LEVEL)
         this.heroType = HeroType.getHeroType(this.hero.getTypeId())
+        onSpellCastTrigger = this.heroType.getOnSpellCastTrigger()
+        onSpellCastTrigger.registerUnitEvent(this.hero, EVENT_UNIT_SPELL_EFFECT)
+
         print("setup completed: "+this.hero.getName())
-        upgrade()
+        this.upgrade()
 
     construct(CPlayer p, int unitId, vec2 pos, angle facing )
         this.hero = createUnit(p.getPlayer(), unitId, pos, facing)
@@ -127,6 +132,10 @@ public class Hero
 
     function getHeroType() returns HeroType
         return this.heroType
+
+    static function getHero(unit whichUnit) returns Hero
+        return unitToHero.get(whichUnit)
+
         
 init
     Hero.classInit()

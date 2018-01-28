@@ -10,6 +10,7 @@ import UnitIndexer
 public class PathUnit 
 
     static int operations = 0
+    static int moveOrders = 0
     static int instances = 0
     static HashMap<unit,PathUnit> unitToPathUnit = new HashMap<unit,PathUnit>
     static group pathUnits = CreateGroup()
@@ -25,8 +26,9 @@ public class PathUnit
     static function classInit()
         periodicTimer.startPeriodic(0.05, function updateMovementStatic)
         doPeriodically(0.05, (CallbackPeriodic cb) -> (begin
-            print("["+instances.toString()+"]operations: "+operations.toString())
+            //print("["+instances.toString()+"]orders: "+moveOrders.toString())
             operations = 0
+            moveOrders = 0
         end))
         onUnitDeindex(function onRemove)
         onAttackTrigger.registerAnyUnitEvent(EVENT_PLAYER_UNIT_ATTACKED)
@@ -62,7 +64,7 @@ public class PathUnit
         this.currentPath = p
 
     function getNextUpdate() returns real
-        return GetRandomReal(0.8, 1.1)
+        return GetRandomReal(1.1, 1.6)
 
     static function onAttackStatic()
         PathUnit pathUnit = unitToPathUnit.get(GetAttacker())
@@ -74,6 +76,7 @@ public class PathUnit
                 pathUnit.nextUpdate = getElapsedGameTime()+4
                 if(pathUnit.assocUnit.getCurrentOrder()!=OrderId("attack"))
                     pathUnit.assocUnit.issuePointOrder("attack", pathUnit.assocUnit.getPos())
+                    moveOrders++
 
         
 
@@ -157,10 +160,12 @@ public class PathUnit
                 if(nearbyPathUnit.currentPath == this.currentPath and (nearbyPathUnit.nextUpdate<gameTime or nearbyPathUnit == this) )
                     if(newOrder==1)
                         n.issuePointOrder("move", v2)
+                        moveOrders++
                         nearbyPathUnit.nextUpdate = gameTime + this.getNextUpdate()
                     else
                         if(gameTime-nearbyPathUnit.lastAttack > 2)
                             n.issuePointOrder("attack", v2)
+                            moveOrders++
                             nearbyPathUnit.nextUpdate = gameTime + this.getNextUpdate()
                         else
                             nearbyPathUnit.nextUpdate = gameTime + this.getNextUpdate()
