@@ -44,6 +44,7 @@ function onSpellCast()
     if(spellId=='A00B') //Dodge
         caster.dispelBuffs(true, true)
         new Buff(caster, caster, (3.+1*level).bonus(caster.getInt(),4), INVIS, 1)
+        return
 
     if(spellId=='A00H') //Poison Spit
         let x = GetSpellTargetX()
@@ -53,12 +54,23 @@ function onSpellCast()
 
         if(not attacker.issuePointOrder("attackground", vec2(x,y)))
             print("failed to order attackground")
-        attacker.setTimedLife(6)
+        attacker.setTimedLife(1)
+        return
+
+    if(spellId=='A00G')
+        let target = GetSpellTargetUnit()
+        var targetPos = target.getPos()
+        var casterPos = caster.getPos()
+        var portPos = targetPos.polarOffset(casterPos.angleTo(targetPos), 100)
+        doAfter(0, () -> caster.setPos(portPos))
+        new Buff(target, caster, (2.5+0.5*level).bonus(caster.getInt(), 2) , STUNNED, 1)
+        caster.dealDamage(target, (225+75*level).bonus(caster.getInt(), 400) , ReductionType.MAGIC)
+        return
 
 
 function onAttack()
-    if(OnAttack.isActive())
-        new Buff(OnAttack.getTarget(), OnAttack.getAttacker(), 5, ENVENOMED_BLADES, OnAttack.getAttacker().getAbilityLevel('A00A'))
+    if(OnAttack.getAttacker().getAbilityLevel('A00L')!=0)
+        new Buff(OnAttack.getTarget(), OnAttack.getAttacker(), 5, ENVENOMED_BLADES, OnAttack.getAttacker().getAbilityLevel('A00L'))
 
 //in for group
 function poisonSpitPeriodic()
@@ -95,7 +107,7 @@ init
         thisBuff.getCaster().dealDamage(thisBuff.getTarget(), 
         (5.*thisBuff.getLevel()).bonus(thisBuff.getCaster().getInt(), 20)
         , ReductionType.MAGIC)
-        print(thisBuff.getTarget().getName()+" poisoned with level "+thisBuff.getLevel().toString()+" dealing"+(5.*thisBuff.getLevel()).bonus(thisBuff.getCaster().getInt(), 20).toString()+" damage.")
+        //print(thisBuff.getTarget().getName()+" poisoned with level "+thisBuff.getLevel().toString()+" dealing"+(5.*thisBuff.getLevel()).bonus(thisBuff.getCaster().getInt(), 20).toString()+" damage.")
     end) )
 
     abilityList = new LinkedList<int>
