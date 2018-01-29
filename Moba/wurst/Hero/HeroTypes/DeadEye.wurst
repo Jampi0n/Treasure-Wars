@@ -7,7 +7,7 @@ public constant HERO_DEADEYE = 'H00I'
 
 function setupStats()
     new HeroType(HERO_DEADEYE)
-        ..setStat(Stat.AD, 10, 70)
+        ..setStat(Stat.AD, 5, 40)
         ..setStat(Stat.AR, 5, 15)
         ..setStat(Stat.AS, 0, 40)
         ..setStat(Stat.HP, 5, 25)

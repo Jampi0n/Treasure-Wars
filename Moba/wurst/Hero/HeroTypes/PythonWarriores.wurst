@@ -32,7 +32,7 @@ function setupStats()
         ..setStat(Stat.MP, 10, 30)
         ..setStat(Stat.MR, 15, 25)
         ..setStat(Stat.MS, 20, 60)
-        ..setStat(Stat.STR, 5, 15)
+        ..setStat(Stat.STR, 5, 20)
         ..setStat(Stat.WP, 20, 35)
         ..setStat(Stat.INT, 5, 40)
 
@@ -57,7 +57,7 @@ function onSpellCast()
         attacker.setTimedLife(1)
         return
 
-    if(spellId=='A00G')
+    if(spellId=='A00G') //Paralyzing Strike
         let target = GetSpellTargetUnit()
         var targetPos = target.getPos()
         var casterPos = caster.getPos()
@@ -67,6 +67,10 @@ function onSpellCast()
         caster.dealDamage(target, (225+75*level).bonus(caster.getInt(), 400) , ReductionType.MAGIC)
         return
 
+    if(spellId=='A00A')
+        let target = GetSpellTargetUnit()
+        caster.dealDamage(target, (25+25*level).bonus(caster.getStr(), 100) , ReductionType.PHYSICAL)
+        return
 
 function onAttack()
     if(OnAttack.getAttacker().getAbilityLevel('A00L')!=0)
