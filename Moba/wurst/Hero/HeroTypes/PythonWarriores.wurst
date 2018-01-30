@@ -4,7 +4,6 @@ import HeroType
 import HeroControl
 import Stats
 import OnAttack
-import BuffType
 import LinkedList
 import Buff
 import General
@@ -106,8 +105,7 @@ init
     ..add('A009')
     ENVENOMED_BLADES.setup(abilityList, 'B007')
     ENVENOMED_BLADES.setPeriodicTime(1)
-    ENVENOMED_BLADES.onPeriodicTrigger = CreateTrigger()
-        ..addAction(()-> (begin
+    ENVENOMED_BLADES.addPeriodicFunction(()-> (begin
         let thisBuff = Buff.getTriggerBuff()
         thisBuff.getCaster().dealDamage(thisBuff.getTarget(), 
         (5.*thisBuff.getLevel()).bonus(thisBuff.getCaster().getInt(), 20)
@@ -126,13 +124,7 @@ init
     ..add('A00J')
     ..add('A00K')
     POISON_SPIT.setup(abilityList, 'B00B')
-    POISON_SPIT.onApply = CreateTrigger()
-
-    //create api, instead of directly using the trigger variable
-    //make trigger variable private 
-    //api automatically creates trigger, if null
-
-    POISON_SPIT.onApply.addAction( () -> (begin
+    POISON_SPIT.addApplyFunction( () -> (begin
         let thisBuff = Buff.getTriggerBuff()
         thisBuff.getCaster().dealDamage(thisBuff.getTarget(), 
         (1.25*thisBuff.getLevel()).bonus(thisBuff.getCaster().getInt(), 5)

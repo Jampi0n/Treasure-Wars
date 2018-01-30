@@ -1,10 +1,10 @@
 package Buff
 
 import TimerUtils
-import BuffType
 import LinkedList
 import UnitIndexer
 import HashMap
+import InstantDummyCaster
 
 /*
 Idea: each unit can have every buff only once
@@ -44,7 +44,166 @@ Duration is fixed when the buff is applied -> use one shot timer
 
 */
 
+public class BuffType
 
+    /*
+
+    onFirst -> buff is used on a unit that does not have the buff
+    onStack -> buff is used on a unit that does have the buff
+    onApply -> is used on a unit
+    onExpire -> duration runs out
+    onDispel -> buff removed before duration runs out: dispel, death, invulnerability, ...
+    To detect this: use native buff management of wc3
+    The buff abilities must not work on dead or invulnerable units for example.
+    onEnd -> buff gone in any way
+
+    */
+    protected trigger onFirst
+    protected trigger onStack
+    protected trigger onApply
+    protected trigger onExpire
+    protected trigger onDispel
+    protected trigger onEnd
+    protected trigger onPeriodicTrigger
+
+    private real periodicTime = 1
+
+    private constant int dummyAbilityId
+    private constant int dummyOrderId
+
+    private boolean magical
+    private boolean positive
+    private int buffId
+    private LinkedList<int> abilities
+
+    /** This buff is applied by using a dummy caster to cast the ability on the target. */
+    construct(int abilityId, string orderString, int buffId, boolean positive, boolean magical)
+        //onFirst -> cast the spell
+        //onEnd -> dispel the buff
+        this.positive = positive
+        this.magical = magical
+
+        this.dummyAbilityId = abilityId
+        this.buffId = buffId
+        this.dummyOrderId = OrderId(orderString)
+        this.onFirst = CreateTrigger()
+            ..addAction(function castDummySpell)
+        this.onEnd = CreateTrigger()
+            ..addAction(function removeDummyBuff)
+
+
+
+    /** This buff is applied by placing a hidden aura ability on the target. */
+    construct(LinkedList<int> abilities, int buffId, boolean positive, boolean magical)
+        //onFirst -> add the aura
+        //onEnd -> remove aura and buff
+        this.positive = positive
+        this.magical = magical
+
+        this.buffId = buffId
+        this.abilities = abilities
+        this.onFirst = CreateTrigger()
+            ..addAction(function addAuraAbility)
+        this.onEnd = CreateTrigger()
+            ..addAction(function removeAuraAbility)
+
+    /* empty constructor, to be able to use constants */
+    construct(boolean positive, boolean magical)
+        this.positive = positive
+        this.magical = magical
+
+    function setup(LinkedList<int> abilities, int buffId)
+        //onFirst -> add the aura
+        //onEnd -> remove aura and buff
+        this.buffId = buffId
+        this.abilities = abilities
+        this.onFirst = CreateTrigger()
+            ..addAction(function addAuraAbility)
+        this.onEnd = CreateTrigger()
+            ..addAction(function removeAuraAbility)
+
+    static function printStatus()
+        let currentBuff = Buff.getTriggerBuff()
+        let target = currentBuff.getTarget()
+        print(target.getName()+" has buff "+ currentBuff.getRemaining().toString())
+
+    static function castDummySpell()
+        let currentBuff = Buff.getTriggerBuff()
+        let buffType = currentBuff.getBuffType()
+        let caster = currentBuff.getCaster()
+        let target = currentBuff.getTarget()
+        InstantDummyCaster.castTarget(caster.getOwner(), buffType.dummyAbilityId, 1, buffType.dummyOrderId, target, target.getPos())
+
+
+    static function removeDummyBuff()
+        let currentBuff = Buff.getTriggerBuff()
+        let buffType = currentBuff.getBuffType()
+        let target = currentBuff.getTarget()
+        target.removeAbility(buffType.buffId)
+
+
+    static function addAuraAbility()
+        let currentBuff = Buff.getTriggerBuff()
+        let buffType = currentBuff.getBuffType()
+        let target = currentBuff.getTarget()
+        buffType.abilities.forEach( (int abilityId ) -> (begin
+            target.addAbility(abilityId)
+            target.setAbilityLevel(abilityId, currentBuff.getLevel())
+        end) )
+
+    static function removeAuraAbility()
+        let currentBuff = Buff.getTriggerBuff()
+        let buffType = currentBuff.getBuffType()
+        let target = currentBuff.getTarget()
+        buffType.abilities.forEach( (int abilityId ) -> target.removeAbility(abilityId))
+        target.removeAbility(buffType.buffId)
+
+    function setPeriodicTime(real newTime)
+        this.periodicTime = newTime
+
+    function getPeriodicTime() returns real
+        return this.periodicTime
+
+    function isMagical() returns boolean
+        return this.magical
+
+    function isPositive() returns boolean
+        return this.positive
+
+    function addFirstFunction(code cb)
+        if(this.onFirst==null)
+            this.onFirst = CreateTrigger()
+        this.onFirst.addAction(cb)
+
+    function addStackFunction(code cb)
+        if(this.onStack==null)
+            this.onStack = CreateTrigger()
+        this.onStack.addAction(cb)
+
+    function addApplyFunction(code cb)
+        if(this.onApply==null)
+            this.onApply = CreateTrigger()
+        this.onApply.addAction(cb)
+
+    function addExpireFunction(code cb)
+        if(this.onExpire==null)
+            this.onExpire = CreateTrigger()
+        this.onExpire.addAction(cb)
+
+    function addDispelFunction(code cb)
+        if(this.onDispel==null)
+            this.onDispel = CreateTrigger()
+        this.onDispel.addAction(cb)
+
+    function addEndFunction(code cb)
+        if(this.onEnd==null)
+            this.onEnd = CreateTrigger()
+        this.onEnd.addAction(cb)
+
+    function addPeriodicFunction(code cb)
+        if(this.onPeriodicTrigger==null)
+            this.onPeriodicTrigger = CreateTrigger()
+        this.onPeriodicTrigger.addAction(cb)
 
 /** Keeps track of the buffs a certain unit has.
 */

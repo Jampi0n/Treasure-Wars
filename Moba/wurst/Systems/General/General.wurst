@@ -41,7 +41,7 @@ public function unit.dealDamage(unit target, real amount, ReductionType reductio
         newAmount = amount
 
     print(this.getName()+" damages "+target.getName()+" for "+amount.toString()+" damage.")
-    UnitDamageTarget(this, target, newAmount, false, false, ATTACK_TYPE_NORMAL, damageType, WEAPON_TYPE_WHOKNOWS)
+    UnitDamageTarget(this, target, newAmount, false, true, ATTACK_TYPE_NORMAL, damageType, WEAPON_TYPE_WHOKNOWS)
 
 
 public function unit.dispelMagicalBuffs(boolean positive, boolean negative)
