@@ -1,0 +1,172 @@
+package Missile
+
+import DummyRecycler
+import TimerUtils
+
+real UPDATE_INTERVAL = 0.03
+int MAX_HITBOX_SIZE = 128
+
+function unit.getHitBox() returns real
+    return 64
+
+public class Missile
+
+    private static Missile currentMissile
+    private static unit currentTarget
+
+    private trigger onHit = null
+    private trigger onExpire = null
+    private trigger onDestroy = null
+    private trigger onHitCondition = null
+    private boolexpr onHitFilter = null
+    private unit dummy
+    private effect model
+    private timer updateTimer
+    private real maxRange = -1
+    private real maxDuration = -1
+    private real currentRange = 0
+    private real currentDuration = 0
+    private group hitUnits
+    private boolean hitOnce = false
+    private unit owner
+    private real size = 50
+    private angle direction
+    private real speed
+
+    construct(unit owner, vec3 start, real speed, angle direction, string model )
+        this.dummy = DummyRecycler.get(start.toVec2(), direction)
+        this.dummy.setFacing(direction)
+        this.dummy.setFlyHeight(start.z, 0)
+        this.model = this.dummy.addEffect(model, "origin")
+        this.owner = owner
+        this.direction = direction
+        this.speed = speed
+
+        this.updateTimer = getTimer()
+            ..setData(this castTo int)
+            ..startPeriodic(UPDATE_INTERVAL, function moveStatic)
+
+    /** the missile hits each target only once. Requires a group.**/
+    function hitOnce()
+        this.hitOnce = true
+        this.hitUnits = CreateGroup()
+    
+    function reflect(unit newOwner, angle newDirection, boolean reset)
+        this.owner = newOwner
+        this.direction = newDirection
+        if(reset)
+            if(hitOnce)
+                this.hitUnits.clear()
+            this.currentRange = 0
+            this.currentDuration = 0
+
+    function move()
+        this.currentDuration += UPDATE_INTERVAL
+        this.currentRange += this.speed*UPDATE_INTERVAL
+
+        
+
+
+        if (this.maxDuration > -0.5 and this.currentDuration > this.maxDuration) or (this.maxRange > -0.5 and this.currentRange > this.maxRange)
+            if this.onExpire != null
+                this.onExpire.execute()
+            destroy this
+
+        else
+            let newPos = this.dummy.getPos().polarOffset(this.direction, this.speed*UPDATE_INTERVAL)
+            this.dummy.setPos(newPos)
+
+            group nearby = CreateGroup()
+            nearby.enumUnitsInRange(newPos, this.size + MAX_HITBOX_SIZE)
+
+            while(not nearby.isEmpty())
+                unit target = FirstOfGroup(nearby)
+                
+                nearby.removeUnit(target)
+                let targetPos = target.getPos()
+                let distance = newPos.distanceTo(targetPos)
+                if (not hitOnce or not hitUnits.contains(target)) and distance <= this.size + target.getHitBox()
+                    currentMissile = this
+                    currentTarget = target
+                    if(this.onHitCondition==null or this.onHitCondition.evaluate())
+                        if this.onHit!=null
+                            this.onHit.execute()
+
+                        if hitOnce
+                            this.hitUnits.addUnit(target)
+
+
+            nearby.destr()
+    
+    static function moveStatic()
+         (GetExpiredTimer().getData() castTo Missile).move()
+
+
+    function addHitCondition(code cb)
+        if(this.onHitCondition == null)
+            this.onHitCondition = CreateTrigger()
+        this.onHitFilter = Condition(cb)
+        this.onHitCondition.addCondition(this.onHitFilter)
+
+    function addHitFunction(code cb)
+        if(this.onHit == null)
+            this.onHit = CreateTrigger()
+        this.onHit.addAction(cb)
+
+    function addExpireFunction(code cb)
+        if(this.onExpire == null)
+            this.onExpire = CreateTrigger()
+        this.onExpire.addAction(cb)
+
+    function addDestroyFunction(code cb)
+        if(this.onDestroy == null)
+            this.onDestroy = CreateTrigger()
+        this.onDestroy.addAction(cb)
+
+    function getOwner() returns unit
+        return this.owner
+    function getSpeed() returns real
+        return this.speed
+    function getSize() returns real
+        return this.size
+    function setSize(real newSize)
+        this.size = newSize
+    function setMaxRange(real range)
+        this.maxRange = range
+    function setMaxDuration(real duration)
+        this.maxDuration = duration
+    
+
+    static function getTriggerMissile() returns Missile
+        return currentMissile
+
+    static function getMissileTarget() returns unit
+        return currentTarget
+
+
+
+    ondestroy
+        this.updateTimer.release()
+        DummyRecycler.recycle(this.dummy, 1.)
+
+        this.model.destr()
+
+        if(this.hitOnce)
+            this.hitUnits.destr()
+
+        if(this.onHit!=null)
+            this.onHit.destr()
+        if(this.onExpire!=null)
+            this.onExpire.destr()
+        if(this.onDestroy!=null)
+            this.onDestroy.execute()
+            this.onDestroy.destr()
+
+        if(this.onHitCondition!=null)
+            this.onHitCondition.destr()
+
+        if(this.onHitFilter!=null)
+            this.onHitFilter.destr()
+
+
+
