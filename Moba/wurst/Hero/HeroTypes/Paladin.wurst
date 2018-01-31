@@ -6,11 +6,74 @@ import Buff
 import LinkedList
 import BuffTypeConfig
 import General
+import DummyRecycler
+import TimerUtils
+import ClosureTimers
 
 public constant HERO_PALADIN = 'H000'
 HeroType heroType
 
 constant HOLY_SHIELD = new BuffType(true, true)
+constant DIVINE_PUNISHMENT = 'A00U'
+
+class DivinePunishment
+
+    private unit caster
+    private int level
+    private effect model
+    private timer checkTimer
+    private int count
+    private boolean succesful
+
+    private unit dummy
+
+    construct(unit caster)
+        this.count = 0
+        this.succesful = false
+        this.caster = caster
+        this.level = caster.getAbilityLevel(DIVINE_PUNISHMENT)
+        //this.model = caster.addEffect("Abilities\\Spells\\Human\\Resurrect\\ResurrectCaster.mdl", "origin")
+        this.dummy = DummyRecycler.get(caster.getPos(), caster.getFacingAngle())
+        this.dummy.setFacing(caster.getFacingAngle())
+        this.model = this.dummy.addEffect("Abilities\\Spells\\Human\\Resurrect\\ResurrectCaster.mdl", "origin")
+        this.checkTimer = getTimer()
+            ..setData(this castTo int)
+            ..startPeriodic(0.1, function updateStatic)
+
+    function update()
+        this.count++
+        if this.count == 20
+            this.succesful = true
+            group nearby = CreateGroup()
+            nearby.enumUnitsInRange(this.caster.getPos(), 600)
+
+            while(not nearby.isEmpty())
+                unit target = FirstOfGroup(nearby)
+                nearby.removeUnit(target)
+                if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(this.caster.getOwner(), false, true) and target.isVisible(this.caster.getOwner())
+                    
+                    target.addEffect("Abilities\\Spells\\Human\\Resurrect\\ResurrectTarget.mdl", "origin").destr()
+                    doAfter(0.4, () -> (begin
+                        this.caster.dealDamage(target, (200.+75*level).bonus(this.caster.getInt(), 300), ReductionType.MAGIC)
+                    end) )
+
+            return
+
+        if this.count>=45
+            destroy this
+            return
+
+        if this.caster.getCurrentOrder()!= OrderId("tranquility") and not succesful
+            destroy this
+            return
+    
+    static function updateStatic()
+        (GetExpiredTimer().getData() castTo DivinePunishment).update()
+
+    ondestroy
+        this.model.destr()
+        DummyRecycler.recycle(this.dummy)
+        this.checkTimer.release()
 
 function setupStats()
     heroType
@@ -33,7 +96,7 @@ function onSpellCast()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
 
-    if(spellId == 'A00M')
+    if(spellId == 'A00M') //shield bash
         let casterPos = caster.getPos()
 
         group nearby = CreateGroup()
@@ -43,14 +106,19 @@ function onSpellCast()
             unit target = FirstOfGroup(nearby)
             nearby.removeUnit(target)
             if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
+                caster.dealDamage(target, (25.+25*level).bonus(caster.getStr(), 50), ReductionType.PHYSICAL)
                 new Buff(target, caster, 0.75 + 0.25*level, STUNNED, 1)
 
 
-    if(spellId == 'A00R')
+    if(spellId == 'A00R') //holy shield
         let target = GetSpellTargetUnit()
         new Buff(target, caster, 1.5 + 0.5*level, UNTARGETABLE, 1)
         new Buff(target, caster, 1.5 + 0.5*level, HOLY_SHIELD, level)
 
+
+    if(spellId == DIVINE_PUNISHMENT) //divine punishment
+        
+        new DivinePunishment(caster)
 
 init
     heroType = new HeroType(HERO_PALADIN)
