@@ -10,6 +10,19 @@ public enum ReductionType
     NONE
 
 
+public function unit.isTargetable(player source, boolean allowFriends, boolean allowEnemies) returns boolean
+    if not this.isAlive()
+        return false
+    if this.isType(UNIT_TYPE_ANCIENT)
+        return false
+    if not allowEnemies and IsUnitEnemy(this, source) 
+        return false
+    if not allowFriends and IsUnitAlly(this, source) 
+        return false
+    
+    return true
+
+
 public function unit.getStr() returns int
     return GetHeroStr(this, true)
 

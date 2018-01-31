@@ -7,9 +7,12 @@ import General
 import Buff
 import BuffTypeConfig
 import Missile
+import LinkedList
 
 public constant HERO_DEADEYE = 'H00I'
 HeroType heroType
+
+constant TERROR = new BuffType(false, true)
 
 function setupStats()
     heroType
@@ -27,10 +30,10 @@ function setupStats()
 
 
 function onAttack()
-    if(OnAttack.getAttacker().getAbilityLevel('A00N')!=0)
-        let target = OnAttack.getTarget()
-        let attacker = OnAttack.getAttacker()
-        let level = attacker.getAbilityLevel('A00N')
+    let target = OnAttack.getTarget()
+    let attacker = OnAttack.getAttacker()
+    let level = attacker.getAbilityLevel('A00N')
+    if level!=0 and target.isTargetable(attacker.getOwner(), false, true)
         if(target.getHP() - GetEventDamage() <= 20 + 10*level)
             attacker.dealDamage(target, 21. + 10*level, ReductionType.NONE)
             createUnit(attacker.getOwner(), 'n00B'+level, target.getPos(), attacker.getPos().angleTo(target.getPos()))
@@ -38,7 +41,7 @@ function onAttack()
 
 function onSpellCast()
     let spellId = GetSpellAbilityId()
-    var caster = GetTriggerUnit()
+    let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
 
     if(spellId=='A00O') //Terror
@@ -48,8 +51,9 @@ function onSpellCast()
         while(not nearby.isEmpty())
             unit target = FirstOfGroup(nearby)
             nearby.removeUnit(target)
-            if(IsUnitEnemy(target, caster.getOwner()) and not target.isType(UNIT_TYPE_ANCIENT) and not target.isType(UNIT_TYPE_STRUCTURE) and target.isAlive())
+            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
                 new Buff(target, caster, 1.5 + 0.5*level, MISS, 1)
+                new Buff(target, caster, 1.5 + 0.5*level, TERROR, level)
 
         nearby.destr()
 
@@ -59,7 +63,7 @@ function onSpellCast()
             ..addHitCondition(() -> (begin
             let missile = Missile.getTriggerMissile()
             let target = Missile.getMissileTarget()
-            return IsUnitEnemy(target, missile.getOwner().getOwner()) and not IsUnitType(target, UNIT_TYPE_ANCIENT) and not IsUnitType(target, UNIT_TYPE_STRUCTURE)
+            return not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(missile.getOwner().getOwner(), false, true)
         end) )
             ..addHitFunction(() -> (begin
             let missile = Missile.getTriggerMissile()
@@ -76,5 +80,9 @@ init
     heroType = new HeroType(HERO_DEADEYE)
     heroType.addOnAttackFunc(function onAttack)
     heroType.addOnSpellCastFunc(function onSpellCast)
+
+    var abilityList = new LinkedList<int>
+    ..add('A00T')
+    TERROR.setup(abilityList, 'B00E')
 
     setupStats()

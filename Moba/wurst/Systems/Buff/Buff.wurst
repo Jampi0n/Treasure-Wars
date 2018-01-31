@@ -118,9 +118,8 @@ public class BuffType
         this.buffId = buffId
         this.abilities = abilities
         this.onFirst = CreateTrigger()
-            ..addAction(function addAuraAbility)
-        this.onEnd = CreateTrigger()
-            ..addAction(function removeAuraAbility)
+        this.addFirstFunction(function addAuraAbility)
+        this.addEndFunction(function removeAuraAbility)
 
     static function printStatus()
         let currentBuff = Buff.getTriggerBuff()

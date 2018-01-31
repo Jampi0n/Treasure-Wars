@@ -2,11 +2,18 @@ package Paladin
 
 import HeroType
 import Stats
+import Buff
+import LinkedList
+import BuffTypeConfig
+import General
 
 public constant HERO_PALADIN = 'H000'
+HeroType heroType
+
+constant HOLY_SHIELD = new BuffType(true, true)
 
 function setupStats()
-    new HeroType(HERO_PALADIN)
+    heroType
         ..setStat(Stat.AD, 5, 25)
         ..setStat(Stat.AR, 10, 40)
         ..setStat(Stat.AS, 10, 30)
@@ -19,7 +26,39 @@ function setupStats()
         ..setStat(Stat.WP, 10, 40)
         ..setStat(Stat.INT, 5, 20)
 
+function onAttack()
+
+function onSpellCast()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+
+    if(spellId == 'A00M')
+        let casterPos = caster.getPos()
+
+        group nearby = CreateGroup()
+        nearby.enumUnitsInRange(casterPos.polarOffset(caster.getFacingAngle(), 100), 150)
+
+        while(not nearby.isEmpty())
+            unit target = FirstOfGroup(nearby)
+            nearby.removeUnit(target)
+            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
+                new Buff(target, caster, 0.75 + 0.25*level, STUNNED, 1)
+
+
+    if(spellId == 'A00R')
+        let target = GetSpellTargetUnit()
+        new Buff(target, caster, 1.5 + 0.5*level, UNTARGETABLE, 1)
+        new Buff(target, caster, 1.5 + 0.5*level, HOLY_SHIELD, level)
 
 
 init
+    heroType = new HeroType(HERO_PALADIN)
+    heroType.addOnAttackFunc(function onAttack)
+    heroType.addOnSpellCastFunc(function onSpellCast)
+
+    var abilityList = new LinkedList<int>
+    ..add('A00S')
+    HOLY_SHIELD.setup(abilityList, 'B00D')
+
     setupStats()

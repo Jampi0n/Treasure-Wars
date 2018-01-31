@@ -37,7 +37,7 @@ function setupStats()
 
 function onSpellCast()
     let spellId = GetSpellAbilityId()
-    var caster = GetTriggerUnit()
+    let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
 
     if(spellId=='A00B') //Dodge
@@ -91,7 +91,7 @@ function poisonSpitPeriodic()
     while(not nearby.isEmpty())
         unit target = FirstOfGroup(nearby)
         nearby.removeUnit(target)
-        if(IsUnitEnemy(target, owner) and not target.isType(UNIT_TYPE_ANCIENT) and not target.isType(UNIT_TYPE_STRUCTURE) and target.isAlive())
+        if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(poisonSpitDummy.getOwner(), false, true)
             new Buff(target, hero, 0.5, POISON_SPIT, level)
 
     nearby.destr()
