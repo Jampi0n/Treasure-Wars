@@ -22,6 +22,9 @@ public function unit.isTargetable(player source, boolean allowFriends, boolean a
     
     return true
 
+public function unit.isVisible(player source) returns boolean
+    return true
+
 
 public function unit.getStr() returns int
     return GetHeroStr(this, true)
