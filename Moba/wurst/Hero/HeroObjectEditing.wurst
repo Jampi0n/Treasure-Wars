@@ -1,0 +1,71 @@
+package HeroObjectEditing
+
+import AbilityObjEditing
+
+/*
+You cannot add learnable abilities to hero with code, it must be done with object data.
+Hero skills will have specific abilityIds:
+
+A+SpecialCharacter+Hero+Hotkey
+
+SpecialCharacter: !, ?, ...
+Anything that is not normally used in ability ids
+
+Hero: Different for every hero: 0-9, a-z, A-Z
+Means 62 heroes per special character.
+
+PQWER
+
+
+*/
+
+
+
+
+public function AbilityDefinition.setupWithHotKey(string name, string hotkey)
+    this.presetHotkey(hotkey)
+    this.setButtonPositionNormalY(2)
+    this.setButtonPositionResearchY(0)
+    this.setLevels(5)
+    this.setRequiredLevel(1)
+    this.setName(name)
+    this.setTooltipLearn("("+hotkey+")"+" Learn "+name+" - [|cffffcc00Level %d|r]")
+    for i = 1 to 5
+        this.setTooltipNormal(i, "("+hotkey+")"+" Learn "+name+" - [|cffffcc00Level "+i.toString()+"|r]")
+        
+    if(hotkey=="Q")
+        this..presetHotkey("Q")
+            ..setButtonPositionNormalX(0)
+            ..setButtonPositionResearchX(0)
+        return
+
+    if(hotkey=="W")
+        this..presetHotkey("W")
+            ..setButtonPositionNormalX(1)
+            ..setButtonPositionResearchX(1)
+        return
+
+    if(hotkey=="E")
+        this..presetHotkey("E")
+            ..setButtonPositionNormalX(2)
+            ..setButtonPositionResearchX(2)
+        return
+
+    if(hotkey=="R")
+        this..presetHotkey("R")
+            ..setButtonPositionNormalX(3)
+            ..setButtonPositionResearchX(3)
+            ..setRequiredLevel(6)
+            ..setLevelSkipRequirement(3)
+        return
+
+    if(hotkey=="D")
+        this..presetHotkey("D")
+            ..setButtonPositionNormalX(2)
+            ..setButtonPositionResearchX(2)
+            ..setButtonPositionNormalX(1)
+            ..setButtonPositionResearchY(1)
+            ..setLevelSkipRequirement(4)
+        return
+
+    print("!")
