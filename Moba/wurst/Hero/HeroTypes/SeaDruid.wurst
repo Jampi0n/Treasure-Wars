@@ -7,7 +7,7 @@ public constant HERO_SEA_DRUID = 'H00K'
 
 function setupStats()
     new HeroType(HERO_SEA_DRUID)
-        ..setStat(Stat.AD, 10, 35)
+        //..setStat(Stat.AD, 10, 35)
         ..setStat(Stat.AR, 15, 25)
         ..setStat(Stat.AS, 0, 10)
         ..setStat(Stat.HP, 20, 60)
@@ -15,7 +15,7 @@ function setupStats()
         ..setStat(Stat.MP, 15, 50)
         ..setStat(Stat.MR, 10, 40)
         ..setStat(Stat.MS, 5, 30)
-        ..setStat(Stat.STR, 10, 55)
+        ..setStat(Stat.STR, 10+10, 55+35)
         ..setStat(Stat.WP, 5, 30)
         ..setStat(Stat.INT, 10, 40)
 

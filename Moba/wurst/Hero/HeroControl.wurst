@@ -41,6 +41,7 @@ public class Hero
         onSpellCastTrigger.registerUnitEvent(this.hero, EVENT_UNIT_SPELL_EFFECT)
 
         print("setup completed: "+this.hero.getName())
+
         this.upgrade()
 
     construct(CPlayer p, int unitId, vec2 pos, angle facing )

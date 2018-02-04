@@ -1,5 +1,7 @@
 package PythonWarriores
 
+//0
+
 import HeroType
 import HeroControl
 import Stats
@@ -10,20 +12,90 @@ import General
 import BuffTypeConfig
 import ClosureTimers
 import OnUnitEnterLeave
+import SoundUtils
+import Assets
+import AbilityObjEditing
+import HeroObjectEditing
+
+
+constant SOUND_PARALYZING_STRIKE = new SoundDefinition(Sounds.shadowStrikeBirth1, false, true)
+constant SOUND_POISON_SPIT = new SoundDefinition(Sounds.corrosiveBreathMissileTarget1, false, true)
+constant SOUND_EMPOWERED_STRIKE = new SoundDefinition(Sounds.metalHeavySliceFlesh3, false, true)
+
+constant ABILITY_ENVENOMED_BLADES = 'A!0P'
+constant ABILITY_MISTWALK = 'A!0Q'
+constant ABILITY_POISON_SPIT = 'A!0W'
+constant ABILITY_EMPOWERED_STRIKE = 'A!0E'
+constant ABILITY_PARALYZING_STRIKE = 'A!0R'
 
 public constant HERO_PYTHON_WARRIORES = 'H00J'
 HeroType heroType
 
-constant ENVENOMED_BLADES = new BuffType(false, true)
-constant DODGE = new BuffType(true, true)
+constant BUFF_ENVENOMED_BLADES = new BuffType(false, true)
 
-constant POISON_SPIT = new BuffType(false, true)
+constant BUFF_POISON_SPIT = new BuffType(false, true)
+
+//Balancing and Object Editing
+constant real array MISTWALK_DURATION = [4, 5, 6, 7, 8]
+constant MISTWALK_DURATION_BONUS = compiletime( (4).toInt() )
+
+@compiletime
+function mistwalk()
+    int array MANA = [180, 190, 200, 210, 220]
+    real array COOLDOWN = [60, 60, 60, 60, 60]
+
+    let mistwalk = new AbilityDefinitionRoar(ABILITY_MISTWALK)
+        ..presetIcon("BTNNoxiousFumes")
+        ..setAnimationNames("morph, first")
+        ..setupWithHotKey("Mistwalk", "Q")
+        ..setLightningEffects("")
+        ..setMissileArt("")
+        ..setArtTarget("")
+        ..setTooltipLearnExtended("learn")
+
+    for i = 1 to 5
+        mistwalk
+            ..setCooldown(i, COOLDOWN[i-1])
+            ..setManaCost(i, MANA[i-1])
+            ..setTargetsAllowed(i, "none")
+            ..setTooltipNormalExtended(i, "Turns the Python Warriores invisibile for "
+            +MISTWALK_DURATION[i-1].toInt().toString()+" (+"+MISTWALK_DURATION_BONUS.toString()+
+            ") seconds.")
+
+@compiletime
+function paralyzingStrike()
+    real array RANGE = [500, 600, 700, 800, 900]
+    int array MANA = [180, 190, 200, 210, 220]
+    real array COOLDOWN = [60, 60, 60, 60, 60]
+
+    let paralyzingStrike = new AbilityDefinitionFarseerChainLightning(ABILITY_PARALYZING_STRIKE)
+        ..presetIcon("BTNINV_ThrowingKnife_04")
+        ..setAnimationNames("spell, slam")
+        ..setupWithHotKey("Paralyzing Strike", "R")
+        ..setLightningEffects("")
+        ..setMissileArt("")
+        ..setArtTarget("")
+        ..setTooltipLearnExtended("learn")
+
+    for i = 1 to 5
+        paralyzingStrike
+            ..setDamageperTarget(i, 0)
+            ..setDamageReductionperTarget(i, 0)
+            ..setNumberofTargetsHit(i, 0)
+            ..setCastRange(i, RANGE[i-1])
+            ..setCooldown(i, COOLDOWN[i-1])
+            ..setManaCost(i, MANA[i-1])
+            ..setTargetsAllowed(i, "air,enemies,ground,neutral,nonancient,organic")
+            ..setTooltipNormalExtended(i, "Range = "+RANGE[i-1].toString()+"|nCooldown = "+COOLDOWN[i-1].toString()+"|nMana = "+MANA[i-1].toString())
+
+
+
 
 group spitDummies = CreateGroup()
 
 function setupStats()
     heroType
-        ..setStat(Stat.AD, 10, 40)
+        //..setStat(Stat.AD, 10, 40)
         ..setStat(Stat.AR, 10, 25)
         ..setStat(Stat.AS, 25, 60)
         ..setStat(Stat.HP, 15, 40)
@@ -31,7 +103,7 @@ function setupStats()
         ..setStat(Stat.MP, 10, 30)
         ..setStat(Stat.MR, 15, 25)
         ..setStat(Stat.MS, 20, 60)
-        ..setStat(Stat.STR, 5, 20)
+        ..setStat(Stat.STR, 5+10, 20+40)
         ..setStat(Stat.WP, 20, 35)
         ..setStat(Stat.INT, 5, 40)
 
@@ -40,9 +112,9 @@ function onSpellCast()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
 
-    if(spellId=='A00B') //Dodge
+    if(spellId==ABILITY_MISTWALK)
         caster.dispelBuffs(true, true)
-        new Buff(caster, caster, (3.+1*level).bonus(caster.getInt(),4), INVIS, 1)
+        new Buff(caster, caster, (MISTWALK_DURATION[level-1]).bonus(caster.getInt(), MISTWALK_DURATION_BONUS*1.), INVIS, 1)
         return
 
     if(spellId=='A00H') //Poison Spit
@@ -56,11 +128,12 @@ function onSpellCast()
         attacker.setTimedLife(1)
         return
 
-    if(spellId=='A00G') //Paralyzing Strike
+    if(spellId==ABILITY_PARALYZING_STRIKE)
         let target = GetSpellTargetUnit()
         var targetPos = target.getPos()
         var casterPos = caster.getPos()
         var portPos = targetPos.polarOffset(casterPos.angleTo(targetPos), 100)
+        SOUND_PARALYZING_STRIKE.playOnPoint(targetPos.toVec3())
         doAfter(0, () -> caster.setPos(portPos))
         new Buff(target, caster, (2.5+0.5*level).bonus(caster.getInt(), 2) , STUNNED, 1)
         caster.dealDamage(target, (225+75*level).bonus(caster.getInt(), 400) , ReductionType.MAGIC)
@@ -69,11 +142,12 @@ function onSpellCast()
     if(spellId=='A00A')
         let target = GetSpellTargetUnit()
         caster.dealDamage(target, (25+25*level).bonus(caster.getStr(), 100) , ReductionType.PHYSICAL)
+        SOUND_EMPOWERED_STRIKE.playOnPoint(target.getPos3Zero()).snd.setVolume(150)
         return
 
 function onAttack()
     if(OnAttack.getAttacker().getAbilityLevel('A00L')!=0)
-        new Buff(OnAttack.getTarget(), OnAttack.getAttacker(), 5, ENVENOMED_BLADES, OnAttack.getAttacker().getAbilityLevel('A00L'))
+        new Buff(OnAttack.getTarget(), OnAttack.getAttacker(), 5, BUFF_ENVENOMED_BLADES, OnAttack.getAttacker().getAbilityLevel('A00L'))
 
 
 //in for group
@@ -92,39 +166,35 @@ function poisonSpitPeriodic()
         unit target = FirstOfGroup(nearby)
         nearby.removeUnit(target)
         if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(poisonSpitDummy.getOwner(), false, true)
-            new Buff(target, hero, 0.5, POISON_SPIT, level)
+            new Buff(target, hero, 0.5, BUFF_POISON_SPIT, level)
 
     nearby.destr()
 
 init
     heroType = new HeroType(HERO_PYTHON_WARRIORES)
     heroType.addOnAttackFunc(function onAttack)
+
     setupStats()
 
     var abilityList = new LinkedList<int>
     ..add('A009')
-    ENVENOMED_BLADES.setup(abilityList, 'B007')
-    ENVENOMED_BLADES.setPeriodicTime(1)
-    ENVENOMED_BLADES.addPeriodicFunction(()-> (begin
+    BUFF_ENVENOMED_BLADES.setup(abilityList, 'B007')
+    BUFF_ENVENOMED_BLADES.setPeriodicTime(1)
+    BUFF_ENVENOMED_BLADES.addPeriodicFunction(()-> (begin
         let thisBuff = Buff.getTriggerBuff()
         thisBuff.getCaster().dealDamage(thisBuff.getTarget(), 
         (5.*thisBuff.getLevel()).bonus(thisBuff.getCaster().getInt(), 20)
         , ReductionType.MAGIC)
         //print(thisBuff.getTarget().getName()+" poisoned with level "+thisBuff.getLevel().toString()+" dealing"+(5.*thisBuff.getLevel()).bonus(thisBuff.getCaster().getInt(), 20).toString()+" damage.")
     end) )
-
-    abilityList = new LinkedList<int>
-    ..add('A00C')
-    ..add('A00D')
-    DODGE.setup(abilityList, 'B008')
     
 
     //Poison Spit
     abilityList = new LinkedList<int>
     ..add('A00J')
     ..add('A00K')
-    POISON_SPIT.setup(abilityList, 'B00B')
-    POISON_SPIT.addApplyFunction( () -> (begin
+    BUFF_POISON_SPIT.setup(abilityList, 'B00B')
+    BUFF_POISON_SPIT.addApplyFunction( () -> (begin
         let thisBuff = Buff.getTriggerBuff()
         thisBuff.getCaster().dealDamage(thisBuff.getTarget(), 
         (1.25*thisBuff.getLevel()).bonus(thisBuff.getCaster().getInt(), 5)
@@ -139,7 +209,7 @@ init
 
         if level >= 1 and level <= 5
             spitDummies.addUnit(spitDummy)
-
+            SOUND_POISON_SPIT.playOnPoint(spitDummy.getPos3Zero())
             real x
             real y
             real angle
@@ -171,3 +241,6 @@ init
 
 
     heroType.addOnSpellCastFunc(function onSpellCast)
+
+
+

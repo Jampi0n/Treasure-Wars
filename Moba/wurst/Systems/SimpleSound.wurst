@@ -1,0 +1,9 @@
+package SimpleSound
+
+public class Sound
+
+    static function play(string path)
+        sound soundHandle = CreateSound(path, false, false, true, 12700, 12700, "")
+        StartSound(soundHandle)
+        KillSoundWhenDone(soundHandle)
+        

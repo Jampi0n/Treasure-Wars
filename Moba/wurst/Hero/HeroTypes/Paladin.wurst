@@ -9,12 +9,20 @@ import General
 import DummyRecycler
 import TimerUtils
 import ClosureTimers
+import SoundUtils
+import Assets
+import AbilityObjEditing
 
 public constant HERO_PALADIN = 'H000'
 HeroType heroType
 
 constant HOLY_SHIELD = new BuffType(true, true)
+constant BATTLE_ROAR = new BuffType(true, true)
 constant DIVINE_PUNISHMENT = 'A00U'
+
+public constant SOUND_SHIELD_BASH = new SoundDefinition(Sounds.metalHeavyBashMetal2, false, true)
+
+public constant SOUND_DIVINE_PUNISHMENT = new SoundDefinition(Sounds.holyBolt, false, true)
 
 class DivinePunishment
 
@@ -31,8 +39,8 @@ class DivinePunishment
         this.count = 0
         this.succesful = false
         this.caster = caster
+        SOUND_DIVINE_PUNISHMENT.playOnPoint(caster.getPos3Zero()).snd.setVolume(120)
         this.level = caster.getAbilityLevel(DIVINE_PUNISHMENT)
-        //this.model = caster.addEffect("Abilities\\Spells\\Human\\Resurrect\\ResurrectCaster.mdl", "origin")
         this.dummy = DummyRecycler.get(caster.getPos(), caster.getFacingAngle())
         this.dummy.setFacing(caster.getFacingAngle())
         this.model = this.dummy.addEffect("Abilities\\Spells\\Human\\Resurrect\\ResurrectCaster.mdl", "origin")
@@ -77,7 +85,7 @@ class DivinePunishment
 
 function setupStats()
     heroType
-        ..setStat(Stat.AD, 5, 25)
+        //..setStat(Stat.AD, 5, 25)
         ..setStat(Stat.AR, 10, 40)
         ..setStat(Stat.AS, 10, 30)
         ..setStat(Stat.HP, 15, 40)
@@ -85,7 +93,7 @@ function setupStats()
         ..setStat(Stat.MP, 5, 20)
         ..setStat(Stat.MR, 5, 20)
         ..setStat(Stat.MS, 0, 30)
-        ..setStat(Stat.STR, 15, 40)
+        ..setStat(Stat.STR, 15+5, 40+25)
         ..setStat(Stat.WP, 10, 40)
         ..setStat(Stat.INT, 5, 20)
 
@@ -98,7 +106,7 @@ function onSpellCast()
 
     if(spellId == 'A00M') //shield bash
         let casterPos = caster.getPos()
-
+        SOUND_SHIELD_BASH.playOnPoint(casterPos.toVec3()).snd.setVolume(150)
         group nearby = CreateGroup()
         nearby.enumUnitsInRange(casterPos.polarOffset(caster.getFacingAngle(), 100), 150)
 
@@ -109,6 +117,17 @@ function onSpellCast()
                 caster.dealDamage(target, (25.+25*level).bonus(caster.getStr(), 50), ReductionType.PHYSICAL)
                 new Buff(target, caster, 0.75 + 0.25*level, STUNNED, 1)
 
+    if(spellId=='A00V') //Battle Roar
+        group nearby = CreateGroup()
+        nearby.enumUnitsInRange(caster.getPos(), 600.+100*level)
+
+        while(not nearby.isEmpty())
+            unit target = FirstOfGroup(nearby)
+            nearby.removeUnit(target)
+            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), true, false)
+                new Buff(target, caster, (6.).bonus(caster.getInt(),6), BATTLE_ROAR, level)
+
+        nearby.destr()
 
     if(spellId == 'A00R') //holy shield
         let target = GetSpellTargetUnit()
@@ -128,5 +147,13 @@ init
     var abilityList = new LinkedList<int>
     ..add('A00S')
     HOLY_SHIELD.setup(abilityList, 'B00D')
+    abilityList = new LinkedList<int>
+    ..add('A00W')
+    BATTLE_ROAR.setup(abilityList, 'B00F')
 
     setupStats()
+
+@compiletime
+function setupAbilities()
+    let aDef = new AbilityDefinition('AAAA','Amgl')
+    aDef.setTooltipLearnExtended("test")
