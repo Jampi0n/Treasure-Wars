@@ -17,7 +17,8 @@ import Assets
 import AbilityObjEditing
 import HeroObjectEditing
 import FormatStrings
-
+import ObjectIdGenerator
+import ObjectIds
 
 constant SOUND_PARALYZING_STRIKE = new SoundDefinition(Sounds.shadowStrikeBirth1, false, true)
 constant SOUND_POISON_SPIT = new SoundDefinition(Sounds.corrosiveBreathMissileTarget1, false, true)
@@ -32,26 +33,13 @@ constant ABILITY_PARALYZING_STRIKE = 'AZ0R'
 public constant HERO_PYTHON_WARRIORES = 'H00J'
 HeroType heroType
 
-constant BUFF_ENVENOMED_BLADES = new BuffType(false, true)
-
-constant BUFF_POISON_SPIT = new BuffType(false, true)
-
 //Balancing and Object Editing
 constant real array ENVENOMED_BLADES_DAMAGE = [5, 10, 15, 20, 25]
 constant real ENVENOMED_BLADES_DAMAGE_BONUS = 20
 constant real array ENVENOMED_BLADES_DURATION = [5, 5 ,5 ,5 ,5 ]
+constant BUFF_ENVENOMED_BLADES = new BuffType(false, true)
 
-constant real array MISTWALK_DURATION = [4, 5, 6, 7, 8]
-constant real MISTWALK_DURATION_BONUS = 4
 
-constant real array POISON_SPIT_SLOW_MS = []
-constant real array POISON_SPIT_SLOW_AS = []
-constant real array POISON_SPIT_DOT = []
-constant real POISON_SPIT_DOT_BONUS = 7.
-constant real array POISON_SPIT_ARMOR_REDUCTION = []
-
-constant real array EMPOWERED_STRIKE_DAMAGE = []
-constant real EMPOWERED_STRIKE_DAMAGE_BONUS = 7
 
 @compiletime
 function envenomedBlades()
@@ -61,16 +49,19 @@ function envenomedBlades()
         ..setLearnString("Attacks deal poison damage every second.", (int lvl) -> (begin
             return formatString("%s damage, %s seconds.", 
             ENVENOMED_BLADES_DAMAGE[lvl-1].str()+ENVENOMED_BLADES_DAMAGE_BONUS.getBonusString(C_INT), 
-            ENVENOMED_BLADES_DURATION[lvl-1])
+            ENVENOMED_BLADES_DURATION[lvl-1].str())
         end) )
 
     for lvl = 1 to 5
         aDef
-            ..setTooltipNormalExtended(lvl, formatString("Attacks deal %s poison damage every second for %s seconds.", 
-            ENVENOMED_BLADES_DAMAGE[lvl-1].str()+ENVENOMED_BLADES_DAMAGE_BONUS.getBonusString(C_INT), 
-            ENVENOMED_BLADES_DURATION[lvl-1])
-            )
+        ..setTooltipNormalExtended(lvl, formatString("Attacks deal %s poison damage every second for %s seconds.", 
+        ENVENOMED_BLADES_DAMAGE[lvl-1].str()+ENVENOMED_BLADES_DAMAGE_BONUS.getBonusString(C_INT), 
+        ENVENOMED_BLADES_DURATION[lvl-1].str())
+        )
     
+constant real array MISTWALK_DURATION = [4, 5, 6, 7, 8]
+constant real MISTWALK_DURATION_BONUS = 4
+
 @compiletime
 function mistwalk()
     int array MANA = [180, 190, 200, 210, 220]
@@ -78,23 +69,124 @@ function mistwalk()
 
     let aDef = new AbilityDefinitionRoar(ABILITY_MISTWALK)
         ..presetIcon("BTNNoxiousFumes")
-        ..setAnimationNames("morph, first")
+        ..setAnimationNames("morph,first")
         ..setupWithHotKey("Mistwalk", "Q")
         ..setLightningEffects("")
         ..setArtCaster("")
         ..setArtEffect("")
         ..setMissileArt("")
         ..setArtTarget("")
-        ..setTooltipLearnExtended("learn")
+        ..setLearnString("Turns the Python Warriores invisibile.", (int lvl) -> (begin
+            return formatString("%s seconds.", MISTWALK_DURATION[lvl-1].str()+MISTWALK_DURATION_BONUS.getBonusString(C_INT))
+        end) )
 
     for i = 1 to 5
         aDef
-            ..setCooldown(i, COOLDOWN[i-1])
-            ..setManaCost(i, MANA[i-1])
-            ..setTargetsAllowed(i, "none")
-            ..setTooltipNormalExtended(i, "Turns the Python Warriores invisibile for "
-            +MISTWALK_DURATION[i-1].toInt().toString()+" (+"+MISTWALK_DURATION_BONUS.toInt().toString()+
-            ") seconds.")
+        ..setCooldown(i, COOLDOWN[i-1])
+        ..setManaCost(i, MANA[i-1])
+        ..setTargetsAllowed(i, "none")
+        ..setTooltipNormalExtended(i, formatString(
+            "Turns the Python Warriores invisibile for %s seconds.", 
+            MISTWALK_DURATION[i-1].toInt().toString()+MISTWALK_DURATION_BONUS.getBonusString(C_INT)))
+
+constant real array POISON_SPIT_SLOW_MS = [-0.3, -0.35, -0.4, -0.45, -0.5]
+constant real array POISON_SPIT_DOT = [10, 15, 20, 25, 30]
+constant real POISON_SPIT_DOT_BONUS = 25.
+constant int array POISON_SPIT_ARMOR_REDUCTION = [-5, -10, -15, -20, -25]
+constant real array POISON_SPIT_DURATION = [6, 7, 8, 9, 10]
+
+constant integer ABILITY_POISON_SPIT_SLOWED = compiletime(ABIL_ID_GEN.next())
+constant integer ABILITY_POISON_SPIT_ARMOR_REDUCED = compiletime(ABIL_ID_GEN.next())
+constant integer BUFF_ID_POISON_SPIT = 'B00B'
+
+constant BUFF_POISON_SPIT = new BuffType(false, true)
+
+@compiletime
+function poisonSpit()
+    int array MANA = [110, 120, 130, 140, 160]
+    real array COOLDOWN = [16, 16, 16, 16, 16]
+
+    let aDef = new AbilityDefinitionDarkRangerSilence(ABILITY_POISON_SPIT)
+        ..presetIcon("BTNSlowSpellGreen")
+        ..setAnimationNames("spell")
+        ..setupWithHotKey("Poison Spit", "W")
+        ..setLightningEffects("")
+        ..setArtCaster("")
+        ..setArtEffect("")
+        ..setMissileArt("")
+        ..setArtTarget("")
+        ..setLearnString("Spits poison at the target area. Enemies within the area of effect are slowed, have reduced armor and take damage over time.",
+        (int lvl) -> (begin
+            return formatString("%s damage per second, %s slow, %s armor, lasts %s seconds.", 
+            POISON_SPIT_DOT[lvl-1].str()+POISON_SPIT_DOT_BONUS.getBonusString(C_INT), 
+            (-POISON_SPIT_SLOW_MS[lvl-1]*100).str()+"%",
+            (-POISON_SPIT_ARMOR_REDUCTION[lvl-1]).str(),
+            POISON_SPIT_DURATION[lvl-1].str())
+        end) )
+
+    for i = 1 to 5
+        aDef
+        ..setCooldown(i, COOLDOWN[i-1])
+        ..setManaCost(i, MANA[i-1])
+        ..setTargetsAllowed(i, "none")
+        ..setTooltipNormalExtended(i, formatString("Spits poison at the target area. Enemies within the area of effect are slowed by %s, have their armor reduced by %s and take %s damage per second.|nLasts %s seconds.",
+        (-POISON_SPIT_SLOW_MS[i-1]*100).str()+"%", (-POISON_SPIT_ARMOR_REDUCTION[i-1]).str(), POISON_SPIT_DOT[i-1].str()+POISON_SPIT_DOT_BONUS.getBonusString(C_INT), POISON_SPIT_DURATION[i-1].str()))
+
+    let aDefSlowAura = new AbilityDefinitionAuraSlow(ABILITY_POISON_SPIT_SLOWED)
+        ..setLevels(5)
+        ..setArtTarget("Units\\Undead\\PlagueCloud\\PlagueCloudtarget.mdl")
+        ..setTargetAttachmentPoint("chest")
+    for i = 1 to 5
+        aDefSlowAura
+        ..setMovementSpeedFactor(i, POISON_SPIT_SLOW_MS[i-1])
+        ..setTargetsAllowed(i, "invulnerable,self,vulnerable")
+        ..setAreaofEffect(i, 1)
+        ..setBuffs(i, int2fourchar(BUFF_ID_POISON_SPIT))
+
+    let aDefArmorReduction = new AbilityDefinitionDefenseBonusPlus1(ABILITY_POISON_SPIT_ARMOR_REDUCED)
+        ..setLevels(5)
+        ..setItemAbility(false)
+    for i = 1 to 5
+        aDefArmorReduction
+        ..setDefenseBonus(i, POISON_SPIT_ARMOR_REDUCTION[i-1])
+
+constant real array EMPOWERED_STRIKE_DAMAGE = [50, 75, 100, 125, 150]
+constant real EMPOWERED_STRIKE_DAMAGE_BONUS = 100
+
+@compiletime
+function empoweredStrike()
+    int array MANA = [50, 50, 50, 50, 50]
+    real array COOLDOWN = [6, 6, 6, 6, 6]
+
+    let aDef = new AbilityDefinitionSeaWitchForkedLightning(ABILITY_EMPOWERED_STRIKE)
+        ..presetIcon("BTNEnchantWeaponGreen")
+        ..setAnimationNames("spell,throw")
+        ..setupWithHotKey("Empowered Strike", "E")
+        ..setLightningEffects("")
+        ..setArtSpecial("")
+        ..setLightningEffects("")
+        ..setLearnString("Strikes the target enemy unit with a powerful melee attack dealing physical damage.", (int lvl) -> (begin
+            return formatString("%s damage.", EMPOWERED_STRIKE_DAMAGE[lvl-1].str()+EMPOWERED_STRIKE_DAMAGE_BONUS.getBonusString(C_STR))
+        end) )
+
+    for i = 1 to 5
+        aDef
+        ..setCooldown(i, COOLDOWN[i-1])
+        ..setManaCost(i, MANA[i-1])
+        ..setNumberofTargetsHit(i, 1)
+        ..setDamageperTarget(i, 0)
+        ..setCastRange(i, 150)
+        ..setDurationNormal(i, 0.1)
+        ..setTargetsAllowed(i, "air,enemies,ground,neutral,nonancient,organic")
+        ..setTooltipNormalExtended(i, formatString("Strikes the target enemy unit with a powerful melee attack dealing %s physical damage.", 
+        EMPOWERED_STRIKE_DAMAGE[i-1].str()+EMPOWERED_STRIKE_DAMAGE_BONUS.getBonusString(C_STR)))
+
+
+
+constant real array PARALYZING_STRIKE_DAMAGE = [250,300,350,400,450]
+constant real PARALYZING_STRIKE_DAMAGE_BONUS = 400
+constant real array PARALYZING_STRIKE_DURATION = []
+constant real PARALYZING_STRIKE_DURATION_BONUS = 2
 
 @compiletime
 function paralyzingStrike()
@@ -151,7 +243,7 @@ function onSpellCast()
         new Buff(caster, caster, (MISTWALK_DURATION[level-1]).bonus(caster.getInt(), MISTWALK_DURATION_BONUS), INVIS, 1)
         return
 
-    if(spellId=='A00H') //Poison Spit
+    if(spellId==ABILITY_POISON_SPIT)
         let x = GetSpellTargetX()
         let y = GetSpellTargetY()
         let attacker = createUnit(caster.getOwner(), 'u000', caster.getPos(), angle(Atan2(y - caster.getY(), x - caster.getX())))
@@ -162,6 +254,12 @@ function onSpellCast()
         attacker.setTimedLife(1)
         return
 
+    if(spellId==ABILITY_EMPOWERED_STRIKE)
+        let target = GetSpellTargetUnit()
+        caster.dealDamage(target, (EMPOWERED_STRIKE_DAMAGE[level-1]).bonus(caster.getStr(), EMPOWERED_STRIKE_DAMAGE_BONUS) , ReductionType.PHYSICAL)
+        SOUND_EMPOWERED_STRIKE.playOnPoint(target.getPos3Zero()).snd.setVolume(150)
+        return
+
     if(spellId==ABILITY_PARALYZING_STRIKE)
         let target = GetSpellTargetUnit()
         var targetPos = target.getPos()
@@ -169,15 +267,11 @@ function onSpellCast()
         var portPos = targetPos.polarOffset(casterPos.angleTo(targetPos), 100)
         SOUND_PARALYZING_STRIKE.playOnPoint(targetPos.toVec3())
         doAfter(0, () -> caster.setPos(portPos))
-        new Buff(target, caster, (2.5+0.5*level).bonus(caster.getInt(), 2) , STUNNED, 1)
-        caster.dealDamage(target, (225+75*level).bonus(caster.getInt(), 400) , ReductionType.MAGIC)
+        new Buff(target, caster, (PARALYZING_STRIKE_DURATION[level-1]).bonus(caster.getInt(), PARALYZING_STRIKE_DURATION_BONUS) , STUNNED, 1)
+        caster.dealDamage(target, (PARALYZING_STRIKE_DAMAGE[level-1]).bonus(caster.getInt(), PARALYZING_STRIKE_DAMAGE_BONUS) , ReductionType.MAGIC)
         return
 
-    if(spellId=='A00A')
-        let target = GetSpellTargetUnit()
-        caster.dealDamage(target, (25+25*level).bonus(caster.getStr(), 100) , ReductionType.PHYSICAL)
-        SOUND_EMPOWERED_STRIKE.playOnPoint(target.getPos3Zero()).snd.setVolume(150)
-        return
+    
 
 function onAttack()
     let level = OnAttack.getAttacker().getAbilityLevel(ABILITY_ENVENOMED_BLADES)
@@ -221,19 +315,18 @@ init
         thisBuff.getCaster().dealDamage(thisBuff.getTarget(), 
         (ENVENOMED_BLADES_DAMAGE[thisBuff.getLevel()-1]).bonus(thisBuff.getCaster().getInt(), ENVENOMED_BLADES_DAMAGE_BONUS)
         , ReductionType.MAGIC)
-        //print(thisBuff.getTarget().getName()+" poisoned with level "+thisBuff.getLevel().toString()+" dealing"+(5.*thisBuff.getLevel()).bonus(thisBuff.getCaster().getInt(), 20).toString()+" damage.")
     end) )
     
 
     //Poison Spit
     abilityList = new LinkedList<int>
-    ..add('A00J')
-    ..add('A00K')
-    BUFF_POISON_SPIT.setup(abilityList, 'B00B')
+    ..add(ABILITY_POISON_SPIT_ARMOR_REDUCED)
+    ..add(ABILITY_POISON_SPIT_SLOWED)
+    BUFF_POISON_SPIT.setup(abilityList, BUFF_ID_POISON_SPIT)
     BUFF_POISON_SPIT.addApplyFunction( () -> (begin
         let thisBuff = Buff.getTriggerBuff()
         thisBuff.getCaster().dealDamage(thisBuff.getTarget(), 
-        (1.25*thisBuff.getLevel()).bonus(thisBuff.getCaster().getInt(), 5)
+        (POISON_SPIT_DOT[thisBuff.getLevel()-1]).bonus(thisBuff.getCaster().getInt(), POISON_SPIT_DOT_BONUS)/4
         , ReductionType.MAGIC)
     end) )
 
@@ -244,6 +337,7 @@ init
             level = spitDummy.getTypeId()+4-'n00A'
 
         if level >= 1 and level <= 5
+            spitDummy.setTimedLife(POISON_SPIT_DURATION[level-1])
             spitDummies.addUnit(spitDummy)
             SOUND_POISON_SPIT.playOnPoint(spitDummy.getPos3Zero())
             real x
