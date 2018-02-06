@@ -16,17 +16,18 @@ import SoundUtils
 import Assets
 import AbilityObjEditing
 import HeroObjectEditing
+import FormatStrings
 
 
 constant SOUND_PARALYZING_STRIKE = new SoundDefinition(Sounds.shadowStrikeBirth1, false, true)
 constant SOUND_POISON_SPIT = new SoundDefinition(Sounds.corrosiveBreathMissileTarget1, false, true)
 constant SOUND_EMPOWERED_STRIKE = new SoundDefinition(Sounds.metalHeavySliceFlesh3, false, true)
 
-constant ABILITY_ENVENOMED_BLADES = 'A!0P'
-constant ABILITY_MISTWALK = 'A!0Q'
-constant ABILITY_POISON_SPIT = 'A!0W'
-constant ABILITY_EMPOWERED_STRIKE = 'A!0E'
-constant ABILITY_PARALYZING_STRIKE = 'A!0R'
+constant ABILITY_ENVENOMED_BLADES = 'AZ0P'
+constant ABILITY_MISTWALK = 'AZ0Q'
+constant ABILITY_POISON_SPIT = 'AZ0W'
+constant ABILITY_EMPOWERED_STRIKE = 'AZ0E'
+constant ABILITY_PARALYZING_STRIKE = 'AZ0R'
 
 public constant HERO_PYTHON_WARRIORES = 'H00J'
 HeroType heroType
@@ -36,30 +37,63 @@ constant BUFF_ENVENOMED_BLADES = new BuffType(false, true)
 constant BUFF_POISON_SPIT = new BuffType(false, true)
 
 //Balancing and Object Editing
-constant real array MISTWALK_DURATION = [4, 5, 6, 7, 8]
-constant MISTWALK_DURATION_BONUS = compiletime( (4).toInt() )
+constant real array ENVENOMED_BLADES_DAMAGE = [5, 10, 15, 20, 25]
+constant real ENVENOMED_BLADES_DAMAGE_BONUS = 20
+constant real array ENVENOMED_BLADES_DURATION = [5, 5 ,5 ,5 ,5 ]
 
+constant real array MISTWALK_DURATION = [4, 5, 6, 7, 8]
+constant real MISTWALK_DURATION_BONUS = 4
+
+constant real array POISON_SPIT_SLOW_MS = []
+constant real array POISON_SPIT_SLOW_AS = []
+constant real array POISON_SPIT_DOT = []
+constant real POISON_SPIT_DOT_BONUS = 7.
+constant real array POISON_SPIT_ARMOR_REDUCTION = []
+
+constant real array EMPOWERED_STRIKE_DAMAGE = []
+constant real EMPOWERED_STRIKE_DAMAGE_BONUS = 7
+
+@compiletime
+function envenomedBlades()
+    let aDef = createNoEffectAbiltiy(ABILITY_ENVENOMED_BLADES)
+        ..presetIcon("PASPoisonBlades")
+        ..setupWithHotKey("Envenomed Blades", "D")
+        ..setLearnString("Attacks deal poison damage every second.", (int lvl) -> (begin
+            return formatString("%s damage, %s seconds.", 
+            ENVENOMED_BLADES_DAMAGE[lvl-1].str()+ENVENOMED_BLADES_DAMAGE_BONUS.getBonusString(C_INT), 
+            ENVENOMED_BLADES_DURATION[lvl-1])
+        end) )
+
+    for lvl = 1 to 5
+        aDef
+            ..setTooltipNormalExtended(lvl, formatString("Attacks deal %s poison damage every second for %s seconds.", 
+            ENVENOMED_BLADES_DAMAGE[lvl-1].str()+ENVENOMED_BLADES_DAMAGE_BONUS.getBonusString(C_INT), 
+            ENVENOMED_BLADES_DURATION[lvl-1])
+            )
+    
 @compiletime
 function mistwalk()
     int array MANA = [180, 190, 200, 210, 220]
     real array COOLDOWN = [60, 60, 60, 60, 60]
 
-    let mistwalk = new AbilityDefinitionRoar(ABILITY_MISTWALK)
+    let aDef = new AbilityDefinitionRoar(ABILITY_MISTWALK)
         ..presetIcon("BTNNoxiousFumes")
         ..setAnimationNames("morph, first")
         ..setupWithHotKey("Mistwalk", "Q")
         ..setLightningEffects("")
+        ..setArtCaster("")
+        ..setArtEffect("")
         ..setMissileArt("")
         ..setArtTarget("")
         ..setTooltipLearnExtended("learn")
 
     for i = 1 to 5
-        mistwalk
+        aDef
             ..setCooldown(i, COOLDOWN[i-1])
             ..setManaCost(i, MANA[i-1])
             ..setTargetsAllowed(i, "none")
             ..setTooltipNormalExtended(i, "Turns the Python Warriores invisibile for "
-            +MISTWALK_DURATION[i-1].toInt().toString()+" (+"+MISTWALK_DURATION_BONUS.toString()+
+            +MISTWALK_DURATION[i-1].toInt().toString()+" (+"+MISTWALK_DURATION_BONUS.toInt().toString()+
             ") seconds.")
 
 @compiletime
@@ -68,7 +102,7 @@ function paralyzingStrike()
     int array MANA = [180, 190, 200, 210, 220]
     real array COOLDOWN = [60, 60, 60, 60, 60]
 
-    let paralyzingStrike = new AbilityDefinitionFarseerChainLightning(ABILITY_PARALYZING_STRIKE)
+    let aDef = new AbilityDefinitionFarseerChainLightning(ABILITY_PARALYZING_STRIKE)
         ..presetIcon("BTNINV_ThrowingKnife_04")
         ..setAnimationNames("spell, slam")
         ..setupWithHotKey("Paralyzing Strike", "R")
@@ -78,7 +112,7 @@ function paralyzingStrike()
         ..setTooltipLearnExtended("learn")
 
     for i = 1 to 5
-        paralyzingStrike
+        aDef
             ..setDamageperTarget(i, 0)
             ..setDamageReductionperTarget(i, 0)
             ..setNumberofTargetsHit(i, 0)
@@ -114,7 +148,7 @@ function onSpellCast()
 
     if(spellId==ABILITY_MISTWALK)
         caster.dispelBuffs(true, true)
-        new Buff(caster, caster, (MISTWALK_DURATION[level-1]).bonus(caster.getInt(), MISTWALK_DURATION_BONUS*1.), INVIS, 1)
+        new Buff(caster, caster, (MISTWALK_DURATION[level-1]).bonus(caster.getInt(), MISTWALK_DURATION_BONUS), INVIS, 1)
         return
 
     if(spellId=='A00H') //Poison Spit
@@ -146,8 +180,10 @@ function onSpellCast()
         return
 
 function onAttack()
-    if(OnAttack.getAttacker().getAbilityLevel('A00L')!=0)
-        new Buff(OnAttack.getTarget(), OnAttack.getAttacker(), 5, BUFF_ENVENOMED_BLADES, OnAttack.getAttacker().getAbilityLevel('A00L'))
+    let level = OnAttack.getAttacker().getAbilityLevel(ABILITY_ENVENOMED_BLADES)
+    if level != 0
+        
+        new Buff(OnAttack.getTarget(), OnAttack.getAttacker(), ENVENOMED_BLADES_DURATION[level-1], BUFF_ENVENOMED_BLADES, level)
 
 
 //in for group
@@ -183,7 +219,7 @@ init
     BUFF_ENVENOMED_BLADES.addPeriodicFunction(()-> (begin
         let thisBuff = Buff.getTriggerBuff()
         thisBuff.getCaster().dealDamage(thisBuff.getTarget(), 
-        (5.*thisBuff.getLevel()).bonus(thisBuff.getCaster().getInt(), 20)
+        (ENVENOMED_BLADES_DAMAGE[thisBuff.getLevel()-1]).bonus(thisBuff.getCaster().getInt(), ENVENOMED_BLADES_DAMAGE_BONUS)
         , ReductionType.MAGIC)
         //print(thisBuff.getTarget().getName()+" poisoned with level "+thisBuff.getLevel().toString()+" dealing"+(5.*thisBuff.getLevel()).bonus(thisBuff.getCaster().getInt(), 20).toString()+" damage.")
     end) )

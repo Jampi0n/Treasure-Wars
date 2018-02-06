@@ -8,7 +8,7 @@ Hero skills will have specific abilityIds:
 
 A+SpecialCharacter+Hero+Hotkey
 
-SpecialCharacter: !, ?, ...
+SpecialCharacter: Z,Y,..
 Anything that is not normally used in ability ids
 
 Hero: Different for every hero: 0-9, a-z, A-Z
@@ -19,8 +19,60 @@ PQWER
 
 */
 
+public constant C_STR = color(255, 187, 102)
+public constant C_INT = color(102, 187, 255)
 
 
+public interface LevelString
+    function getString(int level) returns string
+
+public function real.str() returns string
+    return this.toInt().toString()
+
+public function int.str() returns string
+        return this.toString()
+
+
+
+
+
+public function AbilityDefinition.setLearnString(string intro, LevelString levelString)
+    string learnString = intro+"|n"
+    for i = 1 to 5
+        learnString += getLevelString(i) + levelString.getString(i)
+
+    this.setTooltipLearnExtended(learnString)
+    
+
+public function createNoEffectAbiltiy(int newId) returns AbilityDefinition
+    let aDef = new AbilityDefinition(newId, 'Amgl')
+    aDef.setCheckDependencies(false)
+    aDef.setLevels(5)
+    aDef.setHeroAbility(true)
+    return aDef
+
+public function getLevelString(int level) returns string
+    return " |n|cffffcc00Level "+level.toString()+"|r - "
+
+public function int.getBonusString() returns string
+    if(this==0)
+        return " "
+    return " (+"+this.toString()+") "
+
+public function real.getBonusString() returns string
+    if(this==0)
+        return " "
+    return " (+"+this.toInt().toString()+") "
+
+public function int.getBonusString(color c) returns string
+    if(this==0)
+        return " "
+    return c.toColorString()+" (+"+this.toString()+")|r "
+
+public function real.getBonusString(color c) returns string
+    if(this==0)
+        return " "
+    return c.toColorString()+" (+"+this.toInt().toString()+")|r "
 
 public function AbilityDefinition.setupWithHotKey(string name, string hotkey)
     this.presetHotkey(hotkey)
@@ -63,7 +115,7 @@ public function AbilityDefinition.setupWithHotKey(string name, string hotkey)
         this..presetHotkey("D")
             ..setButtonPositionNormalX(2)
             ..setButtonPositionResearchX(2)
-            ..setButtonPositionNormalX(1)
+            ..setButtonPositionNormalY(1)
             ..setButtonPositionResearchY(1)
             ..setLevelSkipRequirement(4)
         return
