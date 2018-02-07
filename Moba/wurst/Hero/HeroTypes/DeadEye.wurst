@@ -1,5 +1,7 @@
 package DeadEye
 
+//1
+
 import HeroType
 import Stats
 import OnAttack
@@ -8,11 +10,176 @@ import Buff
 import BuffTypeConfig
 import Missile
 import LinkedList
+import AbilityObjEditing
+import ObjectIdGenerator
+import HeroObjectEditing
+import FormatStrings
+import ClosureTimers
+import OnUnitEnterLeave
 
 public constant HERO_DEADEYE = 'H00I'
 HeroType heroType
 
-constant TERROR = new BuffType(false, true)
+constant ABILITY_BLACK_ARROW = 'AZ1P'
+constant ABILITY_PIERCING_SHOT = 'AZ1Q'
+constant ABILITY_TERROR = 'AZ1W'
+constant ABILITY_BONE_BROTHERS = 'AZ1E'
+constant ABILITY_DEATH_PACT = 'AZ1R'
+
+
+//Balancing and Object Editing
+
+constant real array BLACK_ARROW_THRESHOLD = [30, 40, 50, 60, 70]
+constant real array BLACK_ARROW_DURATION = [20, 24, 28, 32, 36]
+
+@compiletime
+function blackArrow()
+    let aDef = createNoEffectAbiltiy(ABILITY_BLACK_ARROW)
+        ..presetIcon("PASTheBlackArrow")
+        ..setupWithHotKey("Black Arrow", "D")
+        ..setLearnString("Increases the damage of killing attacks against enemies and spawns a skeleton.", (int lvl) -> (begin
+            return formatString("%s damage, lasts %s seconds.", 
+            BLACK_ARROW_THRESHOLD[lvl-1].str(), 
+            BLACK_ARROW_DURATION[lvl-1].str())
+        end) )
+
+    for lvl = 1 to 5
+        aDef
+        ..setTooltipNormalExtended(lvl, formatString("Increases the damage of killing attacks against enemies by %s and spawns a skeleton for %s seconds.", 
+        BLACK_ARROW_THRESHOLD[lvl-1].str(), 
+        BLACK_ARROW_DURATION[lvl-1].str())
+        )
+
+
+constant real array PIERCING_SHOT_DAMAGE = [60, 100, 140, 180, 220]
+constant real PIERCING_SHOT_DAMAGE_BONUS = 80
+
+@compiletime
+function piercingShot()
+    int array MANA = [70, 75, 80, 85, 90]
+    real array COOLDOWN = [9, 9, 9, 9, 9]
+    real array RANGE = [800, 800, 800, 800, 800]
+
+    let aDef = new AbilityDefinitionIllidanChannel(ABILITY_PIERCING_SHOT)
+        ..presetIcon("BTNBlackArrows")
+        ..setupWithHotKey("Piercing Shot", "Q")
+        ..setArtCaster("")
+        ..setArtEffect("")
+        ..setMissileArt("")
+        ..setArtTarget("")
+        ..setAnimationNames("spell,throw")
+        ..setLearnString("Shoots an arrow towards the target direction, dealing damage to enemies it strikes through.", (int lvl) -> (begin
+            return formatString("%s damage.", 
+            PIERCING_SHOT_DAMAGE[lvl-1].str()+PIERCING_SHOT_DAMAGE_BONUS.getBonusString(C_STR))
+        end) )
+
+    for lvl = 1 to 5
+        aDef
+        ..setCooldown(lvl, COOLDOWN[lvl-1])
+        ..setManaCost(lvl, MANA[lvl-1])
+        ..setArtDuration(lvl, 0)
+        ..setOptions(lvl, 1)
+        ..setTargetType(lvl, 2)
+        ..setFollowThroughTime(lvl, 0)
+        ..setDisableOtherAbilities(lvl, false)
+        ..setBaseOrderID(lvl, "channel")
+        ..setCastRange(lvl, RANGE[lvl-1])
+        ..setTooltipNormalExtended(lvl, formatString("Shoots an arrow towards the target direction, dealing %s damage to enemies it strikes through.", 
+        PIERCING_SHOT_DAMAGE[lvl-1].str()+PIERCING_SHOT_DAMAGE_BONUS.getBonusString(C_STR))
+        )
+
+
+constant real array ABILITY_TERROR_DURATION = [2, 2.5, 3, 3.5, 4]
+constant real ABILITY_TERROR_DURATION_BONUS = 1
+real array ABILITY_TERROR_AOE = [400, 500, 600, 700, 800]
+
+constant BUFF_TERROR = new BuffType(false, true)
+
+@compiletime
+function terror()
+    int array MANA = [90, 100, 110, 120, 130]
+    real array COOLDOWN = [16, 16, 16, 16, 16]
+    
+    let aDef = new AbilityDefinitionPitLordHowlofTerror(ABILITY_TERROR)
+        ..setAnimationNames("spell,slam")
+        ..presetIcon("BTNHowlOfTerror")
+        ..setupWithHotKey("Terror", "W")
+        ..setLearnString("Terrifies nearby enemies, making them miss on their attacks.", (int lvl) -> (begin
+            return formatString("%s seconds, %s area of effect.", 
+            ABILITY_TERROR_DURATION[lvl-1].toString()+ABILITY_TERROR_DURATION_BONUS.getBonusString(C_INT),
+            ABILITY_TERROR_AOE[lvl-1].str())
+        end) )
+
+    for lvl = 1 to 5
+        aDef
+        ..setCooldown(lvl, COOLDOWN[lvl-1])
+        ..setManaCost(lvl, MANA[lvl-1])
+        ..setTargetsAllowed(lvl, "none")
+        ..setTooltipNormalExtended(lvl, formatString("Terrifies enemies within %s range, making them miss on their attacks for %s seconds.", 
+        ABILITY_TERROR_AOE[lvl-1].str(), ABILITY_TERROR_DURATION[lvl-1].toString()+ABILITY_TERROR_DURATION_BONUS.getBonusString(C_INT)))
+
+
+
+@compiletime
+function boneBrothers()
+    int array MANA = [80, 80, 80, 80, 80]
+    real array COOLDOWN = [18, 16, 14, 12, 10]
+    real array RANGE = [600, 700, 800, 900, 1000]
+
+    string learnString = "Switches position with one of his skeletons.|n"
+    for lvl = 1 to 5
+        learnString+=getLevelString(lvl)+
+        formatString("%s range, %s seconds cooldown.", RANGE[lvl-1].str(), COOLDOWN[lvl-1].str() )
+
+    let aDef = new AbilityDefinitionFarseerChainLightning(ABILITY_BONE_BROTHERS)
+        ..setAnimationNames("spell")
+        ..presetIcon("BTNSkeletalLongevity")
+        ..setupWithHotKey("Bone Brothers", "E")
+        ..setMissileArt("")
+        ..setArtTarget("")
+        ..setLightningEffects("")
+        ..setTooltipLearnExtended(learnString)
+
+    for lvl = 1 to 5
+        aDef
+        ..setDamageperTarget(lvl, 0)
+        ..setDamageReductionperTarget(lvl, 0)
+        ..setNumberofTargetsHit(lvl, 1)
+        ..setCastRange(lvl, RANGE[lvl-1])
+        ..setCooldown(lvl, COOLDOWN[lvl-1])
+        ..setManaCost(lvl, MANA[lvl-1])
+        ..setTargetsAllowed(lvl, "nonancient,player")
+        ..setTooltipNormalExtended(lvl, "Switches position with one of his skeletons." )
+
+
+
+
+@compiletime
+function deathpact()
+    int array MANA = [150, 160, 170, 180, 190]
+    real array COOLDOWN = [90, 90, 90, 90, 90]
+    
+    let aDef = new AbilityDefinitionRoar(ABILITY_DEATH_PACT)
+        ..setLevels(5)
+        ..setAnimationNames("spell")
+        ..presetIcon("BTNDeathPact")
+        ..setupWithHotKey("Death Pact", "R")
+        ..setLearnString("Terrifies nearby enemies, making them miss on their attacks.", (int lvl) -> (begin
+            return formatString("%s seconds, %s area of effect.", 
+            ABILITY_TERROR_DURATION[lvl-1].toString()+ABILITY_TERROR_DURATION_BONUS.getBonusString(C_INT),
+            ABILITY_TERROR_AOE[lvl-1].str())
+        end) )
+
+    for lvl = 1 to 5
+        aDef
+        ..setCooldown(lvl, COOLDOWN[lvl-1])
+        ..setManaCost(lvl, MANA[lvl-1])
+        ..setTargetsAllowed(lvl, "none")
+        ..setTooltipNormalExtended(lvl, formatString("Terrifies enemies within %s range, making them miss on their attacks for %s seconds.", 
+        ABILITY_TERROR_AOE[lvl-1].str(), ABILITY_TERROR_DURATION[lvl-1].toString()+ABILITY_TERROR_DURATION_BONUS.getBonusString(C_INT)))
+
+
+group skeletons = CreateGroup()
 
 function setupStats()
     heroType
@@ -32,19 +199,22 @@ function setupStats()
 function onAttack()
     let target = OnAttack.getTarget()
     let attacker = OnAttack.getAttacker()
-    let level = attacker.getAbilityLevel('A00N')
+    let level = attacker.getAbilityLevel(ABILITY_BLACK_ARROW)
     if level!=0 and target.isTargetable(attacker.getOwner(), false, true) and target.isVisible(attacker.getOwner())
-        if(target.getHP() - GetEventDamage() <= 20 + 10*level)
-            attacker.dealDamage(target, 21. + 10*level, ReductionType.NONE)
-            createUnit(attacker.getOwner(), 'n00B'+level, target.getPos(), attacker.getPos().angleTo(target.getPos()))
-                ..setTimedLife(20)
+        if(target.getHP() - GetEventDamage() <= BLACK_ARROW_THRESHOLD[level-1])
+            attacker.dealDamage(target, BLACK_ARROW_THRESHOLD[level-1]+1, ReductionType.NONE)
+            doAfter(0.1, () -> (begin
+                let skeleton = createUnit(attacker.getOwner(), 'n00B'+level, target.getPos(), attacker.getPos().angleTo(target.getPos()))
+                ..setTimedLife(BLACK_ARROW_DURATION[level-1])
+                skeletons.addUnit(skeleton)
+            end))
 
 function onSpellCast()
     let spellId = GetSpellAbilityId()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
 
-    if(spellId=='A00O') //Terror
+    if(spellId==ABILITY_TERROR)
         group nearby = CreateGroup()
         nearby.enumUnitsInRange(caster.getPos(), 300.+100*level)
 
@@ -52,13 +222,13 @@ function onSpellCast()
             unit target = FirstOfGroup(nearby)
             nearby.removeUnit(target)
             if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
-                new Buff(target, caster, 1.5 + 0.5*level, MISS, 1)
-                new Buff(target, caster, 1.5 + 0.5*level, TERROR, level)
+                new Buff(target, caster, ABILITY_TERROR_DURATION[level-1].bonus(caster.getInt(), ABILITY_TERROR_DURATION_BONUS) , MISS, 1)
+                new Buff(target, caster, ABILITY_TERROR_DURATION[level-1].bonus(caster.getInt(), ABILITY_TERROR_DURATION_BONUS), BUFF_TERROR, level)
 
         nearby.destr()
 
-    if(spellId=='A00Q') //Piercing Shot
-        new Missile(caster, caster.getPos().withZ(80), 900, caster.getPos().angleTo(vec2(GetSpellTargetX(), GetSpellTargetY())), "Abilities\\Weapons\\BallistaMissile\\BallistaMissile.mdl")
+    if(spellId==ABILITY_PIERCING_SHOT)
+        new Missile(caster, caster.getPos().withZ(80), 1500, caster.getPos().angleTo(vec2(GetSpellTargetX(), GetSpellTargetY())), "Abilities\\Weapons\\BallistaMissile\\BallistaMissile.mdl")
             ..hitOnce()
             ..addHitCondition(() -> (begin
             let missile = Missile.getTriggerMissile()
@@ -68,12 +238,40 @@ function onSpellCast()
             ..addHitFunction(() -> (begin
             let missile = Missile.getTriggerMissile()
             let missileCaster = missile.getOwner()
-            missileCaster.dealDamage(Missile.getMissileTarget(), (missileCaster.getAbilityLevel('A00Q')*50.+50).bonus(missileCaster.getStr(), 200), ReductionType.PHYSICAL)
+            missileCaster.dealDamage(Missile.getMissileTarget(), (PIERCING_SHOT_DAMAGE[missileCaster.getAbilityLevel(ABILITY_PIERCING_SHOT)-1]).bonus(missileCaster.getStr(), PIERCING_SHOT_DAMAGE_BONUS), ReductionType.PHYSICAL)
 
         end) )
             ..setMaxRange(1000)
             ..setSize(10)
 
+    if(spellId==ABILITY_BONE_BROTHERS)
+        let target = GetSpellTargetUnit()
+        let targetPos = target.getPos()
+        let casterPos = caster.getPos()
+        doAfter(0, () -> (begin
+            target.setPos(casterPos)
+            caster.setPos(targetPos)
+            //target might nor be at the exact place, because it was still occupied by caster
+            target.setPos(casterPos)
+        end))
+
+        let lfx = addLightning(LIGHTNING_DRAIN, true, targetPos, casterPos)
+        doAfter(0.5, ()->lfx.destr())
+
+    if(spellId==ABILITY_DEATH_PACT)
+        
+        var skeleton = FirstOfGroup(skeletons)
+        var count = 0
+        while(skeleton!=null)
+            skeletons.removeUnit(skeleton)
+            if(skeleton.isAlive())
+                skeleton.addEffect("Abilities\\Spells\\Undead\\DeathPact\\DeathPactTarget.mdl", "origin").destr()
+                skeleton.kill()
+                count++
+            skeleton = FirstOfGroup(skeletons)
+
+        print(count)
+        //
 
 init
     
@@ -81,8 +279,12 @@ init
     heroType.addOnAttackFunc(function onAttack)
     heroType.addOnSpellCastFunc(function onSpellCast)
 
+    onLeave(() -> (begin
+        skeletons.removeUnit(getEnterLeaveUnit())
+    end))
+
     var abilityList = new LinkedList<int>
     ..add('A00T')
-    TERROR.setup(abilityList, 'B00E')
+    BUFF_TERROR.setup(abilityList, 'B00E')
 
     setupStats()
