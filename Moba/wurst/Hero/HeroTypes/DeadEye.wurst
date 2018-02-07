@@ -16,6 +16,9 @@ import HeroObjectEditing
 import FormatStrings
 import ClosureTimers
 import OnUnitEnterLeave
+import DamageDetection
+import Assets
+import SoundUtils
 
 public constant HERO_DEADEYE = 'H00I'
 HeroType heroType
@@ -25,7 +28,9 @@ constant ABILITY_PIERCING_SHOT = 'AZ1Q'
 constant ABILITY_TERROR = 'AZ1W'
 constant ABILITY_BONE_BROTHERS = 'AZ1E'
 constant ABILITY_DEATH_PACT = 'AZ1R'
+constant ABILITY_DEATH_COIL = 'AZ1S'
 
+constant SOUND_BLACK_ARROW = new SoundDefinition(Sounds.raiseSkeleton1, false, true)
 
 //Balancing and Object Editing
 
@@ -90,7 +95,7 @@ function piercingShot()
 
 
 constant real array ABILITY_TERROR_DURATION = [2, 2.5, 3, 3.5, 4]
-constant real ABILITY_TERROR_DURATION_BONUS = 1
+constant real ABILITY_TERROR_DURATION_BONUS = 4
 real array ABILITY_TERROR_AOE = [400, 500, 600, 700, 800]
 
 constant BUFF_TERROR = new BuffType(false, true)
@@ -152,22 +157,30 @@ function boneBrothers()
         ..setTooltipNormalExtended(lvl, "Switches position with one of his skeletons." )
 
 
+        
+constant real array ABILITY_DEATH_COIL_DMG_BASE = [100, 125, 150, 175, 200]
+constant real array ABILITY_DEATH_COIL_DMG_FACTOR = [20, 30, 40, 50, 60]
+constant real ABILITY_DEATH_COIL_DMG_BASE_BONUS = 200
+constant real ABILITY_DEATH_COIL_DMG_FACTOR_BONUS = 20
+constant real ABILITY_DEATH_COIL_DURATION = 10
 
+constant integer BUFF_ID_ON_DEATH_COIL = compiletime(BUFF_ID_GEN.next())
 
 @compiletime
 function deathpact()
     int array MANA = [150, 160, 170, 180, 190]
     real array COOLDOWN = [90, 90, 90, 90, 90]
+    real array RANGE = [800, 900, 1000, 1100, 1200]
     
     let aDef = new AbilityDefinitionRoar(ABILITY_DEATH_PACT)
         ..setLevels(5)
         ..setAnimationNames("spell")
         ..presetIcon("BTNDeathPact")
         ..setupWithHotKey("Death Pact", "R")
-        ..setLearnString("Terrifies nearby enemies, making them miss on their attacks.", (int lvl) -> (begin
-            return formatString("%s seconds, %s area of effect.", 
-            ABILITY_TERROR_DURATION[lvl-1].toString()+ABILITY_TERROR_DURATION_BONUS.getBonusString(C_INT),
-            ABILITY_TERROR_AOE[lvl-1].str())
+        ..setLearnString("Sacrifices all his skeletons to unlock the power of Death Coil for "+ABILITY_DEATH_COIL_DURATION.str()+" seconds.|nDeath Coil deals massive magic damage at the target enemy hero. Sacrificing more skeletons increases the damage of Death Coil.", (int lvl) -> (begin
+            return formatString("%s base damage, %s damage per sacrificed skeleton.", 
+            ABILITY_DEATH_COIL_DMG_BASE[lvl-1].str()+ABILITY_DEATH_COIL_DMG_BASE_BONUS.getBonusString(C_INT),
+            ABILITY_DEATH_COIL_DMG_FACTOR[lvl-1].str()+ABILITY_DEATH_COIL_DMG_FACTOR_BONUS.getBonusString(C_INT))
         end) )
 
     for lvl = 1 to 5
@@ -175,11 +188,37 @@ function deathpact()
         ..setCooldown(lvl, COOLDOWN[lvl-1])
         ..setManaCost(lvl, MANA[lvl-1])
         ..setTargetsAllowed(lvl, "none")
-        ..setTooltipNormalExtended(lvl, formatString("Terrifies enemies within %s range, making them miss on their attacks for %s seconds.", 
-        ABILITY_TERROR_AOE[lvl-1].str(), ABILITY_TERROR_DURATION[lvl-1].toString()+ABILITY_TERROR_DURATION_BONUS.getBonusString(C_INT)))
+        ..setTooltipNormalExtended(lvl, formatString("Sacrifices all his skeletons to unlock the power of Death Coil for %s seconds.|nDeath Coil deals %s plus %s for every sacrificed skeleton magic damage to the target enemy hero.", 
+        ABILITY_DEATH_COIL_DURATION.str(),
+        ABILITY_DEATH_COIL_DMG_BASE[lvl-1].str()+ABILITY_DEATH_COIL_DMG_BASE_BONUS.getBonusString(C_INT),
+        ABILITY_DEATH_COIL_DMG_FACTOR[lvl-1].str()+ABILITY_DEATH_COIL_DMG_FACTOR_BONUS.getBonusString(C_INT)))
 
+    let aDefDeathCoil = createTargetMissile(ABILITY_DEATH_COIL, BUFF_ID_ON_DEATH_COIL)
+        ..setLevels(5)
+        ..setButtonPositionNormalX(3)
+        ..setButtonPositionNormalY(2)
+        ..setHotkeyNormal("R")
+        ..presetIcon("BTNDeathCoil")
+        ..setHeroAbility(false)
+        ..setMissileArt("Abilities\\Spells\\Undead\\DeathCoil\\DeathCoilMissile.mdl")
+        ..setMissileArc(0)
+        ..setMissileSpeed(1100)
+        ..setArtSpecial("Abilities\\Spells\\Undead\\DeathCoil\\DeathCoilSpecialArt.mdl")
+
+    for lvl = 1 to 5
+        aDefDeathCoil
+        ..setCastRange(lvl, RANGE[lvl-1])
+        ..setManaCost(lvl, 0)
+        ..setCooldown(lvl, COOLDOWN[lvl-1])
+        ..setTargetsAllowed(lvl, "air,enemies,ground,neutral,nonancient,organic")
+        ..setTooltipNormal(lvl, "(R) Learn Death Coil - [|cffffcc00Level "+lvl.toString()+"|r]")
+        ..setTooltipNormalExtended(lvl, formatString("Deals %s magic damage and additional %s magic damage for every sacrificed skeleton to the target enemy hero.", 
+        ABILITY_DEATH_COIL_DMG_BASE[lvl-1].str()+ABILITY_DEATH_COIL_DMG_BASE_BONUS.getBonusString(C_INT),
+        ABILITY_DEATH_COIL_DMG_FACTOR[lvl-1].str()+ABILITY_DEATH_COIL_DMG_FACTOR_BONUS.getBonusString(C_INT)))
+        
 
 group skeletons = CreateGroup()
+int skeletonCount = 0
 
 function setupStats()
     heroType
@@ -195,6 +234,19 @@ function setupStats()
         ..setStat(Stat.WP, 5, 10)
         ..setStat(Stat.INT, 5, 20)
 
+function onDamage()
+    let target = GetTriggerUnit()
+    if(target.hasAbility(BUFF_ID_ON_DEATH_COIL))
+        target.removeAbility(BUFF_ID_ON_DEATH_COIL)
+        let caster = GetEventDamageSource()
+        let level = caster.getAbilityLevel(ABILITY_DEATH_PACT)
+        GetEventDamageSource().dealDamage(target, 
+        ABILITY_DEATH_COIL_DMG_BASE[level-1].bonus(caster.getInt(), ABILITY_DEATH_COIL_DMG_BASE_BONUS)+
+        skeletonCount*ABILITY_DEATH_COIL_DMG_FACTOR[level-1].bonus(caster.getInt(), ABILITY_DEATH_COIL_DMG_FACTOR_BONUS), ReductionType.MAGIC)
+        doAfter(1, () -> (begin
+            caster.removeAbility(ABILITY_DEATH_COIL)
+            caster.getOwner().setAbilityAvailable(ABILITY_DEATH_PACT, true)
+        end))
 
 function onAttack()
     let target = OnAttack.getTarget()
@@ -207,6 +259,7 @@ function onAttack()
                 let skeleton = createUnit(attacker.getOwner(), 'n00B'+level, target.getPos(), attacker.getPos().angleTo(target.getPos()))
                 ..setTimedLife(BLACK_ARROW_DURATION[level-1])
                 skeletons.addUnit(skeleton)
+                SOUND_BLACK_ARROW.playOnPoint(target.getPos3Zero()).snd.setVolume(150)
             end))
 
 function onSpellCast()
@@ -262,6 +315,10 @@ function onSpellCast()
         
         var skeleton = FirstOfGroup(skeletons)
         var count = 0
+        caster.addEffect("Abilities\\Spells\\Undead\\DeathPact\\DeathPactCaster.mdl", "origin").destr()
+        
+
+
         while(skeleton!=null)
             skeletons.removeUnit(skeleton)
             if(skeleton.isAlive())
@@ -269,9 +326,16 @@ function onSpellCast()
                 skeleton.kill()
                 count++
             skeleton = FirstOfGroup(skeletons)
-
-        print(count)
-        //
+        skeletonCount = count
+        doAfter(1, () -> (begin
+            caster.getOwner().setAbilityAvailable(ABILITY_DEATH_PACT, false)
+            caster.addAbility(ABILITY_DEATH_COIL)
+            caster.setAbilityLevel(ABILITY_DEATH_COIL, level)
+        end))
+        doAfter(ABILITY_DEATH_COIL_DURATION+1, () -> (begin
+            caster.removeAbility(ABILITY_DEATH_COIL)
+            caster.getOwner().setAbilityAvailable(ABILITY_DEATH_PACT, true)
+        end))
 
 init
     
@@ -288,3 +352,5 @@ init
     BUFF_TERROR.setup(abilityList, 'B00E')
 
     setupStats()
+
+    addOnDamageFunc( Condition (function onDamage))
