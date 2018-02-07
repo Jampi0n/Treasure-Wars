@@ -1,6 +1,7 @@
 package HeroObjectEditing
 
 import AbilityObjEditing
+import ObjectIds
 
 /*
 You cannot add learnable abilities to hero with code, it must be done with object data.
@@ -47,9 +48,22 @@ public function AbilityDefinition.setLearnString(string intro, LevelString level
 public function createNoEffectAbiltiy(int newId) returns AbilityDefinition
     let aDef = new AbilityDefinition(newId, 'Amgl')
     aDef.setCheckDependencies(false)
-    aDef.setLevels(5)
-    aDef.setHeroAbility(true)
     return aDef
+
+public function createTargetMissile(int newId, int buffId) returns AbilityDefinitionAlchemistAcidBomb
+    let aDef = new AbilityDefinitionAlchemistAcidBomb(newId)
+    for i = 1 to 5
+        aDef.setBuffs(i, int2fourchar(buffId))
+        aDef.setArmorPenalty(i, 0)
+        aDef.setPrimaryDamage(i, 0)
+        aDef.setSecondaryDamage(i, 0)
+        aDef.setDamageInterval(i, 10)
+        aDef.setDurationHero(i, 1)
+        aDef.setDurationNormal(i, 1)
+        aDef.setAreaofEffect(i, 1)
+    return aDef
+
+
 
 public function getLevelString(int level) returns string
     return " |n|cffffcc00Level "+level.toString()+"|r - "
@@ -78,12 +92,13 @@ public function AbilityDefinition.setupWithHotKey(string name, string hotkey)
     this.presetHotkey(hotkey)
     this.setButtonPositionNormalY(2)
     this.setButtonPositionResearchY(0)
+    this.setHeroAbility(true)
     this.setLevels(5)
     this.setRequiredLevel(1)
     this.setName(name)
     this.setTooltipLearn("("+hotkey+")"+" Learn "+name+" - [|cffffcc00Level %d|r]")
     for i = 1 to 5
-        this.setTooltipNormal(i, "("+hotkey+")"+" Learn "+name+" - [|cffffcc00Level "+i.toString()+"|r]")
+        this.setTooltipNormal(i, "("+hotkey+") "+name+" - [|cffffcc00Level "+i.toString()+"|r]")
         
     if(hotkey=="Q")
         this..presetHotkey("Q")

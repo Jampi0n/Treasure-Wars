@@ -314,13 +314,13 @@ public class Buff
             this.onApply.execute()
 
         if(oldBuff!=null)
-            print("stack")
+            //print("stack")
             if(this.onStack!=null)
                 this.onStack.execute()
             oldBuff.update(this.caster, duration)
             destroy this
         else
-            print("first")
+            //print("first")
             BuffList.getBuffList(target).add(this)
             if(this.onFirst!=null)
                 this.onFirst.execute()
