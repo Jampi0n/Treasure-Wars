@@ -6,6 +6,7 @@ import ClosureTimers
 import ObjectIdGenerator
 import ItemObjEditing
 import ObjectIds
+import UnitObjEditing
 
 /*  ==========================================================================================================================
 **
@@ -38,7 +39,7 @@ string array itemName
 **
 **  Item Object Generation
 **
-**  public function newItem(string name, int goldCost, int x, int y, string requiredItems, string icon, string desc) returns int
+**  public function newItem(string name, int goldCost, BuildingDefinition shop, int x, int y, string requiredItems, string icon, string desc) returns int
 **
 **  the return value is a custom id that ranges from 0 to n
 **
@@ -47,9 +48,41 @@ string array itemName
 **
 **  ==========================================================================================================================*/
 
-public constant ITEM_ID_RING = compiletime(newItem("Ring", 100, 0, 0, "", "BTNRingGreen", "+4 armor"))
-public constant ITEM_ID_CLAWS = compiletime(newItem("Claws", 200, 1, 0, "", "BTNClawsOfAttack", "+8 damage"))
-public constant ITEM_ID_HELMET = compiletime(newItem("Helmet", 600, 2, 0, ITEM_ID_RING.toString()+","+ITEM_ID_CLAWS.toString(), "BTNHelmOfValor", "+5 armor, +10 damage" ))
+public constant SHOP_ID_1= UNIT_ID_GEN.next()
+public constant SHOP_1 = compiletime(new Shop(SHOP_ID_1, "SHOP 1", "units\\human\\HeroMountainKing\\HeroMountainKing") castTo int)
+
+public constant ITEM_ID_RING = compiletime(newItem("Ring", 100, SHOP_1, 0, 0, "", "BTNRingGreen", "+4 armor"))
+public constant ITEM_ID_CLAWS = compiletime(newItem("Claws", 200, SHOP_1, 1, 0, "", "BTNClawsOfAttack", "+8 damage"))
+public constant ITEM_ID_HELMET = compiletime(newItem("Helmet", 600, SHOP_1, 2, 0, ITEM_ID_RING.toString()+","+ITEM_ID_CLAWS.toString(), "BTNHelmOfValor", "+5 armor, +10 damage" ))
+
+
+/*  ==========================================================================================================================
+**
+**  function to easily create shops
+**
+**  ==========================================================================================================================*/
+
+class Shop
+    string itemsMade
+    BuildingDefinition bDef
+    construct(int unitId, string name, string model)
+        this.bDef = createShop(unitId, name, model)
+        this.itemsMade = ""
+
+function createShop(int newId, string name, string model) returns BuildingDefinition
+    let bDef = new BuildingDefinition(newId, 'hvlt')
+        ..setPathingMap("PathTextures\\4x4SimpleSolid.tga")
+        ..setNormalAbilities("Avul,Aall,Apit")
+        ..setItemsMade("")
+        ..setModelFile(model)
+        ..setShadowImageCenterX(60)..setShadowImageCenterY(60)
+        ..setShadowImageWidth(150)..setShadowImageHeight(150)
+        ..setShadowTextureBuilding("")
+        ..setGroundTexture("")
+        ..setName(name)
+        ..setSelectionScale(2)
+        ..setScalingValue(1.5)
+    return bDef
 
 /*  ==========================================================================================================================
 **
@@ -76,7 +109,7 @@ function stringToList(string sList, string splitChar) returns LinkedList<int>
 **
 **  Main function to create items.
 **  
-**  public function newItem(string name, int goldCost, int x, int y, string requiredItems, string icon, string desc) returns int
+**  public function newItem(string name, int goldCost, int shop, int x, int y, string requiredItems, string icon, string desc) returns int
 **
 **  Must be used within the compiletime() magic function
 **
@@ -85,7 +118,8 @@ function stringToList(string sList, string splitChar) returns LinkedList<int>
 **
 **  ==========================================================================================================================*/
 
-public function newItem(string name, int goldCost, int x, int y, string requiredItems, string icon, string desc) returns int
+public function newItem(string name, int goldCost, int whichShop, int x, int y, string requiredItems, string icon, string desc) returns int
+    let shop = whichShop castTo Shop
     currentItemId++
     itemId[currentItemId] = ITEM_ID_GEN.next()
     itemName[currentItemId] = name
@@ -129,8 +163,18 @@ public function newItem(string name, int goldCost, int x, int y, string required
             ..setButtonPositionY(y)
         itemGoldCost[currentItemId] = recipeGoldCost
 
+        if(shop.itemsMade!="")
+            shop.itemsMade += ","
+        shop.itemsMade += int2fourchar(itemId[currentItemId])
+        shop.bDef.setItemsMade(shop.itemsMade)
+
         return currentItemId - 1
     else
+        if(shop.itemsMade!="")
+            shop.itemsMade += ","
+        shop.itemsMade += int2fourchar(itemId[currentItemId])
+        shop.bDef.setItemsMade(shop.itemsMade)
+
         return currentItemId
 
 public function newItemDefintion(int itemId, int goldCost) returns ItemDefinition
@@ -176,13 +220,16 @@ function setupStringArrayRequiredItems() returns string
 function setupStringArrayItemId() returns string
     string s = ""
     for int i = 0 to currentItemId
-        s += int2fourchar(itemId[i])+"|"
+        s += int2fourchar(itemId[i])
     return s
 
 function setupStringArrayItemIsRecipe() returns string
     string s = ""
     for int i = 0 to currentItemId
-        s += itemIsRecipe[i] ? "1":"0"
+        if itemIsRecipe[i]
+            s += "1"
+        else
+            s += "0"
     return s
 
 public string stringItemGoldCost = compiletime(setupStringArrayGoldCost())
@@ -227,41 +274,50 @@ function setupArrayGoldCost(string stringArray, string splitChar)
     
     string currentString
     var currentIndex = 0
-    while currentIndex < stringArray.length()
+    var stringPos = 0
+    while stringPos < stringArray.length()
         currentString = ""
-        while stringArray.charAt(currentIndex) != splitChar and currentIndex < stringArray.length()
-            currentString += stringArray.charAt(currentIndex)
-            currentIndex ++
+        while stringArray.charAt(stringPos) != splitChar and stringPos < stringArray.length()
+            currentString += stringArray.charAt(stringPos)
+            stringPos ++
 
-            itemGoldCost[currentIndex] = currentString.toInt()
+        itemGoldCost[currentIndex] = currentString.toInt()
+        stringPos++
         currentIndex++
 
 function setupArrayRequiredItems(string stringArray, string splitChar)
     string currentString
     var currentIndex = 0
-    while currentIndex < stringArray.length()
+    var stringPos = 0
+    while stringPos < stringArray.length()
         currentString = ""
-        while stringArray.charAt(currentIndex) != splitChar and currentIndex < stringArray.length()
-            currentString += stringArray.charAt(currentIndex)
-            currentIndex ++
+        while stringArray.charAt(stringPos) != splitChar and stringPos < stringArray.length()
+            currentString += stringArray.charAt(stringPos)
+            stringPos ++
 
-            itemRequiredItems[currentIndex] = currentString
+        itemRequiredItems[currentIndex] = currentString
+        stringPos++
         currentIndex++
 
 function setupArrayItemId(string stringArray)
     string currentString
     var currentIndex = 0
-    while currentIndex < stringArray.length()
-        let stringPos = currentIndex*4
-        currentString = stringArray.charAt(stringPos)+stringArray.charAt(stringPos+1)+stringArray.charAt(stringPos+1)+stringArray.charAt(stringPos+1)
-        currentIndex++
+    var stringPos = 0
+    while stringPos < stringArray.length()
+        currentString = stringArray.charAt(stringPos)+stringArray.charAt(stringPos+1)+stringArray.charAt(stringPos+2)+stringArray.charAt(stringPos+3)
         itemId[currentIndex] = fourchar2int(currentString)
+
+        stringPos += 4
+        currentIndex++
+        
 
 function setupArrayItemIsRecipe(string stringArray)
     var currentIndex = 0
     while currentIndex < stringArray.length()
-        itemIsRecipe[currentIndex] = stringArray.charAt(currentIndex)=="1" ? true : false
+        itemIsRecipe[currentIndex] = (stringArray.charAt(currentIndex)=="1") ? true : false
         currentIndex++
+
+    currentItemId = stringArray.length()
 
 /*  ==========================================================================================================================
 **
@@ -270,7 +326,7 @@ function setupArrayItemIsRecipe(string stringArray)
 **  ==========================================================================================================================*/
 
 function setupItems()
-    for i = 0 to currentItemId
+    for i = 0 to currentItemId-1
         if itemIsRecipe[i]
             itemType[i] = new Recipe(itemId[i], itemGoldCost[i], itemRequiredItems[i], itemType[i-1])
         else
@@ -287,6 +343,7 @@ class Item
         this.gold = gold
         itemIdToItem.put(itemId, this)
 
+
 class Recipe extends Item
 
     constant requiredItems = new LinkedList<int>()
@@ -301,8 +358,12 @@ class Recipe extends Item
     private static function onItemGet(unit hero, item whichItem)
         let itemId = whichItem.getTypeId()
         let itm = itemIdToItem.get(itemId)
-        if(not itm instanceof Recipe)
+      
+
+        if not (itm instanceof Recipe)
             return
+
+
         let recipe = itm castTo Recipe
 
         let owner = hero.getOwner()
@@ -315,7 +376,7 @@ class Recipe extends Item
                     if(missingItems!="")
                         missingItems += ", "
                     missingItems += GetObjectName(itemType[req].itemId)
-                    
+                  
 
         hero.removeItem(whichItem)
         whichItem.remove()
@@ -336,6 +397,23 @@ class Recipe extends Item
         doAfter(0, () -> onItemGet(hero, whichItem))
 
 
+function createShopBuilding(int unitId, boolean first, int position)
+    rect rectGreen = first ? gg_rct_GreenShops1 : gg_rct_GreenShops2
+    rect rectBrown = first ? gg_rct_BrownShops1 : gg_rct_BrownShops2
+
+    vec2 posGreen = rectGreen.getLeftBot().add(64, 64)
+    vec2 posBrown = rectBrown.getRightTop().add(-64, -64)
+
+    if(first)
+        posGreen.add(0, position*128.)
+        posBrown.add(0, -position*128.)
+    else
+        posGreen.add(position*128., 0)
+        posBrown.add(-position*128., 0)
+
+    createUnit(players[10], unitId, posGreen, angle(270))
+    createUnit(players[11], unitId, posBrown, angle(270))
+
 init
     CreateTrigger()
         ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_PICKUP_ITEM)
@@ -344,14 +422,17 @@ init
     setupArrays()
     setupItems()
 
-    doAfter(1, () -> print("gold cost = "+itemGoldCost[ITEM_ID_HELMET].toString()))
-    doAfter(1, () -> print(stringItemGoldCost))
-    doAfter(1, () -> print(stringItemId))
-    doAfter(1, () -> print(stringItemIsRecipe))
-    doAfter(1, () -> print(stringItemRequiredItems))
+    createShopBuilding(SHOP_ID_1, true, 0)
 
+    /*doAfter(1, () -> print("gold cost = "+itemGoldCost[ITEM_ID_HELMET].toString()))
+    doAfter(1, () -> print("id = "+itemId[ITEM_ID_HELMET].toString()))
+    doAfter(1, () -> print("recipe = "+itemIsRecipe[ITEM_ID_HELMET].toString()))
+    doAfter(1, () -> print("required = "+itemRequiredItems[ITEM_ID_HELMET]))
 
-
+    doAfter(1, () -> print("gold cost = "+itemGoldCost[ITEM_ID_HELMET+1].toString()))
+    doAfter(1, () -> print("id = "+itemId[ITEM_ID_HELMET+1].toString()))
+    doAfter(1, () -> print("recipe = "+itemIsRecipe[ITEM_ID_HELMET+1].toString()))
+    doAfter(1, () -> print("required = "+itemRequiredItems[ITEM_ID_HELMET+1]))*/
 
 /*
 constant string array orderIdStrings = [
