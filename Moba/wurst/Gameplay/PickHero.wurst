@@ -28,16 +28,27 @@ enum PickMode
 ban, reverse pick, same heroes
     */
 
+
+function setupCreatedHero(Hero hero)
+    player owner = hero.toUnit().getOwner()
+    CPlayer cPlayer = owner.getCPlayer()
+    owner.setGold(500)
+
+    if(cPlayer.getTeam()==Team.TEAM1)
+        hero.toUnit().setPos(gg_rct_GreenCastle.getCenter())
+        SetHeroLevel(hero.toUnit(), 25, true)
+    else
+        hero.toUnit().setPos(gg_rct_BrownCastle.getCenter())
+
+
 //creates a random hero for a player
 function createRandomHero(CPlayer cPlayer)
     var random = GetRandomInt(0, remainingHeroTypesCount-1)
 
     Hero hero = new Hero(cPlayer, remainingHeroTypes[random].getUnitId() , gg_rct_CenterMid.getCenter(), angle(0))
+    setupCreatedHero(hero)
 
-    if(cPlayer.getTeam()==Team.TEAM1)
-        hero.toUnit().setPos(gg_rct_GreenCastle.getCenter())
-    else
-        hero.toUnit().setPos(gg_rct_BrownCastle.getCenter())
+
 
     for i = 0 to 11
         if(getCPlayer(i).getPlayerType()==PlayerType.HERO)
@@ -101,14 +112,10 @@ function onPick()
     CPlayer cPlayer = pickedUnit.getOwner().getCPlayer()
     if(cPlayer.getPlayerType()==PlayerType.HERO)
         if(Hero.getHero(cPlayer)==null)
-            print("pick")
             if HeroType.getHeroType(pickedUnit.getTypeId()) != null
                 Hero hero = new Hero(pickedUnit)
-                if(cPlayer.getTeam()==Team.TEAM1)
-                    //hero.toUnit().setPos(gg_rct_GreenCastle.getCenter())
-                    SetHeroLevel(hero.toUnit(), 25, true)
-                else
-                    hero.toUnit().setPos(gg_rct_BrownCastle.getCenter())
+                setupCreatedHero(hero)
+
                 removeHeroType(hero.getHeroType())
 
 function allPickEnd()
