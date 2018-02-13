@@ -64,7 +64,7 @@ public class CPlayer
         var admin = false
         for i = 0 to 9
             player p = players[i]
-            Team t = i<=5?Team.TEAM1:Team.TEAM2
+            Team t = i<=4?Team.TEAM1:Team.TEAM2
             if( p.getSlotState()==PLAYER_SLOT_STATE_PLAYING )
                 new CPlayer(p, t, PlayerType.HERO)
                 if(not admin)

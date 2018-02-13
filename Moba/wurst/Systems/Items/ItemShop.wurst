@@ -1,0 +1,431 @@
+package ItemShop
+
+import LinkedList
+import HashMap
+import ClosureTimers
+import ObjectIdGenerator
+import ItemObjEditing
+import ObjectIds
+
+/*  ==========================================================================================================================
+**
+**  compiletime & runtime globals
+**
+**  ==========================================================================================================================*/
+
+string array itemRequiredItems //needed at runtime needs two seperators
+int array itemGoldCost //needed at runtime 3-4 + 1 seperator
+int array itemId //needed at runtime: 4 (no seperator needed)
+boolean array itemIsRecipe //needed at runtime 1
+
+/*  ==========================================================================================================================
+**
+**  compiletime
+**
+**  ==========================================================================================================================*/
+
+/*  ==========================================================================================================================
+**
+**  globals
+**
+**  ==========================================================================================================================*/
+
+int currentItemId = -1
+ItemDefinition array itemDefinition
+string array itemName
+
+/*  ==========================================================================================================================
+**
+**  Item Object Generation
+**
+**  public function newItem(string name, int goldCost, int x, int y, string requiredItems, string icon, string desc) returns int
+**
+**  the return value is a custom id that ranges from 0 to n
+**
+**  requiredItems is a string of this format: id,id,id
+**  the ids need to be casted to strings
+**
+**  ==========================================================================================================================*/
+
+public constant ITEM_ID_RING = compiletime(newItem("Ring", 100, 0, 0, "", "BTNRingGreen", "+4 armor"))
+public constant ITEM_ID_CLAWS = compiletime(newItem("Claws", 200, 1, 0, "", "BTNClawsOfAttack", "+8 damage"))
+public constant ITEM_ID_HELMET = compiletime(newItem("Helmet", 600, 2, 0, ITEM_ID_RING.toString()+","+ITEM_ID_CLAWS.toString(), "BTNHelmOfValor", "+5 armor, +10 damage" ))
+
+/*  ==========================================================================================================================
+**
+**  conversion functions from formatted strings to a list
+**  you cannot pass arrays as arguments, so array conversion is hardcoded
+**
+**  ==========================================================================================================================*/
+
+function stringToList(string sList, string splitChar) returns LinkedList<int>
+    let returnList = new LinkedList<int>()
+    string currentString
+    var currentIndex = 0
+    while currentIndex < sList.length()
+        currentString = ""
+        while sList.charAt(currentIndex) != splitChar and currentIndex < sList.length()
+            currentString += sList.charAt(currentIndex)
+            currentIndex ++
+
+            returnList.add(currentString.toInt())
+        currentIndex++
+    return returnList
+
+/*  ==========================================================================================================================
+**
+**  Main function to create items.
+**  
+**  public function newItem(string name, int goldCost, int x, int y, string requiredItems, string icon, string desc) returns int
+**
+**  Must be used within the compiletime() magic function
+**
+**  For items that have recipes (requiredItems!="") another item object is created, that is the recipe
+**  Values are automatically created for the recipe based on the original item.
+**
+**  ==========================================================================================================================*/
+
+public function newItem(string name, int goldCost, int x, int y, string requiredItems, string icon, string desc) returns int
+    currentItemId++
+    itemId[currentItemId] = ITEM_ID_GEN.next()
+    itemName[currentItemId] = name
+    itemIsRecipe[currentItemId] = false
+    itemRequiredItems[currentItemId] = ""
+    itemDefinition[currentItemId] = newItemDefintion(itemId[currentItemId], goldCost)
+        ..presetIcon(icon)
+        ..setName(name)
+        ..setTooltipBasic(name)
+        ..setDescription(desc)
+        ..setTooltipExtended(desc)
+        ..setButtonPositionX(x)
+        ..setButtonPositionY(y)
+    itemGoldCost[currentItemId] = goldCost
+
+    if requiredItems!="" //create additional recipe item directly after the main item
+        currentItemId++
+        itemId[currentItemId] = ITEM_ID_GEN.next()
+        itemName[currentItemId] = name
+        itemIsRecipe[currentItemId] = true
+        itemRequiredItems[currentItemId] = requiredItems
+        string recipeDesc = desc
+        
+        int recipeGoldCost = goldCost
+
+        let requiredItemList = stringToList(requiredItems, ",")
+
+        for int i in requiredItemList
+            recipeGoldCost -= itemGoldCost[i]
+            recipeDesc += "|n - "+itemName[i]
+
+        destroy requiredItemList
+
+        itemDefinition[currentItemId] = newItemDefintion(itemId[currentItemId], recipeGoldCost)
+            ..presetIcon(icon)
+            ..setName(name+" - Recipe")
+            ..setTooltipBasic(name+" - Recipe")
+            ..setDescription(desc)
+            ..setTooltipExtended(recipeDesc)
+            ..setButtonPositionX(x)
+            ..setButtonPositionY(y)
+        itemGoldCost[currentItemId] = recipeGoldCost
+
+        return currentItemId - 1
+    else
+        return currentItemId
+
+public function newItemDefintion(int itemId, int goldCost) returns ItemDefinition
+    let iDef = new ItemDefinition(itemId, 'ratc')
+        ..setAbilities("")
+        ..setCooldownGroup("")
+        ..setStockReplenishInterval(1)
+        ..setStockStartDelay(0)
+        ..setStockMaximum(1)
+        ..setLevel(1)
+        ..setGoldCost(goldCost)
+    return iDef
+
+function ItemDefinition.presetIcon(string name)
+    string s = name
+    if name.length() < 20 or not name.startsWith("ReplaceableTextures")
+            s = "ReplaceableTextures\\CommandButtons\\" + s
+    if not name.endsWith(".blp")
+        s += ".blp"
+
+    this.setInterfaceIcon(s)
+
+/*  ==========================================================================================================================
+**
+**  During compiletime certain arrays are used.
+**  To preserve their data for runtime they are converted into a string containing all array members seperated by "|".
+**  This conversion happens here.
+**
+**  ==========================================================================================================================*/
+
+function setupStringArrayGoldCost() returns string
+    string s = ""
+    for int i = 0 to currentItemId
+        s += itemGoldCost[i].toString()+"|"
+    return s
+
+function setupStringArrayRequiredItems() returns string
+    string s = ""
+    for int i = 0 to currentItemId
+        s += itemRequiredItems[i]+"|"
+    return s
+
+function setupStringArrayItemId() returns string
+    string s = ""
+    for int i = 0 to currentItemId
+        s += int2fourchar(itemId[i])+"|"
+    return s
+
+function setupStringArrayItemIsRecipe() returns string
+    string s = ""
+    for int i = 0 to currentItemId
+        s += itemIsRecipe[i] ? "1":"0"
+    return s
+
+public string stringItemGoldCost = compiletime(setupStringArrayGoldCost())
+public string stringItemRequiredItems = compiletime(setupStringArrayRequiredItems())
+public string stringItemId = compiletime(setupStringArrayItemId())
+public string stringItemIsRecipe = compiletime(setupStringArrayItemIsRecipe())
+
+/*  ==========================================================================================================================
+**
+**  runtime
+**
+**  ==========================================================================================================================*/
+
+/*  ==========================================================================================================================
+**
+**  globals
+**
+**  ==========================================================================================================================*/
+
+Item array itemType 
+
+/*  ==========================================================================================================================
+**
+**  During compiletime certain arrays are used.
+**  To preserve their data for runtime they are converted into a string containing all array members seperated by "|".
+**  To use them during runtime, the strings are now converted back to arrays.
+**
+**  ==========================================================================================================================*/
+
+function setupArrays()
+    setupArrayGoldCost(stringItemGoldCost, "|")
+    setupArrayRequiredItems(stringItemRequiredItems,"|")
+    setupArrayItemId(stringItemId)
+    setupArrayItemIsRecipe(stringItemIsRecipe)
+
+    stringItemGoldCost=""
+    stringItemRequiredItems=""
+    stringItemId=""
+    stringItemIsRecipe=""
+
+function setupArrayGoldCost(string stringArray, string splitChar)
+    
+    string currentString
+    var currentIndex = 0
+    while currentIndex < stringArray.length()
+        currentString = ""
+        while stringArray.charAt(currentIndex) != splitChar and currentIndex < stringArray.length()
+            currentString += stringArray.charAt(currentIndex)
+            currentIndex ++
+
+            itemGoldCost[currentIndex] = currentString.toInt()
+        currentIndex++
+
+function setupArrayRequiredItems(string stringArray, string splitChar)
+    string currentString
+    var currentIndex = 0
+    while currentIndex < stringArray.length()
+        currentString = ""
+        while stringArray.charAt(currentIndex) != splitChar and currentIndex < stringArray.length()
+            currentString += stringArray.charAt(currentIndex)
+            currentIndex ++
+
+            itemRequiredItems[currentIndex] = currentString
+        currentIndex++
+
+function setupArrayItemId(string stringArray)
+    string currentString
+    var currentIndex = 0
+    while currentIndex < stringArray.length()
+        let stringPos = currentIndex*4
+        currentString = stringArray.charAt(stringPos)+stringArray.charAt(stringPos+1)+stringArray.charAt(stringPos+1)+stringArray.charAt(stringPos+1)
+        currentIndex++
+        itemId[currentIndex] = fourchar2int(currentString)
+
+function setupArrayItemIsRecipe(string stringArray)
+    var currentIndex = 0
+    while currentIndex < stringArray.length()
+        itemIsRecipe[currentIndex] = stringArray.charAt(currentIndex)=="1" ? true : false
+        currentIndex++
+
+/*  ==========================================================================================================================
+**
+**  Creates the runtime item objects based on the compiletime values.
+**
+**  ==========================================================================================================================*/
+
+function setupItems()
+    for i = 0 to currentItemId
+        if itemIsRecipe[i]
+            itemType[i] = new Recipe(itemId[i], itemGoldCost[i], itemRequiredItems[i], itemType[i-1])
+        else
+            itemType[i] = new Item(itemId[i], itemGoldCost[i])
+
+
+class Item
+    static constant itemIdToItem = new HashMap<int,Item>()
+    constant int itemId
+    constant int gold
+
+    construct(int itemId, int gold)
+        this.itemId = itemId
+        this.gold = gold
+        itemIdToItem.put(itemId, this)
+
+class Recipe extends Item
+
+    constant requiredItems = new LinkedList<int>()
+    
+    constant Item resultItem
+
+    construct(int itemId, int gold, string requiredItems, Item resultItem)
+        super(itemId, gold)
+        this.requiredItems = stringToList(requiredItems, ",")
+        this.resultItem = resultItem
+
+    private static function onItemGet(unit hero, item whichItem)
+        let itemId = whichItem.getTypeId()
+        let itm = itemIdToItem.get(itemId)
+        if(not itm instanceof Recipe)
+            return
+        let recipe = itm castTo Recipe
+
+        let owner = hero.getOwner()
+        var missingItems = ""
+        var hasAll = true
+        if recipe != null
+            for int req in recipe.requiredItems
+                if not UnitHasItemOfTypeBJ(hero, itemType[req].itemId)
+                    hasAll = false
+                    if(missingItems!="")
+                        missingItems += ", "
+                    missingItems += GetObjectName(itemType[req].itemId)
+                    
+
+        hero.removeItem(whichItem)
+        whichItem.remove()
+        if hasAll
+            
+            for int req in recipe.requiredItems
+                GetItemOfTypeFromUnitBJ(hero, itemType[req].itemId).remove()
+            hero.addItem(recipe.resultItem.itemId)
+        else
+            owner.addGold(recipe.gold)
+            printTimedToPlayer("You are missing: "+missingItems, 5, owner)
+            printTimedToPlayer("Item price refunded.", 5, owner)
+
+    
+    protected static function onItemGetTrigger()
+        let hero = GetTriggerUnit()
+        let whichItem = GetManipulatedItem()
+        doAfter(0, () -> onItemGet(hero, whichItem))
+
+
+init
+    CreateTrigger()
+        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_PICKUP_ITEM)
+        ..addAction(function Recipe.onItemGetTrigger)
+
+    setupArrays()
+    setupItems()
+
+    doAfter(1, () -> print("gold cost = "+itemGoldCost[ITEM_ID_HELMET].toString()))
+    doAfter(1, () -> print(stringItemGoldCost))
+    doAfter(1, () -> print(stringItemId))
+    doAfter(1, () -> print(stringItemIsRecipe))
+    doAfter(1, () -> print(stringItemRequiredItems))
+
+
+
+
+/*
+constant string array orderIdStrings = [
+    "summonfactory","summonwareagle","summonquilbeast","summongrizzly",
+    "summonphoenix","waterelemental","spiritwolf", "evileye",
+    "inferno", "raisedead", "stasistrap"
+    ]
+
+integer currentItemId = 0
+
+public abstract class Item
+
+    LinkedList<Item> requirements
+    int itemId
+    string name
+    int gold
+    int x
+    int y
+
+    construct(string name, int gold, int itemId, int x, int y)
+        this.itemId = itemId
+        this.name = name
+        this.gold = gold
+        this.x = x
+        this.y = y
+
+
+public class BasicItem extends Item
+
+    construct(string name, int gold, int itemId, int x, int y)
+        super(name, gold, itemId, x, y)
+        this.requirements = new LinkedList<Item>
+        let aDef = new AbilityDefinitionNeutralSpell('AI00'+currentItemId)
+            ..setGoldCost(1, gold)
+            ..setButtonPositionNormalX(x)
+            ..setButtonPositionNormalY(y)
+            ..setTooltipNormal(1, name)
+            ..setTooltipNormalExtended(1, name+"|n"+gold.toString())
+        currentItemId++
+
+
+public class RequiredItem extends Item
+
+    construct(Item baseItem, int y)
+        super(baseItem.name, baseItem.gold, baseItem.itemId, 0, y)
+        let aDef = new AbilityDefinitionNeutralSpell('AI00'+currentItemId)
+            ..setGoldCost(1, gold)
+            ..setButtonPositionNormalX(x)
+            ..setButtonPositionNormalY(y)
+            ..setTooltipNormal(1, name)
+            ..setTooltipNormalExtended(1, name+"|n"+gold.toString())
+        currentItemId++
+
+public class RecipeItem extends Item
+
+    construct(string name, int gold, int itemId, LinkedList<Item> requirements, int x, int y, int tier)
+        super(name, gold, itemId, x, y)
+        this.requirements = requirements
+        let aDef = new AbilityDefinitionIllidanChannel('AI00'+currentItemId)
+            ..setButtonPositionNormalX(x)
+            ..setButtonPositionNormalY(y)
+            ..setTooltipNormal(1, name)
+            ..setTooltipNormalExtended(1, name+"|n"+gold.toString())
+        currentItemId++
+        if tier == 2
+            new RequiredItem(this, 1)
+            for Item req in requirements
+                new RequiredItem(req, 0)
+        
+        if tier == 3
+            new RequiredItem(this, 2)
+            for Item req in requirements
+                if req instanceof RecipeItem
+                    for Item req2 in req.requirements
+                        new RequiredItem(req2, 1)
+                new RequiredItem(req, 0)
+*/

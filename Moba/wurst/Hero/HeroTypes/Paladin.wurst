@@ -12,17 +12,203 @@ import ClosureTimers
 import SoundUtils
 import Assets
 import AbilityObjEditing
+import HeroObjectEditing
+import FormatStrings
+import ObjectIdGenerator
+import ObjectIds
 
 public constant HERO_PALADIN = 'H000'
 HeroType heroType
 
-constant HOLY_SHIELD = new BuffType(true, true)
-constant BATTLE_ROAR = new BuffType(true, true)
-constant DIVINE_PUNISHMENT = 'A00U'
+constant ABILITY_HEAVY_ARMORED = 'AZ2P'
+constant ABILITY_SHIELD_BASH = 'AZ2Q'
+constant ABILITY_BATTLE_ROAR = 'AZ2W'
+constant ABILITY_HOLY_SHIELD = 'AZ2E'
+constant ABILITY_DIVINE_PUNISHMENT = 'AZ2R'
+
+constant BUFF_HOLY_SHIELD = new BuffType(true, true)
 
 public constant SOUND_SHIELD_BASH = new SoundDefinition(Sounds.metalHeavyBashMetal2, false, true)
 
 public constant SOUND_DIVINE_PUNISHMENT = new SoundDefinition(Sounds.holyBolt, false, true)
+
+//Balancing and Object Editing
+
+constant real array HEAVY_ARMOED_REDUCTION = [4, 6, 8, 10, 12]
+
+@compiletime
+function heavyArmored()
+    let aDef = new AbilityDefinitionHardenedSkin(ABILITY_HEAVY_ARMORED)
+        ..setCheckDependencies(false)
+        ..presetIcon("PASHolyArmor")
+        ..setupWithHotKey("Heavy Armored", "D")
+        ..setLearnString("Reduces damage from incoming attacks.", (int lvl) -> (begin
+            return formatString("%s damage reduction.", 
+            HEAVY_ARMOED_REDUCTION[lvl-1].str())
+        end) )
+
+    for lvl = 1 to 5
+        aDef
+            ..setTooltipNormalExtended(lvl, formatString("Reduces damage from incoming attacks by %s.", 
+            HEAVY_ARMOED_REDUCTION[lvl-1].str())
+            )
+
+constant real array SHIELD_BASH_DMG = [75, 100, 125, 150, 175]
+constant real SHIELD_BASH_DMG_BONUS = 50
+
+constant real array SHIELD_BASH_DURATION = [1, 1.25, 1.5, 1.75, 2]
+constant real SHIELD_BASH_DURATION_BONUS = 1
+
+@compiletime
+function shieldBash()
+    int array MANA = [50, 50, 50, 50, 50]
+    real array COOLDOWN = [6, 6, 6, 6, 6]
+
+    let aDef = new AbilityDefinitionPitLordHowlofTerror(ABILITY_SHIELD_BASH)
+        ..setAnimationNames("spell,throw")
+        ..presetIcon("BTNAbility_Warrior_ShieldBash")
+        ..setupWithHotKey("Shield Bash", "Q")
+        ..setArtCaster("")
+        ..setLearnString("Bashes enemies in front of him with his shield, dealing physical damage and stunning them.", (int lvl) -> (begin
+            return formatString("%s damage, %s seconds stun.", 
+            SHIELD_BASH_DMG[lvl-1].str()+SHIELD_BASH_DMG_BONUS.getBonusString(C_STR),
+            SHIELD_BASH_DURATION[lvl-1].toString()+SHIELD_BASH_DURATION_BONUS.getBonusString(C_STR))
+        end) )
+
+    for lvl = 1 to 5
+        aDef
+            ..setCooldown(lvl, COOLDOWN[lvl-1])
+            ..setManaCost(lvl, MANA[lvl-1])
+            ..setTargetsAllowed(lvl, "none")
+            ..setTooltipNormalExtended(lvl, formatString("Bashes enemies in front of him with his shield, dealing %s physical damage and stunning them for %s seconds.", 
+            SHIELD_BASH_DMG[lvl-1].str()+SHIELD_BASH_DMG_BONUS.getBonusString(C_STR),
+            SHIELD_BASH_DURATION[lvl-1].toString()+SHIELD_BASH_DURATION_BONUS.getBonusString(C_STR)))
+
+constant real array BATTLE_ROAR_AOE = [600, 700, 800, 900, 1000]
+constant real array BATTLE_ROAR_AS = [30, 35, 40, 45, 50]
+constant real array BATTLE_ROAR_MS = [30, 35, 40, 45, 50]
+constant real array BATTLE_ROAR_DURATION = [5, 6, 7, 8, 9]
+constant real BATTLE_ROAR_DURATION_BONUS = 2
+
+constant integer ABILITY_BATTLE_ROAR_EFFECT = compiletime(ABIL_ID_GEN.next())
+
+constant integer BUFF_ID_BATTLE_ROAR = 'B00F'
+
+constant BATTLE_ROAR = new BuffType(true, true)
+
+
+@compiletime
+function battleRoar()
+    int array MANA = [80, 90, 100, 110, 120]
+    real array COOLDOWN = [22, 22, 22, 22, 22]
+
+    let aDef = new AbilityDefinitionRoar(ABILITY_BATTLE_ROAR)
+        ..setAnimationNames("spell")
+        ..presetIcon("BTNBattleRoar")
+        ..setupWithHotKey("Battle Roar", "W")
+        ..setLearnString("Increases nearby units' attack and movement speed.", (int lvl) -> (begin
+            return formatString("%s attack speed, %s movement speed, %s seconds", 
+            BATTLE_ROAR_AS[lvl-1].str(),
+            BATTLE_ROAR_MS[lvl-1].str(),
+            BATTLE_ROAR_DURATION[lvl-1].toString()+BATTLE_ROAR_DURATION_BONUS.getBonusString(C_INT))
+        end) )
+
+    for lvl = 1 to 5
+        aDef
+            ..setCooldown(lvl, COOLDOWN[lvl-1])
+            ..setManaCost(lvl, MANA[lvl-1])
+            ..setTargetsAllowed(lvl, "none")
+            ..setTooltipNormalExtended(lvl, formatString("Increases nearby units' attack speed by %s and movement speed by %s for %s seconds.", 
+            BATTLE_ROAR_AS[lvl-1].str(),
+            BATTLE_ROAR_MS[lvl-1].str(),
+            BATTLE_ROAR_DURATION[lvl-1].str()+BATTLE_ROAR_DURATION_BONUS.getBonusString(C_INT)
+            ))
+
+    let aDefAura = new AbilityDefinitionAuraEnduranceCreep(ABILITY_BATTLE_ROAR_EFFECT)
+        ..setButtonPositionNormalX(0)
+        ..setButtonPositionNormalY(-11)
+        ..setArtTarget("Abilities\\Spells\\NightElf\\BattleRoar\\RoarTarget.mdl")
+        ..setTargetAttachmentPoint("overhead")
+        ..setLevels(5)
+
+    for lvl = 1 to 5
+        aDefAura
+            ..setMovementSpeedIncrease(lvl, BATTLE_ROAR_AS[lvl-1])
+            ..setMovementSpeedIncrease(lvl, BATTLE_ROAR_MS[lvl-1])
+            ..setTargetsAllowed(lvl, "invulnerable,self,vulnerable")
+            ..setAreaofEffect(lvl, 1)
+            ..setBuffs(lvl, int2fourchar(BUFF_ID_BATTLE_ROAR))
+
+constant real array HOLY_SHIELD_DURATION = [4, 5, 6, 7, 8]
+constant real HOLY_SHIELD_DURATION_BONUS = 4
+
+@compiletime
+function holyShield()
+    int array MANA = [80, 90, 100, 110, 120]
+    real array COOLDOWN = [14, 14, 14, 14, 14]
+    real array RANGE = [600, 600, 600, 600, 600]
+
+    let aDef = new AbilityDefinitionIllidanChannel(ABILITY_HOLY_SHIELD)
+        ..setAnimationNames("spell")
+        ..setArtCaster("")
+        ..setArtTarget("")
+        ..setArtEffect("")
+        ..presetIcon("BTNAngelicShield")
+        ..setupWithHotKey("Holy Shield", "E")
+        ..setLearnString("Turns the target frendly hero untargetable.", (int lvl) -> (begin
+            return formatString("%s seconds.", 
+            HOLY_SHIELD_DURATION[lvl-1].toString()+HOLY_SHIELD_DURATION_BONUS.getBonusString(C_INT))
+        end) )
+
+    for lvl = 1 to 5
+        aDef
+            ..setCooldown(lvl, COOLDOWN[lvl-1])
+            ..setManaCost(lvl, MANA[lvl-1])
+            ..setCastRange(lvl, RANGE[lvl-1])
+            ..setArtDuration(lvl, 0)
+            ..setBaseOrderID(lvl, "channel")
+            ..setDisableOtherAbilities(lvl, false)
+            ..setFollowThroughTime(lvl, 0)
+            ..setOptions(lvl, 1)
+            ..setTargetType(lvl, 1)
+            ..setTargetsAllowed(lvl, "friend,nonancient")
+            ..setTooltipNormalExtended(lvl, formatString("Turns the target frendly hero untargetable for %s seconds.", 
+            HOLY_SHIELD_DURATION[lvl-1].str()+HOLY_SHIELD_DURATION_BONUS.getBonusString(C_INT)
+            ))
+
+
+constant real DIVINE_PUNISHMENT_AOE = 600
+constant real array DIVINE_PUNISHMENT_DMG = [250, 300, 350, 400, 450]
+constant real DIVINE_PUNISHMENT_DMG_BONUS = 300
+
+@compiletime
+function divinePunishment()
+    int array MANA = [170, 185, 200, 215, 230]
+    real array COOLDOWN = [90, 90, 90, 90, 90]
+
+
+    let aDef = new AbilityDefinitionKeeperoftheGroveTranquility(ABILITY_DIVINE_PUNISHMENT)
+        ..setAnimationNames("spell,channel")
+        ..presetIcon("BTNHolyBan")
+        ..setupWithHotKey("Divine Punishment", "R")
+        ..setLearnString("Calls upon the power of the gods. After two seconds of channeling nearby enemies will be struck by divine magic.", (int lvl) -> (begin
+            return formatString("%s damage.", 
+            DIVINE_PUNISHMENT_DMG[lvl-1].str()+DIVINE_PUNISHMENT_DMG_BONUS.getBonusString(C_INT))
+        end) )
+
+    for lvl = 1 to 5
+        aDef
+            ..setCooldown(lvl, COOLDOWN[lvl-1])
+            ..setManaCost(lvl, MANA[lvl-1])
+            ..setDurationHero(lvl, 2.1)
+            ..setDurationNormal(lvl, 2.1)
+            ..setEffects(lvl, "X000")
+
+            ..setTargetsAllowed(lvl, "none")
+            ..setTooltipNormalExtended(lvl, formatString("Calls upon the power of the gods. After two seconds of channeling nearby enemies will be struck by divine magic and take %s damage.", 
+            DIVINE_PUNISHMENT_DMG[lvl-1].str()+DIVINE_PUNISHMENT_DMG_BONUS.getBonusString(C_INT)
+            ))
+        
 
 class DivinePunishment
 
@@ -40,7 +226,7 @@ class DivinePunishment
         this.succesful = false
         this.caster = caster
         SOUND_DIVINE_PUNISHMENT.playOnPoint(caster.getPos3Zero()).snd.setVolume(120)
-        this.level = caster.getAbilityLevel(DIVINE_PUNISHMENT)
+        this.level = caster.getAbilityLevel(ABILITY_DIVINE_PUNISHMENT)
         this.dummy = DummyRecycler.get(caster.getPos(), caster.getFacingAngle())
         this.dummy.setFacing(caster.getFacingAngle())
         this.model = this.dummy.addEffect("Abilities\\Spells\\Human\\Resurrect\\ResurrectCaster.mdl", "origin")
@@ -53,7 +239,7 @@ class DivinePunishment
         if this.count == 20
             this.succesful = true
             group nearby = CreateGroup()
-            nearby.enumUnitsInRange(this.caster.getPos(), 600)
+            nearby.enumUnitsInRange(this.caster.getPos(), DIVINE_PUNISHMENT_AOE)
 
             while(not nearby.isEmpty())
                 unit target = FirstOfGroup(nearby)
@@ -62,7 +248,7 @@ class DivinePunishment
                     
                     target.addEffect("Abilities\\Spells\\Human\\Resurrect\\ResurrectTarget.mdl", "origin").destr()
                     doAfter(0.4, () -> (begin
-                        this.caster.dealDamage(target, (200.+75*level).bonus(this.caster.getInt(), 300), ReductionType.MAGIC)
+                        this.caster.dealDamage(target, DIVINE_PUNISHMENT_DMG[level-1].bonus(this.caster.getInt(), DIVINE_PUNISHMENT_DMG_BONUS), ReductionType.MAGIC)
                     end) )
 
             return
@@ -104,7 +290,7 @@ function onSpellCast()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
 
-    if(spellId == 'A00M') //shield bash
+    if(spellId == ABILITY_SHIELD_BASH) //shield bash
         let casterPos = caster.getPos()
         SOUND_SHIELD_BASH.playOnPoint(casterPos.toVec3()).snd.setVolume(150)
         group nearby = CreateGroup()
@@ -114,28 +300,29 @@ function onSpellCast()
             unit target = FirstOfGroup(nearby)
             nearby.removeUnit(target)
             if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
-                caster.dealDamage(target, (25.+25*level).bonus(caster.getStr(), 50), ReductionType.PHYSICAL)
-                new Buff(target, caster, 0.75 + 0.25*level, STUNNED, 1)
+                caster.dealDamage(target, SHIELD_BASH_DMG[level-1].bonus(caster.getStr(), SHIELD_BASH_DMG_BONUS), ReductionType.PHYSICAL)
+                new Buff(target, caster, SHIELD_BASH_DURATION[level-1].bonus(caster.getStr(), SHIELD_BASH_DURATION_BONUS), STUNNED, 1)
 
-    if(spellId=='A00V') //Battle Roar
+    if(spellId==ABILITY_BATTLE_ROAR) //Battle Roar
         group nearby = CreateGroup()
-        nearby.enumUnitsInRange(caster.getPos(), 600.+100*level)
+        nearby.enumUnitsInRange(caster.getPos(), BATTLE_ROAR_AOE[level-1])
 
         while(not nearby.isEmpty())
             unit target = FirstOfGroup(nearby)
             nearby.removeUnit(target)
             if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), true, false)
-                new Buff(target, caster, (6.).bonus(caster.getInt(),6), BATTLE_ROAR, level)
+                new Buff(target, caster, BATTLE_ROAR_DURATION[level-1].bonus(caster.getInt(), BATTLE_ROAR_DURATION_BONUS), BATTLE_ROAR, level)
 
         nearby.destr()
 
-    if(spellId == 'A00R') //holy shield
+    if(spellId == ABILITY_HOLY_SHIELD) //holy shield
         let target = GetSpellTargetUnit()
-        new Buff(target, caster, 1.5 + 0.5*level, UNTARGETABLE, 1)
-        new Buff(target, caster, 1.5 + 0.5*level, HOLY_SHIELD, level)
+        let dur = HOLY_SHIELD_DURATION[level-1].bonus(caster.getInt(), HOLY_SHIELD_DURATION_BONUS)
+        new Buff(target, caster, dur, UNTARGETABLE, 1)
+        new Buff(target, caster, dur, BUFF_HOLY_SHIELD, level)
 
 
-    if(spellId == DIVINE_PUNISHMENT) //divine punishment
+    if(spellId == ABILITY_DIVINE_PUNISHMENT) //divine punishment
         
         new DivinePunishment(caster)
 
@@ -145,15 +332,12 @@ init
     heroType.addOnSpellCastFunc(function onSpellCast)
 
     var abilityList = new LinkedList<int>
-    ..add('A00S')
-    HOLY_SHIELD.setup(abilityList, 'B00D')
+        ..add('A00S')
+    BUFF_HOLY_SHIELD.setup(abilityList, 'B00D')
+    
     abilityList = new LinkedList<int>
-    ..add('A00W')
-    BATTLE_ROAR.setup(abilityList, 'B00F')
+        ..add(ABILITY_BATTLE_ROAR_EFFECT)
+    BATTLE_ROAR.setup(abilityList, BUFF_ID_BATTLE_ROAR)
 
     setupStats()
 
-@compiletime
-function setupAbilities()
-    let aDef = new AbilityDefinition('AAAA','Amgl')
-    aDef.setTooltipLearnExtended("test")
