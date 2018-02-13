@@ -54,10 +54,10 @@ function envenomedBlades()
 
     for lvl = 1 to 5
         aDef
-        ..setTooltipNormalExtended(lvl, formatString("Attacks deal %s poison damage every second for %s seconds.", 
-        ENVENOMED_BLADES_DAMAGE[lvl-1].str()+ENVENOMED_BLADES_DAMAGE_BONUS.getBonusString(C_INT), 
-        ENVENOMED_BLADES_DURATION[lvl-1].str())
-        )
+            ..setTooltipNormalExtended(lvl, formatString("Attacks deal %s poison damage every second for %s seconds.", 
+            ENVENOMED_BLADES_DAMAGE[lvl-1].str()+ENVENOMED_BLADES_DAMAGE_BONUS.getBonusString(C_INT), 
+            ENVENOMED_BLADES_DURATION[lvl-1].str())
+            )
     
 constant real array MISTWALK_DURATION = [4, 5, 6, 7, 8]
 constant real MISTWALK_DURATION_BONUS = 4
@@ -82,12 +82,12 @@ function mistwalk()
 
     for lvl = 1 to 5
         aDef
-        ..setCooldown(lvl, COOLDOWN[lvl-1])
-        ..setManaCost(lvl, MANA[lvl-1])
-        ..setTargetsAllowed(lvl, "none")
-        ..setTooltipNormalExtended(lvl, formatString(
-            "Turns the Python Warriores invisibile for %s seconds.", 
-            MISTWALK_DURATION[lvl-1].toInt().toString()+MISTWALK_DURATION_BONUS.getBonusString(C_INT)))
+            ..setCooldown(lvl, COOLDOWN[lvl-1])
+            ..setManaCost(lvl, MANA[lvl-1])
+            ..setTargetsAllowed(lvl, "none")
+            ..setTooltipNormalExtended(lvl, formatString(
+                "Turns the Python Warriores invisibile for %s seconds.", 
+                MISTWALK_DURATION[lvl-1].toInt().toString()+MISTWALK_DURATION_BONUS.getBonusString(C_INT)))
 
 constant real array POISON_SPIT_SLOW_MS = [-0.3, -0.35, -0.4, -0.45, -0.5]
 constant real array POISON_SPIT_DOT = [10, 15, 20, 25, 30]
@@ -126,29 +126,31 @@ function poisonSpit()
 
     for lvl = 1 to 5
         aDef
-        ..setCooldown(lvl, COOLDOWN[lvl-1])
-        ..setManaCost(lvl, MANA[lvl-1])
-        ..setTargetsAllowed(lvl, "none")
-        ..setTooltipNormalExtended(lvl, formatString("Spits poison at the target area. Enemies within the area of effect are slowed by %s, have their armor reduced by %s and take %s damage per second.|nLasts %s seconds.",
-        (-POISON_SPIT_SLOW_MS[lvl-1]*100).str()+"%", (-POISON_SPIT_ARMOR_REDUCTION[lvl-1]).str(), POISON_SPIT_DOT[lvl-1].str()+POISON_SPIT_DOT_BONUS.getBonusString(C_INT), POISON_SPIT_DURATION[lvl-1].str()))
+            ..setCooldown(lvl, COOLDOWN[lvl-1])
+            ..setManaCost(lvl, MANA[lvl-1])
+            ..setTargetsAllowed(lvl, "none")
+            ..setTooltipNormalExtended(lvl, formatString("Spits poison at the target area. Enemies within the area of effect are slowed by %s, have their armor reduced by %s and take %s damage per second.|nLasts %s seconds.",
+            (-POISON_SPIT_SLOW_MS[lvl-1]*100).str()+"%", (-POISON_SPIT_ARMOR_REDUCTION[lvl-1]).str(), POISON_SPIT_DOT[lvl-1].str()+POISON_SPIT_DOT_BONUS.getBonusString(C_INT), POISON_SPIT_DURATION[lvl-1].str()))
 
     let aDefSlowAura = new AbilityDefinitionAuraSlow(ABILITY_POISON_SPIT_SLOWED)
         ..setLevels(5)
+        ..hideIcon()
         ..setArtTarget("Units\\Undead\\PlagueCloud\\PlagueCloudtarget.mdl")
         ..setTargetAttachmentPoint("chest")
     for lvl = 1 to 5
         aDefSlowAura
-        ..setMovementSpeedFactor(lvl, POISON_SPIT_SLOW_MS[lvl-1])
-        ..setTargetsAllowed(lvl, "invulnerable,self,vulnerable")
-        ..setAreaofEffect(lvl, 1)
-        ..setBuffs(lvl, int2fourchar(BUFF_ID_POISON_SPIT))
+            ..setMovementSpeedFactor(lvl, POISON_SPIT_SLOW_MS[lvl-1])
+            ..setTargetsAllowed(lvl, "invulnerable,self,vulnerable")
+            ..setAreaofEffect(lvl, 1)
+            ..setBuffs(lvl, int2fourchar(BUFF_ID_POISON_SPIT))
 
     let aDefArmorReduction = new AbilityDefinitionDefenseBonusPlus1(ABILITY_POISON_SPIT_ARMOR_REDUCED)
         ..setLevels(5)
+        ..hideIcon()
         ..setItemAbility(false)
     for lvl = 1 to 5
         aDefArmorReduction
-        ..setDefenseBonus(lvl, POISON_SPIT_ARMOR_REDUCTION[lvl-1])
+            ..setDefenseBonus(lvl, POISON_SPIT_ARMOR_REDUCTION[lvl-1])
 
 constant real array EMPOWERED_STRIKE_DAMAGE = [50, 75, 100, 125, 150]
 constant real EMPOWERED_STRIKE_DAMAGE_BONUS = 100
@@ -171,15 +173,15 @@ function empoweredStrike()
 
     for lvl = 1 to 5
         aDef
-        ..setCooldown(lvl, COOLDOWN[lvl-1])
-        ..setManaCost(lvl, MANA[lvl-1])
-        ..setNumberofTargetsHit(lvl, 1)
-        ..setDamageperTarget(lvl, 0)
-        ..setCastRange(lvl, 150)
-        ..setDurationNormal(lvl, 0.1)
-        ..setTargetsAllowed(lvl, "air,enemies,ground,neutral,nonancient,organic")
-        ..setTooltipNormalExtended(lvl, formatString("Strikes the target enemy unit with a powerful melee attack dealing %s physical damage.", 
-        EMPOWERED_STRIKE_DAMAGE[lvl-1].str()+EMPOWERED_STRIKE_DAMAGE_BONUS.getBonusString(C_STR)))
+            ..setCooldown(lvl, COOLDOWN[lvl-1])
+            ..setManaCost(lvl, MANA[lvl-1])
+            ..setNumberofTargetsHit(lvl, 1)
+            ..setDamageperTarget(lvl, 0)
+            ..setCastRange(lvl, 150)
+            ..setDurationNormal(lvl, 0.1)
+            ..setTargetsAllowed(lvl, "air,enemies,ground,neutral,nonancient,organic")
+            ..setTooltipNormalExtended(lvl, formatString("Strikes the target enemy unit with a powerful melee attack dealing %s physical damage.", 
+            EMPOWERED_STRIKE_DAMAGE[lvl-1].str()+EMPOWERED_STRIKE_DAMAGE_BONUS.getBonusString(C_STR)))
 
 
 
