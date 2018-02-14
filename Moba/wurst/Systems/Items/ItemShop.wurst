@@ -6,7 +6,7 @@ import ClosureTimers
 import ObjectIdGenerator
 import ItemObjEditing
 import ObjectIds
-import UnitObjEditing
+import AbilityObjEditing
 
 /*  ==========================================================================================================================
 **
@@ -34,6 +34,74 @@ boolean array itemIsRecipe //needed at runtime 1
 int currentItemId = -1
 ItemDefinition array itemDefinition
 string array itemName
+string array shopDescription
+
+
+/*  ==========================================================================================================================
+**
+**  helper functions for item ability generation
+**
+**  ==========================================================================================================================*/
+
+function addHPBonus(int hitPoints) returns string
+    let aId = ABIL_ID_GEN.next()
+    new AbilityDefinitionMaxLifeBonusLeast(aId)
+        ..setMaxLifeGained(1, hitPoints)
+    return int2fourchar(aId)
+
+function addHRBonus(int hitpointRegen) returns string
+    let aId = ABIL_ID_GEN.next()
+    new AbilityDefinitionRegenLife(aId)
+        ..setHitPointsRegeneratedPerSecond(1, hitpointRegen)
+    return int2fourchar(aId)
+
+function addMPBonus(int manaPoints) returns string
+    let aId = ABIL_ID_GEN.next()
+    new AbilityDefinitionMaxManaBonusLeast(aId)
+        ..setMaxManaGained(1, manaPoints)
+    return int2fourchar(aId)
+
+function addADBonus(int attackDamage) returns string
+    let aId = ABIL_ID_GEN.next()
+    new AbilityDefinitionAttackBonus(aId)
+        ..setAttackBonus(1, attackDamage)
+    return int2fourchar(aId)
+
+function addASBonus(int attackSpeed) returns string
+    let aId = ABIL_ID_GEN.next()
+    new AbilityDefinitionAttackSpeedIncrease(aId)
+        ..setAttackSpeedIncrease(1, attackSpeed/100)
+    return int2fourchar(aId)
+
+function addARBonus(int armor) returns string
+    let aId = ABIL_ID_GEN.next()
+    new AbilityDefinitionDefenseBonusPlus1(aId)
+        ..setDefenseBonus(1, armor)
+    return int2fourchar(aId)
+
+function addMSBonus(int movementSpeed) returns string
+    let aId = ABIL_ID_GEN.next()
+    new AbilityDefinitionMoveSpeedBonus(aId)
+        ..setMovementSpeedBonus(1, movementSpeed)
+    return int2fourchar(aId)
+
+function addSTRBonus(int strength) returns string
+    let aId = ABIL_ID_GEN.next()
+    new AbilityDefinitionStrengthBonusPlus1(aId)
+        ..setStrengthBonus(1, strength)
+    return int2fourchar(aId)
+
+function addWPBonus(int willpower) returns string
+    let aId = ABIL_ID_GEN.next()
+    new AbilityDefinitionAgilityBonusPlus1(aId)
+        ..setAgilityBonus(1, willpower)
+    return int2fourchar(aId)
+
+function addINTBonus(int intelligence) returns string
+    let aId = ABIL_ID_GEN.next()
+    new AbilityDefinitionIntelligenceBonusPlus1(aId)
+        ..setIntelligenceBonus(1, intelligence)
+    return int2fourchar(aId)
 
 /*  ==========================================================================================================================
 **
@@ -48,12 +116,55 @@ string array itemName
 **
 **  ==========================================================================================================================*/
 
-public constant SHOP_ID_1= UNIT_ID_GEN.next()
-public constant SHOP_1 = compiletime(new Shop(SHOP_ID_1, "SHOP 1", "units\\human\\HeroMountainKing\\HeroMountainKing") castTo int)
+public constant SHOP_ID_PHYSICAL_1= UNIT_ID_GEN.next()
+public constant SHOP_PHYSICAL_1 = compiletime(new Shop(SHOP_ID_PHYSICAL_1, "SHOP 1", 1.2,  "units\\human\\HeroPaladin\\HeroPaladin") castTo int)
 
-public constant ITEM_ID_RING = compiletime(newItem("Ring", 100, SHOP_1, 0, 0, "", "BTNRingGreen", "+4 armor"))
-public constant ITEM_ID_CLAWS = compiletime(newItem("Claws", 200, SHOP_1, 1, 0, "", "BTNClawsOfAttack", "+8 damage"))
-public constant ITEM_ID_HELMET = compiletime(newItem("Helmet", 600, SHOP_1, 2, 0, ITEM_ID_RING.toString()+","+ITEM_ID_CLAWS.toString(), "BTNHelmOfValor", "+5 armor, +10 damage" ))
+public constant SHOP_ID_PHYSICAL_2= UNIT_ID_GEN.next()
+public constant SHOP_PHYSICAL_2 = compiletime(new Shop(SHOP_ID_PHYSICAL_2, "SHOP 2", 1.4,  "units\\human\\HeroMountainKing\\HeroMountainKing") castTo int)
+
+public constant SHOP_ID_PHYSICAL_3= UNIT_ID_GEN.next()
+public constant SHOP_PHYSICAL_3 = compiletime(new Shop(SHOP_ID_PHYSICAL_3, "SHOP 3", 1.2, "units\\human\\ArthaswithSword\\ArthaswithSword") castTo int)
+
+
+public constant SHOP_ID_MAGICAL_1= UNIT_ID_GEN.next()
+public constant SHOP_MAGICAL_1 = compiletime(new Shop(SHOP_ID_MAGICAL_1, "SHOP 4", 1.1, "units\\human\\HeroArchMage\\HeroArchMage") castTo int)
+
+public constant SHOP_ID_MAGICAL_2= UNIT_ID_GEN.next()
+public constant SHOP_MAGICAL_2 = compiletime(new Shop(SHOP_ID_MAGICAL_2, "SHOP 5", 1.3, "units\\human\\HeroBloodElf\\HeroBloodElf") castTo int)
+
+public constant SHOP_ID_MAGICAL_3= UNIT_ID_GEN.next()
+public constant SHOP_MAGICAL_3 = compiletime(new Shop(SHOP_ID_MAGICAL_3, "SHOP 6", 1.6, "units\\human\\Jaina\\Jaina") castTo int)
+
+
+constant int itemClawDamageBonus = 8
+
+public constant ITEM_ID_CLAWS = compiletime(newItem("Claws", 200, SHOP_PHYSICAL_1, 1, 0, "", "BTNClawsOfAttack",
+"+{0} damage".format(itemClawDamageBonus.toString())
+))
+@compiletime
+function itemClaws()
+    itemDefinition[ITEM_ID_CLAWS].setAbilities(addSTRBonus(itemClawDamageBonus))
+
+    
+constant int itemRingArmorBonus = 4
+
+public constant ITEM_ID_RING = compiletime(newItem("Ring", 100, SHOP_PHYSICAL_1, 0, 0, "", "BTNRingGreen",
+"+{0} armor".format(itemRingArmorBonus.toString())
+))
+@compiletime
+function itemRing()
+    itemDefinition[ITEM_ID_RING].setAbilities(addARBonus(itemRingArmorBonus))
+
+
+constant int itemHelmetDamageBonus = 10
+constant int itemHelmetArmorBonus = 5
+
+public constant ITEM_ID_HELMET = compiletime(newItem("Helmet", 600, SHOP_PHYSICAL_1, 2, 0, ITEM_ID_RING.toString()+","+ITEM_ID_CLAWS.toString(), "BTNHelmOfValor",
+"+{0} damage|n+{1} armor".format(itemHelmetDamageBonus.toString(), itemHelmetArmorBonus.toString())
+))
+@compiletime
+function itemHelmet()
+    itemDefinition[ITEM_ID_HELMET].setAbilities(addSTRBonus(itemHelmetDamageBonus)+","+addARBonus(itemHelmetArmorBonus))
 
 
 /*  ==========================================================================================================================
@@ -64,12 +175,14 @@ public constant ITEM_ID_HELMET = compiletime(newItem("Helmet", 600, SHOP_1, 2, 0
 
 class Shop
     string itemsMade
+    string name
     BuildingDefinition bDef
-    construct(int unitId, string name, string model)
-        this.bDef = createShop(unitId, name, model)
+    construct(int unitId, string name, real size, string model)
+        this.bDef = createShop(unitId, name, size, model)
         this.itemsMade = ""
+        this.name = name
 
-function createShop(int newId, string name, string model) returns BuildingDefinition
+function createShop(int newId, string name, real size, string model) returns BuildingDefinition
     let bDef = new BuildingDefinition(newId, 'hvlt')
         ..setPathingMap("PathTextures\\4x4SimpleSolid.tga")
         ..setNormalAbilities("Avul,Aall,Apit")
@@ -81,7 +194,7 @@ function createShop(int newId, string name, string model) returns BuildingDefini
         ..setGroundTexture("")
         ..setName(name)
         ..setSelectionScale(2)
-        ..setScalingValue(1.5)
+        ..setScalingValue(size)
     return bDef
 
 /*  ==========================================================================================================================
@@ -123,6 +236,7 @@ public function newItem(string name, int goldCost, int whichShop, int x, int y, 
     currentItemId++
     itemId[currentItemId] = ITEM_ID_GEN.next()
     itemName[currentItemId] = name
+    shopDescription[currentItemId] = shop.name + " ["+(x+1).toString()+","+(y+1).toString()+"]"
     itemIsRecipe[currentItemId] = false
     itemRequiredItems[currentItemId] = ""
     itemDefinition[currentItemId] = newItemDefintion(itemId[currentItemId], goldCost)
@@ -141,7 +255,7 @@ public function newItem(string name, int goldCost, int whichShop, int x, int y, 
         itemName[currentItemId] = name
         itemIsRecipe[currentItemId] = true
         itemRequiredItems[currentItemId] = requiredItems
-        string recipeDesc = desc
+        string recipeDesc = desc + "|n|n|cffffcc00Requires:|r"
         
         int recipeGoldCost = goldCost
 
@@ -149,7 +263,7 @@ public function newItem(string name, int goldCost, int whichShop, int x, int y, 
 
         for int i in requiredItemList
             recipeGoldCost -= itemGoldCost[i]
-            recipeDesc += "|n - "+itemName[i]
+            recipeDesc += "|n - "+itemName[i]+"       ( "+shopDescription[i]+" )"
 
         destroy requiredItemList
 
@@ -405,14 +519,27 @@ function createShopBuilding(int unitId, boolean first, int position)
     vec2 posBrown = rectBrown.getRightTop().add(-64, -64)
 
     if(first)
-        posGreen.add(0, position*128.)
-        posBrown.add(0, -position*128.)
+        posGreen=posGreen.add(0, position*128.)
+        posBrown=posBrown.add(0, -position*128.)
     else
-        posGreen.add(position*128., 0)
-        posBrown.add(-position*128., 0)
+        posGreen=posGreen.add(position*128., 0)
+        posBrown=posBrown.add(-position*128., 0)
 
-    createUnit(players[10], unitId, posGreen, angle(270))
-    createUnit(players[11], unitId, posBrown, angle(270))
+    real facing = 0
+    if(not first)
+        facing = 90
+
+    createUnit(players[10], unitId, posGreen, facing.asAngleDegrees())
+        ..addAbility('A00X')
+
+        
+    if(not first)
+        facing = 270
+    else
+        facing = 180
+
+    createUnit(players[11], unitId, posBrown, facing.asAngleDegrees())
+        ..addAbility('A00X')
 
 init
     CreateTrigger()
@@ -422,7 +549,12 @@ init
     setupArrays()
     setupItems()
 
-    createShopBuilding(SHOP_ID_1, true, 0)
+    createShopBuilding(SHOP_ID_PHYSICAL_1, true, 1)
+    createShopBuilding(SHOP_ID_PHYSICAL_2, true, 3)
+    createShopBuilding(SHOP_ID_PHYSICAL_3, true, 5)
+    createShopBuilding(SHOP_ID_MAGICAL_1, false, 1)
+    createShopBuilding(SHOP_ID_MAGICAL_2, false, 3)
+    createShopBuilding(SHOP_ID_MAGICAL_3, false, 5)
 
     /*doAfter(1, () -> print("gold cost = "+itemGoldCost[ITEM_ID_HELMET].toString()))
     doAfter(1, () -> print("id = "+itemId[ITEM_ID_HELMET].toString()))
