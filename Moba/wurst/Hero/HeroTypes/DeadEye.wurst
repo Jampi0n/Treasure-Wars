@@ -13,7 +13,6 @@ import LinkedList
 import AbilityObjEditing
 import ObjectIdGenerator
 import HeroObjectEditing
-import FormatStrings
 import ClosureTimers
 import OnUnitEnterLeave
 import DamageDetection
@@ -43,14 +42,14 @@ function blackArrow()
         ..presetIcon("PASTheBlackArrow")
         ..setupWithHotKey("Black Arrow", "D")
         ..setLearnString("Increases the damage of killing attacks against enemies and spawns a skeleton.", (int lvl) -> (begin
-            return formatString("%s damage, lasts %s seconds.", 
+            return "{0} damage, lasts {1} seconds.".format(
             BLACK_ARROW_THRESHOLD[lvl-1].str(), 
             BLACK_ARROW_DURATION[lvl-1].str())
         end) )
 
     for lvl = 1 to 5
         aDef
-            ..setTooltipNormalExtended(lvl, formatString("Increases the damage of killing attacks against enemies by %s and spawns a skeleton for %s seconds.", 
+            ..setTooltipNormalExtended(lvl, "Increases the damage of killing attacks against enemies by {0} and spawns a skeleton for {1} seconds.".format( 
             BLACK_ARROW_THRESHOLD[lvl-1].str(), 
             BLACK_ARROW_DURATION[lvl-1].str())
             )
@@ -74,7 +73,7 @@ function piercingShot()
         ..setArtTarget("")
         ..setAnimationNames("spell,throw")
         ..setLearnString("Shoots an arrow towards the target direction, dealing damage to enemies it strikes through.", (int lvl) -> (begin
-            return formatString("%s damage.", 
+            return "{0} damage.".format(
             PIERCING_SHOT_DAMAGE[lvl-1].str()+PIERCING_SHOT_DAMAGE_BONUS.getBonusString(C_STR))
         end) )
 
@@ -89,7 +88,7 @@ function piercingShot()
             ..setDisableOtherAbilities(lvl, false)
             ..setBaseOrderID(lvl, "channel")
             ..setCastRange(lvl, RANGE[lvl-1])
-            ..setTooltipNormalExtended(lvl, formatString("Shoots an arrow towards the target direction, dealing %s damage to enemies it strikes through.", 
+            ..setTooltipNormalExtended(lvl, "Shoots an arrow towards the target direction, dealing {0} damage to enemies it strikes through.".format(
             PIERCING_SHOT_DAMAGE[lvl-1].str()+PIERCING_SHOT_DAMAGE_BONUS.getBonusString(C_STR))
             )
 
@@ -110,7 +109,7 @@ function terror()
         ..presetIcon("BTNHowlOfTerror")
         ..setupWithHotKey("Terror", "W")
         ..setLearnString("Terrifies nearby enemies, making them miss on their attacks.", (int lvl) -> (begin
-            return formatString("%s seconds, %s area of effect.", 
+            return "{0} seconds, {1} area of effect.".format(
             TERROR_DURATION[lvl-1].toString()+TERROR_DURATION_BONUS.getBonusString(C_INT),
             TERROR_AOE[lvl-1].str())
         end) )
@@ -120,7 +119,7 @@ function terror()
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setTargetsAllowed(lvl, "none")
-            ..setTooltipNormalExtended(lvl, formatString("Terrifies enemies within %s range, making them miss on their attacks for %s seconds.", 
+            ..setTooltipNormalExtended(lvl, "Terrifies enemies within {0} range, making them miss on their attacks for {1} seconds.".format(
             TERROR_AOE[lvl-1].str(), TERROR_DURATION[lvl-1].toString()+TERROR_DURATION_BONUS.getBonusString(C_INT)))
 
 
@@ -134,7 +133,7 @@ function boneBrothers()
     string learnString = "Switches position with one of his skeletons.|n"
     for lvl = 1 to 5
         learnString+=getLevelString(lvl)+
-        formatString("%s range, %s seconds cooldown.", RANGE[lvl-1].str(), COOLDOWN[lvl-1].str() )
+        "{0} range, {1} seconds cooldown.".format( RANGE[lvl-1].str(), COOLDOWN[lvl-1].str() )
 
     let aDef = new AbilityDefinitionFarseerChainLightning(ABILITY_BONE_BROTHERS)
         ..setAnimationNames("spell")
@@ -178,7 +177,7 @@ function deathpact()
         ..presetIcon("BTNDeathPact")
         ..setupWithHotKey("Death Pact", "R")
         ..setLearnString("Sacrifices all his skeletons to unlock the power of Death Coil for "+DEATH_COIL_DURATION.str()+" seconds.|nDeath Coil deals massive magic damage at the target enemy hero. Sacrificing more skeletons increases the damage of Death Coil.", (int lvl) -> (begin
-            return formatString("%s base damage, %s damage per sacrificed skeleton.", 
+            return "{0} base damage, {1} damage per sacrificed skeleton.".format(
             DEATH_COIL_DMG_BASE[lvl-1].str()+DEATH_COIL_DMG_BASE_BONUS.getBonusString(C_INT),
             DEATH_COIL_DMG_FACTOR[lvl-1].str()+DEATH_COIL_DMG_FACTOR_BONUS.getBonusString(C_INT))
         end) )
@@ -188,7 +187,7 @@ function deathpact()
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setTargetsAllowed(lvl, "none")
-            ..setTooltipNormalExtended(lvl, formatString("Sacrifices all his skeletons to unlock the power of Death Coil for %s seconds.|nDeath Coil deals %s plus %s for every sacrificed skeleton magic damage to the target enemy hero.", 
+            ..setTooltipNormalExtended(lvl, "Sacrifices all his skeletons to unlock the power of Death Coil for {0} seconds.|nDeath Coil deals {1} plus {2} for every sacrificed skeleton magic damage to the target enemy hero.".format(
             DEATH_COIL_DURATION.str(),
             DEATH_COIL_DMG_BASE[lvl-1].str()+DEATH_COIL_DMG_BASE_BONUS.getBonusString(C_INT),
             DEATH_COIL_DMG_FACTOR[lvl-1].str()+DEATH_COIL_DMG_FACTOR_BONUS.getBonusString(C_INT)))
@@ -212,7 +211,7 @@ function deathpact()
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setTargetsAllowed(lvl, "air,enemies,ground,neutral,nonancient,organic")
             ..setTooltipNormal(lvl, "(R) Learn Death Coil - [|cffffcc00Level "+lvl.toString()+"|r]")
-            ..setTooltipNormalExtended(lvl, formatString("Deals %s magic damage and additional %s magic damage for every sacrificed skeleton to the target enemy hero.", 
+            ..setTooltipNormalExtended(lvl, "Deals {0} magic damage and additional {1} magic damage for every sacrificed skeleton to the target enemy hero.".format(
             DEATH_COIL_DMG_BASE[lvl-1].str()+DEATH_COIL_DMG_BASE_BONUS.getBonusString(C_INT),
             DEATH_COIL_DMG_FACTOR[lvl-1].str()+DEATH_COIL_DMG_FACTOR_BONUS.getBonusString(C_INT)))
         

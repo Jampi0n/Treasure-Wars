@@ -151,6 +151,7 @@ public constant ITEM_ID_RING = compiletime(newItem("Ring", 100, SHOP_PHYSICAL_1,
 @compiletime
 function itemRing()
     let armor = 4
+    itemDefinition[ITEM_ID_RING].setAbilities(addARBonus(armor))
     itemDesc[ITEM_ID_RING] = "+{0} armor".format(armor.toString())
 
 

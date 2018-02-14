@@ -13,7 +13,6 @@ import SoundUtils
 import Assets
 import AbilityObjEditing
 import HeroObjectEditing
-import FormatStrings
 import ObjectIdGenerator
 import ObjectIds
 
@@ -43,13 +42,13 @@ function heavyArmored()
         ..presetIcon("PASHolyArmor")
         ..setupWithHotKey("Heavy Armored", "D")
         ..setLearnString("Reduces damage from incoming attacks.", (int lvl) -> (begin
-            return formatString("%s damage reduction.", 
+            return "{0} damage reduction.".format(
             HEAVY_ARMOED_REDUCTION[lvl-1].str())
         end) )
 
     for lvl = 1 to 5
         aDef
-            ..setTooltipNormalExtended(lvl, formatString("Reduces damage from incoming attacks by %s.", 
+            ..setTooltipNormalExtended(lvl, "Reduces damage from incoming attacks by {0}.".format(
             HEAVY_ARMOED_REDUCTION[lvl-1].str())
             )
 
@@ -70,7 +69,7 @@ function shieldBash()
         ..setupWithHotKey("Shield Bash", "Q")
         ..setArtCaster("")
         ..setLearnString("Bashes enemies in front of him with his shield, dealing physical damage and stunning them.", (int lvl) -> (begin
-            return formatString("%s damage, %s seconds stun.", 
+            return "{0} damage, {1} seconds stun.".format(
             SHIELD_BASH_DMG[lvl-1].str()+SHIELD_BASH_DMG_BONUS.getBonusString(C_STR),
             SHIELD_BASH_DURATION[lvl-1].toString()+SHIELD_BASH_DURATION_BONUS.getBonusString(C_STR))
         end) )
@@ -80,7 +79,7 @@ function shieldBash()
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setTargetsAllowed(lvl, "none")
-            ..setTooltipNormalExtended(lvl, formatString("Bashes enemies in front of him with his shield, dealing %s physical damage and stunning them for %s seconds.", 
+            ..setTooltipNormalExtended(lvl, "Bashes enemies in front of him with his shield, dealing {0} physical damage and stunning them for {1} seconds.".format(
             SHIELD_BASH_DMG[lvl-1].str()+SHIELD_BASH_DMG_BONUS.getBonusString(C_STR),
             SHIELD_BASH_DURATION[lvl-1].toString()+SHIELD_BASH_DURATION_BONUS.getBonusString(C_STR)))
 
@@ -107,7 +106,7 @@ function battleRoar()
         ..presetIcon("BTNBattleRoar")
         ..setupWithHotKey("Battle Roar", "W")
         ..setLearnString("Increases nearby units' attack and movement speed.", (int lvl) -> (begin
-            return formatString("%s attack speed, %s movement speed, %s seconds", 
+            return "{0} attack speed, {1} movement speed, {2} seconds".format(
             BATTLE_ROAR_AS[lvl-1].str(),
             BATTLE_ROAR_MS[lvl-1].str(),
             BATTLE_ROAR_DURATION[lvl-1].toString()+BATTLE_ROAR_DURATION_BONUS.getBonusString(C_INT))
@@ -118,7 +117,7 @@ function battleRoar()
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setTargetsAllowed(lvl, "none")
-            ..setTooltipNormalExtended(lvl, formatString("Increases nearby units' attack speed by %s and movement speed by %s for %s seconds.", 
+            ..setTooltipNormalExtended(lvl, "Increases nearby units' attack speed by {0} and movement speed by {1} for {2} seconds.".format(
             BATTLE_ROAR_AS[lvl-1].str(),
             BATTLE_ROAR_MS[lvl-1].str(),
             BATTLE_ROAR_DURATION[lvl-1].str()+BATTLE_ROAR_DURATION_BONUS.getBonusString(C_INT)
@@ -156,7 +155,7 @@ function holyShield()
         ..presetIcon("BTNAngelicShield")
         ..setupWithHotKey("Holy Shield", "E")
         ..setLearnString("Turns the target frendly hero untargetable.", (int lvl) -> (begin
-            return formatString("%s seconds.", 
+            return "{0} seconds.".format(
             HOLY_SHIELD_DURATION[lvl-1].toString()+HOLY_SHIELD_DURATION_BONUS.getBonusString(C_INT))
         end) )
 
@@ -172,7 +171,7 @@ function holyShield()
             ..setOptions(lvl, 1)
             ..setTargetType(lvl, 1)
             ..setTargetsAllowed(lvl, "friend,nonancient")
-            ..setTooltipNormalExtended(lvl, formatString("Turns the target frendly hero untargetable for %s seconds.", 
+            ..setTooltipNormalExtended(lvl, "Turns the target frendly hero untargetable for {0} seconds.".format(
             HOLY_SHIELD_DURATION[lvl-1].str()+HOLY_SHIELD_DURATION_BONUS.getBonusString(C_INT)
             ))
 
@@ -192,7 +191,7 @@ function divinePunishment()
         ..presetIcon("BTNHolyBan")
         ..setupWithHotKey("Divine Punishment", "R")
         ..setLearnString("Calls upon the power of the gods. After two seconds of channeling nearby enemies will be struck by divine magic.", (int lvl) -> (begin
-            return formatString("%s damage.", 
+            return "{0} damage.".format(
             DIVINE_PUNISHMENT_DMG[lvl-1].str()+DIVINE_PUNISHMENT_DMG_BONUS.getBonusString(C_INT))
         end) )
 
@@ -205,7 +204,7 @@ function divinePunishment()
             ..setEffects(lvl, "X000")
 
             ..setTargetsAllowed(lvl, "none")
-            ..setTooltipNormalExtended(lvl, formatString("Calls upon the power of the gods. After two seconds of channeling nearby enemies will be struck by divine magic and take %s damage.", 
+            ..setTooltipNormalExtended(lvl, "Calls upon the power of the gods. After two seconds of channeling nearby enemies will be struck by divine magic and take {0} damage.".format(
             DIVINE_PUNISHMENT_DMG[lvl-1].str()+DIVINE_PUNISHMENT_DMG_BONUS.getBonusString(C_INT)
             ))
         
