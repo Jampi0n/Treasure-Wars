@@ -36,6 +36,9 @@ ItemDefinition array itemDefinition
 string array itemName
 string array shopDescription
 
+string array itemDesc
+string array itemDescPrefix
+
 
 /*  ==========================================================================================================================
 **
@@ -136,35 +139,28 @@ public constant SHOP_ID_MAGICAL_3= UNIT_ID_GEN.next()
 public constant SHOP_MAGICAL_3 = compiletime(new Shop(SHOP_ID_MAGICAL_3, "SHOP 6", 1.6, "units\\human\\Jaina\\Jaina") castTo int)
 
 
-constant int itemClawDamageBonus = 8
-
-public constant ITEM_ID_CLAWS = compiletime(newItem("Claws", 200, SHOP_PHYSICAL_1, 1, 0, "", "BTNClawsOfAttack",
-"+{0} damage".format(itemClawDamageBonus.toString())
-))
+public constant ITEM_ID_CLAWS = compiletime(newItem("Claws", 200, SHOP_PHYSICAL_1, 1, 0, "", "BTNClawsOfAttack"))
 @compiletime
 function itemClaws()
-    itemDefinition[ITEM_ID_CLAWS].setAbilities(addSTRBonus(itemClawDamageBonus))
+    let str = 8
+    itemDefinition[ITEM_ID_CLAWS].setAbilities(addSTRBonus(str))
+    itemDesc[ITEM_ID_CLAWS] = "+{0} strength".format(str.toString())
 
-    
-constant int itemRingArmorBonus = 4
 
-public constant ITEM_ID_RING = compiletime(newItem("Ring", 100, SHOP_PHYSICAL_1, 0, 0, "", "BTNRingGreen",
-"+{0} armor".format(itemRingArmorBonus.toString())
-))
+public constant ITEM_ID_RING = compiletime(newItem("Ring", 100, SHOP_PHYSICAL_1, 0, 0, "", "BTNRingGreen"))
 @compiletime
 function itemRing()
-    itemDefinition[ITEM_ID_RING].setAbilities(addARBonus(itemRingArmorBonus))
+    let armor = 4
+    itemDesc[ITEM_ID_RING] = "+{0} armor".format(armor.toString())
 
 
-constant int itemHelmetDamageBonus = 10
-constant int itemHelmetArmorBonus = 5
-
-public constant ITEM_ID_HELMET = compiletime(newItem("Helmet", 600, SHOP_PHYSICAL_1, 2, 0, ITEM_ID_RING.toString()+","+ITEM_ID_CLAWS.toString(), "BTNHelmOfValor",
-"+{0} damage|n+{1} armor".format(itemHelmetDamageBonus.toString(), itemHelmetArmorBonus.toString())
-))
+public constant ITEM_ID_HELMET = compiletime(newItem("Helmet", 600, SHOP_PHYSICAL_1, 2, 0, ITEM_ID_RING.toString()+","+ITEM_ID_CLAWS.toString(), "BTNHelmOfValor"))
 @compiletime
 function itemHelmet()
-    itemDefinition[ITEM_ID_HELMET].setAbilities(addSTRBonus(itemHelmetDamageBonus)+","+addARBonus(itemHelmetArmorBonus))
+    let str = 10
+    let armor = 5
+    itemDefinition[ITEM_ID_HELMET].setAbilities(addSTRBonus(str)+","+addARBonus(armor))
+    itemDesc[ITEM_ID_HELMET] = "+{0} strength|n+{1} armor".format(str.toString(), armor.toString())
 
 
 /*  ==========================================================================================================================
@@ -231,7 +227,7 @@ function stringToList(string sList, string splitChar) returns LinkedList<int>
 **
 **  ==========================================================================================================================*/
 
-public function newItem(string name, int goldCost, int whichShop, int x, int y, string requiredItems, string icon, string desc) returns int
+public function newItem(string name, int goldCost, int whichShop, int x, int y, string requiredItems, string icon) returns int
     let shop = whichShop castTo Shop
     currentItemId++
     itemId[currentItemId] = ITEM_ID_GEN.next()
@@ -239,12 +235,16 @@ public function newItem(string name, int goldCost, int whichShop, int x, int y, 
     shopDescription[currentItemId] = shop.name + " ["+(x+1).toString()+","+(y+1).toString()+"]"
     itemIsRecipe[currentItemId] = false
     itemRequiredItems[currentItemId] = ""
+
+    itemDescPrefix[currentItemId] = ""
+    itemDesc[currentItemId] = ""
+
     itemDefinition[currentItemId] = newItemDefintion(itemId[currentItemId], goldCost)
         ..presetIcon(icon)
         ..setName(name)
         ..setTooltipBasic(name)
-        ..setDescription(desc)
-        ..setTooltipExtended(desc)
+        //..setDescription(desc)
+        //..setTooltipExtended(desc)
         ..setButtonPositionX(x)
         ..setButtonPositionY(y)
     itemGoldCost[currentItemId] = goldCost
@@ -255,7 +255,7 @@ public function newItem(string name, int goldCost, int whichShop, int x, int y, 
         itemName[currentItemId] = name
         itemIsRecipe[currentItemId] = true
         itemRequiredItems[currentItemId] = requiredItems
-        string recipeDesc = desc + "|n|n|cffffcc00Requires:|r"
+        string recipeDesc = "|n|n|cffffcc00Requires:|r"
         
         int recipeGoldCost = goldCost
 
@@ -267,12 +267,15 @@ public function newItem(string name, int goldCost, int whichShop, int x, int y, 
 
         destroy requiredItemList
 
+        itemDescPrefix[currentItemId] = recipeDesc
+        itemDesc[currentItemId] = ""
+
         itemDefinition[currentItemId] = newItemDefintion(itemId[currentItemId], recipeGoldCost)
             ..presetIcon(icon)
             ..setName(name+" - Recipe")
             ..setTooltipBasic(name+" - Recipe")
-            ..setDescription(desc)
-            ..setTooltipExtended(recipeDesc)
+            //..setDescription(desc)
+            //..setTooltipExtended(recipeDesc)
             ..setButtonPositionX(x)
             ..setButtonPositionY(y)
         itemGoldCost[currentItemId] = recipeGoldCost
@@ -351,6 +354,15 @@ public string stringItemRequiredItems = compiletime(setupStringArrayRequiredItem
 public string stringItemId = compiletime(setupStringArrayItemId())
 public string stringItemIsRecipe = compiletime(setupStringArrayItemIsRecipe())
 
+@compiletime
+function createItemDescritptions()
+    for i = 0 to currentItemId
+        if itemIsRecipe[i]
+            itemDefinition[i].setDescription(itemDesc[i-1]+itemDescPrefix[i])
+            itemDefinition[i].setTooltipExtended(itemDesc[i-1]+itemDescPrefix[i])
+        else
+            itemDefinition[i].setDescription(itemDesc[i])
+            itemDefinition[i].setTooltipExtended(itemDesc[i])
 /*  ==========================================================================================================================
 **
 **  runtime
@@ -431,7 +443,7 @@ function setupArrayItemIsRecipe(string stringArray)
         itemIsRecipe[currentIndex] = (stringArray.charAt(currentIndex)=="1") ? true : false
         currentIndex++
 
-    currentItemId = stringArray.length()
+    currentItemId = stringArray.length()-1
 
 /*  ==========================================================================================================================
 **
@@ -440,7 +452,7 @@ function setupArrayItemIsRecipe(string stringArray)
 **  ==========================================================================================================================*/
 
 function setupItems()
-    for i = 0 to currentItemId-1
+    for i = 0 to currentItemId
         if itemIsRecipe[i]
             itemType[i] = new Recipe(itemId[i], itemGoldCost[i], itemRequiredItems[i], itemType[i-1])
         else
