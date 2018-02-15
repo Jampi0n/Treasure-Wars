@@ -11,27 +11,29 @@ import ClosureTimers
 * Two paths are used per lane to control lane minion movement.
 */
 
-public constant GREEN_TOP = new Path()
-public constant GREEN_MID = new Path()
-public constant GREEN_BOT = new Path()
+public constant GREEN_TOP = new Path(gg_rct_CornerTop.getCenter())
+public constant GREEN_MID = new Path(gg_rct_CenterMid.getCenter())
+public constant GREEN_BOT = new Path(gg_rct_CornerBot.getCenter())
 
-public constant BROWN_TOP = new Path()
-public constant BROWN_MID = new Path()
-public constant BROWN_BOT = new Path()
+public constant BROWN_TOP = new Path(gg_rct_CornerTop.getCenter())
+public constant BROWN_MID = new Path(gg_rct_CenterMid.getCenter())
+public constant BROWN_BOT = new Path(gg_rct_CornerBot.getCenter())
 
 public class Path
 
     Table pathTable
     int pathCount
+    vec2 startTargetPos
 
-    construct()
+    construct(vec2 startTargetPos)
         this.pathTable = new Table()
         this.pathTable.saveInt(0, 0)
         this.pathCount = 0
+        this.startTargetPos = startTargetPos
 
     //adds a new point(x,y) to a path
     function addPoint(vec2 pos)
-        //createUnit(players[0], 'h00G', pos, angle(0))
+        createUnit(players[0], 'h00G', pos, angle(0))
         this.pathTable.saveReal( this.pathCount * 2, pos.x)
         this.pathTable.saveReal( this.pathCount * 2 + 1, pos.y)
         this.pathCount++
@@ -44,6 +46,9 @@ public class Path
 
     function getSubPathY(int index) returns real
         return this.pathTable.loadReal( index * 2 + 1 )
+
+    function getStartTargetPos() returns vec2
+        return startTargetPos
 
 class Point
     vec2 point

@@ -25,14 +25,33 @@ public class PathUnit
 
     static function classInit()
         periodicTimer.startPeriodic(0.05, function updateMovementStatic)
-        doPeriodically(0.05, (CallbackPeriodic cb) -> (begin
-            //print("["+instances.toString()+"]orders: "+moveOrders.toString())
+        doPeriodically(1, (CallbackPeriodic cb) -> (begin
+            print("["+instances.toString()+"]orders: "+moveOrders.toString())
             operations = 0
             moveOrders = 0
         end))
         onUnitDeindex(function onRemove)
         onAttackTrigger.registerAnyUnitEvent(EVENT_PLAYER_UNIT_ATTACKED)
         onAttackTrigger.addAction(function onAttackStatic)
+
+        region brownBase = CreateRegion()
+            ..addRect(gg_rct_BrownBase)
+        region greenBase = CreateRegion()
+            ..addRect(gg_rct_GreenBase) 
+
+        CreateTrigger()
+            ..registerEnterRegion(brownBase, null)
+            ..addAction(function onBaseEnterBrown)
+        CreateTrigger()
+            ..registerLeaveRegion(brownBase, null)
+            ..addAction(function onBaseLeaveBrown)
+
+        CreateTrigger()
+            ..registerEnterRegion(greenBase, null)
+            ..addAction(function onBaseEnterGreen)
+        CreateTrigger()
+            ..registerLeaveRegion(greenBase, null)
+            ..addAction(function onBaseLeaveGreen)
 
 
     //prepares a unit to be able to use paths
@@ -63,6 +82,11 @@ public class PathUnit
     function setPath(Path p)
         this.currentPath = p
 
+    function setPathFirst(Path p)
+        this.currentPath = p
+        this.assocUnit.issuePointOrder("attack", p.getStartTargetPos())
+        this.nextUpdate = gameTime + 15
+        
     function getNextUpdate() returns real
         return GetRandomReal(1.1, 1.6)
 
@@ -99,6 +123,8 @@ public class PathUnit
         real minDistance = -1
         int newSubPath = -1
         int moveSubPath
+
+
         //print(this.currentPath.getSubPathCount()-2)
         for i=this.currentSubPath to this.currentPath.getSubPathCount()-2
 
@@ -107,13 +133,13 @@ public class PathUnit
             v2 = vec2(this.currentPath.getSubPathX(i+1), this.currentPath.getSubPathY(i+1))
             //print("v2="+v2.toString())
             real distance = v0.distanceToSegmentSq(v1, v2).pow(0.5)
-            //print("distance="+distance.toString())
+            //print("["+i.toString()+"] distance="+distance.toString())
             //print("minDistance="+minDistance.toString())
             if(distance <= minDistance+200 or minDistance==-1)
                 minDistance = distance
                 newSubPath = i
             //if a subpath is far away, there won't come any close subpathes anymore
-            if(distance>2000 or minDistance<100)
+            if distance>3000 or minDistance<100
                 break
         int newOrder
         //string currentOrder =  OrderId2String(this.assocUnit.getCurrentOrder())
@@ -129,6 +155,8 @@ public class PathUnit
             moveSubPath = newSubPath+1
 
         v2 = vec2(this.currentPath.getSubPathX(moveSubPath), this.currentPath.getSubPathY(moveSubPath))
+
+        //addEffect("Abilities\\Weapons\\FarseerMissile\\FarseerMissile.mdl", v2)
 
         //print("path: "+this.currentSubPath.toString()+" -> "+newSubPath.toString()+" -> "+moveSubPath.toString())
 
@@ -157,9 +185,13 @@ public class PathUnit
             nearby.removeUnit(n)
             if(unitToPathUnit.has(n))
                 PathUnit nearbyPathUnit = unitToPathUnit.get(n)
+
                 if(nearbyPathUnit.currentPath == this.currentPath and (nearbyPathUnit.nextUpdate<gameTime or nearbyPathUnit == this) )
-                    if(newOrder==1)
+                    
+
+                    if newOrder==1
                         n.issuePointOrder("move", v2)
+                        //print("move back?")
                         moveOrders++
                         nearbyPathUnit.nextUpdate = gameTime + this.getNextUpdate()
                     else
@@ -236,8 +268,56 @@ public class PathUnit
         gameTime = getElapsedGameTime()
         ForGroup(pathUnits, function updateMovementGroup)
 
-            
-            
+    
+    
+    function onBaseLeave()
+        this.nextUpdate = 0
+
+    function onBaseEnter()
+        this.nextUpdate = gameTime + 1000
+        if this.assocUnit.getOwner() == players[10]
+            this.assocUnit.issuePointOrder("attack", gg_rct_BrownCastle.getRightTop())
+        else
+            this.assocUnit.issuePointOrder("attack", gg_rct_GreenCastle.getLeftBot())
+
+    //A path unit enters the enemy base
+    static function onBaseEnterGreen()
+        let u = GetTriggerUnit()
+        if u.getOwner() == players[11]
+            let pathUnit = unitToPathUnit.get(u)
+            if pathUnit != null
+                pathUnit.onBaseEnter()
+                //print("onBaseEnterGreen")
+
+    static function onBaseEnterBrown()
+        let u = GetTriggerUnit()
+        if u.getOwner() == players[10]
+            let pathUnit = unitToPathUnit.get(u)
+            if pathUnit != null
+                pathUnit.onBaseEnter()
+                //print("onBaseEnterBrown")
+
+    //A path unit leaves its own base
+
+    static function onBaseLeaveGreen()
+        let u = GetTriggerUnit()
+        if u.getOwner() == players[10]
+            let pathUnit = unitToPathUnit.get(u)
+            if pathUnit != null
+                pathUnit.onBaseLeave()
+                //print("onBaseLeaveGreen")
+
+
+    static function onBaseLeaveBrown()
+        let u = GetTriggerUnit()
+        if u.getOwner() == players[11]
+            let pathUnit = unitToPathUnit.get(u)
+            if pathUnit != null
+                pathUnit.onBaseLeave()
+                //print("onBaseLeaveBrown")
+
+
+
 
         
 init

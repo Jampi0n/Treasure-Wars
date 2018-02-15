@@ -1,0 +1,128 @@
+package Buildings
+
+import StandardTextTags
+import PlayerControl
+import ClosureTimers
+
+constant integer ALTAR = 'h002'
+constant integer ARCANE_SANCTUM = 'h008'
+constant integer ARCANE_VAULT = 'h005'
+constant integer BARRACKS = 'h003'
+constant integer BASE_TOWER = 'h009'
+constant integer BLACKSMITH = 'h004'
+constant integer CASTLE = 'h001'
+constant integer FARM = 'h007'
+constant integer GATE_TOWER = 'h006'
+constant integer HERO_TOWER = 'h000'
+constant integer WORKSHOP = 'h00A'
+
+public boolean array greenBarracksAlive = [true, true, true]
+public boolean array brownBarracksAlive = [true, true, true]
+
+public boolean array greenWorkshopAlive = [true, true]
+public boolean array brownWorkshopAlive = [true, true]
+
+constant real BARRACKS_REBUILD_TIME = 180
+
+int birth = 0
+
+function onBuildingDeath()
+    let building = GetTriggerUnit()
+    if not building.isType(UNIT_TYPE_STRUCTURE)
+        return
+
+    let unitId = building.getTypeId()
+    let killer = GetKillingUnit().getOwner()
+
+    int bounty = 0
+    int globalBounty = 0
+
+    if unitId == FARM
+        bounty = 100
+        globalBounty = 100
+
+    else if unitId == GATE_TOWER
+        bounty = 100
+        globalBounty = 100
+
+    else if unitId == BASE_TOWER
+        bounty = 150
+        globalBounty = 150
+
+    else if unitId == BARRACKS
+        bounty = 250
+        globalBounty = 1000
+
+        let newBuilding = createUnit(building.getOwner(), unitId, building.getPos(), (270).fromDeg())
+            ..setAnimation("birth")
+            ..setTimeScale(60/BARRACKS_REBUILD_TIME)
+        UnitAddType(newBuilding, UNIT_TYPE_ANCIENT)
+        
+
+        for i=0 to 2
+            
+            if(building==udg_GreenBarracks[i])
+                udg_GreenBarracks[i] = newBuilding
+                greenBarracksAlive[i] = false
+                /*doPeriodically(1, (CallbackPeriodic cb) -> (begin
+                    birth++
+                    print(birth)
+                end) )*/
+                doAfter(BARRACKS_REBUILD_TIME, () -> (begin
+                    newBuilding
+                        ..setAnimation("stand")
+                        ..setTimeScale(1)
+                    greenBarracksAlive[i] = true
+                    UnitRemoveType(newBuilding, UNIT_TYPE_ANCIENT)
+                end))
+            else if(building==udg_BrownBarracks[i])
+                udg_BrownBarracks[i] = newBuilding
+                brownBarracksAlive[i] = false
+                doAfter(BARRACKS_REBUILD_TIME, () -> (begin
+                    newBuilding
+                        ..setAnimation("stand")
+                        ..setTimeScale(1)
+                    brownBarracksAlive[i] = true
+                    UnitRemoveType(newBuilding, UNIT_TYPE_ANCIENT)
+                end))
+
+    else if unitId == WORKSHOP
+        bounty = 250
+        globalBounty = 500
+
+        for i=0 to 1
+            if(building==udg_GreenWorkShop[i])
+                greenWorkshopAlive[i] = false
+            else if(building==udg_BrownWorkShop[i])
+                brownWorkshopAlive[i] = false
+
+
+    else if unitId == ARCANE_VAULT
+        bounty = 200
+        globalBounty = 200
+
+    else if unitId == BLACKSMITH
+        bounty = 250
+        globalBounty = 250
+
+    else if unitId == CASTLE
+        bounty = 1000
+        globalBounty = 1000
+        
+    if bounty + globalBounty > 0
+        killer.addGold(bounty + globalBounty)
+        createGoldBountyTextTag(building, bounty + globalBounty, killer)
+
+        let team = killer.getCPlayer().getTeam()
+        for p = 0 to 9
+            if getCPlayer(p).getTeam() == team and players[p]!=killer
+                players[p].addGold(globalBounty)
+                createGoldBountyTextTag(building, globalBounty, players[p])
+
+
+
+init
+    CreateTrigger()
+        ..addAction(function onBuildingDeath)
+        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
+

@@ -1,8 +1,11 @@
 package WaveUnits
 
-public constant FOOTMAN = 'h00C'
-public constant RIFLEMAN = 'h00B'
-public constant KNIGHT = 'h00D'
-public constant MORTAR_TEAM = 'h00E'
-public constant MILITIA = 'h00F'
+import UnitType
+
+public constant FOOTMAN = createUnitType('h00C', 15)
+public constant RIFLEMAN = createUnitType('h00B', 20)
+public constant KNIGHT = createUnitType('h00D', 40)
+public constant MORTAR_TEAM = createUnitType('h00E', 30)
+public constant MILITIA = createUnitType('h00F', 10)
+
 

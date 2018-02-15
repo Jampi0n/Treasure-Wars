@@ -3,50 +3,115 @@ import ClosureTimers
 import WaveUnits
 import PathUnit
 import Path
+import LinkedList
+import Buildings
+
+constant topUnits = new LinkedList<int>()
+constant midUnits = new LinkedList<int>()
+constant botUnits = new LinkedList<int>()
+
+function setupSpawnUnits()
+    topUnits.add(FOOTMAN)
+    topUnits.add(FOOTMAN)
+    topUnits.add(FOOTMAN)
+    topUnits.add(FOOTMAN)
+    topUnits.add(RIFLEMAN)
+    topUnits.add(RIFLEMAN)
+
+    midUnits.add(FOOTMAN)
+    midUnits.add(FOOTMAN)
+    midUnits.add(FOOTMAN)
+    midUnits.add(KNIGHT)
+    midUnits.add(KNIGHT)
+    midUnits.add(RIFLEMAN)
+    midUnits.add(RIFLEMAN)
+    midUnits.add(RIFLEMAN)
+
+    botUnits.add(FOOTMAN)
+    botUnits.add(FOOTMAN)
+    botUnits.add(FOOTMAN)
+    botUnits.add(FOOTMAN)
+    botUnits.add(RIFLEMAN)
+    botUnits.add(RIFLEMAN)
 
 function spawnWave()
-    unit spawnedUnit
-    PathUnit pathUnit
-    for i = 0 to 5
-        spawnedUnit = createUnit(players[10], FOOTMAN, gg_rct_GreenSpawnTop.getCenter(), angle(45))
-        pathUnit = new PathUnit(spawnedUnit)
-        pathUnit.setPath(GREEN_TOP)
-        
-        spawnedUnit = createUnit(players[10], FOOTMAN, gg_rct_GreenSpawnMid.getCenter(), angle(45))
-        pathUnit = new PathUnit(spawnedUnit)
-        pathUnit.setPath(GREEN_MID)
+    int counter
 
-        spawnedUnit = createUnit(players[10], FOOTMAN, gg_rct_GreenSpawnBot.getCenter(), angle(45))
-        pathUnit = new PathUnit(spawnedUnit)
-        pathUnit.setPath(GREEN_BOT)
+    counter = 0
+    for int unitId in topUnits
+        doAfter(counter*0.25, () -> (begin
+            
+            unit spawnedUnit
+            PathUnit pathUnit
+            if greenBarracksAlive[0]
+                spawnedUnit = createUnit(players[10], unitId, gg_rct_GreenSpawnTop.getCenter(), angle(45))
+                pathUnit = new PathUnit(spawnedUnit)
+                pathUnit.setPathFirst(GREEN_TOP)
+            if brownBarracksAlive[0]
+                spawnedUnit = createUnit(players[11], unitId, gg_rct_BrownSpawnTop.getCenter(), angle(135))
+                pathUnit = new PathUnit(spawnedUnit)
+                pathUnit.setPathFirst(BROWN_TOP)
+        end))
+        counter++
 
+    counter = 0
+    for int unitId in midUnits
+        doAfter(counter*0.25, () -> (begin
+            unit spawnedUnit
+            PathUnit pathUnit
+            if greenBarracksAlive[1]
+                spawnedUnit = createUnit(players[10], unitId, gg_rct_GreenSpawnMid.getCenter(), angle(45))
+                pathUnit = new PathUnit(spawnedUnit)
+                pathUnit.setPathFirst(GREEN_MID)
+            if brownBarracksAlive[1]
+                spawnedUnit = createUnit(players[11], unitId, gg_rct_BrownSpawnMid.getCenter(), angle(135))
+                pathUnit = new PathUnit(spawnedUnit)
+                pathUnit.setPathFirst(BROWN_MID)
+        end))
+        counter++
 
-        spawnedUnit = createUnit(players[11], FOOTMAN, gg_rct_BrownSpawnTop.getCenter(), angle(45))
-        pathUnit = new PathUnit(spawnedUnit)
-        pathUnit.setPath(BROWN_TOP)
+    counter = 0
+    for int unitId in botUnits
+        doAfter(counter*0.25, () -> (begin
+            unit spawnedUnit
+            PathUnit pathUnit
+            if greenBarracksAlive[2]
+                spawnedUnit = createUnit(players[10], unitId, gg_rct_GreenSpawnBot.getCenter(), angle(45))
+                pathUnit = new PathUnit(spawnedUnit)
+                pathUnit.setPathFirst(GREEN_BOT)
+            if brownBarracksAlive[2]
+                spawnedUnit = createUnit(players[11], unitId, gg_rct_BrownSpawnBot.getCenter(), angle(135))
+                pathUnit = new PathUnit(spawnedUnit)
+                pathUnit.setPathFirst(BROWN_BOT)
+        end))
+        counter++
 
-        spawnedUnit = createUnit(players[11], FOOTMAN, gg_rct_BrownSpawnMid.getCenter(), angle(45))
-        pathUnit = new PathUnit(spawnedUnit)
-        pathUnit.setPath(BROWN_MID)
+    doAfter(6, () -> (begin
+        unit spawnedUnit
+        PathUnit pathUnit
+        if greenWorkshopAlive[0]
+            spawnedUnit = createUnit(players[10], MORTAR_TEAM, gg_rct_GreenWorkShopTop.getCenter(), angle(45))
+            pathUnit = new PathUnit(spawnedUnit)
+            pathUnit.setPathFirst(GREEN_TOP)
+        if greenWorkshopAlive[1]
+            spawnedUnit = createUnit(players[10], MORTAR_TEAM, gg_rct_GreenWorkShopBot.getCenter(), angle(45))
+            pathUnit = new PathUnit(spawnedUnit)
+            pathUnit.setPathFirst(GREEN_BOT)
 
-        spawnedUnit = createUnit(players[11], FOOTMAN, gg_rct_BrownSpawnBot.getCenter(), angle(45))
-        pathUnit = new PathUnit(spawnedUnit)
-        pathUnit.setPath(BROWN_BOT)
-
-        spawnedUnit = createUnit(players[11], RIFLEMAN, gg_rct_BrownSpawnTop.getCenter(), angle(45))
-        pathUnit = new PathUnit(spawnedUnit)
-        pathUnit.setPath(BROWN_TOP)
-
-        spawnedUnit = createUnit(players[11], RIFLEMAN, gg_rct_BrownSpawnMid.getCenter(), angle(45))
-        pathUnit = new PathUnit(spawnedUnit)
-        pathUnit.setPath(BROWN_MID)
-
-        spawnedUnit = createUnit(players[11], RIFLEMAN, gg_rct_BrownSpawnBot.getCenter(), angle(45))
-        pathUnit = new PathUnit(spawnedUnit)
-        pathUnit.setPath(BROWN_BOT)
-
+        if brownWorkshopAlive[0]
+            spawnedUnit = createUnit(players[11], MORTAR_TEAM, gg_rct_BrownWorkShopTop.getCenter(), angle(135))
+            pathUnit = new PathUnit(spawnedUnit)
+            pathUnit.setPathFirst(BROWN_TOP)
+        if brownWorkshopAlive[1]
+            spawnedUnit = createUnit(players[11], MORTAR_TEAM, gg_rct_BrownWorkShopBot.getCenter(), angle(135))
+            pathUnit = new PathUnit(spawnedUnit)
+            pathUnit.setPathFirst(BROWN_BOT)
+    end))
     
 
+    
+init
+    setupSpawnUnits()
 
 
 

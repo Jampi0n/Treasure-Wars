@@ -36,7 +36,7 @@ function setupCreatedHero(Hero hero)
 
     if(cPlayer.getTeam()==Team.TEAM1)
         hero.toUnit().setPos(gg_rct_GreenCastle.getCenter())
-        SetHeroLevel(hero.toUnit(), 25, true)
+        //SetHeroLevel(hero.toUnit(), 25, true)
     else
         hero.toUnit().setPos(gg_rct_BrownCastle.getCenter())
 

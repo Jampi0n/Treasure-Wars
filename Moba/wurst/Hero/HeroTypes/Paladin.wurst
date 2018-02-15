@@ -107,8 +107,8 @@ function battleRoar()
         ..setupWithHotKey("Battle Roar", "W")
         ..setLearnString("Increases nearby units' attack and movement speed.", (int lvl) -> (begin
             return "{0} attack speed, {1} movement speed, {2} seconds".format(
-            BATTLE_ROAR_AS[lvl-1].str(),
-            BATTLE_ROAR_MS[lvl-1].str(),
+            BATTLE_ROAR_AS[lvl-1].str()+"%",
+            BATTLE_ROAR_MS[lvl-1].str()+"%",
             BATTLE_ROAR_DURATION[lvl-1].toString()+BATTLE_ROAR_DURATION_BONUS.getBonusString(C_INT))
         end) )
 
@@ -118,8 +118,8 @@ function battleRoar()
             ..setManaCost(lvl, MANA[lvl-1])
             ..setTargetsAllowed(lvl, "none")
             ..setTooltipNormalExtended(lvl, "Increases nearby units' attack speed by {0} and movement speed by {1} for {2} seconds.".format(
-            BATTLE_ROAR_AS[lvl-1].str(),
-            BATTLE_ROAR_MS[lvl-1].str(),
+            BATTLE_ROAR_AS[lvl-1].str()+"%",
+            BATTLE_ROAR_MS[lvl-1].str()+"%",
             BATTLE_ROAR_DURATION[lvl-1].str()+BATTLE_ROAR_DURATION_BONUS.getBonusString(C_INT)
             ))
 
@@ -132,8 +132,8 @@ function battleRoar()
 
     for lvl = 1 to 5
         aDefAura
-            ..setMovementSpeedIncrease(lvl, BATTLE_ROAR_AS[lvl-1])
-            ..setMovementSpeedIncrease(lvl, BATTLE_ROAR_MS[lvl-1])
+            ..setAttackSpeedIncrease(lvl, BATTLE_ROAR_AS[lvl-1]/100)
+            ..setMovementSpeedIncrease(lvl, BATTLE_ROAR_MS[lvl-1]/100)
             ..setTargetsAllowed(lvl, "invulnerable,self,vulnerable")
             ..setAreaofEffect(lvl, 1)
             ..setBuffs(lvl, int2fourchar(BUFF_ID_BATTLE_ROAR))

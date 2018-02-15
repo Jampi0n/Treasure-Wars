@@ -40,7 +40,7 @@ public class Hero
         onSpellCastTrigger = this.heroType.getOnSpellCastTrigger()
         onSpellCastTrigger.registerUnitEvent(this.hero, EVENT_UNIT_SPELL_EFFECT)
 
-        print("setup completed: "+this.hero.getName())
+        //print("setup completed: "+this.hero.getName())
 
         this.upgrade()
 
@@ -77,7 +77,6 @@ public class Hero
         
     function onLevelUp()
         this.level = GetHeroLevel(this.hero)
-        print("new level = "+this.level.toString())
         this.upgrade()
 
     static function onLevelUpStatic()

@@ -1,0 +1,50 @@
+package UnitType
+
+import HashMap
+import StandardTextTags
+
+public function createUnitType(int unitId, int bounty) returns int
+    new UnitType(unitId, bounty)
+    return unitId
+
+public class UnitType
+
+    private static constant unitIdToUnitType = new HashMap<int, UnitType>
+
+    private int unitId
+    private int bounty
+
+    construct(int unitId, int bounty)
+        this.unitId = unitId
+        this.bounty = bounty
+        unitIdToUnitType.put(unitId, this)
+
+    static function getUnitType(int unitId) returns UnitType
+        return unitIdToUnitType.get(unitId)
+
+    function getUnitId() returns integer
+        return this.unitId
+
+    function getBounty() returns integer
+        return this.bounty
+
+function onUnitDeath()
+    let dyingUnit = GetTriggerUnit()
+    let killingUnit = GetKillingUnit()
+    let dyingType = UnitType.getUnitType(dyingUnit.getTypeId())
+    let killingPlayer = killingUnit.getOwner()
+
+    if dyingType == null or not killingPlayer.isEnemyOf(dyingUnit.getOwner())
+        return
+    
+    let bounty = dyingType.getBounty()
+    
+    killingPlayer.addGold(bounty)
+    
+    createGoldBountyTextTag(dyingUnit, bounty, killingPlayer)
+
+init
+    CreateTrigger()
+        ..addAction(function onUnitDeath)
+        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
+
