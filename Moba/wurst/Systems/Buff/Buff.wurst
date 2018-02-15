@@ -44,6 +44,15 @@ Duration is fixed when the buff is applied -> use one shot timer
 
 */
 
+/*
+Null pointer warning
+
+A Buff that is removed wants to remove itself from the unit's buff list.
+
+However if a unit is removed the bufflist is removed first and then the bufflist removes all its buffs.
+
+*/
+
 public class BuffType
 
     /*
@@ -226,8 +235,11 @@ public class BuffList
 
     static function onDeindex()
         let removeList = unitBuffList.get(getDeindexedUnit())
-        unitBuffList.remove(getDeindexedUnit())
+
+        //print("remove bufflist for: "+getDeindexedUnit().getName()+" -> "+getDeindexedUnit().getHandleId().toString())
+
         if(removeList!=null)
+            unitBuffList.remove(getDeindexedUnit())
             destroy removeList
 
     static function getBuffOfType(unit target, BuffType buffType) returns Buff
@@ -347,6 +359,9 @@ public class Buff
         destroy this
 
     function dispel()
+        //print("dispel buff: ")
+        print((this castTo int).toString() )
+
         currentBuff = this
         if(this.onDispel!=null)
             this.onDispel.execute()
@@ -387,9 +402,12 @@ public class Buff
         return currentBuff
 
     ondestroy
-        BuffList.getBuffList(this.target).remove(this)
-        if(this.periodicTimer==this.expireTimer)
-            print("WTF!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11")
+
+        BuffList buffList = BuffList.getBuffList(this.target)
+
+        if buffList!=null
+            buffList.remove(this)
+
         this.expireTimer.release()
         if this.periodicTimer != null
             this.periodicTimer.release()
