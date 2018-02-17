@@ -23,6 +23,8 @@ public class PathUnit
     private real nextUpdate
     private real lastAttack
 
+    boolean checkEnter = false
+
     static function classInit()
         periodicTimer.startPeriodic(0.05, function updateMovementStatic)
         doPeriodically(1, (CallbackPeriodic cb) -> (begin
@@ -67,7 +69,26 @@ public class PathUnit
             pathUnits.addUnit(this.assocUnit)
             this.nextUpdate = getElapsedGameTime() + GetRandomReal(0, 0.1)
             this.lastAttack = 0
+            if(this.assocUnit.getOwner().getId() == 10)
+                for int i = 0 to 4
+                    UnitShareVision(this.assocUnit, players[i], false)
+            else
+                for int i = 5 to 9
+                    UnitShareVision(this.assocUnit, players[i], false)
+            
+            doAfter(0, () -> (this.enableEnterCheck()  ) )
+
             instances++
+
+    function enableEnterCheck()
+        this.checkEnter = true
+
+        if(this.assocUnit.getOwner().getId() == 10)
+            for int i = 0 to 4
+                UnitShareVision(this.assocUnit, players[i], true)
+        else
+            for int i = 5 to 9
+                UnitShareVision(this.assocUnit, players[i], true)
 
     static function onRemove()
         let removedPathUnit = unitToPathUnit.get(getDeindexedUnit())
@@ -285,17 +306,17 @@ public class PathUnit
         let u = GetTriggerUnit()
         if u.getOwner() == players[11]
             let pathUnit = unitToPathUnit.get(u)
-            if pathUnit != null
+            if pathUnit != null and pathUnit.checkEnter == true
                 pathUnit.onBaseEnter()
-                //print("onBaseEnterGreen")
+                print("onBaseEnterGreen")
 
     static function onBaseEnterBrown()
         let u = GetTriggerUnit()
         if u.getOwner() == players[10]
             let pathUnit = unitToPathUnit.get(u)
-            if pathUnit != null
+            if pathUnit != null and pathUnit.checkEnter == true
                 pathUnit.onBaseEnter()
-                //print("onBaseEnterBrown")
+                print("onBaseEnterBrown")
 
     //A path unit leaves its own base
 
@@ -303,7 +324,7 @@ public class PathUnit
         let u = GetTriggerUnit()
         if u.getOwner() == players[10]
             let pathUnit = unitToPathUnit.get(u)
-            if pathUnit != null
+            if pathUnit != null and pathUnit.checkEnter == true
                 pathUnit.onBaseLeave()
                 //print("onBaseLeaveGreen")
 
@@ -312,7 +333,7 @@ public class PathUnit
         let u = GetTriggerUnit()
         if u.getOwner() == players[11]
             let pathUnit = unitToPathUnit.get(u)
-            if pathUnit != null
+            if pathUnit != null and pathUnit.checkEnter == true
                 pathUnit.onBaseLeave()
                 //print("onBaseLeaveBrown")
 

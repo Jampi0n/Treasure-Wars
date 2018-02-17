@@ -33,7 +33,7 @@ public class Path
 
     //adds a new point(x,y) to a path
     function addPoint(vec2 pos)
-        createUnit(players[0], 'h00G', pos, angle(0))
+        //createUnit(players[0], 'h00G', pos, angle(0))
         this.pathTable.saveReal( this.pathCount * 2, pos.x)
         this.pathTable.saveReal( this.pathCount * 2 + 1, pos.y)
         this.pathCount++

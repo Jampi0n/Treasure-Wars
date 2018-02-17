@@ -10,3 +10,6 @@ path unit
 
 do not go back:
 -don't search for sub pathes smaller than the current sub path
+
+
+create path units at enemy base, because ai units like to go backt to where they were created
