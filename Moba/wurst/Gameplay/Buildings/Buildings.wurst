@@ -126,3 +126,16 @@ init
         ..addAction(function onBuildingDeath)
         ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
 
+
+    group buildings = CreateGroup()
+    GroupEnumUnitsOfPlayer(buildings, players[10], null)
+    for unit u in buildings
+        for int i=0 to 4
+            UnitShareVision(u, players[i], true)
+            
+    GroupEnumUnitsOfPlayer(buildings, players[11], null)
+    for unit u in buildings
+        for int i=5 to 9
+            UnitShareVision(u, players[i], true)
+
+    buildings.destr()

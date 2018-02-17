@@ -83,7 +83,12 @@ public class CPlayer
         for i=0 to 11
             for j=0 to 11
                 if(i!=j and getCPlayer(i).getTeam()==getCPlayer(j).getTeam())
-                    SetPlayerAllianceStateBJ(players[i],players[j], bj_ALLIANCE_ALLIED_VISION)
+                    if(i<=9)
+                        SetPlayerAllianceStateBJ(players[i],players[j], bj_ALLIANCE_ALLIED_VISION)
+                    else
+                        SetPlayerAllianceStateBJ(players[i],players[j], bj_ALLIANCE_ALLIED)
+                    
+
 
 init
     CPlayer.initPlayers()
