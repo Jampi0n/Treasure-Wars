@@ -28,7 +28,7 @@ public class PathUnit
     static function classInit()
         periodicTimer.startPeriodic(0.05, function updateMovementStatic)
         doPeriodically(1, (CallbackPeriodic cb) -> (begin
-            print("["+instances.toString()+"]orders: "+moveOrders.toString())
+            //print("["+instances.toString()+"]orders: "+moveOrders.toString())
             operations = 0
             moveOrders = 0
         end))

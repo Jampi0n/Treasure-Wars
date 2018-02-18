@@ -70,6 +70,33 @@ hp, hp-reg, mana, manareg, int
 
 
 
+Stats and implementation:
+
+Advantage using item abilities: configuration can be local, as item object and effect (ability object) are both created at compiletime
+Using triggers, I need to store the configuration for runtime.
+
+calculate relative bonus:
+first absolute, then relative
+
+when?
+	use a function to change a stat, it will automatically
+	change the relative values
+
+
+
+hp:
+	hero stat: upgrade
+	absolute: item ability
+	relative: bonus mod
+hp-reg:
+	remove upgrade, use trigger instead -> prevent hp reg
+	absolute & relative: trigger
+	
+mana & mana-reg same as hp & hp-reg
+
+armor:
+	hero stat: upgrade
+	absolute: item ability
 
 
 

@@ -34,77 +34,11 @@ boolean array itemIsRecipe //needed at runtime 1
 int currentItemId = -1
 ItemDefinition array itemDefinition
 string array itemName
-string array shopDescription
+string array itemShopDescription
+int array itemPosX
+int array itemPosY
 
 string array itemDesc
-string array itemDescPrefix
-
-
-/*  ==========================================================================================================================
-**
-**  helper functions for item ability generation
-**
-**  ==========================================================================================================================*/
-
-function addHPBonus(int hitPoints) returns string
-    let aId = ABIL_ID_GEN.next()
-    new AbilityDefinitionMaxLifeBonusLeast(aId)
-        ..setMaxLifeGained(1, hitPoints)
-    return int2fourchar(aId)
-
-function addHRBonus(int hitpointRegen) returns string
-    let aId = ABIL_ID_GEN.next()
-    new AbilityDefinitionRegenLife(aId)
-        ..setHitPointsRegeneratedPerSecond(1, hitpointRegen)
-    return int2fourchar(aId)
-
-function addMPBonus(int manaPoints) returns string
-    let aId = ABIL_ID_GEN.next()
-    new AbilityDefinitionMaxManaBonusLeast(aId)
-        ..setMaxManaGained(1, manaPoints)
-    return int2fourchar(aId)
-
-function addADBonus(int attackDamage) returns string
-    let aId = ABIL_ID_GEN.next()
-    new AbilityDefinitionAttackBonus(aId)
-        ..setAttackBonus(1, attackDamage)
-    return int2fourchar(aId)
-
-function addASBonus(int attackSpeed) returns string
-    let aId = ABIL_ID_GEN.next()
-    new AbilityDefinitionAttackSpeedIncrease(aId)
-        ..setAttackSpeedIncrease(1, attackSpeed/100)
-    return int2fourchar(aId)
-
-function addARBonus(int armor) returns string
-    let aId = ABIL_ID_GEN.next()
-    new AbilityDefinitionDefenseBonusPlus1(aId)
-        ..setDefenseBonus(1, armor)
-    return int2fourchar(aId)
-
-function addMSBonus(int movementSpeed) returns string
-    let aId = ABIL_ID_GEN.next()
-    new AbilityDefinitionMoveSpeedBonus(aId)
-        ..setMovementSpeedBonus(1, movementSpeed)
-    return int2fourchar(aId)
-
-function addSTRBonus(int strength) returns string
-    let aId = ABIL_ID_GEN.next()
-    new AbilityDefinitionStrengthBonusPlus1(aId)
-        ..setStrengthBonus(1, strength)
-    return int2fourchar(aId)
-
-function addWPBonus(int willpower) returns string
-    let aId = ABIL_ID_GEN.next()
-    new AbilityDefinitionAgilityBonusPlus1(aId)
-        ..setAgilityBonus(1, willpower)
-    return int2fourchar(aId)
-
-function addINTBonus(int intelligence) returns string
-    let aId = ABIL_ID_GEN.next()
-    new AbilityDefinitionIntelligenceBonusPlus1(aId)
-        ..setIntelligenceBonus(1, intelligence)
-    return int2fourchar(aId)
 
 /*  ==========================================================================================================================
 **
@@ -119,104 +53,95 @@ function addINTBonus(int intelligence) returns string
 **
 **  ==========================================================================================================================*/
 
+constant shopList = new LinkedList<Shop>()
+
 public constant SHOP_ID_PHYSICAL_1= UNIT_ID_GEN.next()
 public constant SHOP_PHYSICAL_1 = compiletime(new Shop(SHOP_ID_PHYSICAL_1, "SHOP 1", 1.2,  "units\\human\\HeroPaladin\\HeroPaladin") castTo int)
 
-public constant ITEM_ID_PLATED_GAUNTLETS = compiletime(newItem("Plated Gauntlets", 500, SHOP_PHYSICAL_1, 1, 0, "", "BTNPlatedGauntlet2"))
-
+public constant ITEM_ID_PLATED_GAUNTLETS = compiletime(newItem("Plated Gauntlets", 500, SHOP_PHYSICAL_1, "", "BTNPlatedGauntlet2"))
 @compiletime
 function itemPlatedGauntlets()
     let armor = 10
-    itemDefinition[ITEM_ID_PLATED_GAUNTLETS].setAbilities(addARBonus(armor))
     itemDesc[ITEM_ID_PLATED_GAUNTLETS] = "+{0} armor".format(armor.toString())
 
 public constant SHOP_ID_PHYSICAL_2= UNIT_ID_GEN.next()
 public constant SHOP_PHYSICAL_2 = compiletime(new Shop(SHOP_ID_PHYSICAL_2, "SHOP 2", 1.4,  "units\\human\\HeroMountainKing\\HeroMountainKing") castTo int)
 
-public constant ITEM_ID_HAMMER_OF_STRENGTH = compiletime(newItem("Hammer of Strength", 300, SHOP_PHYSICAL_2, 0, 0, "", "BTNINV_Hammer_15"))
+public constant ITEM_ID_HAMMER_OF_STRENGTH = compiletime(newItem("Hammer of Strength", 300, SHOP_PHYSICAL_2, "", "BTNINV_Hammer_15"))
 @compiletime
 function itemHammerOfStrength()
     let str = 10
-    itemDefinition[ITEM_ID_HAMMER_OF_STRENGTH].setAbilities(addSTRBonus(str))
     itemDesc[ITEM_ID_HAMMER_OF_STRENGTH] = "+{0} strength".format(str.toString())
 
 
-public constant ITEM_ID_GLOVES_OF_HASTE = compiletime(newItem("Gloves of Haste", 450, SHOP_PHYSICAL_2, 1, 0, "", "BTNLeatherGloves"))
+public constant ITEM_ID_GLOVES_OF_HASTE = compiletime(newItem("Gloves of Haste", 450, SHOP_PHYSICAL_2, "", "BTNLeatherGloves"))
 @compiletime
 function itemGlovesOfHaste()
     let as = 20
-    itemDefinition[ITEM_ID_GLOVES_OF_HASTE].setAbilities(addASBonus(as))
     itemDesc[ITEM_ID_GLOVES_OF_HASTE] = "+{0}% attack speed".format(as.toString())
 
 public constant SHOP_ID_PHYSICAL_3= UNIT_ID_GEN.next()
 public constant SHOP_PHYSICAL_3 = compiletime(new Shop(SHOP_ID_PHYSICAL_3, "SHOP 3", 1.2, "units\\human\\ArthaswithSword\\ArthaswithSword") castTo int)
 
-public constant ITEM_ID_BLOOD_SWORD = compiletime(newItem("Blood Sword", 3200, SHOP_PHYSICAL_3, 1, 0, "", "BTNBarbarianBrutalSlasher"))
+public constant ITEM_ID_BLOOD_SWORD = compiletime(newItem("Blood Sword", 4200, SHOP_PHYSICAL_3, ITEM_ID_HAMMER_OF_STRENGTH.toString()+","+ITEM_ID_GLOVES_OF_HASTE.toString(), "BTNBarbarianBrutalSlasher"))
 @compiletime
 function itemBloodSword()
     let str = 50
     let as = 40
-    itemDefinition[ITEM_ID_BLOOD_SWORD].setAbilities(addSTRBonus(str)+","+addASBonus(as))
     itemDesc[ITEM_ID_BLOOD_SWORD] = "+{0} strength|n+{1}% attack speed".format(str.toString(), as.toString())
 
-public constant ITEM_ID_FIREHAND_GAUNTLETS = compiletime(newItem("Firehand Gauntlets", 3000, SHOP_PHYSICAL_3, 0, 0, "", "BTNPlateGauntlet"))
+public constant ITEM_ID_FIREHAND_GAUNTLETS = compiletime(newItem("Firehand Gauntlets", 3000, SHOP_PHYSICAL_3, "", "BTNPlateGauntlet"))
 @compiletime
 function itemFirehandGauntlets()
     let str = 20
     let armor = 40
     let hp = 300
-    itemDefinition[ITEM_ID_FIREHAND_GAUNTLETS].setAbilities(addSTRBonus(str)+","+addARBonus(armor)+","+addHPBonus(hp))
     itemDesc[ITEM_ID_FIREHAND_GAUNTLETS] = "+{0} strength|n+{1} armor|n+{2} hit points".format(str.toString(), armor.toString(), hp.toString())
 
-public constant ITEM_ID_SPIKED_ARMOR = compiletime(newItem("Spiked Armor", 3700, SHOP_PHYSICAL_3, 2, 0, "", "BTNSpikedArmor"))
+public constant ITEM_ID_SPIKED_ARMOR = compiletime(newItem("Spiked Armor", 2700, SHOP_PHYSICAL_3, "", "BTNSpikedArmor"))
 @compiletime
 function itemSpikedArmor()
     let armor = 90
-    itemDefinition[ITEM_ID_SPIKED_ARMOR].setAbilities(addARBonus(armor))
     itemDesc[ITEM_ID_SPIKED_ARMOR] = "+{0} armor".format(armor.toString())
 
 public constant SHOP_ID_MAGICAL_1= UNIT_ID_GEN.next()
 public constant SHOP_MAGICAL_1 = compiletime(new Shop(SHOP_ID_MAGICAL_1, "SHOP 4", 1.1, "units\\human\\HeroArchMage\\HeroArchMage") castTo int)
 
-public constant ITEM_ID_MAGE_AMULET = compiletime(newItem("Mage Amulet", 400, SHOP_MAGICAL_1, 0, 0, "", "BTNEmptyAmulet"))
+public constant ITEM_ID_MAGE_AMULET = compiletime(newItem("Mage Amulet", 400, SHOP_MAGICAL_1, "", "BTNEmptyAmulet"))
 @compiletime
 function itemMageAmulet()
     let hp = 100
     let mp = 100
-    itemDefinition[ITEM_ID_MAGE_AMULET].setAbilities(addHPBonus(hp)+","+addMPBonus(mp))
     itemDesc[ITEM_ID_MAGE_AMULET] = "+{0} hit points|n+{1} mana points".format(hp.toString(), mp.toString())
 
-public constant ITEM_ID_MAGE_GLOVES = compiletime(newItem("Mage Gloves", 500, SHOP_MAGICAL_1, 1, 0, "", "BTNManaGloves"))
+public constant ITEM_ID_MAGE_GLOVES = compiletime(newItem("Mage Gloves", 500, SHOP_MAGICAL_1, "", "BTNManaGloves"))
 @compiletime
 function itemMageGloves()
     let intelligence = 10
     let armor = 5
-    itemDefinition[ITEM_ID_MAGE_GLOVES].setAbilities(addINTBonus(intelligence)+","+addARBonus(armor))
     itemDesc[ITEM_ID_MAGE_GLOVES] = "+{0} intelligence|n+{1} armor".format(intelligence.toString(), armor.toString())
 
 
 public constant SHOP_ID_MAGICAL_2= UNIT_ID_GEN.next()
 public constant SHOP_MAGICAL_2 = compiletime(new Shop(SHOP_ID_MAGICAL_2, "SHOP 5", 1.3, "units\\human\\HeroBloodElf\\HeroBloodElf") castTo int)
 
-public constant ITEM_ID_WIZARDS_HAT = compiletime(newItem("Wizard's Hat", 800, SHOP_MAGICAL_2, 3, 0, "", "BTNWizardsHat"))
+public constant ITEM_ID_WIZARDS_HAT = compiletime(newItem("Wizard's Hat", 800, SHOP_MAGICAL_2, "", "BTNWizardsHat"))
 @compiletime
 function itemWizardsHat()
     let intelligence = 15
     let mp = 100
-    itemDefinition[ITEM_ID_WIZARDS_HAT].setAbilities(addINTBonus(intelligence)+","+addMPBonus(mp))
     itemDesc[ITEM_ID_WIZARDS_HAT] = "+{0} intelligence|n+{1} mana".format(intelligence.toString(), mp.toString())
 
 public constant SHOP_ID_MAGICAL_3= UNIT_ID_GEN.next()
 public constant SHOP_MAGICAL_3 = compiletime(new Shop(SHOP_ID_MAGICAL_3, "SHOP 6", 1.6, "units\\human\\Jaina\\Jaina") castTo int)
 
-public constant ITEM_ID_ENCHANTED_ARMOR = compiletime(newItem("Enchanted Armor", 2800, SHOP_MAGICAL_3, 0, 0, "", "BTNSuperiorMageRobe"))
+public constant ITEM_ID_ENCHANTED_ARMOR = compiletime(newItem("Enchanted Armor", 2800, SHOP_MAGICAL_3, "", "BTNSuperiorMageRobe"))
 @compiletime
 function itemEnchantedArmor()
     let hp = 400
     let armor = 25
     let wp = 25
     let intelligence = 40
-    itemDefinition[ITEM_ID_ENCHANTED_ARMOR].setAbilities(addHPBonus(hp)+","+addARBonus(armor)+","+addWPBonus(wp)+","+addINTBonus(intelligence))
     itemDesc[ITEM_ID_ENCHANTED_ARMOR] = "+{0} hit points|n+{1} armor|n+{2} willpower|n+{3} intelligence".format(hp.toString(), armor.toString(), wp.toString(), intelligence.toString())
 
 
@@ -229,14 +154,27 @@ function itemEnchantedArmor()
 **
 **  ==========================================================================================================================*/
 
+class ItemInShop
+    int goldCost
+    int itemId
+
+    construct(int itemId)
+        this.itemId = itemId
+
+    function setupGoldCost()
+        this.goldCost = itemGoldCost[itemId]
+
 class Shop
     string itemsMade
     string name
+    LinkedList<ItemInShop> soldItems
     BuildingDefinition bDef
     construct(int unitId, string name, real size, string model)
         this.bDef = createShop(unitId, name, size, model)
         this.itemsMade = ""
         this.name = name
+        this.soldItems = new LinkedList<ItemInShop>()
+        shopList.add(this)
 
 function createShop(int newId, string name, real size, string model) returns BuildingDefinition
     let bDef = new BuildingDefinition(newId, 'hvlt')
@@ -287,63 +225,51 @@ function stringToList(string sList, string splitChar) returns LinkedList<int>
 **
 **  ==========================================================================================================================*/
 
-public function newItem(string name, int goldCost, int whichShop, int x, int y, string requiredItems, string icon) returns int
+public function newItem(string name, int goldCost, int whichShop, string requiredItems, string icon) returns int
+    /*
+
+    There should not be any references to other item variables, as they might not have been initialized.
+
+    */
     let shop = whichShop castTo Shop
     currentItemId++
     itemId[currentItemId] = ITEM_ID_GEN.next()
     itemName[currentItemId] = name
-    shopDescription[currentItemId] = shop.name + " ["+(x+1).toString()+","+(y+1).toString()+"]"
+    itemShopDescription[currentItemId] = shop.name
     itemIsRecipe[currentItemId] = false
     itemRequiredItems[currentItemId] = ""
 
-    itemDescPrefix[currentItemId] = ""
+    itemGoldCost[currentItemId] = goldCost
     itemDesc[currentItemId] = ""
 
-    itemDefinition[currentItemId] = newItemDefintion(itemId[currentItemId], goldCost)
+    itemDefinition[currentItemId] = newItemDefintion(itemId[currentItemId])
         ..presetIcon(icon)
         ..setName(name)
         ..setTooltipBasic(name)
-        //..setDescription(desc)
-        //..setTooltipExtended(desc)
-        ..setButtonPositionX(x)
-        ..setButtonPositionY(y)
-    itemGoldCost[currentItemId] = goldCost
+    
 
     if requiredItems!="" //create additional recipe item directly after the main item
         currentItemId++
         itemId[currentItemId] = ITEM_ID_GEN.next()
         itemName[currentItemId] = name
         itemIsRecipe[currentItemId] = true
+
         itemRequiredItems[currentItemId] = requiredItems
-        string recipeDesc = "|n|n|cffffcc00Requires:|r"
-        
-        int recipeGoldCost = goldCost
 
-        let requiredItemList = stringToList(requiredItems, ",")
-
-        for int i in requiredItemList
-            recipeGoldCost -= itemGoldCost[i]
-            recipeDesc += "|n - "+itemName[i]+"       ( "+shopDescription[i]+" )"
-
-        destroy requiredItemList
-
-        itemDescPrefix[currentItemId] = recipeDesc
+        itemGoldCost[currentItemId] = goldCost
         itemDesc[currentItemId] = ""
 
-        itemDefinition[currentItemId] = newItemDefintion(itemId[currentItemId], recipeGoldCost)
+        itemDefinition[currentItemId] = newItemDefintion(itemId[currentItemId])
             ..presetIcon(icon)
             ..setName(name+" - Recipe")
             ..setTooltipBasic(name+" - Recipe")
-            //..setDescription(desc)
-            //..setTooltipExtended(recipeDesc)
-            ..setButtonPositionX(x)
-            ..setButtonPositionY(y)
-        itemGoldCost[currentItemId] = recipeGoldCost
 
         if(shop.itemsMade!="")
             shop.itemsMade += ","
         shop.itemsMade += int2fourchar(itemId[currentItemId])
         shop.bDef.setItemsMade(shop.itemsMade)
+
+        shop.soldItems.add(new ItemInShop(currentItemId))
 
         return currentItemId - 1
     else
@@ -352,9 +278,11 @@ public function newItem(string name, int goldCost, int whichShop, int x, int y, 
         shop.itemsMade += int2fourchar(itemId[currentItemId])
         shop.bDef.setItemsMade(shop.itemsMade)
 
+        shop.soldItems.add(new ItemInShop(currentItemId))
+
         return currentItemId
 
-public function newItemDefintion(int itemId, int goldCost) returns ItemDefinition
+public function newItemDefintion(int itemId) returns ItemDefinition
     let iDef = new ItemDefinition(itemId, 'ratc')
         ..setAbilities("")
         ..setCooldownGroup("")
@@ -362,7 +290,6 @@ public function newItemDefintion(int itemId, int goldCost) returns ItemDefinitio
         ..setStockStartDelay(0)
         ..setStockMaximum(1)
         ..setLevel(1)
-        ..setGoldCost(goldCost)
     return iDef
 
 function ItemDefinition.presetIcon(string name)
@@ -373,6 +300,82 @@ function ItemDefinition.presetIcon(string name)
         s += ".blp"
 
     this.setInterfaceIcon(s)
+
+
+/*  ==========================================================================================================================
+**
+**  Finalize item creation. After all item objects have been created during compile time, the combined information about all items is
+**  used to resolve all values, that reference other items.
+**  By doing so the order in which items are defined does not matter and you can reference items that have not even been created.
+**
+**  gold cost for recipes, description of required items for recipes, button position in shop based on gold cost.
+**
+**  ==========================================================================================================================*/
+
+@compiletime
+function createItemGoldCosts()
+    for i = 0 to currentItemId
+        if itemIsRecipe[i]
+            int recipeGoldCost = itemGoldCost[i]
+            string requiredItems = itemRequiredItems[i]
+            let requiredItemList = stringToList(requiredItems, ",")
+    
+            for int j in requiredItemList
+                recipeGoldCost -= itemGoldCost[j]
+    
+            destroy requiredItemList
+
+            itemGoldCost[i] = recipeGoldCost
+        itemDefinition[i].setGoldCost(itemGoldCost[i])
+
+
+    //the object of class ItemInShop are created, while gold cost is not yet known
+    //now every object is told to retrieve its gold cost from the array
+    for Shop shop in shopList
+        for ItemInShop soldItem in shop.soldItems
+            soldItem.setupGoldCost()
+
+@compiletime
+function sortShops()
+    for Shop shop in shopList
+        shop.soldItems.sortWith( (ItemInShop i1, ItemInShop i2) -> (i1.goldCost - i2.goldCost) )
+
+        int x = 0
+        int y = 0
+        for ItemInShop soldItem in shop.soldItems
+            itemPosX[soldItem.itemId] = x
+            itemPosY[soldItem.itemId] = y
+            itemDefinition[soldItem.itemId]
+                ..setButtonPositionX(x)
+                ..setButtonPositionY(y)
+            x++
+            if(x>3)
+                x = 0
+                y++
+
+@compiletime
+function createItemDescritptions()
+    for i = 0 to currentItemId
+        if itemIsRecipe[i]
+            string recipeDesc = "|n|n|cffffcc00Requires:|r"
+            string requiredItems = itemRequiredItems[i]
+            let requiredItemList = stringToList(requiredItems, ",")
+
+            for int j in requiredItemList
+
+                let buttonPos = " ["+(itemPosX[j]+1).toString()+","+(itemPosY[j]+1).toString()+"]"
+
+                recipeDesc += "|n - "+itemName[j]+"       ( "+itemShopDescription[j] + buttonPos+" )"
+
+            destroy requiredItemList
+
+
+
+            itemDefinition[i].setDescription(itemDesc[i-1] + recipeDesc)
+            itemDefinition[i].setTooltipExtended(itemDesc[i-1] + recipeDesc)
+        else
+            itemDefinition[i].setDescription(itemDesc[i])
+            itemDefinition[i].setTooltipExtended(itemDesc[i])
 
 /*  ==========================================================================================================================
 **
@@ -414,15 +417,6 @@ public string stringItemRequiredItems = compiletime(setupStringArrayRequiredItem
 public string stringItemId = compiletime(setupStringArrayItemId())
 public string stringItemIsRecipe = compiletime(setupStringArrayItemIsRecipe())
 
-@compiletime
-function createItemDescritptions()
-    for i = 0 to currentItemId
-        if itemIsRecipe[i]
-            itemDefinition[i].setDescription(itemDesc[i-1]+itemDescPrefix[i])
-            itemDefinition[i].setTooltipExtended(itemDesc[i-1]+itemDescPrefix[i])
-        else
-            itemDefinition[i].setDescription(itemDesc[i])
-            itemDefinition[i].setTooltipExtended(itemDesc[i])
 /*  ==========================================================================================================================
 **
 **  runtime
