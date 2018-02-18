@@ -23,7 +23,9 @@ public class Hero
     private static constant unitToHero = new HashMap<unit,Hero>
     private static constant assistMap = new HashMap<CPlayer,real>
     private trigger onSpellCastTrigger
-
+    private int array[11] statsAbsoluteBonus //default = 0
+    private real array[11] statsRelativeBonus //default = 0.00
+    private int array[11] statsTotalBonus //default = 0
 
     protected static function classInit()
         onDamageTrigger.addAction(function onDamageStatic)
@@ -39,6 +41,10 @@ public class Hero
         this.heroType = HeroType.getHeroType(this.hero.getTypeId())
         onSpellCastTrigger = this.heroType.getOnSpellCastTrigger()
         onSpellCastTrigger.registerUnitEvent(this.hero, EVENT_UNIT_SPELL_EFFECT)
+
+        for int i = 0 to 10
+            statsAbsoluteBonus[i] = 0
+            statsRelativeBonus[i] = 0
 
         //print("setup completed: "+this.hero.getName())
 
@@ -145,6 +151,35 @@ public class Hero
     static function getHero(player owner) returns Hero
         return getHero(owner.getId())
 
+    /**
+    Updates the total stat bonus based on base stat, absolute stat bonus and relative stat bonus
+    **/
+    private function updateTotalStatBonus(Stat whichStat)
+        int stat = whichStat.toInt()
+        this.statsTotalBonus[stat] = (this.heroType.calculateStat(whichStat, this.level) + this.statsAbsoluteBonus[stat]) * (1. + this.statsRelativeBonus[stat]).toInt()
+
+    /**
+    Sets the absolute stat bonus and updates the total bonus.
+    **/
+    function setStatAbsoluteBonus(Stat whichStat, int newValue)
+        int stat = whichStat.toInt()
+        this.statsAbsoluteBonus[stat] = newValue
+        updateTotalStatBonus(whichStat)
+
+
+    /**
+    Sets the relative stat bonus and updates the total bonus.
+    **/
+    function setStatRelativeBonus(Stat whichStat, real newValue)
+        int stat = whichStat.toInt()
+        this.statsRelativeBonus[stat] = newValue
+        updateTotalStatBonus(whichStat)
+
+    function addStatAbsoluteBonus(Stat whichStat, int plusValue)
+        this.setStatAbsoluteBonus(whichStat, this.statsAbsoluteBonus[whichStat.toInt()] + plusValue)
+
+    function addStatRelativeBonus(Stat whichStat, real plusValue)
+        this.setStatRelativeBonus(whichStat, this.statsRelativeBonus[whichStat.toInt()] + plusValue)
         
 init
     Hero.classInit()
