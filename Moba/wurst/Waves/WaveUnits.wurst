@@ -2,10 +2,10 @@ package WaveUnits
 
 import UnitType
 
-public constant FOOTMAN = createUnitType('h00C', 15)
-public constant RIFLEMAN = createUnitType('h00B', 20)
-public constant KNIGHT = createUnitType('h00D', 40)
-public constant MORTAR_TEAM = createUnitType('h00E', 30)
-public constant MILITIA = createUnitType('h00F', 10)
+public constant FOOTMAN = createUnitType('h00C', 15, 20, 35)
+public constant RIFLEMAN = createUnitType('h00B', 20, 30, 20)
+public constant KNIGHT = createUnitType('h00D', 40, 60, 50)
+public constant MORTAR_TEAM = createUnitType('h00E', 30, 80, 25)
+public constant MILITIA = createUnitType('h00F', 10, 25, 25)
 
 

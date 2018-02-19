@@ -50,7 +50,8 @@ public function AbilityDefinition.setLearnString(string intro, LevelString level
 
 public function createNoEffectAbiltiy(int newId) returns AbilityDefinition
     let aDef = new AbilityDefinition(newId, 'Amgl')
-    aDef.setCheckDependencies(false)
+        ..setCheckDependencies(false)
+        ..setRequirements("")
     return aDef
 
 public function createTargetMissile(int newId, int buffId) returns AbilityDefinitionAlchemistAcidBomb

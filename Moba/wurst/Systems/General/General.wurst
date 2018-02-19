@@ -1,6 +1,7 @@
 package General
 
 import Buff
+import UnitWrapper
 
 constant MAGIC_REDUCTION = 0.01
 
@@ -55,13 +56,38 @@ public function unit.dealDamage(unit target, real amount, ReductionType reductio
         newAmount = amount * (1-( wp*MAGIC_REDUCTION )/( 1 + wp*MAGIC_REDUCTION ))
     else
         newAmount = amount
-
     //print(this.getName()+" damages "+target.getName()+" for "+amount.toString()+" damage.")
     UnitDamageTarget(this, target, newAmount, false, true, ATTACK_TYPE_NORMAL, damageType, WEAPON_TYPE_WHOKNOWS)
 
+public function unit.healHP(real amount)
+    this.setHP(this.getHP() + amount)
+
+public function unit.healMana(real amount)
+    this.setMana(this.getMana() + amount)
+
+public function unit.addMovementSpeedAbsolute(int value)
+    this.addMovementSpeedAbsolute(value.toReal())
+
+/*
+Do not use getMoveSpeed ( current movement speed)
+It is limited by the minimum and maximum movement speed and so it should not be used in calculations here.
+Example trying to slow a unit at minimum movement speed will have not effect, but by reverting the slow, it will actually get a move speed bonus.
+*/
+
+public function unit.addMovementSpeedAbsolute(real value)
+    print("before: "+this.getMoveSpeed().toString()+" "+this.getCurrentMovementSpeed().toString())
+    let newMoveSpeed = this.getCurrentMovementSpeed() + value
+    this.setMovementSpeed(newMoveSpeed)
+    print("after: "+this.getMoveSpeed().toString()+" "+this.getCurrentMovementSpeed().toString())
+
+/**
+Changes a units movement speed relative to its default speed.
+**/
+public function unit.addMovementSpeedRelative(real value) 
+    this.addMovementSpeedAbsolute(value * GetUnitDefaultMoveSpeed(this) )
 
 public function unit.dispelMagicalBuffs(boolean positive, boolean negative)
-    let buffList = BuffList.getBuffList(this).getLinkedList()
+    let buffList = this.getBuffList().getLinkedList()
     for Buff currentBuff in buffList
         let buffType =currentBuff.getBuffType()
         if(buffType.isMagical())
@@ -69,7 +95,7 @@ public function unit.dispelMagicalBuffs(boolean positive, boolean negative)
                 currentBuff.dispel()
 
 public function unit.dispelPhysicallBuffs(boolean positive, boolean negative)
-    let buffList = BuffList.getBuffList(this).getLinkedList()
+    let buffList = this.getBuffList().getLinkedList()
     for Buff currentBuff in buffList
         let buffType =currentBuff.getBuffType()
         if(not buffType.isMagical())

@@ -1,0 +1,199 @@
+package UnitWrapper
+
+import UnitIndexer
+import HashMap
+import initlater Buff
+import Stats
+import initlater General
+import UnitType
+import Upgrades
+
+import BonusMod
+
+/**
+    Every unit gets a unit wrapper
+
+    Contains functionality every unit needs in one place, so only one HashMap is needed.
+**/
+class UnitWrapper
+
+    protected static unit array allUnits
+    protected static int unitWrapperCount = 0
+
+    protected int index
+
+    private static constant unitMap = new HashMap<unit, UnitWrapper>()
+    private unit assocUnit
+
+    protected real currentMovementSpeed
+    protected real defaultMovementSpeed
+
+    private int array[11] statBaseValue
+    //has no effect, is just needed to determine the actual bonus for relative bonus
+
+    private int array[11] statsAbsoluteBonus //default = 0
+    private real array[11] statsRelativeBonus //default = 0.00
+    protected int array[11] statsTotalBonus //default = 0
+
+    protected BuffList buffList
+
+    construct(unit assocUnit)
+
+        this.assocUnit = assocUnit
+
+        allUnits[unitWrapperCount] = this.assocUnit
+        this.index = unitWrapperCount
+        unitWrapperCount++
+
+
+        unitMap.put(assocUnit, this)
+
+        this.currentMovementSpeed = assocUnit.getMoveSpeed()
+        this.defaultMovementSpeed = GetUnitDefaultMoveSpeed(this.assocUnit)
+
+        this.buffList = new BuffList
+
+        for int i = 0 to 10
+            statsAbsoluteBonus[i] = 0
+            statsRelativeBonus[i] = 0
+            statsTotalBonus[i] = 0
+
+        //Base values should never change for units and only change for heroes on level up.
+
+        statBaseValue[Stat.STR.toInt()] = this.assocUnit.getStr(false)
+        statBaseValue[Stat.WP.toInt()] = this.assocUnit.getAgi(false)
+        statBaseValue[Stat.INT.toInt()] = this.assocUnit.getInt(false)
+
+        let uType = UnitType.getUnitType(this.assocUnit.getTypeId())
+
+        if uType != null
+            statBaseValue[Stat.AD.toInt()] = uType.getBaseAttack()
+            statBaseValue[Stat.AR.toInt()] = uType.getBaseArmor()
+        else if this.assocUnit.isType(UNIT_TYPE_HERO)
+            statBaseValue[Stat.AD.toInt()] = 5 + statBaseValue[Stat.STR.toInt()]
+            statBaseValue[Stat.AR.toInt()] = 0
+        else
+            if not this.assocUnit.isType(UNIT_TYPE_STRUCTURE)
+                if this.assocUnit.getAbilityLevel('Aloc') == 0
+                    print("Warning unnkown unit type: "+GetUnitName(this.assocUnit))
+            statBaseValue[Stat.AD.toInt()] = 0
+            statBaseValue[Stat.AR.toInt()] = 0
+
+        statBaseValue[Stat.AS.toInt()] = 0 //not needed as this is always a relative bonus
+        
+        statBaseValue[Stat.HP.toInt()] = this.assocUnit.getMaxHP().toInt()
+        statBaseValue[Stat.HR.toInt()] = 0
+        
+        statBaseValue[Stat.MP.toInt()] = this.assocUnit.getMaxMana().toInt()
+        statBaseValue[Stat.MR.toInt()] = 0
+        statBaseValue[Stat.MS.toInt()] = this.defaultMovementSpeed.toInt()
+    
+    function updateBaseStats()
+        if not this.assocUnit.isType(UNIT_TYPE_HERO)
+            print("Base stats for non-hero units are constant and must not be updated.")
+        statBaseValue[Stat.STR.toInt()] = this.assocUnit.getStr(false)
+        statBaseValue[Stat.WP.toInt()] = this.assocUnit.getAgi(false)
+        statBaseValue[Stat.INT.toInt()] = this.assocUnit.getInt(false)
+
+        statBaseValue[Stat.AD.toInt()] = 5 + statBaseValue[Stat.STR.toInt()] + GetPlayerTechCount(this.assocUnit.getOwner(), UPG_AD, true)
+        
+        statBaseValue[Stat.AS.toInt()] = 0
+        
+        statBaseValue[Stat.HP.toInt()] = 400 + GetPlayerTechCount(this.assocUnit.getOwner(), UPG_HP, true) * 25
+        statBaseValue[Stat.HR.toInt()] = 0
+        
+        statBaseValue[Stat.MP.toInt()] = 100 + GetPlayerTechCount(this.assocUnit.getOwner(), UPG_MP, true) * 10
+        statBaseValue[Stat.MR.toInt()] = 0
+        statBaseValue[Stat.MS.toInt()] = this.defaultMovementSpeed.toInt()
+
+    protected static function getWrapper(unit whichUnit) returns UnitWrapper
+        return unitMap.get(whichUnit)
+
+    ondestroy
+        unitMap.remove(this.assocUnit)
+        destroy this.buffList
+
+        unitWrapperCount--
+        allUnits[this.index] = allUnits[unitWrapperCount]
+
+
+    /**
+    Updates the total stat bonus based on base stat, absolute stat bonus and relative stat bonus
+    **/
+    function updateTotalStatBonus(Stat whichStat)
+        int stat = whichStat.toInt()
+        this.statsTotalBonus[stat] = ((this.statsAbsoluteBonus[stat]) * (1. + this.statsRelativeBonus[stat]) + (this.statBaseValue[stat] * this.statsRelativeBonus[stat]) ).toInt()
+        print("new total bonus = "+this.statsTotalBonus[stat].toString())
+        if whichStat != Stat.MS and whichStat != Stat.HR and whichStat!= Stat.MR
+            this.assocUnit.setBonus(whichStat, this.statsTotalBonus[stat])
+        else
+            if whichStat == Stat.MS
+                this.assocUnit.addMovementSpeedAbsolute( this.statsTotalBonus[stat] )
+            //HR and MR are handled automatically.
+
+    /**
+    Sets the absolute stat bonus and updates the total bonus.
+    **/
+    function setStatAbsoluteBonus(Stat whichStat, int newValue)
+        int stat = whichStat.toInt()
+        this.statsAbsoluteBonus[stat] = newValue
+        updateTotalStatBonus(whichStat)
+
+
+    /**
+    Sets the relative stat bonus and updates the total bonus.
+    **/
+    function setStatRelativeBonus(Stat whichStat, real newValue)
+        int stat = whichStat.toInt()
+        this.statsRelativeBonus[stat] = newValue
+        updateTotalStatBonus(whichStat)
+
+    function addStatAbsoluteBonus(Stat whichStat, int plusValue)
+        this.setStatAbsoluteBonus(whichStat, this.statsAbsoluteBonus[whichStat.toInt()] + plusValue)
+
+    function addStatRelativeBonus(Stat whichStat, real plusValue)
+        this.setStatRelativeBonus(whichStat, this.statsRelativeBonus[whichStat.toInt()] + plusValue)
+
+
+    
+
+
+public function unit.wrapper() returns UnitWrapper
+    return UnitWrapper.getWrapper(this)
+
+public function unit.getCurrentMovementSpeed() returns real
+    return this.wrapper().currentMovementSpeed
+
+public function unit.getDefaultMovementSpeed() returns real
+    return this.wrapper().defaultMovementSpeed
+
+public function unit.updateDefaultMovementSpeed()
+    this.wrapper().defaultMovementSpeed = GetUnitDefaultMoveSpeed(this)
+
+public function unit.setMovementSpeed(real newSpeed)
+    this.wrapper().currentMovementSpeed = newSpeed
+    this.setMoveSpeed(newSpeed)
+
+public function unit.getBuffList() returns BuffList
+    return this.wrapper().buffList
+
+function regenerate()
+    for i = 0 to UnitWrapper.unitWrapperCount-1
+        unit u = UnitWrapper.allUnits[i]
+        
+        if u.isAlive()
+            u.healHP(u.wrapper().statsTotalBonus[Stat.HR.toInt()]/100)
+            
+            u.healMana(u.wrapper().statsTotalBonus[Stat.MR.toInt()]/100)
+
+            if(u.isType(UNIT_TYPE_HERO)) and false
+                print(u.wrapper().statsTotalBonus[Stat.HR.toInt()]/100)
+                print(u.wrapper().statsTotalBonus[Stat.MR.toInt()]/100)
+
+init
+    onUnitIndex(() -> new UnitWrapper(getIndexedUnit()))
+    onUnitDeindex(() -> destroy getDeindexedUnit().wrapper() )
+
+    CreateTrigger()
+        ..addAction(function regenerate)
+        ..registerTimerEvent(0.1, true)

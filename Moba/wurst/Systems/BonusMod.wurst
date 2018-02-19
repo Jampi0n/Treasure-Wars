@@ -1,0 +1,173 @@
+package BonusMod
+
+import AbilityObjEditing
+import Stats
+
+/*
+This system is based on Bonus Mod by
+    Earth-Fury
+based on the work of
+    weaaddar
+*/
+
+constant int MAX_LEVEL = 10
+/*
+0...MAX_LEVEL-1 positive -> MAX_LEVEL positive abilities
+MAX_LEVEL negative
+*/
+constant int MAX_BONUS = (2).pow(MAX_LEVEL)-1
+constant int MIN_BONUS = -MAX_BONUS-1
+//regen stats are handled via trigger
+
+//movement speed is also handled via trigger
+constant BM_HIT_POINTS = 'bHP0'
+constant BM_MANA_POINTS = 'bMP0'
+
+constant BM_ATTACK_SPEED = 'bAS0'
+constant BM_ATTACK_DAMAGE = 'bAD0'
+constant BM_ARMOR = 'bAR0'
+
+constant BM_STRENGTH = 'bST0'
+constant BM_WILLPOWER = 'bWP0'
+constant BM_INTELLIGENCE = 'bIT0'
+
+int array powersOfTwo
+
+function statToBonusAbiltiy(Stat whichStat) returns integer
+    
+    switch whichStat.toInt()
+        case Stat.AD.toInt()
+            return BM_ATTACK_DAMAGE
+        case Stat.AS.toInt()
+            return BM_ATTACK_SPEED
+        case Stat.AR.toInt()
+            return BM_ARMOR
+        case Stat.HP.toInt()
+            return BM_HIT_POINTS
+        case Stat.MP.toInt()
+            return BM_MANA_POINTS
+        case Stat.STR.toInt()
+            return BM_STRENGTH
+        case Stat.WP.toInt()
+            return BM_WILLPOWER
+        case Stat.INT.toInt()
+            return BM_INTELLIGENCE
+        default
+            print("Error. This stat does not use abilities.")
+            return -1
+            
+public function unit.setBonus(Stat whichStat, int bonus)
+
+    int abilityId = statToBonusAbiltiy(whichStat)
+    if abilityId == -1
+        return
+
+    if(bonus > MAX_BONUS)
+        print("Error. This Bonus is too high.")
+        return
+
+    if(bonus < MIN_BONUS)
+        print("Error. This Bonus is too low.")
+        return
+
+    var remainingBonus = bonus
+    if( bonus < 0)
+        remainingBonus = MAX_BONUS + bonus + 1
+        this.addAbility(MAX_LEVEL)
+    else
+        this.removeAbility(MAX_LEVEL)
+
+    for i = MAX_LEVEL-1 downto 0
+        let iBonus = powersOfTwo[i]
+        if remainingBonus >= iBonus
+            this.addAbility(abilityId+i)
+            remainingBonus -= iBonus
+        else
+            this.removeAbility(abilityId+i)
+        
+init
+    for i = 0 to MAX_LEVEL
+        powersOfTwo[i] = (2).pow(i)
+
+
+
+@compiletime
+function generateHitPointBonus()
+    AbilityDefinitionMaxLifeBonusLeast aDef
+    for i = 0 to MAX_LEVEL-1
+        aDef = new AbilityDefinitionMaxLifeBonusLeast(BM_HIT_POINTS+i)
+        aDef.setMaxLifeGained(1, (2).pow(i) )
+
+    aDef = new AbilityDefinitionMaxLifeBonusLeast(BM_HIT_POINTS+MAX_LEVEL)
+    aDef.setMaxLifeGained(1, -(2).pow(MAX_LEVEL) )
+
+@compiletime
+function generateManaPointBonus()
+    AbilityDefinitionMaxManaBonusLeast aDef
+    for i = 0 to MAX_LEVEL-1
+        aDef = new AbilityDefinitionMaxManaBonusLeast(BM_MANA_POINTS+i)
+        aDef.setMaxManaGained(1, (2).pow(i) )
+
+    aDef = new AbilityDefinitionMaxManaBonusLeast(BM_MANA_POINTS+MAX_LEVEL)
+    aDef.setMaxManaGained(1, -(2).pow(MAX_LEVEL) )
+        
+@compiletime
+function generateAttackSpeedBonus()
+    AbilityDefinitionAttackSpeedIncrease aDef
+    for i = 0 to MAX_LEVEL-1
+        aDef = new AbilityDefinitionAttackSpeedIncrease(BM_ATTACK_SPEED+i)
+        aDef.setAttackSpeedIncrease(1, (2).pow(i)/100 )
+
+    aDef = new AbilityDefinitionAttackSpeedIncrease(BM_ATTACK_SPEED+MAX_LEVEL)
+    aDef.setAttackSpeedIncrease(1, -(2).pow(MAX_LEVEL)/100 )
+
+@compiletime
+function generateAttackDamageBonus()
+    AbilityDefinitionAttackBonus aDef
+    for i = 0 to MAX_LEVEL-1
+        aDef = new AbilityDefinitionAttackBonus(BM_ATTACK_DAMAGE+i)
+        aDef.setAttackBonus(1, (2).pow(i) )
+
+    aDef = new AbilityDefinitionAttackBonus(BM_ATTACK_DAMAGE+MAX_LEVEL)
+    aDef.setAttackBonus(1, -(2).pow(MAX_LEVEL) )
+                
+@compiletime
+function generateArmorBonus()
+    AbilityDefinitionDefenseBonusPlus1 aDef
+    for i = 0 to MAX_LEVEL-1
+        aDef = new AbilityDefinitionDefenseBonusPlus1(BM_ARMOR+i)
+        aDef.setDefenseBonus(1, (2).pow(i) )
+
+    aDef = new AbilityDefinitionDefenseBonusPlus1(BM_ARMOR+MAX_LEVEL)
+    aDef.setDefenseBonus(1, -(2).pow(MAX_LEVEL) )
+     
+@compiletime
+function generateStrengthSpeedBonus()
+    AbilityDefinitionStrengthBonusPlus1 aDef
+    for i = 0 to MAX_LEVEL-1
+        aDef = new AbilityDefinitionStrengthBonusPlus1(BM_STRENGTH+i)
+        aDef.setStrengthBonus(1, (2).pow(i) )
+
+    aDef = new AbilityDefinitionStrengthBonusPlus1(BM_STRENGTH+MAX_LEVEL)
+    aDef.setStrengthBonus(1, -(2).pow(MAX_LEVEL) )
+             
+@compiletime
+function generateWillpowerSpeedBonus()
+    AbilityDefinitionAgilityBonusPlus1 aDef
+    for i = 0 to MAX_LEVEL-1
+        aDef = new AbilityDefinitionAgilityBonusPlus1(BM_WILLPOWER+i)
+        aDef.setAgilityBonus(1, (2).pow(i) )
+
+    aDef = new AbilityDefinitionAgilityBonusPlus1(BM_WILLPOWER+MAX_LEVEL)
+    aDef.setAgilityBonus(1, -(2).pow(MAX_LEVEL) )
+             
+@compiletime
+function generateIntelligenceSpeedBonus()
+    AbilityDefinitionIntelligenceBonusPlus1 aDef
+    for i = 0 to MAX_LEVEL-1
+        aDef = new AbilityDefinitionIntelligenceBonusPlus1(BM_INTELLIGENCE+i)
+        aDef.setIntelligenceBonus(1, (2).pow(i) )
+
+    aDef = new AbilityDefinitionIntelligenceBonusPlus1(BM_INTELLIGENCE+MAX_LEVEL)
+    aDef.setIntelligenceBonus(1, -(2).pow(MAX_LEVEL) )
+

@@ -3,8 +3,8 @@ package UnitType
 import HashMap
 import StandardTextTags
 
-public function createUnitType(int unitId, int bounty) returns int
-    new UnitType(unitId, bounty)
+public function createUnitType(int unitId, int bounty, int baseAttack, int baseArmor) returns int
+    new UnitType(unitId, bounty, baseAttack, baseArmor)
     return unitId
 
 public class UnitType
@@ -14,9 +14,14 @@ public class UnitType
     private int unitId
     private int bounty
 
-    construct(int unitId, int bounty)
+    private int baseAttack
+    private int baseArmor
+
+    construct(int unitId, int bounty, int baseAttack, int baseArmor)
         this.unitId = unitId
         this.bounty = bounty
+        this.baseAttack = baseAttack
+        this.baseArmor = baseArmor
         unitIdToUnitType.put(unitId, this)
 
     static function getUnitType(int unitId) returns UnitType
@@ -27,6 +32,12 @@ public class UnitType
 
     function getBounty() returns integer
         return this.bounty
+
+    function getBaseAttack() returns integer
+        return this.baseAttack
+
+    function getBaseArmor() returns integer
+        return this.baseArmor
 
 function onUnitDeath()
     let dyingUnit = GetTriggerUnit()

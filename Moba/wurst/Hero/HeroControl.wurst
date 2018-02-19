@@ -7,6 +7,7 @@ import HeroType
 import Upgrades
 import Stats
 import ErrorHandling
+import UnitWrapper
 
 public class Hero
 
@@ -23,9 +24,6 @@ public class Hero
     private static constant unitToHero = new HashMap<unit,Hero>
     private static constant assistMap = new HashMap<CPlayer,real>
     private trigger onSpellCastTrigger
-    private int array[11] statsAbsoluteBonus //default = 0
-    private real array[11] statsRelativeBonus //default = 0.00
-    private int array[11] statsTotalBonus //default = 0
 
     protected static function classInit()
         onDamageTrigger.addAction(function onDamageStatic)
@@ -42,9 +40,6 @@ public class Hero
         onSpellCastTrigger = this.heroType.getOnSpellCastTrigger()
         onSpellCastTrigger.registerUnitEvent(this.hero, EVENT_UNIT_SPELL_EFFECT)
 
-        for int i = 0 to 10
-            statsAbsoluteBonus[i] = 0
-            statsRelativeBonus[i] = 0
 
         //print("setup completed: "+this.hero.getName())
 
@@ -73,13 +68,26 @@ public class Hero
         SetPlayerTechResearched(upgradePlayer, UPG_AR , this.heroType.calculateStat(Stat.AR, lvl))
         SetPlayerTechResearched(upgradePlayer, UPG_AS , this.heroType.calculateStat(Stat.AS, lvl))
         SetPlayerTechResearched(upgradePlayer, UPG_HP , this.heroType.calculateStat(Stat.HP, lvl))
-        SetPlayerTechResearched(upgradePlayer, UPG_HR , this.heroType.calculateStat(Stat.HR, lvl))
+        //SetPlayerTechResearched(upgradePlayer, UPG_HR , this.heroType.calculateStat(Stat.HR, lvl))
+        this.hero.wrapper().addStatAbsoluteBonus(Stat.HR, this.heroType.calculateStat(Stat.HR, lvl) - this.heroType.calculateStat(Stat.HR, lvl-1))
+
         SetPlayerTechResearched(upgradePlayer, UPG_MP , this.heroType.calculateStat(Stat.MP, lvl))
-        SetPlayerTechResearched(upgradePlayer, UPG_MR , this.heroType.calculateStat(Stat.MR, lvl))
+        //SetPlayerTechResearched(upgradePlayer, UPG_MR , this.heroType.calculateStat(Stat.MR, lvl))
+        this.hero.wrapper().addStatAbsoluteBonus(Stat.MR, this.heroType.calculateStat(Stat.MR, lvl) - this.heroType.calculateStat(Stat.MR, lvl-1))
+
         SetPlayerTechResearched(upgradePlayer, UPG_MS , this.heroType.calculateStat(Stat.MS, lvl))
+        this.hero.updateDefaultMovementSpeed()
+
+        //this.hero.wrapper().addStatAbsoluteBonus(Stat.MS, this.heroType.calculateStat(Stat.MS, lvl) - this.heroType.calculateStat(Stat.MS, lvl-1))
+
         SetHeroStr(this.hero, this.heroType.calculateStat(Stat.STR, lvl), true)
         SetHeroAgi(this.hero, this.heroType.calculateStat(Stat.WP, lvl), true)
         SetHeroInt(this.hero, this.heroType.calculateStat(Stat.INT, lvl), true)
+
+        this.hero.wrapper().updateBaseStats()
+
+        for int i = 0 to 10
+            this.hero.wrapper().updateTotalStatBonus(i castTo Stat)
         
     function onLevelUp()
         this.level = GetHeroLevel(this.hero)
@@ -136,6 +144,9 @@ public class Hero
     function getHeroType() returns HeroType
         return this.heroType
 
+    function getLevel() returns int
+        return this.level
+
     static function getHero(unit whichUnit) returns Hero
         return unitToHero.get(whichUnit)
 
@@ -151,35 +162,6 @@ public class Hero
     static function getHero(player owner) returns Hero
         return getHero(owner.getId())
 
-    /**
-    Updates the total stat bonus based on base stat, absolute stat bonus and relative stat bonus
-    **/
-    private function updateTotalStatBonus(Stat whichStat)
-        int stat = whichStat.toInt()
-        this.statsTotalBonus[stat] = (this.heroType.calculateStat(whichStat, this.level) + this.statsAbsoluteBonus[stat]) * (1. + this.statsRelativeBonus[stat]).toInt()
-
-    /**
-    Sets the absolute stat bonus and updates the total bonus.
-    **/
-    function setStatAbsoluteBonus(Stat whichStat, int newValue)
-        int stat = whichStat.toInt()
-        this.statsAbsoluteBonus[stat] = newValue
-        updateTotalStatBonus(whichStat)
-
-
-    /**
-    Sets the relative stat bonus and updates the total bonus.
-    **/
-    function setStatRelativeBonus(Stat whichStat, real newValue)
-        int stat = whichStat.toInt()
-        this.statsRelativeBonus[stat] = newValue
-        updateTotalStatBonus(whichStat)
-
-    function addStatAbsoluteBonus(Stat whichStat, int plusValue)
-        this.setStatAbsoluteBonus(whichStat, this.statsAbsoluteBonus[whichStat.toInt()] + plusValue)
-
-    function addStatRelativeBonus(Stat whichStat, real plusValue)
-        this.setStatRelativeBonus(whichStat, this.statsRelativeBonus[whichStat.toInt()] + plusValue)
         
 init
     Hero.classInit()

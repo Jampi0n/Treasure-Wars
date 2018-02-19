@@ -2,8 +2,7 @@ package Buff
 
 import TimerUtils
 import LinkedList
-import UnitIndexer
-import HashMap
+import UnitWrapper
 import InstantDummyCaster
 
 /*
@@ -217,15 +216,11 @@ public class BuffType
 */
 public class BuffList 
 
-    private static constant unitBuffList = new HashMap<unit, BuffList>
     private LinkedList<Buff> linkedList
 
     construct()
         linkedList = new LinkedList<Buff>
 
-    static function onIndex()
-        BuffList newList = new BuffList()
-        unitBuffList.put(getIndexedUnit(), newList)
 
     function add(Buff newBuff)
         this.linkedList.add(newBuff)
@@ -233,17 +228,8 @@ public class BuffList
     function remove(Buff removeBuff)
         this.linkedList.remove(removeBuff)
 
-    static function onDeindex()
-        let removeList = unitBuffList.get(getDeindexedUnit())
-
-        //print("remove bufflist for: "+getDeindexedUnit().getName()+" -> "+getDeindexedUnit().getHandleId().toString())
-
-        if(removeList!=null)
-            unitBuffList.remove(getDeindexedUnit())
-            destroy removeList
-
     static function getBuffOfType(unit target, BuffType buffType) returns Buff
-        let buffList = unitBuffList.get(target)
+        let buffList = target.getBuffList()
         let iter = buffList.linkedList.iterator()
         while(iter.hasNext())
             let next = iter.next()
@@ -256,7 +242,7 @@ public class BuffList
         return getBuffOfType(target, buffType) != null
 
     static function hasBuff(unit target, Buff whichBuff) returns boolean
-        let buffList = unitBuffList.get(target)
+        let buffList = target.getBuffList()
         let iter = buffList.linkedList.iterator()
         while(iter.hasNext())
             let next = iter.next()
@@ -264,9 +250,6 @@ public class BuffList
                 return true
         destroy iter
         return false
-    
-    static function getBuffList(unit target) returns BuffList
-        return unitBuffList.get(target)
 
     function getLinkedList() returns LinkedList<Buff>
         return this.linkedList
@@ -333,7 +316,7 @@ public class Buff
             destroy this
         else
             //print("first")
-            BuffList.getBuffList(target).add(this)
+            target.getBuffList().add(this)
             if(this.onFirst!=null)
                 this.onFirst.execute()
 
@@ -403,7 +386,7 @@ public class Buff
 
     ondestroy
 
-        BuffList buffList = BuffList.getBuffList(this.target)
+        BuffList buffList = target.getBuffList()
 
         if buffList!=null
             buffList.remove(this)
@@ -412,8 +395,3 @@ public class Buff
         if this.periodicTimer != null
             this.periodicTimer.release()
         //do not modify triggers. They belong to the BuffType
-
-
-init
-    onUnitIndex(function BuffList.onIndex )
-    onUnitDeindex(function BuffList.onDeindex )

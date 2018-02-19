@@ -138,7 +138,8 @@ function poisonSpit()
         ..setTargetAttachmentPoint("chest")
     for lvl = 1 to 5
         aDefSlowAura
-            ..setMovementSpeedFactor(lvl, POISON_SPIT_SLOW_MS[lvl-1])
+            //..setMovementSpeedFactor(lvl, POISON_SPIT_SLOW_MS[lvl-1]) movement speed will be handled via trigger
+            ..setMovementSpeedFactor(lvl, 0)
             ..setTargetsAllowed(lvl, "invulnerable,self,vulnerable")
             ..setAreaofEffect(lvl, 1)
             ..setBuffs(lvl, int2fourchar(BUFF_ID_POISON_SPIT))
@@ -335,6 +336,17 @@ init
         thisBuff.getCaster().dealDamage(thisBuff.getTarget(), 
         (POISON_SPIT_DOT[thisBuff.getLevel()-1]).bonus(thisBuff.getCaster().getInt(), POISON_SPIT_DOT_BONUS)/4
         , ReductionType.MAGIC)
+    end) )
+    BUFF_POISON_SPIT.addFirstFunction( () -> (begin
+        let thisBuff = Buff.getTriggerBuff()
+        print("add slow")
+        thisBuff.getTarget().addMovementSpeedRelative( POISON_SPIT_SLOW_MS[thisBuff.getLevel()-1] )
+    end) )
+
+    BUFF_POISON_SPIT.addEndFunction( () -> (begin
+        let thisBuff = Buff.getTriggerBuff()
+        print("remove slow")
+        thisBuff.getTarget().addMovementSpeedRelative( -POISON_SPIT_SLOW_MS[thisBuff.getLevel()-1] )
     end) )
 
     onEnter(() -> (begin
