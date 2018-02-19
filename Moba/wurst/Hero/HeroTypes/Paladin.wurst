@@ -39,6 +39,7 @@ constant real array HEAVY_ARMOED_REDUCTION = [4, 6, 8, 10, 12]
 function heavyArmored()
     let aDef = new AbilityDefinitionHardenedSkin(ABILITY_HEAVY_ARMORED)
         ..setCheckDependencies(false)
+        ..setRequirements("")
         ..presetIcon("PASHolyArmor")
         ..setupWithHotKey("Heavy Armored", "D")
         ..setLearnString("Reduces damage from incoming attacks.", (int lvl) -> (begin

@@ -16,7 +16,7 @@ import AbilityObjEditing
 
 string array itemRequiredItems //needed at runtime needs two seperators
 int array itemGoldCost //needed at runtime 3-4 + 1 seperator
-int array itemId //needed at runtime: 4 (no seperator needed)
+public int array itemIdArray //needed at runtime: 4 (no seperator needed)
 boolean array itemIsRecipe //needed at runtime 1
 
 /*  ==========================================================================================================================
@@ -233,7 +233,7 @@ public function newItem(string name, int goldCost, int whichShop, string require
     */
     let shop = whichShop castTo Shop
     currentItemId++
-    itemId[currentItemId] = ITEM_ID_GEN.next()
+    itemIdArray[currentItemId] = ITEM_ID_GEN.next()
     itemName[currentItemId] = name
     itemShopDescription[currentItemId] = shop.name
     itemIsRecipe[currentItemId] = false
@@ -242,7 +242,7 @@ public function newItem(string name, int goldCost, int whichShop, string require
     itemGoldCost[currentItemId] = goldCost
     itemDesc[currentItemId] = ""
 
-    itemDefinition[currentItemId] = newItemDefintion(itemId[currentItemId])
+    itemDefinition[currentItemId] = newItemDefintion(itemIdArray[currentItemId])
         ..presetIcon(icon)
         ..setName(name)
         ..setTooltipBasic(name)
@@ -250,7 +250,7 @@ public function newItem(string name, int goldCost, int whichShop, string require
 
     if requiredItems!="" //create additional recipe item directly after the main item
         currentItemId++
-        itemId[currentItemId] = ITEM_ID_GEN.next()
+        itemIdArray[currentItemId] = ITEM_ID_GEN.next()
         itemName[currentItemId] = name
         itemIsRecipe[currentItemId] = true
 
@@ -259,14 +259,14 @@ public function newItem(string name, int goldCost, int whichShop, string require
         itemGoldCost[currentItemId] = goldCost
         itemDesc[currentItemId] = ""
 
-        itemDefinition[currentItemId] = newItemDefintion(itemId[currentItemId])
+        itemDefinition[currentItemId] = newItemDefintion(itemIdArray[currentItemId])
             ..presetIcon(icon)
             ..setName(name+" - Recipe")
             ..setTooltipBasic(name+" - Recipe")
 
         if(shop.itemsMade!="")
             shop.itemsMade += ","
-        shop.itemsMade += int2fourchar(itemId[currentItemId])
+        shop.itemsMade += int2fourchar(itemIdArray[currentItemId])
         shop.bDef.setItemsMade(shop.itemsMade)
 
         shop.soldItems.add(new ItemInShop(currentItemId))
@@ -275,7 +275,7 @@ public function newItem(string name, int goldCost, int whichShop, string require
     else
         if(shop.itemsMade!="")
             shop.itemsMade += ","
-        shop.itemsMade += int2fourchar(itemId[currentItemId])
+        shop.itemsMade += int2fourchar(itemIdArray[currentItemId])
         shop.bDef.setItemsMade(shop.itemsMade)
 
         shop.soldItems.add(new ItemInShop(currentItemId))
@@ -400,7 +400,7 @@ function setupStringArrayRequiredItems() returns string
 function setupStringArrayItemId() returns string
     string s = ""
     for int i = 0 to currentItemId
-        s += int2fourchar(itemId[i])
+        s += int2fourchar(itemIdArray[i])
     return s
 
 function setupStringArrayItemIsRecipe() returns string
@@ -485,7 +485,7 @@ function setupArrayItemId(string stringArray)
     var stringPos = 0
     while stringPos < stringArray.length()
         currentString = stringArray.charAt(stringPos)+stringArray.charAt(stringPos+1)+stringArray.charAt(stringPos+2)+stringArray.charAt(stringPos+3)
-        itemId[currentIndex] = fourchar2int(currentString)
+        itemIdArray[currentIndex] = fourchar2int(currentString)
 
         stringPos += 4
         currentIndex++
@@ -508,9 +508,9 @@ function setupArrayItemIsRecipe(string stringArray)
 function setupItems()
     for i = 0 to currentItemId
         if itemIsRecipe[i]
-            itemType[i] = new Recipe(itemId[i], itemGoldCost[i], itemRequiredItems[i], itemType[i-1])
+            itemType[i] = new Recipe(itemIdArray[i], itemGoldCost[i], itemRequiredItems[i], itemType[i-1])
         else
-            itemType[i] = new Item(itemId[i], itemGoldCost[i])
+            itemType[i] = new Item(itemIdArray[i], itemGoldCost[i])
 
 
 class Item

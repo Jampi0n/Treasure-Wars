@@ -1,0 +1,35 @@
+package ItemConfiguration
+
+import ItemEffects
+import ItemShop
+import UnitWrapper
+import Stats
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+init
+    new ItemType(ITEM_ID_HAMMER_OF_STRENGTH, 
+    () -> (getTriggerHero().wrapper().addStatAbsoluteBonus(Stat.STR, 20)),
+    () -> (getTriggerHero().wrapper().addStatAbsoluteBonus(Stat.STR, -10)) )
+
+    new ItemType(ITEM_ID_GLOVES_OF_HASTE, 
+    () -> (getTriggerHero().wrapper().addStatRelativeBonus(Stat.STR, 0.5)),
+    () -> (getTriggerHero().wrapper().addStatRelativeBonus(Stat.STR, -0.5)) )
+

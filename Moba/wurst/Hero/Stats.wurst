@@ -1,17 +1,17 @@
 package Stats
 
 public enum Stat
-    HP
-    HR
-    MP
-    MR
-    AD
-    AS
-    AR
-    MS
-    STR
-    WP
-    INT
+    HP // upgrade (25) + bonus mod
+    HR // triggers (0.1)
+    MP // upgrade (10) + bonus mod
+    MR // triggers (0.1)
+    AD // bonus mod (heroes use strength instead)
+    AS // upgrade (0.01) + bonus mod (0.01)
+    AR // upgrade + bonus mod
+    MS // triggers (any value)
+    STR // triggers + bonus mod
+    WP // triggers + bonus mod
+    INT // triggers + bonus mod
 
 public function Stat.toInt() returns int
     return this castTo int

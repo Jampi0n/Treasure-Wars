@@ -32,7 +32,7 @@ ban, reverse pick, same heroes
 function setupCreatedHero(Hero hero)
     player owner = hero.toUnit().getOwner()
     CPlayer cPlayer = owner.getCPlayer()
-    owner.setGold(500)
+    owner.setGold(5000)
 
     if(cPlayer.getTeam()==Team.TEAM1)
         hero.toUnit().setPos(gg_rct_GreenCastle.getCenter())
