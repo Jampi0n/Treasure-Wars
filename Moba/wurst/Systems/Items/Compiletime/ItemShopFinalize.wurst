@@ -1,7 +1,9 @@
-package ShopFinalize
+package ItemShopFinalize
 
-import ItemShop
+import ItemShopRequirements
+import ItemShopInitialize
 import ShopArmor
+import initlater ItemShopSystem
 import Execute
 import ObjectIds
 
@@ -66,24 +68,24 @@ public function int2threechar(int value) returns string
     return result
 
 function createItemGoldCosts()
-    for i = 0 to currentItemId
-        if itemIsRecipe[i]
-            let requiredItemList = stringToList(itemRequiredItems[i], ",")
+    for i = 0 to compCurrentItemId
+        if compItemIsRecipe[i]
+            let requiredItemList = stringToList(compItemRequiredItems[i], ",")
     
             for int j in requiredItemList
-                itemGoldCost[i] -= itemGoldCost[j]
+                compItemGoldCost[i] -= compItemGoldCost[j]
     
             destroy requiredItemList
             compStringItemIsRecipe += "1"
         else
             compStringItemIsRecipe += "0"
 
-        compStringItemId += int2threechar(itemIdArray[i])
-        compStringItemGoldCost += itemGoldCost[i].toString()+"|"
-        compStringItemRequiredItems += itemRequiredItems[i]+"|"
+        compStringItemId += int2threechar(compItemIdArray[i])
+        compStringItemGoldCost += compItemGoldCost[i].toString()+"|"
+        compStringItemRequiredItems += compItemRequiredItems[i]+"|"
         
             
-        itemDefinition[i].setGoldCost(itemGoldCost[i])
+        compItemDefinition[i].setGoldCost(compItemGoldCost[i])
 
 
     //the object of class ItemInShop are created, while gold cost is not yet known
@@ -99,9 +101,9 @@ function sortShops()
         int x = 0
         int y = 0
         for ItemInShop soldItem in shop.soldItems
-            itemPosX[soldItem.itemId] = x
-            itemPosY[soldItem.itemId] = y
-            itemDefinition[soldItem.itemId]
+            compItemPosX[soldItem.itemId] = x
+            compItemPosY[soldItem.itemId] = y
+            compItemDefinition[soldItem.itemId]
                 ..setButtonPositionX(x)
                 ..setButtonPositionY(y)
             x++
@@ -110,27 +112,27 @@ function sortShops()
                 y++
 
 function createItemDescritptions()
-    for i = 0 to currentItemId
-        if itemIsRecipe[i]
+    for i = 0 to compCurrentItemId
+        if compItemIsRecipe[i]
             string recipeDesc = "|n|n|cffffcc00Requires:|r"
-            string requiredItems = itemRequiredItems[i]
+            string requiredItems = compItemRequiredItems[i]
             let requiredItemList = stringToList(requiredItems, ",")
 
             for int j in requiredItemList
 
-                let buttonPos = " ["+(itemPosX[j]+1).toString()+","+(itemPosY[j]+1).toString()+"]"
+                let buttonPos = " ["+(compItemPosX[j]+1).toString()+","+(compItemPosY[j]+1).toString()+"]"
 
-                recipeDesc += "|n - "+itemName[j]+"       ( "+itemShopDescription[j] + buttonPos+" )"
+                recipeDesc += "|n - "+compItemName[j]+"       ( "+compItemShopDescription[j] + buttonPos+" )"
 
             destroy requiredItemList
 
 
 
-            itemDefinition[i].setDescription(itemDesc[i-1] + recipeDesc)
-            itemDefinition[i].setTooltipExtended(itemDesc[i-1] + recipeDesc)
+            compItemDefinition[i].setDescription(compItemDesc[i-1] + recipeDesc)
+            compItemDefinition[i].setTooltipExtended(compItemDesc[i-1] + recipeDesc)
         else
-            itemDefinition[i].setDescription(itemDesc[i])
-            itemDefinition[i].setTooltipExtended(itemDesc[i])
+            compItemDefinition[i].setDescription(compItemDesc[i])
+            compItemDefinition[i].setTooltipExtended(compItemDesc[i])
 
 @compiletime
 public function itemShopFinalize()
@@ -139,7 +141,7 @@ public function itemShopFinalize()
     createItemDescritptions()
 
 
-    /*  ==========================================================================================================================
+/*  ==========================================================================================================================
 **
 **  During compiletime certain arrays are used.
 **  To preserve their data for runtime they are converted into a string containing all array members seperated by "|".
@@ -152,6 +154,18 @@ public string stringItemRequiredItems = compiletime(compStringItemRequiredItems)
 public string stringItemId = compiletime(compStringItemId)
 public string stringItemIsRecipe = compiletime(compStringItemIsRecipe)
 
+
+/*  ==========================================================================================================================
+**
+**  globals
+**
+**  ==========================================================================================================================*/
+
+public int array itemGoldCost
+public string array itemRequiredItems
+public int array itemIdArray
+public boolean array itemIsRecipe
+public int MAX_ITEM_ID
 
 /*  ==========================================================================================================================
 **
@@ -241,7 +255,6 @@ function setupArrayItemId()
         currentIndex++
     end))
 
-    currentItemId = stringLength-1
 
 function setupArrayItemIsRecipe()
     stringArray = stringItemIsRecipe
@@ -255,7 +268,7 @@ function setupArrayItemIsRecipe()
         currentIndex++
     end))
 
-    currentItemId = stringArray.length()-1
+    MAX_ITEM_ID = stringLength-1
 
 
 init
@@ -266,7 +279,13 @@ init
     createShopBuilding(SHOP_ID_MAGICAL_2, false, 3)
     createShopBuilding(SHOP_ID_MAGICAL_3, false, 5)
 
-    setupArrays()
+    Item.classInit()
 
+    setupArrays()
     setupItems()
+
+    shopArmorInit()
+
+
+    
 

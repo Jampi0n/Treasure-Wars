@@ -1,7 +1,7 @@
 package ShopArmor
 
-import ItemEffects
-import ItemShop
+import initlater ItemShopSystem
+import ItemShopInitialize
 import UnitWrapper
 import Stats
 import ObjectIdGenerator
@@ -21,20 +21,21 @@ function itemPlatedGauntlets()
 
 
 
-@compiletime
+
 function itemSpikedMail()
-    ITEM_ID_SPIKED_MAIL.getTypeDef()
-        ..setDescription("17")
-        ..setGoldCost(1700)
-        ..addRequirement(ITEM_ID_PLATED_GAUNTLETS)
+    if compiletime
+        ITEM_ID_SPIKED_MAIL.getTypeDef()
+            ..setDescription("17")
+            ..setGoldCost(1700)
+            ..addRequirement(ITEM_ID_PLATED_GAUNTLETS)
+    else
+        ITEM_ID_SPIKED_MAIL.getItem()
+            ..setPickupFunction(() -> (getTriggerHero().wrapper().addStatAbsoluteBonus(Stat.AR, 10)))
+            ..setDropFunction(() -> (getTriggerHero().wrapper().addStatAbsoluteBonus(Stat.AR, -10)))
+
+@compiletime
+public function shopArmorInit()
+    itemSpikedMail()
 
 
-init
-    new ItemType(ITEM_ID_HAMMER_OF_STRENGTH, 
-    () -> (getTriggerHero().wrapper().addStatAbsoluteBonus(Stat.MS, 60)),
-    () -> (getTriggerHero().wrapper().addStatAbsoluteBonus(Stat.MS, -60)) )
-
-    new ItemType(ITEM_ID_GLOVES_OF_HASTE, 
-    () -> (getTriggerHero().wrapper().addStatRelativeBonus(Stat.MS, -0.2)),
-    () -> (getTriggerHero().wrapper().addStatRelativeBonus(Stat.MS, 0.2)) )
 
