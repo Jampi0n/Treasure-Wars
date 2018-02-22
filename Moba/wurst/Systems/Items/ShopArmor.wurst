@@ -6,24 +6,6 @@ import UnitWrapper
 import Stats
 import ObjectIdGenerator
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 init
     new ItemType(ITEM_ID_HAMMER_OF_STRENGTH, 
     () -> (getTriggerHero().wrapper().addStatAbsoluteBonus(Stat.MS, 60)),
@@ -54,9 +36,11 @@ function itemPlatedGauntlets()
 
 
 
-public constant ITEM_ID_SPIKED_MAIL = compiletime(newItem("Spiked Mail", 500, SHOP_PHYSICAL_1, ITEM_ID_PLATED_GAUNTLETS.toString(), "BTNINV_Chest_Chain_14"))
+public constant ITEM_ID_SPIKED_MAIL = compiletime(newItem("Spiked Mail", 500, SHOP_PHYSICAL_1, "", "BTNINV_Chest_Chain_14"))
 
 @compiletime
 function itemSpikedMail()
-    let armor = 10
-    itemDesc[ITEM_ID_SPIKED_MAIL] = "this thing should require smth".format(armor.toString())
+    ITEM_ID_SPIKED_MAIL.getTypeDef()
+        ..setDescription("17")
+        ..setGoldCost(1700)
+        ..addRequirement(ITEM_ID_PLATED_GAUNTLETS)

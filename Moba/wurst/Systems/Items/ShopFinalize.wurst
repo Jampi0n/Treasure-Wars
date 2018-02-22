@@ -3,7 +3,6 @@ package ShopFinalize
 import ItemShop
 import ShopArmor
 
-
 function createShopBuilding(int unitId, boolean first, int position)
     rect rectGreen = first ? gg_rct_GreenShops1 : gg_rct_GreenShops2
     rect rectBrown = first ? gg_rct_BrownShops1 : gg_rct_BrownShops2
@@ -33,6 +32,10 @@ function createShopBuilding(int unitId, boolean first, int position)
 
     createUnit(players[11], unitId, posBrown, facing.asAngleDegrees())
         ..addAbility('A00X')
+
+@compiletime
+function finalize()
+    itemShopFinalize()
 
 init
     createShopBuilding(SHOP_ID_PHYSICAL_1, true, 1)

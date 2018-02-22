@@ -348,12 +348,11 @@ function stringToList(string sList, string splitChar) returns LinkedList<int>
 
 public function newItem(string name, int goldCost, int whichShop, string requiredItems, string icon) returns int
     /*
-
     There should not be any references to other item variables, as they might not have been initialized.
-
     */
     let shop = whichShop castTo Shop
     currentItemId++
+    new ItemTypeDef(currentItemId)
     itemIdArray[currentItemId] = ITEM_ID_GEN.next()
     itemName[currentItemId] = name
     itemShopDescription[currentItemId] = shop.name
@@ -371,6 +370,7 @@ public function newItem(string name, int goldCost, int whichShop, string require
 
     if requiredItems!="" //create additional recipe item directly after the main item
         currentItemId++
+        new ItemTypeDef(currentItemId)
         itemIdArray[currentItemId] = ITEM_ID_GEN.next()
         itemName[currentItemId] = name
         itemIsRecipe[currentItemId] = true
@@ -423,7 +423,49 @@ function ItemDefinition.presetIcon(string name)
     this.setInterfaceIcon(s)
 
 
-/*  ==========================================================================================================================
+    /*  ==========================================================================================================================
+**
+**
+**  Compiletime class for easier item modification.
+**
+**  ==========================================================================================================================*/
+
+public function int.getTypeDef() returns ItemTypeDef
+    return ItemTypeDef.idToTypeDef.get(this)
+
+public class ItemTypeDef
+
+    private int itemId
+    private string requirements
+    protected static constant idToTypeDef = new HashMap<int, ItemTypeDef>()
+    
+    construct(int itemId)
+        this.itemId = itemId
+        idToTypeDef.put(this.itemId, this)
+        this.requirements = ""
+    
+    function getId() returns integer
+        return this.itemId
+
+    function getItemDefinition() returns ItemDefinition
+        return itemDefinition[this.getId()]
+
+    function setGoldCost(int gold)
+        itemGoldCost[this.getId()] = gold
+
+    function setDescription(string newDesc)
+        itemDesc[this.getId()] = newDesc
+
+    function addRequirement(int id)
+        if(this.requirements=="")
+            this.requirements+=id.toString()
+        else
+            this.requirements+=","+id.toString()
+
+        itemRequiredItems[this.getId()] = this.requirements
+        
+
+    /*  ==========================================================================================================================
 **
 **  Finalize item creation. After all item objects have been created during compile time, the combined information about all items is
 **  used to resolve all values, that reference other items.
@@ -452,7 +494,6 @@ public function int2threechar(int value) returns string
 
     return result
 
-@compiletime
 function createItemGoldCosts()
     for i = 0 to currentItemId
         if itemIsRecipe[i]
@@ -480,7 +521,6 @@ function createItemGoldCosts()
         for ItemInShop soldItem in shop.soldItems
             soldItem.setupGoldCost()
 
-@compiletime
 function sortShops()
     for Shop shop in shopList
         shop.soldItems.sortWith( (ItemInShop i1, ItemInShop i2) -> (i1.goldCost - i2.goldCost) )
@@ -498,7 +538,6 @@ function sortShops()
                 x = 0
                 y++
 
-@compiletime
 function createItemDescritptions()
     for i = 0 to currentItemId
         if itemIsRecipe[i]
@@ -521,6 +560,11 @@ function createItemDescritptions()
         else
             itemDefinition[i].setDescription(itemDesc[i])
             itemDefinition[i].setTooltipExtended(itemDesc[i])
+
+public function itemShopFinalize()
+    createItemGoldCosts()
+    sortShops()
+    createItemDescritptions()
 
 /*  ==========================================================================================================================
 **
@@ -743,80 +787,3 @@ init
     doAfter(1, () -> print("id = "+itemId[ITEM_ID_HELMET+1].toString()))
     doAfter(1, () -> print("recipe = "+itemIsRecipe[ITEM_ID_HELMET+1].toString()))
     doAfter(1, () -> print("required = "+itemRequiredItems[ITEM_ID_HELMET+1]))*/
-
-/*
-constant string array orderIdStrings = [
-    "summonfactory","summonwareagle","summonquilbeast","summongrizzly",
-    "summonphoenix","waterelemental","spiritwolf", "evileye",
-    "inferno", "raisedead", "stasistrap"
-    ]
-
-integer currentItemId = 0
-
-public abstract class Item
-
-    LinkedList<Item> requirements
-    int itemId
-    string name
-    int gold
-    int x
-    int y
-
-    construct(string name, int gold, int itemId, int x, int y)
-        this.itemId = itemId
-        this.name = name
-        this.gold = gold
-        this.x = x
-        this.y = y
-
-
-public class BasicItem extends Item
-
-    construct(string name, int gold, int itemId, int x, int y)
-        super(name, gold, itemId, x, y)
-        this.requirements = new LinkedList<Item>
-        let aDef = new AbilityDefinitionNeutralSpell('AI00'+currentItemId)
-            ..setGoldCost(1, gold)
-            ..setButtonPositionNormalX(x)
-            ..setButtonPositionNormalY(y)
-            ..setTooltipNormal(1, name)
-            ..setTooltipNormalExtended(1, name+"|n"+gold.toString())
-        currentItemId++
-
-
-public class RequiredItem extends Item
-
-    construct(Item baseItem, int y)
-        super(baseItem.name, baseItem.gold, baseItem.itemId, 0, y)
-        let aDef = new AbilityDefinitionNeutralSpell('AI00'+currentItemId)
-            ..setGoldCost(1, gold)
-            ..setButtonPositionNormalX(x)
-            ..setButtonPositionNormalY(y)
-            ..setTooltipNormal(1, name)
-            ..setTooltipNormalExtended(1, name+"|n"+gold.toString())
-        currentItemId++
-
-public class RecipeItem extends Item
-
-    construct(string name, int gold, int itemId, LinkedList<Item> requirements, int x, int y, int tier)
-        super(name, gold, itemId, x, y)
-        this.requirements = requirements
-        let aDef = new AbilityDefinitionIllidanChannel('AI00'+currentItemId)
-            ..setButtonPositionNormalX(x)
-            ..setButtonPositionNormalY(y)
-            ..setTooltipNormal(1, name)
-            ..setTooltipNormalExtended(1, name+"|n"+gold.toString())
-        currentItemId++
-        if tier == 2
-            new RequiredItem(this, 1)
-            for Item req in requirements
-                new RequiredItem(req, 0)
-        
-        if tier == 3
-            new RequiredItem(this, 2)
-            for Item req in requirements
-                if req instanceof RecipeItem
-                    for Item req2 in req.requirements
-                        new RequiredItem(req2, 1)
-                new RequiredItem(req, 0)
-*/
