@@ -1,0 +1,191 @@
+package ItemShopSystem
+
+import ClosureTimers
+import ItemShopFinalize
+import HashMap
+import LinkedList
+import ItemShopRequirements
+import ShopArmor
+
+//This package is imported ny other item packages, but they use initlater to avoid cyclic requirements. So the initialization of this
+//package is manually called by other packages and not by using init, because init is after all other item packages.
+//Init only contains functions that can be executed later.
+
+
+/*  ==========================================================================================================================
+**
+**  runtime
+**
+**  ==========================================================================================================================*/
+
+/*  ==========================================================================================================================
+**
+**  globals
+**
+**  ==========================================================================================================================*/
+
+Item array itemType 
+
+/*  ==========================================================================================================================
+**
+**  Creates the runtime item objects based on the compiletime values.
+**
+**  ==========================================================================================================================*/
+
+
+public function setupItems()
+    for i = 0 to MAX_ITEM_ID
+        if itemIsRecipe[i]
+            itemType[i] = new Recipe(itemIdArray[i], itemGoldCost[i], itemRequiredItems[i], itemType[i-1])
+        else
+            itemType[i] = new Item(itemIdArray[i], itemGoldCost[i])
+
+interface ItemPickUp
+    function onItemPickUp()
+
+interface ItemDrop
+    function onItemDrop()
+
+item triggerItem
+unit triggerHero
+        
+public function getTriggerItem() returns item
+    return triggerItem
+
+public function getTriggerHero() returns unit
+    return triggerHero
+
+public function int.getItem() returns Item
+    return Item.itemMap.get(itemIdArray[this])
+
+public class Item
+    protected constant int itemTypeId
+    protected constant int gold
+
+    protected static HashMap<int, Item> itemMap
+    private static trigger onItemPickUp = CreateTrigger()
+    private static trigger onItemDrop = CreateTrigger()
+    ItemPickUp onPickUp
+    ItemDrop onDrop
+
+    construct(int itemTypeId, int gold)
+        this.itemTypeId = itemTypeId
+        this.gold = gold
+        if itemMap == null
+            print("still null")
+        else
+            itemMap.put(itemTypeId, this)
+
+    static function classInit() //class must be initialized, before the package (before items are set up in Finalize)
+        itemMap = new HashMap<int, Item>()
+        onItemPickUp = CreateTrigger()
+            ..addAction(function onItemPickUp)
+            ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_PICKUP_ITEM)
+        onItemDrop = CreateTrigger()
+            ..addAction(function onItemDrop)
+            ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DROP_ITEM)
+
+    static function onItemPickUp()
+        triggerItem = GetManipulatedItem()
+        triggerHero = GetTriggerUnit()
+        let itemType = itemMap.get(triggerItem.getTypeId())
+        if itemType != null and itemType.onPickUp != null
+            itemType.onPickUp.onItemPickUp()
+
+    static function onItemDrop()
+        triggerItem = GetManipulatedItem()
+        triggerHero = GetTriggerUnit()
+        let itemType = itemMap.get(triggerItem.getTypeId())
+        if itemType != null and itemType.onDrop != null
+            itemType.onDrop.onItemDrop()
+
+    function setPickupFunction(ItemPickUp onPickUp)
+        this.onPickUp = onPickUp
+
+    function setDropFunction(ItemDrop onDrop)
+        this.onDrop = onDrop
+
+    function getTypeId() returns int
+        return this.itemTypeId
+
+
+    
+
+
+public class Recipe extends Item
+
+    protected LinkedList<int> requiredItems
+    
+    protected constant Item resultItem
+
+    construct(int itemTypeId, int gold, string requiredItems, Item resultItem)
+        super(itemTypeId, gold)
+        this.requiredItems = stringToList(requiredItems, ",")
+        this.resultItem = resultItem
+
+    private static function onItemGet(unit hero, item whichItem)
+        let itemTypeId = whichItem.getTypeId()
+        let itm = itemMap.get(itemTypeId)
+      
+
+        if not (itm instanceof Recipe)
+            return
+
+
+        let recipe = itm castTo Recipe
+
+        let owner = hero.getOwner()
+        var missingItems = ""
+        var hasAll = true
+        if recipe != null
+            for int req in recipe.requiredItems
+                if not UnitHasItemOfTypeBJ(hero, itemType[req].itemTypeId)
+                    hasAll = false
+                    if(missingItems!="")
+                        missingItems += ", "
+                    missingItems += GetObjectName(itemType[req].itemTypeId)
+                  
+
+        hero.removeItem(whichItem)
+        whichItem.remove()
+        if hasAll
+            
+            for int req in recipe.requiredItems
+                GetItemOfTypeFromUnitBJ(hero, itemType[req].itemTypeId).remove()
+            hero.addItem(recipe.resultItem.itemTypeId)
+        else
+            owner.addGold(recipe.gold)
+            printTimedToPlayer("You are missing: "+missingItems, 5, owner)
+            printTimedToPlayer("Item price refunded.", 5, owner)
+
+    
+    protected static function onItemGetTrigger()
+        let hero = GetTriggerUnit()
+        let whichItem = GetManipulatedItem()
+        doAfter(0, () -> onItemGet(hero, whichItem))
+
+
+init
+    CreateTrigger()
+        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_PICKUP_ITEM)
+        ..addAction(function Recipe.onItemGetTrigger)
+
+    /*doAfter(1, () -> print("gold cost = "+itemGoldCost[ITEM_ID_HELMET].toString()))
+    doAfter(1, () -> print("id = "+itemId[ITEM_ID_HELMET].toString()))
+    doAfter(1, () -> print("recipe = "+itemIsRecipe[ITEM_ID_HELMET].toString()))
+    doAfter(1, () -> print("required = "+itemRequiredItems[ITEM_ID_HELMET]))
+
+    doAfter(1, () -> print("gold cost = "+itemGoldCost[ITEM_ID_HELMET+1].toString()))
+    doAfter(1, () -> print("id = "+itemId[ITEM_ID_HELMET+1].toString()))
+    doAfter(1, () -> print("recipe = "+itemIsRecipe[ITEM_ID_HELMET+1].toString()))
+    doAfter(1, () -> print("required = "+itemRequiredItems[ITEM_ID_HELMET+1]))*/
+/*
+    doAfter(1, () -> print("gold cost = "+itemGoldCost[ITEM_ID_SPIKED_MAIL].toString()))
+    doAfter(1, () -> print("id = "+itemIdArray[ITEM_ID_SPIKED_MAIL].toString()))
+    doAfter(1, () -> print("recipe = "+itemIsRecipe[ITEM_ID_SPIKED_MAIL].toString()))
+    doAfter(1, () -> print("required = "+itemRequiredItems[ITEM_ID_SPIKED_MAIL]))
+
+    doAfter(1, () -> print("gold cost = "+itemGoldCost[ITEM_ID_SPIKED_MAIL+1].toString()))
+    doAfter(1, () -> print("id = "+itemIdArray[ITEM_ID_SPIKED_MAIL+1].toString()))
+    doAfter(1, () -> print("recipe = "+itemIsRecipe[ITEM_ID_SPIKED_MAIL+1].toString()))
+    doAfter(1, () -> print("required = "+itemRequiredItems[ITEM_ID_SPIKED_MAIL+1]))*/

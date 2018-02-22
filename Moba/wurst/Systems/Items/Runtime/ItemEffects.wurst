@@ -1,6 +1,5 @@
 package ItemEffects
-
-import ItemShop
+/*
 import HashMap
 
 
@@ -32,7 +31,7 @@ public class ItemType
 
         this.onPickUp = onPickUp
         this.onDrop = onDrop
-        itemMap.put(itemIdArray[itemId], this)
+        itemMap.put(getItemId(itemId), this)
 
 
     static function classInit()
@@ -59,4 +58,4 @@ public class ItemType
 
 
 init
-    ItemType.classInit()
+    ItemType.classInit()*/

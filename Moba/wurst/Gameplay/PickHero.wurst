@@ -150,13 +150,13 @@ function endPickMode()
     chooseModeTimer.release()
 
     if(pickMode == PickMode.ALLPICK)
-        print("|cffffcc00All Pick was chosen. You have 30 seconds to pick a Hero!|r")
+        //print("|cffffcc00All Pick was chosen. You have 30 seconds to pick a Hero!|r")
         allPick()
     if(pickMode == PickMode.ALLRANDOM)
-        print("|cffffcc00All Random was chosen. Heroes will be random!|r")
+        //print("|cffffcc00All Random was chosen. Heroes will be random!|r")
         allRandom()
     if(pickMode == PickMode.UNDECIDED)
-        print("|cffffcc00No mode was chosen. Heroes will be random!|r")
+        //print("|cffffcc00No mode was chosen. Heroes will be random!|r")
         pickMode = PickMode.ALLRANDOM
         allRandom()
 
@@ -196,7 +196,7 @@ function startPickMode()
     TimerDialogSetTitle(timerWindow,"Choose pick mode:")
     TimerDialogDisplay(timerWindow, true)
 
-    print("|cffffcc00"+players[adminPlayer].getName()+" has 30 seconds to pick a mode!|r")
+    //print("|cffffcc00"+players[adminPlayer].getName()+" has 30 seconds to pick a mode!|r")
 
 init
     doAfter(0, ()-> startPickMode())
