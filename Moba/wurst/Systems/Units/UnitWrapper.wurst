@@ -7,6 +7,8 @@ import Stats
 import initlater General
 import UnitType
 import Upgrades
+import initlater HeroControl
+import LinkedList
 
 import BonusMod
 
@@ -34,6 +36,8 @@ class UnitWrapper
     private int array[11] statsAbsoluteBonus //default = 0
     private real array[11] statsRelativeBonus //default = 0.00
     protected int array[11] statsTotalBonus //default = 0
+
+    private static constant unnkownUnitTypes = new LinkedList<int>()
 
     protected BuffList buffList
 
@@ -70,12 +74,14 @@ class UnitWrapper
             statBaseValue[Stat.AD.toInt()] = uType.getBaseAttack()
             statBaseValue[Stat.AR.toInt()] = uType.getBaseArmor()
         else if this.assocUnit.isType(UNIT_TYPE_HERO)
-            statBaseValue[Stat.AD.toInt()] = 5 + statBaseValue[Stat.STR.toInt()]
+            statBaseValue[Stat.AD.toInt()] = 17 + statBaseValue[Stat.STR.toInt()]
             statBaseValue[Stat.AR.toInt()] = 0
         else
             if not this.assocUnit.isType(UNIT_TYPE_STRUCTURE)
                 if this.assocUnit.getAbilityLevel('Aloc') == 0
-                    print("Warning unnkown unit type: "+GetUnitName(this.assocUnit))
+                    if not unnkownUnitTypes.contains(this.assocUnit.getTypeId())
+                        unnkownUnitTypes.add(this.assocUnit.getTypeId())
+                        print("Warning unnkown unit type: "+GetUnitName(this.assocUnit))
             statBaseValue[Stat.AD.toInt()] = 0
             statBaseValue[Stat.AR.toInt()] = 0
 
@@ -95,8 +101,8 @@ class UnitWrapper
         statBaseValue[Stat.WP.toInt()] = this.assocUnit.getAgi(false)
         statBaseValue[Stat.INT.toInt()] = this.assocUnit.getInt(false)
 
-        statBaseValue[Stat.AD.toInt()] = 5 + statBaseValue[Stat.STR.toInt()] + GetPlayerTechCount(this.assocUnit.getOwner(), UPG_AD, true)
-        
+        statBaseValue[Stat.AD.toInt()] = 17 + statBaseValue[Stat.STR.toInt()] + GetPlayerTechCount(this.assocUnit.getOwner(), UPG_AD, true)
+        statBaseValue[Stat.AR.toInt()] = GetPlayerTechCount(this.assocUnit.getOwner(), UPG_AR, true)
         statBaseValue[Stat.AS.toInt()] = 0
         
         statBaseValue[Stat.HP.toInt()] = 400 + GetPlayerTechCount(this.assocUnit.getOwner(), UPG_HP, true) * 25
@@ -123,12 +129,12 @@ class UnitWrapper
     function updateTotalStatBonus(Stat whichStat)
         int stat = whichStat.toInt()
         this.statsTotalBonus[stat] = ((this.statsAbsoluteBonus[stat]) * (1. + this.statsRelativeBonus[stat]) + (this.statBaseValue[stat] * this.statsRelativeBonus[stat]) ).toInt()
-        print("new total bonus = "+this.statsTotalBonus[stat].toString())
+        //print("new total bonus = "+this.statsTotalBonus[stat].toString())
         if whichStat != Stat.MS and whichStat != Stat.HR and whichStat!= Stat.MR
             this.assocUnit.setBonus(whichStat, this.statsTotalBonus[stat])
         else
             if whichStat == Stat.MS
-                this.assocUnit.addMovementSpeedAbsolute( this.statsTotalBonus[stat] )
+                this.assocUnit.setMovementSpeed( this.statBaseValue[stat] + this.statsTotalBonus[stat].toReal() )
             //HR and MR are handled automatically.
 
     /**
@@ -154,7 +160,13 @@ class UnitWrapper
     function addStatRelativeBonus(Stat whichStat, real plusValue)
         this.setStatRelativeBonus(whichStat, this.statsRelativeBonus[whichStat.toInt()] + plusValue)
 
+    function printStats()
+        for i = 0 to 10
+            printStat(i castTo Stat)
 
+    function printStat(Stat whichStat)
+        int stat = whichStat.toInt()
+        print(whichStat.toString()+" ( "+statBaseValue[stat].toString()+" + "+statsAbsoluteBonus[stat].toString()+" ) * "+statsRelativeBonus[stat].toString() + "->" +statsTotalBonus[stat].toString() )
     
 
 
@@ -168,11 +180,16 @@ public function unit.getDefaultMovementSpeed() returns real
     return this.wrapper().defaultMovementSpeed
 
 public function unit.updateDefaultMovementSpeed()
-    this.wrapper().defaultMovementSpeed = GetUnitDefaultMoveSpeed(this)
+    if this.isType(UNIT_TYPE_HERO)
+        this.wrapper().defaultMovementSpeed = GetUnitDefaultMoveSpeed(this) + GetPlayerTechCount(this.getOwner(), UPG_MS, true) 
+        //print(GetUnitDefaultMoveSpeed(this) + GetPlayerTechCount(this.getOwner(), UPG_MS, true))
 
 public function unit.setMovementSpeed(real newSpeed)
     this.wrapper().currentMovementSpeed = newSpeed
+    //print("set ms to "+newSpeed.toString())
     this.setMoveSpeed(newSpeed)
+
+
 
 public function unit.getBuffList() returns BuffList
     return this.wrapper().buffList
@@ -197,3 +214,9 @@ init
     CreateTrigger()
         ..addAction(function regenerate)
         ..registerTimerEvent(0.1, true)
+
+    CreateTrigger()
+        ..registerPlayerChatEvent(players[0], "-s", true)
+        ..addAction(() -> (begin
+            Hero.getHero(players[0]).toUnit().wrapper().printStats()
+        end))
