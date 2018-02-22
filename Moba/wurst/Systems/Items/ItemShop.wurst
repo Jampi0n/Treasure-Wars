@@ -8,6 +8,9 @@ import ItemObjEditing
 import ObjectIds
 import AbilityObjEditing
 import Execute
+import ErrorHandling
+
+import initlater ShopArmor
 
 /*  ==========================================================================================================================
 **
@@ -15,10 +18,10 @@ import Execute
 **
 **  ==========================================================================================================================*/
 
-string array itemRequiredItems //needed at runtime needs two seperators
-int array itemGoldCost //needed at runtime 3-4 + 1 seperator
+public string array itemRequiredItems //needed at runtime needs two seperators
+public int array itemGoldCost //needed at runtime 3-4 + 1 seperator
 public int array itemIdArray //needed at runtime: 4 (no seperator needed)
-boolean array itemIsRecipe //needed at runtime 1
+public boolean array itemIsRecipe //needed at runtime 1
 
 /*  ==========================================================================================================================
 **
@@ -32,12 +35,12 @@ boolean array itemIsRecipe //needed at runtime 1
 **
 **  ==========================================================================================================================*/
 
-int currentItemId = -1
-ItemDefinition array itemDefinition
-string array itemName
-string array itemShopDescription
-int array itemPosX
-int array itemPosY
+public int currentItemId = -1
+public ItemDefinition array itemDefinition
+public string array itemName
+public string array itemShopDescription
+public int array itemPosX
+public int array itemPosY
 
 public string array itemDesc
 
@@ -54,7 +57,7 @@ public string array itemDesc
 **
 **  ==========================================================================================================================*/
 
-constant shopList = new LinkedList<Shop>()
+public constant shopList = new LinkedList<Shop>()
 
 
 
@@ -62,34 +65,26 @@ constant shopList = new LinkedList<Shop>()
 public constant SHOP_ID_PHYSICAL_2= UNIT_ID_GEN.next()
 public constant SHOP_PHYSICAL_2 = compiletime(new Shop(SHOP_ID_PHYSICAL_2, "SHOP 2", 1.4,  "units\\human\\HeroMountainKing\\HeroMountainKing") castTo int)
 
-public constant ITEM_ID_HAMMER_OF_STRENGTH = compiletime(newItem("Hammer of Strength", 300, SHOP_PHYSICAL_2, "", "BTNINV_Hammer_15"))
+public constant ITEM_ID_HAMMER_OF_STRENGTH = compiletime(newItem("Hammer of Strength", SHOP_PHYSICAL_2, false, "BTNINV_Hammer_15"))
 @compiletime
 function itemHammerOfStrength()
     let str = 10
     itemDesc[ITEM_ID_HAMMER_OF_STRENGTH] = "+{0} strength".format(str.toString())
 
-    newItem("Plated Gauntlets", 500, SHOP_PHYSICAL_2, "", "BTNPlatedGauntlet2")
-    newItem("Plated Gauntlets", 500, SHOP_PHYSICAL_2, "", "BTNPlatedGauntlet2")
-    newItem("Plated Gauntlets", 500, SHOP_PHYSICAL_2, "", "BTNPlatedGauntlet2")
-    newItem("Plated Gauntlets", 500, SHOP_PHYSICAL_2, "", "BTNPlatedGauntlet2")
-    newItem("Plated Gauntlets", 500, SHOP_PHYSICAL_2, "", "BTNPlatedGauntlet2")
-    newItem("Plated Gauntlets", 500, SHOP_PHYSICAL_2, "", "BTNPlatedGauntlet2")
-    newItem("Plated Gauntlets", 500, SHOP_PHYSICAL_2, "", "BTNPlatedGauntlet2")
 
-
-public constant ITEM_ID_GLOVES_OF_HASTE = compiletime(newItem("Gloves of Haste", 450, SHOP_PHYSICAL_2, "", "BTNLeatherGloves"))
+public constant ITEM_ID_GLOVES_OF_HASTE = compiletime(newItem("Gloves of Haste", SHOP_PHYSICAL_2, false, "BTNLeatherGloves"))
 @compiletime
 function itemGlovesOfHaste()
     let as = 20
     itemDesc[ITEM_ID_GLOVES_OF_HASTE] = "+{0}% attack speed".format(as.toString())
 
-public constant ITEM_ID_WAR_AXE = compiletime(newItem("War Axe", 450, SHOP_PHYSICAL_2, "", "BTNINV_Axe_18"))
+public constant ITEM_ID_WAR_AXE = compiletime(newItem("War Axe", SHOP_PHYSICAL_2, false, "BTNINV_Axe_18"))
 @compiletime
 function itemWarAxe()
     let as = 20
     itemDesc[ITEM_ID_WAR_AXE] = "+{0}% attack speed".format(as.toString())
 
-public constant ITEM_ID_SKULL_AXE = compiletime(newItem("Skull Axe", 1200, SHOP_PHYSICAL_2, "", "BTNINV_Axe_09"))
+public constant ITEM_ID_SKULL_AXE = compiletime(newItem("Skull Axe", SHOP_PHYSICAL_2, false, "BTNINV_Axe_09"))
 @compiletime
 function itemSkullAxe()
     let as = 20
@@ -98,14 +93,14 @@ function itemSkullAxe()
 public constant SHOP_ID_PHYSICAL_3= UNIT_ID_GEN.next()
 public constant SHOP_PHYSICAL_3 = compiletime(new Shop(SHOP_ID_PHYSICAL_3, "SHOP 3", 1.2, "units\\human\\ArthaswithSword\\ArthaswithSword") castTo int)
 
-public constant ITEM_ID_BLOOD_SWORD = compiletime(newItem("Blood Sword", 4200, SHOP_PHYSICAL_3, ITEM_ID_HAMMER_OF_STRENGTH.toString()+","+ITEM_ID_GLOVES_OF_HASTE.toString(), "BTNBarbarianBrutalSlasher"))
+public constant ITEM_ID_BLOOD_SWORD = compiletime(newItem("Blood Sword", SHOP_PHYSICAL_3, false, "BTNBarbarianBrutalSlasher"))
 @compiletime
 function itemBloodSword()
     let str = 50
     let as = 40
     itemDesc[ITEM_ID_BLOOD_SWORD] = "+{0} strength|n+{1}% attack speed".format(str.toString(), as.toString())
 
-public constant ITEM_ID_FIREHAND_GAUNTLETS = compiletime(newItem("Firehand Gauntlets", 3000, SHOP_PHYSICAL_3, "", "BTNPlateGauntlet"))
+public constant ITEM_ID_FIREHAND_GAUNTLETS = compiletime(newItem("Firehand Gauntlets", SHOP_PHYSICAL_3, false, "BTNPlateGauntlet"))
 @compiletime
 function itemFirehandGauntlets()
     let str = 20
@@ -113,33 +108,33 @@ function itemFirehandGauntlets()
     let hp = 300
     itemDesc[ITEM_ID_FIREHAND_GAUNTLETS] = "+{0} strength|n+{1} armor|n+{2} hit points".format(str.toString(), armor.toString(), hp.toString())
 
-public constant ITEM_ID_SPIKED_ARMOR = compiletime(newItem("Spiked Armor", 2700, SHOP_PHYSICAL_3, "", "BTNSpikedArmor"))
+public constant ITEM_ID_SPIKED_ARMOR = compiletime(newItem("Spiked Armor", SHOP_PHYSICAL_3, false, "BTNSpikedArmor"))
 @compiletime
 function itemSpikedArmor()
     let armor = 90
     itemDesc[ITEM_ID_SPIKED_ARMOR] = "+{0} armor".format(armor.toString())
 
     
-public constant ITEM_ID_CURSED_SWORD = compiletime(newItem("Cursed Sword", 2700, SHOP_PHYSICAL_3, "", "BTNCursedSword"))
+public constant ITEM_ID_CURSED_SWORD = compiletime(newItem("Cursed Sword", SHOP_PHYSICAL_3, false, "BTNCursedSword"))
 @compiletime
 function itemCursedSword()
     let armor = 90
     itemDesc[ITEM_ID_CURSED_SWORD] = "+{0} armor".format(armor.toString())
 
 
-public constant ITEM_ID_RAVEN_SWORD = compiletime(newItem("Raven Sword", 2700, SHOP_PHYSICAL_3, "", "BTNRaven_Sword"))
+public constant ITEM_ID_RAVEN_SWORD = compiletime(newItem("Raven Sword", SHOP_PHYSICAL_3, false, "BTNRaven_Sword"))
 @compiletime
 function itemRavenSword()
     let armor = 90
     itemDesc[ITEM_ID_RAVEN_SWORD] = "+{0} armor".format(armor.toString())
 
-public constant ITEM_ID_ARMOR_OF_COURAGE = compiletime(newItem("Armor of Courage", 2700, SHOP_PHYSICAL_3, "", "BTNINV_Chest_Plate09"))
+public constant ITEM_ID_ARMOR_OF_COURAGE = compiletime(newItem("Armor of Courage", SHOP_PHYSICAL_3, false, "BTNINV_Chest_Plate09"))
 @compiletime
 function itemArmorOfCourage()
     let armor = 90
     itemDesc[ITEM_ID_ARMOR_OF_COURAGE] = "+{0} armor".format(armor.toString())
 
-public constant ITEM_ID_HELMET_OF_JUSTICE = compiletime(newItem("Helmet of Justice", 2700, SHOP_PHYSICAL_3, "", "BTNINV_Helmet_21"))
+public constant ITEM_ID_HELMET_OF_JUSTICE = compiletime(newItem("Helmet of Justice", SHOP_PHYSICAL_3, false, "BTNINV_Helmet_21"))
 @compiletime
 function itemHelmetOfJustice()
     let armor = 90
@@ -148,21 +143,21 @@ function itemHelmetOfJustice()
 public constant SHOP_ID_MAGICAL_1= UNIT_ID_GEN.next()
 public constant SHOP_MAGICAL_1 = compiletime(new Shop(SHOP_ID_MAGICAL_1, "SHOP 4", 1.1, "units\\human\\HeroArchMage\\HeroArchMage") castTo int)
 
-public constant ITEM_ID_MAGE_AMULET = compiletime(newItem("Mage Amulet", 400, SHOP_MAGICAL_1, "", "BTNEmptyAmulet"))
+public constant ITEM_ID_MAGE_AMULET = compiletime(newItem("Mage Amulet", SHOP_MAGICAL_1, false, "BTNEmptyAmulet"))
 @compiletime
 function itemMageAmulet()
     let hp = 100
     let mp = 100
     itemDesc[ITEM_ID_MAGE_AMULET] = "+{0} hit points|n+{1} mana points".format(hp.toString(), mp.toString())
 
-public constant ITEM_ID_MAGE_GLOVES = compiletime(newItem("Mage Gloves", 500, SHOP_MAGICAL_1, "", "BTNManaGloves"))
+public constant ITEM_ID_MAGE_GLOVES = compiletime(newItem("Mage Gloves", SHOP_MAGICAL_1, false, "BTNManaGloves"))
 @compiletime
 function itemMageGloves()
     let intelligence = 10
     let armor = 5
     itemDesc[ITEM_ID_MAGE_GLOVES] = "+{0} intelligence|n+{1} armor".format(intelligence.toString(), armor.toString())
 
-public constant ITEM_ID_MANA_RING = compiletime(newItem("Mana Ring", 500, SHOP_MAGICAL_1, "", "BTNINV_Jewelry_Ring_10"))
+public constant ITEM_ID_MANA_RING = compiletime(newItem("Mana Ring", SHOP_MAGICAL_1, false, "BTNINV_Jewelry_Ring_10"))
 @compiletime
 function itemManaRing()
     let intelligence = 10
@@ -170,7 +165,7 @@ function itemManaRing()
     itemDesc[ITEM_ID_MANA_RING] = "+{0} intelligence|n+{1} armor".format(intelligence.toString(), armor.toString())
 
 
-public constant ITEM_ID_MAGE_ARMOR = compiletime(newItem("Mage Armor", 500, SHOP_MAGICAL_1, "", "BTNINV_Chest_Plate07"))
+public constant ITEM_ID_MAGE_ARMOR = compiletime(newItem("Mage Armor", SHOP_MAGICAL_1, false, "BTNINV_Chest_Plate07"))
 @compiletime
 function itemMageArmor()
     let intelligence = 10
@@ -180,7 +175,7 @@ function itemMageArmor()
 public constant SHOP_ID_MAGICAL_2= UNIT_ID_GEN.next()
 public constant SHOP_MAGICAL_2 = compiletime(new Shop(SHOP_ID_MAGICAL_2, "SHOP 5", 1.3, "units\\human\\HeroBloodElf\\HeroBloodElf") castTo int)
 
-public constant ITEM_ID_WIZARDS_HAT = compiletime(newItem("Wizard's Hat", 800, SHOP_MAGICAL_2, "", "BTNWizardsHat"))
+public constant ITEM_ID_WIZARDS_HAT = compiletime(newItem("Wizard's Hat", SHOP_MAGICAL_2, false, "BTNWizardsHat"))
 @compiletime
 function itemWizardsHat()
     let intelligence = 15
@@ -188,27 +183,18 @@ function itemWizardsHat()
     itemDesc[ITEM_ID_WIZARDS_HAT] = "+{0} intelligence|n+{1} mana".format(intelligence.toString(), mp.toString())
     
 
-public constant ITEM_ID_SKULL_PENDANT = compiletime(newItem("Skull Pendant", 800, SHOP_MAGICAL_2, "", "BTNAncientAmulet"))
+public constant ITEM_ID_SKULL_PENDANT = compiletime(newItem("Skull Pendant", SHOP_MAGICAL_2, false, "BTNAncientAmulet"))
 @compiletime
 function itemSkullPendant()
     let intelligence = 15
     let mp = 100
     itemDesc[ITEM_ID_SKULL_PENDANT] = "+{0} intelligence|n+{1} mana".format(intelligence.toString(), mp.toString())
 
-    newItem("Plated Gauntlets", 500, SHOP_MAGICAL_2, "", "BTNPlatedGauntlet2")
-    newItem("Plated Gauntlets", 500, SHOP_MAGICAL_2, "", "BTNPlatedGauntlet2")
-    newItem("Plated Gauntlets", 500, SHOP_MAGICAL_2, "", "BTNPlatedGauntlet2")
-    newItem("Plated Gauntlets", 500, SHOP_MAGICAL_2, "", "BTNPlatedGauntlet2")
-    newItem("Plated Gauntlets", 500, SHOP_MAGICAL_2, "", "BTNPlatedGauntlet2")
-    newItem("Plated Gauntlets", 500, SHOP_MAGICAL_2, "", "BTNPlatedGauntlet2")
-    newItem("Plated Gauntlets", 500, SHOP_MAGICAL_2, "", "BTNPlatedGauntlet2")
-    newItem("Plated Gauntlets", 500, SHOP_MAGICAL_2, "", "BTNPlatedGauntlet2")
-    newItem("Plated Gauntlets", 500, SHOP_MAGICAL_2, "", "BTNPlatedGauntlet2")
 
 public constant SHOP_ID_MAGICAL_3= UNIT_ID_GEN.next()
 public constant SHOP_MAGICAL_3 = compiletime(new Shop(SHOP_ID_MAGICAL_3, "SHOP 6", 1.6, "units\\human\\Jaina\\Jaina") castTo int)
 
-public constant ITEM_ID_ENCHANTED_ARMOR = compiletime(newItem("Enchanted Armor", 2800, SHOP_MAGICAL_3, "", "BTNSuperiorMageRobe"))
+public constant ITEM_ID_ENCHANTED_ARMOR = compiletime(newItem("Enchanted Armor", SHOP_MAGICAL_3, false, "BTNSuperiorMageRobe"))
 @compiletime
 function itemEnchantedArmor()
     let hp = 400
@@ -218,7 +204,7 @@ function itemEnchantedArmor()
     itemDesc[ITEM_ID_ENCHANTED_ARMOR] = "+{0} hit points|n+{1} armor|n+{2} willpower|n+{3} intelligence".format(hp.toString(), armor.toString(), wp.toString(), intelligence.toString())
 
 
-public constant ITEM_ID_EMERALD_PENDANT = compiletime(newItem("Emerald Pendant", 2800, SHOP_MAGICAL_3, "", "BTNAmulet"))
+public constant ITEM_ID_EMERALD_PENDANT = compiletime(newItem("Emerald Pendant", SHOP_MAGICAL_3, false, "BTNAmulet"))
 @compiletime
 function itemEmeraldPendant()
     let hp = 400
@@ -229,7 +215,7 @@ function itemEmeraldPendant()
     
 
 
-public constant ITEM_ID_RING_OF_DARKNESS = compiletime(newItem("Ring of Darkness", 2800, SHOP_MAGICAL_3, "", "BTNINV_Jewelry_Ring_15"))
+public constant ITEM_ID_RING_OF_DARKNESS = compiletime(newItem("Ring of Darkness", SHOP_MAGICAL_3, false, "BTNINV_Jewelry_Ring_15"))
 @compiletime
 function itemRingOfDarkness()
     let hp = 400
@@ -239,7 +225,7 @@ function itemRingOfDarkness()
     itemDesc[ITEM_ID_RING_OF_DARKNESS] = "+{0} hit points|n+{1} armor|n+{2} willpower|n+{3} intelligence".format(hp.toString(), armor.toString(), wp.toString(), intelligence.toString())
 
 
-public constant ITEM_ID_BLESSED_GOBLET = compiletime(newItem("Blessed Goblet", 2800, SHOP_MAGICAL_3, "", "BTNBless"))
+public constant ITEM_ID_BLESSED_GOBLET = compiletime(newItem("Blessed Goblet", SHOP_MAGICAL_3, false, "BTNBless"))
 @compiletime
 function itemBlessedGoblet()
     let hp = 400
@@ -249,7 +235,7 @@ function itemBlessedGoblet()
     itemDesc[ITEM_ID_BLESSED_GOBLET] = "+{0} hit points|n+{1} armor|n+{2} willpower|n+{3} intelligence".format(hp.toString(), armor.toString(), wp.toString(), intelligence.toString())
 
 
-public constant ITEM_ID_WAND_OF_DEATH = compiletime(newItem("Wand of Death", 2800, SHOP_MAGICAL_3, "", "BTNINV_Wand_12"))
+public constant ITEM_ID_WAND_OF_DEATH = compiletime(newItem("Wand of Death", SHOP_MAGICAL_3, false, "BTNINV_Wand_12"))
 @compiletime
 function itemWandOfDeath()
     let hp = 400
@@ -259,7 +245,7 @@ function itemWandOfDeath()
     itemDesc[ITEM_ID_WAND_OF_DEATH] = "+{0} hit points|n+{1} armor|n+{2} willpower|n+{3} intelligence".format(hp.toString(), armor.toString(), wp.toString(), intelligence.toString())
 
 
-public constant ITEM_ID_WAND_OF_BLOOD = compiletime(newItem("Wand of BLood", 2800, SHOP_MAGICAL_3, "", "BTNINV_Wand_09"))
+public constant ITEM_ID_WAND_OF_BLOOD = compiletime(newItem("Wand of BLood", SHOP_MAGICAL_3, false, "BTNINV_Wand_09"))
 @compiletime
 function itemWandOfBlood()
     let hp = 400
@@ -275,7 +261,7 @@ function itemWandOfBlood()
 **
 **  ==========================================================================================================================*/
 
-class ItemInShop
+public class ItemInShop
     int goldCost
     int itemId
 
@@ -319,7 +305,7 @@ function createShop(int newId, string name, real size, string model) returns Bui
 **
 **  ==========================================================================================================================*/
 
-function stringToList(string sList, string splitChar) returns LinkedList<int>
+public function stringToList(string sList, string splitChar) returns LinkedList<int>
     let returnList = new LinkedList<int>()
     string currentString
     var currentIndex = 0
@@ -346,20 +332,18 @@ function stringToList(string sList, string splitChar) returns LinkedList<int>
 **
 **  ==========================================================================================================================*/
 
-public function newItem(string name, int goldCost, int whichShop, string requiredItems, string icon) returns int
+public function newItem(string name, int whichShop, boolean hasRecipe, string icon) returns int
     /*
     There should not be any references to other item variables, as they might not have been initialized.
     */
     let shop = whichShop castTo Shop
     currentItemId++
-    new ItemTypeDef(currentItemId)
     itemIdArray[currentItemId] = ITEM_ID_GEN.next()
     itemName[currentItemId] = name
     itemShopDescription[currentItemId] = shop.name
     itemIsRecipe[currentItemId] = false
     itemRequiredItems[currentItemId] = ""
 
-    itemGoldCost[currentItemId] = goldCost
     itemDesc[currentItemId] = ""
 
     itemDefinition[currentItemId] = newItemDefintion(itemIdArray[currentItemId])
@@ -367,23 +351,23 @@ public function newItem(string name, int goldCost, int whichShop, string require
         ..setName(name)
         ..setTooltipBasic(name)
     
+    new ItemTypeDef(currentItemId, hasRecipe)
 
-    if requiredItems!="" //create additional recipe item directly after the main item
+    if hasRecipe //create additional recipe item directly after the main item
         currentItemId++
-        new ItemTypeDef(currentItemId)
         itemIdArray[currentItemId] = ITEM_ID_GEN.next()
         itemName[currentItemId] = name
         itemIsRecipe[currentItemId] = true
+        itemRequiredItems[currentItemId] = ""
 
-        itemRequiredItems[currentItemId] = requiredItems
-
-        itemGoldCost[currentItemId] = goldCost
         itemDesc[currentItemId] = ""
 
         itemDefinition[currentItemId] = newItemDefintion(itemIdArray[currentItemId])
             ..presetIcon(icon)
             ..setName(name+" - Recipe")
             ..setTooltipBasic(name+" - Recipe")
+
+
 
         if(shop.itemsMade!="")
             shop.itemsMade += ","
@@ -438,146 +422,38 @@ public class ItemTypeDef
     private int itemId
     private string requirements
     protected static constant idToTypeDef = new HashMap<int, ItemTypeDef>()
-    
-    construct(int itemId)
+    private boolean hasRecipe //determines whether this item def has a recipe, the item def is never a recipe itself
+
+    construct(int itemId, boolean hasRecipe)
         this.itemId = itemId
         idToTypeDef.put(this.itemId, this)
         this.requirements = ""
+        this.hasRecipe = hasRecipe
     
     function getId() returns integer
         return this.itemId
 
-    function getItemDefinition() returns ItemDefinition
-        return itemDefinition[this.getId()]
-
     function setGoldCost(int gold)
         itemGoldCost[this.getId()] = gold
+        if hasRecipe
+            itemGoldCost[this.getId()+1] = gold
 
     function setDescription(string newDesc)
         itemDesc[this.getId()] = newDesc
+        if hasRecipe
+            itemDesc[this.getId()+1] = newDesc
 
     function addRequirement(int id)
-        if(this.requirements=="")
-            this.requirements+=id.toString()
+        if hasRecipe
+            if(this.requirements=="")
+                this.requirements+=id.toString()
+            else
+                this.requirements+=","+id.toString()
+
+            itemRequiredItems[this.getId()+1] = this.requirements
         else
-            this.requirements+=","+id.toString()
+            error("Cannot add requirements to non-recipe items. Name of item:"+itemName[this.getId()])
 
-        itemRequiredItems[this.getId()] = this.requirements
-        
-
-    /*  ==========================================================================================================================
-**
-**  Finalize item creation. After all item objects have been created during compile time, the combined information about all items is
-**  used to resolve all values, that reference other items.
-**  By doing so the order in which items are defined does not matter and you can reference items that have not even been created.
-**
-**  gold cost for recipes, description of required items for recipes, button position in shop based on gold cost.
-**
-**  ==========================================================================================================================*/
-
-public string compStringItemGoldCost = "" //compiletime(setupStringArrayGoldCost())
-public string compStringItemRequiredItems = ""//compiletime(setupStringArrayRequiredItems())
-public string compStringItemId = ""//compiletime(setupStringArrayItemId())
-public string compStringItemIsRecipe = "" //compiletime(setupStringArrayItemIsRecipe())
-
-constant CHARMAP = ".................................!.#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[.]^_`abcdefghijklmnopqrstuvwxyz{|}~................................................................................................................................."
-
-/** Convert a integer id value into a 3-letter id code. */
-public function int2threechar(int value) returns string
-    var result = ""
-    var remainingValue = value
-
-    for int byteno = 0 to 2
-        let charValue = remainingValue mod 256
-        remainingValue = remainingValue div 256
-        result = CHARMAP.charAt(charValue) + result
-
-    return result
-
-function createItemGoldCosts()
-    for i = 0 to currentItemId
-        if itemIsRecipe[i]
-            let requiredItemList = stringToList(itemRequiredItems[i], ",")
-    
-            for int j in requiredItemList
-                itemGoldCost[i] -= itemGoldCost[j]
-    
-            destroy requiredItemList
-            compStringItemIsRecipe += "1"
-        else
-            compStringItemIsRecipe += "0"
-
-        compStringItemId += int2threechar(itemIdArray[i])
-        compStringItemGoldCost += itemGoldCost[i].toString()+"|"
-        compStringItemRequiredItems += itemRequiredItems[i]+"|"
-        
-            
-        itemDefinition[i].setGoldCost(itemGoldCost[i])
-
-
-    //the object of class ItemInShop are created, while gold cost is not yet known
-    //now every object is told to retrieve its gold cost from the array
-    for Shop shop in shopList
-        for ItemInShop soldItem in shop.soldItems
-            soldItem.setupGoldCost()
-
-function sortShops()
-    for Shop shop in shopList
-        shop.soldItems.sortWith( (ItemInShop i1, ItemInShop i2) -> (i1.goldCost - i2.goldCost) )
-
-        int x = 0
-        int y = 0
-        for ItemInShop soldItem in shop.soldItems
-            itemPosX[soldItem.itemId] = x
-            itemPosY[soldItem.itemId] = y
-            itemDefinition[soldItem.itemId]
-                ..setButtonPositionX(x)
-                ..setButtonPositionY(y)
-            x++
-            if(x>3)
-                x = 0
-                y++
-
-function createItemDescritptions()
-    for i = 0 to currentItemId
-        if itemIsRecipe[i]
-            string recipeDesc = "|n|n|cffffcc00Requires:|r"
-            string requiredItems = itemRequiredItems[i]
-            let requiredItemList = stringToList(requiredItems, ",")
-
-            for int j in requiredItemList
-
-                let buttonPos = " ["+(itemPosX[j]+1).toString()+","+(itemPosY[j]+1).toString()+"]"
-
-                recipeDesc += "|n - "+itemName[j]+"       ( "+itemShopDescription[j] + buttonPos+" )"
-
-            destroy requiredItemList
-
-
-
-            itemDefinition[i].setDescription(itemDesc[i-1] + recipeDesc)
-            itemDefinition[i].setTooltipExtended(itemDesc[i-1] + recipeDesc)
-        else
-            itemDefinition[i].setDescription(itemDesc[i])
-            itemDefinition[i].setTooltipExtended(itemDesc[i])
-
-public function itemShopFinalize()
-    createItemGoldCosts()
-    sortShops()
-    createItemDescritptions()
-
-/*  ==========================================================================================================================
-**
-**  During compiletime certain arrays are used.
-**  To preserve their data for runtime they are converted into a string containing all array members seperated by "|".
-**  This conversion happens here.
-**
-**  ==========================================================================================================================*/
-
-public string stringItemGoldCost = compiletime(compStringItemGoldCost)
-public string stringItemRequiredItems = compiletime(compStringItemRequiredItems)
-public string stringItemId = compiletime(compStringItemId)
-public string stringItemIsRecipe = compiletime(compStringItemIsRecipe)
 
 /*  ==========================================================================================================================
 **
@@ -595,109 +471,11 @@ Item array itemType
 
 /*  ==========================================================================================================================
 **
-**  During compiletime certain arrays are used.
-**  To preserve their data for runtime they are converted into a string containing all array members seperated by "|".
-**  To use them during runtime, the strings are now converted back to arrays.
-**
-**  ==========================================================================================================================*/
-
-int currentIndex = 0
-int stringPos = 0
-string stringArray = ""
-string currentString = ""
-int stringLength = 0
-
-function resetLoopVariables()
-    stringPos = 0
-    currentIndex = 0
-    currentString = ""
-    stringLength = stringArray.length()
-
-function setupArrays()
-    execute( () -> setupArrayGoldCost())
-    execute( () -> setupArrayRequiredItems())
-    execute( () -> setupArrayItemId())
-    execute( () -> setupArrayItemIsRecipe())
-
-    /*let s0 = stringItemGoldCost
-    let s1 = stringItemId
-    let s2 = stringItemIsRecipe
-    let s3 = stringItemRequiredItems
-
-    doAfter(1, () ->print(s0))
-    doAfter(2, () ->print(s1))
-    doAfter(3, () ->print(s2))
-    doAfter(4, () ->print(s3))*/
-
-    stringItemGoldCost=""
-    stringItemRequiredItems=""
-    stringItemId=""
-    stringItemIsRecipe=""
-
-function setupArrayGoldCost()
-    stringArray = stringItemGoldCost
-    resetLoopVariables()
-
-    executeWhile(20, ()->(stringPos < stringLength), () -> (begin
-        currentString = ""
-        while stringArray.charAt(stringPos) != "|" and stringPos < stringArray.length()
-            currentString += stringArray.charAt(stringPos)
-            stringPos ++
-
-        itemGoldCost[currentIndex] = currentString.toInt()
-        stringPos++
-        currentIndex++
-    end))
-
-function setupArrayRequiredItems()
-    stringArray = stringItemRequiredItems
-    resetLoopVariables()
-    executeWhile(20, ()->(stringPos < stringLength), () -> (begin
-        currentString = ""
-        while stringArray.charAt(stringPos) != "|" and stringPos < stringArray.length()
-            currentString += stringArray.charAt(stringPos)
-            stringPos ++
-
-        itemRequiredItems[currentIndex] = currentString
-        stringPos++
-        currentIndex++
-    end))
-
-function setupArrayItemId()
-    stringArray = stringItemId
-    resetLoopVariables()
-        
-    executeWhile(10, ()->(stringPos < stringLength), () -> (begin
-        string currentString = stringArray.substring(stringPos, stringPos+3)
-        itemIdArray[currentIndex] = fourchar2int("I"+currentString)
-
-        stringPos += 3
-        currentIndex++
-    end))
-
-    currentItemId = stringLength-1
-
-function setupArrayItemIsRecipe()
-    stringArray = stringItemIsRecipe
-    resetLoopVariables()
-
-    executeWhile(100, ()->(stringPos < stringLength), () -> (begin
-        string currentString = stringArray.charAt(stringPos)
-        itemIsRecipe[currentIndex] = currentString=="1" ? true : false
-
-        stringPos += 1
-        currentIndex++
-    end))
-
-    currentItemId = stringArray.length()-1
-
-/*  ==========================================================================================================================
-**
 **  Creates the runtime item objects based on the compiletime values.
 **
 **  ==========================================================================================================================*/
 
-function setupItems()
+public function setupItems()
     for i = 0 to currentItemId
         if itemIsRecipe[i]
             itemType[i] = new Recipe(itemIdArray[i], itemGoldCost[i], itemRequiredItems[i], itemType[i-1])
@@ -774,9 +552,6 @@ init
         ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_PICKUP_ITEM)
         ..addAction(function Recipe.onItemGetTrigger)
 
-    setupArrays()
-    setupItems()
-
 
     /*doAfter(1, () -> print("gold cost = "+itemGoldCost[ITEM_ID_HELMET].toString()))
     doAfter(1, () -> print("id = "+itemId[ITEM_ID_HELMET].toString()))
@@ -787,3 +562,13 @@ init
     doAfter(1, () -> print("id = "+itemId[ITEM_ID_HELMET+1].toString()))
     doAfter(1, () -> print("recipe = "+itemIsRecipe[ITEM_ID_HELMET+1].toString()))
     doAfter(1, () -> print("required = "+itemRequiredItems[ITEM_ID_HELMET+1]))*/
+
+    doAfter(1, () -> print("gold cost = "+itemGoldCost[ITEM_ID_SPIKED_MAIL].toString()))
+    doAfter(1, () -> print("id = "+itemIdArray[ITEM_ID_SPIKED_MAIL].toString()))
+    doAfter(1, () -> print("recipe = "+itemIsRecipe[ITEM_ID_SPIKED_MAIL].toString()))
+    doAfter(1, () -> print("required = "+itemRequiredItems[ITEM_ID_SPIKED_MAIL]))
+
+    doAfter(1, () -> print("gold cost = "+itemGoldCost[ITEM_ID_SPIKED_MAIL+1].toString()))
+    doAfter(1, () -> print("id = "+itemIdArray[ITEM_ID_SPIKED_MAIL+1].toString()))
+    doAfter(1, () -> print("recipe = "+itemIsRecipe[ITEM_ID_SPIKED_MAIL+1].toString()))
+    doAfter(1, () -> print("required = "+itemRequiredItems[ITEM_ID_SPIKED_MAIL+1]))
