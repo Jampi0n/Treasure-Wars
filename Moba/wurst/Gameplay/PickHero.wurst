@@ -4,6 +4,7 @@ import PlayerControl
 import HeroControl
 import HeroType
 import ClosureTimers
+import General
 
 public PickMode pickMode
 timer chooseModeTimer
@@ -35,10 +36,12 @@ function setupCreatedHero(Hero hero)
     owner.setGold(5000)
 
     if(cPlayer.getTeam()==Team.TEAM1)
-        hero.toUnit().setPos(gg_rct_GreenCastle.getCenter())
+        if not DEBUG_MODE
+            hero.toUnit().setPos(gg_rct_GreenCastle.getCenter())
         //SetHeroLevel(hero.toUnit(), 25, true)
     else
-        hero.toUnit().setPos(gg_rct_BrownCastle.getCenter())
+        if not DEBUG_MODE
+            hero.toUnit().setPos(gg_rct_BrownCastle.getCenter())
 
 
 //creates a random hero for a player
@@ -201,3 +204,17 @@ init
         pickMode = PickMode.ALLPICK
         endPickMode()
     end))
+
+    if DEBUG_MODE
+        CreateTrigger()
+            ..registerPlayerChatEvent(players[0], "hero ", false)
+            ..addAction(() -> (begin
+                let i = GetEventPlayerChatString().substring(5).toInt()
+                createRandomHero(getCPlayer(i))
+
+                SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_VISION, true)
+                SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_CONTROL, true)
+                SetPlayerAlliance(players[0], players[i], ALLIANCE_SHARED_CONTROL, true)
+                SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_ADVANCED_CONTROL, true)
+            end))
+    

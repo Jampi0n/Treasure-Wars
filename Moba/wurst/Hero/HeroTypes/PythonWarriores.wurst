@@ -18,6 +18,7 @@ import AbilityObjEditing
 import HeroObjectEditing
 import ObjectIdGenerator
 import ObjectIds
+import UnitWrapper
 
 constant SOUND_PARALYZING_STRIKE = new SoundDefinition(Sounds.shadowStrikeBirth1, false, true)
 constant SOUND_POISON_SPIT = new SoundDefinition(Sounds.corrosiveBreathMissileTarget1, false, true)
@@ -339,14 +340,12 @@ init
     end) )
     BUFF_POISON_SPIT.addFirstFunction( () -> (begin
         let thisBuff = Buff.getTriggerBuff()
-        print("add slow")
-        thisBuff.getTarget().addMovementSpeedRelative( POISON_SPIT_SLOW_MS[thisBuff.getLevel()-1] )
+        thisBuff.getTarget().wrapper().addStatRelativeBonus( Stat.MS, POISON_SPIT_SLOW_MS[thisBuff.getLevel()-1] )
     end) )
 
     BUFF_POISON_SPIT.addEndFunction( () -> (begin
         let thisBuff = Buff.getTriggerBuff()
-        print("remove slow")
-        thisBuff.getTarget().addMovementSpeedRelative( -POISON_SPIT_SLOW_MS[thisBuff.getLevel()-1] )
+        thisBuff.getTarget().wrapper().addStatRelativeBonus( Stat.MS, -POISON_SPIT_SLOW_MS[thisBuff.getLevel()-1] )
     end) )
 
     onEnter(() -> (begin

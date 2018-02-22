@@ -10,7 +10,9 @@ based on the work of
     weaaddar
 */
 
-constant int MAX_LEVEL = 10
+constant int MAX_LEVEL = 16 //2^16 = 65k, should be enough
+
+
 /*
 0...MAX_LEVEL-1 positive -> MAX_LEVEL positive abilities
 MAX_LEVEL negative

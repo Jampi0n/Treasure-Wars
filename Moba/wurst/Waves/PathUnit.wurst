@@ -308,7 +308,7 @@ public class PathUnit
             let pathUnit = unitToPathUnit.get(u)
             if pathUnit != null and pathUnit.checkEnter == true
                 pathUnit.onBaseEnter()
-                print("onBaseEnterGreen")
+                //print("onBaseEnterGreen")
 
     static function onBaseEnterBrown()
         let u = GetTriggerUnit()
@@ -316,7 +316,7 @@ public class PathUnit
             let pathUnit = unitToPathUnit.get(u)
             if pathUnit != null and pathUnit.checkEnter == true
                 pathUnit.onBaseEnter()
-                print("onBaseEnterBrown")
+                //print("onBaseEnterBrown")
 
     //A path unit leaves its own base
 

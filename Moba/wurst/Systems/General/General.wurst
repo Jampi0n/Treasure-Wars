@@ -2,14 +2,21 @@ package General
 
 import Buff
 import UnitWrapper
+import initlater HeroControl
+import ClosureTimers
 
 constant MAGIC_REDUCTION = 0.01
+
+public constant DEBUG_MODE = true
 
 public enum ReductionType
     PHYSICAL
     MAGIC
     NONE
 
+public function printWarning(string warning)
+    if warning != ""
+        //print(warning)
 
 public function unit.isTargetable(player source, boolean allowFriends, boolean allowEnemies) returns boolean
     if not this.isAlive()
@@ -65,27 +72,6 @@ public function unit.healHP(real amount)
 public function unit.healMana(real amount)
     this.setMana(this.getMana() + amount)
 
-public function unit.addMovementSpeedAbsolute(int value)
-    this.addMovementSpeedAbsolute(value.toReal())
-
-/*
-Do not use getMoveSpeed ( current movement speed)
-It is limited by the minimum and maximum movement speed and so it should not be used in calculations here.
-Example trying to slow a unit at minimum movement speed will have not effect, but by reverting the slow, it will actually get a move speed bonus.
-*/
-
-public function unit.addMovementSpeedAbsolute(real value)
-    print("before: "+this.getMoveSpeed().toString()+" "+this.getCurrentMovementSpeed().toString())
-    let newMoveSpeed = this.getCurrentMovementSpeed() + value
-    this.setMovementSpeed(newMoveSpeed)
-    print("after: "+this.getMoveSpeed().toString()+" "+this.getCurrentMovementSpeed().toString())
-
-/**
-Changes a units movement speed relative to its default speed.
-**/
-public function unit.addMovementSpeedRelative(real value) 
-    this.addMovementSpeedAbsolute(value * GetUnitDefaultMoveSpeed(this) )
-
 public function unit.dispelMagicalBuffs(boolean positive, boolean negative)
     let buffList = this.getBuffList().getLinkedList()
     for Buff currentBuff in buffList
@@ -106,3 +92,17 @@ public function unit.dispelPhysicallBuffs(boolean positive, boolean negative)
 public function unit.dispelBuffs(boolean positive, boolean negative)
     this.dispelMagicalBuffs(positive, negative)
     this.dispelPhysicallBuffs(positive, negative)
+
+public function player.getFullName() returns string
+    let hero = Hero.getHero(this)
+    if(hero != null)
+        return this.getName()+ " ("+hero.toUnit().getName()+")"
+    else
+        return this.getName()
+
+public function player.getFullColoredName() returns string
+    return fromPlayer(this).toColorString()+this.getFullName()+"|r"
+
+init
+    if DEBUG_MODE
+        doAfter(1, () -> print("DEBUG_MODE is enabled."))

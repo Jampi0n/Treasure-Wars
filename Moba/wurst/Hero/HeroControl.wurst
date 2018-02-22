@@ -6,8 +6,10 @@ import GameTimer
 import HeroType
 import Upgrades
 import Stats
-import ErrorHandling
 import UnitWrapper
+import TimerUtils
+import LinkedList
+import General
 
 public class Hero
 
@@ -24,11 +26,14 @@ public class Hero
     private static constant unitToHero = new HashMap<unit,Hero>
     private static constant assistMap = new HashMap<CPlayer,real>
     private trigger onSpellCastTrigger
+    private timer reviveTimer
+    private timerdialog reviveWindow
 
     protected static function classInit()
         onDamageTrigger.addAction(function onDamageStatic)
         onDeathTrigger.addAction(function onDeathStatic)
         onLevelUpTrigger.addAction(function onLevelUpStatic)
+
 
     function setup()
         unitToHero.put(this.hero, this)
@@ -40,6 +45,11 @@ public class Hero
         onSpellCastTrigger = this.heroType.getOnSpellCastTrigger()
         onSpellCastTrigger.registerUnitEvent(this.hero, EVENT_UNIT_SPELL_EFFECT)
 
+        this.reviveTimer = getTimer()
+            ..setData(this castTo int)
+        this.reviveWindow = CreateTimerDialog(this.reviveTimer)
+        TimerDialogDisplay(this.reviveWindow, false)
+        TimerDialogSetTitle(this.reviveWindow, owner.getPlayer().getFullColoredName())
 
         //print("setup completed: "+this.hero.getName())
 
@@ -60,7 +70,6 @@ public class Hero
     function toUnit() returns unit
         return this.hero
 
-    //
     function upgrade()
         integer lvl = this.level
         player upgradePlayer = this.owner.getPlayer()
@@ -109,12 +118,93 @@ public class Hero
     static function onDamageStatic()
         unitToHero.get( GetTriggerUnit()).onDamage()
 
+    function revive()
+        TimerDialogDisplay(this.reviveWindow, false)
+        vec2 pos
+        if this.owner.getTeam() == Team.TEAM1
+            pos = gg_rct_GreenCastle.getCenter()
+        else
+            pos = gg_rct_BrownCastle.getCenter()
+            
+        this.hero.revive(pos, true)
+
+    static function reviveStatic()
+        let t = GetExpiredTimer()
+        let hero = t.getData() castTo Hero
+        t.pause()
+        hero.revive()
+
     //handles death
     function onDeath()
-        for i = 0 to 15
-            CPlayer assistant = getCPlayer(i)
-            if(assistMap.get(assistant) > getElapsedGameTime() )
-                print("assist:"+assistant.toString())
+        int offset = this.owner.getTeam()==Team.TEAM1 ? 5 : 0
+        real maxValue = -1
+        int maxIndex = -1 //find last assistant, to replace killer, if killer is not a player
+        player killer = GetKillingUnit().getOwner()
+        let assistList = new LinkedList<CPlayer>
+
+        for i = 0 to  4
+            CPlayer assistant = getCPlayer(i+ offset)
+            let time = assistMap.get(assistant)
+            if(time > getElapsedGameTime() and assistant.getPlayer()!=killer)
+                assistList.add(assistant)
+                if(time > maxValue)
+                    maxValue = time
+                    maxIndex = i
+
+        //replace killer with last assistant, if there is an assistant
+        if (killer.getId() < offset or killer.getId() > offset+4) and not assistList.isEmpty()
+            killer = players[offset+maxIndex]
+            assistList.remove(killer.getCPlayer())
+
+        string assistString = ""
+
+        int size = assistList.size()
+        int c = 0
+        for CPlayer p in assistList
+            c++
+            assistString += p.getPlayer().getFullColoredName()+" "
+            if c == size-1
+                assistString += "and "
+            else if c < size
+                assistString += ", "
+
+        
+
+        let bounty = 200
+        int assistBounty = (bounty/(2*(size+1))).toInt()
+
+        int killBounty = (bounty/2 + bounty/(2*(size+1))).toInt()
+
+        if size == 0
+            printTimed("{0} was killed by {1}. Bounty is {2} for kill.".format(
+                this.owner.getPlayer().getFullColoredName(), 
+                killer.getFullColoredName(),
+                "|cffffcc00"+bounty.toString()+"|r"
+            ), 10)
+
+            killer.addGold(bounty)
+        else
+            printTimed("{0} was killed by {1} with the help of {2}. Bounty is {3} for kill and {4} for each assist.".format(
+                this.owner.getPlayer().getFullColoredName(), 
+                killer.getFullColoredName(),
+                assistString,
+                "|cffffcc00"+killBounty.toString()+"|r",
+                "|cffffcc00"+assistBounty.toString()+"|r"
+            ), 10)
+
+            killer.addGold(killBounty)
+            for CPlayer p in assistList
+                p.getPlayer().addGold(assistBounty)
+            
+        destroy assistList
+
+        //+" |cffffcc00( +"+(bounty/(2*size)).toInt().toString()+")|r"
+
+        this.reviveTimer
+            ..start(10.+level*2, function reviveStatic)
+        TimerDialogDisplay(this.reviveWindow, true)
+            
+            
 
 
     static function onDeathStatic()
@@ -152,7 +242,7 @@ public class Hero
 
     static function getHero(int index) returns Hero
         if index < 0 or index > 9
-            error("Index does not exist")
+            printWarning("Index does not exist")
             return null
         return heroes[index]
     
