@@ -2,6 +2,9 @@ package ShopFinalize
 
 import ItemShop
 import ShopArmor
+import Execute
+import ObjectIds
+
 
 function createShopBuilding(int unitId, boolean first, int position)
     rect rectGreen = first ? gg_rct_GreenShops1 : gg_rct_GreenShops2
@@ -33,9 +36,227 @@ function createShopBuilding(int unitId, boolean first, int position)
     createUnit(players[11], unitId, posBrown, facing.asAngleDegrees())
         ..addAbility('A00X')
 
+/*  ==========================================================================================================================
+**
+**  Finalize item creation. After all item objects have been created during compile time, the combined information about all items is
+**  used to resolve all values, that reference other items.
+**  By doing so the order in which items are defined does not matter and you can reference items that have not even been created.
+**
+**  gold cost for recipes, description of required items for recipes, button position in shop based on gold cost.
+**
+**  ==========================================================================================================================*/
+
+public string compStringItemGoldCost = "" //compiletime(setupStringArrayGoldCost())
+public string compStringItemRequiredItems = ""//compiletime(setupStringArrayRequiredItems())
+public string compStringItemId = ""//compiletime(setupStringArrayItemId())
+public string compStringItemIsRecipe = "" //compiletime(setupStringArrayItemIsRecipe())
+
+constant CHARMAP = ".................................!.#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[.]^_`abcdefghijklmnopqrstuvwxyz{|}~................................................................................................................................."
+
+/** Convert a integer id value into a 3-letter id code. */
+public function int2threechar(int value) returns string
+    var result = ""
+    var remainingValue = value
+
+    for int byteno = 0 to 2
+        let charValue = remainingValue mod 256
+        remainingValue = remainingValue div 256
+        result = CHARMAP.charAt(charValue) + result
+
+    return result
+
+function createItemGoldCosts()
+    for i = 0 to currentItemId
+        if itemIsRecipe[i]
+            let requiredItemList = stringToList(itemRequiredItems[i], ",")
+    
+            for int j in requiredItemList
+                itemGoldCost[i] -= itemGoldCost[j]
+    
+            destroy requiredItemList
+            compStringItemIsRecipe += "1"
+        else
+            compStringItemIsRecipe += "0"
+
+        compStringItemId += int2threechar(itemIdArray[i])
+        compStringItemGoldCost += itemGoldCost[i].toString()+"|"
+        compStringItemRequiredItems += itemRequiredItems[i]+"|"
+        
+            
+        itemDefinition[i].setGoldCost(itemGoldCost[i])
+
+
+    //the object of class ItemInShop are created, while gold cost is not yet known
+    //now every object is told to retrieve its gold cost from the array
+    for Shop shop in shopList
+        for ItemInShop soldItem in shop.soldItems
+            soldItem.setupGoldCost()
+
+function sortShops()
+    for Shop shop in shopList
+        shop.soldItems.sortWith( (ItemInShop i1, ItemInShop i2) -> (i1.goldCost - i2.goldCost) )
+
+        int x = 0
+        int y = 0
+        for ItemInShop soldItem in shop.soldItems
+            itemPosX[soldItem.itemId] = x
+            itemPosY[soldItem.itemId] = y
+            itemDefinition[soldItem.itemId]
+                ..setButtonPositionX(x)
+                ..setButtonPositionY(y)
+            x++
+            if(x>3)
+                x = 0
+                y++
+
+function createItemDescritptions()
+    for i = 0 to currentItemId
+        if itemIsRecipe[i]
+            string recipeDesc = "|n|n|cffffcc00Requires:|r"
+            string requiredItems = itemRequiredItems[i]
+            let requiredItemList = stringToList(requiredItems, ",")
+
+            for int j in requiredItemList
+
+                let buttonPos = " ["+(itemPosX[j]+1).toString()+","+(itemPosY[j]+1).toString()+"]"
+
+                recipeDesc += "|n - "+itemName[j]+"       ( "+itemShopDescription[j] + buttonPos+" )"
+
+            destroy requiredItemList
+
+
+
+            itemDefinition[i].setDescription(itemDesc[i-1] + recipeDesc)
+            itemDefinition[i].setTooltipExtended(itemDesc[i-1] + recipeDesc)
+        else
+            itemDefinition[i].setDescription(itemDesc[i])
+            itemDefinition[i].setTooltipExtended(itemDesc[i])
+
 @compiletime
-function finalize()
-    itemShopFinalize()
+public function itemShopFinalize()
+    createItemGoldCosts()
+    sortShops()
+    createItemDescritptions()
+
+
+    /*  ==========================================================================================================================
+**
+**  During compiletime certain arrays are used.
+**  To preserve their data for runtime they are converted into a string containing all array members seperated by "|".
+**  This conversion happens here.
+**
+**  ==========================================================================================================================*/
+
+public string stringItemGoldCost = compiletime(compStringItemGoldCost)
+public string stringItemRequiredItems = compiletime(compStringItemRequiredItems)
+public string stringItemId = compiletime(compStringItemId)
+public string stringItemIsRecipe = compiletime(compStringItemIsRecipe)
+
+
+/*  ==========================================================================================================================
+**
+**  During compiletime certain arrays are used.
+**  To preserve their data for runtime they are converted into a string containing all array members seperated by "|".
+**  To use them during runtime, the strings are now converted back to arrays.
+**
+**  ==========================================================================================================================*/
+
+int currentIndex = 0
+int stringPos = 0
+string stringArray = ""
+string currentString = ""
+int stringLength = 0
+
+function resetLoopVariables()
+    stringPos = 0
+    currentIndex = 0
+    currentString = ""
+    stringLength = stringArray.length()
+
+function setupArrays()
+    execute( () -> setupArrayGoldCost())
+    execute( () -> setupArrayRequiredItems())
+    execute( () -> setupArrayItemId())
+    execute( () -> setupArrayItemIsRecipe())
+
+    let s0 = stringItemGoldCost
+    let s1 = stringItemId
+    let s2 = stringItemIsRecipe
+    let s3 = stringItemRequiredItems
+
+    print(s0)
+    print(s1)
+    print(s2)
+    print(s3)
+
+    /*
+    doAfter(1, () ->print(s0))
+    doAfter(2, () ->print(s1))
+    doAfter(3, () ->print(s2))
+    doAfter(4, () ->print(s3))*/
+
+    stringItemGoldCost=""
+    stringItemRequiredItems=""
+    stringItemId=""
+    stringItemIsRecipe=""
+
+function setupArrayGoldCost()
+    stringArray = stringItemGoldCost
+    resetLoopVariables()
+
+    executeWhile(20, ()->(stringPos < stringLength), () -> (begin
+        currentString = ""
+        while stringArray.charAt(stringPos) != "|" and stringPos < stringArray.length()
+            currentString += stringArray.charAt(stringPos)
+            stringPos ++
+
+        itemGoldCost[currentIndex] = currentString.toInt()
+        stringPos++
+        currentIndex++
+    end))
+
+function setupArrayRequiredItems()
+    stringArray = stringItemRequiredItems
+    resetLoopVariables()
+    executeWhile(20, ()->(stringPos < stringLength), () -> (begin
+        currentString = ""
+        while stringArray.charAt(stringPos) != "|" and stringPos < stringArray.length()
+            currentString += stringArray.charAt(stringPos)
+            stringPos ++
+
+        itemRequiredItems[currentIndex] = currentString
+        stringPos++
+        currentIndex++
+    end))
+
+function setupArrayItemId()
+    stringArray = stringItemId
+    resetLoopVariables()
+        
+    executeWhile(10, ()->(stringPos < stringLength), () -> (begin
+        string currentString = stringArray.substring(stringPos, stringPos+3)
+        itemIdArray[currentIndex] = fourchar2int("I"+currentString)
+
+        stringPos += 3
+        currentIndex++
+    end))
+
+    currentItemId = stringLength-1
+
+function setupArrayItemIsRecipe()
+    stringArray = stringItemIsRecipe
+    resetLoopVariables()
+
+    executeWhile(100, ()->(stringPos < stringLength), () -> (begin
+        string currentString = stringArray.charAt(stringPos)
+        itemIsRecipe[currentIndex] = currentString=="1" ? true : false
+
+        stringPos += 1
+        currentIndex++
+    end))
+
+    currentItemId = stringArray.length()-1
+
 
 init
     createShopBuilding(SHOP_ID_PHYSICAL_1, true, 1)
@@ -44,3 +265,8 @@ init
     createShopBuilding(SHOP_ID_MAGICAL_1, false, 1)
     createShopBuilding(SHOP_ID_MAGICAL_2, false, 3)
     createShopBuilding(SHOP_ID_MAGICAL_3, false, 5)
+
+    setupArrays()
+
+    setupItems()
+

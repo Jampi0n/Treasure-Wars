@@ -6,6 +6,29 @@ import UnitWrapper
 import Stats
 import ObjectIdGenerator
 
+
+public constant SHOP_ID_PHYSICAL_1 = UNIT_ID_GEN.next()
+public constant SHOP_PHYSICAL_1 = compiletime(new Shop(SHOP_ID_PHYSICAL_1, "SHOP 1", 1.2,  "units\\human\\HeroPaladin\\HeroPaladin") castTo int)
+
+public constant ITEM_ID_PLATED_GAUNTLETS = compiletime(newItem("Plated Gauntlets", SHOP_PHYSICAL_1, false, "BTNPlatedGauntlet2"))
+public constant ITEM_ID_SPIKED_MAIL = compiletime(newItem("Spiked Mail", SHOP_PHYSICAL_1, true, "BTNINV_Chest_Chain_14"))
+
+@compiletime
+function itemPlatedGauntlets()
+    ITEM_ID_PLATED_GAUNTLETS.getTypeDef()
+        ..setDescription("needed")
+        ..setGoldCost(150)
+
+
+
+@compiletime
+function itemSpikedMail()
+    ITEM_ID_SPIKED_MAIL.getTypeDef()
+        ..setDescription("17")
+        ..setGoldCost(1700)
+        ..addRequirement(ITEM_ID_PLATED_GAUNTLETS)
+
+
 init
     new ItemType(ITEM_ID_HAMMER_OF_STRENGTH, 
     () -> (getTriggerHero().wrapper().addStatAbsoluteBonus(Stat.MS, 60)),
@@ -15,32 +38,3 @@ init
     () -> (getTriggerHero().wrapper().addStatRelativeBonus(Stat.MS, -0.2)),
     () -> (getTriggerHero().wrapper().addStatRelativeBonus(Stat.MS, 0.2)) )
 
-public constant SHOP_ID_PHYSICAL_1 = UNIT_ID_GEN.next()
-public constant SHOP_PHYSICAL_1 = compiletime(new Shop(SHOP_ID_PHYSICAL_1, "SHOP 1", 1.2,  "units\\human\\HeroPaladin\\HeroPaladin") castTo int)
-
-public constant ITEM_ID_PLATED_GAUNTLETS = compiletime(newItem("Plated Gauntlets", 500, SHOP_PHYSICAL_1, "", "BTNPlatedGauntlet2"))
-@compiletime
-function itemPlatedGauntlets()
-    let armor = 10
-    itemDesc[ITEM_ID_PLATED_GAUNTLETS] = "+{0} armor".format(armor.toString())
-
-    newItem("Plated Gauntlets", 500, SHOP_PHYSICAL_1, "", "BTNPlatedGauntlet2")
-    newItem("Plated Gauntlets", 500, SHOP_PHYSICAL_1, "", "BTNPlatedGauntlet2")
-    newItem("Plated Gauntlets", 500, SHOP_PHYSICAL_1, "", "BTNPlatedGauntlet2")
-    newItem("Plated Gauntlets", 500, SHOP_PHYSICAL_1, "", "BTNPlatedGauntlet2")
-    newItem("Plated Gauntlets", 500, SHOP_PHYSICAL_1, "", "BTNPlatedGauntlet2")
-    newItem("Plated Gauntlets", 500, SHOP_PHYSICAL_1, "", "BTNPlatedGauntlet2")
-    newItem("Plated Gauntlets", 500, SHOP_PHYSICAL_1, "", "BTNPlatedGauntlet2")
-    newItem("Plated Gauntlets", 500, SHOP_PHYSICAL_1, "", "BTNPlatedGauntlet2")
-    newItem("Plated Gauntlets", 500, SHOP_PHYSICAL_1, "", "BTNPlatedGauntlet2")
-
-
-
-public constant ITEM_ID_SPIKED_MAIL = compiletime(newItem("Spiked Mail", 500, SHOP_PHYSICAL_1, "", "BTNINV_Chest_Chain_14"))
-
-@compiletime
-function itemSpikedMail()
-    ITEM_ID_SPIKED_MAIL.getTypeDef()
-        ..setDescription("17")
-        ..setGoldCost(1700)
-        ..addRequirement(ITEM_ID_PLATED_GAUNTLETS)
