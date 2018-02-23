@@ -1,0 +1,24 @@
+package ItemIdGeneration
+
+import ItemShopInitialize
+import ObjectIdGenerator
+
+public constant SHOP_ID_MAGICAL_1= UNIT_ID_GEN.next()
+public constant SHOP_MAGICAL_1 = compiletime(new Shop(SHOP_ID_MAGICAL_1, "SHOP 4", 1.1, "units\\human\\HeroArchMage\\HeroArchMage") castTo int)
+
+constant THIS_SHOP = SHOP_MAGICAL_1
+
+public constant ITEM_ID_MAGE_ARMOR = compiletime(newItem("Mage Armor", THIS_SHOP, false, "BTNINV_Chest_Plate07"))
+public constant ITEM_ID_MAGE_AMULET = compiletime(newItem("Mage Amulet", THIS_SHOP, false, "BTNEmptyAmulet"))
+public constant ITEM_ID_MAGE_GLOVES = compiletime(newItem("Mage Gloves", THIS_SHOP, false, "BTNManaGloves"))
+public constant ITEM_ID_MANA_RING = compiletime(newItem("Mana Ring", THIS_SHOP, false, "BTNINV_Jewelry_Ring_10"))
+public constant ITEM_ID_WIZARDS_HAT = compiletime(newItem("Wizard's Hat", THIS_SHOP, false, "BTNWizardsHat"))
+public constant ITEM_ID_GEM_OF_MANA = compiletime(newItem("Gem of Mana", THIS_SHOP, false, "BTNINV_Misc_Gem_Sapphire_02"))
+public constant ITEM_ID_GEM_OF_DARKNESS = compiletime(newItem("Gem of Darkness", THIS_SHOP, false, "BTNJewelOfDarkness"))
+
+public constant ITEM_ID_SKULL = compiletime(newItem("Skull", THIS_SHOP, false, "BTNSkull"))
+
+public constant ITEM_ID_VOODOO_DOLL = compiletime(newItem("Voodoo Doll", THIS_SHOP, false, "BTNZandalariVoodooDoll"))
+public constant ITEM_ID_SPELL_BOOK = compiletime(newItem("Spell Book", THIS_SHOP, false, "BTNBook"))
+public constant ITEM_ID_MAGIC_STAFF = compiletime(newItem("Magic Staff", THIS_SHOP, false, "BTNStickStaff"))
+public constant ITEM_ID_APPRENTICES_SCROLL = compiletime(newItem("Apprentice's Scroll", THIS_SHOP, false, "BTNAdept01"))

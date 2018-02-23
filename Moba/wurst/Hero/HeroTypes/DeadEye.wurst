@@ -274,8 +274,8 @@ function onSpellCast()
             unit target = FirstOfGroup(nearby)
             nearby.removeUnit(target)
             if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
-                new Buff(target, caster, TERROR_DURATION[level-1].bonus(caster.getInt(), TERROR_DURATION_BONUS) , MISS, 1)
-                new Buff(target, caster, TERROR_DURATION[level-1].bonus(caster.getInt(), TERROR_DURATION_BONUS), BUFF_TERROR, level)
+                target.addBuffReduced( caster, TERROR_DURATION[level-1].bonus(caster.getInt(), TERROR_DURATION_BONUS) , MISS, 1)
+                target.addBuffReduced( caster, TERROR_DURATION[level-1].bonus(caster.getInt(), TERROR_DURATION_BONUS), BUFF_TERROR, level)
 
         nearby.destr()
 

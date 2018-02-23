@@ -7,7 +7,7 @@ import ClosureTimers
 
 constant MAGIC_REDUCTION = 0.01
 
-public constant DEBUG_MODE = false//true
+public constant DEBUG_MODE = true
 
 public enum ReductionType
     PHYSICAL
@@ -54,6 +54,15 @@ public function real.bonus(int statValue, real atHundred) returns real
 
 public function int.bonus(int statValue, real atHundred) returns real
     return this.toReal().bonus(statValue, atHundred)
+
+
+public function unit.addBuff(unit caster, real duration, BuffType buffType, int level) returns Buff
+    return new Buff(this, caster, duration, buffType, level)
+
+public function unit.addBuffReduced(unit caster, real duration, BuffType buffType, int level) returns Buff
+    let wp = GetHeroAgi(this, true)
+    real realDuration =  duration * (1-( wp*MAGIC_REDUCTION )/( 1 + wp*MAGIC_REDUCTION ))
+    return new Buff(this, caster, realDuration, buffType, level)
 
 public function unit.dealDamage(unit target, real amount, ReductionType reductionType)
     let damageType = reductionType == ReductionType.PHYSICAL ? DAMAGE_TYPE_NORMAL : DAMAGE_TYPE_UNIVERSAL

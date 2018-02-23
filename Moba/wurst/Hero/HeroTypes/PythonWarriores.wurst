@@ -248,7 +248,7 @@ function onSpellCast()
 
     if(spellId==ABILITY_MISTWALK)
         caster.dispelBuffs(true, true)
-        new Buff(caster, caster, (MISTWALK_DURATION[level-1]).bonus(caster.getInt(), MISTWALK_DURATION_BONUS), INVIS, 1)
+        caster.addBuff( caster, (MISTWALK_DURATION[level-1]).bonus(caster.getInt(), MISTWALK_DURATION_BONUS), INVIS, 1)
         return
 
     if(spellId==ABILITY_POISON_SPIT)
@@ -276,7 +276,7 @@ function onSpellCast()
         var portPos = targetPos.polarOffset(casterPos.angleTo(targetPos), 100)
         SOUND_PARALYZING_STRIKE.playOnPoint(targetPos.toVec3())
         doAfter(0, () -> caster.setPos(portPos))
-        new Buff(target, caster, (PARALYZING_STRIKE_DURATION[level-1]).bonus(caster.getInt(), PARALYZING_STRIKE_DURATION_BONUS) , STUNNED, 1)
+        target.addBuffReduced( caster, (PARALYZING_STRIKE_DURATION[level-1]).bonus(caster.getInt(), PARALYZING_STRIKE_DURATION_BONUS) , STUNNED, 1)
         caster.dealDamage(target, (PARALYZING_STRIKE_DAMAGE[level-1]).bonus(caster.getInt(), PARALYZING_STRIKE_DAMAGE_BONUS) , ReductionType.MAGIC)
         return
 
@@ -286,7 +286,7 @@ function onAttack()
     let level = OnAttack.getAttacker().getAbilityLevel(ABILITY_ENVENOMED_BLADES)
     if level != 0
         
-        new Buff(OnAttack.getTarget(), OnAttack.getAttacker(), ENVENOMED_BLADES_DURATION[level-1], BUFF_ENVENOMED_BLADES, level)
+        OnAttack.getTarget().addBuffReduced( OnAttack.getAttacker(), ENVENOMED_BLADES_DURATION[level-1], BUFF_ENVENOMED_BLADES, level)
 
 
 //in for group
