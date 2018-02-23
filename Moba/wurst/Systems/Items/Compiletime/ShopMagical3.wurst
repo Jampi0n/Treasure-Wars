@@ -1,0 +1,76 @@
+package ShopMagical3
+
+import initlater ItemShopSystem
+import ItemShopInitialize
+import UnitWrapper
+import Stats
+import ObjectIdGenerator
+
+import ShopPhysical1
+import ShopMagical1
+import ShopPhysical2
+import ShopMagical2
+
+
+
+public constant SHOP_ID_MAGICAL_3= UNIT_ID_GEN.next()
+public constant SHOP_MAGICAL_3 = compiletime(new Shop(SHOP_ID_MAGICAL_3, "SHOP 6", 1.6, "units\\human\\Jaina\\Jaina") castTo int)
+
+constant THIS_SHOP = SHOP_MAGICAL_3
+
+
+public constant ITEM_ID_ENCHANTED_ARMOR = compiletime(newItem("Enchanted Armor", THIS_SHOP, false, "BTNSuperiorMageRobe"))
+public constant ITEM_ID_EMERALD_PENDANT = compiletime(newItem("Emerald Pendant", THIS_SHOP, false, "BTNAmulet"))
+public constant ITEM_ID_RING_OF_DARKNESS = compiletime(newItem("Ring of Darkness", THIS_SHOP, false, "BTNINV_Jewelry_Ring_15"))
+public constant ITEM_ID_BLESSED_GOBLET = compiletime(newItem("Blessed Goblet", THIS_SHOP, false, "BTNBless"))
+public constant ITEM_ID_WAND_OF_DEATH = compiletime(newItem("Wand of Death", THIS_SHOP, false, "BTNINV_Wand_12"))
+public constant ITEM_ID_WAND_OF_BLOOD = compiletime(newItem("Wand of BLood", THIS_SHOP, false, "BTNINV_Wand_09"))
+public constant ITEM_ID_BRACER_OF_POWER = compiletime(newItem("Bracer of Power", THIS_SHOP, false, "BTNBracerOfAbjuration"))
+public constant ITEM_ID_ARCANE_BLADE  = compiletime(newItem("Arcane Blade", THIS_SHOP, false, "BTNScarabusEdgeV2"))
+public constant ITEM_ID_VAMPIRIC_GOBLET  = compiletime(newItem("Vampiric Goblet", THIS_SHOP, false, "BTNGobletOfVampires"))
+public constant ITEM_ID_VOID_ARMOR  = compiletime(newItem("Void Armor", THIS_SHOP, false, "BTNHalfArmorOfDarkness"))
+
+public constant ITEM_ID_ARCANE_SHIELD  = compiletime(newItem("Arcane Shield", THIS_SHOP, false, "BTNArcanumProtector"))
+public constant ITEM_ID_SCROLL_OF_CONJURATION  = compiletime(newItem("Scroll of Conjuration", THIS_SHOP, false, "BTNAdept003"))
+
+function itemEnchantedArmor(int itemId)
+    if compiletime
+        itemId.getTypeDef()
+            ..setDescription("needed")
+            ..setGoldCost(150)
+    else
+        itemId.getItem()
+            ..addStatBonusAbsolute(Stat.AR, 10)
+
+function itemEmeraldPendant(int itemId)
+
+    
+
+function itemRingOfDarkness(int itemId)
+
+
+function itemBlessedGoblet(int itemId)
+
+
+function itemWandOfDeath(int itemId)
+
+
+function itemWandOfBlood(int itemId)
+
+function itemArcaneBlade(int itemId)
+
+function itemVampiricGoblet(int itemId)
+
+function itemVoidArmor(int itemId)
+
+@compiletime
+public function shopMagical3Init()
+    itemEnchantedArmor(ITEM_ID_ENCHANTED_ARMOR)
+    itemEmeraldPendant(ITEM_ID_EMERALD_PENDANT)
+    itemRingOfDarkness(ITEM_ID_RING_OF_DARKNESS)
+    itemBlessedGoblet(ITEM_ID_BLESSED_GOBLET)
+    itemWandOfBlood(ITEM_ID_WAND_OF_BLOOD)
+    itemWandOfDeath(ITEM_ID_WAND_OF_DEATH)
+    itemArcaneBlade(ITEM_ID_ARCANE_BLADE)
+    itemVampiricGoblet(ITEM_ID_VAMPIRIC_GOBLET)
+    itemVoidArmor(ITEM_ID_VOID_ARMOR)

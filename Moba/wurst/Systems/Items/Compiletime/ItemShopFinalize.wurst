@@ -2,10 +2,17 @@ package ItemShopFinalize
 
 import ItemShopRequirements
 import ItemShopInitialize
-import ShopArmor
+import ShopPhysical1
+import ShopMagical1
+import ShopPhysical2
+import ShopMagical2
+import ShopPhysical3
+import ShopMagical3
 import initlater ItemShopSystem
 import Execute
 import ObjectIds
+import ErrorHandling
+
 
 
 function createShopBuilding(int unitId, boolean first, int position)
@@ -101,6 +108,8 @@ function sortShops()
         int x = 0
         int y = 0
         for ItemInShop soldItem in shop.soldItems
+            if y>2
+                error("Too many items in the shop.")
             compItemPosX[soldItem.itemId] = x
             compItemPosY[soldItem.itemId] = y
             compItemDefinition[soldItem.itemId]
@@ -284,7 +293,12 @@ init
     setupArrays()
     setupItems()
 
-    shopArmorInit()
+    shopPhysical1Init()
+    shopMagical1Init()
+    shopPhysical2Init()
+    shopMagical2Init()
+    shopPhysical3Init()
+    shopMagical3Init()
 
 
     

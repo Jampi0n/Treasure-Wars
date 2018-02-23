@@ -5,7 +5,8 @@ import ItemShopFinalize
 import HashMap
 import LinkedList
 import ItemShopRequirements
-import ShopArmor
+import Stats
+import UnitWrapper
 
 //This package is imported ny other item packages, but they use initlater to avoid cyclic requirements. So the initialization of this
 //package is manually called by other packages and not by using init, because init is after all other item packages.
@@ -55,6 +56,33 @@ public function getTriggerItem() returns item
 public function getTriggerHero() returns unit
     return triggerHero
 
+function unit.countItemsOfType(int itemId) returns int
+    item indexItem
+    int count = 0
+
+    for i = 0 to bj_MAX_INVENTORY-1
+        indexItem = UnitItemInSlot(this, i)
+        if (indexItem != null) and (indexItem.getTypeId() == itemId)
+            count++
+
+    return count
+
+//returns if the picked up item is the first of its type and if the dropped item is the last of its type
+public function isUnique() returns boolean
+    return getTriggerHero().countItemsOfType(getTriggerItem().getTypeId()) == 1
+
+//returns if the the hero has not this item
+public function hasNot(int itemId) returns boolean
+    return getTriggerHero().countItemsOfType(itemId) == 0
+
+/*combined usage:
+pick up boots 1
+isUnique() and hasNot(boots 2)
+onPickup: the hero has not boots 2 and picked up his first boots 1 => add unique boots bonus
+onDrop: the hero has not boots 2 and dropped his last boots 1 => remove unique boots bonus
+
+*/
+
 public function int.getItem() returns Item
     return Item.itemMap.get(itemIdArray[this])
 
@@ -65,8 +93,8 @@ public class Item
     protected static HashMap<int, Item> itemMap
     private static trigger onItemPickUp = CreateTrigger()
     private static trigger onItemDrop = CreateTrigger()
-    ItemPickUp onPickUp
-    ItemDrop onDrop
+    private constant onPickUp = new LinkedList<ItemPickUp>
+    private constant onDrop = new LinkedList<ItemDrop>
 
     construct(int itemTypeId, int gold)
         this.itemTypeId = itemTypeId
@@ -89,21 +117,41 @@ public class Item
         triggerItem = GetManipulatedItem()
         triggerHero = GetTriggerUnit()
         let itemType = itemMap.get(triggerItem.getTypeId())
-        if itemType != null and itemType.onPickUp != null
-            itemType.onPickUp.onItemPickUp()
+        if itemType != null
+            for c in itemType.onPickUp
+                c.onItemPickUp()
 
     static function onItemDrop()
         triggerItem = GetManipulatedItem()
         triggerHero = GetTriggerUnit()
         let itemType = itemMap.get(triggerItem.getTypeId())
-        if itemType != null and itemType.onDrop != null
-            itemType.onDrop.onItemDrop()
+        if itemType != null
+            for c in itemType.onDrop
+                c.onItemDrop()
 
-    function setPickupFunction(ItemPickUp onPickUp)
-        this.onPickUp = onPickUp
+    function addPickupFunction(ItemPickUp onPickUp)
+        this.onPickUp.add(onPickUp)
 
-    function setDropFunction(ItemDrop onDrop)
-        this.onDrop = onDrop
+    function addDropFunction(ItemDrop onDrop)
+        this.onDrop.add(onDrop)
+
+    function addStatBonusAbsolute(Stat whichStat, int bonus)
+        addPickupFunction( ()-> (begin
+            getTriggerHero().wrapper().addStatAbsoluteBonus(whichStat, bonus)
+        end))
+
+        addDropFunction( ()-> (begin
+            getTriggerHero().wrapper().addStatAbsoluteBonus(whichStat, -bonus)
+        end))
+
+    function addStatBonusRelative(Stat whichStat, real bonus)
+        addPickupFunction( ()-> (begin
+            getTriggerHero().wrapper().addStatRelativeBonus(whichStat, bonus)
+        end))
+
+        addDropFunction( ()-> (begin
+            getTriggerHero().wrapper().addStatRelativeBonus(whichStat, -bonus)
+        end))
 
     function getTypeId() returns int
         return this.itemTypeId

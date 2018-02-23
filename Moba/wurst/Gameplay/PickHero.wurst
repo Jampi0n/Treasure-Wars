@@ -36,12 +36,12 @@ function setupCreatedHero(Hero hero)
     owner.setGold(5000)
 
     if(cPlayer.getTeam()==Team.TEAM1)
-        if not DEBUG_MODE
-            hero.toUnit().setPos(gg_rct_GreenCastle.getCenter())
+        //if not DEBUG_MODE
+        hero.toUnit().setPos(gg_rct_GreenCastle.getCenter())
         //SetHeroLevel(hero.toUnit(), 25, true)
     else
-        if not DEBUG_MODE
-            hero.toUnit().setPos(gg_rct_BrownCastle.getCenter())
+        //if not DEBUG_MODE
+        hero.toUnit().setPos(gg_rct_BrownCastle.getCenter())
 
 
 //creates a random hero for a player
@@ -150,13 +150,13 @@ function endPickMode()
     chooseModeTimer.release()
 
     if(pickMode == PickMode.ALLPICK)
-        //print("|cffffcc00All Pick was chosen. You have 30 seconds to pick a Hero!|r")
+        print("|cffffcc00All Pick was chosen. You have 30 seconds to pick a Hero!|r")
         allPick()
     if(pickMode == PickMode.ALLRANDOM)
-        //print("|cffffcc00All Random was chosen. Heroes will be random!|r")
+        print("|cffffcc00All Random was chosen. Heroes will be random!|r")
         allRandom()
     if(pickMode == PickMode.UNDECIDED)
-        //print("|cffffcc00No mode was chosen. Heroes will be random!|r")
+        print("|cffffcc00No mode was chosen. Heroes will be random!|r")
         pickMode = PickMode.ALLRANDOM
         allRandom()
 
@@ -196,15 +196,19 @@ function startPickMode()
     TimerDialogSetTitle(timerWindow,"Choose pick mode:")
     TimerDialogDisplay(timerWindow, true)
 
-    //print("|cffffcc00"+players[adminPlayer].getName()+" has 30 seconds to pick a mode!|r")
+    print("|cffffcc00"+players[adminPlayer].getName()+" has 30 seconds to pick a mode!|r")
 
 init
     doAfter(0, ()-> startPickMode())
-    doAfter(0.1, () -> (begin
-        pickMode = PickMode.ALLPICK
-        endPickMode()
-    end))
 
+    // DEBUG_MODE automatically chooses all pick
+    if DEBUG_MODE
+        doAfter(0.1, () -> (begin
+            pickMode = PickMode.ALLPICK
+            endPickMode()
+        end))
+
+    // you can spawn new heroes in DEBUG_MODE
     if DEBUG_MODE
         CreateTrigger()
             ..registerPlayerChatEvent(players[0], "hero ", false)

@@ -176,7 +176,7 @@ public class Hero
         int killBounty = (bounty/2 + bounty/(2*(size+1))).toInt()
 
         if size == 0
-            printTimed("{0} was killed by {1}. Bounty is {2} for kill.".format(
+            printTimed("{0} was killed by {1} for {2} gold.".format(
                 this.owner.getPlayer().getFullColoredName(), 
                 killer.getFullColoredName(),
                 "|cffffcc00"+bounty.toString()+"|r"
@@ -184,12 +184,13 @@ public class Hero
 
             killer.addGold(bounty)
         else
-            printTimed("{0} was killed by {1} with the help of {2}. Bounty is {3} for kill and {4} for each assist.".format(
+            printTimed("{0} was killed by {1} for {3} gold. {2} get{5} {4} gold for helping.".format(
                 this.owner.getPlayer().getFullColoredName(), 
                 killer.getFullColoredName(),
                 assistString,
                 "|cffffcc00"+killBounty.toString()+"|r",
-                "|cffffcc00"+assistBounty.toString()+"|r"
+                "|cffffcc00"+assistBounty.toString()+"|r",
+                size==1?"s":""
             ), 10)
 
             killer.addGold(killBounty)
