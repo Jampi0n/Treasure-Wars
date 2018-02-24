@@ -56,7 +56,7 @@ public function getTriggerItem() returns item
 public function getTriggerHero() returns unit
     return triggerHero
 
-function unit.countItemsOfType(int itemId) returns int
+public function unit.countItemsOfType(int itemId) returns int
     item indexItem
     int count = 0
 
@@ -82,6 +82,9 @@ onPickup: the hero has not boots 2 and picked up his first boots 1 => add unique
 onDrop: the hero has not boots 2 and dropped his last boots 1 => remove unique boots bonus
 
 */
+
+public function convertItemId(int itemId) returns int
+    return itemIdArray[itemId]
 
 public function int.getItem() returns Item
     return Item.itemMap.get(itemIdArray[this])

@@ -5,31 +5,9 @@ import ItemShopInitialize
 import UnitWrapper
 import Stats
 import ObjectIdGenerator
-
-import ShopPhysical1
-import ShopMagical1
+import ItemIdGeneration
 
 
-public constant SHOP_ID_MAGICAL_2= UNIT_ID_GEN.next()
-public constant SHOP_MAGICAL_2 = compiletime(new Shop(SHOP_ID_MAGICAL_2, "SHOP 5", 1.3, "units\\human\\HeroBloodElf\\HeroBloodElf") castTo int)
-
-constant THIS_SHOP = SHOP_MAGICAL_2
-
-
-
-public constant ITEM_ID_SKULL_PENDANT = compiletime(newItem("Skull Pendant", THIS_SHOP, false, "BTNAncientAmulet"))
-public constant ITEM_ID_VISION_WARD = compiletime(newItem("Vision Ward", THIS_SHOP, false, "BTNVisionWand"))
-public constant ITEM_ID_VOODOO_MASK = compiletime(newItem("Voodoo Mask", THIS_SHOP, false, "BTNTiki_Mask_A_Icon_001"))
-public constant ITEM_ID_GHOST_HOOD = compiletime(newItem("Ghost Hood", THIS_SHOP, false, "BTNspookyhood"))
-public constant ITEM_ID_EVIL_BOOK = compiletime(newItem("Evil Book", THIS_SHOP, false, "BTNmonsterbook2"))
-public constant ITEM_ID_FROST_RING = compiletime(newItem("Frost Ring", THIS_SHOP, false, "BTNColdFireRing"))    
-public constant ITEM_ID_SCEPTER_OF_THE_TIDES = compiletime(newItem("Scepter of the Tides", THIS_SHOP, false, "BTNScepterOfTheTides"))
-public constant ITEM_ID_BOOTS_OF_DARKNESS = compiletime(newItem("Boots Of Darkness", THIS_SHOP, true, "BTNWalkersOfDarkness"))
-public constant ITEM_ID_MAGMA_CRYSTAL = compiletime(newItem("Magma Crystal", THIS_SHOP, true, "BTNRedCrystal"))
-public constant ITEM_ID_CURSED_MASK = compiletime(newItem("Cursed Mask", THIS_SHOP, true, "BTNLugubriousMask"))
-
-public constant ITEM_ID_ANCIENT_STONE_TABLET = compiletime(newItem("Ancient Stone Tablet", THIS_SHOP, true, "BTNINV_Misc_StoneTablet_05"))
-public constant ITEM_ID_BATTLEMAGE_ARMOR = compiletime(newItem("Battle Mage Armor", THIS_SHOP, true, "BTNBattlemageArmor"))
 
 function itemSkullPendant(int itemId)
     if compiletime

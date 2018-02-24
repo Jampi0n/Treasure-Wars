@@ -5,32 +5,9 @@ import ItemShopInitialize
 import UnitWrapper
 import Stats
 import ObjectIdGenerator
-
-import ShopPhysical1
-import ShopMagical1
-
-public constant SHOP_ID_PHYSICAL_2= UNIT_ID_GEN.next()
-public constant SHOP_PHYSICAL_2 = compiletime(new Shop(SHOP_ID_PHYSICAL_2, "SHOP 2", 1.4,  "units\\human\\HeroMountainKing\\HeroMountainKing") castTo int)
-
-constant THIS_SHOP = SHOP_PHYSICAL_2
+import ItemIdGeneration
 
 
-public constant ITEM_ID_SKULL_AXE = compiletime(newItem("Skull Axe", THIS_SHOP, true, "BTNINV_Axe_09"))
-public constant ITEM_ID_GAUNTLET_OF_PROTECTION = compiletime(newItem("Gauntlet of Protection", THIS_SHOP, true, "BTNPlatedGauntlet"))
-public constant ITEM_ID_HEAVY_BOOTS = compiletime(newItem("Heavy Boots", THIS_SHOP, true, "BTNHeavyBoots"))
-public constant ITEM_ID_SPIKED_MAIL = compiletime(newItem("Spiked Mail", THIS_SHOP, true, "BTNINV_Chest_Chain_14"))
-public constant ITEM_ID_HEAVY_ARMOR = compiletime(newItem("Heavy Armor", THIS_SHOP, true, "BTNSeaHeavyArmor"))
-
-public constant ITEM_ID_WAR_HORN = compiletime(newItem("War Horn", THIS_SHOP, true, "BTNHorn"))
-public constant ITEM_ID_WAR_DRUM = compiletime(newItem("War Drum", THIS_SHOP, true, "BTNTribalDrumOfWar"))
-public constant ITEM_ID_HEAVY_HELMET = compiletime(newItem("Heavy Helmet", THIS_SHOP, true, "BTNHelmetOfDefender"))
-public constant ITEM_ID_HAMMER_OF_MIGHT = compiletime(newItem("Hammer of Might", THIS_SHOP, true, "BTNINV_Hammer_10"))
-public constant ITEM_ID_STEEL_ARMOR = compiletime(newItem("Steel Armor", THIS_SHOP, true, "BTNINV_Chest_Plate11"))
-
-public constant ITEM_ID_MACE = compiletime(newItem("Mace", THIS_SHOP, true, "BTNMaceStrikeGlowless"))
-
-
-public constant ITEM_ID_RAVEN_SWORD = compiletime(newItem("Raven Sword", THIS_SHOP, false, "BTNRaven_Sword"))
 
 function itemSkullAxe(int itemId)
     if compiletime

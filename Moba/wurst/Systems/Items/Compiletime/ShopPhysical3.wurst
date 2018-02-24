@@ -5,32 +5,8 @@ import ItemShopInitialize
 import UnitWrapper
 import Stats
 import ObjectIdGenerator
+import ItemIdGeneration
 
-import ShopPhysical1
-import ShopMagical1
-import ShopPhysical2
-import ShopMagical2
-
-
-public constant SHOP_ID_PHYSICAL_3= UNIT_ID_GEN.next()
-public constant SHOP_PHYSICAL_3 = compiletime(new Shop(SHOP_ID_PHYSICAL_3, "SHOP 3", 1.2, "units\\human\\ArthaswithSword\\ArthaswithSword") castTo int)
-
-constant THIS_SHOP = SHOP_PHYSICAL_3
-
-
-public constant ITEM_ID_CURSED_SWORD = compiletime(newItem("Cursed Sword", THIS_SHOP, false, "BTNCursedSword"))
-public constant ITEM_ID_INFERNAL_BOW = compiletime(newItem("Infernal Bow", THIS_SHOP, true, "BTNInfernalbow"))
-public constant ITEM_ID_ARMOR_OF_COURAGE = compiletime(newItem("Armor of Courage", THIS_SHOP, false, "BTNINV_Chest_Plate09"))
-public constant ITEM_ID_HELMET_OF_JUSTICE = compiletime(newItem("Helmet of Justice", THIS_SHOP, false, "BTNINV_Helmet_21"))
-public constant ITEM_ID_BLOOD_SWORD = compiletime(newItem("Blood Sword", THIS_SHOP, false, "BTNBarbarianBrutalSlasher"))
-public constant ITEM_ID_FIREHAND_GAUNTLETS = compiletime(newItem("Firehand Gauntlets", THIS_SHOP, false, "BTNPlateGauntlet"))
-public constant ITEM_ID_SPIKED_ARMOR = compiletime(newItem("Spiked Armor", THIS_SHOP, false, "BTNSpikedArmor"))
-public constant ITEM_ID_RUNIC_ARMOR = compiletime(newItem("Runic Armor", THIS_SHOP, false, "BTNRunestoneBreastplate"))
-
-public constant ITEM_ID_ENCHANTED_BLADE = compiletime(newItem("Runic Armor", THIS_SHOP, false, "BTN_RunicBlade_CR"))
-public constant ITEM_ID_AXE_OF_DECAY = compiletime(newItem("Runic Armor", THIS_SHOP, false, "BTNINV_Axe_15"))
-public constant ITEM_ID_HOLY_SHIELD = compiletime(newItem("Holy Shield", THIS_SHOP, false, "BTNGoldenShieldHoly"))
-public constant ITEM_ID_SACRIFICIAL_DAGGER = compiletime(newItem("Sacrificial Dagger", THIS_SHOP, false, "BTNBloodStinger"))
 
 
 function itemBloodSword(int itemId)
