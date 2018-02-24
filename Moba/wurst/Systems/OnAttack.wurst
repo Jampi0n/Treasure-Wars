@@ -2,6 +2,97 @@ package OnAttack
 
 import DamageDetection
 import HeroType
+import General
+import AbilityObjEditing
+import ObjectIdGenerator
+import LinkedList
+import TimerUtils
+
+import ItemIdGeneration
+import ItemShopSystem
+
+constant PREVENT_DEATH = compiletime(ABIL_ID_GEN.next())
+
+unit prevenDeathUnit
+real prevenDeathAfterLife
+timer preventDeathTimer = getTimer()
+
+@compiletime
+function setupPreventDeath()
+    new AbilityDefinitionMaxLifeBonusGreater(PREVENT_DEATH)
+        ..setMaxLifeGained(1, 100000)
+
+
+function unit.dealDamageNoEvent(unit target, real amount, ReductionType reductionType)
+    disableDamageDetect()
+    this.dealDamage(target, amount, reductionType)
+    enableDamageDetect()
+
+function unitSetAfterLife()
+    if prevenDeathUnit == null
+        return
+
+    prevenDeathUnit
+        ..removeAbility(PREVENT_DEATH)
+        ..setHP(prevenDeathAfterLife)
+
+    prevenDeathUnit = null
+
+/*
+**
+**  This function handles ALL damage event funtions, where the damage amount matters.
+**  By having all in this function, the order the functions run can be set the easiest.
+**
+*/
+function handleDamageAmount(boolean isAttack)
+    unit source = OnAttack.getAttacker()
+    unit target = OnAttack.getTarget()
+    let originalDamage = GetEventDamage()
+    real currentDamage = originalDamage
+    real afterLife
+
+    //===============================================================================
+
+
+    //example:
+    //currentDamage = currentDamage/2
+
+
+    if isAttack and target.isType(UNIT_TYPE_HERO)
+        if target.countItemsOfType(convertItemId(ITEM_ID_SHIELD)) != 0
+            currentDamage = currentDamage-6
+
+
+
+    //===============================================================================
+    if prevenDeathUnit != null
+        prevenDeathUnit.removeAbility(PREVENT_DEATH)
+        prevenDeathUnit.setHP(prevenDeathAfterLife)
+        prevenDeathUnit = null
+
+    if currentDamage < 0
+        currentDamage = 0
+
+    if currentDamage > originalDamage
+        source.dealDamageNoEvent(target, currentDamage-originalDamage, ReductionType.NONE)
+    if currentDamage < originalDamage
+        //how much life the target is supposed to have after dealing damage
+        let life = target.getHP()
+        afterLife = life - currentDamage
+        
+        //only do stuff, if the unit is supposed to survive
+        if life - currentDamage > 0.41
+            //if the target would die, even though it is supposed to survive:
+            if life - originalDamage < 0.41
+                target.setHP(target.getMaxHP())
+                target.addAbility(PREVENT_DEATH)
+
+            prevenDeathUnit = target
+            prevenDeathAfterLife = afterLife
+            preventDeathTimer.start(0, function unitSetAfterLife)
+
+
+
 
 public class OnAttack
 
@@ -12,21 +103,28 @@ public class OnAttack
 
     protected static function onDamage()
         target = GetTriggerUnit()
-        
+        attacker = GetEventDamageSource()
+
+
         active = false
         var attacked = false
 
         if(target.hasAbility('B005')) //passive
             target.removeAbility('B005')
             attacked = true
-        if(target.hasAbility('B006')) //arrow
+        else if(target.hasAbility('B006')) //arrow
             target.removeAbility('B006')
             attacked = true
             active = true
 
         if(attacked)
-            attacker = GetEventDamageSource()
+            //if target.isType(UNIT_TYPE_HERO)
+            handleDamageAmount(true)
             onAttackTrigger.execute()
+        else
+            //if target.isType(UNIT_TYPE_HERO)
+            handleDamageAmount(false)    
+
 
     static function getAttacker() returns unit
         return attacker
