@@ -5,6 +5,7 @@ import HeroControl
 import HeroType
 import ClosureTimers
 import General
+import Gameplay
 
 public PickMode pickMode
 timer chooseModeTimer
@@ -34,15 +35,19 @@ function setupCreatedHero(Hero hero)
     player owner = hero.toUnit().getOwner()
     CPlayer cPlayer = owner.getCPlayer()
     owner.setGold(5000)
+    vec2 pos
+    patron[owner.getId()].remove()
 
     if(cPlayer.getTeam()==Team.TEAM1)
         //if not DEBUG_MODE
-        hero.toUnit().setPos(gg_rct_GreenCastle.getCenter())
+        pos = gg_rct_GreenCastle.getCenter()
         //SetHeroLevel(hero.toUnit(), 25, true)
     else
         //if not DEBUG_MODE
-        hero.toUnit().setPos(gg_rct_BrownCastle.getCenter())
-
+        pos = gg_rct_BrownCastle.getCenter()
+       
+    hero.toUnit().setPos(pos)
+    PanCameraTo(pos.x, pos.y)
 
 //creates a random hero for a player
 function createRandomHero(CPlayer cPlayer)
@@ -81,6 +86,8 @@ function allRandom()
     for i = 0 to 11
         if(getCPlayer(i).getPlayerType()==PlayerType.HERO)
             createRandomHero(getCPlayer(i))
+
+    allHeroesPicked()
 
 function allPick()
 
@@ -135,12 +142,14 @@ function allPickEnd()
             patron[i]=null
             if(Hero.getHero(getCPlayer(i))==null)
                 if(GetLocalPlayer()==players[i])
-                    print("|cffffcc00 you have not picked a hero in time. You will get a random one.")
+                    print("|cffffcc00You have not picked a hero in time. You will get a random one.")
                 createRandomHero(getCPlayer(i))
 
     onPickTrigger
         ..clearActions()
         ..destr()
+
+    allHeroesPicked()
 
 
 
