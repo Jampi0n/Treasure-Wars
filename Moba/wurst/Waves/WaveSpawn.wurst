@@ -5,10 +5,21 @@ import PathUnit
 import Path
 import LinkedList
 import Buildings
+import ErrorHandling
 
 constant topUnits = new LinkedList<int>()
 constant midUnits = new LinkedList<int>()
 constant botUnits = new LinkedList<int>()
+
+constant real SPAWN_INTERVAL = 50
+boolean spawnStarted = false
+
+public function startSpawning()
+    if spawnStarted
+        error("Spawning has already started.")
+    else
+        doPeriodically(SPAWN_INTERVAL, (CallbackPeriodic _) -> spawnWave())
+        spawnStarted = true
 
 function spawnUnit( boolean firstTeam, int unitId, vec2 startPos) returns unit
     let spawnedUnit = createUnit(players[10 + (firstTeam ? 0 : 1)], unitId, firstTeam ? gg_rct_BrownCastle.getRightTop() : gg_rct_GreenCastle.getLeftBot() , angle(45. + (firstTeam ? 0 : 180) ))
@@ -134,13 +145,3 @@ function spawnWave()
     
 init
     setupSpawnUnits()
-
-
-
-
-
-    
-
-init
-    doAfter(5, () -> spawnWave()) 
-    doPeriodically(50, (CallbackPeriodic _) -> spawnWave())

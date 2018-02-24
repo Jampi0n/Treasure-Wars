@@ -5,8 +5,8 @@ import HeroType
 import General
 import AbilityObjEditing
 import ObjectIdGenerator
-import LinkedList
 import TimerUtils
+import UnitTypeConfig
 
 import ItemIdGeneration
 import ItemShopSystem
@@ -61,6 +61,7 @@ function handleDamageAmount(boolean isAttack)
     if isAttack and target.isType(UNIT_TYPE_HERO)
         if target.countItemsOfType(convertItemId(ITEM_ID_SHIELD)) != 0
             currentDamage = currentDamage-6
+            print("block")
 
 
 
@@ -102,28 +103,32 @@ public class OnAttack
     private static trigger onAttackTrigger = CreateTrigger()
 
     protected static function onDamage()
-        target = GetTriggerUnit()
-        attacker = GetEventDamageSource()
+        //use local variables to avoid overwriting
+        //set global variables right before calling other functions
+        let localTarget = GetTriggerUnit()
+        let localAttacker = GetEventDamageSource()
+        var localActive = false
+        var localAttacked = false
 
 
-        active = false
-        var attacked = false
+        if(localTarget.hasAbility('B005')) or localAttacker.getTypeId() == MORTAR_TEAM //passive
+            localTarget.removeAbility('B005')
+            localAttacked = true
+        else if(localTarget.hasAbility('B006')) //arrow
+            localTarget.removeAbility('B006')
+            localActive = true
+            localAttacked = true
 
-        if(target.hasAbility('B005')) //passive
-            target.removeAbility('B005')
-            attacked = true
-        else if(target.hasAbility('B006')) //arrow
-            target.removeAbility('B006')
-            attacked = true
-            active = true
 
-        if(attacked)
-            //if target.isType(UNIT_TYPE_HERO)
-            handleDamageAmount(true)
+        target = localTarget
+        attacker = localAttacker
+        active = localActive
+        handleDamageAmount(localAttacked)
+        if(localAttacked)
+            target = localTarget
+            attacker = localAttacker
+            active = localActive
             onAttackTrigger.execute()
-        else
-            //if target.isType(UNIT_TYPE_HERO)
-            handleDamageAmount(false)    
 
 
     static function getAttacker() returns unit
