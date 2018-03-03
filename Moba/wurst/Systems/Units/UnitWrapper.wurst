@@ -115,12 +115,24 @@ class UnitWrapper
     protected static function getWrapper(unit whichUnit) returns UnitWrapper
         return unitMap.get(whichUnit)
 
-    ondestroy
-        unitMap.remove(this.assocUnit)
+    //custom destroy function, so unit wrapper is destroyed last and can be used in the clean up routines
+    protected function destr()
+
+        
+
+        //the dispel function must be executed before the unit wrapper is destroyed
+        for Buff b in this.buffList.getLinkedList()
+            b.dispel()
+
         destroy this.buffList
 
+        //remove unit wrapper
         unitWrapperCount--
         allUnits[this.index] = allUnits[unitWrapperCount]
+        unitMap.remove(this.assocUnit)
+        destroy this
+
+
 
 
     /**
@@ -209,7 +221,7 @@ function regenerate()
 
 init
     onUnitIndex(() -> new UnitWrapper(getIndexedUnit()))
-    onUnitDeindex(() -> destroy getDeindexedUnit().wrapper() )
+    onUnitDeindex(() -> getDeindexedUnit().wrapper().destr() )
 
     CreateTrigger()
         ..addAction(function regenerate)

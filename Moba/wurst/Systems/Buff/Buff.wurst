@@ -255,9 +255,6 @@ public class BuffList
         return this.linkedList
 
     ondestroy
-        for Buff b in this.linkedList
-            b.dispel()
-
         destroy linkedList
 
 public class Buff
@@ -341,7 +338,7 @@ public class Buff
 
     function dispel()
         //print("dispel buff: ")
-        print((this castTo int).toString() )
+        //print((this castTo int).toString() )
 
         currentBuff = this
         if(this.onDispel!=null)

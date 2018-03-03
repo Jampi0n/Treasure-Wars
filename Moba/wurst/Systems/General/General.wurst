@@ -7,7 +7,7 @@ import ClosureTimers
 
 constant MAGIC_REDUCTION = 0.01
 
-public constant DEBUG_MODE = false//true
+public constant DEBUG_MODE = not false
 
 public enum ReductionType
     PHYSICAL

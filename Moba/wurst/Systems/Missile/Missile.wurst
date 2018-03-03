@@ -2,6 +2,7 @@ package Missile
 
 import DummyRecycler
 import TimerUtils
+import ClosureTimers
 
 real UPDATE_INTERVAL = 0.03
 int MAX_HITBOX_SIZE = 128
@@ -9,16 +10,31 @@ int MAX_HITBOX_SIZE = 128
 function unit.getHitBox() returns real
     return 64
 
+public interface MissileHitFunction
+    function missileHit(Missile thisMissile, unit target)
+
+public interface MissileCheckFunction
+    function missileCheck(Missile thisMissile, unit target) returns boolean
+
+public interface MissileEndFunction
+    function missileEnd(Missile thisMissile)
+
 public class Missile
 
     private static Missile currentMissile
     private static unit currentTarget
 
-    private trigger onHit = null
-    private trigger onExpire = null
-    private trigger onDestroy = null
-    private trigger onHitCondition = null
-    private boolexpr onHitFilter = null
+    //private trigger onHitCondition = null
+    private MissileCheckFunction onHitFilter = null
+    //private trigger onHit = null
+    private MissileHitFunction onHitFunction = null
+
+
+    //private trigger onExpire = null
+    private MissileEndFunction onExpireFunction = null
+    //private trigger onDestroy = null
+    private MissileEndFunction onDestroyFunction = null
+
     private unit dummy
     private effect model
     private timer updateTimer
@@ -32,6 +48,8 @@ public class Missile
     private real size = 50
     private angle direction
     private real speed
+    private boolean destroyed = false
+
 
     construct(unit owner, vec3 start, real speed, angle direction, string model )
         this.dummy = DummyRecycler.get(start.toVec2(), direction)
@@ -68,8 +86,8 @@ public class Missile
 
 
         if (this.maxDuration > -0.5 and this.currentDuration > this.maxDuration) or (this.maxRange > -0.5 and this.currentRange > this.maxRange)
-            if this.onExpire != null
-                this.onExpire.execute()
+            if this.onExpireFunction != null
+                this.onExpireFunction.missileEnd(this)
             destroy this
 
         else
@@ -80,17 +98,21 @@ public class Missile
             nearby.enumUnitsInRange(newPos, this.size + MAX_HITBOX_SIZE)
 
             while(not nearby.isEmpty())
+
+                if destroyed
+                    break
+
                 unit target = FirstOfGroup(nearby)
                 
                 nearby.removeUnit(target)
                 let targetPos = target.getPos()
                 let distance = newPos.distanceTo(targetPos)
-                if (not hitOnce or not hitUnits.contains(target)) and distance <= this.size + target.getHitBox()
+                if (not hitOnce or not hitUnits.contains(target)) and distance <= this.size + target.getHitBox() and target != this.getOwner()
                     currentMissile = this
                     currentTarget = target
-                    if(this.onHitCondition==null or this.onHitCondition.evaluate())
-                        if this.onHit!=null
-                            this.onHit.execute()
+                    if this.onHitFilter==null or this.onHitFilter.missileCheck(this, target)
+                        if this.onHitFunction != null
+                            this.onHitFunction.missileHit(this, target)
 
                         if hitOnce
                             this.hitUnits.addUnit(target)
@@ -101,27 +123,21 @@ public class Missile
     static function moveStatic()
          (GetExpiredTimer().getData() castTo Missile).move()
 
+    function destr()
+        this.destroyed = true
+        doAfter(0, () -> destroy this)
 
-    function addHitCondition(code cb)
-        if(this.onHitCondition == null)
-            this.onHitCondition = CreateTrigger()
-        this.onHitFilter = Condition(cb)
-        this.onHitCondition.addCondition(this.onHitFilter)
+    function setHitCondition(MissileCheckFunction hitCondition)
+        this.onHitFilter = hitCondition
 
-    function addHitFunction(code cb)
-        if(this.onHit == null)
-            this.onHit = CreateTrigger()
-        this.onHit.addAction(cb)
+    function setHitFunction(MissileHitFunction hitFunction)
+        this.onHitFunction = hitFunction
 
-    function addExpireFunction(code cb)
-        if(this.onExpire == null)
-            this.onExpire = CreateTrigger()
-        this.onExpire.addAction(cb)
+    function setExpireFunction(MissileEndFunction expireFunction)
+        this.onExpireFunction = expireFunction
 
-    function addDestroyFunction(code cb)
-        if(this.onDestroy == null)
-            this.onDestroy = CreateTrigger()
-        this.onDestroy.addAction(cb)
+    function setDestroyFunction(MissileEndFunction destroyFunction)
+        this.onDestroyFunction = destroyFunction
 
     function getOwner() returns unit
         return this.owner
@@ -154,19 +170,14 @@ public class Missile
         if(this.hitOnce)
             this.hitUnits.destr()
 
-        if(this.onHit!=null)
-            this.onHit.destr()
-        if(this.onExpire!=null)
-            this.onExpire.destr()
-        if(this.onDestroy!=null)
-            this.onDestroy.execute()
-            this.onDestroy.destr()
-
-        if(this.onHitCondition!=null)
-            this.onHitCondition.destr()
-
         if(this.onHitFilter!=null)
-            this.onHitFilter.destr()
+            destroy this.onHitFilter
 
+        if(this.onHitFunction!=null)
+            destroy this.onHitFunction
 
-
+        if(this.onExpireFunction!=null)
+            destroy this.onExpireFunction
+        if(this.onDestroyFunction!=null)
+            this.onDestroyFunction.missileEnd(this)
+            destroy this.onDestroyFunction

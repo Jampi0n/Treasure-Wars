@@ -1,15 +1,15 @@
 package OnAttack
 
 import DamageDetection
-import HeroType
-import General
+import initlater HeroType
 import AbilityObjEditing
-import ObjectIdGenerator
+import ClosureTimers
 import TimerUtils
 import UnitTypeConfig
+import LinkedList
 
 import ItemIdGeneration
-import ItemShopSystem
+import initlater ItemShopSystem
 
 constant PREVENT_DEATH = compiletime(ABIL_ID_GEN.next())
 
@@ -44,9 +44,7 @@ function unitSetAfterLife()
 **  By having all in this function, the order the functions run can be set the easiest.
 **
 */
-function handleDamageAmount(boolean isAttack)
-    unit source = OnAttack.getAttacker()
-    unit target = OnAttack.getTarget()
+function handleDamageAmount(unit source, unit target, boolean isAttack, boolean _isActive)
     let originalDamage = GetEventDamage()
     real currentDamage = originalDamage
     real afterLife
@@ -59,9 +57,8 @@ function handleDamageAmount(boolean isAttack)
 
 
     if isAttack and target.isType(UNIT_TYPE_HERO)
-        if target.countItemsOfType(convertItemId(ITEM_ID_SHIELD)) != 0
-            currentDamage = currentDamage-6
-            print("block")
+        currentDamage = currentDamage - 8 * target.countItemsOfType(convertItemId(ITEM_ID_SHIELD))
+
 
 
 
@@ -93,7 +90,8 @@ function handleDamageAmount(boolean isAttack)
             preventDeathTimer.start(0, function unitSetAfterLife)
 
 
-
+public interface OnAttackFunction
+    function onAttack(unit attacker, unit target, boolean isActive)
 
 public class OnAttack
 
@@ -101,6 +99,9 @@ public class OnAttack
     private static unit attacker
     private static boolean active
     private static trigger onAttackTrigger = CreateTrigger()
+    private static constant onAttackFunctionList = new LinkedList<OnAttackFunction>()
+
+    protected static int countEvents = 0
 
     protected static function onDamage()
         //use local variables to avoid overwriting
@@ -110,6 +111,9 @@ public class OnAttack
         var localActive = false
         var localAttacked = false
 
+        countEvents++
+        if countEvents > 100
+            print("Warning. Very high number of damage events: "+countEvents.toString())
 
         if(localTarget.hasAbility('B005')) or localAttacker.getTypeId() == MORTAR_TEAM //passive
             localTarget.removeAbility('B005')
@@ -123,30 +127,30 @@ public class OnAttack
         target = localTarget
         attacker = localAttacker
         active = localActive
-        handleDamageAmount(localAttacked)
+        handleDamageAmount(localAttacker, localTarget, localAttacked, localActive)
+
+        //use a list with arguments, as a onAttack function could trigger an onAttack event and overwrite the variables
         if(localAttacked)
-            target = localTarget
-            attacker = localAttacker
-            active = localActive
-            onAttackTrigger.execute()
+            for OnAttackFunction onAttack in onAttackFunctionList
+                onAttack.onAttack(attacker, target, active)
 
 
-    static function getAttacker() returns unit
+    /*static function getAttacker() returns unit
         return attacker
 
     static function getTarget() returns unit
         return target   
 
     static function isActive() returns boolean
-        return active
+        return active*/
 
-    static function addOnAttackFunc(code onAttack)
-        onAttackTrigger.addAction(onAttack)    
+    static function addOnAttackFunc(OnAttackFunction onAttack)
+        onAttackFunctionList.add(onAttack)
 
-    protected static function onAttackAbilities()
-        HeroType heroType = HeroType.getHeroType(getAttacker().getTypeId())
+    protected static function onAttackAbilities(unit attacker, unit target, boolean isActive)
+        HeroType heroType = HeroType.getHeroType(attacker.getTypeId())
         if(heroType!=null)
-            heroType.onAttack()
+            heroType.onAttack(attacker, target, isActive)
 
 
 init
@@ -155,4 +159,8 @@ init
     //use hashmap, so onAttack is more efficient
     //if there are a lot of heroes, if-then-else to find the correct
     //actions to execute is inefficient
-    OnAttack.addOnAttackFunc(function OnAttack.onAttackAbilities)
+    OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> OnAttack.onAttackAbilities(attacker, target, isActive))
+
+    doPeriodically(0.1, (CallbackPeriodic _cb) -> (begin
+        OnAttack.countEvents = 0
+    end))

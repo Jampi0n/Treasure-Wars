@@ -4,8 +4,8 @@ import PlayerControl
 import HeroControl
 import HeroType
 import ClosureTimers
-import General
 import Gameplay
+import HashMap
 
 public PickMode pickMode
 timer chooseModeTimer
@@ -17,9 +17,11 @@ region pickRegion
 
 unit array tavern
 unit array patron
+fogmodifier array tavernVision
 
 HeroType array remainingHeroTypes
 int remainingHeroTypesCount
+constant heroTypeIndex = new HashMap<HeroType, int>()
 
 enum PickMode
     UNDECIDED
@@ -34,7 +36,11 @@ ban, reverse pick, same heroes
 function setupCreatedHero(Hero hero)
     player owner = hero.toUnit().getOwner()
     CPlayer cPlayer = owner.getCPlayer()
-    owner.setGold(5000)
+    if DEBUG_MODE
+        owner.setGold(5000)
+    else
+        owner.setGold(500)
+        
     vec2 pos
     patron[owner.getId()].remove()
 
@@ -62,6 +68,10 @@ function createRandomHero(CPlayer cPlayer)
         if(getCPlayer(i).getPlayerType()==PlayerType.HERO)
             SetPlayerTechMaxAllowed(players[i],  remainingHeroTypes[random].getUnitId(), 0)
 
+
+    heroTypeIndex.put(remainingHeroTypes[random], heroTypeIndex.get(remainingHeroTypes[remainingHeroTypesCount-1]))
+    heroTypeIndex.remove(remainingHeroTypes[remainingHeroTypesCount-1])
+
     remainingHeroTypes[random] = remainingHeroTypes[remainingHeroTypesCount-1]
     remainingHeroTypes[remainingHeroTypesCount-1]=null
     remainingHeroTypesCount--
@@ -69,14 +79,16 @@ function createRandomHero(CPlayer cPlayer)
 
 
 function removeHeroType(HeroType herotype)
-    for i = 0 to remainingHeroTypesCount-1
-        if(remainingHeroTypes[i]==herotype)
-            remainingHeroTypes[i] = remainingHeroTypes[remainingHeroTypesCount-1]
-            remainingHeroTypes[remainingHeroTypesCount-1]=null
-            remainingHeroTypesCount--
-            break
+    let index = heroTypeIndex.get(herotype)
 
-    for i = 0 to 11
+    heroTypeIndex.put(remainingHeroTypes[index], heroTypeIndex.get(remainingHeroTypes[remainingHeroTypesCount-1]))
+    heroTypeIndex.remove(remainingHeroTypes[remainingHeroTypesCount-1])
+
+    remainingHeroTypes[index] = remainingHeroTypes[remainingHeroTypesCount-1]
+    remainingHeroTypes[remainingHeroTypesCount-1]=null
+    remainingHeroTypesCount--
+
+    for i = 0 to 9
         if(getCPlayer(i).getPlayerType()==PlayerType.HERO)
             SetPlayerTechMaxAllowed(players[i], herotype.getUnitId(), 0)
         
@@ -102,7 +114,12 @@ function allPick()
     for i = 0 to 11
         if(getCPlayer(i).getPlayerType()==PlayerType.HERO)
             patron[i] = createUnit(players[i], 'n006', gg_rct_CenterMid.getCenter(), angle(0))
+            tavernVision[i] = CreateFogModifierRadius(players[i], FOG_OF_WAR_VISIBLE,
+                                gg_rct_CenterMid.getCenterX(),  gg_rct_CenterMid.getCenterX(), 900, true, false)
+            FogModifierStart(tavernVision[i])
 
+
+   
 
     pickRegion = CreateRegion()
         ..addRect(bj_mapInitialPlayableArea)
@@ -110,8 +127,10 @@ function allPick()
         ..addAction(function onPick)
         ..registerEnterRegion(pickRegion, null)
 
+    let pickTime = DEBUG_MODE?5.:30.
+
     pickTimer = getTimer()
-        ..start(30, function allPickEnd)
+        ..start(pickTime, function allPickEnd)
 
     timerWindow = CreateTimerDialog(pickTimer)
     TimerDialogSetTitle(timerWindow,"Pick hero:")
@@ -144,6 +163,9 @@ function allPickEnd()
                 if(GetLocalPlayer()==players[i])
                     print("|cffffcc00You have not picked a hero in time. You will get a random one.")
                 createRandomHero(getCPlayer(i))
+
+            FogModifierStop(tavernVision[i])
+            DestroyFogModifier(tavernVision[i])
 
     onPickTrigger
         ..clearActions()
@@ -188,6 +210,7 @@ function startPickMode()
 
     for i = 0 to remainingHeroTypesCount-1
         remainingHeroTypes[i] = HeroType.heroTypes[i]
+        heroTypeIndex.put(HeroType.heroTypes[i], i)
 
     PanCameraToTimed(gg_rct_CenterMid.getCenterX(), gg_rct_CenterMid.getCenterY(), 0)
     

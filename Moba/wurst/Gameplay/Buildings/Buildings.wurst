@@ -110,12 +110,15 @@ function onBuildingDeath()
         globalBounty = 1000
         
     if bounty + globalBounty > 0
-        killer.addGold(bounty + globalBounty)
-        createGoldBountyTextTag(building, bounty + globalBounty, killer)
+        let team = building.getOwner().getCPlayer().getTeam()
 
-        let team = killer.getCPlayer().getTeam()
+        if killer.getCPlayer().getTeam() == team
+            killer.addGold(bounty + globalBounty)
+            createGoldBountyTextTag(building, bounty + globalBounty, killer)
+
+        
         for p = 0 to 9
-            if getCPlayer(p).getTeam() == team and players[p]!=killer
+            if getCPlayer(p).getTeam() != team and players[p]!=killer
                 players[p].addGold(globalBounty)
                 createGoldBountyTextTag(building, globalBounty, players[p])
 

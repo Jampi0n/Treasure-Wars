@@ -1,7 +1,9 @@
 package HeroObjectEditing
 
 import AbilityObjEditing
-import ObjectIds
+import BuffObjEditing
+import public ObjectIds
+import public ObjectIdGenerator
 
 /*
 You cannot add learnable abilities to hero with code, it must be done with object data.
@@ -67,6 +69,53 @@ public function createTargetMissile(int newId, int buffId) returns AbilityDefini
         aDef.setAreaofEffect(i, 1)
     return aDef
 
+public function createDummyBuff() returns int
+    let buffId = BUFF_ID_GEN.next()
+    new BuffDefinition(buffId, 'BHwe')
+    return buffId
+
+public function createBasicBuff(string name, string desc, string icon, string model) returns int
+    let buffId = BUFF_ID_GEN.next()
+    new BuffDefinition(buffId, 'BHwe')
+        ..setTooltipNormal(1, name)
+        ..setTooltipNormalExtended(1, desc)
+        ..setIcon(icon)
+        ..setArtTarget(1, model)
+    return buffId
+
+public function createAuraBuff(string name, string desc, string icon) returns int
+    let buffId = BUFF_ID_GEN.next()
+    new BuffDefinition(buffId, 'BHwe')
+        ..setTooltipNormal(1, name)
+        ..setTooltipNormalExtended(1, desc)
+        ..setIcon(icon)
+    return buffId
+
+public function createNegativeBuffAbility(int levels, int buffId, string model) returns integer
+    let abilityId = ABIL_ID_GEN.next()
+    let aDef = new AbilityDefinitionAuraSlow(abilityId)
+        ..setArtTarget(model)
+    for i = 1 to levels
+        aDef
+            ..setTargetsAllowed(i, "invulnerable,self,vulnerable")
+            ..setAreaofEffect(i, 1)
+            ..setMovementSpeedFactor(i, 0)
+            ..setAttackSpeedFactor(i, 0)
+            ..setBuffs(i, int2fourchar(buffId))
+    return abilityId
+
+public function createPositiveBuffAbility(int levels, int buffId, string model) returns integer
+    let abilityId = ABIL_ID_GEN.next()
+    let aDef = new AbilityDefinitionUnholyAuracreep(abilityId)
+        ..setArtTarget(model)
+    for i = 1 to levels
+        aDef
+            ..setTargetsAllowed(i, "invulnerable,self,vulnerable")
+            ..setAreaofEffect(i, 1)
+            ..setMovementSpeedIncrease(i, 0)
+            ..setLifeRegenerationIncrease(i, 0)
+            ..setBuffs(i, int2fourchar(buffId))
+    return abilityId
 
 
 public function getLevelString(int level) returns string
