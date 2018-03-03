@@ -5,7 +5,8 @@ import ItemShopInitialize
 import UnitWrapper
 import Stats
 import ItemIdGeneration
-
+import OnAttack
+import General
 
 function itemPlatedGauntlets(int itemId)
     int armor = 10
@@ -101,17 +102,25 @@ function itemDagger(int itemId)
             ..setGoldCost(460)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.AR, 10)
+            ..addStatBonusAbsolute(Stat.STR, str)
+            ..addStatBonusAbsolute(Stat.AS, as)
 
 function itemBow(int itemId)
-    int str = 15
+    int str = 5
+    int unitDmg = 25
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} strength".format(str.toString()))
+            ..setDescription("+ {0} strength|nDeals {1} additional damage to units.".format(str.toString(), unitDmg.toString() ))
             ..setGoldCost(650)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.AR, 10)
+            ..addStatBonusAbsolute(Stat.STR, str)
+
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if not target.isType(UNIT_TYPE_HERO) and not target.isType(UNIT_TYPE_STRUCTURE) and attacker.isType(UNIT_TYPE_HERO)
+                let dmg = attacker.countItemsOfType(convertItemId(itemId)) * unitDmg
+                attacker.dealDamage(target, dmg.toReal(), ReductionType.PHYSICAL)
+        end))
 
 function itemShield(int itemId)
     int ar = 5
@@ -141,8 +150,11 @@ function itemSpikes(int itemId)
             ..setDescription("Enemies attacking the hero will take {0} damage.".format(spikeDmg.toString()))
             ..setGoldCost(360)
     else
-        itemId.getItem()
-            ..addStatBonusAbsolute(Stat.AR, 10)
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if target.isType(UNIT_TYPE_HERO)
+                let dmg = target.countItemsOfType(convertItemId(itemId)) * spikeDmg
+                target.dealDamage(attacker, dmg.toReal(), ReductionType.PHYSICAL)
+        end))
 
 @compiletime
 public function shopPhysical1Init()

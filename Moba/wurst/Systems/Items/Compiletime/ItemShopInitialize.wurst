@@ -86,7 +86,8 @@ public class Shop
 function createShop(int newId, string name, real size, string model) returns BuildingDefinition
     let bDef = new BuildingDefinition(newId, 'hvlt')
         ..setPathingMap("PathTextures\\4x4SimpleSolid.tga")
-        ..setNormalAbilities("Abds,Aall,Apit")
+        ..setNormalAbilities("Abds,Aall,Apit,Avul")
+        ..setHitPointsMaximumBase(1000)
         ..setItemsMade("")
         ..setModelFile(model)
         ..setShadowImageCenterX(60)..setShadowImageCenterY(60)
@@ -129,6 +130,7 @@ public function newItem(string name, int whichShop, boolean hasRecipe, string ic
         ..presetIcon(icon)
         ..setName(name)
         ..setTooltipBasic(name)
+
     
     new ItemTypeDef(compCurrentItemId, hasRecipe)
 

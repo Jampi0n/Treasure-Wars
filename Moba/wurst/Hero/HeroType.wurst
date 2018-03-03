@@ -1,7 +1,13 @@
 package HeroType
 
 import HashMap
-import Stats
+import OnAttack
+import public Stats
+import public Buff
+import public BuffTypeConfig
+import public General
+import public UnitWrapper
+import public HeroObjectEditing
 
 public constant HERO_MAX_LEVEL = 25
 
@@ -12,8 +18,8 @@ public class HeroType
 
     private static constant unitIdToHeroType = new HashMap<integer, HeroType>
     private int unitId
-    private trigger onAttackTrigger = CreateTrigger()
     private trigger onSpellCastTrigger = CreateTrigger()
+    private OnAttackFunction onAttack
 
     static HeroType array heroTypes 
     static int heroTypeCount = 0
@@ -50,11 +56,13 @@ public class HeroType
     function onSpellCast()
         this.onSpellCastTrigger.execute()
 
-    function onAttack()
-        this.onAttackTrigger.execute()
 
-    function addOnAttackFunc(code onAttack)
-        onAttackTrigger.addAction(onAttack)    
+    function onAttack(unit attacker, unit target, boolean isActive)
+        if this.onAttack != null
+            this.onAttack.onAttack(attacker, target, isActive)
+
+    function setOnAttackFunc(OnAttackFunction onAttack)
+        this.onAttack = onAttack
 
     function addOnSpellCastFunc(code onSpellCast)
         onSpellCastTrigger.addAction(onSpellCast)    
