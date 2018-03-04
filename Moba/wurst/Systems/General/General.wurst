@@ -121,7 +121,9 @@ init
     setGetBuffListFunction( (unit u) -> (begin
         return u.getBuffList()
     end))
+
     
+    dispelBuffsOnDeath()
 
     if DEBUG_MODE
         doAfter(1, () -> print("DEBUG_MODE is enabled."))
