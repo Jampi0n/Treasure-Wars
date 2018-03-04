@@ -1,6 +1,7 @@
 package General
 
 import Buff
+import Missile
 import UnitWrapper
 import initlater HeroControl
 import ClosureTimers
@@ -113,5 +114,14 @@ public function player.getFullColoredName() returns string
     return fromPlayer(this).toColorString()+this.getFullName()+"|r"
 
 init
+    setHitBoxFunction( (unit u) -> (begin
+        return 64.
+    end))
+
+    setGetBuffListFunction( (unit u) -> (begin
+        return u.getBuffList()
+    end))
+    
+
     if DEBUG_MODE
         doAfter(1, () -> print("DEBUG_MODE is enabled."))
