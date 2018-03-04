@@ -6,9 +6,17 @@ import ClosureTimers
 
 real UPDATE_INTERVAL = 0.03
 int MAX_HITBOX_SIZE = 128
+HitBoxFunction hitBoxFunction
+
+public function setHitBoxFunction(HitBoxFunction hitBoxFunc)
+    hitBoxFunction = hitBoxFunc
+
+    
+public interface HitBoxFunction
+    function getHitBox(unit whichUnit) returns real
 
 function unit.getHitBox() returns real
-    return 64
+    return hitBoxFunction.getHitBox(this)
 
 public interface MissileHitFunction
     function missileHit(Missile thisMissile, unit target)

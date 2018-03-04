@@ -1,6 +1,7 @@
 package BonusMod
 
 import AbilityObjEditing
+import ObjectIdGenerator
 import Stats
 
 /*
@@ -12,7 +13,6 @@ based on the work of
 
 constant int MAX_LEVEL = 16 //2^16 = 65k, should be enough
 
-
 /*
 0...MAX_LEVEL-1 positive -> MAX_LEVEL positive abilities
 MAX_LEVEL negative
@@ -22,18 +22,26 @@ constant int MIN_BONUS = -MAX_BONUS-1
 //regen stats are handled via trigger
 
 //movement speed is also handled via trigger
-constant BM_HIT_POINTS = 'bHP0'
-constant BM_MANA_POINTS = 'bMP0'
+constant BM_HIT_POINTS = compiletime(generateIds())
+constant BM_MANA_POINTS = compiletime(generateIds())
 
-constant BM_ATTACK_SPEED = 'bAS0'
-constant BM_ATTACK_DAMAGE = 'bAD0'
-constant BM_ARMOR = 'bAR0'
+constant BM_ATTACK_SPEED = compiletime(generateIds())
+constant BM_ATTACK_DAMAGE = compiletime(generateIds())
+constant BM_ARMOR = compiletime(generateIds())
 
-constant BM_STRENGTH = 'bST0'
-constant BM_WILLPOWER = 'bWP0'
-constant BM_INTELLIGENCE = 'bIT0'
+constant BM_STRENGTH = compiletime(generateIds())
+constant BM_AGILITY = compiletime(generateIds())
+constant BM_INTELLIGENCE = compiletime(generateIds())
 
 int array powersOfTwo
+
+function generateIds() returns int
+    int first = ABIL_ID_GEN.next()
+    for i=1 to MAX_LEVEL
+        ABIL_ID_GEN.next()
+
+    return first
+
 
 function statToBonusAbiltiy(Stat whichStat) returns integer
     
@@ -50,8 +58,8 @@ function statToBonusAbiltiy(Stat whichStat) returns integer
             return BM_MANA_POINTS
         case Stat.STR.toInt()
             return BM_STRENGTH
-        case Stat.WP.toInt()
-            return BM_WILLPOWER
+        case Stat.AGI.toInt()
+            return BM_AGILITY
         case Stat.INT.toInt()
             return BM_INTELLIGENCE
         default
@@ -157,10 +165,10 @@ function generateStrengthSpeedBonus()
 function generateWillpowerSpeedBonus()
     AbilityDefinitionAgilityBonusPlus1 aDef
     for i = 0 to MAX_LEVEL-1
-        aDef = new AbilityDefinitionAgilityBonusPlus1(BM_WILLPOWER+i)
+        aDef = new AbilityDefinitionAgilityBonusPlus1(BM_AGILITY+i)
         aDef.setAgilityBonus(1, (2).pow(i) )
 
-    aDef = new AbilityDefinitionAgilityBonusPlus1(BM_WILLPOWER+MAX_LEVEL)
+    aDef = new AbilityDefinitionAgilityBonusPlus1(BM_AGILITY+MAX_LEVEL)
     aDef.setAgilityBonus(1, -(2).pow(MAX_LEVEL) )
              
 @compiletime
