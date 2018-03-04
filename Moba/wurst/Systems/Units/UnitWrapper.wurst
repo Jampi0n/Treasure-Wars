@@ -65,7 +65,7 @@ class UnitWrapper
         //Base values should never change for units and only change for heroes on level up.
 
         statBaseValue[Stat.STR.toInt()] = this.assocUnit.getStr(false)
-        statBaseValue[Stat.WP.toInt()] = this.assocUnit.getAgi(false)
+        statBaseValue[Stat.AGI.toInt()] = this.assocUnit.getAgi(false)
         statBaseValue[Stat.INT.toInt()] = this.assocUnit.getInt(false)
 
         let uType = UnitType.getUnitType(this.assocUnit.getTypeId())
@@ -98,7 +98,7 @@ class UnitWrapper
         if not this.assocUnit.isType(UNIT_TYPE_HERO)
             print("Base stats for non-hero units are constant and must not be updated.")
         statBaseValue[Stat.STR.toInt()] = this.assocUnit.getStr(false)
-        statBaseValue[Stat.WP.toInt()] = this.assocUnit.getAgi(false)
+        statBaseValue[Stat.AGI.toInt()] = this.assocUnit.getAgi(false)
         statBaseValue[Stat.INT.toInt()] = this.assocUnit.getInt(false)
 
         statBaseValue[Stat.AD.toInt()] = 17 + statBaseValue[Stat.STR.toInt()] + GetPlayerTechCount(this.assocUnit.getOwner(), UPG_AD, true)

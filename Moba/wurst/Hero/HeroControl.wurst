@@ -87,7 +87,7 @@ public class Hero
         //this.hero.wrapper().addStatAbsoluteBonus(Stat.MS, this.heroType.calculateStat(Stat.MS, lvl) - this.heroType.calculateStat(Stat.MS, lvl-1))
 
         SetHeroStr(this.hero, this.heroType.calculateStat(Stat.STR, lvl), true)
-        SetHeroAgi(this.hero, this.heroType.calculateStat(Stat.WP, lvl), true)
+        SetHeroAgi(this.hero, this.heroType.calculateStat(Stat.AGI, lvl), true)
         SetHeroInt(this.hero, this.heroType.calculateStat(Stat.INT, lvl), true)
 
         this.hero.wrapper().updateBaseStats()
