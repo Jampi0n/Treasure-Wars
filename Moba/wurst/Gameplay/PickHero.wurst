@@ -38,20 +38,21 @@ function setupCreatedHero(Hero hero)
     CPlayer cPlayer = owner.getCPlayer()
     if DEBUG_MODE
         owner.setGold(5000)
+        SetHeroLevel(hero.toUnit(), 25, true)
     else
         owner.setGold(500)
         
-    vec2 pos
+    vec2 pos = gg_rct_CenterMid.getCenter()
     patron[owner.getId()].remove()
 
     if(cPlayer.getTeam()==Team.TEAM1)
-        //if not DEBUG_MODE
-        pos = gg_rct_GreenCastle.getCenter()
-        //SetHeroLevel(hero.toUnit(), 25, true)
+        if not DEBUG_MODE
+            pos = gg_rct_GreenCastle.getCenter()
     else
-        //if not DEBUG_MODE
-        pos = gg_rct_BrownCastle.getCenter()
+        if not DEBUG_MODE
+            pos = gg_rct_BrownCastle.getCenter()
        
+    
     hero.toUnit().setPos(pos)
     PanCameraTo(pos.x, pos.y)
 
@@ -127,7 +128,7 @@ function allPick()
         ..addAction(function onPick)
         ..registerEnterRegion(pickRegion, null)
 
-    let pickTime = DEBUG_MODE?5.:30.
+    let pickTime = DEBUG_MODE?10.:30.
 
     pickTimer = getTimer()
         ..start(pickTime, function allPickEnd)

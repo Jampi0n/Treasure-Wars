@@ -3,7 +3,6 @@ package UnitWrapper
 import UnitIndexer
 import HashMap
 import initlater Buff
-import Stats
 import initlater General
 import UnitType
 import Upgrades
@@ -12,12 +11,22 @@ import LinkedList
 
 import BonusMod
 
+public interface CalculateTotalBonus
+    function calculate(UnitWrapper whichWrapper, Stat whichStat)
+
 /**
     Every unit gets a unit wrapper
 
     Contains functionality every unit needs in one place, so only one HashMap is needed.
 **/
-class UnitWrapper
+public class UnitWrapper
+
+    constant static CalculateTotalBonus defaultCalcualtion = (UnitWrapper whichWrapper, Stat whichStat) -> (begin
+        int stat = whichStat.toInt()
+        whichWrapper.statsTotalBonus[stat] = ((whichWrapper.getStatAbsoluteBonus(whichStat)) * (1. + whichWrapper.getStatRelativeBonus(whichStat)) + (whichWrapper.getStatBaseValue(whichStat) * whichWrapper.getStatRelativeBonus(whichStat)) ).toInt()
+    end)
+
+    private CalculateTotalBonus bonusCalculation = defaultCalcualtion
 
     protected static unit array allUnits
     protected static int unitWrapperCount = 0
@@ -35,7 +44,7 @@ class UnitWrapper
 
     private int array[11] statsAbsoluteBonus //default = 0
     private real array[11] statsRelativeBonus //default = 0.00
-    protected int array[11] statsTotalBonus //default = 0
+    int array[11] statsTotalBonus //default = 0
 
     private static constant unnkownUnitTypes = new LinkedList<int>()
 
@@ -135,19 +144,23 @@ class UnitWrapper
 
 
 
+    function setBonusCalculation(CalculateTotalBonus bonusCalculation)
+        this.bonusCalculation = bonusCalculation
+
     /**
     Updates the total stat bonus based on base stat, absolute stat bonus and relative stat bonus
     **/
     function updateTotalStatBonus(Stat whichStat)
-        int stat = whichStat.toInt()
-        this.statsTotalBonus[stat] = ((this.statsAbsoluteBonus[stat]) * (1. + this.statsRelativeBonus[stat]) + (this.statBaseValue[stat] * this.statsRelativeBonus[stat]) ).toInt()
-        //print("new total bonus = "+this.statsTotalBonus[stat].toString())
+        this.bonusCalculation.calculate(this, whichStat)
+        this.applyTotalStatBonus(whichStat)
+        
+
+    function applyTotalStatBonus(Stat whichStat)
         if whichStat != Stat.MS and whichStat != Stat.HR and whichStat!= Stat.MR
-            this.assocUnit.setBonus(whichStat, this.statsTotalBonus[stat])
+            this.toUnit().setBonus(whichStat, this.statsTotalBonus[whichStat.toInt()])
         else
             if whichStat == Stat.MS
-                this.assocUnit.setMovementSpeed( this.statBaseValue[stat] + this.statsTotalBonus[stat].toReal() )
-            //HR and MR are handled automatically.
+                this.toUnit().setMovementSpeed( this.getStatBaseValue(whichStat) + this.statsTotalBonus[whichStat.toInt()].toReal() )
 
     /**
     Sets the absolute stat bonus and updates the total bonus.
@@ -179,8 +192,18 @@ class UnitWrapper
     function printStat(Stat whichStat)
         int stat = whichStat.toInt()
         print(whichStat.toString()+" ( "+statBaseValue[stat].toString()+" + "+statsAbsoluteBonus[stat].toString()+" ) * "+statsRelativeBonus[stat].toString() + "->" +statsTotalBonus[stat].toString() )
-    
 
+    function toUnit() returns unit
+        return this.assocUnit
+
+    function getStatAbsoluteBonus(Stat whichStat) returns int
+        return this.statsAbsoluteBonus[whichStat.toInt()]
+
+    function getStatRelativeBonus(Stat whichStat) returns real
+        return this.statsRelativeBonus[whichStat.toInt()]
+    
+    function getStatBaseValue(Stat whichStat) returns int
+        return this.statBaseValue[whichStat.toInt()]
 
 public function unit.wrapper() returns UnitWrapper
     return UnitWrapper.getWrapper(this)

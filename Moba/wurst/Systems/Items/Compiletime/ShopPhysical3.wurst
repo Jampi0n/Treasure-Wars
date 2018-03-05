@@ -12,8 +12,11 @@ import ItemIdGeneration
 function itemBloodSword(int itemId)
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("needed")
-            ..setGoldCost(150)
+            ..setDescription("634")
+            ..setGoldCost(634)
+            ..addRequirement(ITEM_ID_HAMMER_OF_MIGHT)
+            ..addRequirement(ITEM_ID_MACE)
+            ..addRequirement(ITEM_ID_RING_OF_REGEN)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.AR, 10)
@@ -21,8 +24,11 @@ function itemBloodSword(int itemId)
 function itemFirehandGauntlets(int itemId)
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("needed")
-            ..setGoldCost(150)
+            ..setDescription("765")
+            ..setGoldCost(765)
+            ..addRequirement(ITEM_ID_GAUNTLET_OF_PROTECTION)
+            ..addRequirement(ITEM_ID_MAGMA_CRYSTAL)
+            ..addRequirement(ITEM_ID_GLOVES_OF_HASTE)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.AR, 10)
@@ -30,8 +36,11 @@ function itemFirehandGauntlets(int itemId)
 function itemSpikedArmor(int itemId)
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("needed")
-            ..setGoldCost(150)
+            ..setDescription("1234")
+            ..setGoldCost(1234)
+            ..addRequirement(ITEM_ID_SPIKED_MAIL)
+            ..addRequirement(ITEM_ID_SHIELD)
+            ..addRequirement(ITEM_ID_HEAVY_ARMOR)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.AR, 10)
@@ -39,8 +48,11 @@ function itemSpikedArmor(int itemId)
 function itemCursedSword(int itemId)
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("needed")
-            ..setGoldCost(150)
+            ..setDescription("432")
+            ..setGoldCost(432)
+            ..addRequirement(ITEM_ID_RAVEN_SWORD)
+            ..addRequirement(ITEM_ID_SKULL_AXE)
+            ..addRequirement(ITEM_ID_GEM_OF_DARKNESS)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.AR, 10)
@@ -48,8 +60,11 @@ function itemCursedSword(int itemId)
 function itemArmorOfCourage(int itemId)
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("needed")
-            ..setGoldCost(150)
+            ..setDescription("12")
+            ..setGoldCost(12)
+            ..addRequirement(ITEM_ID_HEAVY_ARMOR)
+            ..addRequirement(ITEM_ID_STEEL_ARMOR)
+            ..addRequirement(ITEM_ID_SHIELD)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.AR, 10)
@@ -57,12 +72,87 @@ function itemArmorOfCourage(int itemId)
 function itemHelmetOfJustice(int itemId)
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("needed")
-            ..setGoldCost(150)
+            ..setDescription("7864")
+            ..setGoldCost(7864)
+            ..addRequirement(ITEM_ID_HEAVY_HELMET)
+            ..addRequirement(ITEM_ID_SHIELD)
+            ..addRequirement(ITEM_ID_GEM_OF_HEALTH)
+            ..addRequirement(ITEM_ID_RING_OF_REGEN)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.AR, 10)
 
+function itemInfernalBow(int itemId)
+    if compiletime
+        itemId.getTypeDef()
+            ..setDescription("543")
+            ..setGoldCost(543)
+            ..addRequirement(ITEM_ID_MAGMA_CRYSTAL)
+            ..addRequirement(ITEM_ID_BOW)
+            ..addRequirement(ITEM_ID_SKULL_AXE)
+    else
+        itemId.getItem()
+            ..addStatBonusAbsolute(Stat.AR, 10)
+
+function itemRunicArmor(int itemId)
+    if compiletime
+        itemId.getTypeDef()
+            ..setDescription("234")
+            ..setGoldCost(234)
+            ..addRequirement(ITEM_ID_STEEL_ARMOR)
+            ..addRequirement(ITEM_ID_FROST_RING)
+            ..addRequirement(ITEM_ID_GEM_OF_MANA)
+    else
+        itemId.getItem()
+            ..addStatBonusAbsolute(Stat.AR, 10)
+
+function itemEnchantedBlade(int itemId)
+    if compiletime
+        itemId.getTypeDef()
+            ..setDescription("84")
+            ..setGoldCost(84)
+            ..addRequirement(ITEM_ID_DAGGER)
+            ..addRequirement(ITEM_ID_GEM_OF_MANA)
+            ..addRequirement(ITEM_ID_WAR_AXE)
+    else
+        itemId.getItem()
+            ..addStatBonusAbsolute(Stat.AR, 10)
+
+function itemAxeOfDecay(int itemId)
+    if compiletime
+        itemId.getTypeDef()
+            ..setDescription("965")
+            ..setGoldCost(965)
+            ..addRequirement(ITEM_ID_SKULL_AXE)
+            ..addRequirement(ITEM_ID_SKULL)
+            ..addRequirement(ITEM_ID_CURSED_MASK)
+    else
+        itemId.getItem()
+            ..addStatBonusAbsolute(Stat.AR, 10)
+
+function itemHolyShield(int itemId)
+    if compiletime
+        itemId.getTypeDef()
+            ..setDescription("621")
+            ..setGoldCost(621)
+            ..addRequirement(ITEM_ID_SHIELD)
+            ..addRequirement(ITEM_ID_ANCIENT_STONE_TABLET)
+    else
+        itemId.getItem()
+            ..addStatBonusAbsolute(Stat.AR, 10)
+
+function itemSacrificialDagger(int itemId)
+    if compiletime
+        itemId.getTypeDef()
+            ..setDescription("312")
+            ..setGoldCost(312)
+            ..addRequirement(ITEM_ID_DAGGER)
+            ..addRequirement(ITEM_ID_GEM_OF_HEALTH)
+            ..addRequirement(ITEM_ID_RING_OF_REGEN)
+            ..addRequirement(ITEM_ID_MACE)
+    else
+        itemId.getItem()
+            ..addStatBonusAbsolute(Stat.AR, 10)
 
 @compiletime
 public function shopPhysical3Init()
@@ -71,5 +161,11 @@ public function shopPhysical3Init()
     itemCursedSword(ITEM_ID_CURSED_SWORD)
     itemFirehandGauntlets(ITEM_ID_FIREHAND_GAUNTLETS)
     itemHelmetOfJustice(ITEM_ID_HELMET_OF_JUSTICE)
-    
     itemSpikedArmor(ITEM_ID_SPIKED_ARMOR)
+    itemInfernalBow(ITEM_ID_INFERNAL_BOW)
+    itemRunicArmor(ITEM_ID_RUNIC_ARMOR)
+    itemEnchantedBlade(ITEM_ID_ENCHANTED_BLADE)
+    itemAxeOfDecay(ITEM_ID_AXE_OF_DECAY)
+    itemHolyShield(ITEM_ID_HOLY_SHIELD)
+    itemSacrificialDagger(ITEM_ID_SACRIFICIAL_DAGGER)
+    

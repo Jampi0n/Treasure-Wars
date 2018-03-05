@@ -103,7 +103,11 @@ function createItemGoldCosts()
 
 function sortShops()
     for Shop shop in shopList
-        shop.soldItems.sortWith( (ItemInShop i1, ItemInShop i2) -> (i1.goldCost - i2.goldCost) )
+        shop.soldItems.sortWith( (ItemInShop i1, ItemInShop i2) -> (begin
+            int gold1 = compItemGoldCost[i1.itemId - (compItemIsRecipe[i1.itemId]?1:0) ]
+            int gold2 = compItemGoldCost[i2.itemId - (compItemIsRecipe[i2.itemId]?1:0) ]
+            return gold1 - gold2
+        end) )
 
         int x = 0
         int y = 0
@@ -131,7 +135,7 @@ function createItemDescritptions()
 
                 let buttonPos = " ["+(compItemPosX[j]+1).toString()+","+(compItemPosY[j]+1).toString()+"]"
 
-                recipeDesc += "|n - "+compItemName[j]+"       ( "+compItemShopDescription[j] + buttonPos+" )"
+                recipeDesc += "|n - "+compItemName[j]+" ( "+compItemShopDescription[j] + buttonPos+" )"
 
             destroy requiredItemList
 
