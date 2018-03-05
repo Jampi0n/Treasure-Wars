@@ -8,6 +8,8 @@ import public BuffTypeConfig
 import public General
 import public UnitWrapper
 import public HeroObjectEditing
+import public Assets
+import public AbilityObjEditing
 
 public constant HERO_MAX_LEVEL = 25
 
@@ -19,7 +21,8 @@ public class HeroType
     private static constant unitIdToHeroType = new HashMap<integer, HeroType>
     private int unitId
     private trigger onSpellCastTrigger = CreateTrigger()
-    private OnAttackFunction onAttack
+    private OnAttackFunction onAttack = null
+    private CalculateTotalBonus bonusCalculation = null
 
     static HeroType array heroTypes 
     static int heroTypeCount = 0
@@ -78,6 +81,12 @@ public class HeroType
         let result = getBase(stat) + ( ( this.getMax(stat) - getBase(stat) ) *( (level - 1 )/(HERO_MAX_LEVEL - 1) ) ).toInt()
         //print(stat.toString()+" -> "+result.toString())
         return result
+    
+    function setBonusCalculation(CalculateTotalBonus bonusCalculation)
+        this.bonusCalculation = bonusCalculation
+
+    function getBonusCalculation() returns CalculateTotalBonus
+        return this.bonusCalculation
 
     static function getHeroType(integer unitId) returns HeroType
         return unitIdToHeroType.get(unitId)

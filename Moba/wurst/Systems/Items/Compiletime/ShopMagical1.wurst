@@ -29,7 +29,15 @@ function itemMageArmor(int itemId)
 function itemWizardsHat(int itemId)
 
 function itemGemOfMana(int itemId)
-
+    int mp = 150
+    if compiletime
+        itemId.getTypeDef()
+            ..setDescription("+ {0} mana points".format(mp.toString()))
+            ..setGoldCost(500)
+    else
+        itemId.getItem()
+            ..addStatBonusAbsolute(Stat.MP, mp)
+            
 function itemGemOfDarkness(int itemId)
     
 

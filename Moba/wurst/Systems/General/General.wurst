@@ -5,6 +5,8 @@ import Missile
 import UnitWrapper
 import initlater HeroControl
 import ClosureTimers
+import Knockback3
+import UnitType
 
 constant MAGIC_REDUCTION = 0.01
 
@@ -114,8 +116,17 @@ public function player.getFullColoredName() returns string
     return fromPlayer(this).toColorString()+this.getFullName()+"|r"
 
 init
+    Knockback3.destroyDestructableSpeedThreshold = 999999999.
+
     setHitBoxFunction( (unit u) -> (begin
-        return 64.
+        real ret = 32
+        if u.isType(UNIT_TYPE_HERO)
+            ret = 64
+        else
+            let unitType = UnitType.getUnitType(u.getTypeId())
+            if unitType!=null
+                ret = unitType.getHitBox().toReal()
+        return ret
     end))
 
     setGetBuffListFunction( (unit u) -> (begin

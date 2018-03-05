@@ -3,12 +3,12 @@ package UnitType
 import HashMap
 import StandardTextTags
 
-public function createUnitType(int unitId, int bounty, int baseAttack, int baseArmor) returns int
-    new UnitType(unitId, bounty, baseAttack, baseArmor)
+public function createUnitType(int unitId, int bounty, int baseAttack, int baseArmor, int hitBox) returns int
+    new UnitType(unitId, bounty, baseAttack, baseArmor, hitBox)
     return unitId
 
 public function createUnitType(int unitId) returns int
-    new UnitType(unitId, 0, 0, 0)
+    new UnitType(unitId, 0, 0, 0, 32)
     return unitId
 
 public class UnitType
@@ -21,27 +21,33 @@ public class UnitType
     private int baseAttack
     private int baseArmor
 
-    construct(int unitId, int bounty, int baseAttack, int baseArmor)
+    private int hitBox
+
+    construct(int unitId, int bounty, int baseAttack, int baseArmor, int hitBox)
         this.unitId = unitId
         this.bounty = bounty
         this.baseAttack = baseAttack
         this.baseArmor = baseArmor
+        this.hitBox = hitBox
         unitIdToUnitType.put(unitId, this)
 
     static function getUnitType(int unitId) returns UnitType
         return unitIdToUnitType.get(unitId)
 
-    function getUnitId() returns integer
+    function getUnitId() returns int
         return this.unitId
 
-    function getBounty() returns integer
+    function getBounty() returns int
         return this.bounty
 
-    function getBaseAttack() returns integer
+    function getBaseAttack() returns int
         return this.baseAttack
 
-    function getBaseArmor() returns integer
+    function getBaseArmor() returns int
         return this.baseArmor
+
+    function getHitBox() returns int
+        return this.hitBox
 
 function onUnitDeath()
     let dyingUnit = GetTriggerUnit()

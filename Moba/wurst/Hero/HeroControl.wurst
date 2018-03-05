@@ -31,6 +31,14 @@ public class Hero
         onDeathTrigger.addAction(function onDeathStatic)
         onLevelUpTrigger.addAction(function onLevelUpStatic)
 
+        CreateTrigger()
+            ..addAction(() -> (begin
+                let hero = unitToHero.get(GetTriggerUnit())
+                if hero != null
+                    hero.upgrade()
+            end))
+            ..registerAnyUnitEvent(EVENT_PLAYER_HERO_SKILL)
+
 
     function setup()
         unitToHero.put(this.hero, this)
@@ -47,7 +55,8 @@ public class Hero
         this.reviveWindow = CreateTimerDialog(this.reviveTimer)
         TimerDialogDisplay(this.reviveWindow, false)
         TimerDialogSetTitle(this.reviveWindow, owner.getPlayer().getFullColoredName())
-
+        if this.heroType.getBonusCalculation() != null
+            this.hero.wrapper().setBonusCalculation(this.heroType.getBonusCalculation())
         //print("setup completed: "+this.hero.getName())
 
         this.upgrade()

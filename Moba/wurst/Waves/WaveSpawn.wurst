@@ -6,6 +6,7 @@ import Path
 import LinkedList
 import Buildings
 import ErrorHandling
+import General
 
 constant topUnits = new LinkedList<int>()
 constant midUnits = new LinkedList<int>()
@@ -18,6 +19,9 @@ public function startSpawning()
     if spawnStarted
         error("Spawning has already started.")
     else
+        if DEBUG_MODE
+            spawnWave()
+
         doPeriodically(SPAWN_INTERVAL, (CallbackPeriodic _) -> spawnWave())
         spawnStarted = true
 

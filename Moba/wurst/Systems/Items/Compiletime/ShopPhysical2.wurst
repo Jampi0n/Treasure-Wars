@@ -34,6 +34,7 @@ function itemHeavyBoots(int itemId)
             ..setDescription("needed")
             ..setGoldCost(1200)
             ..addRequirement(ITEM_ID_LIGHT_BOOTS)
+            ..addRequirement(ITEM_ID_GEM_OF_HEALTH)
     else
         itemId.getItem()
 
@@ -126,6 +127,7 @@ function itemRavenSword(int itemId)
             ..setGoldCost(1700)
             ..addRequirement(ITEM_ID_DAGGER)
             ..addRequirement(ITEM_ID_WAR_AXE)
+            ..addRequirement(ITEM_ID_GEM_OF_DARKNESS)
     else
         itemId.getItem()
 

@@ -1,12 +1,105 @@
 package SeaDruid
-/*
+
+//3
+
 import HeroType
-import Stats
+import Knockback3
+import Missile
+import TimerUtils
+import ClosureTimers
 
 public constant HERO_SEA_DRUID = 'H00K'
+HeroType heroType
+
+constant ABILITY_ANCIENT_KNOWLEDGE = 'AZ3P'
+constant ABILITY_TIDAL_FURY = 'AZ3Q'
+constant ABILITY_BATTLE_ROAR = 'AZ3W'
+constant ABILITY_HOLY_SHIELD = 'AZ3E'
+constant ABILITY_RITUAL_OF_THE_SEAS = 'AZ3R'
+
+
+constant real array ANCIENT_KNOWLEDGE_HP_BONUS = [4, 3.5, 3, 2.5, 2]
+constant real array ANCIENT_KNOWLEDGE_MP_BONUS = [8, 7, 6, 5, 4]
+
+@compiletime
+function ancientKnowledge()
+    let aDef = createNoEffectAbiltiy(ABILITY_ANCIENT_KNOWLEDGE)
+        ..presetIcon("PASSeaDruidism")
+        ..setupWithHotKey("Ancient Knowledge", "D")
+        ..setLearnString("Increases his maximum hit points for a portion of his maximum mana ponits and increases his maximum mana points by "+
+        "a portion of his maximum hit points.", (int lvl) -> (begin
+            return "1 hit point for every {0} mana points, 1 mana point for every {1} hit points".format(
+            ANCIENT_KNOWLEDGE_HP_BONUS[lvl-1].toString(), ANCIENT_KNOWLEDGE_MP_BONUS[lvl-1].toString())
+        end) )
+
+    for lvl = 1 to 5
+        aDef
+            ..setTooltipNormalExtended(lvl, ("Increases maximum hit points by 1 for every {0} points of his maximum mana points and "+
+            "increases his maximum mana points by 1 for every {1} points of his maximum hit points.").format(
+                ANCIENT_KNOWLEDGE_HP_BONUS[lvl-1].toString(), ANCIENT_KNOWLEDGE_MP_BONUS[lvl-1].toString())
+            )
+
+constant real array TIDAL_FURY_HIT_DMG = [75, 100, 125, 150, 175]
+constant real TIDAL_FURY_HIT_DMG_BONUS = 100
+
+constant real array TIDAL_FURY_WAVE_DMG = [20, 30, 40, 50, 60]
+constant real TIDAL_FURY_WAVE_DMG_BONUS = 50
+
+@compiletime
+function tidalFury()
+    int array MANA = [90, 100, 110, 120, 130]
+    real array COOLDOWN = [6, 6, 6, 6, 6]
+
+    let aDef = new AbilityDefinitionPitLordHowlofTerror(ABILITY_TIDAL_FURY)
+        ..setAnimationNames("attack,slam")
+        ..presetIcon(Icons.bTNCrushingWave)
+        ..setupWithHotKey("Tidal Fury", "Q")
+        ..setArtCaster("")
+        ..setLearnString("Knocks nearby enemy units back, dealing damage and releasing a crushing wave for every enemy unit hit. The wave deals damage to every enemy it passes through.", (int lvl) -> (begin
+            return "{0} knockback damage, {1} wave damage.".format(
+            TIDAL_FURY_HIT_DMG[lvl-1].str()+TIDAL_FURY_HIT_DMG_BONUS.getBonusString(C_STR),
+            TIDAL_FURY_WAVE_DMG[lvl-1].str()+TIDAL_FURY_WAVE_DMG_BONUS.getBonusString(C_INT))
+        end) )
+
+    for lvl = 1 to 5
+        aDef
+            ..setCooldown(lvl, COOLDOWN[lvl-1])
+            ..setManaCost(lvl, MANA[lvl-1])
+            ..setTargetsAllowed(lvl, "none")
+            ..setTooltipNormalExtended(lvl, "Knocks nearby enemy units back, dealing {0} damage and releasing a crushing wave for every enemy unit hit. The wave deals {1} damage to every enemy it passes through.".format(
+            TIDAL_FURY_HIT_DMG[lvl-1].str()+TIDAL_FURY_HIT_DMG_BONUS.getBonusString(C_STR),
+            TIDAL_FURY_WAVE_DMG[lvl-1].str()+TIDAL_FURY_WAVE_DMG_BONUS.getBonusString(C_INT)))
+
+
+@compiletime
+function ritualOfTheSeas()
+    int array MANA = [250, 300, 350, 400, 450]
+    real array COOLDOWN = [90, 90, 90, 90, 90]
+
+
+    let aDef = new AbilityDefinitionKeeperoftheGroveTranquility(ABILITY_RITUAL_OF_THE_SEAS)
+        ..setAnimationNames("spell,channel")
+        ..presetIcon("BTNGuardianofTheSea")
+        ..setupWithHotKey("Ritual of the Seas", "R")
+        ..setLearnString("Calls upon the power of the gods. After two seconds of channeling nearby enemies will be struck by divine magic.", (int lvl) -> (begin
+            return "{0} damage."
+        end) )
+
+    for lvl = 1 to 5
+        aDef
+            ..setCooldown(lvl, COOLDOWN[lvl-1])
+            ..setManaCost(lvl, MANA[lvl-1])
+            ..setDurationHero(lvl, 15)
+            ..setDurationNormal(lvl, 15)
+            ..setEffects(lvl, "X000")
+
+            ..setTargetsAllowed(lvl, "none")
+            ..setTooltipNormalExtended(lvl, "Calls upon the power of the gods. After two seconds of channeling nearby enemies will be struck by divine magic and take {0} damage.".format(
+                ""
+            ))
 
 function setupStats()
-    new HeroType(HERO_SEA_DRUID)
+    heroType
         //..setStat(Stat.AD, 10, 35)
         ..setStat(Stat.AR, 15, 25)
         ..setStat(Stat.AS, 0, 10)
@@ -16,10 +109,124 @@ function setupStats()
         ..setStat(Stat.MR, 10, 40)
         ..setStat(Stat.MS, 5, 30)
         ..setStat(Stat.STR, 10+10, 55+35)
-        ..setStat(Stat.WP, 5, 30)
+        ..setStat(Stat.AGI, 5, 30)
         ..setStat(Stat.INT, 10, 40)
 
+function onSpellCast()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+
+    if(spellId == ABILITY_TIDAL_FURY)
+        let casterPos = caster.getPos()
+        group nearby = CreateGroup()
+        nearby.enumUnitsInRange(casterPos, 300)
+
+        while(not nearby.isEmpty())
+            unit target = FirstOfGroup(nearby)
+            nearby.removeUnit(target)
+            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
+                caster.dealDamage(Missile.getMissileTarget(), (TIDAL_FURY_HIT_DMG[level-1]).bonus(caster.getStr(), TIDAL_FURY_HIT_DMG_BONUS), ReductionType.PHYSICAL)
+                Knockback3.add(target, caster.getPos().polarOffset(caster.getPos().angleTo(target.getPos()), 500), 500)
+
+                new Missile(caster, caster.getPos().withZ(80), 900, caster.getPos().angleTo(target.getPos()), Abilities.crushingWaveMissile)
+                    ..hitOnce()
+                    ..setSize(125)
+                    ..setHitCondition((Missile missile, unit target) -> (begin
+                    return not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(missile.getOwner().getOwner(), false, true)
+                end) )
+                    ..setHitFunction((Missile missile, unit target) -> (begin
+                    let missileCaster = missile.getOwner()
+                    missileCaster.dealDamage(Missile.getMissileTarget(), (TIDAL_FURY_WAVE_DMG[level-1]).bonus(missileCaster.getInt(), TIDAL_FURY_WAVE_DMG_BONUS), ReductionType.MAGIC)
         
+                end) )
+                    ..setMaxRange(500)
+
+    if(spellId == ABILITY_RITUAL_OF_THE_SEAS)
+
+        new RitualOfTheSeas(caster)
+
+class RitualOfTheSeas
+
+    private unit caster
+    private int level
+    private timer checkTimer
+    private int count
+
+    private unit dummy
+
+    construct(unit caster)
+        this.count = 0
+        this.caster = caster
+        this.level = caster.getAbilityLevel(ABILITY_RITUAL_OF_THE_SEAS)
+
+
+        this.checkTimer = getTimer()
+            ..setData(this castTo int)
+            ..startPeriodic(0.1, function updateStatic)
+
+    function update()
+        this.count++
+        if this.count == 20
+            this.count = 0
+
+            this.caster.addEffect("Models\\PsyWave.mdx", "origin").destr()
+
+            group nearby = CreateGroup()
+            nearby.enumUnitsInRange(this.caster.getPos(), 900)
+
+
+            while(not nearby.isEmpty())
+                unit target = FirstOfGroup(nearby)
+                nearby.removeUnit(target)
+                if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(this.caster.getOwner(), false, true) and target.isVisible(this.caster.getOwner())
+                    doAfter(target.getPos().distanceTo(caster.getPos())/1000 , () -> (begin
+                    
+                        target.addEffect("head", Abilities.blinkCaster)
+                        caster.dealDamage(target, 100, ReductionType.MAGIC)
+
+                    end))
+                    
+   
+
+            return
+
+        if this.caster.getCurrentOrder()!= OrderId("tranquility")
+            destroy this
+            return
+    
+    static function updateStatic()
+        (GetExpiredTimer().getData() castTo RitualOfTheSeas).update()
+
+    ondestroy
+
+        this.checkTimer.release()
 
 init
-    setupStats()*/
+    heroType = new HeroType(HERO_SEA_DRUID)
+        ..setBonusCalculation((UnitWrapper whichWrapper, Stat whichStat) -> (begin
+            let lvl = whichWrapper.toUnit().getAbilityLevel(ABILITY_ANCIENT_KNOWLEDGE)
+            if lvl == 0
+                UnitWrapper.defaultCalcualtion.calculate(whichWrapper, whichStat)
+            else
+                if whichStat == Stat.HP or whichStat == Stat.MP //if hp or mana was changed, calculate special values.
+                    let hp = Stat.HP.toInt()
+                    let mp = Stat.MP.toInt()
+                    UnitWrapper.defaultCalcualtion.calculate(whichWrapper, Stat.HP)
+                    UnitWrapper.defaultCalcualtion.calculate(whichWrapper, Stat.MP)
+                    let hpBonus = whichWrapper.statsTotalBonus[hp]
+                    let mpBonus = whichWrapper.statsTotalBonus[mp]
+                    print("hpBonus = "+hpBonus.toString()+", mpBonus = "+mpBonus.toString())
+                    whichWrapper.statsTotalBonus[hp] = hpBonus + ((1/ANCIENT_KNOWLEDGE_HP_BONUS[lvl-1]) * (mpBonus + whichWrapper.getStatBaseValue(Stat.MP)) ).toInt()
+                    whichWrapper.statsTotalBonus[mp] = mpBonus + ((1/ANCIENT_KNOWLEDGE_MP_BONUS[lvl-1]) * (hpBonus + whichWrapper.getStatBaseValue(Stat.HP)) ).toInt()
+                    print("newHpBonus = "+whichWrapper.statsTotalBonus[hp].toString()+", newHpBonus = "+whichWrapper.statsTotalBonus[mp].toString())
+                    whichWrapper.applyTotalStatBonus(Stat.HP)
+                    whichWrapper.applyTotalStatBonus(Stat.MP)
+                else //else calculate default values
+                    UnitWrapper.defaultCalcualtion.calculate(whichWrapper, whichStat)
+
+        end))
+
+    heroType.addOnSpellCastFunc(function onSpellCast)
+
+    setupStats()

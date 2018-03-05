@@ -5,11 +5,9 @@ package DeadEye
 import HeroType
 import Missile
 import LinkedList
-import AbilityObjEditing
 import ClosureTimers
 import OnUnitEnterLeave
 import DamageDetection
-import Assets
 import SoundUtils
 
 public constant HERO_DEADEYE = 'H00I'
@@ -275,7 +273,7 @@ function onSpellCast()
     if(spellId==ABILITY_PIERCING_SHOT)
         new Missile(caster, caster.getPos().withZ(80), 1500, caster.getPos().angleTo(vec2(GetSpellTargetX(), GetSpellTargetY())), "Abilities\\Weapons\\BallistaMissile\\BallistaMissile.mdl")
             ..hitOnce()
-            ..setSize(125)
+            ..setSize(75)
             ..setHitCondition((Missile missile, unit target) -> (begin
             return not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(missile.getOwner().getOwner(), false, true)
         end) )
@@ -285,7 +283,6 @@ function onSpellCast()
 
         end) )
             ..setMaxRange(1000)
-            ..setSize(10)
 
     if(spellId==ABILITY_BONE_BROTHERS)
         let target = GetSpellTargetUnit()
