@@ -225,6 +225,12 @@ public class ItemTypeDef
         if hasRecipe
             compItemDesc[this.getId()+1] = newDesc
 
+    function setAbility(int abilityTypeId)
+        compItemDefinition[this.itemId]
+            ..setAbilities(int2fourchar(abilityTypeId))
+            ..setCooldownGroup(int2fourchar(abilityTypeId))
+            ..setActivelyUsed(true)
+
     function addRequirement(int id)
         if hasRecipe
             if(this.requirements=="")

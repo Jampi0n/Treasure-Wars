@@ -13,37 +13,35 @@ import General
 
 
 function itemMageAmulet(int itemId)
-    int mp = 10 //trigger
+    int mp = 100
+    int hp = 150
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("Restores {0} mana points per kill.".format(mp.toString()))
-            ..setGoldCost(400)
+            ..setDescription("+ {0} mana points|n +{1} hit points".format(mp.toString(), hp.toString()))
+            ..setGoldCost(850)
     else
-        CreateTrigger()
-            ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
-            ..addAction(() -> (begin
-                let killer = GetKillingUnit()
-                if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and killer.hasItemById(convertItemId(ITEM_ID_MAGE_AMULET))
-                    killer.addMana(10. * killer.countItemsOfType(convertItemId(ITEM_ID_MAGE_AMULET)))
-            end))
+        itemId.getItem()
+            ..addStatBonusAbsolute(Stat.MP, mp)
+            ..addStatBonusAbsolute(Stat.HP, hp)
+
 
 function itemMageGloves(int itemId)
-    int wp = 10
+    int wp = 5
     if compiletime
         itemId.getTypeDef()
         ..setDescription("+ {0} willpower".format(wp.toString()))
             ..setGoldCost(500)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.MP, wp)
+            ..addStatBonusAbsolute(Stat.AGI, wp)
 
 
 function itemManaRing(int itemId)
-    int hr = 30
+    int hr = 15
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} mana regeneration per 10 seconds".format(hr.toString()))
-            ..setGoldCost(450)
+            ..setDescription("+ {0} mana point regeneration per 10 seconds".format(hr.toString()))
+            ..setGoldCost(500)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.HR, hr)
@@ -51,12 +49,12 @@ function itemManaRing(int itemId)
 
 function itemMageArmor(int itemId)
     int mp = 50
-    int hp = 50
-    int ar = 5
+    int hp = 80
+    int ar = 4
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} mana points|n +{1} hit points|n +{2} armor".format(mp.toString(), hp.toString(), ar.toString()))
-            ..setGoldCost(750)
+            ..setGoldCost(800)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.MP, mp)
@@ -65,18 +63,18 @@ function itemMageArmor(int itemId)
 
 
 function itemWizardsHat(int itemId)
-    int intel = 8
+    int intel = 5
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} intelligence".format(intel.toString()))
-            ..setGoldCost(400)
+            ..setGoldCost(500)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.INT, intel)
 
             
 function itemGemOfMana(int itemId)
-    int mp = 150
+    int mp = 100
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} mana points".format(mp.toString()))
@@ -86,27 +84,32 @@ function itemGemOfMana(int itemId)
             ..addStatBonusAbsolute(Stat.MP, mp)
             
 function itemGemOfDarkness(int itemId)
-    int dmg = 8
+    int voidDmg = 8
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("Attacks deal {0} additional void damage.".format(dmg.toString()))
-            ..setGoldCost(540)
+            ..setDescription("Attacks deal {0} additional void damage.".format(voidDmg.toString()))
+            ..setGoldCost(650)
     else
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if attacker.hasItemById(itemId)
-                attacker.dealDamage(target, dmg.toReal() * attacker.countItemsOfType(convertItemId(itemId)) , ReductionType.NONE)
+            if attacker.hasItemById(convertItemId(itemId))
+                attacker.dealDamage(target, voidDmg.toReal() * attacker.countItemsOfType(convertItemId(itemId)) , ReductionType.NONE)
         end))
 
 
 function itemSkull(int itemId)
-    int dmg = 10
+    int mana = 7 // trigger
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} attack damage".format(dmg.toString()))
-            ..setGoldCost(420)
+            ..setDescription("Restores {0} mana points per kill.".format(mana.toString()))
+            ..setGoldCost(550)
     else
-        itemId.getItem()
-            ..addStatBonusAbsolute(Stat.AD, dmg)
+        CreateTrigger()
+            ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
+            ..addAction(() -> (begin
+                let killer = GetKillingUnit()
+                if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and killer.hasItemById(convertItemId(ITEM_ID_SKULL))
+                    killer.addMana(7. * killer.countItemsOfType(convertItemId(ITEM_ID_SKULL)))
+            end))
 
 function itemVoodooDoll(int itemId)
     int mp = 4
@@ -116,16 +119,16 @@ function itemVoodooDoll(int itemId)
             ..setGoldCost(600)
     else
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if target.hasItemById(itemId)
+            if target.hasItemById(convertItemId(itemId))
                 target.addMana(mp.toReal() * target.countItemsOfType(convertItemId(itemId)))
         end))
 
 function itemSpellBook(int itemId)
-    int intel = 15
+    int intel = 8
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} intelligence".format(intel.toString()))
-            ..setGoldCost(750)
+            ..setGoldCost(800)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.INT, intel)
@@ -138,7 +141,7 @@ function itemMagicStaff(int itemId)
             ..setGoldCost(640)
     else
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if attacker.hasItemById(itemId) and target.getMana() > 0
+            if attacker.hasItemById(convertItemId(itemId)) and target.getMana() > 0
                 let manaDrained = min(mana.toReal() * target.countItemsOfType(convertItemId(itemId)) , target.getMana())
                 attacker.addMana(manaDrained)
                 target.addMana(-manaDrained)
