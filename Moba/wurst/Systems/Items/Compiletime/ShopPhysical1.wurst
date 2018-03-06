@@ -9,22 +9,22 @@ import OnAttack
 import General
 
 function itemPlatedGauntlets(int itemId)
-    int armor = 10
+    int armor = 5
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} armor".format(armor.toString()))
-            ..setGoldCost(450)
+            ..setGoldCost(500)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.AR, armor)
 
 
 function itemHammerOfStrength(int itemId)
-    int str = 8
+    int str = 5
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} strength".format(str.toString()))
-            ..setGoldCost(400)
+            ..setGoldCost(500)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.STR, str)
@@ -35,18 +35,18 @@ function itemGlovesOfHaste(int itemId)
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0}% attack speed".format(as.toString()))
-            ..setGoldCost(380)
+            ..setGoldCost(500)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.AS, as)
 
 
 function itemWarAxe(int itemId)
-    int str = 15
+    int str = 8
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} strength".format(str.toString()))
-            ..setGoldCost(750)
+            ..setGoldCost(800)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.STR, str)
@@ -56,7 +56,7 @@ function itemLightBoots(int itemId)
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} movement speed|nMovement speed bonus from boots does not stack.".format(ms.toString()))
-            ..setGoldCost(400)
+            ..setGoldCost(500)
     else
         itemId.getItem()
             ..addPickupFunction(()->(begin
@@ -70,12 +70,12 @@ function itemLightBoots(int itemId)
             end))
 
 function itemLeatherArmor(int itemId)
-    int ar = 10
-    int hp = 100
+    int ar = 5
+    int hp = 125
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} armor|n+ {1} hit points".format(ar.toString(), hp.toString()))
-            ..setGoldCost(720)
+            ..setGoldCost(780)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.AR, ar)
@@ -84,7 +84,7 @@ function itemLeatherArmor(int itemId)
 
 
 function itemGemOfHealth(int itemId)
-    int hp = 150
+    int hp = 200
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} hit points".format(hp.toString()))
@@ -95,11 +95,11 @@ function itemGemOfHealth(int itemId)
 
 function itemDagger(int itemId)
     int str = 5
-    int as = 5
+    int as = 10
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} strength|n+ {1} attack speed".format(str.toString(), as.toString()))
-            ..setGoldCost(460)
+            ..setGoldCost(900)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.STR, str)
@@ -111,7 +111,7 @@ function itemBow(int itemId)
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} strength|nDeals {1} additional damage to units.".format(str.toString(), unitDmg.toString() ))
-            ..setGoldCost(650)
+            ..setGoldCost(750)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.STR, str)
@@ -124,11 +124,11 @@ function itemBow(int itemId)
 
 function itemShield(int itemId)
     int ar = 5
-    int block = 8
+    int block = 10
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} armor|nBlocks {1} damage of incoming attacks.".format(ar.toString(), block.toString()))
-            ..setGoldCost(600)
+            ..setGoldCost(850)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.AR, ar)
@@ -138,17 +138,17 @@ function itemRingOfRegen(int itemId)
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} hit point regeneration per 10 seconds".format(hr.toString()))
-            ..setGoldCost(450)
+            ..setGoldCost(500)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.HR, hr)
 
 function itemSpikes(int itemId)
-    let spikeDmg = 6
+    let spikeDmg = 10
     if compiletime
         itemId.getTypeDef()
             ..setDescription("Enemies attacking the hero will take {0} damage.".format(spikeDmg.toString()))
-            ..setGoldCost(360)
+            ..setGoldCost(600)
     else
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             if target.isType(UNIT_TYPE_HERO)

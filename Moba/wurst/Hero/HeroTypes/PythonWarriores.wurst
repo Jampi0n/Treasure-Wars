@@ -305,7 +305,7 @@ init
     setupStats()
 
     var abilityList = new LinkedList<int>
-    ..add('A009')
+        ..add('A009')
     BUFF_ENVENOMED_BLADES.setup(abilityList, 'B007')
     BUFF_ENVENOMED_BLADES.setPeriodicTime(1)
     BUFF_ENVENOMED_BLADES.addPeriodicFunction(()-> (begin

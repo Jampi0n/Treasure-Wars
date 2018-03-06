@@ -38,19 +38,17 @@ function setupCreatedHero(Hero hero)
     CPlayer cPlayer = owner.getCPlayer()
     if DEBUG_MODE
         owner.setGold(5000)
-        SetHeroLevel(hero.toUnit(), 25, true)
+        //SetHeroLevel(hero.toUnit(), 25, true)
     else
         owner.setGold(500)
         
-    vec2 pos = gg_rct_CenterMid.getCenter()
+    vec2 pos// = gg_rct_CenterMid.getCenter()
     patron[owner.getId()].remove()
 
     if(cPlayer.getTeam()==Team.TEAM1)
-        if not DEBUG_MODE
-            pos = gg_rct_GreenCastle.getCenter()
+        pos = gg_rct_GreenCastle.getCenter()
     else
-        if not DEBUG_MODE
-            pos = gg_rct_BrownCastle.getCenter()
+        pos = gg_rct_BrownCastle.getCenter()
        
     
     hero.toUnit().setPos(pos)
@@ -241,8 +239,9 @@ init
             endPickMode()
         end))
 
-    // you can spawn new heroes in DEBUG_MODE
+    
     if DEBUG_MODE
+        // you can spawn new heroes in DEBUG_MODE
         CreateTrigger()
             ..registerPlayerChatEvent(players[0], "hero ", false)
             ..addAction(() -> (begin
@@ -254,4 +253,39 @@ init
                 SetPlayerAlliance(players[0], players[i], ALLIANCE_SHARED_CONTROL, true)
                 SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_ADVANCED_CONTROL, true)
             end))
-    
+        // teleport heroes mid
+        CreateTrigger()
+            ..registerPlayerChatEvent(players[0], "mid ", false)
+            ..addAction(() -> (begin
+                let i = GetEventPlayerChatString().substring(4).toInt()
+                let hero = Hero.getHero(i)
+                if hero != null
+                    hero.toUnit().setXY(gg_rct_CenterMid.getCenter())
+            end))
+
+        CreateTrigger()
+            ..registerPlayerChatEvent(players[0], "mid", true)
+            ..addAction(() -> (begin
+                let hero = Hero.getHero(0)
+                if hero != null
+                    hero.toUnit().setXY(gg_rct_CenterMid.getCenter())
+            end))
+
+        CreateTrigger()
+            ..registerPlayerChatEvent(players[0], "lvl ", false)
+            ..addAction(() -> (begin
+                let i = GetEventPlayerChatString().substring(4).toInt()
+                let hero = Hero.getHero(i)
+                if hero != null
+                    hero.toUnit().setLevel(25, false)
+            end))
+
+        CreateTrigger()
+            ..registerPlayerChatEvent(players[0], "lvl", true)
+            ..addAction(() -> (begin
+                let hero = Hero.getHero(0)
+                if hero != null
+                    hero.toUnit().setLevel(25, false)
+            end))
+
+     //SetHeroLevel(hero.toUnit(), 25, true)

@@ -131,7 +131,7 @@ public class OnAttack
         //use a list with arguments, as a onAttack function could trigger an onAttack event and overwrite the variables
         if(localAttacked)
             for OnAttackFunction onAttack in onAttackFunctionList
-                onAttack.onAttack(attacker, target, active)
+                onAttack.onAttack(localAttacker, localTarget, localActive)
 
 
     /*static function getAttacker() returns unit
