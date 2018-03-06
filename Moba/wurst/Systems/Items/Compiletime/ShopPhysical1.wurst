@@ -42,11 +42,11 @@ function itemGlovesOfHaste(int itemId)
 
 
 function itemWarAxe(int itemId)
-    int str = 10
+    int str = 15
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} strength".format(str.toString()))
-            ..setGoldCost(500)
+            ..setGoldCost(750)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.STR, str)
@@ -75,7 +75,7 @@ function itemLeatherArmor(int itemId)
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} armor|n+ {1} hit points".format(ar.toString(), hp.toString()))
-            ..setGoldCost(750)
+            ..setGoldCost(720)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.AR, ar)
@@ -168,6 +168,6 @@ public function shopPhysical1Init()
     itemDagger(ITEM_ID_DAGGER)
     itemBow(ITEM_ID_BOW)
     itemShield(ITEM_ID_SHIELD)
-    itemRingOfRegen(ITEM_ID_RING_OF_REGEN)
+    itemRingOfRegen(ITEM_ID_RING_OF_HEALTH)
     itemSpikes(ITEM_ID_SPIKES)
 

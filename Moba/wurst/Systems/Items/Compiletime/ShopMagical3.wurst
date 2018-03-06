@@ -14,32 +14,130 @@ import ItemIdGeneration
 function itemEnchantedArmor(int itemId)
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("needed")
-            ..setGoldCost(150)
+            ..setDescription("armor + hp + mana")
+            ..setGoldCost(3900)
+            ..addRequirement(ITEM_ID_BATTLEMAGE_ARMOR)
+            ..addRequirement(ITEM_ID_LEATHER_ARMOR)
+            ..addRequirement(ITEM_ID_GEM_OF_HEALTH)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.AR, 10)
 
 function itemEmeraldPendant(int itemId)
-
+    if compiletime
+        itemId.getTypeDef()
+            ..setDescription("raw damage + mana on kill + int")
+            ..setGoldCost(3600)
+            ..addRequirement(ITEM_ID_SKULL_PENDANT)
+            ..addRequirement(ITEM_ID_CURSED_MASK)
+    else
+        itemId.getItem()
+            ..addStatBonusAbsolute(Stat.AR, 10)
+            
     
 
 function itemRingOfDarkness(int itemId)
-
+    if compiletime
+        itemId.getTypeDef()
+            ..setDescription("needed")
+            ..setGoldCost(3100)
+            ..addRequirement(ITEM_ID_RING_OF_REGEN)
+            ..addRequirement(ITEM_ID_MANA_RING)
+    else
+        itemId.getItem()
+            ..addStatBonusAbsolute(Stat.AR, 10)
+            
 
 function itemBlessedGoblet(int itemId)
-
+    if compiletime
+        itemId.getTypeDef()
+            ..setDescription("needed")
+            ..setGoldCost(3300)
+            ..addRequirement(ITEM_ID_MAGMA_CRYSTAL)
+            ..addRequirement(ITEM_ID_ANCIENT_STONE_TABLET)
+    else
+        itemId.getItem()
+            ..addStatBonusAbsolute(Stat.AR, 10)
+            
 
 function itemWandOfDeath(int itemId)
-
+    if compiletime
+        itemId.getTypeDef()
+            ..setDescription("needed")
+            ..setGoldCost(3500)
+            ..addRequirement(ITEM_ID_CURSED_MASK)
+            ..addRequirement(ITEM_ID_SCEPTER_OF_THE_TIDES)
+    else
+        itemId.getItem()
+            ..addStatBonusAbsolute(Stat.AR, 10)
+            
 
 function itemWandOfBlood(int itemId)
-
+    if compiletime
+        itemId.getTypeDef()
+            ..setDescription("needed")
+            ..setGoldCost(3000)
+            ..addRequirement(ITEM_ID_VISION_WARD)
+            ..addRequirement(ITEM_ID_MAGIC_STAFF)
+    else
+        itemId.getItem()
+            ..addStatBonusAbsolute(Stat.AR, 10)
+            
 function itemArcaneBlade(int itemId)
+    if compiletime
+        itemId.getTypeDef()
+            ..setDescription("needed")
+            ..setGoldCost(3700)
+            ..addRequirement(ITEM_ID_SCEPTER_OF_THE_TIDES)
+            ..addRequirement(ITEM_ID_RAVEN_SWORD)
+    else
+        itemId.getItem()
+            ..addStatBonusAbsolute(Stat.AR, 10)
 
 function itemVampiricGoblet(int itemId)
+    if compiletime
+        itemId.getTypeDef()
+            ..setDescription("needed")
+            ..setGoldCost(4100)
+            ..addRequirement(ITEM_ID_VOODOO_MASK)
+            ..addRequirement(ITEM_ID_CURSED_MASK)
+    else
+        itemId.getItem()
+            ..addStatBonusAbsolute(Stat.AR, 10)
 
 function itemVoidArmor(int itemId)
+    if compiletime
+        itemId.getTypeDef()
+            ..setDescription("needed")
+            ..setGoldCost(3200)
+            ..addRequirement(ITEM_ID_BATTLEMAGE_ARMOR)
+            ..addRequirement(ITEM_ID_GEM_OF_DARKNESS)
+    else
+        itemId.getItem()
+            ..addStatBonusAbsolute(Stat.AR, 10)
+    
+function itemArcaneShield(int itemId)
+    if compiletime
+        itemId.getTypeDef()
+            ..setDescription("needed")
+            ..setGoldCost(3800)
+            ..addRequirement(ITEM_ID_ANCIENT_STONE_TABLET)
+            ..addRequirement(ITEM_ID_GHOST_HOOD)
+    else
+        itemId.getItem()
+            ..addStatBonusAbsolute(Stat.AR, 10)
+
+function itemScrollOfConjuration(int itemId)
+    if compiletime
+        itemId.getTypeDef()
+            ..setDescription("needed")
+            ..setGoldCost(4000)
+            ..addRequirement(ITEM_ID_APPRENTICES_SCROLL)
+            ..addRequirement(ITEM_ID_EVIL_BOOK)
+            ..addRequirement(ITEM_ID_SPELL_BOOK)
+    else
+        itemId.getItem()
+            ..addStatBonusAbsolute(Stat.AR, 10)
 
 @compiletime
 public function shopMagical3Init()
@@ -52,3 +150,5 @@ public function shopMagical3Init()
     itemArcaneBlade(ITEM_ID_ARCANE_BLADE)
     itemVampiricGoblet(ITEM_ID_VAMPIRIC_GOBLET)
     itemVoidArmor(ITEM_ID_VOID_ARMOR)
+    itemArcaneShield(ITEM_ID_ARCANE_SHIELD)
+    itemScrollOfConjuration(ITEM_ID_SCROLL_OF_CONJURATION)

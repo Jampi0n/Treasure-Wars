@@ -13,7 +13,7 @@ function itemSkullAxe(int itemId)
     if compiletime
         itemId.getTypeDef()
             ..setDescription("needed")
-            ..setGoldCost(150)
+            ..setGoldCost(1400)
             ..addRequirement(ITEM_ID_WAR_AXE)
             ..addRequirement(ITEM_ID_SKULL)
     else
@@ -23,12 +23,13 @@ function itemGauntletOfProtection(int itemId)
     if compiletime
         itemId.getTypeDef()
             ..setDescription("needed")
-            ..setGoldCost(900)
+            ..setGoldCost(1100)
             ..addRequirement(ITEM_ID_PLATED_GAUNTLETS)
     else
         itemId.getItem()
 
 function itemHeavyBoots(int itemId)
+    int ms = 40
     if compiletime
         itemId.getTypeDef()
             ..setDescription("needed")
@@ -37,12 +38,21 @@ function itemHeavyBoots(int itemId)
             ..addRequirement(ITEM_ID_GEM_OF_HEALTH)
     else
         itemId.getItem()
+            ..addPickupFunction(()->(begin
+                if isUnique() and hasNot(ITEM_ID_HEAVY_BOOTS) and hasNot(ITEM_ID_BOOTS_OF_DARKNESS)
+                    getTriggerHero().wrapper().addStatAbsoluteBonus(Stat.MS, ms)
+            end))
+
+            ..addDropFunction(()->(begin
+                if isUnique() and hasNot(ITEM_ID_HEAVY_BOOTS) and hasNot(ITEM_ID_BOOTS_OF_DARKNESS)
+                    getTriggerHero().wrapper().addStatAbsoluteBonus(Stat.MS, -ms)
+            end))
 
 function itemSpikedMail(int itemId)
     if compiletime
         itemId.getTypeDef()
             ..setDescription("17")
-            ..setGoldCost(1700)
+            ..setGoldCost(1600)
             ..addRequirement(ITEM_ID_SPIKES)
             ..addRequirement(ITEM_ID_LEATHER_ARMOR)
     else
@@ -54,7 +64,6 @@ function itemHeavyArmor(int itemId)
             ..setDescription("17")
             ..setGoldCost(1700)
             ..addRequirement(ITEM_ID_LEATHER_ARMOR)
-            ..addRequirement(ITEM_ID_SHIELD)
             ..addRequirement(ITEM_ID_GEM_OF_HEALTH)
     else
         itemId.getItem()
@@ -63,7 +72,7 @@ function itemMace(int itemId)
     if compiletime
         itemId.getTypeDef()
             ..setDescription("17")
-            ..setGoldCost(1700)
+            ..setGoldCost(1900)
             ..addRequirement(ITEM_ID_SPIKES)
             ..addRequirement(ITEM_ID_WAR_AXE)
     else
@@ -73,7 +82,7 @@ function itemSteelArmor(int itemId)
     if compiletime
         itemId.getTypeDef()
             ..setDescription("17")
-            ..setGoldCost(1700)
+            ..setGoldCost(1500)
             ..addRequirement(ITEM_ID_MAGE_AMULET)
             ..addRequirement(ITEM_ID_LEATHER_ARMOR)
     else
@@ -83,7 +92,7 @@ function itemHammerOfMight(int itemId)
     if compiletime
         itemId.getTypeDef()
             ..setDescription("17")
-            ..setGoldCost(1700)
+            ..setGoldCost(1500)
             ..addRequirement(ITEM_ID_SPIKES)
             ..addRequirement(ITEM_ID_HAMMER_OF_STRENGTH)
     else
@@ -93,7 +102,7 @@ function itemWarDrum(int itemId)
     if compiletime
         itemId.getTypeDef()
             ..setDescription("17")
-            ..setGoldCost(1700)
+            ..setGoldCost(2500)
             ..addRequirement(ITEM_ID_GLOVES_OF_HASTE)
             ..addRequirement(ITEM_ID_LIGHT_BOOTS)
     else
@@ -103,7 +112,7 @@ function itemWarHorn(int itemId)
     if compiletime
         itemId.getTypeDef()
             ..setDescription("17")
-            ..setGoldCost(1700)
+            ..setGoldCost(2500)
             ..addRequirement(ITEM_ID_HAMMER_OF_STRENGTH)
             ..addRequirement(ITEM_ID_WAR_AXE)
             ..addRequirement(ITEM_ID_BOW)
@@ -114,7 +123,7 @@ function itemHeavyHelmet(int itemId)
     if compiletime
         itemId.getTypeDef()
             ..setDescription("17")
-            ..setGoldCost(1200)
+            ..setGoldCost(1300)
             ..addRequirement(ITEM_ID_GEM_OF_HEALTH)
             ..addRequirement(ITEM_ID_SHIELD)
     else
@@ -124,8 +133,7 @@ function itemRavenSword(int itemId)
     if compiletime
         itemId.getTypeDef()
             ..setDescription("17")
-            ..setGoldCost(1700)
-            ..addRequirement(ITEM_ID_DAGGER)
+            ..setGoldCost(1600)
             ..addRequirement(ITEM_ID_WAR_AXE)
             ..addRequirement(ITEM_ID_GEM_OF_DARKNESS)
     else

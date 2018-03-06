@@ -9,7 +9,7 @@ public constant SHOP_MAGICAL_1 = compiletime(new Shop(SHOP_ID_MAGICAL_1, "SHOP 4
 public constant ITEM_ID_MAGE_ARMOR = compiletime(newItem("Mage Armor", SHOP_MAGICAL_1, false, "BTNINV_Chest_Plate07"))
 public constant ITEM_ID_MAGE_AMULET = compiletime(newItem("Mage Amulet", SHOP_MAGICAL_1, false, "BTNEmptyAmulet"))
 public constant ITEM_ID_MAGE_GLOVES = compiletime(newItem("Mage Gloves", SHOP_MAGICAL_1, false, "BTNManaGloves"))
-public constant ITEM_ID_MANA_RING = compiletime(newItem("Mana Ring", SHOP_MAGICAL_1, false, "BTNINV_Jewelry_Ring_10"))
+public constant ITEM_ID_MANA_RING = compiletime(newItem("Ring of Mana", SHOP_MAGICAL_1, false, "BTNINV_Jewelry_Ring_10"))
 public constant ITEM_ID_WIZARDS_HAT = compiletime(newItem("Wizard's Hat", SHOP_MAGICAL_1, false, "BTNWizardsHat"))
 public constant ITEM_ID_GEM_OF_MANA = compiletime(newItem("Gem of Mana", SHOP_MAGICAL_1, false, "BTNINV_Misc_Gem_Sapphire_02"))
 public constant ITEM_ID_GEM_OF_DARKNESS = compiletime(newItem("Gem of Darkness", SHOP_MAGICAL_1, false, "BTNJewelOfDarkness"))
@@ -28,7 +28,7 @@ public constant ITEM_ID_VISION_WARD = compiletime(newItem("Vision Ward", SHOP_MA
 public constant ITEM_ID_VOODOO_MASK = compiletime(newItem("Voodoo Mask", SHOP_MAGICAL_2, true, "BTNTiki_Mask_A_Icon_001"))
 public constant ITEM_ID_GHOST_HOOD = compiletime(newItem("Ghost Hood", SHOP_MAGICAL_2, true, "BTNspookyhood"))
 public constant ITEM_ID_EVIL_BOOK = compiletime(newItem("Evil Book", SHOP_MAGICAL_2, true, "BTNmonsterbook2"))
-public constant ITEM_ID_FROST_RING = compiletime(newItem("Frost Ring", SHOP_MAGICAL_2, true, "BTNColdFireRing"))    
+public constant ITEM_ID_RING_OF_REGEN = compiletime(newItem("Ring of Regeneration", SHOP_MAGICAL_2, true, "BTNColdFireRing"))    
 public constant ITEM_ID_SCEPTER_OF_THE_TIDES = compiletime(newItem("Scepter of the Tides", SHOP_MAGICAL_2, true, "BTNScepterOfTheTides"))
 public constant ITEM_ID_BOOTS_OF_DARKNESS = compiletime(newItem("Boots Of Darkness", SHOP_MAGICAL_2, true, "BTNWalkersOfDarkness"))
 public constant ITEM_ID_MAGMA_CRYSTAL = compiletime(newItem("Magma Crystal", SHOP_MAGICAL_2, true, "BTNRedCrystal"))
@@ -67,7 +67,7 @@ public constant ITEM_ID_SPIKES = compiletime(newItem("Spikes", SHOP_PHYSICAL_1, 
 public constant ITEM_ID_SHIELD = compiletime(newItem("Shield", SHOP_PHYSICAL_1, false, "BTNRuinedShield"))
 public constant ITEM_ID_BOW = compiletime(newItem("Bow", SHOP_PHYSICAL_1, false, "BTNGoldenWoodBow"))
 public constant ITEM_ID_DAGGER = compiletime(newItem("Dagger", SHOP_PHYSICAL_1, false, "BTNBoneDagger"))
-public constant ITEM_ID_RING_OF_REGEN = compiletime(newItem("Ring of Regeneration", SHOP_PHYSICAL_1, false, "BTNINV_Jewelry_Ring_09"))
+public constant ITEM_ID_RING_OF_HEALTH = compiletime(newItem("Ring of Health", SHOP_PHYSICAL_1, false, "BTNINV_Jewelry_Ring_09"))
 
 
 public constant SHOP_ID_PHYSICAL_2= UNIT_ID_GEN.next()
