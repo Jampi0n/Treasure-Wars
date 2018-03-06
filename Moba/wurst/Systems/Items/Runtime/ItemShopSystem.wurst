@@ -56,13 +56,13 @@ public function getTriggerItem() returns item
 public function getTriggerHero() returns unit
     return triggerHero
 
-public function unit.countItemsOfType(int itemId) returns int
+public function unit.countItemsOfType(int itemTypeId) returns int
     item indexItem
     int count = 0
 
     for i = 0 to bj_MAX_INVENTORY-1
         indexItem = UnitItemInSlot(this, i)
-        if (indexItem != null) and (indexItem.getTypeId() == itemId)
+        if (indexItem != null) and (indexItem.getTypeId() == itemTypeId)
             count++
 
     return count
