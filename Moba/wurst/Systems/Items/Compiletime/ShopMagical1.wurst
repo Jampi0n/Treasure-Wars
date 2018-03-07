@@ -26,11 +26,11 @@ function itemMageAmulet(int itemId)
 
 
 function itemMageGloves(int itemId)
-    int wp = 5
+    int wp = 6
     if compiletime
         itemId.getTypeDef()
         ..setDescription("+ {0} willpower".format(wp.toString()))
-            ..setGoldCost(500)
+            ..setGoldCost(400)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.AGI, wp)
@@ -50,7 +50,7 @@ function itemManaRing(int itemId)
 function itemMageArmor(int itemId)
     int mp = 50
     int hp = 80
-    int ar = 4
+    int ar = 6
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} mana points|n +{1} hit points|n +{2} armor".format(mp.toString(), hp.toString(), ar.toString()))
@@ -63,11 +63,11 @@ function itemMageArmor(int itemId)
 
 
 function itemWizardsHat(int itemId)
-    int intel = 5
+    int intel = 6
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} intelligence".format(intel.toString()))
-            ..setGoldCost(500)
+            ..setGoldCost(400)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.INT, intel)
@@ -84,7 +84,7 @@ function itemGemOfMana(int itemId)
             ..addStatBonusAbsolute(Stat.MP, mp)
             
 function itemGemOfDarkness(int itemId)
-    int voidDmg = 8
+    int voidDmg = 12
     if compiletime
         itemId.getTypeDef()
             ..setDescription("Attacks deal {0} additional void damage.".format(voidDmg.toString()))
@@ -124,7 +124,7 @@ function itemVoodooDoll(int itemId)
         end))
 
 function itemSpellBook(int itemId)
-    int intel = 8
+    int intel = 12
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} intelligence".format(intel.toString()))

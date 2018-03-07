@@ -58,7 +58,7 @@ function itemVisionWard(int itemId)
 
             
 function itemVoodooMask(int itemId)
-    int intel = 12
+    int intel = 18
     int voodooDmg = 250 //trigger
     if compiletime
         itemId.getTypeDef()
@@ -84,14 +84,14 @@ function itemVoodooMask(int itemId)
 function itemGhostHood(int itemId)
     int mp = 60
     int hp = 100
-    int ar = 5
-    int wp = 8
+    int ar = 6
+    int wp = 14
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} mana points|n+ {1} hit points|n+ {2} armor|n+ {3} willpower".format(
                 mp.toString(), hp.toString(), ar.toString(), wp.toString()
             ))
-            ..setGoldCost(1760)
+            ..setGoldCost(1840)
             ..addRequirement(ITEM_ID_MAGE_ARMOR)
             ..addRequirement(ITEM_ID_MAGE_GLOVES)
     else
@@ -102,18 +102,18 @@ function itemGhostHood(int itemId)
             ..addStatBonusAbsolute(Stat.AR, ar)
 
 function itemEvilBook(int itemId)
-    int intel = 20
-    int intelFactor = 15
+    int intel = 25
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} intelligence|n+ {1}% intelligence".format(intel.toString(), intelFactor.toString()))
+            ..setDescription("+ {0} intelligence".format(
+                intel.toString()
+            ))
             ..setGoldCost(1650)
             ..addRequirement(ITEM_ID_APPRENTICES_SCROLL)
             ..addRequirement(ITEM_ID_SPELL_BOOK)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.INT, intel)
-            ..addStatBonusRelative(Stat.INT, intelFactor/100)
             
 function itemFrostRing(int itemId)
     int hr = 60
@@ -132,8 +132,8 @@ function itemFrostRing(int itemId)
             ..addStatBonusAbsolute(Stat.MR, hr)
 
 function itemScepterOfTheTides(int itemId)
-    int intel = 6
-    int voidDmg = 10
+    int intel = 9
+    int voidDmg = 15
     int manaDrain = 8
     if compiletime
         itemId.getTypeDef()
@@ -159,7 +159,7 @@ function itemScepterOfTheTides(int itemId)
 
 function itemBootsOfDarkness(int itemId)
     int ms = 40
-    int voidDmg = 12
+    int voidDmg = 18
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} movement speed|nAttacks deal {1} additional void damage.|nMovement speed bonus from boots does not stack.".format(
@@ -188,7 +188,7 @@ function itemBootsOfDarkness(int itemId)
 function itemMagmaCrystal(int itemId)
     int mp = 125
     int hp = 250
-    int magicDmg = 15
+    int magicDmg = 20
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} hit points|n+ {1} mana points|nAttacks deal {2} additional magic damage.".format(
@@ -209,7 +209,7 @@ function itemMagmaCrystal(int itemId)
         end))
 
 function itemCursedMask(int itemId)
-    int intel = 10
+    int intel = 15
     int killMana = 12 //trigger
     if compiletime
         itemId.getTypeDef()
@@ -234,7 +234,7 @@ function itemCursedMask(int itemId)
 
 function itemAncientStoneTablet(int itemId)
     int hp = 260
-    int wp = 12
+    int wp = 18
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} hit points|n+ {1} willpower".format(
@@ -251,7 +251,7 @@ function itemAncientStoneTablet(int itemId)
 function itemBattlemageArmor(int itemId)
     int mp = 70
     int hp = 250
-    int ar = 8
+    int ar = 12
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} mana points|n +{1} hit points|n +{2} armor".format(mp.toString(), hp.toString(), ar.toString()))
