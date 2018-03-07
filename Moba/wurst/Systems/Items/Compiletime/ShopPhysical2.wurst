@@ -16,7 +16,7 @@ import Assets
 function itemSkullAxe(int itemId)
     int mana = 10 // trigger
     int hp = 15 // trigger
-    int str = 10
+    int str = 15
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} strength|nRestores {1} hit points and {2} mana points per kill.".format(
@@ -39,7 +39,7 @@ function itemSkullAxe(int itemId)
             end))
 
 function itemGauntletOfProtection(int itemId)
-    int ar = 15
+    int ar = 22
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} armor".format(
@@ -53,7 +53,7 @@ function itemGauntletOfProtection(int itemId)
 
 function itemHeavyBoots(int itemId)
     int ms = 40
-    int ar = 12
+    int ar = 17
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+{1} armor|n+ {0} movement speed|nMovement speed bonus from boots does not stack.".format(
@@ -76,9 +76,9 @@ function itemHeavyBoots(int itemId)
             end))
 
 function itemSpikedMail(int itemId)
-    int ar = 6
+    int ar = 9
     int hp = 140
-    int spikeDmg = 15
+    int spikeDmg = 18
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} armor|n+ {1} hit points|nEnemies attacking the hero will take {2} damage.".format(
@@ -98,7 +98,7 @@ function itemSpikedMail(int itemId)
         end))
 
 function itemHeavyArmor(int itemId)
-    int ar = 10
+    int ar = 15
     int hp = 350
     if compiletime
         itemId.getTypeDef()
@@ -117,7 +117,7 @@ constant int MACE_BUFF_ID = compiletime(createAuraBuff("Bleeding", "This unit is
 constant int MACE_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, MACE_BUFF_ID, Abilities.stampedeMissileDeath))
 
 function itemMace(int itemId)
-    int str = 14
+    int str = 20
     int bleedDmg = 25 //trigger
     int bleedDuration = 3
     if compiletime
@@ -152,8 +152,8 @@ function itemMace(int itemId)
 
 
 function itemSteelArmor(int itemId)
-    int ar = 6
-    int wp = 8
+    int ar = 9
+    int wp = 12
     int hp = 150
     if compiletime
         itemId.getTypeDef()
@@ -174,7 +174,7 @@ constant int HAMMER_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, HAMMER
             
 
 function itemHammerOfMight(int itemId)
-    int str = 16
+    int str = 24
     int armorDmg = 25 //trigger
     int armorDuration = 6
     if compiletime
@@ -314,7 +314,7 @@ function itemWarHorn(int itemId)
         end))
 
 function itemHeavyHelmet(int itemId)
-    int ar = 8
+    int ar = 12
     int hr = 50
     if compiletime
         itemId.getTypeDef()
@@ -329,7 +329,7 @@ function itemHeavyHelmet(int itemId)
             ..addStatBonusAbsolute(Stat.HR, hr)
 
 function itemRavenSword(int itemId)
-    int dmg = 16
+    int dmg = 24
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} strength|nDoes not increase attack damage, but deals {0} additional void damage instead.".format(
