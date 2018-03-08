@@ -26,6 +26,10 @@ public class Hero
     private timer reviveTimer
     private timerdialog reviveWindow
 
+    //when gold or xp is shared, their values are mostly non integer. To avoid rounding errors, the remainder will be stored here.
+    private real sharedGold = 0
+    private real sharedXp = 0
+
     protected static function classInit()
         onDamageTrigger.addAction(function onDamageStatic)
         onDeathTrigger.addAction(function onDeathStatic)
@@ -207,6 +211,14 @@ public class Hero
 
         //+" |cffffcc00( +"+(bounty/(2*size)).toInt().toString()+")|r"
 
+        //xp
+        let xp = 50.
+
+        for CPlayer cPLayer in CPlayer.getEnemyHeroPlayers(this.owner.getTeam())
+            let hero = Hero.getHero(cPLayer)
+            if hero != null
+                hero.addXp(xp)
+
         this.reviveTimer
             ..start(10.+level*2, function reviveStatic)
         TimerDialogDisplay(this.reviveWindow, true)
@@ -258,6 +270,19 @@ public class Hero
 
     static function getHero(player owner) returns Hero
         return getHero(owner.getId())
+
+
+    function addGold(real gold)
+        this.sharedGold += gold
+        let intGold = this.sharedGold.toInt()
+        this.owner.getPlayer().addGold(intGold)
+        this.sharedGold -= intGold
+
+    function addXp(real xp)
+        this.sharedXp += xp
+        let intXp = this.sharedXp.toInt()
+        this.hero.addXp(intXp, true)
+        this.sharedXp -= intXp
 
         
 init

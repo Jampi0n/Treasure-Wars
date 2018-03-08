@@ -1,5 +1,8 @@
 package PlayerControl
 
+import LinkedList
+import ErrorHandling
+
 /*
 * This package handles players
 *
@@ -34,6 +37,13 @@ public class CPlayer
     private player assocPlayer
     private int playerId
     
+    private static constant team1HeroPlayers = new LinkedList<CPlayer>()
+    private static constant team2HeroPlayers = new LinkedList<CPlayer>()
+
+    private static int team1HeroCount = 0
+    private static int team2HeroCount = 0
+
+
     protected static CPlayer array idToPlayer
     private Team team
     private PlayerType playertype
@@ -44,7 +54,7 @@ public class CPlayer
         this.team = t
         this.playertype = pType
         idToPlayer[this.playerId] = this
-    
+
     function toString() returns string
         return "Player = "+assocPlayer.getName()
 
@@ -60,22 +70,74 @@ public class CPlayer
     function getPlayerType() returns PlayerType
         return this.playertype
 
-    static function initPlayers()
+    static function getAllyHeroPlayers(Team t) returns LinkedList<CPlayer>
+        if t == Team.TEAM1
+            return team1HeroPlayers
+        else if t == Team.TEAM2
+            return team2HeroPlayers
+        else
+            error("Must be used on TEAM1 or TEAM2")
+            return null
+
+    static function getAllyHeroPlayers(player p) returns LinkedList<CPlayer>
+        return getAllyHeroPlayers(p.getCPlayer().getTeam())
+
+    static function getEnemyHeroPlayers(Team t) returns LinkedList<CPlayer>
+        if t == Team.TEAM1
+            return team2HeroPlayers
+        else if t == Team.TEAM2
+            return team1HeroPlayers
+        else
+            error("Must be used on TEAM1 or TEAM2")
+            return null
+
+    static function getEnemyHeroPlayers(player p) returns LinkedList<CPlayer>
+        return getEnemyHeroPlayers(p.getCPlayer().getTeam())
+
+    static function getTeamHeroCount(Team t) returns int
+        if t == Team.TEAM1
+            return team1HeroCount
+        else if t == Team.TEAM2
+            return team2HeroCount
+        else
+            error("Must be used on TEAM1 or TEAM2")
+            return -1
+
+    static function invertTeam(Team t) returns Team
+        if t == Team.TEAM1
+            return Team.TEAM2
+        else if t == Team.TEAM2
+            return Team.TEAM1
+        else
+            error("Must be used on TEAM1 or TEAM2")
+            return t
+
+    protected static function initPlayers()
         var admin = false
+        CPlayer cPlayer
         for i = 0 to 9
             player p = players[i]
             Team t = i<=4?Team.TEAM1:Team.TEAM2
             if( p.getSlotState()==PLAYER_SLOT_STATE_PLAYING )
-                new CPlayer(p, t, PlayerType.HERO)
+                cPlayer = new CPlayer(p, t, PlayerType.HERO)
                 if(not admin)
                     admin = true
                     adminPlayer = i
+
+                if t==Team.TEAM1
+                    team1HeroPlayers.add(cPlayer)
+                    team1HeroCount++
+                else
+                    team2HeroPlayers.add(cPlayer)
+                    team2HeroCount++
+            
             else
                 new CPlayer(p, t, PlayerType.NONE)
     
-    
+
         new CPlayer(players[10], Team.TEAM1, PlayerType.ARMY)
         new CPlayer(players[11], Team.TEAM2, PlayerType.ARMY)
+
         new CPlayer(players[12], Team.NEUTRAL_HOSTILE, PlayerType.NEUTRAL)
         for i=13 to 15
             new CPlayer(players[15], Team.NEUTRAL_PASSIVE, PlayerType.NEUTRAL)

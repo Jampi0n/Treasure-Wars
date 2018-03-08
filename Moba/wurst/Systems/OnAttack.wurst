@@ -48,20 +48,33 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
     real currentDamage = originalDamage
     real afterLife
 
-    //===============================================================================
-
+    
 
     //example:
     //currentDamage = currentDamage/2
 
+    /*
+        untargetable -> damage = 0 and no further damage handling
+        only for attacks, because every other damage will be dealt in code and there I can decide individually, if I want to deal damage
+    */
 
-    if isAttack and target.isType(UNIT_TYPE_HERO)
-        currentDamage = currentDamage - 8 * target.countItemsOfType(convertItemId(ITEM_ID_SHIELD))
+    if target.isType(UNIT_TYPE_ANCIENT) and isAttack 
+        currentDamage = 0
+    else
+
+        //===============================================================================
+
+        if isAttack and target.isType(UNIT_TYPE_HERO)
+            currentDamage = currentDamage - 8 * target.countItemsOfType(convertItemId(ITEM_ID_SHIELD))
+
+
+    
+
+        //===============================================================================
 
 
 
-
-    //===============================================================================
+    
     if prevenDeathUnit != null
         prevenDeathUnit.removeAbility(PREVENT_DEATH)
         prevenDeathUnit.setHP(prevenDeathAfterLife)
@@ -110,6 +123,7 @@ public class OnAttack
         var localActive = false
         var localAttacked = false
 
+
         countEvents++
         if countEvents > 100
             print("Warning. Very high number of damage events: "+countEvents.toString())
@@ -129,7 +143,7 @@ public class OnAttack
         handleDamageAmount(localAttacker, localTarget, localAttacked, localActive)
 
         //use a list with arguments, as a onAttack function could trigger an onAttack event and overwrite the variables
-        if(localAttacked)
+        if localAttacked and not localTarget.isType(UNIT_TYPE_ANCIENT) //untargetable
             for OnAttackFunction onAttack in onAttackFunctionList
                 onAttack.onAttack(localAttacker, localTarget, localActive)
 

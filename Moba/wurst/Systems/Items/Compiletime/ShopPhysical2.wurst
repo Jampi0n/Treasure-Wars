@@ -27,7 +27,7 @@ function itemSkullAxe(int itemId)
             ..addRequirement(ITEM_ID_SKULL)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.STR, 10)
+            ..addStatBonusAbsolute(Stat.STR, str)
         CreateTrigger()
             ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
             ..addAction(() -> (begin
@@ -36,6 +36,8 @@ function itemSkullAxe(int itemId)
                 if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and count!=0
                     killer.addMana(10. * count)
                     killer.addHP(15. * count)
+                    killer.addEffect(Abilities.spiritTouchTarget, "origin").destr()
+                    killer.addEffect(Abilities.vampiricAuraTarget, "origin").destr()
             end))
 
 function itemGauntletOfProtection(int itemId)
@@ -92,7 +94,7 @@ function itemSpikedMail(int itemId)
             ..addStatBonusAbsolute(Stat.AR, ar)
             ..addStatBonusAbsolute(Stat.HP, hp)
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if target.isType(UNIT_TYPE_HERO)
+            if target.isType(UNIT_TYPE_HERO) and not attacker.isType(UNIT_TYPE_STRUCTURE)
                 let dmg = target.countItemsOfType(convertItemId(itemId)) * spikeDmg
                 target.dealDamage(attacker, dmg.toReal(), ReductionType.PHYSICAL)
         end))
@@ -114,11 +116,11 @@ function itemHeavyArmor(int itemId)
             ..addStatBonusAbsolute(Stat.HP, hp)
 
 constant int MACE_BUFF_ID = compiletime(createAuraBuff("Bleeding", "This unit is bleeding; it takes damage over time.", "BTNMaceStrikeGlowless"))
-constant int MACE_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, MACE_BUFF_ID, Abilities.stampedeMissileDeath))
+constant int MACE_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, MACE_BUFF_ID, ""))
 
 function itemMace(int itemId)
     int str = 20
-    int bleedDmg = 25 //trigger
+    int bleedDmg = 25
     int bleedDuration = 3
     if compiletime
 
@@ -138,16 +140,15 @@ function itemMace(int itemId)
             ..add(MACE_ABILTIY_ID)
         maceBuff.setup(abilityList, MACE_BUFF_ID)
         maceBuff.setPeriodicTime(1)
-        maceBuff.addPeriodicFunction(()-> (begin
-            let thisBuff = Buff.getTriggerBuff()
-            thisBuff.getCaster().dealDamage(thisBuff.getTarget(), 25/3, ReductionType.PHYSICAL)
+        maceBuff.addPeriodicFunction((Buff thisBuff)-> (begin
+            thisBuff.getCaster().dealDamage(thisBuff.getTarget(), bleedDmg/bleedDuration, ReductionType.PHYSICAL)
         end) )
 
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             
-            if attacker.isType(UNIT_TYPE_HERO) and attacker.hasItemById(convertItemId(itemId))
-                print("mace")
+            if attacker.isType(UNIT_TYPE_HERO) and attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
                 new Buff(target, attacker, bleedDuration.toReal(), maceBuff, 1)
+                target.addEffect(Abilities.hydraliskImpact, "chest").destr()
         end))
 
 
@@ -175,7 +176,7 @@ constant int HAMMER_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, HAMMER
 
 function itemHammerOfMight(int itemId)
     int str = 24
-    int armorDmg = 25 //trigger
+    int armorDmg = 25
     int armorDuration = 6
     if compiletime
         itemId.getTypeDef()
@@ -193,19 +194,19 @@ function itemHammerOfMight(int itemId)
         var abilityList = new LinkedList<int>
             ..add(HAMMER_ABILTIY_ID)
         hammerBuff.setup(abilityList, HAMMER_BUFF_ID)
-        hammerBuff.addFirstFunction(() -> (begin
-            Buff.getTriggerBuff().getTarget().wrapper().addStatRelativeBonus(Stat.AR, -25/100)
+        hammerBuff.addFirstFunction((Buff thisBuff) -> (begin
+            thisBuff.getTarget().wrapper().addStatRelativeBonus(Stat.AR, -armorDmg*10)
         end))
 
-        hammerBuff.addEndFunction(() -> (begin
-            Buff.getTriggerBuff().getTarget().wrapper().addStatRelativeBonus(Stat.AR, 25/100)
+        hammerBuff.addEndFunction((Buff thisBuff) -> (begin
+            thisBuff.getTarget().wrapper().addStatRelativeBonus(Stat.AR, armorDmg*10)
         end))
 
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             
-            if attacker.isType(UNIT_TYPE_HERO) and attacker.hasItemById(convertItemId(itemId))
-                print("hammer")
+            if attacker.isType(UNIT_TYPE_HERO) and attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
                 new Buff(target, attacker, armorDuration.toReal(), hammerBuff, 1)
+                target.addEffect(Abilities.bloodElfSpellThiefMISSILE, "chest").destr()
         end))
 
 constant int WAR_DRUM_BUFF_ID = compiletime(createAuraBuff("War Drum", "This unit has increased attack and movement speed.", "BTNTribalDrumOfWar"))
@@ -235,8 +236,8 @@ function checkAura()
     nearby.destr()
 
 function itemWarDrum(int itemId)
-    int asBonus = 25 // trigger
-    int msBonus = 10 // trigger
+    int asBonus = 25
+    int msBonus = 10
     if compiletime
         itemId.getTypeDef()
             ..setDescription("Increases nearby unit's attack speed by {0}% and movement speed by {1}%. This effect does not stack".format(
@@ -259,16 +260,16 @@ function itemWarDrum(int itemId)
         var abilityList = new LinkedList<int>
             ..add(WAR_DRUM_ABILTIY_ID)
         BUFF_WAR_DRUM.setup(abilityList, WAR_DRUM_BUFF_ID)
-        BUFF_WAR_DRUM.addFirstFunction(() -> (begin
-            Buff.getTriggerBuff().getTarget().wrapper()
-                ..addStatRelativeBonus(Stat.MS, 10/100)
-                ..addStatAbsoluteBonus(Stat.AS, 25)
+        BUFF_WAR_DRUM.addFirstFunction((Buff thisBuff) -> (begin
+            thisBuff.getTarget().wrapper()
+                ..addStatRelativeBonus(Stat.MS, msBonus*10)
+                ..addStatAbsoluteBonus(Stat.AS, asBonus)
         end))
 
-        BUFF_WAR_DRUM.addEndFunction(() -> (begin
-            Buff.getTriggerBuff().getTarget().wrapper()
-                ..addStatRelativeBonus(Stat.MS, -10/100)
-                ..addStatAbsoluteBonus(Stat.AS, -25)
+        BUFF_WAR_DRUM.addEndFunction((Buff thisBuff) -> (begin
+            thisBuff.getTarget().wrapper()
+                ..addStatRelativeBonus(Stat.MS, -msBonus*10)
+                ..addStatAbsoluteBonus(Stat.AS, -asBonus)
         end))
 
         CreateTrigger()
@@ -279,7 +280,7 @@ function itemWarDrum(int itemId)
     
 
 function itemWarHorn(int itemId)
-    int adBonus = 30 // trigger
+    int adBonus = 30
     if compiletime
         itemId.getTypeDef()
             ..setDescription("Increases nearby unit's attack damage by {0}%.".format(
@@ -303,14 +304,14 @@ function itemWarHorn(int itemId)
         var abilityList = new LinkedList<int>
             ..add(WAR_HORN_ABILTIY_ID)
         BUFF_WAR_HORN.setup(abilityList, WAR_HORN_BUFF_ID)
-        BUFF_WAR_HORN.addFirstFunction(() -> (begin
-            Buff.getTriggerBuff().getTarget().wrapper()
-                ..addStatRelativeBonus(Stat.AD, 30/100)
+        BUFF_WAR_HORN.addFirstFunction((Buff thisBuff) -> (begin
+            thisBuff.getTarget().wrapper()
+                ..addStatRelativeBonus(Stat.AD, adBonus*10)
         end))
 
-        BUFF_WAR_HORN.addEndFunction(() -> (begin
-            Buff.getTriggerBuff().getTarget().wrapper()
-                ..addStatRelativeBonus(Stat.AD, -30/100)
+        BUFF_WAR_HORN.addEndFunction((Buff thisBuff) -> (begin
+            thisBuff.getTarget().wrapper()
+                ..addStatRelativeBonus(Stat.AD, -adBonus*10)
         end))
 
 function itemHeavyHelmet(int itemId)
@@ -329,22 +330,25 @@ function itemHeavyHelmet(int itemId)
             ..addStatBonusAbsolute(Stat.HR, hr)
 
 function itemRavenSword(int itemId)
-    int dmg = 24
+    int dmg = 20
+    int as = 15
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} strength|nDoes not increase attack damage, but deals {0} additional void damage instead.".format(
-                dmg.toString()
+            ..setDescription("+ {0} strength|n+ {1}% attack speed|nDoes not increase attack damage, but deals {0} additional void damage instead.".format(
+                dmg.toString(), as.toString()
             ))
-            ..setGoldCost(1700)
-            ..addRequirement(ITEM_ID_WAR_AXE)
+            ..setGoldCost(1900)
+            ..addRequirement(ITEM_ID_DAGGER)
             ..addRequirement(ITEM_ID_GEM_OF_DARKNESS)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.STR, dmg)
             ..addStatBonusAbsolute(Stat.AD, -dmg)
+            ..addStatBonusAbsolute(Stat.AS, as)
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if attacker.hasItemById(convertItemId(itemId))
+            if attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
                 attacker.dealDamage(target, dmg.toReal() * attacker.countItemsOfType(convertItemId(itemId)) , ReductionType.NONE)
+                target.addEffect(Abilities.avengerMissile, "chest").destr()
         end))
 
 @compiletime

@@ -32,6 +32,7 @@ function itemSkullPendant(int itemId)
                 let killer = GetKillingUnit()
                 if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and killer.hasItemById(convertItemId(ITEM_ID_SKULL_PENDANT))
                     killer.addMana(12. * killer.countItemsOfType(convertItemId(ITEM_ID_SKULL_PENDANT)))
+                    killer.addEffect(Abilities.spiritTouchTarget, "origin").destr()
             end))
 
 
@@ -129,7 +130,7 @@ function itemFrostRing(int itemId)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.HR, hr)
-            ..addStatBonusAbsolute(Stat.MR, hr)
+            ..addStatBonusAbsolute(Stat.MR, mr)
 
 function itemScepterOfTheTides(int itemId)
     int intel = 9
@@ -149,21 +150,24 @@ function itemScepterOfTheTides(int itemId)
 
 
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if attacker.hasItemById(convertItemId(itemId))
+            if attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
                 let manaDrained = min(manaDrain.toReal() * target.countItemsOfType(convertItemId(itemId)) , target.getMana())
                 attacker.dealDamage(target, voidDmg.toReal() * attacker.countItemsOfType(convertItemId(itemId)) , ReductionType.NONE)
                 attacker.addMana(manaDrained)
                 target.addMana(-manaDrained)
+                target.addEffect(Abilities.avengerMissile, "chest").destr()
+                target.addEffect(Abilities.arcaneTowerAttack, "chest").destr()
         end))
 
 
 function itemBootsOfDarkness(int itemId)
     int ms = 40
-    int voidDmg = 18
+    int voidDmg = 12
+    int intelFactor = 10
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} movement speed|nAttacks deal {1} additional void damage.|nMovement speed bonus from boots does not stack.".format(
-                ms.toString(), voidDmg.toString()
+            ..setDescription("+ {0} movement speed|n+ {1}% intelligence|nAttacks deal {2} additional void damage.|nMovement speed bonus from boots does not stack.".format(
+                ms.toString(), intelFactor.toString(), voidDmg.toString()
             ))
             ..setGoldCost(1500)
             ..addRequirement(ITEM_ID_LIGHT_BOOTS)
@@ -179,10 +183,12 @@ function itemBootsOfDarkness(int itemId)
                 if isUnique() and hasNot(ITEM_ID_HEAVY_BOOTS) and hasNot(ITEM_ID_BOOTS_OF_DARKNESS)
                     getTriggerHero().wrapper().addStatAbsoluteBonus(Stat.MS, -ms)
             end))
+            ..addStatBonusRelative(Stat.INT, intelFactor*10)
 
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if attacker.hasItemById(convertItemId(itemId))
+            if attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
                 attacker.dealDamage(target, voidDmg.toReal() * attacker.countItemsOfType(convertItemId(itemId)) , ReductionType.NONE)
+                target.addEffect(Abilities.avengerMissile, "chest").destr()
         end))
 
 function itemMagmaCrystal(int itemId)
@@ -201,11 +207,12 @@ function itemMagmaCrystal(int itemId)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.MP, mp)
-            ..addStatBonusAbsolute(Stat.MP, hp)
+            ..addStatBonusAbsolute(Stat.HP, hp)
 
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if attacker.hasItemById(convertItemId(itemId))
+            if attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
                 attacker.dealDamage(target, magicDmg.toReal() * attacker.countItemsOfType(convertItemId(itemId)) , ReductionType.MAGIC)
+                target.addEffect(Abilities.fireBallMissile, "chest").destr()
         end))
 
 function itemCursedMask(int itemId)
@@ -229,6 +236,7 @@ function itemCursedMask(int itemId)
                 let killer = GetKillingUnit()
                 if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and killer.hasItemById(convertItemId(ITEM_ID_CURSED_MASK))
                     killer.addMana(12. * killer.countItemsOfType(convertItemId(ITEM_ID_CURSED_MASK)))
+                    killer.addEffect(Abilities.spiritTouchTarget, "origin").destr()
             end))
 
 
@@ -254,7 +262,9 @@ function itemBattlemageArmor(int itemId)
     int ar = 12
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} mana points|n +{1} hit points|n +{2} armor".format(mp.toString(), hp.toString(), ar.toString()))
+            ..setDescription("+ {0} mana points|n+ {1} hit points|n+ {2} armor".format(
+                mp.toString(), hp.toString(), ar.toString()
+            ))
             ..setGoldCost(1700)
             ..addRequirement(ITEM_ID_MAGE_ARMOR)
             ..addRequirement(ITEM_ID_GEM_OF_HEALTH)

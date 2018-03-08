@@ -23,7 +23,7 @@ public class UnitWrapper
 
     constant static CalculateTotalBonus defaultCalcualtion = (UnitWrapper whichWrapper, Stat whichStat) -> (begin
         int stat = whichStat.toInt()
-        whichWrapper.statsTotalBonus[stat] = ((whichWrapper.getStatAbsoluteBonus(whichStat)) * (1. + whichWrapper.getStatRelativeBonus(whichStat)) + (whichWrapper.getStatBaseValue(whichStat) * whichWrapper.getStatRelativeBonus(whichStat)) ).toInt()
+        whichWrapper.statsTotalBonus[stat] = ((whichWrapper.getStatAbsoluteBonus(whichStat)) * (1. + whichWrapper.getStatRelativeBonus(whichStat)/1000 ) + (whichWrapper.getStatBaseValue(whichStat) * whichWrapper.getStatRelativeBonus(whichStat)/1000) ).round()
     end)
 
     private CalculateTotalBonus bonusCalculation = defaultCalcualtion
@@ -43,7 +43,10 @@ public class UnitWrapper
     //has no effect, is just needed to determine the actual bonus for relative bonus
 
     private int array[11] statsAbsoluteBonus //default = 0
-    private real array[11] statsRelativeBonus //default = 0.00
+    private int array[11] statsRelativeBonus //default = 0.00
+    /*
+        Use integer to avoid rounding errors. 1000 means 100% or 1
+    */
     int array[11] statsTotalBonus //default = 0
 
     private static constant unnkownUnitTypes = new LinkedList<int>()
@@ -156,6 +159,10 @@ public class UnitWrapper
         
 
     function applyTotalStatBonus(Stat whichStat)
+        if whichStat == Stat.HP
+            print(this.statsTotalBonus[Stat.HP.toInt()])
+            print(this.getStatRelativeBonus(Stat.HP).toString())
+
         if whichStat != Stat.MS and whichStat != Stat.HR and whichStat!= Stat.MR
             this.toUnit().setBonus(whichStat, this.statsTotalBonus[whichStat.toInt()])
         else
@@ -174,7 +181,7 @@ public class UnitWrapper
     /**
     Sets the relative stat bonus and updates the total bonus.
     **/
-    function setStatRelativeBonus(Stat whichStat, real newValue)
+    function setStatRelativeBonus(Stat whichStat, int newValue)
         int stat = whichStat.toInt()
         this.statsRelativeBonus[stat] = newValue
         updateTotalStatBonus(whichStat)
@@ -182,7 +189,7 @@ public class UnitWrapper
     function addStatAbsoluteBonus(Stat whichStat, int plusValue)
         this.setStatAbsoluteBonus(whichStat, this.statsAbsoluteBonus[whichStat.toInt()] + plusValue)
 
-    function addStatRelativeBonus(Stat whichStat, real plusValue)
+    function addStatRelativeBonus(Stat whichStat, int plusValue)
         this.setStatRelativeBonus(whichStat, this.statsRelativeBonus[whichStat.toInt()] + plusValue)
 
     function printStats()
@@ -199,7 +206,7 @@ public class UnitWrapper
     function getStatAbsoluteBonus(Stat whichStat) returns int
         return this.statsAbsoluteBonus[whichStat.toInt()]
 
-    function getStatRelativeBonus(Stat whichStat) returns real
+    function getStatRelativeBonus(Stat whichStat) returns int
         return this.statsRelativeBonus[whichStat.toInt()]
     
     function getStatBaseValue(Stat whichStat) returns int

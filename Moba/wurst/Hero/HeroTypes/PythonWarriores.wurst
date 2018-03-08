@@ -79,11 +79,12 @@ function mistwalk()
                 "Turns the Python Warriores invisibile for {0} seconds.".format(
                 MISTWALK_DURATION[lvl-1].toInt().toString()+MISTWALK_DURATION_BONUS.getBonusString(C_INT)))
 
-constant real array POISON_SPIT_SLOW_MS = [-30, -35, -40, -45, -50]
+constant int array POISON_SPIT_SLOW_MS = [-30, -35, -40, -45, -50]
 constant real array POISON_SPIT_DOT = [10, 15, 20, 25, 30]
 constant real POISON_SPIT_DOT_BONUS = 25.
 constant int array POISON_SPIT_ARMOR_REDUCTION = [-5, -10, -15, -20, -25]
 constant real array POISON_SPIT_DURATION = [6, 7, 8, 9, 10]
+constant real array POISON_SPIT_AOE = [200, 225, 250, 275, 300]
 
 constant integer ABILITY_POISON_SPIT_SLOWED = compiletime(ABIL_ID_GEN.next())
 constant integer ABILITY_POISON_SPIT_ARMOR_REDUCED = compiletime(ABIL_ID_GEN.next())
@@ -117,6 +118,7 @@ function poisonSpit()
     for lvl = 1 to 5
         aDef
             ..setCooldown(lvl, COOLDOWN[lvl-1])
+            ..setAreaofEffect(lvl, POISON_SPIT_AOE[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setTargetsAllowed(lvl, "none")
             ..setTooltipNormalExtended(lvl, "Spits poison at the target area. Enemies within the area of effect are slowed by {0}, have their armor reduced by {1} and take {2} damage per second.|nLasts {3} seconds.".format(
@@ -288,7 +290,7 @@ function poisonSpitPeriodic()
         level = poisonSpitDummy.getTypeId()+4-'n00A'
 
     group nearby = CreateGroup()
-    nearby.enumUnitsInRange(poisonSpitDummy.getPos(), 175.+25*level)
+    nearby.enumUnitsInRange(poisonSpitDummy.getPos(), POISON_SPIT_AOE[level-1])
 
     while(not nearby.isEmpty())
         unit target = FirstOfGroup(nearby)
@@ -308,8 +310,7 @@ init
         ..add('A009')
     BUFF_ENVENOMED_BLADES.setup(abilityList, 'B007')
     BUFF_ENVENOMED_BLADES.setPeriodicTime(1)
-    BUFF_ENVENOMED_BLADES.addPeriodicFunction(()-> (begin
-        let thisBuff = Buff.getTriggerBuff()
+    BUFF_ENVENOMED_BLADES.addPeriodicFunction((Buff thisBuff)-> (begin
         thisBuff.getCaster().dealDamage(thisBuff.getTarget(), 
         (ENVENOMED_BLADES_DAMAGE[thisBuff.getLevel()-1]).bonus(thisBuff.getCaster().getInt(), ENVENOMED_BLADES_DAMAGE_BONUS)
         , ReductionType.MAGIC)
@@ -321,20 +322,17 @@ init
     ..add(ABILITY_POISON_SPIT_ARMOR_REDUCED)
     ..add(ABILITY_POISON_SPIT_SLOWED)
     BUFF_POISON_SPIT.setup(abilityList, BUFF_ID_POISON_SPIT)
-    BUFF_POISON_SPIT.addApplyFunction( () -> (begin
-        let thisBuff = Buff.getTriggerBuff()
+    BUFF_POISON_SPIT.addApplyFunction( (Buff thisBuff) -> (begin
         thisBuff.getCaster().dealDamage(thisBuff.getTarget(), 
         (POISON_SPIT_DOT[thisBuff.getLevel()-1]).bonus(thisBuff.getCaster().getInt(), POISON_SPIT_DOT_BONUS)/4
         , ReductionType.MAGIC)
     end) )
-    BUFF_POISON_SPIT.addFirstFunction( () -> (begin
-        let thisBuff = Buff.getTriggerBuff()
-        thisBuff.getTarget().wrapper().addStatRelativeBonus( Stat.MS, POISON_SPIT_SLOW_MS[thisBuff.getLevel()-1]/100 )
+    BUFF_POISON_SPIT.addFirstFunction( (Buff thisBuff) -> (begin
+        thisBuff.getTarget().wrapper().addStatRelativeBonus( Stat.MS, POISON_SPIT_SLOW_MS[thisBuff.getLevel()-1]*10 )
     end) )
 
-    BUFF_POISON_SPIT.addEndFunction( () -> (begin
-        let thisBuff = Buff.getTriggerBuff()
-        thisBuff.getTarget().wrapper().addStatRelativeBonus( Stat.MS, -POISON_SPIT_SLOW_MS[thisBuff.getLevel()-1]/100 )
+    BUFF_POISON_SPIT.addEndFunction( (Buff thisBuff) -> (begin
+        thisBuff.getTarget().wrapper().addStatRelativeBonus( Stat.MS, -POISON_SPIT_SLOW_MS[thisBuff.getLevel()-1]*10 )
     end) )
 
     onEnter(() -> (begin
@@ -352,8 +350,8 @@ init
             real angle
             for i = 0 to 9 + level*3
                 angle = i/(10 + level*3)*2*bj_PI
-                x = spitDummy.getX() + (140 + 25*level) * angle.cos()
-                y = spitDummy.getY() + (140 + 25*level) * angle.sin()
+                x = spitDummy.getX() + (POISON_SPIT_AOE[level-1]-25) * angle.cos()
+                y = spitDummy.getY() + (POISON_SPIT_AOE[level-1]-25) * angle.sin()
                 var e = AddSpecialEffect("Units\\Undead\\PlagueCloud\\PlagueCloudtarget.mdl", x, y)
                 doAfter(5.+level, () -> DestroyEffect(e))
 

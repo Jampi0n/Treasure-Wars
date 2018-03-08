@@ -115,13 +115,13 @@ public class PathUnit
         PathUnit pathUnit = unitToPathUnit.get(GetAttacker())
         if( pathUnit!=null)
             pathUnit.lastAttack = getElapsedGameTime()
-        else
-            pathUnit = unitToPathUnit.get(GetTriggerUnit())
-            if( pathUnit!=null and GetAttacker().isType(UNIT_TYPE_STRUCTURE))
-                pathUnit.nextUpdate = getElapsedGameTime()+4
-                if(pathUnit.assocUnit.getCurrentOrder()!=OrderId("attack"))
-                    pathUnit.assocUnit.issuePointOrder("attack", pathUnit.assocUnit.getPos())
-                    moveOrders++
+
+        pathUnit = unitToPathUnit.get(GetTriggerUnit())
+        if( pathUnit!=null and GetAttacker().isType(UNIT_TYPE_STRUCTURE))
+            pathUnit.nextUpdate = getElapsedGameTime()+4
+            if(pathUnit.assocUnit.getCurrentOrder()!=OrderId("attack"))
+                pathUnit.assocUnit.issuePointOrder("attack", pathUnit.assocUnit.getPos())
+                moveOrders++
 
         
 
