@@ -5,12 +5,12 @@ import StandardTextTags
 import initlater HeroControl
 import PlayerControl
 
-public function createUnitType(int unitId, int bounty, int baseAttack, int baseArmor, int hitBox) returns int
-    new UnitType(unitId, bounty, baseAttack, baseArmor, hitBox)
+public function createUnitType(int unitId, int bounty, int baseAttack, int baseArmor, int hitBox, string modelPath) returns int
+    new UnitType(unitId, bounty, baseAttack, baseArmor, hitBox, modelPath)
     return unitId
 
 public function createUnitType(int unitId) returns int
-    new UnitType(unitId, 0, 0, 0, 32)
+    new UnitType(unitId, 0, 0, 0, 32, "")
     return unitId
 
 public class UnitType
@@ -25,12 +25,15 @@ public class UnitType
 
     private int hitBox
 
-    construct(int unitId, int bounty, int baseAttack, int baseArmor, int hitBox)
+    private string modelPath
+
+    construct(int unitId, int bounty, int baseAttack, int baseArmor, int hitBox, string modelPath)
         this.unitId = unitId
         this.bounty = bounty
         this.baseAttack = baseAttack
         this.baseArmor = baseArmor
         this.hitBox = hitBox
+        this.modelPath = modelPath
         unitIdToUnitType.put(unitId, this)
 
     static function getUnitType(int unitId) returns UnitType
@@ -50,6 +53,9 @@ public class UnitType
 
     function getHitBox() returns int
         return this.hitBox
+
+    function getModel() returns string
+        return this.modelPath
 
 function onUnitDeath()
     let dyingUnit = GetTriggerUnit()

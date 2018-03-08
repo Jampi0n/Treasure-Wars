@@ -7,6 +7,7 @@ import HeroType
 import Upgrades
 import TimerUtils
 import LinkedList
+import ClosureTimers
 
 public class Hero
 
@@ -29,6 +30,8 @@ public class Hero
     //when gold or xp is shared, their values are mostly non integer. To avoid rounding errors, the remainder will be stored here.
     private real sharedGold = 0
     private real sharedXp = 0
+
+    private unit heroGlow = null
 
     protected static function classInit()
         onDamageTrigger.addAction(function onDamageStatic)
@@ -63,7 +66,21 @@ public class Hero
             this.hero.wrapper().setBonusCalculation(this.heroType.getBonusCalculation())
         //print("setup completed: "+this.hero.getName())
 
+        if this.heroType.getUsesHeroGlow()
+            print("use hero glow")
+            this.heroGlow = createUnit(this.hero.getOwner(), 'n00H', this.hero.getPos(), angle(0))
+
+            
+
+            doPeriodically(0.03, (CallbackPeriodic _) ->(begin
+                if this.hero.isAlive()
+                    this.heroGlow.setXY(this.hero.getPos())
+            end))
+
         this.upgrade()
+
+        if this.heroType.getOnCreateFunction() != null
+            this.heroType.getOnCreateFunction().onCreate(this)
 
     construct(CPlayer p, int unitId, vec2 pos, angle facing )
         this.hero = createUnit(p.getPlayer(), unitId, pos, facing)
@@ -137,6 +154,11 @@ public class Hero
             pos = gg_rct_BrownCastle.getCenter()
             
         this.hero.revive(pos, true)
+        if this.heroGlow != null
+            this.heroGlow
+                ..setXY(pos)
+                ..show()
+
 
     static function reviveStatic()
         let t = GetExpiredTimer()
@@ -146,6 +168,10 @@ public class Hero
 
     //handles death
     function onDeath()
+
+        if this.heroGlow != null
+            //this.heroGlow.hide()
+
         int offset = this.owner.getTeam()==Team.TEAM1 ? 5 : 0
         real maxValue = -1
         int maxIndex = -1 //find last assistant, to replace killer, if killer is not a player
