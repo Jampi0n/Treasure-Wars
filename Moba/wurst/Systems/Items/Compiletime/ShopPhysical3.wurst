@@ -55,7 +55,7 @@ function itemBloodSword(int itemId)
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             
             if attacker.isType(UNIT_TYPE_HERO) and attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
-                new Buff(target, attacker, buffDur.toReal(), bloodSwordBuff, 1)
+                target.addBuffReduced(attacker, buffDur.toReal(), bloodSwordBuff, 1)
                 target.addEffect(Abilities.orbCorruptionSpecialArt, "chest").destr()
         end))
 
@@ -271,21 +271,18 @@ constant int AXE_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, AXE_BUFF_
 
 function itemAxeOfDecay(int itemId)
     int str = 30
-    int intel = 15
-    int slow = 30
+    int slow = 40
     int slowDur = 2
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} strength|n +{1} intelligence|nAttacks slow the target's movement speed by {2}% for {3} seconds.".format(
-                str.toString(), intel.toString(), slow.toString(), slowDur.toString()
+            ..setDescription("+ {0} strength|nAttacks slow the target's movement speed by {1}% for {2} seconds.".format(
+                str.toString(), slow.toString(), slowDur.toString()
             ))
             ..setGoldCost(3600)
             ..addRequirement(ITEM_ID_SKULL_AXE)
-            ..addRequirement(ITEM_ID_CURSED_MASK)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.STR, str)
-            ..addStatBonusAbsolute(Stat.INT, intel)
 
         BuffType axeBuff = new BuffType(false, false)
         var abilityList = new LinkedList<int>
@@ -301,7 +298,7 @@ function itemAxeOfDecay(int itemId)
 
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             if attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
-                new Buff(target, attacker, slowDur.toReal(), axeBuff, 1)
+                target.addBuffReduced( attacker, slowDur.toReal(), axeBuff, 1)
         end))
         
 
@@ -337,8 +334,9 @@ function itemHolyShield(int itemId)
             ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_SPELL_EFFECT)
             ..addAction(() ->(begin
                 if GetSpellAbilityId() == 'A00G'
-                    new Buff(GetTriggerUnit(), GetTriggerUnit(), 2, BUFF_HOLY_SHIELD, 1)
-                    new Buff(GetTriggerUnit(), GetTriggerUnit(), 2, UNTARGETABLE, 1)
+                    let hero = GetTriggerUnit()
+                    hero.addBuff( hero, 2, BUFF_HOLY_SHIELD, 1)
+                    hero.addBuff( hero, 2, UNTARGETABLE, 1)
             end))
 
 

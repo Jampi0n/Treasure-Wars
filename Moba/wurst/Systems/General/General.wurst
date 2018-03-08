@@ -7,6 +7,8 @@ import initlater HeroControl
 import ClosureTimers
 import Knockback3
 import UnitType
+import initlater ItemIdGeneration
+import initlater ItemShopSystem
 
 constant MAGIC_REDUCTION = 0.01
 
@@ -65,6 +67,9 @@ public function unit.addBuff(unit caster, real duration, BuffType buffType, int 
 public function unit.addBuffReduced(unit caster, real duration, BuffType buffType, int level) returns Buff
     let wp = GetHeroAgi(this, true)
     real realDuration =  duration * (1-( wp*MAGIC_REDUCTION )/( 1 + wp*MAGIC_REDUCTION ))
+    if this.hasItemById(convertItemId(ITEM_ID_ARCANE_SHIELD))
+        realDuration = realDuration * 0.85
+
     return new Buff(this, caster, realDuration, buffType, level)
 
 public function unit.dealDamage(unit target, real amount, ReductionType reductionType)
@@ -149,5 +154,8 @@ init
             let attacker = GetTriggerUnit()
             let target = GetOrderTargetUnit()
             if target != null and attacker.getOwner().isAllyOf(target.getOwner())
-                doAfter(0, () -> (attacker.issuePointOrder("attack", target.getPos())))
+                doAfter(0, () -> (begin
+                    if not attacker.issuePointOrder("attack", target.getPos())
+                        attacker.issueImmediateOrder("stop")
+                end))
     end))

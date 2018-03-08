@@ -147,7 +147,7 @@ function itemMace(int itemId)
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             
             if attacker.isType(UNIT_TYPE_HERO) and attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
-                new Buff(target, attacker, bleedDuration.toReal(), maceBuff, 1)
+                target.addBuffReduced( attacker, bleedDuration.toReal(), maceBuff, 1)
                 target.addEffect(Abilities.hydraliskImpact, "chest").destr()
         end))
 
@@ -205,7 +205,7 @@ function itemHammerOfMight(int itemId)
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             
             if attacker.isType(UNIT_TYPE_HERO) and attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
-                new Buff(target, attacker, armorDuration.toReal(), hammerBuff, 1)
+                target.addBuffReduced( attacker, armorDuration.toReal(), hammerBuff, 1)
                 target.addEffect(Abilities.bloodElfSpellThiefMISSILE, "chest").destr()
         end))
 
@@ -229,9 +229,9 @@ function checkAura()
         nearby.removeUnit(target)
         if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(auraHero.getOwner(), true, false)
             if auraHero.hasItemById(convertItemId(ITEM_ID_WAR_DRUM))
-                new Buff(target, auraHero, 0.5, BUFF_WAR_DRUM, 1)
+                target.addBuff( auraHero, 0.5, BUFF_WAR_DRUM, 1)
             if auraHero.hasItemById(convertItemId(ITEM_ID_WAR_HORN))
-                new Buff(target, auraHero, 0.5, BUFF_WAR_HORN, 1)
+                target.addBuff( auraHero, 0.5, BUFF_WAR_HORN, 1)
 
     nearby.destr()
 

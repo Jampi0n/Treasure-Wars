@@ -49,6 +49,7 @@ function setupCreatedHero(Hero hero)
         pos = gg_rct_GreenCastle.getCenter()
     else
         pos = gg_rct_BrownCastle.getCenter()
+
        
     
     hero.toUnit().setPos(pos)

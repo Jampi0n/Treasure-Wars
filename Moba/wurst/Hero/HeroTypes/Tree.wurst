@@ -1,0 +1,252 @@
+package Tree
+
+//4
+
+import HeroType
+import TimerUtils
+import UnitType
+import ClosureTimers
+import HeroControl
+
+
+public constant HERO_TREE = 'H014'
+HeroType heroType
+
+constant UPROOTED = compiletime(UNIT_ID_GEN.next())
+
+constant ABILITY_ANCIENT_KNOWLEDGE = 'AZ4P'
+constant ABILITY_EAT_UNIT = 'AZ4Q'
+constant ABILITY_BATTLE_ROAR = 'AZ4W'
+constant ABILITY_ROOT = 'AZ4E'
+constant ABILITY_RITUAL_OF_THE_SEAS = 'AZ4R'
+
+constant real array DEVOUR_HEAL = [100, 150, 200, 250, 300]
+constant real DEVOUR_HEAL_BONUS = 200
+
+constant real array DEVOUR_COOLDOWN = [25, 22, 19, 16, 13]
+
+@compiletime
+function rootDummy()
+    new UnitDefinition(UPROOTED, 'hfoo')
+        ..setNormalAbilities("Aloc")
+        ..setModelFile("")
+        ..setShadowImageUnit("")
+        ..setAttacksEnabled(0)
+        ..setMovementType(MovementType.Fly)
+        ..setCollisionSize(0)
+        ..setFoodCost(0)
+        ..setSightRadiusDay(0)
+        ..setSightRadiusNight(0)
+        ..setUpgradesUsed("")
+        ..setUnitSoundSet("")
+        ..setName("Uprooted")
+
+@compiletime
+function devourUnit()
+    int array MANA = [150, 160, 170, 180, 190]
+
+    let aDef = new AbilityDefinitionFarseerChainLightning(ABILITY_EAT_UNIT)
+        ..presetIcon("BTNStrengthofNature")
+        ..setAnimationNames("spell")
+        ..setupWithHotKey("Eat Unit", "Q")
+        ..setLightningEffects("")
+        ..setArtTarget("")
+        ..setMissileArt("")
+        ..setArtSpecial("")
+        ..setLightningEffects("")
+        ..setRequirements(int2fourchar(UPROOTED))
+        ..setCheckDependencies(true)
+        ..setLearnString("Devours the target enemy unit and heals the hero.", (int lvl) -> (begin
+            return "{0} hit points healed, {1} seconds cooldown.".format( DEVOUR_HEAL[lvl-1].str()+DEVOUR_HEAL_BONUS.getBonusString(C_INT), DEVOUR_COOLDOWN[lvl-1].str())
+        end) )
+
+    for lvl = 1 to 5
+        aDef
+            ..setCooldown(lvl, DEVOUR_COOLDOWN[lvl-1])
+            ..setManaCost(lvl, MANA[lvl-1])
+            ..setNumberofTargetsHit(lvl, 1)
+            ..setDamageperTarget(lvl, 0)
+            ..setCastRange(lvl, 150)
+            ..setDurationNormal(lvl, 0.1)
+            ..setTargetsAllowed(lvl, "air,enemies,ground,neutral,nonancient,organic")
+            ..setTooltipNormalExtended(lvl, "Devours the target enemy unit and heals the hero for {0} hit points.".format(
+                DEVOUR_HEAL[lvl-1].str()+DEVOUR_HEAL_BONUS.getBonusString(C_INT)
+            ))
+/*
+@compiletime
+function root()
+    int array MANA = [40, 45, 50, 55, 60]
+    real array COOLDOWN = [3, 3, 3, 3, 3]
+
+    let aDef = new AbilityDefinitionBearform(ABILITY_ROOT)
+        ..presetIcon(Icons.bTNRoot)
+        ..setIconTurnOff(Icons.bTNUproot)
+        ..setupWithHotKey("Root", "E")
+        ..setLearnString("Devours the target enemy unit and heals the hero.", (int lvl) -> (begin
+            return "{0} hit points healed, {1} seconds cooldown.".format( DEVOUR_HEAL[lvl-1].str()+DEVOUR_HEAL_BONUS.getBonusString(C_INT), DEVOUR_COOLDOWN[lvl-1].str())
+        end) )
+
+    for lvl = 1 to 5
+        aDef
+            ..setCooldown(lvl, COOLDOWN[lvl-1])
+            ..setManaCost(lvl, MANA[lvl-1])
+            ..setNormalFormUnit(lvl, int2fourchar('H014'))
+            ..setAlternateFormUnit(lvl, int2fourchar('H015'))
+            ..setDurationNormal(lvl, 2.57)
+            ..setTargetsAllowed(lvl, "air,enemies,ground,neutral,nonancient,organic")
+            ..setTooltipNormalExtended(lvl, "Devours the target enemy unit and heals the hero for {0} hit points.".format(
+                DEVOUR_HEAL[lvl-1].str()+DEVOUR_HEAL_BONUS.getBonusString(C_INT)
+            ))
+            ..setTooltipTurnOffExtended(lvl, "Devours the target enemy unit and heals the hero for {0} hit points.".format(
+                DEVOUR_HEAL[lvl-1].str()+DEVOUR_HEAL_BONUS.getBonusString(C_INT)
+            ))
+*/
+
+
+function string.findLastCharacter(string char) returns int
+    for i = this.length()-1 downto 0
+        if this.charAt(i) == char
+            return i
+    
+    return -1
+
+
+unit array uprooted_dummy
+
+
+class EatTreeAnimation
+
+
+    private real xFactor
+    private vec2 startPos
+    private angle direction
+
+    private unit caster
+    private unit target
+    private int level
+    private timer checkTimer
+    private int count
+
+    private boolean kill = false
+    private effect model
+
+
+    construct(unit caster, unit target)
+        this.count = 0
+        this.caster = caster
+        this.target = target
+        
+        this.level = caster.getAbilityLevel(ABILITY_EAT_UNIT)
+        this.startPos = target.getPos()
+        this.direction = startPos.angleTo(caster.getPos())
+
+        string modelPath = ""
+        let uType = UnitType.getUnitType(target.getTypeId())
+        if uType != null
+            modelPath = uType.getModel()
+
+
+
+            modelPath = modelPath.substring(modelPath.findLastCharacter("\\")+1, modelPath.length()-4)+"NoDeath"+".mdx"
+
+            doAfter( 0, () -> caster.setColor(target.getOwner().getColor()))
+
+            print(modelPath)
+
+        this.model = caster.addEffect(modelPath, "sprite, eattree")
+
+        xFactor = caster.getPos().distanceTo(this.startPos)
+
+        target.hide()
+        target.pause()
+
+        this.checkTimer = getTimer()
+            ..setData(this castTo int)
+            ..startPeriodic(0.02, function updateStatic)
+
+    function update()
+        this.count++
+
+    
+        if count >= 75
+            kill = true
+
+        if this.caster.getCurrentOrder()!= OrderId("chainlightning")
+            destroy this
+            return
+    
+    static function updateStatic()
+        (GetExpiredTimer().getData() castTo EatTreeAnimation).update()
+
+    ondestroy
+        print("destroy")
+
+        this.model.destr()
+
+        target.show()
+        target.unpause()
+        
+        if kill
+            target.setXY(caster.getPos())
+            target.setHP(1)
+            caster.dealDamage(target, 10, ReductionType.NONE)
+            target.remove()
+            caster.addHP(DEVOUR_HEAL[level-1].bonus(caster.getStr(), DEVOUR_HEAL_BONUS))
+
+        this.checkTimer.release()
+
+function onRoot(unit caster, int level) // add bonus
+    caster.wrapper().addStatRelativeBonus(Stat.AR, level * 10 * 10)
+    caster.wrapper().addStatAbsoluteBonus(Stat.STR, level * 10)
+function onUproot(unit caster, int level) // remove bonus
+    caster.wrapper().addStatRelativeBonus(Stat.AR, -level * 10 * 10)
+    caster.wrapper().addStatAbsoluteBonus(Stat.STR, -level * 10)
+
+function onSpellCast()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+
+    if(spellId == ABILITY_EAT_UNIT)
+        new EatTreeAnimation(caster, GetSpellTargetUnit())
+
+    else if (spellId == ABILITY_ROOT)
+        let pId = caster.getOwner().getId()
+        if caster.getTypeId() == 'H014'
+            uprooted_dummy[pId].setOwner(Player(PLAYER_NEUTRAL_PASSIVE), false)
+            doAfter( 3.57, () -> onRoot(caster, level))
+        else
+            uprooted_dummy[pId].setOwner(Player(pId), false)
+            doAfter( 3.57, () -> onUproot(caster, level))
+
+
+function setupStats()
+    heroType
+        //..setStat(Stat.AD, 5, 40)
+        ..setStat(Stat.AR, 9, 41)
+        ..setStat(Stat.AS, 0, 8)
+        ..setStat(Stat.HP, 15, 73)
+        ..setStat(Stat.HR, 10, 44)
+        ..setStat(Stat.MP, 15, 38)
+        ..setStat(Stat.MR, 17, 42)
+        ..setStat(Stat.MS, 0, 6)
+        ..setStat(Stat.STR, 25, 93)
+        ..setStat(Stat.AGI, 10, 43)
+        ..setStat(Stat.INT, 12, 31)
+
+
+        
+init
+    for i = 0 to bj_MAX_PLAYERS-1
+        uprooted_dummy[i] = null
+
+    heroType = new HeroType(HERO_TREE)
+    heroType
+        ..addOnSpellCastFunc(function onSpellCast)
+        ..useHeroGlow()
+        ..addMorph('H015')
+        ..setOnCreateFunction((Hero hero) -> (begin
+            uprooted_dummy[hero.toUnit().getOwner().getId()] = createUnit(hero.toUnit().getOwner(), UPROOTED, hero.toUnit().getPos(), angle(0))
+        end))
+
+    setupStats()

@@ -69,6 +69,15 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
 
 
     
+        if not isAttack and source.hasItemById(convertItemId(ITEM_ID_VAMPIRIC_GOBLET))
+            source.addHP(currentDamage * 0.1)
+            source.addMana(currentDamage * 0.05)
+            source.addEffect(Abilities.spiritTouchTarget, "origin").destr()
+            source.addEffect(Abilities.vampiricAuraTarget, "origin").destr()
+    
+        if target.hasItemById(convertItemId(ITEM_ID_VOID_ARMOR))
+            target.addMana(currentDamage * 0.05)
+            currentDamage *= 0.95
 
         //===============================================================================
 

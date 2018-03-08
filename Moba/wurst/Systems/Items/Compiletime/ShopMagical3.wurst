@@ -2,12 +2,11 @@ package ShopMagical3
 
 import initlater ItemShopSystem
 import ItemShopInitialize
-import UnitWrapper
 import Stats
 import ItemIdGeneration
 import Assets
 import General
-
+import OnAttack
 
 
 function itemEnchantedArmor(int itemId)
@@ -41,7 +40,8 @@ function itemEmeraldPendant(int itemId)
             ))
             ..setGoldCost(3500)
             ..addRequirement(ITEM_ID_SKULL_PENDANT)
-            ..addRequirement(ITEM_ID_CURSED_MASK)
+            ..addRequirement(ITEM_ID_GEM_OF_HEALTH)
+            ..addRequirement(ITEM_ID_GEM_OF_MANA)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.HP, hp)
@@ -114,83 +114,163 @@ function itemBlessedGoblet(int itemId)
             
 
 function itemWandOfDeath(int itemId)
+    int intel = 16
+    int voidDmg = 30
+    int manaDrain = 15
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("needed")
-            ..setGoldCost(3500)
-            ..addRequirement(ITEM_ID_CURSED_MASK)
+            ..setDescription("+ {0} intelligence|nDrains {1} mana and deals {2} void damage per attack.".format(
+                intel.toString(), manaDrain.toString(), voidDmg.toString()
+            ))
+            ..setGoldCost(3900)
             ..addRequirement(ITEM_ID_SCEPTER_OF_THE_TIDES)
-    else
-        itemId.getItem()
-            ..addStatBonusAbsolute(Stat.AR, 10)
-            
-
-function itemWandOfBlood(int itemId)
-    if compiletime
-        itemId.getTypeDef()
-            ..setDescription("needed")
-            ..setGoldCost(3000)
-            ..addRequirement(ITEM_ID_VISION_WARD)
             ..addRequirement(ITEM_ID_MAGIC_STAFF)
-    else
-        itemId.getItem()
-            ..addStatBonusAbsolute(Stat.AR, 10)
-            
-function itemArcaneBlade(int itemId)
-    if compiletime
-        itemId.getTypeDef()
-            ..setDescription("needed")
-            ..setGoldCost(3700)
-            ..addRequirement(ITEM_ID_SCEPTER_OF_THE_TIDES)
-            ..addRequirement(ITEM_ID_RAVEN_SWORD)
-    else
-        itemId.getItem()
-            ..addStatBonusAbsolute(Stat.AR, 10)
-
-function itemVampiricGoblet(int itemId)
-    if compiletime
-        itemId.getTypeDef()
-            ..setDescription("needed")
-            ..setGoldCost(4100)
-            ..addRequirement(ITEM_ID_VOODOO_MASK)
-            ..addRequirement(ITEM_ID_CURSED_MASK)
-    else
-        itemId.getItem()
-            ..addStatBonusAbsolute(Stat.AR, 10)
-
-function itemVoidArmor(int itemId)
-    if compiletime
-        itemId.getTypeDef()
-            ..setDescription("needed")
-            ..setGoldCost(3200)
-            ..addRequirement(ITEM_ID_BATTLEMAGE_ARMOR)
             ..addRequirement(ITEM_ID_GEM_OF_DARKNESS)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.AR, 10)
-    
-function itemArcaneShield(int itemId)
+            ..addStatBonusAbsolute(Stat.INT, intel)
+
+
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
+                let manaDrained = min(manaDrain.toReal() * target.countItemsOfType(convertItemId(itemId)) , target.getMana())
+                attacker.dealDamage(target, voidDmg.toReal() * attacker.countItemsOfType(convertItemId(itemId)) , ReductionType.NONE)
+                attacker.addMana(manaDrained)
+                target.addMana(-manaDrained)
+                target.addEffect(Abilities.avengerMissile, "chest").destr()
+                target.addEffect(Abilities.arcaneTowerAttack, "chest").destr()
+        end))
+            
+
+function itemWandOfBlood(int itemId)
+    int intel = 12
+    int hpDrain = 16
+    int manaDrain = 10
+    int hp = 200
     if compiletime
         itemId.getTypeDef()
             ..setDescription("needed")
+            ..setGoldCost(3650)
+            ..addRequirement(ITEM_ID_MAGIC_STAFF)
+            ..addRequirement(ITEM_ID_RING_OF_HEALTH)
+            ..addRequirement(ITEM_ID_GEM_OF_HEALTH)
+    else
+        itemId.getItem()
+            ..addStatBonusAbsolute(Stat.HP, hp)
+            ..addStatBonusAbsolute(Stat.INT, intel)
+
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
+                let manaDrained = min(manaDrain.toReal() * target.countItemsOfType(convertItemId(itemId)) , target.getMana())
+                attacker.dealDamage(target, hpDrain.toReal() * attacker.countItemsOfType(convertItemId(itemId)) , ReductionType.MAGIC)
+                attacker.addHP(hpDrain.toReal())
+                attacker.addMana(manaDrained)
+                target.addMana(-manaDrained)
+                target.addEffect(Abilities.spellBreakerAttack, "chest").destr()
+                target.addEffect(Abilities.arcaneTowerAttack, "chest").destr()
+        end))
+            
+function itemArcaneBlade(int itemId)
+    int as = 20
+    int mp = 250
+    int manaFactor = 6
+    if compiletime
+        itemId.getTypeDef()
+            ..setDescription("+ {0} mana points|n+ {1}% attack speed|nDeals {2}% of your current mana as magic damage.".format(
+                mp.toString(), as.toString(), manaFactor.toString()
+            ))
             ..setGoldCost(3800)
-            ..addRequirement(ITEM_ID_ANCIENT_STONE_TABLET)
+            ..addRequirement(ITEM_ID_RAVEN_SWORD)
+            ..addRequirement(ITEM_ID_GEM_OF_MANA)
+    else
+        itemId.getItem()
+            ..addStatBonusAbsolute(Stat.AS, as)
+            ..addStatBonusAbsolute(Stat.MP, mp)
+
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+
+                attacker.dealDamage(target, attacker.getMana() * manaFactor * attacker.countItemsOfType(convertItemId(itemId)) , ReductionType.MAGIC)
+
+                target.addEffect(Abilities.farseerMissile, "chest").destr()
+
+        end))
+
+function itemVampiricGoblet(int itemId)
+    int intel = 20
+    int hp = 150
+    int mp = 150
+    int hpFactor = 10 // -> onAttack
+    int manaFactor = 5 // -> onAttack
+    if compiletime
+        itemId.getTypeDef()
+            ..setDescription("+ {0} mana points|n +{1} hit point|n+ {2} intelligence|nDealing spell damage restores {3}% of the damage dealt as hitpoints and {4}% as mana points. This effect does not stack.".format(
+                mp.toString(), hp.toString(), intel.toString(), hpFactor.toString(), manaFactor.toString()
+            ))
+            ..setGoldCost(4750)
+            ..addRequirement(ITEM_ID_SKULL_PENDANT)
+            ..addRequirement(ITEM_ID_CURSED_MASK)
+    else
+        itemId.getItem()
+            ..addStatBonusAbsolute(Stat.INT, intel)
+            ..addStatBonusAbsolute(Stat.HP, hp)
+            ..addStatBonusAbsolute(Stat.MP, mp)
+
+
+
+function itemVoidArmor(int itemId)
+    int mp = 150
+    int hp = 350
+    int ar = 18
+    int wp = 14
+
+    int dmgReduction = 5 // -> onAttack
+    if compiletime
+        itemId.getTypeDef()
+            ..setDescription("+ {0} mana points|n+ {1} hit points|n+ {2} armor|n+ {3} willpower|nReduces incoming damage by {4}% and converts it into mana for the hero. This effect does not stack.".format(
+                mp.toString(), hp.toString(), ar.toString(), dmgReduction.toString()
+            ))
+            ..setGoldCost(4250)
+            ..addRequirement(ITEM_ID_BATTLEMAGE_ARMOR)
             ..addRequirement(ITEM_ID_GHOST_HOOD)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.AR, 10)
-
-function itemScrollOfConjuration(int itemId)
+            ..addStatBonusAbsolute(Stat.MP, mp)
+            ..addStatBonusAbsolute(Stat.HP, hp)
+            ..addStatBonusAbsolute(Stat.AR, ar)
+            ..addStatBonusAbsolute(Stat.AGI, wp)
+    
+function itemArcaneShield(int itemId)
+    int hp = 275
+    int wp = 40
+    int deBuffReduction = 15 // -> General
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("needed")
-            ..setGoldCost(4000)
+            ..setDescription("+ {0} hit points|n+ {1} willpower|nMost negative buffs last {2}% shorter.".format(
+                hp.toString(), wp.toString(), deBuffReduction.toString()
+            ))
+            ..setGoldCost(3800)
+            ..addRequirement(ITEM_ID_ANCIENT_STONE_TABLET)
+    else
+        itemId.getItem()
+            ..addStatBonusAbsolute(Stat.HP, hp)
+            ..addStatBonusAbsolute(Stat.AGI, wp)
+
+function itemScrollOfConjuration(int itemId)
+    int intel = 40
+    int intelFactor = 25
+    if compiletime
+        itemId.getTypeDef()
+            ..setDescription("+ {0} intelligence|Increases your intelligence by {1}%.".format(
+                intel.toString(), intelFactor.toString()
+            ))
+            ..setGoldCost(4300)
             ..addRequirement(ITEM_ID_APPRENTICES_SCROLL)
             ..addRequirement(ITEM_ID_EVIL_BOOK)
             ..addRequirement(ITEM_ID_SPELL_BOOK)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.AR, 10)
+            ..addStatBonusAbsolute(Stat.INT, intel)
+            ..addStatBonusRelative(Stat.INT, intelFactor*10)
 
 @compiletime
 public function shopMagical3Init()

@@ -69,11 +69,14 @@ public function real.getBonusString(color c) returns string
 public function AbilityDefinition.setupWithHotKey(string name, string hotkey)
     this.presetHotkey(hotkey)
     this.setButtonPositionNormalY(2)
+    this.setButtonPositionTurnOffY(2)
     this.setButtonPositionResearchY(0)
     this.setHeroAbility(true)
     this.setLevels(5)
     this.setRequiredLevel(1)
     this.setName(name)
+    this.setRequirements("")
+    this.setCheckDependencies(false)
     this.setTooltipLearn("("+hotkey+")"+" Learn "+name+" - [|cffffcc00Level %d|r]")
     for i = 1 to 5
         this.setTooltipNormal(i, "("+hotkey+") "+name+" - [|cffffcc00Level "+i.toString()+"|r]")
@@ -82,24 +85,27 @@ public function AbilityDefinition.setupWithHotKey(string name, string hotkey)
         this..presetHotkey("Q")
             ..setButtonPositionNormalX(0)
             ..setButtonPositionResearchX(0)
-        return
+            ..setButtonPositionTurnOffX(0)
 
     if(hotkey=="W")
         this..presetHotkey("W")
             ..setButtonPositionNormalX(1)
             ..setButtonPositionResearchX(1)
+            ..setButtonPositionTurnOffX(1)
         return
 
     if(hotkey=="E")
         this..presetHotkey("E")
             ..setButtonPositionNormalX(2)
             ..setButtonPositionResearchX(2)
+            ..setButtonPositionTurnOffX(2)
         return
 
     if(hotkey=="R")
         this..presetHotkey("R")
             ..setButtonPositionNormalX(3)
             ..setButtonPositionResearchX(3)
+            ..setButtonPositionTurnOffX(3)
             ..setRequiredLevel(6)
             ..setLevelSkipRequirement(3)
         return

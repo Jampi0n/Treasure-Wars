@@ -10,6 +10,10 @@ import public UnitWrapper
 import public HeroObjectEditing
 import public Assets
 import public AbilityObjEditing
+import initlater HeroControl
+
+public interface OnCreateFunction
+    function onCreate(Hero hero)
 
 public constant HERO_MAX_LEVEL = 25
 
@@ -24,10 +28,14 @@ public class HeroType
     private OnAttackFunction onAttack = null
     private CalculateTotalBonus bonusCalculation = null
 
+    private OnCreateFunction onCreateFunction = null
+
+    private boolean useHeroGlow = false
+
     static HeroType array heroTypes 
     static int heroTypeCount = 0
 
-    construct(integer id)
+    construct(int id)
         unitIdToHeroType.put(id, this)
         this.unitId = id
         for i = 0 to 10
@@ -36,6 +44,9 @@ public class HeroType
 
         heroTypes[heroTypeCount] = this
         heroTypeCount++
+
+    function addMorph(int id)
+        unitIdToHeroType.put(id, this)
 
     function setBase(Stat stat, integer value)
         this.statsBase[stat.toInt()] = value
@@ -58,7 +69,6 @@ public class HeroType
 
     function onSpellCast()
         this.onSpellCastTrigger.execute()
-
 
     function onAttack(unit attacker, unit target, boolean isActive)
         if this.onAttack != null
@@ -90,3 +100,15 @@ public class HeroType
 
     static function getHeroType(integer unitId) returns HeroType
         return unitIdToHeroType.get(unitId)
+
+    function useHeroGlow()
+        this.useHeroGlow = true
+
+    function getUsesHeroGlow() returns boolean
+        return this.useHeroGlow
+
+    function setOnCreateFunction(OnCreateFunction onCreate)
+        this.onCreateFunction = onCreate
+
+    function getOnCreateFunction() returns OnCreateFunction
+        return this.onCreateFunction
