@@ -147,7 +147,7 @@ public class Item
             getTriggerHero().wrapper().addStatAbsoluteBonus(whichStat, -bonus)
         end))
 
-    function addStatBonusRelative(Stat whichStat, real bonus)
+    function addStatBonusRelative(Stat whichStat, int bonus)
         addPickupFunction( ()-> (begin
             getTriggerHero().wrapper().addStatRelativeBonus(whichStat, bonus)
         end))

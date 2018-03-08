@@ -6,7 +6,7 @@ import ItemIdGeneration
 import Stats
 import OnAttack
 import General
-
+import Assets
 
 
 
@@ -37,14 +37,14 @@ function itemMageGloves(int itemId)
 
 
 function itemManaRing(int itemId)
-    int hr = 15
+    int mr = 15
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} mana point regeneration per 10 seconds".format(hr.toString()))
+            ..setDescription("+ {0} mana point regeneration per 10 seconds".format(mr.toString()))
             ..setGoldCost(500)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.HR, hr)
+            ..addStatBonusAbsolute(Stat.HR, mr)
 
 
 function itemMageArmor(int itemId)
@@ -91,8 +91,9 @@ function itemGemOfDarkness(int itemId)
             ..setGoldCost(650)
     else
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if attacker.hasItemById(convertItemId(itemId))
+            if attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
                 attacker.dealDamage(target, voidDmg.toReal() * attacker.countItemsOfType(convertItemId(itemId)) , ReductionType.NONE)
+                target.addEffect(Abilities.avengerMissile, "chest").destr()
         end))
 
 
@@ -109,6 +110,7 @@ function itemSkull(int itemId)
                 let killer = GetKillingUnit()
                 if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and killer.hasItemById(convertItemId(ITEM_ID_SKULL))
                     killer.addMana(7. * killer.countItemsOfType(convertItemId(ITEM_ID_SKULL)))
+                    killer.addEffect(Abilities.spiritTouchTarget, "origin").destr()
             end))
 
 function itemVoodooDoll(int itemId)
@@ -119,8 +121,9 @@ function itemVoodooDoll(int itemId)
             ..setGoldCost(600)
     else
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if target.hasItemById(convertItemId(itemId))
+            if target.hasItemById(convertItemId(itemId)) and not attacker.isType(UNIT_TYPE_STRUCTURE)
                 target.addMana(mp.toReal() * target.countItemsOfType(convertItemId(itemId)))
+                target.addEffect(Abilities.spiritTouchTarget, "origin").destr()
         end))
 
 function itemSpellBook(int itemId)
@@ -141,10 +144,11 @@ function itemMagicStaff(int itemId)
             ..setGoldCost(640)
     else
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if attacker.hasItemById(convertItemId(itemId)) and target.getMana() > 0
+            if attacker.hasItemById(convertItemId(itemId)) and target.getMana() > 0 and not target.isType(UNIT_TYPE_STRUCTURE)
                 let manaDrained = min(mana.toReal() * target.countItemsOfType(convertItemId(itemId)) , target.getMana())
                 attacker.addMana(manaDrained)
                 target.addMana(-manaDrained)
+                target.addEffect(Abilities.arcaneTowerAttack, "chest").destr()
         end))
 
 
@@ -161,6 +165,7 @@ function itemApprenticeScroll(int itemId)
                 let hero = GetTriggerUnit()
                 if hero.hasItemById(convertItemId(ITEM_ID_APPRENTICES_SCROLL))
                     hero.addMana(hero.getMaxMana()*0.35)
+                    hero.addEffect(Abilities.aImaTarget, "chest").destr()
         end))
 
 @compiletime

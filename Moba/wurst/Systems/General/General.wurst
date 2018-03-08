@@ -138,3 +138,16 @@ init
 
     if DEBUG_MODE
         doAfter(1, () -> print("DEBUG_MODE is enabled."))
+
+    //prevent teamkill
+    let trg = CreateTrigger()
+    for i = 0 to 9
+        trg.registerPlayerUnitEvent(Player(i), EVENT_PLAYER_UNIT_ISSUED_UNIT_ORDER, null)
+
+    trg.addAction(() ->(begin
+        if GetIssuedOrderId() == OrderId("attack")
+            let attacker = GetTriggerUnit()
+            let target = GetOrderTargetUnit()
+            if target != null and attacker.getOwner().isAllyOf(target.getOwner())
+                doAfter(0, () -> (attacker.issuePointOrder("attack", target.getPos())))
+    end))

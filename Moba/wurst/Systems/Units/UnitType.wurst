@@ -2,6 +2,8 @@ package UnitType
 
 import HashMap
 import StandardTextTags
+import initlater HeroControl
+import PlayerControl
 
 public function createUnitType(int unitId, int bounty, int baseAttack, int baseArmor, int hitBox) returns int
     new UnitType(unitId, bounty, baseAttack, baseArmor, hitBox)
@@ -54,15 +56,58 @@ function onUnitDeath()
     let killingUnit = GetKillingUnit()
     let dyingType = UnitType.getUnitType(dyingUnit.getTypeId())
     let killingPlayer = killingUnit.getOwner()
+    let dyingCPlayer = dyingUnit.getOwner().getCPlayer()
 
-    if dyingType == null or not killingPlayer.isEnemyOf(dyingUnit.getOwner())
+    if dyingType == null
         return
     
-    let bounty = dyingType.getBounty()
+    // army unit dies
+    if dyingCPlayer.getTeam() == Team.TEAM1 or dyingCPlayer.getTeam() == Team.TEAM2
+        let bounty = dyingType.getBounty()
+        let xp = dyingUnit.getLevel()*10
+        let xpAllyFactor = 0.5
+        let bountyAllyFactor = 0.25
+        /*
+            The killer (if exists) gets full gold / xp.
+            The killing team gets bountyAllyFactor/xpAllyFactor of the full gold / xp evenly shared amongst all players except the killer.
+        */
+
+        int killerExists = 0
+        //the killing player belongs to the enemy team
+        if killingPlayer.getCPlayer().getTeam() == CPlayer.invertTeam(dyingCPlayer.getTeam()) and killingPlayer.getId() < 10
+            killerExists = 1
+
+        // killer reward
+        if killerExists == 1
+            killingPlayer.addGold(bounty)
+            createGoldBountyTextTag(dyingUnit, bounty, killingPlayer)
+            //xp
+
+            let killingHero = Hero.getHero(killingPlayer)
+            if killingHero != null
+                killingHero.toUnit().addXp(xp, true)
+
+        // killer team reward
+
+        // enemy team of dying unit
+        let killingAllies = CPlayer.getEnemyHeroPlayers(dyingUnit.getOwner())
+        // size of enemy team without killing player and without the army player
+        let killingAlliesSize = CPlayer.getTeamHeroCount(CPlayer.invertTeam(dyingCPlayer.getTeam()) ) - killerExists
+        
+        let teamBounty = bounty * bountyAllyFactor / killingAlliesSize
+        let teamXp = xp * xpAllyFactor / killingAlliesSize
+
+        if killingAllies != null
+        for CPlayer cPlayer in killingAllies
+            player p = cPlayer.getPlayer()
+            if p != killingPlayer
+                let hero = Hero.getHero(p)
+                if hero != null
+                    hero.addXp( teamXp)
+                    hero.addGold(teamBounty)
+        
     
-    killingPlayer.addGold(bounty)
     
-    createGoldBountyTextTag(dyingUnit, bounty, killingPlayer)
 
 init
     CreateTrigger()

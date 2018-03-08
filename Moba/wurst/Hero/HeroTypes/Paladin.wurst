@@ -78,7 +78,7 @@ function shieldBash()
 
 constant real array BATTLE_ROAR_AOE = [600, 700, 800, 900, 1000]
 constant real array BATTLE_ROAR_AS = [30, 35, 40, 45, 50]
-constant real array BATTLE_ROAR_MS = [30, 35, 40, 45, 50]
+constant int array BATTLE_ROAR_MS = [30, 35, 40, 45, 50]
 constant real array BATTLE_ROAR_DURATION = [5, 6, 7, 8, 9]
 constant real BATTLE_ROAR_DURATION_BONUS = 2
 
@@ -331,12 +331,10 @@ init
     abilityList = new LinkedList<int>
         ..add(ABILITY_BATTLE_ROAR_BUFF)
     BATTLE_ROAR.setup(abilityList, BUFF_ID_BATTLE_ROAR)
-    BATTLE_ROAR.addFirstFunction( () -> (begin
-        let thisBuff = Buff.getTriggerBuff()
-        thisBuff.getTarget().wrapper().addStatRelativeBonus( Stat.MS, BATTLE_ROAR_MS[thisBuff.getLevel()-1]/100 )
+    BATTLE_ROAR.addFirstFunction( (Buff thisBuff) -> (begin
+        thisBuff.getTarget().wrapper().addStatRelativeBonus( Stat.MS, BATTLE_ROAR_MS[thisBuff.getLevel()-1]*10 )
     end) )
-    BATTLE_ROAR.addEndFunction( () -> (begin
-        let thisBuff = Buff.getTriggerBuff()
+    BATTLE_ROAR.addEndFunction( (Buff thisBuff) -> (begin
         if thisBuff == null
             print("thisBuff = null")
 
@@ -346,7 +344,7 @@ init
         if thisBuff.getTarget().wrapper() == null
             print("wrapper = null")
 
-        thisBuff.getTarget().wrapper().addStatRelativeBonus( Stat.MS, -BATTLE_ROAR_MS[thisBuff.getLevel()-1]/100 )
+        thisBuff.getTarget().wrapper().addStatRelativeBonus( Stat.MS, -BATTLE_ROAR_MS[thisBuff.getLevel()-1]*10 )
     end) )
 
     setupStats()
