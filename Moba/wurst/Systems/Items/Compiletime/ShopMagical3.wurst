@@ -28,6 +28,7 @@ function itemEnchantedArmor(int itemId)
             ..addStatBonusAbsolute(Stat.MP, mp)
             ..addStatBonusAbsolute(Stat.HP, hp)
             ..addStatBonusAbsolute(Stat.AR, ar)
+            ..addStatBonusAbsolute(Stat.INT, intel)
 
 function itemEmeraldPendant(int itemId)
     int hp = 350
@@ -149,7 +150,9 @@ function itemWandOfBlood(int itemId)
     int hp = 200
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("needed")
+            ..setDescription("+ {0} intelligence|n+ {1} hit points|nDrains {2} hit points and {3} mana points per attack.".format(
+                intel.toString(), hp.toString(), hpDrain.toString(), manaDrain.toString()
+            ))
             ..setGoldCost(3650)
             ..addRequirement(ITEM_ID_MAGIC_STAFF)
             ..addRequirement(ITEM_ID_RING_OF_HEALTH)
@@ -188,11 +191,9 @@ function itemArcaneBlade(int itemId)
             ..addStatBonusAbsolute(Stat.MP, mp)
 
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-
-                attacker.dealDamage(target, attacker.getMana() * manaFactor * attacker.countItemsOfType(convertItemId(itemId)) , ReductionType.MAGIC)
-
+            if attacker.hasItemById(convertItemId(itemId))
+                attacker.dealDamage(target, attacker.getMana() * manaFactor/100 * attacker.countItemsOfType(convertItemId(itemId)) , ReductionType.MAGIC)
                 target.addEffect(Abilities.farseerMissile, "chest").destr()
-
         end))
 
 function itemVampiricGoblet(int itemId)
@@ -260,7 +261,7 @@ function itemScrollOfConjuration(int itemId)
     int intelFactor = 25
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} intelligence|Increases your intelligence by {1}%.".format(
+            ..setDescription("+ {0} intelligence|nIncreases your intelligence by {1}%.".format(
                 intel.toString(), intelFactor.toString()
             ))
             ..setGoldCost(4300)
@@ -271,6 +272,27 @@ function itemScrollOfConjuration(int itemId)
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.INT, intel)
             ..addStatBonusRelative(Stat.INT, intelFactor*10)
+
+function itemBracerOfPower(int itemId)
+    int hp = 250
+    int mp = 125
+    int hr = 80
+    int mr = 40
+    if compiletime
+        itemId.getTypeDef()
+            ..setDescription("+ {0} hit points|n+ {1} mana points|n+ {2} hit point regeneration per 10 seconds|n+ {3} mana point regeneration per 10 seconds".format(
+                hp.toString(), mp.toString(), hr.toString(), mr.toString()
+            ))
+            ..setGoldCost(3700)
+            ..addRequirement(ITEM_ID_RING_OF_REGEN)
+            ..addRequirement(ITEM_ID_GEM_OF_HEALTH)
+            ..addRequirement(ITEM_ID_GEM_OF_MANA)
+    else
+        itemId.getItem()
+            ..addStatBonusAbsolute(Stat.HP, hp)
+            ..addStatBonusAbsolute(Stat.MP, mp)
+            ..addStatBonusAbsolute(Stat.HR, hr)
+            ..addStatBonusAbsolute(Stat.MR, mr)
 
 @compiletime
 public function shopMagical3Init()
@@ -285,3 +307,4 @@ public function shopMagical3Init()
     itemVoidArmor(ITEM_ID_VOID_ARMOR)
     itemArcaneShield(ITEM_ID_ARCANE_SHIELD)
     itemScrollOfConjuration(ITEM_ID_SCROLL_OF_CONJURATION)
+    itemBracerOfPower(ITEM_ID_BRACER_OF_POWER)

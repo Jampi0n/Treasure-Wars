@@ -159,10 +159,6 @@ public class UnitWrapper
         
 
     function applyTotalStatBonus(Stat whichStat)
-        if whichStat == Stat.HP
-            print(this.statsTotalBonus[Stat.HP.toInt()])
-            print(this.getStatRelativeBonus(Stat.HP).toString())
-
         if whichStat != Stat.MS and whichStat != Stat.HR and whichStat!= Stat.MR
             this.toUnit().setBonus(whichStat, this.statsTotalBonus[whichStat.toInt()])
         else

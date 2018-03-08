@@ -75,7 +75,8 @@ function itemFirehandGauntlets(int itemId)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.MP, mp)
-            ..addStatBonusAbsolute(Stat.MP, hp)
+            ..addStatBonusAbsolute(Stat.HP, hp)
+            ..addStatBonusAbsolute(Stat.AR, ar)
 
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             if attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
