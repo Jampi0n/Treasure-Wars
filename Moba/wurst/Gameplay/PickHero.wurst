@@ -53,7 +53,8 @@ function setupCreatedHero(Hero hero)
        
     
     hero.toUnit().setPos(pos)
-    PanCameraTo(pos.x, pos.y)
+    if GetLocalPlayer() == hero.toUnit().getOwner()
+        PanCameraTo(pos.x, pos.y)
 
 //creates a random hero for a player
 function createRandomHero(CPlayer cPlayer)

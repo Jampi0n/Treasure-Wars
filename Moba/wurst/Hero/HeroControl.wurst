@@ -67,7 +67,6 @@ public class Hero
         //print("setup completed: "+this.hero.getName())
 
         if this.heroType.getUsesHeroGlow()
-            print("use hero glow")
             this.heroGlow = createUnit(this.hero.getOwner(), 'n00H', this.hero.getPos(), angle(0))
 
             
@@ -76,6 +75,9 @@ public class Hero
                 if this.hero.isAlive()
                     this.heroGlow.setXY(this.hero.getPos())
             end))
+
+        this.hero.wrapper().addStatAbsoluteBonus(Stat.MR, this.heroType.calculateStat(Stat.MR, 1) )
+        this.hero.wrapper().addStatAbsoluteBonus(Stat.HR, this.heroType.calculateStat(Stat.HR, 1) )
 
         this.upgrade()
 
@@ -98,35 +100,39 @@ public class Hero
         return this.hero
 
     function upgrade()
-        integer lvl = this.level
+        int newLvl = GetHeroLevel(this.hero)
         player upgradePlayer = this.owner.getPlayer()
-        SetPlayerTechResearched(upgradePlayer, UPG_AD , this.heroType.calculateStat(Stat.AD, lvl))
-        SetPlayerTechResearched(upgradePlayer, UPG_AR , this.heroType.calculateStat(Stat.AR, lvl))
-        SetPlayerTechResearched(upgradePlayer, UPG_AS , this.heroType.calculateStat(Stat.AS, lvl))
-        SetPlayerTechResearched(upgradePlayer, UPG_HP , this.heroType.calculateStat(Stat.HP, lvl))
+        SetPlayerTechResearched(upgradePlayer, UPG_AD , this.heroType.calculateStat(Stat.AD, newLvl))
+        SetPlayerTechResearched(upgradePlayer, UPG_AR , this.heroType.calculateStat(Stat.AR, newLvl))
+        SetPlayerTechResearched(upgradePlayer, UPG_AS , this.heroType.calculateStat(Stat.AS, newLvl))
+        SetPlayerTechResearched(upgradePlayer, UPG_HP , this.heroType.calculateStat(Stat.HP, newLvl))
         //SetPlayerTechResearched(upgradePlayer, UPG_HR , this.heroType.calculateStat(Stat.HR, lvl))
-        this.hero.wrapper().addStatAbsoluteBonus(Stat.HR, this.heroType.calculateStat(Stat.HR, lvl) - this.heroType.calculateStat(Stat.HR, lvl-1))
+        
 
-        SetPlayerTechResearched(upgradePlayer, UPG_MP , this.heroType.calculateStat(Stat.MP, lvl))
+        SetPlayerTechResearched(upgradePlayer, UPG_MP , this.heroType.calculateStat(Stat.MP, newLvl))
         //SetPlayerTechResearched(upgradePlayer, UPG_MR , this.heroType.calculateStat(Stat.MR, lvl))
-        this.hero.wrapper().addStatAbsoluteBonus(Stat.MR, this.heroType.calculateStat(Stat.MR, lvl) - this.heroType.calculateStat(Stat.MR, lvl-1))
 
-        SetPlayerTechResearched(upgradePlayer, UPG_MS , this.heroType.calculateStat(Stat.MS, lvl))
+        this.hero.wrapper().addStatAbsoluteBonus(Stat.MR, this.heroType.calculateStat(Stat.MR, newLvl) - this.heroType.calculateStat(Stat.MR, this.level))
+        this.hero.wrapper().addStatAbsoluteBonus(Stat.HR, this.heroType.calculateStat(Stat.HR, newLvl) - this.heroType.calculateStat(Stat.HR, this.level))
+
+
+        SetPlayerTechResearched(upgradePlayer, UPG_MS , this.heroType.calculateStat(Stat.MS, newLvl))
         this.hero.updateDefaultMovementSpeed()
 
         //this.hero.wrapper().addStatAbsoluteBonus(Stat.MS, this.heroType.calculateStat(Stat.MS, lvl) - this.heroType.calculateStat(Stat.MS, lvl-1))
 
-        SetHeroStr(this.hero, this.heroType.calculateStat(Stat.STR, lvl), true)
-        SetHeroAgi(this.hero, this.heroType.calculateStat(Stat.AGI, lvl), true)
-        SetHeroInt(this.hero, this.heroType.calculateStat(Stat.INT, lvl), true)
+        SetHeroStr(this.hero, this.heroType.calculateStat(Stat.STR, newLvl), true)
+        SetHeroAgi(this.hero, this.heroType.calculateStat(Stat.AGI, newLvl), true)
+        SetHeroInt(this.hero, this.heroType.calculateStat(Stat.INT, newLvl), true)
 
         this.hero.wrapper().updateBaseStats()
 
         for int i = 0 to 10
             this.hero.wrapper().updateTotalStatBonus(i castTo Stat)
+
+        this.level = newLvl
         
     function onLevelUp()
-        this.level = GetHeroLevel(this.hero)
         this.upgrade()
 
     static function onLevelUpStatic()

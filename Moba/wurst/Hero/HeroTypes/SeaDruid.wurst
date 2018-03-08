@@ -216,10 +216,10 @@ init
                     UnitWrapper.defaultCalcualtion.calculate(whichWrapper, Stat.MP)
                     let hpBonus = whichWrapper.statsTotalBonus[hp]
                     let mpBonus = whichWrapper.statsTotalBonus[mp]
-                    print("hpBonus = "+hpBonus.toString()+", mpBonus = "+mpBonus.toString())
+                    //print("hpBonus = "+hpBonus.toString()+", mpBonus = "+mpBonus.toString())
                     whichWrapper.statsTotalBonus[hp] = hpBonus + ((1/ANCIENT_KNOWLEDGE_HP_BONUS[lvl-1]) * (mpBonus + whichWrapper.getStatBaseValue(Stat.MP)) ).toInt()
                     whichWrapper.statsTotalBonus[mp] = mpBonus + ((1/ANCIENT_KNOWLEDGE_MP_BONUS[lvl-1]) * (hpBonus + whichWrapper.getStatBaseValue(Stat.HP)) ).toInt()
-                    print("newHpBonus = "+whichWrapper.statsTotalBonus[hp].toString()+", newHpBonus = "+whichWrapper.statsTotalBonus[mp].toString())
+                    //print("newHpBonus = "+whichWrapper.statsTotalBonus[hp].toString()+", newHpBonus = "+whichWrapper.statsTotalBonus[mp].toString())
                     whichWrapper.applyTotalStatBonus(Stat.HP)
                     whichWrapper.applyTotalStatBonus(Stat.MP)
                 else //else calculate default values
