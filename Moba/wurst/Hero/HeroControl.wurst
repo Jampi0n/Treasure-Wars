@@ -178,24 +178,24 @@ public class Hero
         if this.heroGlow != null
             //this.heroGlow.hide()
 
-        int offset = this.owner.getTeam()==Team.TEAM1 ? 5 : 0
         real maxValue = -1
-        int maxIndex = -1 //find last assistant, to replace killer, if killer is not a player
+        CPlayer lastAssistant = null //find last assistant, to replace killer, if killer is not a player
         player killer = GetKillingUnit().getOwner()
         let assistList = new LinkedList<CPlayer>
 
-        for i = 0 to  4
-            CPlayer assistant = getCPlayer(i+ offset)
+        let teamList = CPlayer.getEnemyHeroPlayers(this.owner.getTeam())
+
+        for CPlayer assistant in teamList
             let time = assistMap.get(assistant)
             if(time > getElapsedGameTime() and assistant.getPlayer()!=killer)
                 assistList.add(assistant)
                 if(time > maxValue)
                     maxValue = time
-                    maxIndex = i
+                    lastAssistant = assistant
 
         //replace killer with last assistant, if there is an assistant
-        if (killer.getId() < offset or killer.getId() > offset+4) and not assistList.isEmpty()
-            killer = players[offset+maxIndex]
+        if not teamList.contains(killer.getCPlayer()) and not assistList.isEmpty()
+            killer = lastAssistant.getPlayer()
             assistList.remove(killer.getCPlayer())
 
         string assistString = ""
@@ -292,7 +292,7 @@ public class Hero
         return unitToHero.get(whichUnit)
 
     static function getHero(int index) returns Hero
-        if index < 0 or index > 9
+        if index < 0 or index > MAX_HERO_COUNT - 1
             printWarning("Index does not exist")
             return null
         return heroes[index]

@@ -125,10 +125,11 @@ function onBuildingDeath()
             createGoldBountyTextTag(building, bounty + globalBounty, killer)
 
         
-        for p = 0 to 9
-            if getCPlayer(p).getTeam() == CPlayer.invertTeam(team) and players[p]!=killer
-                players[p].addGold(globalBounty)
-                createGoldBountyTextTag(building, globalBounty, players[p])
+        for CPlayer cp in CPlayer.getEnemyHeroPlayers(team)
+            let p = cp.getPlayer()
+            if cp.getTeam() == CPlayer.invertTeam(team) and p!=killer
+                p.addGold(globalBounty)
+                createGoldBountyTextTag(building, globalBounty, p)
 
 
 

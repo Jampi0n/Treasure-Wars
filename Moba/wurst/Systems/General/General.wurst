@@ -9,10 +9,11 @@ import Knockback3
 import UnitType
 import initlater ItemIdGeneration
 import initlater ItemShopSystem
+import public Constants
 
-constant MAGIC_REDUCTION = 0.01
 
-public constant DEBUG_MODE = not false
+
+
 
 public enum ReductionType
     PHYSICAL
@@ -146,7 +147,7 @@ init
 
     //prevent teamkill
     let trg = CreateTrigger()
-    for i = 0 to 9
+    for i = 0 to MAX_HERO_COUNT-1
         trg.registerPlayerUnitEvent(Player(i), EVENT_PLAYER_UNIT_ISSUED_UNIT_ORDER, null)
 
     trg.addAction(() ->(begin

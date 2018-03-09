@@ -89,7 +89,7 @@ function removeHeroType(HeroType herotype)
     remainingHeroTypes[remainingHeroTypesCount-1]=null
     remainingHeroTypesCount--
 
-    for i = 0 to 9
+    for i = 0 to MAX_HERO_COUNT-1
         if(getCPlayer(i).getPlayerType()==PlayerType.HERO)
             SetPlayerTechMaxAllowed(players[i], herotype.getUnitId(), 0)
         

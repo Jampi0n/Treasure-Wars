@@ -242,15 +242,16 @@ function onDamage()
 
 function onAttack(unit attacker, unit target, boolean _isActive)
     let level = attacker.getAbilityLevel(ABILITY_BLACK_ARROW)
-    if level!=0 and target.isTargetable(attacker.getOwner(), false, true) and target.isVisible(attacker.getOwner())
+    if level!=0 and target.isTargetable(attacker.getOwner(), false, true) and target.isVisible(attacker.getOwner()) and not target.isType(UNIT_TYPE_STRUCTURE) and not target.isType(UNIT_TYPE_HERO)
         doAfter(0, () -> (begin
             if(target.getHP() <= BLACK_ARROW_THRESHOLD[level-1])
+                let pos =  target.getPos()
                 attacker.dealDamage(target, BLACK_ARROW_THRESHOLD[level-1]+1, ReductionType.NONE)
                 doAfter(0.1, () -> (begin
-                    let skeleton = createUnit(attacker.getOwner(), 'n00B'+level, target.getPos(), attacker.getPos().angleTo(target.getPos()))
+                    let skeleton = createUnit(attacker.getOwner(), 'n00B'+level, pos, attacker.getPos().angleTo(target.getPos()))
                     ..setTimedLife(BLACK_ARROW_DURATION[level-1])
                     skeletons.addUnit(skeleton)
-                    SOUND_BLACK_ARROW.playOnPoint(target.getPos3Zero()).snd.setVolume(150)
+                    SOUND_BLACK_ARROW.playOnPoint(pos.toVec3()).snd.setVolume(150)
                 end))
         end))
 

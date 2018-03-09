@@ -69,12 +69,6 @@ public class PathUnit
             pathUnits.addUnit(this.assocUnit)
             this.nextUpdate = getElapsedGameTime() + GetRandomReal(0, 0.1)
             this.lastAttack = 0
-            if(this.assocUnit.getOwner().getId() == 10)
-                for int i = 0 to 4
-                    //UnitShareVision(this.assocUnit, players[i], false)
-            else
-                for int i = 5 to 9
-                    //UnitShareVision(this.assocUnit, players[i], false)
             
             doAfter(0, () -> (this.enableEnterCheck()  ) )
 
@@ -82,13 +76,6 @@ public class PathUnit
 
     function enableEnterCheck()
         this.checkEnter = true
-
-        if(this.assocUnit.getOwner().getId() == 10)
-            for int i = 0 to 4
-                UnitShareVision(this.assocUnit, players[i], true)
-        else
-            for int i = 5 to 9
-                UnitShareVision(this.assocUnit, players[i], true)
 
     static function onRemove()
         let removedPathUnit = unitToPathUnit.get(getDeindexedUnit())
