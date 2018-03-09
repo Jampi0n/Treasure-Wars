@@ -50,6 +50,7 @@ public class CPlayer
     private PlayerType playertype
 
     construct(player p, Team t, PlayerType pType)
+        objectCount++
         this.assocPlayer = p
         this.playerId = p.getId()
         this.team = t

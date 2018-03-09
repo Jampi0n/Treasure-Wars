@@ -62,7 +62,7 @@ function rootDummy()
 
 @compiletime
 function devourUnit()
-    int array MANA = [150, 160, 170, 180, 190]
+    int array MANA = [120, 115, 110, 105, 100]
 
     let aDef = new AbilityDefinitionFarseerChainLightning(ABILITY_EAT_UNIT)
         ..presetIcon("BTNStrengthofNature")
@@ -137,9 +137,11 @@ constant real array ROOT_AOE_DAMAGE = [20, 30, 40, 50, 60]
 constant real ROOT_AOE_DAMAGE_BONUS = 40
 constant real array ROOT_AOE_RANGE = [150, 175, 200, 225, 250]
 
+constant real ROOT_DURATION = 1.75//2.57
+
 @compiletime
 function root()
-    int array MANA = [40, 45, 50, 55, 60]
+    int array MANA = [25, 25, 25, 25, 25]
     real array COOLDOWN = [3, 3, 3, 3, 3]
 
     let aDef = new AbilityDefinitionBearform(ABILITY_ROOT)
@@ -156,7 +158,7 @@ function root()
             ..setManaCost(lvl, MANA[lvl-1])
             ..setNormalFormUnit(lvl, int2fourchar('H014'))
             ..setAlternateFormUnit(lvl, int2fourchar('H015'))
-            ..setDurationNormal(lvl, 2.57)
+            ..setDurationNormal(lvl, ROOT_DURATION)
             ..setTooltipTurnOff(lvl, "(E) Uproot - [|cffffcc00Level "+lvl.toString()+"|r]")
             ..setTooltipNormalExtended(lvl, "Burrows the Ancient's roots into the ground, rendering it immobile, but allowing to hurl enormous rocks dealing {0} area of effect damage. The Ancient's armor and willpower are increased by {1} while rooted.".format(
                 ROOT_AOE_DAMAGE[lvl-1].str()+ROOT_AOE_DAMAGE_BONUS.getBonusString(C_STR), ROOT_RESISTANCE[lvl-1].str()
@@ -295,6 +297,7 @@ function onRootStats(unit caster, int level) // add bonus
 function onRoot(unit caster, int level) // add bonus
     doAfter(0, () -> caster.setPropWindow(0))
     onRootStats(caster, level)
+    caster.setTimeScale(1)
 
 function onUprootStats(unit caster, int level) // remove bonus
     caster.wrapper().addStatAbsoluteBonus(Stat.AR, -ROOT_RESISTANCE[level-1])
@@ -304,6 +307,7 @@ function onUprootStats(unit caster, int level) // remove bonus
 function onUproot(unit caster, int level) // remove bonus
     caster.setPropWindow(GetUnitDefaultPropWindow(caster))
     onUprootStats(caster, level)
+    caster.setTimeScale(1)
 
 class NaturesWrath
 
@@ -374,11 +378,13 @@ function onSpellCast()
     else if (spellId == ABILITY_ROOT)
         let pId = caster.getOwner().getId()
         if caster.getTypeId() == 'H014'
+            caster.setTimeScale(2.57/ROOT_DURATION)
             uprooted_dummy[pId].setOwner(Player(PLAYER_NEUTRAL_PASSIVE), false)
-            doAfter( 2.57, () -> onRoot(caster, level))
+            doAfter( ROOT_DURATION, () -> onRoot(caster, level))
         else
             uprooted_dummy[pId].setOwner(Player(pId), false)
-            doAfter( 2.57, () -> onUproot(caster, level))
+            caster.setTimeScale(2.57/ROOT_DURATION)
+            doAfter( ROOT_DURATION, () -> onUproot(caster, level))
 
     else if (spellId == ABILITY_IMPALE)
 
@@ -416,15 +422,15 @@ function onSpellCast()
 function setupStats()
     heroType
         //..setStat(Stat.AD, 5, 40)
-        ..setStat(Stat.AR, 9, 41)
+        ..setStat(Stat.AR, 8, 39)
         ..setStat(Stat.AS, 0, 8)
-        ..setStat(Stat.HP, 15, 73)
-        ..setStat(Stat.HR, 10, 44)
-        ..setStat(Stat.MP, 15, 38)
-        ..setStat(Stat.MR, 17, 42)
+        ..setStat(Stat.HP, 13, 69)
+        ..setStat(Stat.HR, 13, 54)
+        ..setStat(Stat.MP, 15, 48)
+        ..setStat(Stat.MR, 12, 38)
         ..setStat(Stat.MS, 0, 6)
         ..setStat(Stat.STR, 25, 51)
-        ..setStat(Stat.AGI, 10, 43)
+        ..setStat(Stat.AGI, 7, 36)
         ..setStat(Stat.INT, 12, 31)
 
 

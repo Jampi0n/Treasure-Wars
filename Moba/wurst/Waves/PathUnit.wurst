@@ -6,6 +6,7 @@ import HashMap
 import GameTimer
 import ClosureTimers
 import UnitIndexer
+import Constants
 
 public class PathUnit 
 
@@ -58,6 +59,7 @@ public class PathUnit
 
     //prepares a unit to be able to use paths
     construct(unit u)
+        objectCount++
         if(unitToPathUnit.has(u))
             print("Warning! - "+u.getName()+" is already a PathUnit.")
             destroy(this)
@@ -83,6 +85,7 @@ public class PathUnit
             destroy removedPathUnit
 
     ondestroy
+        objectCount--
         unitToPathUnit.remove(this.assocUnit)
         pathUnits.removeUnit(this.assocUnit)
         instances--

@@ -85,12 +85,14 @@ public class Hero
             this.heroType.getOnCreateFunction().onCreate(this)
 
     construct(CPlayer p, int unitId, vec2 pos, angle facing )
+        objectCount++
         this.hero = createUnit(p.getPlayer(), unitId, pos, facing)
         this.owner = p
         this.level = 1
         this.setup()
     
     construct(unit u)
+        objectCount++
         this.hero = u
         this.level = GetHeroLevel(this.hero)
         this.owner = u.getOwner().getCPlayer()
@@ -163,7 +165,7 @@ public class Hero
         if this.heroGlow != null
             this.heroGlow
                 ..setXY(pos)
-                ..show()
+                ..setVertexColor(colorA(255, 255, 255, 255))
 
 
     static function reviveStatic()
@@ -176,7 +178,7 @@ public class Hero
     function onDeath()
 
         if this.heroGlow != null
-            //this.heroGlow.hide()
+            this.heroGlow.setVertexColor(colorA(255, 255, 255, 0))
 
         real maxValue = -1
         CPlayer lastAssistant = null //find last assistant, to replace killer, if killer is not a player

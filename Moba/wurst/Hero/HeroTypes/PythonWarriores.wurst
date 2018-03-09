@@ -247,7 +247,7 @@ function onSpellCast()
         let x = GetSpellTargetX()
         let y = GetSpellTargetY()
         let attacker = createUnit(caster.getOwner(), 'u000', caster.getPos(), angle(Atan2(y - caster.getY(), x - caster.getX())))
-        attacker.setAbilityLevel('A00I', level)
+        attacker.setAbilityLevel('A007', level)
 
         if(not attacker.issuePointOrder("attackground", vec2(x,y)))
             print("failed to order attackground")
@@ -345,13 +345,15 @@ init
             spitDummy.setTimedLife(POISON_SPIT_DURATION[level-1])
             spitDummies.addUnit(spitDummy)
             SOUND_POISON_SPIT.playOnPoint(spitDummy.getPos3Zero())
+
+
             real x
             real y
             real angle
             for i = 0 to 9 + level*3
                 angle = i/(10 + level*3)*2*bj_PI
-                x = spitDummy.getX() + (POISON_SPIT_AOE[level-1]-25) * angle.cos()
-                y = spitDummy.getY() + (POISON_SPIT_AOE[level-1]-25) * angle.sin()
+                x = spitDummy.getX() + (POISON_SPIT_AOE[level-1]-50) * angle.cos()
+                y = spitDummy.getY() + (POISON_SPIT_AOE[level-1]-50) * angle.sin()
                 var e = AddSpecialEffect("Units\\Undead\\PlagueCloud\\PlagueCloudtarget.mdl", x, y)
                 doAfter(5.+level, () -> DestroyEffect(e))
 

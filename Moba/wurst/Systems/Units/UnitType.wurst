@@ -4,6 +4,7 @@ import HashMap
 import StandardTextTags
 import initlater HeroControl
 import PlayerControl
+import Constants
 
 public function createUnitType(int unitId, int bounty, int baseAttack, int baseArmor, int hitBox, string modelPath) returns int
     new UnitType(unitId, bounty, baseAttack, baseArmor, hitBox, modelPath)
@@ -28,6 +29,7 @@ public class UnitType
     private string modelPath
 
     construct(int unitId, int bounty, int baseAttack, int baseArmor, int hitBox, string modelPath)
+        objectCount++
         this.unitId = unitId
         this.bounty = bounty
         this.baseAttack = baseAttack
