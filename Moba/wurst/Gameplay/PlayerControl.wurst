@@ -2,6 +2,7 @@ package PlayerControl
 
 import LinkedList
 import ErrorHandling
+import Constants
 
 /*
 * This package handles players
@@ -115,9 +116,9 @@ public class CPlayer
     protected static function initPlayers()
         var admin = false
         CPlayer cPlayer
-        for i = 0 to 9
+        for i = 0 to MAX_HERO_COUNT-1
             player p = players[i]
-            Team t = i<=4?Team.TEAM1:Team.TEAM2
+            Team t = i <= (MAX_HERO_COUNT/2)-1 ?Team.TEAM1:Team.TEAM2
             if( p.getSlotState()==PLAYER_SLOT_STATE_PLAYING )
                 cPlayer = new CPlayer(p, t, PlayerType.HERO)
                 if(not admin)
@@ -135,20 +136,17 @@ public class CPlayer
                 new CPlayer(p, t, PlayerType.NONE)
     
 
-        new CPlayer(players[10], Team.TEAM1, PlayerType.ARMY)
-        new CPlayer(players[11], Team.TEAM2, PlayerType.ARMY)
+        new CPlayer(players[MAX_HERO_COUNT], Team.TEAM1, PlayerType.ARMY)
+        new CPlayer(players[MAX_HERO_COUNT+1], Team.TEAM2, PlayerType.ARMY)
 
-        new CPlayer(players[12], Team.NEUTRAL_HOSTILE, PlayerType.NEUTRAL)
-        for i=13 to 15
-            new CPlayer(players[15], Team.NEUTRAL_PASSIVE, PlayerType.NEUTRAL)
+        new CPlayer(players[PLAYER_NEUTRAL_AGGRESSIVE], Team.NEUTRAL_HOSTILE, PlayerType.NEUTRAL)
+        for i=PLAYER_NEUTRAL_AGGRESSIVE+1 to PLAYER_NEUTRAL_PASSIVE
+            new CPlayer(players[i], Team.NEUTRAL_PASSIVE, PlayerType.NEUTRAL)
     
-        for i=0 to 11
-            for j=0 to 11
+        for i=0 to MAX_HERO_COUNT+1
+            for j=0 to MAX_HERO_COUNT+1
                 if(i!=j and getCPlayer(i).getTeam()==getCPlayer(j).getTeam())
-                    if(i<=9)
-                        SetPlayerAllianceStateBJ(players[i],players[j], bj_ALLIANCE_ALLIED_VISION)
-                    else
-                        SetPlayerAllianceStateBJ(players[i],players[j], bj_ALLIANCE_ALLIED_VISION)
+                    SetPlayerAllianceStateBJ(players[i],players[j], bj_ALLIANCE_ALLIED_VISION)
                     
 
 
