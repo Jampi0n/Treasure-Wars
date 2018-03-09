@@ -12,6 +12,7 @@ constant integer BASE_TOWER = 'h009'
 constant integer BLACKSMITH = 'h004'
 constant integer CASTLE = 'h001'
 constant integer FARM = 'h007'
+constant integer OUTER_TOWER = 'h016'
 constant integer GATE_TOWER = 'h006'
 constant integer HERO_TOWER = 'h000'
 constant integer WORKSHOP = 'h00A'
@@ -26,6 +27,9 @@ constant real BARRACKS_REBUILD_TIME = 180
 
 int birth = 0
 
+
+
+
 function onBuildingDeath()
     let building = GetTriggerUnit()
     if not building.isType(UNIT_TYPE_STRUCTURE)
@@ -38,20 +42,24 @@ function onBuildingDeath()
     int globalBounty = 0
 
     if unitId == FARM
-        bounty = 100
-        globalBounty = 100
+        bounty = 50
+        globalBounty = 50
+
+    else if unitId == OUTER_TOWER
+        bounty = 75
+        globalBounty = 75
 
     else if unitId == GATE_TOWER
         bounty = 100
         globalBounty = 100
 
     else if unitId == BASE_TOWER
-        bounty = 150
-        globalBounty = 150
+        bounty = 100
+        globalBounty = 100
 
     else if unitId == BARRACKS
         bounty = 250
-        globalBounty = 1000
+        globalBounty = 250
 
         let newBuilding = createUnit(building.getOwner(), unitId, building.getPos(), (270).fromDeg())
             ..setAnimation("birth")
@@ -87,8 +95,8 @@ function onBuildingDeath()
                 end))
 
     else if unitId == WORKSHOP
-        bounty = 250
-        globalBounty = 500
+        bounty = 150
+        globalBounty = 150
 
         for i=0 to 1
             if(building==udg_GreenWorkShop[i])
@@ -98,12 +106,12 @@ function onBuildingDeath()
 
 
     else if unitId == ARCANE_VAULT
-        bounty = 200
-        globalBounty = 200
+        bounty = 100
+        globalBounty = 100
 
     else if unitId == BLACKSMITH
-        bounty = 250
-        globalBounty = 250
+        bounty = 150
+        globalBounty = 150
 
     else if unitId == CASTLE
         bounty = 1000
@@ -112,13 +120,13 @@ function onBuildingDeath()
     if bounty + globalBounty > 0
         let team = building.getOwner().getCPlayer().getTeam()
 
-        if killer.getCPlayer().getTeam() == team
+        if killer.getCPlayer().getTeam() == CPlayer.invertTeam(team)
             killer.addGold(bounty + globalBounty)
             createGoldBountyTextTag(building, bounty + globalBounty, killer)
 
         
         for p = 0 to 9
-            if getCPlayer(p).getTeam() != team and players[p]!=killer
+            if getCPlayer(p).getTeam() == CPlayer.invertTeam(team) and players[p]!=killer
                 players[p].addGold(globalBounty)
                 createGoldBountyTextTag(building, globalBounty, players[p])
 
