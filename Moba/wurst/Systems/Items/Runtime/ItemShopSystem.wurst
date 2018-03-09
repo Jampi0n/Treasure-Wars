@@ -7,6 +7,7 @@ import LinkedList
 import ItemShopRequirements
 import Stats
 import UnitWrapper
+import Constants
 
 //This package is imported ny other item packages, but they use initlater to avoid cyclic requirements. So the initialization of this
 //package is manually called by other packages and not by using init, because init is after all other item packages.
@@ -100,6 +101,7 @@ public class Item
     private constant onDrop = new LinkedList<ItemDrop>
 
     construct(int itemTypeId, int gold)
+        objectCount++
         this.itemTypeId = itemTypeId
         this.gold = gold
         if itemMap == null

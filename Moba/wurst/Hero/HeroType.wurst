@@ -36,6 +36,7 @@ public class HeroType
     static int heroTypeCount = 0
 
     construct(int id)
+        objectCount++
         unitIdToHeroType.put(id, this)
         this.unitId = id
         for i = 0 to 10

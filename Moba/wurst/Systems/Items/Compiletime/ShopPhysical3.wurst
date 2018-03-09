@@ -245,7 +245,7 @@ function itemEnchantedBlade(int itemId)
     int mBurn = 10
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} strength|n+ {1} attack speed|n+ {2} willpower|nAttacks burn {3}, dealing damage equal to the mana burned.".format(
+            ..setDescription("+ {0} strength|n+ {1}% attack speed|n+ {2} willpower|nAttacks burn {3}, dealing damage equal to the mana burned.".format(
                 str.toString(), as.toString(), wp.toString(), mBurn.toString()
             ))
             ..setGoldCost(3600)
@@ -271,8 +271,8 @@ constant int AXE_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, AXE_BUFF_
                     
 
 function itemAxeOfDecay(int itemId)
-    int str = 30
-    int slow = 40
+    int str = 35
+    int slow = 25
     int slowDur = 2
     if compiletime
         itemId.getTypeDef()
@@ -350,7 +350,7 @@ function itemSacrificialDagger(int itemId)
     int dur = 10 //trigger
     if compiletime
         itemId.getTypeDef()
-            ..setDescription(("+ {0} strength|n+ {1} attack speed|n+ {2} hit points|n+ {3} hit point regeneration per 10 seconds|n"+
+            ..setDescription(("+ {0} strength|n+ {1}% attack speed|n+ {2} hit points|n+ {3} hit point regeneration per 10 seconds|n"+
             "Killing a unit increases your maximum hit points by {4}% for {5} seconds.").format(
                 str.toString(), as.toString(), hp.toString(), hr.toString(), maxHp.toString(), dur.toString()
             ))

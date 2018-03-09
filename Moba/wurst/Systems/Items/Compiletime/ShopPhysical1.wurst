@@ -98,7 +98,7 @@ function itemDagger(int itemId)
     int as = 10
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} strength|n+ {1} attack speed".format(str.toString(), as.toString()))
+            ..setDescription("+ {0} strength|n+ {1}% attack speed".format(str.toString(), as.toString()))
             ..setGoldCost(800)
     else
         itemId.getItem()

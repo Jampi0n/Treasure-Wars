@@ -3,6 +3,7 @@ package Path
 import Table
 import LinkedList
 import ClosureTimers
+import Constants
 
 /*
 * This class represents a one-directional path for AI controlled units to follow
@@ -54,12 +55,16 @@ class Point
     vec2 point
 
     construct(vec2 point)
+        objectCount++
         this.point = point
 
     construct(real x, real y)
+        objectCount++
         this.point = vec2(x, y)
 
-
+    ondestroy
+        objectCount--
+   
 /** adds n points between the two points to the list. The second point is not added.*/
 function addMultiplePoints(LinkedList<Point> pointList, vec2 pos1, vec2 pos2, int n)
     let startX = pos1.x
@@ -107,6 +112,8 @@ function createPaths()
         let point = brownIter.next().point
         BROWN_TOP.addPoint(point)
 
+    for Point p in pointList
+        destroy p
     destroy pointList
 
 
@@ -135,6 +142,8 @@ function createPaths()
         let point = brownIter.next().point
         BROWN_MID.addPoint(point)
 
+    for Point p in pointList
+        destroy p
     destroy pointList
 
     //bot
@@ -164,6 +173,8 @@ function createPaths()
         let point = brownIter.next().point
         BROWN_BOT.addPoint(point)
 
+    for Point p in pointList
+        destroy p
     destroy pointList
 
 

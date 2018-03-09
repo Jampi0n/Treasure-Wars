@@ -72,10 +72,8 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
         if not isAttack and source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_VAMPIRIC_GOBLET))
             source.addHP(currentDamage * 0.1)
             source.addMana(currentDamage * 0.05)
-            source.addEffect(Abilities.spiritTouchTarget, "origin").destr()
-            source.addEffect(Abilities.vampiricAuraTarget, "origin").destr()
     
-        if source.isType(UNIT_TYPE_HERO) and target.hasItemById(convertItemId(ITEM_ID_VOID_ARMOR))
+        if target.isType(UNIT_TYPE_HERO) and target.hasItemById(convertItemId(ITEM_ID_VOID_ARMOR))
             target.addMana(currentDamage * 0.05)
             currentDamage *= 0.95
 
@@ -89,12 +87,13 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
         prevenDeathUnit.setHP(prevenDeathAfterLife)
         prevenDeathUnit = null
 
-    if currentDamage < 0
-        currentDamage = 0
+
 
     if currentDamage > originalDamage
         source.dealDamageNoEvent(target, currentDamage-originalDamage, ReductionType.NONE)
-    if currentDamage < originalDamage
+    else if currentDamage < originalDamage
+        if currentDamage < 0
+            currentDamage = 0
         //how much life the target is supposed to have after dealing damage
         let life = target.getHP()
         afterLife = life - currentDamage
