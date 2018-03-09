@@ -26,7 +26,7 @@ constant int array REGENERATION_HIT_POINT_REGEN = [50, 75, 100, 125, 150]
 @compiletime
 function passive()
     let aDef =createNoEffectAbiltiy(ABILITY_REGENERATION)
-        ..setupWithHotKey("Regeneration", "D")
+        ..setupWithHotKey("Recovery", "D")
         ..presetIcon("PASSpell_Nature_ResistNature")
         ..setLearnString("Increases the Ancient's hit point regeneration.", (int lvl) -> (begin
             return "{0}% increased regeneration".format(
@@ -113,8 +113,8 @@ function entanglingRoots()
         ..setAnimationNames("attack,2")
         ..setupWithHotKey("Entangling Roots", "W")
         ..setMissileArt("")
-        ..setRequirements(int2fourchar(UPROOTED))
-        ..setCheckDependencies(true)
+        //..setRequirements(int2fourchar(UPROOTED))
+        //..setCheckDependencies(true)
         ..setLearnString("Releases thorns in a line, damaging and entangling every enemy unit they pass through.", (int lvl) -> (begin
             return "{0} damage, {1} second.".format( ENTANGLE_HIT_DAMAGE[lvl-1].str()+ENTANGLE_HIT_DAMAGE_BONUS.getBonusString(C_INT), ENTANGLE_DURATION[lvl-1].toString()+ENTANGLE_DURATION_BONUS.getBonusString(C_INT) )
         end) )
@@ -293,6 +293,7 @@ function onRootStats(unit caster, int level) // add bonus
     caster.wrapper().addStatAbsoluteBonus(Stat.AGI, ROOT_RESISTANCE[level-1])
 
 function onRoot(unit caster, int level) // add bonus
+    doAfter(0, () -> caster.setPropWindow(0))
     onRootStats(caster, level)
 
 function onUprootStats(unit caster, int level) // remove bonus
@@ -301,6 +302,7 @@ function onUprootStats(unit caster, int level) // remove bonus
     
 
 function onUproot(unit caster, int level) // remove bonus
+    caster.setPropWindow(GetUnitDefaultPropWindow(caster))
     onUprootStats(caster, level)
 
 class NaturesWrath
@@ -443,6 +445,14 @@ init
         ..addMorph('H015')
         ..setOnCreateFunction((Hero hero) -> (begin
             uprooted_dummy[hero.toUnit().getOwner().getId()] = createUnit(hero.toUnit().getOwner(), UPROOTED, hero.toUnit().getPos(), angle(0))
+            CreateTrigger()
+                ..registerUnitEvent(hero.toUnit(), EVENT_UNIT_ISSUED_POINT_ORDER)
+                ..addAction(() ->(begin
+                    let u = GetTriggerUnit()
+                    if GetIssuedOrderId() == OrderId("smart") and u.getTypeId() == 'H015'
+                        let pos = vec2( GetOrderPointX(), GetOrderPointY() )
+                        doAfter(0, () -> u.issuePointOrder("attack", pos))
+            end))
         end))
 
     setupStats()
@@ -465,3 +475,5 @@ init
                 onUprootStats(u, newLevel - 1)
                 onRootStats(u, newLevel)
         end))
+
+

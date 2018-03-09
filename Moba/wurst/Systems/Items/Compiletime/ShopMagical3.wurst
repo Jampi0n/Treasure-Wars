@@ -7,6 +7,7 @@ import ItemIdGeneration
 import Assets
 import General
 import OnAttack
+import UnitWrapper
 
 
 function itemEnchantedArmor(int itemId)
@@ -261,7 +262,7 @@ function itemScrollOfConjuration(int itemId)
     int intelFactor = 25
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} intelligence|nIncreases your intelligence by {1}%.".format(
+            ..setDescription("+ {0} intelligence|nIncreases your intelligence by {1}%.|nThis effect does not stack.".format(
                 intel.toString(), intelFactor.toString()
             ))
             ..setGoldCost(4300)
@@ -271,7 +272,15 @@ function itemScrollOfConjuration(int itemId)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.INT, intel)
-            ..addStatBonusRelative(Stat.INT, intelFactor*10)
+
+            ..addPickupFunction(() -> (begin
+                if isUnique()
+                    getTriggerHero().wrapper().addStatRelativeBonus(Stat.INT,  intelFactor*10)
+            end))
+            ..addDropFunction(() -> (begin
+                if isUnique()
+                    getTriggerHero().wrapper().addStatRelativeBonus(Stat.INT,  -intelFactor*10)
+            end))
 
 function itemBracerOfPower(int itemId)
     int hp = 250
