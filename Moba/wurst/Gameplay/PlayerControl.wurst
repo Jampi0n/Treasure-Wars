@@ -55,6 +55,13 @@ public class CPlayer
         this.team = t
         this.playertype = pType
         idToPlayer[this.playerId] = this
+        if pType == PlayerType.HERO
+            if t == Team.TEAM1
+                team1HeroPlayers.add(this)
+                team1HeroCount++
+            else
+                team2HeroPlayers.add(this)
+                team2HeroCount++
 
     function toString() returns string
         return "Player = "+assocPlayer.getName()
@@ -115,23 +122,14 @@ public class CPlayer
 
     protected static function initPlayers()
         var admin = false
-        CPlayer cPlayer
         for i = 0 to MAX_HERO_COUNT-1
             player p = players[i]
             Team t = i <= (MAX_HERO_COUNT/2)-1 ?Team.TEAM1:Team.TEAM2
             if( p.getSlotState()==PLAYER_SLOT_STATE_PLAYING )
-                cPlayer = new CPlayer(p, t, PlayerType.HERO)
+                new CPlayer(p, t, PlayerType.HERO)
                 if(not admin)
                     admin = true
                     adminPlayer = i
-
-                if t==Team.TEAM1
-                    team1HeroPlayers.add(cPlayer)
-                    team1HeroCount++
-                else
-                    team2HeroPlayers.add(cPlayer)
-                    team2HeroCount++
-            
             else
                 new CPlayer(p, t, PlayerType.NONE)
     

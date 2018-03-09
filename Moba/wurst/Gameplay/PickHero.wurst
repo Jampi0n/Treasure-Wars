@@ -250,6 +250,8 @@ init
                 let i = GetEventPlayerChatString().substring(5).toInt()
                 createRandomHero(getCPlayer(i))
 
+                new CPlayer(players[i], i<=4?Team.TEAM1:Team.TEAM2, PlayerType.HERO)
+
                 SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_VISION, true)
                 SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_CONTROL, true)
                 SetPlayerAlliance(players[0], players[i], ALLIANCE_SHARED_CONTROL, true)
