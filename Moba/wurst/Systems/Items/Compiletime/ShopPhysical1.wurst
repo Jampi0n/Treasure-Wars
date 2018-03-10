@@ -60,12 +60,12 @@ function itemLightBoots(int itemId)
     else
         itemId.getItem()
             ..addPickupFunction(()->(begin
-                if isUnique() and hasNot(ITEM_ID_HEAVY_BOOTS) and hasNot(ITEM_ID_BOOTS_OF_DARKNESS)
+                if isUnique() and hasNot(convertItemId(ITEM_ID_HEAVY_BOOTS)) and hasNot(convertItemId(ITEM_ID_BOOTS_OF_DARKNESS))
                     getTriggerHero().wrapper().addStatAbsoluteBonus(Stat.MS, ms)
             end))
 
             ..addDropFunction(()->(begin
-                if isUnique() and hasNot(ITEM_ID_HEAVY_BOOTS) and hasNot(ITEM_ID_BOOTS_OF_DARKNESS)
+                if isUnique() and hasNot(convertItemId(ITEM_ID_HEAVY_BOOTS)) and hasNot(convertItemId(ITEM_ID_BOOTS_OF_DARKNESS))
                     getTriggerHero().wrapper().addStatAbsoluteBonus(Stat.MS, -ms)
             end))
 

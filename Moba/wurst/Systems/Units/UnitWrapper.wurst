@@ -7,6 +7,7 @@ import initlater General
 import UnitType
 import Upgrades
 import initlater HeroControl
+import ErrorHandling
 import LinkedList
 
 import BonusMod
@@ -68,7 +69,7 @@ public class UnitWrapper
         this.currentMovementSpeed = assocUnit.getMoveSpeed()
         this.defaultMovementSpeed = GetUnitDefaultMoveSpeed(this.assocUnit)
 
-        this.buffList = new BuffList
+        this.buffList = null // new BuffList  create BuffList only when needed
 
         for int i = 0 to 10
             statsAbsoluteBonus[i] = 0
@@ -141,10 +142,11 @@ public class UnitWrapper
         
 
         //the dispel function must be executed before the unit wrapper is destroyed
-        for Buff b in this.buffList.getLinkedList()
-            b.dispel()
+        if this.buffList != null
+            for Buff b in this.buffList.getLinkedList()
+                b.dispel()
 
-        destroy this.buffList
+            destroy this.buffList
 
         //remove unit wrapper
         unitWrapperCount--
@@ -153,6 +155,11 @@ public class UnitWrapper
         destroy this
 
 
+    function createBuffList()
+        if this.buffList == null
+            this.buffList = new BuffList()
+        else
+            error("This unit wrapper already has a buffList")
 
 
     function setBonusCalculation(CalculateTotalBonus bonusCalculation)

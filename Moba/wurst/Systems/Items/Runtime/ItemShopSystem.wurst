@@ -73,8 +73,8 @@ public function isUnique() returns boolean
     return getTriggerHero().countItemsOfType(getTriggerItem().getTypeId()) == 1
 
 //returns if the the hero has not this item
-public function hasNot(int itemId) returns boolean
-    return getTriggerHero().countItemsOfType(itemId) == 0
+public function hasNot(int itemTypeId) returns boolean
+    return getTriggerHero().countItemsOfType(itemTypeId) == 0
 
 /*combined usage:
 pick up boots 1

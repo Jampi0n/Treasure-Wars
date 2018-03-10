@@ -91,20 +91,22 @@ public function unit.healMana(real amount)
     this.setMana(this.getMana() + amount)
 
 public function unit.dispelMagicalBuffs(boolean positive, boolean negative)
-    let buffList = this.getBuffList().getLinkedList()
-    for Buff currentBuff in buffList
-        let buffType =currentBuff.getBuffType()
-        if(buffType.isMagical())
-            if(positive and buffType.isPositive()) or (negative and not buffType.isPositive())
-                currentBuff.dispel()
+    let buffList = this.getBuffList()
+    if buffList != null
+        for Buff currentBuff in buffList.getLinkedList()
+            let buffType =currentBuff.getBuffType()
+            if(buffType.isMagical())
+                if(positive and buffType.isPositive()) or (negative and not buffType.isPositive())
+                    currentBuff.dispel()
 
 public function unit.dispelPhysicallBuffs(boolean positive, boolean negative)
-    let buffList = this.getBuffList().getLinkedList()
-    for Buff currentBuff in buffList
-        let buffType =currentBuff.getBuffType()
-        if(not buffType.isMagical())
-            if(positive and buffType.isPositive()) or (negative and not buffType.isPositive())
-                currentBuff.dispel()
+    let buffList = this.getBuffList()
+    if buffList != null
+        for Buff currentBuff in buffList.getLinkedList()
+            let buffType =currentBuff.getBuffType()
+            if(not buffType.isMagical())
+                if(positive and buffType.isPositive()) or (negative and not buffType.isPositive())
+                    currentBuff.dispel()
 
 
 public function unit.dispelBuffs(boolean positive, boolean negative)
@@ -139,11 +141,19 @@ init
         return u.getBuffList()
     end))
 
+    setCreateBuffListFunction( (unit u) -> (begin
+        u.wrapper().createBuffList()
+    end))
     
     dispelBuffsOnDeath()
 
     if DEBUG_MODE
         doAfter(1, () -> print("DEBUG_MODE is enabled."))
+        CreateTrigger()
+            ..registerPlayerChatEvent(players[0], "buff", false)
+            ..addAction(() -> (begin
+                debugBuff()
+            end))
 
     //prevent teamkill
     let trg = CreateTrigger()
