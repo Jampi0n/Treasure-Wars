@@ -48,12 +48,16 @@ public class Hero
 
 
     function setup()
+        this.heroType = HeroType.getHeroType(this.hero.getTypeId())
+
+        if this.heroType.getOnInitFunction() != null
+            this.heroType.getOnInitFunction().onInit()
+
         unitToHero.put(this.hero, this)
         heroes[this.owner.getId()] = this
         onDamageTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DAMAGED)
         onDeathTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DEATH)
         onLevelUpTrigger.registerUnitEvent(this.hero, EVENT_UNIT_HERO_LEVEL)
-        this.heroType = HeroType.getHeroType(this.hero.getTypeId())
         onSpellCastTrigger = this.heroType.getOnSpellCastTrigger()
         onSpellCastTrigger.registerUnitEvent(this.hero, EVENT_UNIT_SPELL_EFFECT)
 

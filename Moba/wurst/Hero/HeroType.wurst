@@ -15,6 +15,9 @@ import initlater HeroControl
 public interface OnCreateFunction
     function onCreate(Hero hero)
 
+public interface OnInitFunction
+    function onInit()
+
 public constant HERO_MAX_LEVEL = 25
 
 public class HeroType
@@ -29,6 +32,7 @@ public class HeroType
     private CalculateTotalBonus bonusCalculation = null
 
     private OnCreateFunction onCreateFunction = null
+    private OnInitFunction onInitFunction = null
 
     private boolean useHeroGlow = false
 
@@ -108,8 +112,22 @@ public class HeroType
     function getUsesHeroGlow() returns boolean
         return this.useHeroGlow
 
+    /**
+        HeroType and Hero are created. Now certain hero specific code can be run.
+    **/
     function setOnCreateFunction(OnCreateFunction onCreate)
         this.onCreateFunction = onCreate
 
     function getOnCreateFunction() returns OnCreateFunction
         return this.onCreateFunction
+
+    /**
+        Initializes the HeroType object. Used to setup all triggers and the stats. If the herotype is unused this is not run and saves a lot of memory.
+    **/
+    function setOnInitFunction(OnInitFunction onInit)
+        this.onInitFunction = onInit
+
+    function getOnInitFunction() returns OnInitFunction
+        return this.onInitFunction
+
+        

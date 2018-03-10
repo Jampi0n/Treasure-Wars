@@ -433,35 +433,21 @@ function setupStats()
         ..setStat(Stat.AGI, 7, 36)
         ..setStat(Stat.INT, 12, 31)
 
+function initHeroType()
+    setupStats()
 
-        
-init
-    var abilityList = new LinkedList<int>
-        ..add(ENTAGLING_ROOTS_ABILITY_ID)
-    BUFF_ENTAGLING_ROOTS.setup(abilityList, ENTAGLING_ROOTS_BUFF_ID)
-
-    for i = 0 to bj_MAX_PLAYERS-1
-        uprooted_dummy[i] = null
-
-    heroType = new HeroType(HERO_TREE)
     heroType
         ..setOnAttackFunc((unit attacker, unit target, boolean isActive) -> onAttack(attacker, target, isActive))
         ..addOnSpellCastFunc(function onSpellCast)
         ..useHeroGlow()
         ..addMorph('H015')
-        ..setOnCreateFunction((Hero hero) -> (begin
-            uprooted_dummy[hero.toUnit().getOwner().getId()] = createUnit(hero.toUnit().getOwner(), UPROOTED, hero.toUnit().getPos(), angle(0))
-            CreateTrigger()
-                ..registerUnitEvent(hero.toUnit(), EVENT_UNIT_ISSUED_POINT_ORDER)
-                ..addAction(() ->(begin
-                    let u = GetTriggerUnit()
-                    if GetIssuedOrderId() == OrderId("smart") and u.getTypeId() == 'H015'
-                        let pos = vec2( GetOrderPointX(), GetOrderPointY() )
-                        doAfter(0, () -> u.issuePointOrder("attack", pos))
-            end))
-        end))
 
-    setupStats()
+    var abilityList = new LinkedList<int>
+        ..add(ENTAGLING_ROOTS_ABILITY_ID)
+    BUFF_ENTAGLING_ROOTS.setup(abilityList, ENTAGLING_ROOTS_BUFF_ID)
+
+    for i = 0 to bj_MAX_PLAYERS-1
+        uprooted_dummy[i] = null 
 
     CreateTrigger()
         ..registerAnyUnitEvent(EVENT_PLAYER_HERO_SKILL)
@@ -481,5 +467,23 @@ init
                 onUprootStats(u, newLevel - 1)
                 onRootStats(u, newLevel)
         end))
+
+function createHeroType(Hero hero)
+    uprooted_dummy[hero.toUnit().getOwner().getId()] = createUnit(hero.toUnit().getOwner(), UPROOTED, hero.toUnit().getPos(), angle(0))
+    CreateTrigger()
+        ..registerUnitEvent(hero.toUnit(), EVENT_UNIT_ISSUED_POINT_ORDER)
+        ..addAction(() ->(begin
+            let u = GetTriggerUnit()
+            if GetIssuedOrderId() == OrderId("smart") and u.getTypeId() == 'H015'
+                let pos = vec2( GetOrderPointX(), GetOrderPointY() )
+                doAfter(0, () -> u.issuePointOrder("attack", pos))
+    end))
+
+init
+    heroType = new HeroType(HERO_TREE)
+        ..setOnInitFunction(() -> initHeroType())
+        ..setOnCreateFunction((Hero hero) -> createHeroType(hero))
+
+   
 
 
