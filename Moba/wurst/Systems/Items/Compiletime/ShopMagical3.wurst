@@ -258,8 +258,8 @@ function itemArcaneShield(int itemId)
             ..addStatBonusAbsolute(Stat.AGI, wp)
 
 function itemScrollOfConjuration(int itemId)
-    int intel = 40
-    int intelFactor = 25
+    int intel = 45
+    int intelFactor = 20
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} intelligence|nIncreases your intelligence by {1}%.|nThis effect does not stack.".format(

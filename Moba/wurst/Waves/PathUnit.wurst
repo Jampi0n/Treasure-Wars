@@ -7,6 +7,8 @@ import GameTimer
 import ClosureTimers
 import UnitIndexer
 import Constants
+import PlayerControl
+import initlater WaveSpawn
 
 public class PathUnit 
 
@@ -56,6 +58,10 @@ public class PathUnit
             ..registerLeaveRegion(greenBase, null)
             ..addAction(function onBaseLeaveGreen)
 
+        CreateTrigger()
+            ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
+            ..addAction(function onDeath)
+
 
     //prepares a unit to be able to use paths
     construct(unit u)
@@ -84,7 +90,25 @@ public class PathUnit
         if(removedPathUnit!=null)
             destroy removedPathUnit
 
+    static function onDeath()
+        let removedPathUnit = unitToPathUnit.get(GetTriggerUnit())
+        if(removedPathUnit!=null)
+            destroy removedPathUnit   
+
     ondestroy
+        if this.currentPath == GREEN_TOP
+            addLaneUnitCount(Team.TEAM1, Lane.TOP, -1)
+        else if this.currentPath == GREEN_MID
+            addLaneUnitCount(Team.TEAM1, Lane.MID, -1)
+        else if this.currentPath == GREEN_BOT
+            addLaneUnitCount(Team.TEAM1, Lane.BOT, -1)
+        else if this.currentPath == BROWN_TOP
+            addLaneUnitCount(Team.TEAM2, Lane.TOP, -1)
+        else if this.currentPath == BROWN_MID
+            addLaneUnitCount(Team.TEAM2, Lane.MID, -1)
+        else if this.currentPath == BROWN_BOT
+            addLaneUnitCount(Team.TEAM2, Lane.BOT, -1)
+
         objectCount--
         unitToPathUnit.remove(this.assocUnit)
         pathUnits.removeUnit(this.assocUnit)

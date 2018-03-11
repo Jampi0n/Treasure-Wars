@@ -15,7 +15,7 @@ import Assets
 import ClosureTimers
 
 constant int BLOOD_SWORD_BUFF_ID = compiletime(createAuraBuff("Blood Sword", "This unit has reduced armor and takes damage over time.", "BTNBarbarianBrutalSlasher"))
-constant int BLOOD_SWORD_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, BLOOD_SWORD_BUFF_ID, ""))
+constant int BLOOD_SWORD_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, BLOOD_SWORD_BUFF_ID, "", ""))
 
 function itemBloodSword(int itemId)
     int buffDur = 4
@@ -267,7 +267,7 @@ function itemEnchantedBlade(int itemId)
         end))
 
 constant int AXE_BUFF_ID = compiletime(createAuraBuff("Axe of Decay", "This unit'smovement speed is reduced.", "BTNINV_Axe_15"))
-constant int AXE_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, AXE_BUFF_ID, Abilities.crippleTarget))
+constant int AXE_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, AXE_BUFF_ID, Abilities.crippleTarget, ""))
                     
 
 function itemAxeOfDecay(int itemId)
@@ -304,7 +304,7 @@ function itemAxeOfDecay(int itemId)
         
 
 constant HOLY_SHIELD_BUFF_ID = compiletime(createAuraBuff("Holy Shield", "This unit is protected by Holy Shield; it is untargetable.", "BTNGoldenShieldHoly"))
-constant HOLY_SHIELD_ABILTIY_ID = compiletime(createPositiveBuffAbility(1, HOLY_SHIELD_BUFF_ID, "Abilities\\Spells\\Human\\DivineShield\\DivineShieldTarget.mdl"))
+constant HOLY_SHIELD_ABILTIY_ID = compiletime(createPositiveBuffAbility(1, HOLY_SHIELD_BUFF_ID, "Abilities\\Spells\\Human\\DivineShield\\DivineShieldTarget.mdl", ""))
 constant BUFF_HOLY_SHIELD = new BuffType(true, true)
 
 function itemHolyShield(int itemId)

@@ -116,7 +116,7 @@ function itemHeavyArmor(int itemId)
             ..addStatBonusAbsolute(Stat.HP, hp)
 
 constant int MACE_BUFF_ID = compiletime(createAuraBuff("Bleeding", "This unit is bleeding; it takes damage over time.", "BTNMaceStrikeGlowless"))
-constant int MACE_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, MACE_BUFF_ID, ""))
+constant int MACE_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, MACE_BUFF_ID, "", ""))
 
 function itemMace(int itemId)
     int str = 20
@@ -171,7 +171,7 @@ function itemSteelArmor(int itemId)
             ..addStatBonusAbsolute(Stat.HP, hp)
 
 constant int HAMMER_BUFF_ID = compiletime(createAuraBuff("Break Armor", "This unit's armor is broken; it has reduced armor.", "BTNINV_Hammer_10"))
-constant int HAMMER_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, HAMMER_BUFF_ID, ""))
+constant int HAMMER_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, HAMMER_BUFF_ID, "", ""))
             
 
 function itemHammerOfMight(int itemId)
@@ -210,10 +210,10 @@ function itemHammerOfMight(int itemId)
         end))
 
 constant int WAR_DRUM_BUFF_ID = compiletime(createAuraBuff("War Drum", "This unit has increased attack and movement speed.", "BTNTribalDrumOfWar"))
-constant int WAR_DRUM_ABILTIY_ID = compiletime(createPositiveBuffAbility(1, WAR_DRUM_BUFF_ID, Abilities.generalAuraTarget))
+constant int WAR_DRUM_ABILTIY_ID = compiletime(createPositiveBuffAbility(1, WAR_DRUM_BUFF_ID, Abilities.generalAuraTarget, ""))
 constant BuffType BUFF_WAR_DRUM = new BuffType( true, true)        
 constant int WAR_HORN_BUFF_ID = compiletime(createAuraBuff("War Horn", "This unit has increased attack damage.", "BTNHorn"))
-constant int WAR_HORN_ABILTIY_ID = compiletime(createPositiveBuffAbility(1, WAR_HORN_BUFF_ID, Abilities.generalAuraTarget))
+constant int WAR_HORN_ABILTIY_ID = compiletime(createPositiveBuffAbility(1, WAR_HORN_BUFF_ID, Abilities.generalAuraTarget, ""))
 constant BuffType BUFF_WAR_HORN = new BuffType( true, true)       
 group auraHeroes = CreateGroup()
 
@@ -307,13 +307,11 @@ function itemWarHorn(int itemId)
         BUFF_WAR_HORN.addFirstFunction((Buff thisBuff) -> (begin
             thisBuff.getTarget().wrapper()
                 ..addStatRelativeBonus(Stat.AD, adBonus*10)
-            print(thisBuff.getTarget().getName()+": add warhorn")
         end))
 
         BUFF_WAR_HORN.addEndFunction((Buff thisBuff) -> (begin
             thisBuff.getTarget().wrapper()
                 ..addStatRelativeBonus(Stat.AD, -adBonus*10)
-            print(thisBuff.getTarget().getName()+": remove warhorn")
         end))
 
 function itemHeavyHelmet(int itemId)
