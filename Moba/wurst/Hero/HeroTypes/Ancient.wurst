@@ -1,4 +1,4 @@
-package Tree
+package Ancient
 
 //4
 
@@ -7,7 +7,6 @@ import TimerUtils
 import UnitType
 import ClosureTimers
 import HeroControl
-import LinkedList
 
 
 public constant HERO_TREE = 'H014'
@@ -21,7 +20,7 @@ constant ABILITY_IMPALE = 'AZ4W'
 constant ABILITY_ROOT = 'AZ4E'
 constant ABILITY_NATURES_WRATH = 'AZ4R'
 
-constant int array REGENERATION_HIT_POINT_REGEN = [50, 75, 100, 125, 150]
+constant int array REGENERATION_HIT_POINT_REGEN = [30, 45, 60, 75, 90]
 
 @compiletime
 function passive()
@@ -87,7 +86,7 @@ function devourUnit()
             ..setDamageperTarget(lvl, 0)
             ..setCastRange(lvl, 150)
             ..setDurationNormal(lvl, 0.1)
-            ..setTargetsAllowed(lvl, "air,enemies,ground,neutral,nonancient,organic")
+            ..setTargetsAllowed(lvl, "air,enemies,ground,neutral,nonancient,organic,nonhero")
             ..setTooltipNormalExtended(lvl, "Grabs the target enemy unit to devour it and heals the hero for {0} hit points.".format(
                 DEVOUR_HEAL[lvl-1].str()+DEVOUR_HEAL_BONUS.getBonusString(C_INT)
             ))
@@ -99,7 +98,7 @@ constant real ENTANGLE_HIT_DAMAGE_BONUS = 100
 
 constant BuffType BUFF_ENTAGLING_ROOTS = new BuffType(false, true)
 constant int ENTAGLING_ROOTS_BUFF_ID = compiletime(createAuraBuff("Entangling Roots", "This unit was hit by Entangling Roots; it cannot move or attack.", "BTNEntnagle"))
-constant int ENTAGLING_ROOTS_ABILITY_ID = compiletime(createNegativeBuffAbility(5, ENTAGLING_ROOTS_BUFF_ID, Abilities.entanglingRootsTarget))
+constant int ENTAGLING_ROOTS_ABILITY_ID = compiletime(createNegativeBuffAbility(5, ENTAGLING_ROOTS_BUFF_ID, Abilities.entanglingRootsTarget, "origin"))
 
 
 @compiletime
@@ -429,7 +428,7 @@ function setupStats()
         ..setStat(Stat.MP, 15, 48)
         ..setStat(Stat.MR, 12, 38)
         ..setStat(Stat.MS, 0, 6)
-        ..setStat(Stat.STR, 25, 51)
+        ..setStat(Stat.STR, 22, 54)
         ..setStat(Stat.AGI, 7, 36)
         ..setStat(Stat.INT, 12, 31)
 

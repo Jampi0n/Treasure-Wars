@@ -1,7 +1,6 @@
 package Paladin
 
 import HeroType
-import LinkedList
 import DummyRecycler
 import TimerUtils
 import ClosureTimers
@@ -136,7 +135,7 @@ constant real array HOLY_SHIELD_DURATION = [4, 5, 6, 7, 8]
 constant real HOLY_SHIELD_DURATION_BONUS = 4
 
 constant int BUFF_ID_HOLY_SHIELD = compiletime(createAuraBuff("Holy Shield", "This unit is protected by Holy Shield; it is untargetable.", "BTNAngelicShield"))
-constant int ABILITY_HOLY_SHIELD_BUFF = compiletime(createPositiveBuffAbility(5, BUFF_ID_HOLY_SHIELD, "Abilities\\Spells\\Human\\DivineShield\\DivineShieldTarget.mdl"))
+constant int ABILITY_HOLY_SHIELD_BUFF = compiletime(createPositiveBuffAbility(5, BUFF_ID_HOLY_SHIELD, "Abilities\\Spells\\Human\\DivineShield\\DivineShieldTarget.mdl", "origin"))
 
 @compiletime
 function holyShield()
@@ -320,8 +319,7 @@ function onSpellCast()
         
         new DivinePunishment(caster)
 
-init
-    heroType = new HeroType(HERO_PALADIN)
+function initHeroType()
     heroType.addOnSpellCastFunc(function onSpellCast)
 
     var abilityList = new LinkedList<int>
@@ -349,3 +347,9 @@ init
 
     setupStats()
 
+
+
+init
+    heroType = new HeroType(HERO_PALADIN)
+        ..setOnInitFunction(() -> initHeroType())
+  

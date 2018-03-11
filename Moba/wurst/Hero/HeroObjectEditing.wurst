@@ -66,6 +66,34 @@ public function real.getBonusString(color c) returns string
         return " "
     return c.toColorString()+" (+"+this.toInt().toString()+")|r "
 
+public enum TargetType
+    INSTANT
+    UNIT
+    POINT
+    UNIT_OR_POINT
+    AREA
+
+public function AbilityDefinitionIllidanChannel.setupChannel(TargetType targetType, string orderId)
+    for lvl = 1 to 5
+        this
+            ..setOptions(lvl, 1)
+            ..setFollowThroughTime(lvl, 0)
+            ..setDisableOtherAbilities(lvl, false)
+            ..setBaseOrderID(lvl, orderId)
+            ..setArtDuration(lvl, 0)
+
+        if targetType == TargetType.INSTANT
+            this.setTargetType(lvl, 0)
+        else if targetType == TargetType.UNIT
+            this.setTargetType(lvl, 1)
+        else if targetType == TargetType.POINT
+            this.setTargetType(lvl, 2)
+        else if targetType == TargetType.UNIT_OR_POINT
+            this.setTargetType(lvl, 3)
+        else if targetType == TargetType.AREA
+            this.setTargetType(lvl, 2)
+            this.setOptions(lvl, 3)
+
 public function AbilityDefinition.setupWithHotKey(string name, string hotkey)
     this.presetHotkey(hotkey)
     this.setButtonPositionNormalY(2)

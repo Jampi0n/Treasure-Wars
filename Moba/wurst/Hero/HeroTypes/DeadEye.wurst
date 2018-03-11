@@ -4,7 +4,6 @@ package DeadEye
 
 import HeroType
 import Missile
-import LinkedList
 import ClosureTimers
 import OnUnitEnterLeave
 import DamageDetection
@@ -282,7 +281,7 @@ function onSpellCast()
         end) )
             ..setHitFunction((Missile missile, unit target) -> (begin
             let missileCaster = missile.getOwner()
-            missileCaster.dealDamage(Missile.getMissileTarget(), (PIERCING_SHOT_DAMAGE[missileCaster.getAbilityLevel(ABILITY_PIERCING_SHOT)-1]).bonus(missileCaster.getStr(), PIERCING_SHOT_DAMAGE_BONUS), ReductionType.PHYSICAL)
+            missileCaster.dealDamage(Missile.getMissileTarget(), (PIERCING_SHOT_DAMAGE[level-1]).bonus(missileCaster.getStr(), PIERCING_SHOT_DAMAGE_BONUS), ReductionType.PHYSICAL)
 
         end) )
             ..setMaxRange(1000)
@@ -326,9 +325,7 @@ function onSpellCast()
             caster.getOwner().setAbilityAvailable(ABILITY_DEATH_PACT, true)
         end))
 
-init
-    
-    heroType = new HeroType(HERO_DEADEYE)
+function initHeroType()
     heroType.setOnAttackFunc((unit attacker, unit target, boolean isActive) -> onAttack(attacker, target, isActive))
     heroType.addOnSpellCastFunc(function onSpellCast)
 
@@ -343,3 +340,8 @@ init
     setupStats()
 
     addOnDamageFunc( Condition (function onDamage))
+    
+init
+    
+    heroType = new HeroType(HERO_DEADEYE)
+        ..setOnInitFunction(() -> initHeroType())

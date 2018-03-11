@@ -7,13 +7,14 @@ import Knockback3
 import Missile
 import TimerUtils
 import ClosureTimers
+import Fx
 
 public constant HERO_SEA_DRUID = 'H00K'
 HeroType heroType
 
 constant ABILITY_ANCIENT_KNOWLEDGE = 'AZ3P'
 constant ABILITY_TIDAL_FURY = 'AZ3Q'
-constant ABILITY_BATTLE_ROAR = 'AZ3W'
+constant ABILITY_GIANT_FISH = 'AZ3W'
 constant ABILITY_HOLY_SHIELD = 'AZ3E'
 constant ABILITY_RITUAL_OF_THE_SEAS = 'AZ3R'
 
@@ -71,6 +72,53 @@ function tidalFury()
             TIDAL_FURY_WAVE_DMG[lvl-1].str()+TIDAL_FURY_WAVE_DMG_BONUS.getBonusString(C_INT)))
 
 
+constant real array FISH_DAMAGE = [75, 100, 125, 150, 175]
+constant real FISH_DAMAGE_BONUS = 150
+
+constant int array FISH_ATTACK_SPEED = [30, 40, 50, 60, 70]
+constant int array FISH_MOVE_SPEED = [30, 40, 50, 60, 70]
+
+constant real array FISH_SLOW_DURATION = [3, 3.5, 4, 4.5, 5]
+
+constant int FISH_BUFF_ID = compiletime(createAuraBuff("Giant Fish", "This unit was hit by a giant fish; its movement and attack speed are slowed.", "BTNDeepseaMurloc"))
+constant int FISH_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, FISH_BUFF_ID, Abilities.stasisTotemTarget, "overhead"))
+
+BuffType buffFish
+
+@compiletime
+function giantFish()
+    int array MANA = [110, 120, 130, 140, 150]
+    real array COOLDOWN = [12, 12, 12, 12, 12]
+    real array RANGE = [1200, 1200, 1200, 1200, 1200]
+
+    let aDef = new AbilityDefinitionIllidanChannel(ABILITY_GIANT_FISH)
+        ..presetIcon("BTNDeepseaMurloc")
+        ..setupWithHotKey("Giant Fish", "W")
+        ..setArtCaster("")
+        ..setArtEffect("")
+        ..setMissileArt("")
+        ..setArtTarget("")
+        ..setAnimationNames("spell")
+        ..setLearnString("Throws a giant fish towards the target direction, dealing damage to enemies it strikes through.", (int lvl) -> (begin
+            return "{0} damage.".format(
+                FISH_DAMAGE[lvl-1].str()+FISH_DAMAGE_BONUS.getBonusString(C_STR))
+        end) )
+
+    for lvl = 1 to 5
+        aDef
+            ..setCooldown(lvl, COOLDOWN[lvl-1])
+            ..setManaCost(lvl, MANA[lvl-1])
+            ..setArtDuration(lvl, 0)
+            ..setOptions(lvl, 1)
+            ..setTargetType(lvl, 2)
+            ..setFollowThroughTime(lvl, 0)
+            ..setDisableOtherAbilities(lvl, false)
+            ..setBaseOrderID(lvl, "channel")
+            ..setCastRange(lvl, RANGE[lvl-1])
+            ..setTooltipNormalExtended(lvl, "Throws a giant fish towards the target direction, dealing {0} damage to enemies it strikes through.".format(
+                FISH_DAMAGE[lvl-1].str()+FISH_DAMAGE_BONUS.getBonusString(C_STR))
+            )
+
 @compiletime
 function ritualOfTheSeas()
     int array MANA = [250, 300, 350, 400, 450]
@@ -108,7 +156,7 @@ function setupStats()
         ..setStat(Stat.MP, 15, 50)
         ..setStat(Stat.MR, 10, 40)
         ..setStat(Stat.MS, 5, 30)
-        ..setStat(Stat.STR, 10+10, 55+35)
+        ..setStat(Stat.STR, 21, 84)
         ..setStat(Stat.AGI, 5, 30)
         ..setStat(Stat.INT, 10, 40)
 
@@ -126,7 +174,7 @@ function onSpellCast()
             unit target = FirstOfGroup(nearby)
             nearby.removeUnit(target)
             if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
-                caster.dealDamage(Missile.getMissileTarget(), (TIDAL_FURY_HIT_DMG[level-1]).bonus(caster.getStr(), TIDAL_FURY_HIT_DMG_BONUS), ReductionType.PHYSICAL)
+                caster.dealDamage(target, (TIDAL_FURY_HIT_DMG[level-1]).bonus(caster.getStr(), TIDAL_FURY_HIT_DMG_BONUS), ReductionType.PHYSICAL)
                 Knockback3.add(target, caster.getPos().polarOffset(caster.getPos().angleTo(target.getPos()), 500), 500)
 
                 new Missile(caster, caster.getPos().withZ(80), 900, caster.getPos().angleTo(target.getPos()), Abilities.crushingWaveMissile)
@@ -137,11 +185,29 @@ function onSpellCast()
                 end) )
                     ..setHitFunction((Missile missile, unit target) -> (begin
                     let missileCaster = missile.getOwner()
-                    missileCaster.dealDamage(Missile.getMissileTarget(), (TIDAL_FURY_WAVE_DMG[level-1]).bonus(missileCaster.getInt(), TIDAL_FURY_WAVE_DMG_BONUS), ReductionType.MAGIC)
+                    missileCaster.dealDamage(target, (TIDAL_FURY_WAVE_DMG[level-1]).bonus(missileCaster.getInt(), TIDAL_FURY_WAVE_DMG_BONUS), ReductionType.MAGIC)
         
                 end) )
                     ..setMaxRange(500)
-
+    if(spellId==ABILITY_GIANT_FISH)
+        new Missile(caster, caster.getPos().withZ(80), 800, caster.getPos().angleTo(vec2(GetSpellTargetX(), GetSpellTargetY())), "Fesh_Final2.mdx")
+        ..hitOnce()
+        ..setSize(150)
+        ..setHitCondition((Missile missile, unit target) -> (begin
+            return not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(missile.getOwner().getOwner(), false, true)
+        end) )
+        ..setHitFunction((Missile missile, unit target) -> (begin
+            let missileCaster = missile.getOwner()
+            missileCaster.dealDamage(Missile.getMissileTarget(), (FISH_DAMAGE[level-1]).bonus(missileCaster.getInt(), FISH_DAMAGE_BONUS), ReductionType.MAGIC)
+            target.addBuffReduced(caster, FISH_SLOW_DURATION[level-1], buffFish, level)
+        end) )
+        ..setMaxRange(1000)
+        ..setScale(4)
+        ..setDestroyFunction((Missile missile) -> (begin
+            let fx = new Fx(missile.getDummy().getPos(), Abilities.stampedeMissileDeath)
+            fx.setScale(3)
+            destroy fx
+        end))
     if(spellId == ABILITY_RITUAL_OF_THE_SEAS)
 
         new RitualOfTheSeas(caster)
@@ -202,8 +268,9 @@ class RitualOfTheSeas
 
         this.checkTimer.release()
 
-init
-    heroType = new HeroType(HERO_SEA_DRUID)
+function initHeroType()
+    setupStats()
+    heroType
         ..setBonusCalculation((UnitWrapper whichWrapper, Stat whichStat) -> (begin
             let lvl = whichWrapper.toUnit().getAbilityLevel(ABILITY_ANCIENT_KNOWLEDGE)
             if lvl == 0
@@ -224,9 +291,32 @@ init
                     whichWrapper.applyTotalStatBonus(Stat.MP)
                 else //else calculate default values
                     UnitWrapper.defaultCalcualtion.calculate(whichWrapper, whichStat)
-
         end))
+        ..addOnSpellCastFunc(function onSpellCast)
 
-    heroType.addOnSpellCastFunc(function onSpellCast)
+    buffFish = new BuffType(false, true)
 
-    setupStats()
+    var abilityList = new LinkedList<int>
+        ..add(FISH_ABILTIY_ID)
+    buffFish.setup(abilityList, FISH_BUFF_ID)
+
+    buffFish.addFirstFunction( (Buff whichBuff) -> (begin
+        let level = whichBuff.getLevel()
+        whichBuff.getTarget().wrapper()
+            ..addStatAbsoluteBonus(Stat.AS, -FISH_ATTACK_SPEED[level - 1])
+            ..addStatRelativeBonus(Stat.MS, -FISH_MOVE_SPEED[level - 1]*10)
+    end))
+
+    buffFish.addEndFunction( (Buff whichBuff) -> (begin
+        let level = whichBuff.getLevel()
+        whichBuff.getTarget().wrapper()
+            ..addStatAbsoluteBonus(Stat.AS, FISH_ATTACK_SPEED[level - 1])
+            ..addStatRelativeBonus(Stat.MS, FISH_MOVE_SPEED[level - 1]*10)
+    end))
+
+init
+    heroType = new HeroType(HERO_SEA_DRUID)
+        ..setOnInitFunction(() -> initHeroType())
+      
+
+   
