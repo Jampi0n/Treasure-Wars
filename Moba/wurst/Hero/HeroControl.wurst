@@ -21,7 +21,7 @@ public class Hero
     private static constant onLevelUpTrigger = CreateTrigger()
     protected static Hero array heroes
     private static constant unitToHero = new HashMap<unit,Hero>
-    private static constant assistMap = new HashMap<CPlayer,real>
+    private constant assistMap = new HashMap<CPlayer,real>
     private trigger onSpellCastTrigger
     private timer reviveTimer
     private timerdialog reviveWindow
@@ -145,12 +145,12 @@ public class Hero
     
     //handles assists
     function addAssistDuration(CPlayer p)
-        assistMap.put(p,getElapsedGameTime() + assistDuration)
+        this.assistMap.put(p,getElapsedGameTime() + assistDuration)
 
     function onDamage()
         CPlayer damageSource
         damageSource = GetEventDamageSource().getOwner().getCPlayer()
-        if( damageSource.getTeam()!=this.owner.getTeam())
+        if damageSource != null and damageSource.getTeam()!=this.owner.getTeam()
             this.addAssistDuration(damageSource)
 
     static function onDamageStatic()
@@ -188,18 +188,18 @@ public class Hero
         player killer = GetKillingUnit().getOwner()
         let assistList = new LinkedList<CPlayer>
 
-        let teamList = CPlayer.getEnemyHeroPlayers(this.owner.getTeam())
+        let enemyList = CPlayer.getEnemyHeroPlayers(this.owner.getTeam())
 
-        for CPlayer assistant in teamList
-            let time = assistMap.get(assistant)
+        for CPlayer assistant in enemyList
+            let time = this.assistMap.get(assistant)
             if(time > getElapsedGameTime() and assistant.getPlayer()!=killer)
                 assistList.add(assistant)
                 if(time > maxValue)
                     maxValue = time
                     lastAssistant = assistant
 
-        //replace killer with last assistant, if there is an assistant
-        if not teamList.contains(killer.getCPlayer()) and not assistList.isEmpty()
+        //replace killer with last assistant, if killer is not an enemy hero
+        if not enemyList.contains(killer.getCPlayer()) and not assistList.isEmpty()
             killer = lastAssistant.getPlayer()
             assistList.remove(killer.getCPlayer())
 
