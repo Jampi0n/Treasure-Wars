@@ -8,6 +8,7 @@ import Knockback3
 import Missile
 import TimerUtils
 import ClosureTimers
+import Fx
 
 public constant HERO_SEA_DRUID = 'H00K'
 HeroType heroType
@@ -335,11 +336,15 @@ function initHeroType()
 
         nearby.destr()
 
+        let fx = new Fx(impact.getPos(), Abilities.stampedeMissileDeath)
+        fx.setScale(3)
+        destroy fx
+
     end))
 
 init
-    //heroType = new HeroType(HERO_SEA_DRUID)
-    //    ..setOnInitFunction(() -> initHeroType())
+    heroType = new HeroType(HERO_SEA_DRUID)
+        ..setOnInitFunction(() -> initHeroType())
       
 
    
