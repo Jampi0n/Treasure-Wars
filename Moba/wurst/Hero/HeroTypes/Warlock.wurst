@@ -183,8 +183,8 @@ constant real RAY_OF_DEATH_AFTER_AOE = 250
 
 @compiletime
 function rayOfDeath()
-    int array MANA = [10, 10, 10, 10, 10]//[300, 350, 400, 450, 500]
-    real array COOLDOWN = [2, 2, 2, 2, 2]//[90, 85, 80, 75, 70]
+    int array MANA = [300, 350, 400, 450, 500]
+    real array COOLDOWN = [90, 85, 80, 75, 70]
     real array RANGE = [600, 600, 600, 600, 600]
 
     let aDef = new AbilityDefinitionAerialShackles(ABILITY_RAY_OF_DEATH)

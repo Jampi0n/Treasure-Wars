@@ -3,11 +3,11 @@ package SeaDruid
 //3
 
 import HeroType
+import HeroControl
 import Knockback3
 import Missile
 import TimerUtils
 import ClosureTimers
-import Fx
 
 public constant HERO_SEA_DRUID = 'H00K'
 HeroType heroType
@@ -80,10 +80,15 @@ constant int array FISH_MOVE_SPEED = [30, 40, 50, 60, 70]
 
 constant real array FISH_SLOW_DURATION = [3, 3.5, 4, 4.5, 5]
 
+constant real array FISH_AOE = [200, 225, 250, 275, 300]
+
 constant int FISH_BUFF_ID = compiletime(createAuraBuff("Giant Fish", "This unit was hit by a giant fish; its movement and attack speed are slowed.", "BTNDeepseaMurloc"))
 constant int FISH_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, FISH_BUFF_ID, Abilities.stasisTotemTarget, "overhead"))
 
+constant int FISH_IMPACT = compiletime(ArtilleryDetection.createDetectionDummy())
+constant int FISH_ARTILLERY = compiletime(ArtilleryDetection.createArtilleryDummy(50, 3, "Fesh_Final2.mdx", 600, 0.3, FISH_IMPACT))
 BuffType buffFish
+
 
 @compiletime
 function giantFish()
@@ -108,13 +113,9 @@ function giantFish()
         aDef
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
-            ..setArtDuration(lvl, 0)
-            ..setOptions(lvl, 1)
-            ..setTargetType(lvl, 2)
-            ..setFollowThroughTime(lvl, 0)
-            ..setDisableOtherAbilities(lvl, false)
-            ..setBaseOrderID(lvl, "channel")
+            ..setupChannel(TargetType.AREA, "shockwave")
             ..setCastRange(lvl, RANGE[lvl-1])
+            ..setAreaofEffect(lvl, FISH_AOE[lvl-1])
             ..setTooltipNormalExtended(lvl, "Throws a giant fish towards the target direction, dealing {0} damage to enemies it strikes through.".format(
                 FISH_DAMAGE[lvl-1].str()+FISH_DAMAGE_BONUS.getBonusString(C_STR))
             )
@@ -190,6 +191,9 @@ function onSpellCast()
                 end) )
                     ..setMaxRange(500)
     if(spellId==ABILITY_GIANT_FISH)
+        ArtilleryDetection.fireArtillery(caster.getOwner(), FISH_ARTILLERY, caster.getPos(), vec2(GetSpellTargetX(), GetSpellTargetY()))
+
+    /*
         new Missile(caster, caster.getPos().withZ(80), 800, caster.getPos().angleTo(vec2(GetSpellTargetX(), GetSpellTargetY())), "Fesh_Final2.mdx")
         ..hitOnce()
         ..setSize(150)
@@ -207,7 +211,7 @@ function onSpellCast()
             let fx = new Fx(missile.getDummy().getPos(), Abilities.stampedeMissileDeath)
             fx.setScale(3)
             destroy fx
-        end))
+        end))*/
     if(spellId == ABILITY_RITUAL_OF_THE_SEAS)
 
         new RitualOfTheSeas(caster)
@@ -253,7 +257,7 @@ class RitualOfTheSeas
 
                     end))
                     
-   
+            nearby.destr()
 
             return
 
@@ -314,9 +318,28 @@ function initHeroType()
             ..addStatRelativeBonus(Stat.MS, FISH_MOVE_SPEED[level - 1]*10)
     end))
 
+    ArtilleryDetection.registerArtilleryHit(FISH_IMPACT, (unit impact) ->(begin
+        group nearby = CreateGroup()
+        let caster = Hero.getHero(impact.getOwner()).toUnit()
+        let level = caster.getAbilityLevel(ABILITY_GIANT_FISH)
+        nearby.enumUnitsInRange(impact.getPos(), FISH_AOE[level-1])
+
+
+        while(not nearby.isEmpty())
+            unit target = FirstOfGroup(nearby)
+            nearby.removeUnit(target)
+            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(impact.getOwner(), false, true)
+
+                caster.dealDamage(target, (FISH_DAMAGE[level-1]).bonus(caster.getInt(), FISH_DAMAGE_BONUS), ReductionType.MAGIC)
+                target.addBuffReduced(caster, FISH_SLOW_DURATION[level-1], buffFish, level)
+
+        nearby.destr()
+
+    end))
+
 init
-    heroType = new HeroType(HERO_SEA_DRUID)
-        ..setOnInitFunction(() -> initHeroType())
+    //heroType = new HeroType(HERO_SEA_DRUID)
+    //    ..setOnInitFunction(() -> initHeroType())
       
 
    
