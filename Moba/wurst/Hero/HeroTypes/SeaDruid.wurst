@@ -9,6 +9,7 @@ import Missile
 import TimerUtils
 import ClosureTimers
 import Fx
+import SoundUtils
 
 public constant HERO_SEA_DRUID = 'H00K'
 HeroType heroType
@@ -16,7 +17,7 @@ HeroType heroType
 constant ABILITY_ANCIENT_KNOWLEDGE = 'AZ3P'
 constant ABILITY_TIDAL_FURY = 'AZ3Q'
 constant ABILITY_GIANT_FISH = 'AZ3W'
-constant ABILITY_HOLY_SHIELD = 'AZ3E'
+constant ABILITY_MANA_SHIELD = 'AZ3E'
 constant ABILITY_RITUAL_OF_THE_SEAS = 'AZ3R'
 
 
@@ -88,6 +89,9 @@ constant int FISH_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, FISH_BUF
 
 constant int FISH_IMPACT = compiletime(ArtilleryDetection.createDetectionDummy())
 constant int FISH_ARTILLERY = compiletime(ArtilleryDetection.createArtilleryDummy(50, 3, "Fesh_Final2.mdx", 600, 0.3, FISH_IMPACT))
+
+constant SOUND_FISH_IMPACT = new SoundDefinition(Sounds.artilleryCorpseExplodeDeath1, false, true)
+
 BuffType buffFish
 
 
@@ -107,7 +111,7 @@ function giantFish()
         ..setAnimationNames("spell")
         ..setLearnString("Throws a giant fish towards the target direction, dealing damage to enemies it strikes through.", (int lvl) -> (begin
             return "{0} damage.".format(
-                FISH_DAMAGE[lvl-1].str()+FISH_DAMAGE_BONUS.getBonusString(C_STR))
+                FISH_DAMAGE[lvl-1].str()+FISH_DAMAGE_BONUS.getBonusString(C_INT))
         end) )
 
     for lvl = 1 to 5
@@ -118,8 +122,62 @@ function giantFish()
             ..setCastRange(lvl, RANGE[lvl-1])
             ..setAreaofEffect(lvl, FISH_AOE[lvl-1])
             ..setTooltipNormalExtended(lvl, "Throws a giant fish towards the target direction, dealing {0} damage to enemies it strikes through.".format(
-                FISH_DAMAGE[lvl-1].str()+FISH_DAMAGE_BONUS.getBonusString(C_STR))
+                FISH_DAMAGE[lvl-1].str()+FISH_DAMAGE_BONUS.getBonusString(C_INT))
             )
+
+
+constant int MANA_SHIELD_BUFF_ID = compiletime(createBasicBuff("Mana Shield", "Uses mana to reduce incoming damage.", Icons.bTNNeutralManaShield, Abilities.manaShieldCaster, "origin"))
+
+public constant real array MANA_SHIELD_REDUCTION = [0.2, 0.3, 0.4, 0.5]
+public constant real array MANA_PER_DAMAGE = [0.5, 0.45, 0.4, 0.35, 0.3]
+
+public BuffType buffManaShield // the actual effect is in OnAttack
+
+@compiletime
+function manaShield()
+    int array MANA = [50, 50, 50, 50, 50]
+    real array MANA_PER_SECOND = [4, 4.5, 5, 5.5, 6]
+    real array COOLDOWN = [5, 5, 5, 5, 5]
+
+
+    let aDef = new AbilityDefinitionDemonHunterImmolation(ABILITY_MANA_SHIELD)
+        ..setAnimationNames("")
+        ..presetIcon(Icons.bTNNeutralManaShield)
+        ..setIconTurnOff(Icons.bTNneutralManaShieldOff)
+        ..setupWithHotKey("Mana Shield", "E")
+        ..setLearnString("Reduces incoming damage at the cost of mana. Also drains mana while activated.", (int lvl) -> (begin
+            return "{0}% reduction, {1} mana points per blocked damage point.".format(
+                (MANA_SHIELD_REDUCTION[lvl-1]*100).str(), MANA_PER_DAMAGE[lvl-1].toString()
+            )
+        end) )
+
+    for lvl = 1 to 5
+        aDef
+            ..setCooldown(lvl, COOLDOWN[lvl-1])
+            ..setManaCost(lvl, MANA[lvl-1])
+            ..setDurationHero(lvl, 1)
+            ..setDurationNormal(lvl, 1)
+            ..setDamageperInterval(lvl, 0)
+            ..setBuffs(lvl, int2fourchar(MANA_SHIELD_BUFF_ID)+",BEia")
+            ..setManaDrainedperSecond(lvl, MANA_PER_SECOND[lvl-1])
+            ..setTooltipTurnOff(lvl, "(E) Deactivate Mana Shield - [|cffffcc00Level "+lvl.toString()+"|r]")
+            ..setTooltipTurnOffExtended(lvl, "Deactivate Mana Shield to stop draining mana.")
+            ..setTargetsAllowed(lvl, "none")
+            ..setTooltipNormalExtended(lvl, "Reduces incoming damage by {0}%, by spending {1} mana points for every blocked point of damage. Also drains mana while activated.".format(
+                (MANA_SHIELD_REDUCTION[lvl-1]*100).str(), MANA_PER_DAMAGE[lvl-1].toString()
+            ))
+
+
+
+constant real array RITUAL_HP_DRAIN = [50, 75, 100, 125, 150]
+constant real array RITUAL_MANA_DRAIN = [30, 45, 60, 75, 90]
+
+constant real RITUAL_HP_DRAIN_BONUS = 100
+constant real RITUAL_MANA_DRAIN_BONUS = 60
+
+constant real array RITUAL_AOE = [700, 800, 900, 1000, 1100]
+
+constant int array RITUAL_WAVE_COUNT = [6, 7, 8, 9, 10]
 
 @compiletime
 function ritualOfTheSeas()
@@ -131,36 +189,42 @@ function ritualOfTheSeas()
         ..setAnimationNames("spell,channel")
         ..presetIcon("BTNGuardianofTheSea")
         ..setupWithHotKey("Ritual of the Seas", "R")
-        ..setLearnString("Calls upon the power of the gods. After two seconds of channeling nearby enemies will be struck by divine magic.", (int lvl) -> (begin
-            return "{0} damage."
+        ..setLearnString("Sends out magical energy, that drain hit points and mana from nearby enemies.", (int lvl) -> (begin
+            return "{0} damage, {1} mana, lasts for {2} waves.".format(
+                RITUAL_HP_DRAIN[lvl-1].str()+RITUAL_HP_DRAIN_BONUS.getBonusString(C_INT),
+                RITUAL_MANA_DRAIN[lvl-1].str()+RITUAL_MANA_DRAIN_BONUS.getBonusString(C_INT),
+                RITUAL_WAVE_COUNT[lvl-1].str()
+            )
         end) )
 
     for lvl = 1 to 5
         aDef
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
-            ..setDurationHero(lvl, 15)
-            ..setDurationNormal(lvl, 15)
+            ..setDurationHero(lvl, RITUAL_WAVE_COUNT[lvl-1]*2 + 0.1)
+            ..setDurationNormal(lvl, RITUAL_WAVE_COUNT[lvl-1]*2 + 0.1)
             ..setEffects(lvl, "X000")
 
             ..setTargetsAllowed(lvl, "none")
-            ..setTooltipNormalExtended(lvl, "Calls upon the power of the gods. After two seconds of channeling nearby enemies will be struck by divine magic and take {0} damage.".format(
-                ""
+            ..setTooltipNormalExtended(lvl, "Sends out magical energy, that drain {0} hit points and {1} mana from nearby enemies.|nLasts for {2} waves.".format(
+                RITUAL_HP_DRAIN[lvl-1].str()+RITUAL_HP_DRAIN_BONUS.getBonusString(C_INT),
+                RITUAL_MANA_DRAIN[lvl-1].str()+RITUAL_MANA_DRAIN_BONUS.getBonusString(C_INT),
+                RITUAL_WAVE_COUNT[lvl-1].str()
             ))
 
 function setupStats()
     heroType
         //..setStat(Stat.AD, 10, 35)
-        ..setStat(Stat.AR, 15, 25)
-        ..setStat(Stat.AS, 0, 10)
-        ..setStat(Stat.HP, 20, 60)
-        ..setStat(Stat.HR, 15, 40)
-        ..setStat(Stat.MP, 15, 50)
-        ..setStat(Stat.MR, 10, 40)
-        ..setStat(Stat.MS, 5, 30)
+        ..setStat(Stat.AR, 13, 24)
+        ..setStat(Stat.AS, 0, 8)
+        ..setStat(Stat.HP, 19, 63)
+        ..setStat(Stat.HR, 17, 42)
+        ..setStat(Stat.MP, 16, 54)
+        ..setStat(Stat.MR, 15, 35)
+        ..setStat(Stat.MS, 6, 27)
         ..setStat(Stat.STR, 21, 84)
-        ..setStat(Stat.AGI, 5, 30)
-        ..setStat(Stat.INT, 10, 40)
+        ..setStat(Stat.AGI, 6, 21)
+        ..setStat(Stat.INT, 13, 47)
 
 function onSpellCast()
     let spellId = GetSpellAbilityId()
@@ -191,28 +255,12 @@ function onSpellCast()
         
                 end) )
                     ..setMaxRange(500)
-    if(spellId==ABILITY_GIANT_FISH)
+    else if(spellId==ABILITY_GIANT_FISH)
         ArtilleryDetection.fireArtillery(caster.getOwner(), FISH_ARTILLERY, caster.getPos(), vec2(GetSpellTargetX(), GetSpellTargetY()))
 
-    /*
-        new Missile(caster, caster.getPos().withZ(80), 800, caster.getPos().angleTo(vec2(GetSpellTargetX(), GetSpellTargetY())), "Fesh_Final2.mdx")
-        ..hitOnce()
-        ..setSize(150)
-        ..setHitCondition((Missile missile, unit target) -> (begin
-            return not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(missile.getOwner().getOwner(), false, true)
-        end) )
-        ..setHitFunction((Missile missile, unit target) -> (begin
-            let missileCaster = missile.getOwner()
-            missileCaster.dealDamage(Missile.getMissileTarget(), (FISH_DAMAGE[level-1]).bonus(missileCaster.getInt(), FISH_DAMAGE_BONUS), ReductionType.MAGIC)
-            target.addBuffReduced(caster, FISH_SLOW_DURATION[level-1], buffFish, level)
-        end) )
-        ..setMaxRange(1000)
-        ..setScale(4)
-        ..setDestroyFunction((Missile missile) -> (begin
-            let fx = new Fx(missile.getDummy().getPos(), Abilities.stampedeMissileDeath)
-            fx.setScale(3)
-            destroy fx
-        end))*/
+    else if spellId == ABILITY_MANA_SHIELD
+        caster.addBuff(caster, -1, buffManaShield, level)
+
     if(spellId == ABILITY_RITUAL_OF_THE_SEAS)
 
         new RitualOfTheSeas(caster)
@@ -244,7 +292,7 @@ class RitualOfTheSeas
             this.caster.addEffect("Models\\PsyWave.mdx", "origin").destr()
 
             group nearby = CreateGroup()
-            nearby.enumUnitsInRange(this.caster.getPos(), 900)
+            nearby.enumUnitsInRange(this.caster.getPos(), RITUAL_AOE[level-1])
 
 
             while(not nearby.isEmpty())
@@ -252,9 +300,17 @@ class RitualOfTheSeas
                 nearby.removeUnit(target)
                 if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(this.caster.getOwner(), false, true) and target.isVisible(this.caster.getOwner())
                     doAfter(target.getPos().distanceTo(caster.getPos())/1000 , () -> (begin
-                    
-                        target.addEffect("head", Abilities.blinkCaster)
-                        caster.dealDamage(target, 100, ReductionType.MAGIC)
+
+                        let manaDrained = min( target.getMana(), RITUAL_MANA_DRAIN[level-1].bonus(caster.getInt(), RITUAL_MANA_DRAIN_BONUS))
+                        let hpDrained = min( target.getHP(), RITUAL_HP_DRAIN[level-1].bonus(caster.getInt(), RITUAL_HP_DRAIN_BONUS))
+
+
+                        target.addMana(-manaDrained.reduce(target.getWp()))
+                        caster.addMana(manaDrained.reduce(target.getWp()))
+
+
+                        caster.dealDamage(target, hpDrained, ReductionType.MAGIC)
+                        caster.addHP( hpDrained.reduce(target.getWp()))
 
                     end))
                     
@@ -340,6 +396,16 @@ function initHeroType()
         fx.setScale(3)
         destroy fx
 
+        SOUND_FISH_IMPACT.playOnPoint(impact.getPos3Zero()).snd.setVolume(120)
+
+    end))
+
+    buffManaShield = new BuffType(true, true) // the actual effect is in OnAttack
+        ..setPeriodicTime(0.1)
+    buffManaShield.addPeriodicFunction( (Buff whichBuff) -> (begin
+        let caster = whichBuff.getCaster()
+        if not caster.hasAbility(MANA_SHIELD_BUFF_ID)
+            whichBuff.dispel()
     end))
 
 init
