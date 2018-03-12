@@ -3,17 +3,18 @@ package OnAttack
 import DamageDetection
 import initlater HeroType
 import ClosureTimers
-import TimerUtils
+//import TimerUtils
 import UnitTypeConfig
+import initlater SeaDruid
 
 import ItemIdGeneration
 import initlater ItemShopSystem
 
 constant PREVENT_DEATH = compiletime(ABIL_ID_GEN.next())
 
-unit prevenDeathUnit
+/*unit prevenDeathUnit
 real prevenDeathAfterLife
-timer preventDeathTimer = getTimer()
+timer preventDeathTimer = getTimer()*/
 
 @compiletime
 function setupPreventDeath()
@@ -26,15 +27,12 @@ function unit.dealDamageNoEvent(unit target, real amount, ReductionType reductio
     this.dealDamage(target, amount, reductionType)
     enableDamageDetect()
 
-function unitSetAfterLife()
-    if prevenDeathUnit == null
-        return
-
-    prevenDeathUnit
-        ..removeAbility(PREVENT_DEATH)
-        ..setHP(prevenDeathAfterLife)
-
-    prevenDeathUnit = null
+/*function unitSetAfterLife()
+    if prevenDeathUnit != null
+        prevenDeathUnit.removeAbility(PREVENT_DEATH)
+        prevenDeathUnit.setHP(prevenDeathAfterLife)
+        print("now set hp of "+prevenDeathUnit.getName()+" to "+prevenDeathAfterLife.toString())
+        prevenDeathUnit = null*/
 
 /*
 **
@@ -47,7 +45,18 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
     real currentDamage = originalDamage
     real afterLife
 
-    
+    if originalDamage.abs() < 0.000001 //damage very small, just ignore
+        return
+
+    //if source.isType(UNIT_TYPE_HERO) or target.isType(UNIT_TYPE_HERO)
+        //print(source.getName()+" damages "+target.getName()+": "+currentDamage.toString()+" "+isAttack.toString())
+
+    // if damage events are at the same time e.g spikes, this will cause problems
+    // always use delayed unitSetAfterLife()
+    /*if prevenDeathUnit != null
+        print("- - -")
+        unitSetAfterLife()
+        print("+ + +")*/
 
     //example:
     //currentDamage = currentDamage/2
@@ -63,28 +72,31 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
 
         //===============================================================================
 
+        // shield - ITEM
         if isAttack and target.isType(UNIT_TYPE_HERO)
             currentDamage = currentDamage - 8 * target.countItemsOfType(convertItemId(ITEM_ID_SHIELD))
 
+        // mana shield - SEA DRUID
+        if target.isType(UNIT_TYPE_HERO) and BuffList.hasBuffType(target, buffManaShield)
+            
+            let manaShield = BuffList.getBuffOfType(target, buffManaShield)
+            let level = manaShield.getLevel()
 
+            
+            manaShield.getTarget().addMana( - MANA_SHIELD_REDUCTION[level-1] * MANA_PER_DAMAGE[level-1] * currentDamage)
+            currentDamage = currentDamage * (1.-MANA_SHIELD_REDUCTION[level-1])
     
+        // vampiric goblet - ITEM
         if not isAttack and source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_VAMPIRIC_GOBLET))
             source.addHP(currentDamage * 0.1)
             source.addMana(currentDamage * 0.05)
     
+        // void armor - ITEM
         if target.isType(UNIT_TYPE_HERO) and target.hasItemById(convertItemId(ITEM_ID_VOID_ARMOR))
             target.addMana(currentDamage * 0.05)
             currentDamage *= 0.95
 
         //===============================================================================
-
-
-
-    
-    if prevenDeathUnit != null
-        prevenDeathUnit.removeAbility(PREVENT_DEATH)
-        prevenDeathUnit.setHP(prevenDeathAfterLife)
-        prevenDeathUnit = null
 
 
 
@@ -94,7 +106,11 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
         if currentDamage < 0
             currentDamage = 0
         //how much life the target is supposed to have after dealing damage
+
+
         let life = target.getHP()
+
+
         afterLife = life - currentDamage
         
         //only do stuff, if the unit is supposed to survive
@@ -104,9 +120,12 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
                 target.setHP(target.getMaxHP())
                 target.addAbility(PREVENT_DEATH)
 
-            prevenDeathUnit = target
-            prevenDeathAfterLife = afterLife
-            preventDeathTimer.start(0, function unitSetAfterLife)
+            
+            doAfter(0, () -> (begin
+                target
+                    ..removeAbility(PREVENT_DEATH)
+                    ..setHP(afterLife)
+            end))
 
 
 public interface OnAttackFunction

@@ -73,6 +73,9 @@ public function unit.addBuffReduced(unit caster, real duration, BuffType buffTyp
 
     return new Buff(this, caster, realDuration, buffType, level)
 
+public function real.reduce(int amount) returns real
+    return this * (1-( amount*MAGIC_REDUCTION )/( 1 + amount*MAGIC_REDUCTION ))
+
 public function unit.dealDamage(unit target, real amount, ReductionType reductionType)
     let damageType = reductionType == ReductionType.PHYSICAL ? DAMAGE_TYPE_NORMAL : DAMAGE_TYPE_UNIVERSAL
     real newAmount
