@@ -1,6 +1,7 @@
 package General
 
 import Buff
+import BuffTypeConfig
 import Missile
 import UnitWrapper
 import initlater HeroControl
@@ -39,6 +40,14 @@ public function unit.isTargetable(player source, boolean allowFriends, boolean a
 public function unit.isVisible(player source) returns boolean
     return IsUnitVisible(this, source)
 
+public function unit.isMovable() returns boolean
+    if GetUnitPropWindow(this) < 0.00001
+        return false
+    if BuffList.hasBuffType(this, ENSNARED)
+        return false
+    if BuffList.hasBuffType(this, ENTANGLED)
+        return false
+    return true
 
 public function unit.getStr() returns int
     return GetHeroStr(this, true)
