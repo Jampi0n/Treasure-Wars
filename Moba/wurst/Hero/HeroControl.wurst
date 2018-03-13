@@ -180,6 +180,8 @@ public class Hero
     //handles death
     function onDeath()
 
+        this.owner.addDeath()
+
         if this.heroGlow != null
             this.heroGlow.setVertexColor(colorA(255, 255, 255, 0))
 
@@ -229,7 +231,9 @@ public class Hero
                 "|cffffcc00"+bounty.toString()+"|r"
             ), 10)
 
-            killer.addGold(bounty)
+            if killer.getId() < MAX_HERO_COUNT
+                killer.addGold(bounty)
+                killer.getCPlayer().addHeroKill()
         else
             printTimed("{0} was killed by {1} for {3} gold. {2} get{5} {4} gold for helping.".format(
                 this.owner.getPlayer().getFullColoredName(), 
@@ -240,9 +244,13 @@ public class Hero
                 size==1?"s":""
             ), 10)
 
-            killer.addGold(killBounty)
+            if killer.getId() < MAX_HERO_COUNT
+                killer.addGold(bounty)
+                killer.getCPlayer().addHeroKill()
+                
             for CPlayer p in assistList
                 p.getPlayer().addGold(assistBounty)
+                p.addAssist()
             
         destroy assistList
 

@@ -88,6 +88,8 @@ function onUnitDeath()
         // killer reward
         if killerExists == 1
             killingPlayer.addGold(bounty)
+            if killingPlayer.getId() < MAX_HERO_COUNT
+                killingPlayer.getCPlayer().addUnitKill()
             createGoldBountyTextTag(dyingUnit, bounty, killingPlayer)
             //xp
 

@@ -467,6 +467,16 @@ function initHeroType()
                 onRootStats(u, newLevel)
         end))
 
+    CreateTrigger()
+        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
+        ..addAction(() -> (begin
+            if GetTriggerUnit().getTypeId() == 'H015' 
+                let u = GetTriggerUnit()
+                onUproot(u, u.getAbilityLevel(ABILITY_ROOT))
+
+    end))
+
+
 function createHeroType(Hero hero)
     uprooted_dummy[hero.toUnit().getOwner().getId()] = createUnit(hero.toUnit().getOwner(), UPROOTED, hero.toUnit().getPos(), angle(0))
     CreateTrigger()

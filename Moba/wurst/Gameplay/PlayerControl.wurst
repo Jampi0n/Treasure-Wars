@@ -2,8 +2,9 @@ package PlayerControl
 
 import LinkedList
 import ErrorHandling
+import ClosureTimers
 import Constants
-
+import Assets
 /*
 * This package handles players
 *
@@ -32,6 +33,125 @@ public function player.getCPlayer() returns CPlayer
 public function getCPlayer(int id) returns CPlayer
     return CPlayer.idToPlayer[id]
 
+public class ScoreTable
+
+    static protected multiboard mBoard
+
+    protected static int team1Kills = 0
+    protected static int team2Kills = 0
+
+    static CPlayer array rowToPlayer
+    static int array playerToRow
+
+    static constant playerList = new LinkedList<CPlayer>
+
+    static function updateHeader(boolean firstTeam)
+        let row = (firstTeam ? 0 : CPlayer.team1HeroCount + 1)
+        string teamName = firstTeam ?
+        playercolors[MAX_HERO_COUNT].toColorString() +   "Green|r" :
+        playercolors[MAX_HERO_COUNT+1].toColorString() + "Brown|r"
+        
+        mBoard.getItem(row, 0)
+            ..setStyle(true, false)
+            ..setValue(teamName)
+            ..setWidth(0.08)
+        mBoard.getItem(row, 1)
+            ..setStyle(false, true)
+            ..setValue("H")
+            ..setIcon(Icons.bTNHelmutPurple)
+        mBoard.getItem(row, 2)
+            ..setStyle(false, true)
+            ..setValue("D")
+            ..setIcon(Icons.bTNSkeletonWarrior)
+        mBoard.getItem(row, 3)
+            ..setStyle(false, true)
+            ..setValue("A")
+            ..setIcon(Icons.bTNStatUp)
+        mBoard.getItem(row, 4)
+            ..setStyle(false, true)
+            ..setValue("U")
+            ..setIcon(Icons.bTNFootman)
+
+    static function update()
+        int index = 0
+        mBoard.display(true)
+
+        updateHeader(true)
+        updateHeader(false)
+
+        for CPlayer p in playerList
+            let row = 1 + index + (p.getTeam() == Team.TEAM2 ? 1: 0)
+            rowToPlayer[row] = p
+            playerToRow[p.getId()] = row
+            mBoard.getItem(row, 0)
+                ..setStyle(true, false)
+                ..setValue(p.getPlayer().getNameColored())
+                ..setWidth(0.08)
+            mBoard.getItem(row, 1)
+                ..setStyle(true, false)
+                ..setValue(p.getHeroKills().toString()) 
+            mBoard.getItem(row, 2)
+                ..setStyle(true, false)
+                ..setValue(p.getDeaths().toString()) 
+            mBoard.getItem(row, 3)
+                ..setStyle(true, false)
+                ..setValue(p.getAssists().toString()) 
+            mBoard.getItem(row, 4)
+                ..setStyle(true, false)
+                ..setValue(p.getUnitKills().toString())
+            index++
+
+    static function updatePlayerHeroKills(CPlayer p)
+        let row = playerToRow[p.getId()]
+        mBoard.getItem(row, 1)
+            ..setStyle(true, false)
+            ..setValue(p.getHeroKills().toString()) 
+
+        mBoard.setTitle("Score: "+
+        playercolors[MAX_HERO_COUNT].toColorString()+team1Kills.toString()+"|r / "+
+        playercolors[MAX_HERO_COUNT+1].toColorString()+team2Kills.toString()+"|r"  )
+
+    static function updatePlayerDeaths(CPlayer p)
+        let row = playerToRow[p.getId()]
+        mBoard.getItem(row, 2)
+            ..setStyle(true, false)
+            ..setValue(p.getDeaths().toString()) 
+
+    static function updatePlayerAssists(CPlayer p)
+        let row = playerToRow[p.getId()]
+        mBoard.getItem(row, 3)
+            ..setStyle(true, false)
+            ..setValue(p.getAssists().toString()) 
+            
+    static function updatePlayerUnitKills(CPlayer p)
+        let row = playerToRow[p.getId()]
+        mBoard.getItem(row, 4)
+            ..setStyle(true, false)
+            ..setValue(p.getUnitKills().toString())
+
+    static function create()
+        mBoard = CreateMultiboard()
+            ..setColumnCount(5)
+            ..setRowCount(2)
+            ..display(true)
+            ..minimalize(true)
+        doAfter(0.02, () -> mBoard.minimalize(false))
+
+        mBoard.setItemsStyle(true, false)
+        mBoard.setTitle("Score: "+playercolors[MAX_HERO_COUNT].toColorString()+"0|r / "+playercolors[MAX_HERO_COUNT+1].toColorString()+"0|r"  )
+
+
+    static function addPlayer(CPlayer p)
+        doAfter(0.01, () -> (begin
+            playerList.add(p)
+            playerList.sortWith( (CPlayer p1, CPlayer p2) -> (p1.getId() - p2.getId()) )
+            mBoard.setRowCount(mBoard.getRowCount()+1)
+            update()
+        end))
+
+        
+
+
 //player class
 public class CPlayer
 
@@ -41,9 +161,13 @@ public class CPlayer
     private static constant team1HeroPlayers = new LinkedList<CPlayer>()
     private static constant team2HeroPlayers = new LinkedList<CPlayer>()
 
-    private static int team1HeroCount = 0
-    private static int team2HeroCount = 0
+    protected static int team1HeroCount = 0
+    protected static int team2HeroCount = 0
 
+    private int unitKills = 0
+    private int heroKills = 0
+    private int deaths = 0
+    private int assists = 0
 
     protected static CPlayer array idToPlayer
     private Team team
@@ -57,12 +181,48 @@ public class CPlayer
         this.playertype = pType
         idToPlayer[this.playerId] = this
         if pType == PlayerType.HERO
+            ScoreTable.addPlayer(this)
             if t == Team.TEAM1
                 team1HeroPlayers.add(this)
                 team1HeroCount++
             else
                 team2HeroPlayers.add(this)
                 team2HeroCount++
+
+        
+
+    function addUnitKill()
+        this.unitKills++
+        ScoreTable.updatePlayerUnitKills(this)
+
+    function addHeroKill()
+        this.heroKills++
+        if this.team == Team.TEAM1
+            ScoreTable.team1Kills++
+        else if this.team == Team.TEAM2
+            ScoreTable.team2Kills++
+
+        ScoreTable.updatePlayerHeroKills(this)
+
+    function addDeath()
+        this.deaths++
+        ScoreTable.updatePlayerDeaths(this)
+
+    function addAssist()
+        this.assists++
+        ScoreTable.updatePlayerAssists(this)
+
+    function getUnitKills() returns int
+        return this.unitKills
+
+    function getHeroKills() returns int
+        return this.heroKills
+
+    function getDeaths() returns int
+        return this.deaths
+
+    function getAssists() returns int
+        return this.assists
 
     function toString() returns string
         return "Player = "+assocPlayer.getName()
@@ -151,3 +311,4 @@ public class CPlayer
 
 init
     CPlayer.initPlayers()
+    doAfter(0, () -> ScoreTable.create())
