@@ -112,7 +112,7 @@ function allPick()
     tavern[2].setColor(PLAYER_COLOR_YELLOW)
     tavern[3] = createUnit(players[15], 'n005', gg_rct_Tavern3.getCenter(), angle(0) )
     tavern[3].setColor(PLAYER_COLOR_GREEN)
-    for i = 0 to 11
+    for i = 0 to MAX_HERO_COUNT-1
         if(getCPlayer(i).getPlayerType()==PlayerType.HERO)
             patron[i] = createUnit(players[i], 'n006', gg_rct_CenterMid.getCenter(), angle(0))
             tavernVision[i] = CreateFogModifierRadius(players[i], FOG_OF_WAR_VISIBLE,
