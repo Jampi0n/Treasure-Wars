@@ -1,0 +1,391 @@
+package Drillmo
+
+//6
+
+import HeroType
+import TimerUtils
+import ClosureTimers
+import DamageDetection
+
+public constant HERO_DRILLMO = 'H00L'
+HeroType heroType
+
+constant ABILITY_OVERCHARGE = 'AZ6P'
+constant ABILITY_PULL = 'AZ6Q'
+constant ABILITY_SPIKE_BALL = 'AZ6W'
+constant ABILITY_SPEED_BOOST = 'AZ6E'
+constant ABILITY_ROCKET = 'AZ6R'
+
+function setupStats()
+    heroType
+        //..setStat(Stat.AD, 5, 40)
+        ..setStat(Stat.AR, 6, 23)
+        ..setStat(Stat.AS, 24, 63)
+        ..setStat(Stat.HP, 11, 42)
+        ..setStat(Stat.HR, 7, 26)
+        ..setStat(Stat.MP, 17, 45)
+        ..setStat(Stat.MR, 14, 36)
+        ..setStat(Stat.MS, 15, 43)
+        ..setStat(Stat.STR, 19, 44)
+        ..setStat(Stat.AGI, 5, 14)
+        ..setStat(Stat.INT, 7, 24)
+
+constant int array OVERCHARGE_ATTACK_SPEED = [20, 30, 40, 50, 60]
+
+@compiletime
+function passive()
+    let aDef =createNoEffectAbiltiy(ABILITY_OVERCHARGE)
+        ..setupWithHotKey("Fast Engine", "D")
+        ..presetIcon("PASMechanism")
+        ..setIconResearch("ReplaceableTextures\\CommandButtons\\BTNMechanism.blp")
+        ..setLearnString("Increases the hero's attack speed.", (int lvl) -> (begin
+            return "{0}% bonus attack speed.".format(
+                OVERCHARGE_ATTACK_SPEED[lvl-1].str())
+        end) )
+
+    for lvl = 1 to 5
+        aDef
+            ..setTooltipNormalExtended(lvl, "Increases the hero's attack speed by {0}%.".format(
+                OVERCHARGE_ATTACK_SPEED[lvl-1].str())
+            )
+
+constant real array PULL_DAMAGE = [25, 75, 125, 175, 225]
+constant real PULL_DAMAGE_BONUS = 80
+constant real array PULL_COOLDOWN = [18, 16, 14, 12, 10]
+
+@compiletime
+function pull()
+    int array MANA = [130, 125, 120, 115, 110]
+    
+    real RANGE = 700
+
+    let aDef = new AbilityDefinitionIllidanChannel(ABILITY_PULL)
+        ..presetIcon("BTNTitansGrip")
+        ..setAnimationNames("spell,two")
+        ..setupWithHotKey("Pull", "Q")
+        ..setLightningEffects("")
+        ..setArtCaster("")
+        ..setArtEffect("")
+        ..setMissileArt("")
+        ..setArtTarget("")
+        ..setupChannel(TargetType.POINT, "thunderbolt")
+        ..setLearnString(CHANNELING_SPELL + "Sends out his hand to damage and pull an enemy to him. While being pulled, the target is stunned, but cannot be targeted.|nThe first target hit once the hand returns will be pulled.", (int lvl) -> (begin
+            return "{0} damage, {1} seconds cooldown.".format(
+                PULL_DAMAGE[lvl-1].str()+PULL_DAMAGE_BONUS.getBonusString(C_STR), PULL_COOLDOWN[lvl-1].str()
+            )
+        end) )
+
+    for lvl = 1 to 5
+        aDef
+            ..setCooldown(lvl, PULL_COOLDOWN[lvl-1])
+            ..setManaCost(lvl, MANA[lvl-1])
+            ..setCastRange(lvl, RANGE)
+            ..setTargetsAllowed(lvl, "none")
+            ..setFollowThroughTime(lvl, 1.5)
+            ..setTooltipNormalExtended(lvl, CHANNELING_SPELL + "Sends out his hand to deal {0} damage to a target and pull it to him. While being pulled, the target is stunned, but cannot be targeted.|nThe first target hit once the hand returns will be pulled.".format(
+                PULL_DAMAGE[lvl-1].str()+PULL_DAMAGE_BONUS.getBonusString(C_STR)
+            ))
+
+constant real array SPIKE_BALL_DMG = [40, 60, 80, 100, 120]
+constant real SPIKE_BALL_DMG_BONUS = 50
+constant real array SPIKE_BALL_STUN = [1.4, 1.7, 2, 2.3, 2.6]
+constant real array SPIKE_BALL_DOT_DURATION = [4, 4, 4, 4, 4]
+constant real array SPIKE_BALL_DOT_DMG = [40, 60, 80, 100, 120]
+constant real SPIKE_BALL_DOT_DMG_BONUS = 50
+
+BuffType buffSpikeBall
+
+constant int SPIKE_BALL_BUFF_ID = compiletime(createAuraBuff("Spike Ball", "This unit is taking damage over time.", "BTNSpikeBall2Small"))
+constant int SPIKE_BALL_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, SPIKE_BALL_BUFF_ID, "FatalWoundV2.mdx", "chest"))
+
+
+@compiletime
+function spikeBall()
+    int array MANA = [110, 120, 130, 140, 150]
+    real array COOLDOWN = [8, 8, 8, 8, 8]
+
+    let aDef = new AbilityDefinitionIllidanChannel(ABILITY_SPIKE_BALL)
+        ..setAnimationNames("spell,slam")
+        ..presetIcon("BTNSpikeBall2Small")
+        ..setupWithHotKey("Spike Ball", "W")
+        ..setArtCaster("")
+        ..setArtEffect("")
+        ..setMissileArt("")
+        ..setArtTarget("")
+        ..setupChannel(TargetType.INSTANT, "thunderclap")
+        ..setLearnString(CHANNELING_SPELL + "Slams the ground with a massive spike ball, dealing damage stunning targets in an area in front of the hero. After that targets will be bleeding and take additional damage.", (int lvl) -> (begin
+            return "{0} instant damage, {1} seconds stun, {2} damage over {3} seconds.".format(
+                SPIKE_BALL_DMG[lvl-1].str()+SPIKE_BALL_DMG_BONUS.getBonusString(C_STR),
+                SPIKE_BALL_STUN[lvl-1].toString(),
+                SPIKE_BALL_DOT_DMG[lvl-1].str()+SPIKE_BALL_DOT_DMG_BONUS.getBonusString(C_STR),
+                SPIKE_BALL_DOT_DURATION[lvl-1].toString()
+            )
+        end) )
+
+    for lvl = 1 to 5
+        aDef
+            ..setCooldown(lvl, COOLDOWN[lvl-1])
+            ..setManaCost(lvl, MANA[lvl-1])
+            ..setTargetsAllowed(lvl, "none")
+            ..setFollowThroughTime(lvl, 0.8)
+            ..setTooltipNormalExtended(lvl, CHANNELING_SPELL + "Slams the ground with a massive spike ball, dealing {0} damage stunning targets in an area in front of the hero for {1} seconds. After that targets will be bleeding and take additional {2} damage over {3}.".format(
+                SPIKE_BALL_DMG[lvl-1].str()+SPIKE_BALL_DMG_BONUS.getBonusString(C_STR),
+                SPIKE_BALL_STUN[lvl-1].toString(),
+                SPIKE_BALL_DOT_DMG[lvl-1].str()+SPIKE_BALL_DOT_DMG_BONUS.getBonusString(C_STR),
+                SPIKE_BALL_DOT_DURATION[lvl-1].toString()
+            ))
+
+constant int array SPEED_BOOST_BONUS = [50, 75, 100, 125, 150]
+constant real array SPEED_BOOST_DURATION = [6, 8, 10, 12, 14]
+
+constant int SPEED_BOOST_BUFF_ID = compiletime(createAuraBuff("Speed Boost", "This unit has increased movement speed.", "DISBTNGoblinRocketBoots"))
+constant int SPEED_BOOST_ABILITY_ID = compiletime(createPositiveBuffAbility(5, SPEED_BOOST_BUFF_ID, "", ""))
+
+BuffType buffSpeedBoost
+
+@compiletime
+function speedBoost()
+    int array MANA = [50, 55, 60, 65, 70]
+    real array COOLDOWN = [20, 21, 22, 23, 24]
+
+    let aDef = new AbilityDefinitionBeserk(ABILITY_SPEED_BOOST)
+        ..setAnimationNames("")
+        ..presetIcon("BTNGoblinRocketBoots")
+        ..setupWithHotKey("Speed Boost", "E")
+        ..setArtCaster("")
+        ..setArtEffect("")
+        ..setMissileArt("")
+        ..setArtTarget("")
+        ..setLearnString("Temporarily increases the hero's movement speed.", (int lvl) -> (begin
+            return "{0}% speed bonus, {1} seconds.".format(
+                SPEED_BOOST_BONUS[lvl-1].toString(),
+                SPEED_BOOST_DURATION[lvl-1].str()
+            )
+        end) )
+
+    for lvl = 1 to 5
+        aDef
+            ..setCooldown(lvl, COOLDOWN[lvl-1])
+            ..setManaCost(lvl, MANA[lvl-1])
+            ..setTargetsAllowed(lvl, "none")
+            ..setAttackSpeedIncrease(lvl, 0)
+            ..setDamageTakenIncrease(lvl, 0)
+            ..setMovementSpeedIncrease(lvl, 0)
+            ..setBuffs(lvl, int2fourchar(SPEED_BOOST_BUFF_ID))
+            ..setDurationHero(lvl, 0.01)
+            ..setTooltipNormalExtended(lvl, "Increases the hero's movement speed by {0}% for {1} seconds.".format(
+                SPEED_BOOST_BONUS[lvl-1].toString(),
+                SPEED_BOOST_DURATION[lvl-1].str()
+            ))
+
+constant int ROCKET_BUFF_ID = compiletime(createDummyBuff())
+constant real array ROCKET_DMG = [200, 225, 250, 275, 300]
+constant real ROCKET_DMG_BONUS = 200
+constant real array ROCKET_RANGE = [2000, 3000, 4000, 5000, 6000]
+constant real array ROCKET_COOLDOWN = [40, 35, 30, 25, 20]
+
+@compiletime
+function rocket()
+    int array MANA = [150, 150, 150, 150, 150]
+    
+    
+    let aDef = createTargetMissile(ABILITY_ROCKET, ROCKET_BUFF_ID)
+        ..setAnimationNames("spell,throw")
+        ..presetIcon(Icons.bTNHumanArtilleryUpOne)
+        ..setupWithHotKey("Homing Missile", "R")
+        ..setArtCaster("")
+        ..setArtEffect("")
+        ..setMissileArt(Abilities.mortarMissile)
+        ..setMissileArc(0.15)
+        ..setArtTarget("")
+        ..setLearnString("Fires a rocket at the target enemy unit, dealing damage in an area around the target.", (int lvl) -> (begin
+            return "{0} damage, {1} range, {2} seconds cooldown.".format(
+                ROCKET_DMG[lvl-1].str()+ROCKET_DMG_BONUS.getBonusString(C_STR),
+                ROCKET_RANGE[lvl-1].str(),
+                ROCKET_COOLDOWN[lvl-1].str()
+            )
+        end) )
+
+    for lvl = 1 to 5
+        aDef
+            ..setCooldown(lvl, ROCKET_COOLDOWN[lvl-1])
+            ..setManaCost(lvl, MANA[lvl-1])
+            ..setCastRange(lvl, ROCKET_RANGE[lvl-1])
+            ..setTargetsAllowed(lvl, "nonancient,enemies,ground")
+            ..setTooltipNormalExtended(lvl,"Fires a rocket at the target enemy unit, dealing {0} damage in an area around the target.".format(
+                ROCKET_DMG[lvl-1].str()+ROCKET_DMG_BONUS.getBonusString(C_STR)
+            ))
+
+class Pull
+
+    private unit caster
+    private int level
+    private timer checkTimer
+    private int count = 0
+    private angle direction
+    private unit pulledUnit = null
+    private boolean hasPulled = false
+
+    construct(unit caster, int level, vec2 target)
+        this.caster = caster
+        this.level = level
+        this.direction = caster.getPos().angleTo(target)
+        this.checkTimer = getTimer()
+            ..setData(this castTo int)
+            ..startPeriodic(0.02, function updateStatic)
+
+    function update()
+        this.count++
+        if count >= 70-25 or caster.getCurrentOrder() != OrderId("thunderbolt") or (hasPulled and not pulledUnit.isAlive())
+            destroy this
+        else
+            vec2 pos
+            real relativePos
+            //if count < 15
+                //relativePos = count/15
+            if count > 25-25
+                if count > 35-25
+                    relativePos = 2 - (count + 25)/35
+                else
+                    relativePos = 1
+
+                pos = this.caster.getPos().polarOffset(direction, 700 * relativePos)
+
+                if not hasPulled
+                    real minDistance = 100
+                    unit minUnit = null
+                    group nearby = CreateGroup()
+                    nearby.enumUnitsInRange(pos, 40)
+                
+                    while(not nearby.isEmpty())
+                        unit target = FirstOfGroup(nearby)
+                        nearby.removeUnit(target)
+                        if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true) and target.isMovable()
+                            let distance = target.getPos().distanceTo(pos)
+                            if distance < minDistance
+                                minDistance = distance
+                                minUnit = target
+
+                    nearby.destr()
+
+                    if minUnit != null
+                        this.pulledUnit = minUnit
+                        hasPulled = true
+                        this.caster.dealDamage(this.pulledUnit, PULL_DAMAGE[this.level-1].bonus(this.caster.getStr(), PULL_DAMAGE_BONUS), ReductionType.PHYSICAL)
+                        this.pulledUnit.addBuff(caster, 0.15, STUNNED, 1)
+                        this.pulledUnit.addBuff(caster, 0.15, UNTARGETABLE, 1)
+                        this.pulledUnit.setPropWindow(0)
+
+                else
+                    if count < 60 -25
+                        this.pulledUnit.addBuff(caster, 0.15, STUNNED, 1)
+                        this.pulledUnit.addBuff(caster, 0.15, UNTARGETABLE, 1)
+                        this.pulledUnit.setXY(pos)
+
+    static function updateStatic()
+        (GetExpiredTimer().getData() castTo Pull).update()
+
+    ondestroy
+        this.checkTimer.release()
+        if this.pulledUnit != null
+            this.pulledUnit.setPropWindow(GetUnitDefaultPropWindow(this.pulledUnit))
+
+function onSpellCast()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+
+    if spellId == ABILITY_PULL
+        new Pull(caster, level, vec2(GetSpellTargetX(), GetSpellTargetY()))
+
+    else if spellId == ABILITY_SPIKE_BALL
+        doAfter(0.5, () -> (begin
+            if caster.getCurrentOrder() == OrderId("thunderclap")
+                let ballPos = caster.getPos().polarOffset(caster.getFacingAngle(), 140)
+                group nearby = CreateGroup()
+                nearby.enumUnitsInRange(ballPos, 250)
+
+                while(not nearby.isEmpty())
+                    unit target = FirstOfGroup(nearby)
+                    nearby.removeUnit(target)
+                    if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
+                        caster.dealDamage(target, SPIKE_BALL_DMG[level-1].bonus(caster.getStr(), SPIKE_BALL_DMG_BONUS), ReductionType.PHYSICAL)
+                        target.addBuffReduced( caster, SPIKE_BALL_STUN[level-1], STUNNED, 1)
+                        target.addBuffReduced( caster, SPIKE_BALL_DOT_DURATION[level-1], buffSpikeBall, level)
+                nearby.destr()
+        end))
+
+    else if spellId == ABILITY_SPEED_BOOST
+        caster.addBuff(caster, SPEED_BOOST_DURATION[level-1], buffSpeedBoost, level)
+
+function onDamage()
+    let u = GetTriggerUnit()
+    if u.hasAbility(ROCKET_BUFF_ID)
+        u.removeAbility(ROCKET_BUFF_ID)
+        //addEffect(Abilities.mortarMissile, u.getPos()).destr()
+        let caster = GetEventDamageSource()
+        let level = caster.getAbilityLevel(ABILITY_ROCKET)
+        group nearby = CreateGroup()
+        nearby.enumUnitsInRange(u.getPos(), 250)
+
+        while(not nearby.isEmpty())
+            unit target = FirstOfGroup(nearby)
+            nearby.removeUnit(target)
+            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
+                caster.dealDamage(target, ROCKET_DMG[level-1].bonus(caster.getStr(), ROCKET_DMG_BONUS), ReductionType.PHYSICAL)
+        nearby.destr()
+
+        
+
+
+function initHeroType()
+    heroType.addOnSpellCastFunc(function onSpellCast)
+    setupStats()
+
+    buffSpikeBall = new BuffType(false, false)
+    var abilityList = new LinkedList<int>
+    abilityList.add(SPIKE_BALL_ABILTIY_ID)
+    buffSpikeBall.setup(abilityList, SPIKE_BALL_BUFF_ID)
+
+    buffSpikeBall.setPeriodicTime(0.25)
+    buffSpikeBall.addPeriodicFunction((Buff whichBuff) -> (begin
+        let caster = whichBuff.getCaster()
+        let level = whichBuff.getLevel()
+        caster.dealDamage(whichBuff.getTarget(), 0.25 * SPIKE_BALL_DOT_DMG[level-1].bonus(caster.getStr(), SPIKE_BALL_DOT_DMG_BONUS) / SPIKE_BALL_DOT_DURATION[level-1] , ReductionType.PHYSICAL)
+    end))
+
+    buffSpeedBoost = new BuffType(true, true)
+    abilityList = new LinkedList<int>
+    abilityList.add(SPEED_BOOST_ABILITY_ID)
+    buffSpeedBoost.setup(abilityList, SPEED_BOOST_BUFF_ID)
+    buffSpeedBoost.addFirstFunction((Buff whichBuff) -> (begin
+        let target = whichBuff.getTarget()
+        target.wrapper().addStatRelativeBonus(Stat.MS, SPEED_BOOST_BONUS[whichBuff.getLevel()-1]*10)
+        AddUnitAnimationProperties(target, "fast", true)
+    end))
+
+    buffSpeedBoost.addEndFunction((Buff whichBuff) -> (begin
+        let target = whichBuff.getTarget()
+        target.wrapper().addStatRelativeBonus(Stat.MS, -SPEED_BOOST_BONUS[whichBuff.getLevel()-1]*10)
+        AddUnitAnimationProperties(target, "fast", false)
+    end))
+
+
+    addOnDamageFunc( Condition( function onDamage ) )
+
+    CreateTrigger()
+        ..registerAnyUnitEvent(EVENT_PLAYER_HERO_SKILL)
+        ..addAction(() -> (begin
+            let u = GetTriggerUnit()
+            if GetLearnedSkill() == ABILITY_OVERCHARGE
+                let newLevel = u.getAbilityLevel(ABILITY_OVERCHARGE)
+                if newLevel!= 1
+                    u.wrapper().addStatAbsoluteBonus(Stat.AS, -OVERCHARGE_ATTACK_SPEED[newLevel-2])
+
+                u.wrapper().addStatAbsoluteBonus(Stat.AS, OVERCHARGE_ATTACK_SPEED[newLevel-1])
+        end))
+    
+    
+init
+    heroType = new HeroType(HERO_DRILLMO)
+        ..setOnInitFunction(() -> initHeroType())
