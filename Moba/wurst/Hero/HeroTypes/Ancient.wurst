@@ -74,7 +74,7 @@ function devourUnit()
         ..setLightningEffects("")
         ..setRequirements(int2fourchar(UPROOTED))
         ..setCheckDependencies(true)
-        ..setLearnString("Grabs the target enemy unit to devour it and heals the hero.", (int lvl) -> (begin
+        ..setLearnString(CHANNELING_SPELL + "Grabs the target enemy unit to devour it and heals the hero.", (int lvl) -> (begin
             return "{0} hit points healed, {1} seconds cooldown.".format( DEVOUR_HEAL[lvl-1].str()+DEVOUR_HEAL_BONUS.getBonusString(C_INT), DEVOUR_COOLDOWN[lvl-1].str())
         end) )
 
@@ -87,7 +87,7 @@ function devourUnit()
             ..setCastRange(lvl, 150)
             ..setDurationNormal(lvl, 0.1)
             ..setTargetsAllowed(lvl, "air,enemies,ground,neutral,nonancient,organic,nonhero")
-            ..setTooltipNormalExtended(lvl, "Grabs the target enemy unit to devour it and heals the hero for {0} hit points.".format(
+            ..setTooltipNormalExtended(lvl, CHANNELING_SPELL + "Grabs the target enemy unit to devour it and heals the hero for {0} hit points.".format(
                 DEVOUR_HEAL[lvl-1].str()+DEVOUR_HEAL_BONUS.getBonusString(C_INT)
             ))
 

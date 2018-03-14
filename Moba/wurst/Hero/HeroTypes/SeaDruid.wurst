@@ -109,6 +109,7 @@ function giantFish()
         ..setMissileArt("")
         ..setArtTarget("")
         ..setAnimationNames("spell")
+        ..setupChannel(TargetType.AREA, "shockwave")
         ..setLearnString("Throws a giant fish towards the target direction, dealing damage to enemies it strikes through.", (int lvl) -> (begin
             return "{0} damage.".format(
                 FISH_DAMAGE[lvl-1].str()+FISH_DAMAGE_BONUS.getBonusString(C_INT))
@@ -118,7 +119,6 @@ function giantFish()
         aDef
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
-            ..setupChannel(TargetType.AREA, "shockwave")
             ..setCastRange(lvl, RANGE[lvl-1])
             ..setAreaofEffect(lvl, FISH_AOE[lvl-1])
             ..setTooltipNormalExtended(lvl, "Throws a giant fish towards the target direction, dealing {0} damage to enemies it strikes through.".format(
@@ -189,7 +189,7 @@ function ritualOfTheSeas()
         ..setAnimationNames("spell,channel")
         ..presetIcon("BTNGuardianofTheSea")
         ..setupWithHotKey("Ritual of the Seas", "R")
-        ..setLearnString("Sends out magical energy, that drain hit points and mana from nearby enemies.", (int lvl) -> (begin
+        ..setLearnString(CHANNELING_SPELL + "Sends out magical energy, that drain hit points and mana from nearby enemies.", (int lvl) -> (begin
             return "{0} damage, {1} mana, lasts for {2} waves.".format(
                 RITUAL_HP_DRAIN[lvl-1].str()+RITUAL_HP_DRAIN_BONUS.getBonusString(C_INT),
                 RITUAL_MANA_DRAIN[lvl-1].str()+RITUAL_MANA_DRAIN_BONUS.getBonusString(C_INT),
@@ -206,7 +206,7 @@ function ritualOfTheSeas()
             ..setEffects(lvl, "X000")
 
             ..setTargetsAllowed(lvl, "none")
-            ..setTooltipNormalExtended(lvl, "Sends out magical energy, that drain {0} hit points and {1} mana from nearby enemies.|nLasts for {2} waves.".format(
+            ..setTooltipNormalExtended(lvl, CHANNELING_SPELL + "Sends out magical energy, that drain {0} hit points and {1} mana from nearby enemies.|nLasts for {2} waves.".format(
                 RITUAL_HP_DRAIN[lvl-1].str()+RITUAL_HP_DRAIN_BONUS.getBonusString(C_INT),
                 RITUAL_MANA_DRAIN[lvl-1].str()+RITUAL_MANA_DRAIN_BONUS.getBonusString(C_INT),
                 RITUAL_WAVE_COUNT[lvl-1].str()
@@ -215,10 +215,10 @@ function ritualOfTheSeas()
 function setupStats()
     heroType
         //..setStat(Stat.AD, 10, 35)
-        ..setStat(Stat.AR, 13, 24)
+        ..setStat(Stat.AR, 11, 24)
         ..setStat(Stat.AS, 0, 8)
-        ..setStat(Stat.HP, 19, 63)
-        ..setStat(Stat.HR, 17, 42)
+        ..setStat(Stat.HP, 17, 63)
+        ..setStat(Stat.HR, 14, 42)
         ..setStat(Stat.MP, 16, 54)
         ..setStat(Stat.MR, 15, 35)
         ..setStat(Stat.MS, 6, 27)

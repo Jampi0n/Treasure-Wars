@@ -186,7 +186,7 @@ function divinePunishment()
         ..setAnimationNames("spell,channel")
         ..presetIcon("BTNHolyBan")
         ..setupWithHotKey("Divine Punishment", "R")
-        ..setLearnString("Calls upon the power of the gods. After two seconds of channeling nearby enemies will be struck by divine magic.", (int lvl) -> (begin
+        ..setLearnString(CHANNELING_SPELL + "Calls upon the power of the gods. After two seconds of channeling nearby enemies will be struck by divine magic.", (int lvl) -> (begin
             return "{0} damage.".format(
             DIVINE_PUNISHMENT_DMG[lvl-1].str()+DIVINE_PUNISHMENT_DMG_BONUS.getBonusString(C_INT))
         end) )
@@ -200,7 +200,7 @@ function divinePunishment()
             ..setEffects(lvl, "X000")
 
             ..setTargetsAllowed(lvl, "none")
-            ..setTooltipNormalExtended(lvl, "Calls upon the power of the gods. After two seconds of channeling nearby enemies will be struck by divine magic and take {0} damage.".format(
+            ..setTooltipNormalExtended(lvl, CHANNELING_SPELL + "Calls upon the power of the gods. After two seconds of channeling nearby enemies will be struck by divine magic and take {0} damage.".format(
             DIVINE_PUNISHMENT_DMG[lvl-1].str()+DIVINE_PUNISHMENT_DMG_BONUS.getBonusString(C_INT)
             ))
         
@@ -287,7 +287,7 @@ function onSpellCast()
         let casterPos = caster.getPos()
         SOUND_SHIELD_BASH.playOnPoint(casterPos.toVec3()).snd.setVolume(150)
         group nearby = CreateGroup()
-        nearby.enumUnitsInRange(casterPos.polarOffset(caster.getFacingAngle(), 100), 150)
+        nearby.enumUnitsInRange(casterPos.polarOffset(caster.getFacingAngle(), 140), 180)
 
         while(not nearby.isEmpty())
             unit target = FirstOfGroup(nearby)
@@ -295,6 +295,8 @@ function onSpellCast()
             if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
                 caster.dealDamage(target, SHIELD_BASH_DMG[level-1].bonus(caster.getStr(), SHIELD_BASH_DMG_BONUS), ReductionType.PHYSICAL)
                 target.addBuffReduced( caster, SHIELD_BASH_DURATION[level-1].bonus(caster.getStr(), SHIELD_BASH_DURATION_BONUS), STUNNED, 1)
+
+        nearby.destr()
 
     if(spellId==ABILITY_BATTLE_ROAR) //Battle Roar
         group nearby = CreateGroup()
