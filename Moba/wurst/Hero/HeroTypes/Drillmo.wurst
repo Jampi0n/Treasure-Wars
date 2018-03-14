@@ -138,7 +138,7 @@ function spikeBall()
 constant int array SPEED_BOOST_BONUS = [50, 75, 100, 125, 150]
 constant real array SPEED_BOOST_DURATION = [6, 8, 10, 12, 14]
 
-constant int SPEED_BOOST_BUFF_ID = compiletime(createAuraBuff("Speed Boost", "This unit has increased movement speed.", "DISBTNGoblinRocketBoots"))
+constant int SPEED_BOOST_BUFF_ID = compiletime(createAuraBuff("Speed Boost", "This unit has increased movement speed.", "BTNGoblinRocketBoots"))
 constant int SPEED_BOOST_ABILITY_ID = compiletime(createPositiveBuffAbility(5, SPEED_BOOST_BUFF_ID, "", ""))
 
 BuffType buffSpeedBoost
