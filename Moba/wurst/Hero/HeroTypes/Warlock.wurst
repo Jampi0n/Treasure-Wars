@@ -41,7 +41,7 @@ constant int array FEL_MAGIC_INTEL = [5, 10, 15, 20, 25]
 function passive()
     let aDef =createNoEffectAbiltiy(ABILITY_FEL_MAGIC)
         ..setupWithHotKey("Fel Magic", "D")
-        ..presetIcon("PASHeartOfSearinox")
+        ..setupIcon("PASHeartOfSearinox")
         ..setLearnString("Increases the Warlock's intelligence.", (int lvl) -> (begin
             return "{0}% bonus intelligence".format(
                 FEL_MAGIC_INTEL[lvl-1].str())
@@ -63,7 +63,7 @@ function firebolt()
     real array RANGE = [700, 700, 700, 700, 700]
 
     let aDef = new AbilityDefinitionIllidanChannel(ABILITY_FIREBOLT)
-        ..presetIcon("BTNChaosOrb")
+        ..setupIcon("BTNChaosOrb")
         ..setupWithHotKey("Fire Ball", "Q")
         ..setArtCaster("")
         ..setArtEffect("")
@@ -99,7 +99,7 @@ function infernalMeteor()
     real array RANGE = [600, 675, 750, 825, 900]
 
     let aDef = new AbilityDefinitionIllidanChannel(ABILITY_INFERNAL_METEOR)
-        ..presetIcon("BTNMeteor")
+        ..setupIcon("BTNMeteor")
         ..setupWithHotKey("Infernal Meteor", "W")
         ..setArtCaster("")
         ..setArtEffect("")
@@ -146,7 +146,7 @@ function soulburn()
     real array RANGE = [700, 700, 700, 700, 700]
 
     let aDef = new AbilityDefinitionIllidanChannel(ABILITY_SOUL_BURN)
-        ..presetIcon("BTNSoulBurn2")
+        ..setupIcon("BTNSoulBurn2")
         ..setupWithHotKey("Soul Burn", "E")
         ..setArtCaster("")
         ..setArtEffect("")
@@ -188,7 +188,7 @@ function rayOfDeath()
     real array RANGE = [600, 600, 600, 600, 600]
 
     let aDef = new AbilityDefinitionAerialShackles(ABILITY_RAY_OF_DEATH)
-        ..presetIcon("BTNNetherBolt")
+        ..setupIcon("BTNNetherBolt")
         ..setupWithHotKey("Ray of Death", "R")
         ..setArtCaster("")
         ..setArtEffect("")

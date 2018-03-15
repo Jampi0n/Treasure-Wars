@@ -6,9 +6,21 @@ import ClosureTimers
 //import TimerUtils
 import UnitTypeConfig
 import initlater SeaDruid
+import initlater TrollBerserker
+import StandardTextTags
 
 import ItemIdGeneration
 import initlater ItemShopSystem
+
+public constant ADVANCED_ONHIT =  'A00I'
+public constant DEFAULT_ONHIT = 'A008'
+/*
+    ADVANCED_ONHIT can temporarily replace the default on hit abiltiy to get a temporary special attack, that depends
+    on the time when the attack is fired and not when it is hit (so only relevant for ranged attacks)
+    ADVANCED_ONHIT will trigger all effects DEFAULT_ONHIT triggers, but can be used to trigger additional effects
+    Every hero should only have one ability utilizing ADVANCED_ONHIT (more abilities would be repetitive anyways)
+*/
+
 
 constant PREVENT_DEATH = compiletime(ABIL_ID_GEN.next())
 
@@ -40,7 +52,7 @@ function unit.dealDamageNoEvent(unit target, real amount, ReductionType reductio
 **  By having all in this function, the order the functions run can be set the easiest.
 **
 */
-function handleDamageAmount(unit source, unit target, boolean isAttack, boolean _isActive)
+function handleDamageAmount(unit source, unit target, boolean isAttack, boolean _isActive, boolean advanced)
     let originalDamage = GetEventDamage()
     real currentDamage = originalDamage
     real afterLife
@@ -71,6 +83,15 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
     else
 
         //===============================================================================
+
+
+        // critical strike - TROLL BERSERKER
+        if advanced and source.isType(UNIT_TYPE_HERO) and BuffList.hasBuffType(source, buffCriticalStrike)
+            let critical = BuffList.getBuffOfType(source, buffCriticalStrike)
+            currentDamage = currentDamage * (100 + CRITICAL_DAMAGE_MULT[critical.getLevel()-1])/100
+            createCriticalStrikeTextTag(target, currentDamage.toInt())
+            critical.dispel()
+
 
         // shield - ITEM
         if isAttack and target.isType(UNIT_TYPE_HERO)
@@ -131,6 +152,10 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
 public interface OnAttackFunction
     function onAttack(unit attacker, unit target, boolean isActive)
 
+public interface OnAttackFunctionAdvanced
+    function onAttack(unit attacker, unit target, boolean isActive, boolean advanced)
+
+
 public class OnAttack
 
     private static unit target
@@ -138,6 +163,7 @@ public class OnAttack
     private static boolean active
     private static trigger onAttackTrigger = CreateTrigger()
     private static constant onAttackFunctionList = new LinkedList<OnAttackFunction>()
+    private static constant onAttackFunctionListAdvanced = new LinkedList<OnAttackFunctionAdvanced>()
 
     protected static int countEvents = 0
 
@@ -148,7 +174,7 @@ public class OnAttack
         let localAttacker = GetEventDamageSource()
         var localActive = false
         var localAttacked = false
-
+        var advanced = false
 
         countEvents++
         if countEvents > 100
@@ -157,6 +183,11 @@ public class OnAttack
         if(localTarget.hasAbility('B005')) or localAttacker.getTypeId() == MORTAR_TEAM //passive
             localTarget.removeAbility('B005')
             localAttacked = true
+        if(localTarget.hasAbility('B00G')) //advanced
+            localTarget.removeAbility('B00G')
+            localAttacked = true
+            advanced = true
+
         else if(localTarget.hasAbility('B006')) //arrow
             localTarget.removeAbility('B006')
             localActive = true
@@ -166,12 +197,17 @@ public class OnAttack
         target = localTarget
         attacker = localAttacker
         active = localActive
-        handleDamageAmount(localAttacker, localTarget, localAttacked, localActive)
+        handleDamageAmount(localAttacker, localTarget, localAttacked, localActive, advanced)
 
         //use a list with arguments, as a onAttack function could trigger an onAttack event and overwrite the variables
         if localAttacked and not localTarget.isType(UNIT_TYPE_ANCIENT) //untargetable
             for OnAttackFunction onAttack in onAttackFunctionList
                 onAttack.onAttack(localAttacker, localTarget, localActive)
+
+            for OnAttackFunctionAdvanced onAttack in onAttackFunctionListAdvanced
+                onAttack.onAttack(localAttacker, localTarget, localActive, advanced)
+
+        
 
 
     /*static function getAttacker() returns unit
@@ -186,10 +222,23 @@ public class OnAttack
     static function addOnAttackFunc(OnAttackFunction onAttack)
         onAttackFunctionList.add(onAttack)
 
-    protected static function onAttackAbilities(unit attacker, unit target, boolean isActive)
+    static function addOnAttackFuncAdvanced(OnAttackFunctionAdvanced onAttack)
+        onAttackFunctionListAdvanced.add(onAttack)
+
+    protected static function onAttackAbilities(unit attacker, unit target, boolean isActive, boolean advanced)
         HeroType heroType = HeroType.getHeroType(attacker.getTypeId())
         if(heroType!=null)
-            heroType.onAttack(attacker, target, isActive)
+            heroType.onAttack(attacker, target, isActive, advanced)
+
+    static function useAdvanced(unit whichUnit, boolean advanced)
+        if advanced
+            whichUnit
+                ..removeAbility(DEFAULT_ONHIT)
+                ..addAbility(ADVANCED_ONHIT)
+        else
+            whichUnit
+                ..removeAbility(ADVANCED_ONHIT)
+                ..addAbility(DEFAULT_ONHIT)
 
 
 init
@@ -198,7 +247,7 @@ init
     //use hashmap, so onAttack is more efficient
     //if there are a lot of heroes, if-then-else to find the correct
     //actions to execute is inefficient
-    OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> OnAttack.onAttackAbilities(attacker, target, isActive))
+    OnAttack.addOnAttackFuncAdvanced((unit attacker, unit target, boolean isActive, boolean advanced) -> OnAttack.onAttackAbilities(attacker, target, isActive, advanced))
 
     doPeriodically(0.1, (CallbackPeriodic _cb) -> (begin
         OnAttack.countEvents = 0

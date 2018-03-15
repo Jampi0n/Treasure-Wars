@@ -27,7 +27,7 @@ constant real array ANCIENT_KNOWLEDGE_MP_BONUS = [8, 7, 6, 5, 4]
 @compiletime
 function ancientKnowledge()
     let aDef = createNoEffectAbiltiy(ABILITY_ANCIENT_KNOWLEDGE)
-        ..presetIcon("PASSeaDruidism")
+        ..setupIcon("PASSeaDruidism")
         ..setupWithHotKey("Ancient Knowledge", "D")
         ..setLearnString("Increases his maximum hit points for a portion of his maximum mana ponits and increases his maximum mana points by "+
         "a portion of his maximum hit points.", (int lvl) -> (begin
@@ -55,7 +55,7 @@ function tidalFury()
 
     let aDef = new AbilityDefinitionPitLordHowlofTerror(ABILITY_TIDAL_FURY)
         ..setAnimationNames("attack,slam")
-        ..presetIcon(Icons.bTNCrushingWave)
+        ..setupIcon(Icons.bTNCrushingWave)
         ..setupWithHotKey("Tidal Fury", "Q")
         ..setArtCaster("")
         ..setLearnString("Knocks nearby enemy units back, dealing damage and releasing a crushing wave for every enemy unit hit. The wave deals damage to every enemy it passes through.", (int lvl) -> (begin
@@ -102,7 +102,7 @@ function giantFish()
     real array RANGE = [1200, 1200, 1200, 1200, 1200]
 
     let aDef = new AbilityDefinitionIllidanChannel(ABILITY_GIANT_FISH)
-        ..presetIcon("BTNDeepseaMurloc")
+        ..setupIcon("BTNDeepseaMurloc")
         ..setupWithHotKey("Giant Fish", "W")
         ..setArtCaster("")
         ..setArtEffect("")
@@ -142,7 +142,7 @@ function manaShield()
 
     let aDef = new AbilityDefinitionDemonHunterImmolation(ABILITY_MANA_SHIELD)
         ..setAnimationNames("")
-        ..presetIcon(Icons.bTNNeutralManaShield)
+        ..setupIcon(Icons.bTNNeutralManaShield)
         ..setIconTurnOff(Icons.bTNneutralManaShieldOff)
         ..setupWithHotKey("Mana Shield", "E")
         ..setLearnString("Reduces incoming damage at the cost of mana. Also drains mana while activated.", (int lvl) -> (begin
@@ -187,7 +187,7 @@ function ritualOfTheSeas()
 
     let aDef = new AbilityDefinitionKeeperoftheGroveTranquility(ABILITY_RITUAL_OF_THE_SEAS)
         ..setAnimationNames("spell,channel")
-        ..presetIcon("BTNGuardianofTheSea")
+        ..setupIcon("BTNGuardianofTheSea")
         ..setupWithHotKey("Ritual of the Seas", "R")
         ..setLearnString(CHANNELING_SPELL + "Sends out magical energy, that drain hit points and mana from nearby enemies.", (int lvl) -> (begin
             return "{0} damage, {1} mana, lasts for {2} waves.".format(

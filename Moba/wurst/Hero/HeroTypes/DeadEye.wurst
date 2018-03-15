@@ -29,7 +29,7 @@ constant real array BLACK_ARROW_DURATION = [30, 35, 40, 45, 50]
 @compiletime
 function blackArrow()
     let aDef = createNoEffectAbiltiy(ABILITY_BLACK_ARROW)
-        ..presetIcon("PASTheBlackArrow")
+        ..setupIcon("PASTheBlackArrow")
         ..setupWithHotKey("Black Arrow", "D")
         ..setLearnString("Increases the damage of killing attacks against enemies and spawns a skeleton.", (int lvl) -> (begin
             return "{0} damage, lasts {1} seconds.".format(
@@ -55,7 +55,7 @@ function piercingShot()
     real array RANGE = [800, 800, 800, 800, 800]
 
     let aDef = new AbilityDefinitionIllidanChannel(ABILITY_PIERCING_SHOT)
-        ..presetIcon("BTNBlackArrows")
+        ..setupIcon("BTNBlackArrows")
         ..setupWithHotKey("Piercing Shot", "Q")
         ..setArtCaster("")
         ..setArtEffect("")
@@ -96,7 +96,7 @@ function terror()
     
     let aDef = new AbilityDefinitionPitLordHowlofTerror(ABILITY_TERROR)
         ..setAnimationNames("spell,slam")
-        ..presetIcon("BTNHowlOfTerror")
+        ..setupIcon("BTNHowlOfTerror")
         ..setupWithHotKey("Terror", "W")
         ..setLearnString("Terrifies nearby enemies, making them miss on their attacks.", (int lvl) -> (begin
             return "{0} seconds, {1} area of effect.".format(
@@ -127,7 +127,7 @@ function boneBrothers()
 
     let aDef = new AbilityDefinitionFarseerChainLightning(ABILITY_BONE_BROTHERS)
         ..setAnimationNames("spell")
-        ..presetIcon("BTNSkeletalLongevity")
+        ..setupIcon("BTNSkeletalLongevity")
         ..setupWithHotKey("Bone Brothers", "E")
         ..setMissileArt("")
         ..setArtTarget("")
@@ -164,7 +164,7 @@ function deathpact()
     let aDef = new AbilityDefinitionRoar(ABILITY_DEATH_PACT)
         ..setLevels(5)
         ..setAnimationNames("spell")
-        ..presetIcon("BTNDeathPact")
+        ..setupIcon("BTNDeathPact")
         ..setupWithHotKey("Death Pact", "R")
         ..setArtCaster("Abilities\\Spells\\Undead\\DeathPact\\DeathPactCaster.mdl")
 
@@ -189,7 +189,7 @@ function deathpact()
         ..setButtonPositionNormalX(3)
         ..setButtonPositionNormalY(2)
         ..setHotkeyNormal("R")
-        ..presetIcon("BTNDeathCoil")
+        ..setupIcon("BTNDeathCoil")
         ..setHeroAbility(false)
         ..setMissileArt("Abilities\\Spells\\Undead\\DeathCoil\\DeathCoilMissile.mdl")
         ..setMissileArc(0)
@@ -326,7 +326,7 @@ function onSpellCast()
         end))
 
 function initHeroType()
-    heroType.setOnAttackFunc((unit attacker, unit target, boolean isActive) -> onAttack(attacker, target, isActive))
+    heroType.setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
     heroType.addOnSpellCastFunc(function onSpellCast)
 
     onLeave(() -> (begin
