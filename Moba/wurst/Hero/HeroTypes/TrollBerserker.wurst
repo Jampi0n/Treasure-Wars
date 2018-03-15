@@ -1,0 +1,388 @@
+package TrollBerserker
+
+//7
+
+import HeroType
+import ClosureTimers
+import OnAttack
+
+
+public constant HERO_TROLL_BERSERKER = 'H00X'
+HeroType heroType
+
+
+constant ABILITY_FOCUS = 'AZ7P'
+constant ABILITY_CRITICAL = 'AZ7Q'
+constant ABILITY_BLINK = 'AZ7W'
+constant ABILITY_SWITCH_WEAPONS = 'AZ7E'
+constant ABILITY_GROWTH = 'AZ7R'
+
+constant real array FOCUS_DURATION = [4, 6, 8, 10, 12]
+constant int FOCUS_BONUS = 2
+
+@compiletime
+function focus()
+    let aDef = createNoEffectAbiltiy(ABILITY_FOCUS)
+        ..setupIcon("PASGrimRupture")
+        ..setupWithHotKey("Focus", "D")
+        ..setLearnString("Every attack increases the Troll Berserker's strength by {0} for a short time.".format(FOCUS_BONUS.str()), (int lvl) -> (begin
+            return "{0} seconds.".format(
+                FOCUS_DURATION[lvl-1].str()
+                )
+        end) )
+
+    for lvl = 1 to 5
+        aDef
+            ..setTooltipNormalExtended(lvl, "Every attack increases the Troll Berserker's strength by {0} for {1} seconds.".format(
+                FOCUS_BONUS.str(), FOCUS_DURATION[lvl-1].str()
+            ))
+
+public constant real array CRITICAL_DAMAGE_MULT = [100, 150, 200, 250, 300]
+
+constant int CRITICAL_BUFF_ID = compiletime(createAuraBuff("Critical Strike", "This unit's next attack will deal more damage.", "BTN_CR_BLOOD"))
+constant int CRITICAL_ABILITY_ID = compiletime(createPositiveBuffAbility(5, CRITICAL_BUFF_ID, "", ""))
+
+public BuffType buffCriticalStrike
+
+
+@compiletime
+function critical()
+    int array MANA = [40, 40, 40, 40, 40]
+    real array COOLDOWN = [5, 5, 5, 5, 5]
+
+    let aDef = new AbilityDefinitionBeserk(ABILITY_CRITICAL)
+        ..setupIcon("BTN_CR_BLOOD")
+        ..setAnimationNames("")
+        ..setupWithHotKey("Critical Strike", "Q")
+        ..setLightningEffects("")
+        ..setArtTarget("")
+        ..setMissileArt("")
+        ..setArtSpecial("")
+        ..setLightningEffects("")
+        ..setCheckDependencies(true)
+        ..setLearnString("Increases the attack damage of the next attack.", (int lvl) -> (begin
+            return "{0}% damage increase.".format(
+                CRITICAL_DAMAGE_MULT[lvl-1].str()
+                )
+        end) )
+
+    for lvl = 1 to 5
+        aDef
+            ..setCooldown(lvl, COOLDOWN[lvl-1])
+            ..setManaCost(lvl, MANA[lvl-1])
+            ..setAttackSpeedIncrease(lvl, 0)
+            ..setDamageTakenIncrease(lvl, 0)
+            ..setMovementSpeedIncrease(lvl, 0)
+            ..setBuffs(lvl, int2fourchar(CRITICAL_BUFF_ID))
+            ..setDurationHero(lvl, 0.01)
+            ..setTargetsAllowed(lvl, "air,enemies,ground,neutral,nonancient,organic,nonhero")
+            ..setTooltipNormalExtended(lvl, "Increases the attack damage of the next attack by {0}%.".format(
+                CRITICAL_DAMAGE_MULT[lvl-1].str()
+            ))
+
+
+constant real array BLINK_MAX_RANGE =[600, 650, 700, 750, 800]
+constant real array BLINK_COOLDOWN = [15, 13, 11, 9, 7]
+
+@compiletime
+function blink()
+    int array MANA = [80, 75, 70, 65, 60]
+
+    let aDef = new AbilityDefinitionWardenBlink(ABILITY_BLINK)
+        ..setAnimationNames("")
+        ..setupWithHotKey("Blink", "W")
+        ..setLightningEffects("")
+        ..setArtTarget("")
+        ..setMissileArt("")
+        ..setArtSpecial("")
+        ..setLightningEffects("")
+        ..setCheckDependencies(true)
+        ..setLearnString("Teleports the Troll Berserker a short distance.", (int lvl) -> (begin
+            return "{0} range, {1} seconds cooldown".format(
+                BLINK_MAX_RANGE[lvl-1].str(),
+                BLINK_COOLDOWN[lvl-1].str()
+                )
+        end) )
+
+    for lvl = 1 to 5
+        aDef
+            ..setCooldown(lvl, BLINK_COOLDOWN[lvl-1])
+            ..setManaCost(lvl, MANA[lvl-1])
+            ..setMinimumRange(lvl, 250)
+            ..setMaximumRange(lvl, BLINK_MAX_RANGE[lvl-1])
+            ..setTooltipNormalExtended(lvl, "Teleports the Troll Berserker a short distance.")
+
+constant int array SWITCH_DMG = [5, 10, 15, 20, 25]
+constant int array SWITCH_MOVE_SPEED = [10, 15, 20, 25, 30]
+
+constant real SWITCH_DURATION = 1.67
+
+@compiletime
+function switchWeapons()
+    int array MANA = [20, 20, 20, 20, 20]
+    real array COOLDOWN = [5, 5, 5, 5, 5]
+
+    let aDef = new AbilityDefinitionBearform(ABILITY_SWITCH_WEAPONS)
+        ..setupIcon("BTNLightning_blade")
+        ..setIconTurnOff("ReplaceableTextures\\CommandButtons\\BTNThrowingAxe.blp")
+        ..setupWithHotKey("Switch to Melee", "E")
+        ..setLearnString("Turnes the Troll Berserker into a melee fighter, increasing attack damage and movement speed.", (int lvl) -> (begin
+            return "{0} attack damage, {1}% movement speed.".format(
+                SWITCH_DMG[lvl-1].str(), SWITCH_MOVE_SPEED[lvl-1].str()
+            )
+        end) )
+
+    for lvl = 1 to 5
+        aDef
+            ..setCooldown(lvl, COOLDOWN[lvl-1])
+            ..setManaCost(lvl, MANA[lvl-1])
+            ..setNormalFormUnit(lvl, int2fourchar('H00X'))
+            ..setAlternateFormUnit(lvl, int2fourchar('H018'))
+            ..setDurationNormal(lvl, SWITCH_DURATION)
+            ..setTooltipTurnOff(lvl, "(E) Switch to Ranged - [|cffffcc00Level "+lvl.toString()+"|r]")
+            ..setTooltipNormalExtended(lvl, "Turnes the Troll Berserker into a melee fighter, increasing attack damage by {0} and movement speed by {1}%.".format(
+                SWITCH_DMG[lvl-1].str(), SWITCH_MOVE_SPEED[lvl-1].str()
+            ))
+            ..setTooltipTurnOffExtended(lvl, "Turnes the Troll Berserker back into a ranged fighter.")
+
+
+constant real array GROWTH_HP =[300, 350, 400, 450, 500]
+constant real GROWTH_HP_BONUS = 400
+constant int array GROWTH_HP_REGEN = [4, 6, 8, 10, 12]
+
+constant real array GROWTH_DURATION = [15, 15, 15, 15, 15]
+
+constant real array GROWTH_FEAR_DURATION = [2, 2.5, 3, 3.5 ,4]
+constant real GROWTH_FEAR_AOE = 900
+
+constant int GROWTH_BUFF_ID = compiletime(createAuraBuff("Berserk", "This unit's maximum hit points and hit point regeneration are increased.", "BTNDireGrowth"))
+constant int GROWTH_ABILITY_ID = compiletime(ABIL_ID_GEN.next())
+
+constant int GROWTH_FEAR_BUFF_ID = compiletime(createAuraBuff("Berserk- Fear", "This unit is under the effect of Fear; it cannot move.", "BTNDireGrowth"))
+constant int GROWTH_FEAR_ABILTIY_ID = compiletime( createNegativeBuffAbility(5, GROWTH_FEAR_BUFF_ID, "FearEffect2.mdx", "overhead") )
+
+constant real GROWTH_SCALE = 1.7
+
+BuffType buffGrowth
+BuffType buffGrowthFear
+
+@compiletime
+function growth()
+    int array MANA = [140, 150, 160, 170, 180]
+    real array COOLDOWN = [75, 75, 75, 75, 75]
+
+    let buffADef = new AbilityDefinitionUnholyAuracreep(GROWTH_ABILITY_ID)
+        ..setArtTarget("Abilities\\Spells\\Orc\\Bloodlust\\BloodlustTarget.mdl,Abilities\\Spells\\Orc\\Bloodlust\\BloodlustSpecial.mdl")
+        ..setTargetAttachmentPoint("hand,left")
+        ..setTargetAttachmentPoint1("hand,right")
+        ..setTargetAttachments(2)
+        ..hideIcon()
+    for i = 1 to 5
+        buffADef
+            ..setTargetsAllowed(i, "invulnerable,self,vulnerable")
+            ..setAreaofEffect(i, 1)
+            ..setMovementSpeedIncrease(i, 0)
+            ..setLifeRegenerationIncrease(i, 0)
+            ..setBuffs(i, int2fourchar(GROWTH_BUFF_ID))
+
+
+    let aDef = new AbilityDefinitionRoar(ABILITY_GROWTH)
+        ..setupIcon("BTNDireGrowth")
+        ..setAnimationNames("")
+        ..setupWithHotKey("Berserk", "R")
+        ..setLightningEffects("")
+        ..setArtTarget("")
+        ..setMissileArt("")
+        ..setArtSpecial("")
+        ..setLightningEffects("")
+        ..setCheckDependencies(true)
+        ..setLearnString("Increases the Troll Berserker's maximum hit points and hit point regeneration. When activated, the Troll Berserker petrifies nearby enemies making them unable to move for a short time.", (int lvl) -> (begin
+            return "{0} hit points, {1} hit point regeneration per second, lasts {2} seconds, {3} seconds fear.".format(
+                GROWTH_HP[lvl-1].str() + GROWTH_HP_BONUS.getBonusString(C_INT),
+                GROWTH_HP_REGEN[lvl-1].str(),
+                GROWTH_DURATION[lvl-1].str(),
+                GROWTH_FEAR_DURATION[lvl-1].toString()
+                )
+        end) )
+
+    for lvl = 1 to 5
+        aDef
+            ..setCooldown(lvl, COOLDOWN[lvl-1])
+            ..setManaCost(lvl, MANA[lvl-1])
+
+            ..setTargetsAllowed(lvl, "none")
+            ..setTooltipNormalExtended(lvl, "Increases the Troll Berserker's maximum hit points by {0} and hit point regeneration by {1} hit points per second for {2} seconds. When activated, the Troll Berserker petrifies nearby enemies making them unable to move for {3} seconds.".format(
+                GROWTH_HP[lvl-1].str() + GROWTH_HP_BONUS.getBonusString(C_INT),
+                GROWTH_HP_REGEN[lvl-1].str(),
+                GROWTH_DURATION[lvl-1].str(),
+                GROWTH_FEAR_DURATION[lvl-1].toString()
+            ))
+
+            
+
+function onMeleeStats(unit caster, int level) // add bonus
+    caster.wrapper().addStatAbsoluteBonus(Stat.AD, SWITCH_DMG[level-1])
+    caster.wrapper().addStatRelativeBonus(Stat.MS, SWITCH_MOVE_SPEED[level-1]*10)
+
+function onSwitchToMelee(unit caster, int level) // add bonus
+    doAfter(0, () -> (begin
+        onMeleeStats(caster, level)
+        if BuffList.hasBuffType(caster, buffGrowth)
+            caster.setScale(GROWTH_SCALE)
+    end))
+
+function onRangedStats(unit caster, int level) // remove bonus
+    caster.wrapper().addStatAbsoluteBonus(Stat.AD, -SWITCH_DMG[level-1])
+    caster.wrapper().addStatRelativeBonus(Stat.MS, -SWITCH_MOVE_SPEED[level-1]*10)
+    
+
+function onSwitchToRanged(unit caster, int level) // remove bonus
+    doAfter(0, () -> (begin
+        onRangedStats(caster, level)
+        if BuffList.hasBuffType(caster, buffGrowth)
+            caster.setScale(GROWTH_SCALE)
+    end))
+
+
+
+function onAttack(unit attacker, unit _target, boolean _isActive)
+    let level = attacker.getAbilityLevel(ABILITY_FOCUS)
+    let wrapper = attacker.wrapper()
+    wrapper.addStatAbsoluteBonus(Stat.STR, FOCUS_BONUS)
+    doAfter(FOCUS_DURATION[level-1], () -> (wrapper.addStatAbsoluteBonus(Stat.STR, -FOCUS_BONUS)))
+    
+
+
+function onSpellCast()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+
+    if(spellId == ABILITY_CRITICAL)
+        caster.addBuff(caster, 4, buffCriticalStrike, level)
+
+    else if (spellId == ABILITY_SWITCH_WEAPONS)
+        if caster.getTypeId() == 'H00X'
+            doAfter( SWITCH_DURATION, () -> onSwitchToMelee(caster, level))
+        else
+            doAfter( SWITCH_DURATION, () -> onSwitchToRanged(caster, level))
+
+
+    if(spellId == ABILITY_GROWTH)
+        caster.addBuff(caster, GROWTH_DURATION[level-1], buffGrowth, level)
+        group nearby = CreateGroup()
+
+        nearby.enumUnitsInRange(caster.getPos(), GROWTH_FEAR_AOE)
+
+
+        while(not nearby.isEmpty())
+            unit target = FirstOfGroup(nearby)
+            nearby.removeUnit(target)
+            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
+
+                target.addBuffReduced(caster, GROWTH_FEAR_DURATION[level-1], buffGrowthFear, level)
+                target.addBuffReduced(caster, GROWTH_FEAR_DURATION[level-1], ENSNARED, level)
+
+
+        nearby.destr()
+
+
+
+function setupStats()
+    heroType
+        //..setStat(Stat.AD, 5, 40)
+        ..setStat(Stat.AR, 7, 21)
+        ..setStat(Stat.AS, 23, 58)
+        ..setStat(Stat.HP, 11, 42)
+        ..setStat(Stat.HR, 15, 34)
+        ..setStat(Stat.MP, 10, 27)
+        ..setStat(Stat.MR, 12, 37)
+        ..setStat(Stat.MS, 12, 41)
+        ..setStat(Stat.STR, 17, 78)
+        ..setStat(Stat.AGI, 7, 17)
+        ..setStat(Stat.INT, 4, 11)
+
+function initHeroType()
+    setupStats()
+
+    heroType
+        ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
+        ..addOnSpellCastFunc(function onSpellCast)
+        ..addMorph('H018')
+
+    buffCriticalStrike = new BuffType(true, false)
+
+    var abilityList = new LinkedList<int>
+        ..add(CRITICAL_ABILITY_ID)
+    buffCriticalStrike.setup(abilityList, CRITICAL_BUFF_ID)
+    buffCriticalStrike.addFirstFunction((Buff whichBuff) -> (begin
+        OnAttack.useAdvanced( whichBuff.getTarget(), true)
+    end))
+
+    buffCriticalStrike.addEndFunction((Buff whichBuff) -> (begin
+        OnAttack.useAdvanced( whichBuff.getTarget(), false)
+    end))
+
+    buffGrowth = new BuffType(true, true)
+
+    abilityList = new LinkedList<int>
+        ..add(GROWTH_ABILITY_ID)
+    buffGrowth.setup(abilityList, GROWTH_BUFF_ID)
+    buffGrowth.addFirstFunction((Buff whichBuff) -> (begin
+        let level = whichBuff.getLevel()
+        let caster = whichBuff.getCaster()
+        let target = whichBuff.getTarget()
+        target.wrapper()
+            ..addStatAbsoluteBonus(Stat.HP, GROWTH_HP[level-1].bonus(caster.getInt(), GROWTH_HP_BONUS).toInt())
+            ..addStatAbsoluteBonus(Stat.HR, GROWTH_HP_REGEN[level-1]*10)
+
+        target.setScale(GROWTH_SCALE)
+    end))
+
+    buffGrowth.addEndFunction((Buff whichBuff) -> (begin
+        let level = whichBuff.getLevel()
+        let caster = whichBuff.getCaster()
+        let target = whichBuff.getTarget()
+        target.wrapper()
+            ..addStatAbsoluteBonus(Stat.HP, -GROWTH_HP[level-1].bonus(caster.getInt(), GROWTH_HP_BONUS).toInt())
+            ..addStatAbsoluteBonus(Stat.HR, -GROWTH_HP_REGEN[level-1]*10)
+
+        target.setScale(1.3)
+    end))
+
+    buffGrowthFear = new BuffType(false, true)
+    abilityList = new LinkedList<int>
+        ..add(GROWTH_FEAR_ABILTIY_ID)
+    buffGrowthFear.setup(abilityList, GROWTH_FEAR_BUFF_ID)
+
+
+    CreateTrigger()
+        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
+        ..addAction(() -> (begin
+            if GetTriggerUnit().getTypeId() == 'H018' 
+                let u = GetTriggerUnit()
+                onSwitchToRanged(u, u.getAbilityLevel(ABILITY_SWITCH_WEAPONS))
+
+    end))
+
+    CreateTrigger()
+        ..registerAnyUnitEvent(EVENT_PLAYER_HERO_SKILL)
+        ..addAction(() -> (begin
+            let u = GetTriggerUnit()
+
+
+                
+
+            if GetLearnedSkill() == ABILITY_SWITCH_WEAPONS and u.getTypeId() == 'H018' 
+                let newLevel = u.getAbilityLevel(ABILITY_SWITCH_WEAPONS)
+                onRangedStats(u, newLevel - 1)
+                onMeleeStats(u, newLevel)
+        end))
+
+init
+    heroType = new HeroType(HERO_TROLL_BERSERKER)
+        ..setOnInitFunction(() -> initHeroType())
+
+   
+
+

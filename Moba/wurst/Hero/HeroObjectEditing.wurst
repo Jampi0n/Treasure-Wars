@@ -96,6 +96,27 @@ public function AbilityDefinitionIllidanChannel.setupChannel(TargetType targetTy
             this.setTargetType(lvl, 2)
             this.setOptions(lvl, 3)
 
+public function AbilityDefinition.setupIcon(string name)
+        string sNormal = name
+        string sLearn
+
+        if name.length() < 20 or not name.startsWith("ReplaceableTextures")
+            sNormal = "ReplaceableTextures\\CommandButtons\\" + sNormal
+        if not name.endsWith(".blp")
+            sNormal += ".blp"
+
+            
+        if name.startsWith("PAS")
+            sLearn = "ReplaceableTextures\\CommandButtons\\BTN" + name.substring(3) + ".blp"
+        else
+            sLearn = sNormal
+
+
+
+
+        this.setIconResearch(sLearn)
+        this.setIconNormal(sNormal)
+
 public function AbilityDefinition.setupWithHotKey(string name, string hotkey)
     this.presetHotkey(hotkey)
     this.setButtonPositionNormalY(2)

@@ -29,7 +29,7 @@ public class HeroType
     private static constant unitIdToHeroType = new HashMap<integer, HeroType>
     private int unitId
     private trigger onSpellCastTrigger = CreateTrigger()
-    private OnAttackFunction onAttack = null
+    private OnAttackFunctionAdvanced onAttack = null
     private CalculateTotalBonus bonusCalculation = null
 
     private OnCreateFunction onCreateFunction = null
@@ -76,11 +76,11 @@ public class HeroType
     function onSpellCast()
         this.onSpellCastTrigger.execute()
 
-    function onAttack(unit attacker, unit target, boolean isActive)
+    function onAttack(unit attacker, unit target, boolean isActive, boolean advanced)
         if this.onAttack != null
-            this.onAttack.onAttack(attacker, target, isActive)
+            this.onAttack.onAttack(attacker, target, isActive, advanced)
 
-    function setOnAttackFunc(OnAttackFunction onAttack)
+    function setOnAttackFunc(OnAttackFunctionAdvanced onAttack)
         this.onAttack = onAttack
 
     function addOnSpellCastFunc(code onSpellCast)

@@ -26,7 +26,7 @@ constant int array REGENERATION_HIT_POINT_REGEN = [30, 45, 60, 75, 90]
 function passive()
     let aDef =createNoEffectAbiltiy(ABILITY_REGENERATION)
         ..setupWithHotKey("Recovery", "D")
-        ..presetIcon("PASSpell_Nature_ResistNature")
+        ..setupIcon("PASSpell_Nature_ResistNature")
         ..setLearnString("Increases the Ancient's hit point regeneration.", (int lvl) -> (begin
             return "{0}% increased regeneration".format(
                 REGENERATION_HIT_POINT_REGEN[lvl-1].str())
@@ -64,7 +64,7 @@ function devourUnit()
     int array MANA = [120, 115, 110, 105, 100]
 
     let aDef = new AbilityDefinitionFarseerChainLightning(ABILITY_EAT_UNIT)
-        ..presetIcon("BTNStrengthofNature")
+        ..setupIcon("BTNStrengthofNature")
         ..setAnimationNames("spell")
         ..setupWithHotKey("Eat Unit", "Q")
         ..setLightningEffects("")
@@ -108,7 +108,7 @@ function entanglingRoots()
 
 
     let aDef = new AbilityDefinitionDreadlordCarrionSwarm(ABILITY_IMPALE)
-        ..presetIcon("BTNEntnagle")
+        ..setupIcon("BTNEntnagle")
         ..setAnimationNames("attack,2")
         ..setupWithHotKey("Entangling Roots", "W")
         ..setMissileArt("")
@@ -144,7 +144,7 @@ function root()
     real array COOLDOWN = [3, 3, 3, 3, 3]
 
     let aDef = new AbilityDefinitionBearform(ABILITY_ROOT)
-        ..presetIcon(Icons.bTNRoot)
+        ..setupIcon(Icons.bTNRoot)
         ..setIconTurnOff(Icons.bTNUproot)
         ..setupWithHotKey("Root", "E")
         ..setLearnString("Burrows the Ancient's roots into the ground, rendering it immobile, but allowing to hurl enormous rocks dealing area of effect damage. The Ancient's armor and willpower are increased while rooted.", (int lvl) -> (begin
@@ -178,7 +178,7 @@ function naturesWrath()
     int array MANA = [160, 170, 180, 190, 200]
 
     let aDef = new AbilityDefinitionBeserk(ABILITY_NATURES_WRATH)
-        ..presetIcon("BTNNaturesWrath")
+        ..setupIcon("BTNNaturesWrath")
         ..setupWithHotKey("Nature's Wrath", "R")
         ..setLearnString("Covers the ancient in a storm of sharp leaves, that deal damage to nearby enemies.", (int lvl) -> (begin
             return "{0} damage per second, lasts {1} seconds, {2} seconds cooldown.".format( 
@@ -436,7 +436,7 @@ function initHeroType()
     setupStats()
 
     heroType
-        ..setOnAttackFunc((unit attacker, unit target, boolean isActive) -> onAttack(attacker, target, isActive))
+        ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
         ..addOnSpellCastFunc(function onSpellCast)
         ..useHeroGlow()
         ..addMorph('H015')

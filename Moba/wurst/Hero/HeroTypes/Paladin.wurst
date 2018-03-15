@@ -31,7 +31,7 @@ function heavyArmored()
     let aDef = new AbilityDefinitionHardenedSkin(ABILITY_HEAVY_ARMORED)
         ..setCheckDependencies(false)
         ..setRequirements("")
-        ..presetIcon("PASHolyArmor")
+        ..setupIcon("PASHolyArmor")
         ..setupWithHotKey("Heavy Armored", "D")
         ..setLearnString("Reduces damage from incoming attacks.", (int lvl) -> (begin
             return "{0} damage reduction.".format(
@@ -57,7 +57,7 @@ function shieldBash()
 
     let aDef = new AbilityDefinitionPitLordHowlofTerror(ABILITY_SHIELD_BASH)
         ..setAnimationNames("spell,throw")
-        ..presetIcon("BTNAbility_Warrior_ShieldBash")
+        ..setupIcon("BTNAbility_Warrior_ShieldBash")
         ..setupWithHotKey("Shield Bash", "Q")
         ..setArtCaster("")
         ..setLearnString("Bashes enemies in front of him with his shield, dealing physical damage and stunning them.", (int lvl) -> (begin
@@ -95,7 +95,7 @@ function battleRoar()
 
     let aDef = new AbilityDefinitionRoar(ABILITY_BATTLE_ROAR)
         ..setAnimationNames("spell")
-        ..presetIcon("BTNBattleRoar")
+        ..setupIcon("BTNBattleRoar")
         ..setupWithHotKey("Battle Roar", "W")
         ..setLearnString("Increases nearby units' attack and movement speed.", (int lvl) -> (begin
             return "{0} attack speed, {1} movement speed, {2} seconds".format(
@@ -148,7 +148,7 @@ function holyShield()
         ..setArtCaster("")
         ..setArtTarget("")
         ..setArtEffect("")
-        ..presetIcon("BTNAngelicShield")
+        ..setupIcon("BTNAngelicShield")
         ..setupWithHotKey("Holy Shield", "E")
         ..setLearnString("Turns the target frendly hero untargetable.", (int lvl) -> (begin
             return "{0} seconds.".format(
@@ -184,7 +184,7 @@ function divinePunishment()
 
     let aDef = new AbilityDefinitionKeeperoftheGroveTranquility(ABILITY_DIVINE_PUNISHMENT)
         ..setAnimationNames("spell,channel")
-        ..presetIcon("BTNHolyBan")
+        ..setupIcon("BTNHolyBan")
         ..setupWithHotKey("Divine Punishment", "R")
         ..setLearnString(CHANNELING_SPELL + "Calls upon the power of the gods. After two seconds of channeling nearby enemies will be struck by divine magic.", (int lvl) -> (begin
             return "{0} damage.".format(
