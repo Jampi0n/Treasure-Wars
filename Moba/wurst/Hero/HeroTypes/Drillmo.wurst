@@ -95,7 +95,7 @@ constant real SPIKE_BALL_DOT_DMG_BONUS = 50
 
 BuffType buffSpikeBall
 
-constant int SPIKE_BALL_BUFF_ID = compiletime(createAuraBuff("Spike Ball", "This unit is taking damage over time.", "BTNSpikeBall2Small"))
+constant int SPIKE_BALL_BUFF_ID = compiletime(createAuraBuff("Spike Ball", "This unit is taking damage over time.", "BTNSpikeBall"))
 constant int SPIKE_BALL_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, SPIKE_BALL_BUFF_ID, "FatalWoundV2.mdx", "chest"))
 
 
@@ -106,7 +106,7 @@ function spikeBall()
 
     let aDef = new AbilityDefinitionIllidanChannel(ABILITY_SPIKE_BALL)
         ..setAnimationNames("spell,slam")
-        ..setupIcon("BTNSpikeBall2Small")
+        ..setupIcon("BTNSpikeBall")
         ..setupWithHotKey("Spike Ball", "W")
         ..setArtCaster("")
         ..setArtEffect("")
@@ -294,6 +294,7 @@ class Pull
         //destroy this.fx
         if this.pulledUnit != null
             this.pulledUnit.setPropWindow(GetUnitDefaultPropWindow(this.pulledUnit))
+            this.pulledUnit.setPos(this.pulledUnit.getPos())
 
 function onSpellCast()
     let spellId = GetSpellAbilityId()
