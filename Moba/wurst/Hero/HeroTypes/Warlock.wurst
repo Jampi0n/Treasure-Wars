@@ -231,7 +231,7 @@ function onSpellCast()
             end) )
                 ..setHitFunction((Missile missile, unit target) -> (begin
                 let missileCaster = missile.getOwner()
-                missileCaster.dealDamage(Missile.getMissileTarget(), (FIREBOLT_DAMAGE[level-1]).bonus(missileCaster.getStr(), FIREBOLT_DAMAGE_BONUS), ReductionType.MAGIC)
+                missileCaster.dealDamage(Missile.getMissileTarget(), (FIREBOLT_DAMAGE[level-1]).bonus(missileCaster.getInt(), FIREBOLT_DAMAGE_BONUS), ReductionType.MAGIC)
                 missile.destr()
 
             end) )

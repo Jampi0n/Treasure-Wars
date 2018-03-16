@@ -192,7 +192,7 @@ function itemArcaneBlade(int itemId)
             ..addStatBonusAbsolute(Stat.MP, mp)
 
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if attacker.hasItemById(convertItemId(itemId))
+            if attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
                 attacker.dealDamage(target, attacker.getMana() * manaFactor/100 * attacker.countItemsOfType(convertItemId(itemId)) , ReductionType.MAGIC)
                 target.addEffect(Abilities.farseerMissile, "chest").destr()
         end))

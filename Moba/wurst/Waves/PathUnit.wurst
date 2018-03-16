@@ -195,7 +195,7 @@ public class PathUnit
 
         //print("path: "+this.currentSubPath.toString()+" -> "+newSubPath.toString()+" -> "+moveSubPath.toString())
 
-        if(minDistance>600)
+        if(minDistance>900)
             newOrder = 1
         else
             newOrder = 2
