@@ -2,6 +2,9 @@ package UnitTypeConfig
 
 import UnitType
 import Assets
+import initlater OnAttack
+import ClosureTimers
+import General
 
 /*
     EAT UNIT: every unit that can be eaten needs a version modelName+NoDeath.mdx that has invisible death animation
@@ -16,6 +19,8 @@ public constant KNIGHT = createUnitType('h00D', 60, 60, 50, 64, Units.knight1)
 public constant MORTAR_TEAM = createUnitType('h00E', 50, 80, 25, 48, Units.mortarTeam1)
 public constant MILITIA = createUnitType('h00F', 10, 25, 25, 32, Units.militia)
 
+public constant TANK = createUnitType('h019', 100, 100, 90, 48, Units.warWagon)
+
 public constant DARK_MINION_1 = createUnitType('n00C', 10, 15, 10, 32, Units.skeleton1)
 public constant DARK_MINION_2 = createUnitType('n00D', 10, 20, 15, 32, Units.skeleton1)
 public constant DARK_MINION_3 = createUnitType('n00E', 10, 25, 20, 32, Units.skeleton1)
@@ -24,3 +29,19 @@ public constant DARK_MINION_5 = createUnitType('n00G', 10, 35, 30, 32, Units.ske
 
 
 
+init
+    doAfter(0, () -> (begin
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean _isActive) -> (begin
+            if attacker.getTypeId() == TANK
+                group nearby = CreateGroup()
+                nearby.enumUnitsInRange(target.getPos(), 250)
+
+                while(not nearby.isEmpty())
+                    unit u = FirstOfGroup(nearby)
+                    nearby.removeUnit(u)
+                    if u.isTargetable(attacker.getOwner(), false, true) and u!=target
+                        attacker.dealDamage(u, 75, ReductionType.PHYSICAL)
+
+                nearby.destr()
+        end))
+    end))

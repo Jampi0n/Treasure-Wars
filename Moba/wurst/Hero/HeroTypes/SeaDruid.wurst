@@ -21,8 +21,8 @@ constant ABILITY_MANA_SHIELD = 'AZ3E'
 constant ABILITY_RITUAL_OF_THE_SEAS = 'AZ3R'
 
 
-constant real array ANCIENT_KNOWLEDGE_HP_BONUS = [4, 3.5, 3, 2.5, 2]
-constant real array ANCIENT_KNOWLEDGE_MP_BONUS = [8, 7, 6, 5, 4]
+constant real array ANCIENT_KNOWLEDGE_HP_BONUS = [6, 5.5, 5, 4.5, 4]
+constant real array ANCIENT_KNOWLEDGE_MP_BONUS = [12, 11, 10, 9, 8]
 
 @compiletime
 function ancientKnowledge()
@@ -50,8 +50,8 @@ constant real TIDAL_FURY_WAVE_DMG_BONUS = 50
 
 @compiletime
 function tidalFury()
-    int array MANA = [90, 100, 110, 120, 130]
-    real array COOLDOWN = [6, 6, 6, 6, 6]
+    int array MANA = [100, 110, 120, 130, 140]
+    real array COOLDOWN = [8, 8, 8, 8, 8]
 
     let aDef = new AbilityDefinitionPitLordHowlofTerror(ABILITY_TIDAL_FURY)
         ..setAnimationNames("attack,slam")
@@ -97,7 +97,7 @@ BuffType buffFish
 
 @compiletime
 function giantFish()
-    int array MANA = [110, 120, 130, 140, 150]
+    int array MANA = [115, 130, 145, 160, 175]
     real array COOLDOWN = [12, 12, 12, 12, 12]
     real array RANGE = [1200, 1200, 1200, 1200, 1200]
 
@@ -128,7 +128,7 @@ function giantFish()
 
 constant int MANA_SHIELD_BUFF_ID = compiletime(createBasicBuff("Mana Shield", "Uses mana to reduce incoming damage.", Icons.bTNNeutralManaShield, Abilities.manaShieldCaster, "origin"))
 
-public constant real array MANA_SHIELD_REDUCTION = [0.2, 0.3, 0.4, 0.5]
+public constant real array MANA_SHIELD_REDUCTION = [0.2, 0.3, 0.4, 0.5, 0.6]
 public constant real array MANA_PER_DAMAGE = [0.5, 0.45, 0.4, 0.35, 0.3]
 
 public BuffType buffManaShield // the actual effect is in OnAttack
@@ -136,7 +136,7 @@ public BuffType buffManaShield // the actual effect is in OnAttack
 @compiletime
 function manaShield()
     int array MANA = [50, 50, 50, 50, 50]
-    real array MANA_PER_SECOND = [4, 4.5, 5, 5.5, 6]
+    real array MANA_PER_SECOND = [7, 8.5, 10, 11.5, 13]
     real array COOLDOWN = [5, 5, 5, 5, 5]
 
 
@@ -175,9 +175,12 @@ constant real array RITUAL_MANA_DRAIN = [30, 45, 60, 75, 90]
 constant real RITUAL_HP_DRAIN_BONUS = 100
 constant real RITUAL_MANA_DRAIN_BONUS = 60
 
-constant real array RITUAL_AOE = [700, 800, 900, 1000, 1100]
+constant real array RITUAL_AOE = [900, 900, 900, 900, 900]
 
 constant int array RITUAL_WAVE_COUNT = [6, 7, 8, 9, 10]
+
+constant int RITUAL_HP_RATIO = 10
+constant int RITUAL_MANA_RATIO = 25
 
 @compiletime
 function ritualOfTheSeas()
@@ -189,7 +192,11 @@ function ritualOfTheSeas()
         ..setAnimationNames("spell,channel")
         ..setupIcon("BTNGuardianofTheSea")
         ..setupWithHotKey("Ritual of the Seas", "R")
-        ..setLearnString(CHANNELING_SPELL + "Sends out magical energy, that drain hit points and mana from nearby enemies.", (int lvl) -> (begin
+        ..setLearnString(CHANNELING_SPELL + "Sends out magical energy, that drains hit points and mana from nearby enemies.|nThe Sea Druid gets {0}% of the hit points and {1}% of the mana drained.".format(
+            RITUAL_HP_RATIO.str(),
+            RITUAL_MANA_RATIO.str()
+        )    
+        , (int lvl) -> (begin
             return "{0} damage, {1} mana, lasts for {2} waves.".format(
                 RITUAL_HP_DRAIN[lvl-1].str()+RITUAL_HP_DRAIN_BONUS.getBonusString(C_INT),
                 RITUAL_MANA_DRAIN[lvl-1].str()+RITUAL_MANA_DRAIN_BONUS.getBonusString(C_INT),
@@ -206,10 +213,12 @@ function ritualOfTheSeas()
             ..setEffects(lvl, "X000")
 
             ..setTargetsAllowed(lvl, "none")
-            ..setTooltipNormalExtended(lvl, CHANNELING_SPELL + "Sends out magical energy, that drain {0} hit points and {1} mana from nearby enemies.|nLasts for {2} waves.".format(
+            ..setTooltipNormalExtended(lvl, CHANNELING_SPELL + "Sends out magical energy, that drain {0} hit points and {1} mana from nearby enemies.|nLasts for {2} waves.|nThe Sea Druid gets {3}% of the hit points and {4}% of the mana drained.".format(
                 RITUAL_HP_DRAIN[lvl-1].str()+RITUAL_HP_DRAIN_BONUS.getBonusString(C_INT),
                 RITUAL_MANA_DRAIN[lvl-1].str()+RITUAL_MANA_DRAIN_BONUS.getBonusString(C_INT),
-                RITUAL_WAVE_COUNT[lvl-1].str()
+                RITUAL_WAVE_COUNT[lvl-1].str(),
+                RITUAL_HP_RATIO.str(),
+                RITUAL_MANA_RATIO.str()
             ))
 
 function setupStats()
@@ -307,11 +316,11 @@ class RitualOfTheSeas
 
 
                         target.addMana(-manaDrained.reduce(target.getWp()))
-                        caster.addMana(manaDrained.reduce(target.getWp()))
+                        caster.addMana(manaDrained.reduce(target.getWp()) * RITUAL_MANA_RATIO/100 )
 
 
                         caster.dealDamage(target, hpDrained, ReductionType.MAGIC)
-                        caster.addHP( hpDrained.reduce(target.getWp()))
+                        caster.addHP( hpDrained.reduce(target.getWp()) * RITUAL_HP_RATIO/100 )
 
                     end))
                     

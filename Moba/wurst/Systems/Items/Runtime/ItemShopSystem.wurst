@@ -201,7 +201,7 @@ public class Recipe extends Item
 
         hero.removeItem(whichItem)
         whichItem.remove()
-        if hasAll
+        if hasAll or DEBUG_MODE
             
             for int req in recipe.requiredItems
                 GetItemOfTypeFromUnitBJ(hero, itemType[req].itemTypeId).remove()

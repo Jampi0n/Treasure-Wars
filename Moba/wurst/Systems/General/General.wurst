@@ -82,15 +82,15 @@ public function unit.addBuffReduced(unit caster, real duration, BuffType buffTyp
 
     return new Buff(this, caster, realDuration, buffType, level)
 
-public function real.reduce(int amount) returns real
-    return this * (1-( amount*MAGIC_REDUCTION )/( 1 + amount*MAGIC_REDUCTION ))
+public function real.reduce(int stat) returns real
+    return this * (1-( stat*MAGIC_REDUCTION )/( 1 + stat*MAGIC_REDUCTION ))
 
 public function unit.dealDamage(unit target, real amount, ReductionType reductionType)
     let damageType = reductionType == ReductionType.PHYSICAL ? DAMAGE_TYPE_NORMAL : DAMAGE_TYPE_UNIVERSAL
     real newAmount
     if(reductionType == ReductionType.MAGIC and target.isType(UNIT_TYPE_HERO))
         let wp = GetHeroAgi(target, true)
-        newAmount = amount * (1-( wp*MAGIC_REDUCTION )/( 1 + wp*MAGIC_REDUCTION ))
+        newAmount = amount.reduce(wp)
     else
         newAmount = amount
     //print(this.getName()+" damages "+target.getName()+" for "+amount.toString()+" damage.")

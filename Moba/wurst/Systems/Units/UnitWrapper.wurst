@@ -45,6 +45,8 @@ public class UnitWrapper
 
     private int array[11] statsAbsoluteBonus //default = 0
     private int array[11] statsRelativeBonus //default = 0.00
+
+    private int array[11] statsAbsoluteBonusReal //default = 0
     /*
         Use integer to avoid rounding errors. 1000 means 100% or 1
     */
@@ -73,6 +75,7 @@ public class UnitWrapper
 
         for int i = 0 to 10
             statsAbsoluteBonus[i] = 0
+            statsAbsoluteBonusReal[i] = 0
             statsRelativeBonus[i] = 0
             statsTotalBonus[i] = 0
 
@@ -188,6 +191,20 @@ public class UnitWrapper
         this.statsAbsoluteBonus[stat] = newValue
         updateTotalStatBonus(whichStat)
 
+
+    /**
+    If real values are needed, the variable statsAbsoluteBonusReal keeps track of the bonus and increases the standard int value,
+    as soon as it is over 1.
+    **/  
+    function addStatAbsoluteBonusReal(Stat whichStat, int plusValue)
+        int stat = whichStat.toInt()
+        this.statsAbsoluteBonusReal[stat] += plusValue
+        print("new value = "+statsAbsoluteBonusReal[stat].toString())
+        if this.statsAbsoluteBonusReal[stat].abs() >= 1000
+            addStatAbsoluteBonus(whichStat, (this.statsAbsoluteBonusReal[stat]/1000).toInt() )
+            print("add bonus"+(this.statsAbsoluteBonusReal[stat]/1000).toInt().toString())
+            this.statsAbsoluteBonusReal[stat] -= (this.statsAbsoluteBonusReal[stat]/1000).toInt()*1000
+            
 
     /**
     Sets the relative stat bonus and updates the total bonus.
