@@ -3,6 +3,10 @@ package BuildingTypes
 import StandardTextTags
 import PlayerControl
 import ClosureTimers
+import initlater WaveSpawn
+import initlater UnitTypeConfig
+import PathUnit
+import Path
 
 constant integer ALTAR = 'h002'
 constant integer ARCANE_SANCTUM = 'h008'
@@ -16,6 +20,7 @@ constant integer OUTER_TOWER = 'h016'
 constant integer GATE_TOWER = 'h006'
 constant integer HERO_TOWER = 'h000'
 constant integer WORKSHOP = 'h00A'
+constant int WORKSHOP_REBUILD = 'h01A'
 
 public boolean array greenBarracksAlive = [true, true, true]
 public boolean array brownBarracksAlive = [true, true, true]
@@ -24,6 +29,9 @@ public boolean array greenWorkshopAlive = [true, true]
 public boolean array brownWorkshopAlive = [true, true]
 
 constant real BARRACKS_REBUILD_TIME = 180
+constant real WORKSHOP_REBUILD_TIME = 60
+
+constant int SHOP_SHARING = 'Aall'
 
 int birth = 0
 
@@ -72,10 +80,6 @@ function onBuildingDeath()
             if(building==udg_GreenBarracks[i])
                 udg_GreenBarracks[i] = newBuilding
                 greenBarracksAlive[i] = false
-                /*doPeriodically(1, (CallbackPeriodic cb) -> (begin
-                    birth++
-                    print(birth)
-                end) )*/
                 doAfter(BARRACKS_REBUILD_TIME, () -> (begin
                     newBuilding
                         ..setAnimation("stand")
@@ -98,11 +102,19 @@ function onBuildingDeath()
         bounty = 150
         globalBounty = 150
 
+        let newBuilding = createUnit(building.getOwner(), WORKSHOP_REBUILD, building.getPos(), (270).fromDeg())
+            ..setAnimation("birth")
+            ..setTimeScale(0)
+        UnitAddType(newBuilding, UNIT_TYPE_ANCIENT)
+
         for i=0 to 1
             if(building==udg_GreenWorkShop[i])
+                udg_GreenWorkShop[i] = newBuilding
                 greenWorkshopAlive[i] = false
+
             else if(building==udg_BrownWorkShop[i])
                 brownWorkshopAlive[i] = false
+                udg_BrownWorkShop[i] = newBuilding
 
 
     else if unitId == ARCANE_VAULT
@@ -133,12 +145,87 @@ function onBuildingDeath()
 
 
 
+function onBuildingAbility()
+    let itemTypeId = GetSoldItem().getTypeId()
+    let building = GetTriggerUnit()
+    if itemTypeId == 'I000' //Rebuild Workshop
+        building.removeAbility(SHOP_SHARING)
+        building.setTimeScale(60/WORKSHOP_REBUILD_TIME)
+        doAfter(BARRACKS_REBUILD_TIME, () -> (begin
+            UnitRemoveType(building, UNIT_TYPE_ANCIENT)
+            for i = 0 to 1
+                if building == udg_BrownWorkShop[i]
+                    brownWorkshopAlive[i] = true
+                    let owner = building.getOwner()
+                    let pos = building.getPos()
+                    building.remove()
+                    udg_BrownWorkShop[i] = createUnit(owner, WORKSHOP, pos, (270).fromDeg())
+                    break
+                if building == udg_GreenWorkShop[i]
+                    greenWorkshopAlive[i] = true
+                    let owner = building.getOwner()
+                    let pos = building.getPos()
+                    building.remove()
+                    udg_BrownWorkShop[i] = createUnit(owner, WORKSHOP, pos, (270).fromDeg())
+                    break
+        end))
+    if itemTypeId == 'I001' //Siege Engine
+
+        if building == udg_GreenWorkShop[0]
+            let spawnedUnit = spawnUnit(true, TANK, gg_rct_GreenWorkShopTop.getCenter())
+            let pathUnit = new PathUnit(spawnedUnit)
+            pathUnit.setPathFirst(GREEN_TOP)
+            addLaneUnitCount(Team.TEAM1, Lane.TOP, 1)
+        else if building == udg_GreenWorkShop[1]
+            let spawnedUnit = spawnUnit(true, TANK, gg_rct_GreenWorkShopBot.getCenter())
+            let pathUnit = new PathUnit(spawnedUnit)
+            pathUnit.setPathFirst(GREEN_BOT)
+            addLaneUnitCount(Team.TEAM1, Lane.BOT, 1)
+        else if building == udg_BrownWorkShop[0]
+            let spawnedUnit = spawnUnit(false, TANK, gg_rct_BrownWorkShopTop.getCenter())
+            let pathUnit = new PathUnit(spawnedUnit)
+            pathUnit.setPathFirst(BROWN_TOP)
+            addLaneUnitCount(Team.TEAM2, Lane.TOP, 1)
+        else if building == udg_BrownWorkShop[1]
+            let spawnedUnit = spawnUnit(false, TANK, gg_rct_BrownWorkShopBot.getCenter())
+            let pathUnit = new PathUnit(spawnedUnit)
+            pathUnit.setPathFirst(BROWN_BOT)
+            addLaneUnitCount(Team.TEAM2, Lane.BOT, 1)
+
+    if itemTypeId == 'I002' //Melee Attack
+        let current = GetPlayerTechCount(building.getOwner(), 'R000', true)
+        if current == 4
+            SetPlayerTechMaxAllowed(building.getOwner(), itemTypeId, 0)
+        SetPlayerTechResearched(building.getOwner(), 'R000', current + 1)
+
+    if itemTypeId == 'I003' //Ranged Attack
+        let current = GetPlayerTechCount(building.getOwner(), 'R001', true)
+        if current == 4
+            SetPlayerTechMaxAllowed(building.getOwner(), itemTypeId, 0)
+        SetPlayerTechResearched(building.getOwner(), 'R001', current + 1)
+
+    if itemTypeId == 'I004' //Heavy Armor
+        let current = GetPlayerTechCount(building.getOwner(), 'R002', true)
+        if current == 4
+            SetPlayerTechMaxAllowed(building.getOwner(), itemTypeId, 0)
+        SetPlayerTechResearched(building.getOwner(), 'R002', current + 1)
+
+    if itemTypeId == 'I005' //Light Armor
+        let current = GetPlayerTechCount(building.getOwner(), 'R003', true)
+        if current == 4
+            SetPlayerTechMaxAllowed(building.getOwner(), itemTypeId, 0)
+        SetPlayerTechResearched(building.getOwner(), 'R003', current + 1)
+
+
+
 init
     CreateTrigger()
         ..addAction(function onBuildingDeath)
         ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
 
-
+    CreateTrigger()
+        ..addAction(function onBuildingAbility)
+        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_SELL_ITEM)
     /*group buildings = CreateGroup()
     GroupEnumUnitsOfPlayer(buildings, players[10], null)
     for unit u in buildings

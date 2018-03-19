@@ -12,7 +12,6 @@ import LinkedList
 import OnAttack
 import General
 import Assets
-import ClosureTimers
 
 constant int BLOOD_SWORD_BUFF_ID = compiletime(createAuraBuff("Blood Sword", "This unit has reduced armor and takes damage over time.", "BTNBarbarianBrutalSlasher"))
 constant int BLOOD_SWORD_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, BLOOD_SWORD_BUFF_ID, "", ""))
@@ -345,14 +344,12 @@ function itemSacrificialDagger(int itemId)
     int str = 15
     int as = 25
     int hp = 250
-    int hr = 35
-    int maxHp = 5 //trigger
-    int dur = 10 //trigger
+    int lifesteal = 15
     if compiletime
         itemId.getTypeDef()
             ..setDescription(("+ {0} strength|n+ {1}% attack speed|n+ {2} hit points|n+ {3} hit point regeneration per 10 seconds|n"+
-            "Killing a unit increases your maximum hit points by {4}% for {5} seconds.").format(
-                str.toString(), as.toString(), hp.toString(), hr.toString(), maxHp.toString(), dur.toString()
+            "Attacks restore {4}% of the damage dealt.").format(
+                str.toString(), as.toString(), hp.toString(), lifesteal.toString()
             ))
             ..setGoldCost(3450)
             ..addRequirement(ITEM_ID_DAGGER)
@@ -363,19 +360,7 @@ function itemSacrificialDagger(int itemId)
             ..addStatBonusAbsolute(Stat.STR, str)
             ..addStatBonusAbsolute(Stat.AS, as)
             ..addStatBonusAbsolute(Stat.HP, hp)
-            ..addStatBonusAbsolute(Stat.HR, hr)
 
-            
-        CreateTrigger()
-            ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
-            ..addAction(() -> (begin
-                let killer = GetKillingUnit()
-                if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and killer.hasItemById(convertItemId(ITEM_ID_SACRIFICIAL_DAGGER))
-                    killer.wrapper().addStatRelativeBonus(Stat.HP, 50)
-                    doAfter(10, () -> (begin
-                        killer.wrapper().addStatRelativeBonus(Stat.HP, -50)
-                    end))
-            end))
 
 
 @compiletime

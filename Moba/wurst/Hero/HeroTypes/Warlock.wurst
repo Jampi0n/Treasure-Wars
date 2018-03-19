@@ -310,7 +310,7 @@ function initHeroType()
         ..addPeriodicFunction((Buff whichBuff) ->(begin
             let target = whichBuff.getTarget()
             let caster = whichBuff.getCaster()
-            caster.dealDamage(target, 0.5 * SOUL_BURN_DAMAGE[caster.getAbilityLevel(ABILITY_SOUL_BURN)].bonus(caster.getInt(), SOUL_BURN_DAMAGE_BONUS), ReductionType.MAGIC)
+            caster.dealDamage(target, 0.5 * SOUL_BURN_DAMAGE[caster.getAbilityLevel(ABILITY_SOUL_BURN)-1].bonus(caster.getInt(), SOUL_BURN_DAMAGE_BONUS), ReductionType.MAGIC)
         end))
 
     CreateTrigger()

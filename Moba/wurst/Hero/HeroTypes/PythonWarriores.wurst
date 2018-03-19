@@ -79,8 +79,8 @@ function mistwalk()
                 MISTWALK_DURATION[lvl-1].toString()+MISTWALK_DURATION_BONUS.getBonusString(C_INT)))
 
 constant int array POISON_SPIT_SLOW_MS = [-30, -35, -40, -45, -50]
-constant real array POISON_SPIT_DOT = [10, 15, 20, 25, 30]
-constant real POISON_SPIT_DOT_BONUS = 25.
+constant real array POISON_SPIT_DOT = [15, 20, 25, 30, 35]
+constant real POISON_SPIT_DOT_BONUS = 30.
 constant int array POISON_SPIT_ARMOR_REDUCTION = [-5, -10, -15, -20, -25]
 constant real array POISON_SPIT_DURATION = [6, 7, 8, 9, 10]
 constant real array POISON_SPIT_AOE = [200, 225, 250, 275, 300]

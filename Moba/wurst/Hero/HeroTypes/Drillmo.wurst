@@ -198,6 +198,7 @@ function rocket()
         ..setArtEffect("")
         ..setMissileArt(Abilities.mortarMissile)
         ..setMissileArc(0.15)
+        ..setMissileSpeed(1500)
         ..setArtTarget("")
         ..setLearnString("Fires a rocket at the target enemy unit, dealing damage in an area around the target.", (int lvl) -> (begin
             return "{0} damage, {1} range, {2} seconds cooldown.".format(
