@@ -114,11 +114,11 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
 
         // wand of blood - ITEM
         if source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_WAND_OF_BLOOD)) and not target.isType(UNIT_TYPE_STRUCTURE)
-            source.addHP(currentDamage * 0.1)
+            source.addHP(currentDamage * 0.05)
 
         // sacrifical dagger - ITEM
         if isAttack and source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_SACRIFICIAL_DAGGER)) and not target.isType(UNIT_TYPE_STRUCTURE)
-            source.addHP(currentDamage * 0.15)
+            source.addHP(currentDamage * 0.10)
 
         // void armor - ITEM
         if target.isType(UNIT_TYPE_HERO) and target.hasItemById(convertItemId(ITEM_ID_VOID_ARMOR))

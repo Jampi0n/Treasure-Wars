@@ -2,7 +2,6 @@ package ShopMagical3
 
 import initlater ItemShopSystem
 import ItemShopInitialize
-import Stats
 import ItemIdGeneration
 import Assets
 import General
@@ -137,8 +136,8 @@ function itemWandOfDeath(int itemId)
             
 
 function itemWandOfBlood(int itemId)
-    int intel = 30
-    int lifesteal = 10
+    int intel = 35
+    int lifesteal = 5
     int hp = 200
     if compiletime
         itemId.getTypeDef()

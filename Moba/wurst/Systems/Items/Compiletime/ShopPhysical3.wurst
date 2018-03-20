@@ -3,7 +3,6 @@ package ShopPhysical3
 import initlater ItemShopSystem
 import ItemShopInitialize
 import UnitWrapper
-import Stats
 import ItemIdGeneration
 import Buff
 import BuffTypeConfig
@@ -344,7 +343,7 @@ function itemSacrificialDagger(int itemId)
     int str = 15
     int as = 25
     int hp = 250
-    int lifesteal = 15
+    int lifesteal = 10
     if compiletime
         itemId.getTypeDef()
             ..setDescription(("+ {0} strength|n+ {1}% attack speed|n+ {2} hit points|n+ {3} hit point regeneration per 10 seconds|n"+
