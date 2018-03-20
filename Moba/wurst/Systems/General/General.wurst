@@ -11,7 +11,9 @@ import UnitType
 import initlater ItemIdGeneration
 import initlater ItemShopSystem
 import public Constants
-
+import Assets
+import DamageDetection
+import HashMap
 
 
 
@@ -134,6 +136,68 @@ public function player.getFullName() returns string
 
 public function player.getFullColoredName() returns string
     return fromPlayer(this).toColorString()+this.getFullName()+"|r"
+
+
+public class ChannelTeleport
+
+    private unit caster
+    private vec2 targetPos = vec2(0,0)
+    private effect channelEffectCaster
+    private effect channelEffectTarget
+    private static constant unitMap = new HashMap<unit, ChannelTeleport>
+    private boolean alive = true
+    private real maxDamage
+    private real damage = 0
+
+
+    construct(unit caster, vec2 targetPos, real dur, real maxDamage)
+        this.caster = caster
+        this.targetPos = targetPos
+        this.maxDamage = maxDamage
+        create(dur)
+
+    private function create(real dur)
+        this.caster.pause()
+        this.channelEffectCaster = addEffect(Abilities.massTeleportTo, this.caster.getPos())
+        this.channelEffectTarget = addEffect(Abilities.massTeleportTo, this.targetPos)
+        addOnDamageFunc(Condition(function onDamage))
+        unitMap.put(this.caster, this)
+        doAfter(dur, () ->(begin
+            if this.alive
+                this.onTeleport()
+            else
+                destroy this
+        end))
+
+    private static function onDamage()
+        let teleport = unitMap.get(GetTriggerUnit())
+        if teleport == null
+            return
+        teleport.damage += GetEventDamage()
+        if teleport.maxDamage > -0.5 and teleport.damage > teleport.maxDamage
+            teleport.remove()
+        else
+            let u = GetTriggerUnit()
+            if BuffList.hasBuffType(u, STUNNED) or BuffList.hasBuffType(u, SILENCED) or not u.isMovable()
+                teleport.remove()
+        
+    private function onTeleport()
+        addEffect(Abilities.massTeleportCaster, this.caster.getPos()).destr()
+        addEffect(Abilities.massTeleportTarget, this.targetPos).destr()
+        this.caster.setPos(targetPos)
+        this.remove()
+        destroy this
+
+    private function remove()
+        this.alive = false
+        this.channelEffectCaster.destr()
+        this.channelEffectTarget.destr()
+        unitMap.remove(this.caster)
+        this.caster.unpause()
+
+
+
+
 
 init
     Knockback3.destroyDestructableSpeedThreshold = 999999999.
