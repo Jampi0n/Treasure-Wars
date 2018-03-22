@@ -103,6 +103,8 @@ function allRandom()
     allHeroesPicked()
 
 function allPick()
+    int pickTime = DEBUG_MODE?10:60
+    print("|cffffcc00All Pick was chosen. You have " + pickTime.toString() + " seconds to pick a Hero!|r")
 
     tavern[0] = createUnit(players[15], 'n002', gg_rct_Tavern0.getCenter(), angle(0) )
     tavern[0].setColor(PLAYER_COLOR_RED)
@@ -128,10 +130,8 @@ function allPick()
         ..addAction(function onPick)
         ..registerEnterRegion(pickRegion, null)
 
-    let pickTime = DEBUG_MODE?10.:30.
-
     pickTimer = getTimer()
-        ..start(pickTime, function allPickEnd)
+        ..start(pickTime.toReal(), function allPickEnd)
 
     timerWindow = CreateTimerDialog(pickTimer)
     TimerDialogSetTitle(timerWindow,"Pick hero:")
@@ -182,7 +182,6 @@ function endPickMode()
     chooseModeTimer.release()
 
     if(pickMode == PickMode.ALLPICK)
-        print("|cffffcc00All Pick was chosen. You have 30 seconds to pick a Hero!|r")
         allPick()
     if(pickMode == PickMode.ALLRANDOM)
         print("|cffffcc00All Random was chosen. Heroes will be random!|r")

@@ -244,11 +244,13 @@ function onSpellCast()
             group nearby = CreateGroup()
             nearby.enumUnitsInRange(pos, METEOR_AOE[level-1])
         
+            let dmg = METEOR_DAMAGE[level - 1].bonus(caster.getInt(), METEOR_DAMAGE_BONUS)
+
             while(not nearby.isEmpty())
                 unit target = FirstOfGroup(nearby)
                 nearby.removeUnit(target)
                 if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
-                    caster.dealDamage(target, METEOR_DAMAGE[level - 1].bonus(caster.getInt(), METEOR_DAMAGE_BONUS), ReductionType.MAGIC)
+                    caster.dealDamage(target, dmg, ReductionType.MAGIC)
                     target.addBuffReduced(caster, METEOR_STUN_DURATION[level-1], STUNNED, 1)
             nearby.destr()
         end))
@@ -280,12 +282,14 @@ function initHeroType()
 
             group nearby = CreateGroup()
             nearby.enumUnitsInRange(pos, RAY_OF_DEATH_AFTER_AOE)
-        
+
+            let dmg = RAY_OF_DEATH_AFTER_DAMAGE[caster.getAbilityLevel(ABILITY_RAY_OF_DEATH)-1].bonus(caster.getInt(), RAY_OF_DEATH_AFTER_DAMAGE_BONUS)
+
             while(not nearby.isEmpty())
                 unit target = FirstOfGroup(nearby)
                 nearby.removeUnit(target)
                 if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
-                    caster.dealDamage(target, RAY_OF_DEATH_AFTER_DAMAGE[caster.getAbilityLevel(ABILITY_RAY_OF_DEATH)-1].bonus(caster.getInt(), RAY_OF_DEATH_AFTER_DAMAGE_BONUS), ReductionType.MAGIC)
+                    caster.dealDamage(target, dmg, ReductionType.MAGIC)
         
             nearby.destr()
 
@@ -326,12 +330,13 @@ function initHeroType()
                 group nearby = CreateGroup()
                 nearby.enumUnitsInRange(pos, SOUL_BURN_AOE)
 
+                let dur = whichBuff.getRemaining()
 
                 while(not nearby.isEmpty())
                     unit target = FirstOfGroup(nearby)
                     nearby.removeUnit(target)
                     if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true) and not BuffList.hasBuffType(target, buffSoulBurn)
-                        target.addBuffReduced(caster, whichBuff.getRemaining(), buffSoulBurn, level)
+                        target.addBuffReduced(caster, dur, buffSoulBurn, level)
             
                 nearby.destr()
     end))

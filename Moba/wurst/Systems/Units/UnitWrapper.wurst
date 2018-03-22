@@ -199,10 +199,8 @@ public class UnitWrapper
     function addStatAbsoluteBonusReal(Stat whichStat, int plusValue)
         int stat = whichStat.toInt()
         this.statsAbsoluteBonusReal[stat] += plusValue
-        print("new value = "+statsAbsoluteBonusReal[stat].toString())
         if this.statsAbsoluteBonusReal[stat].abs() >= 1000
             addStatAbsoluteBonus(whichStat, (this.statsAbsoluteBonusReal[stat]/1000).toInt() )
-            print("add bonus"+(this.statsAbsoluteBonusReal[stat]/1000).toInt().toString())
             this.statsAbsoluteBonusReal[stat] -= (this.statsAbsoluteBonusReal[stat]/1000).toInt()*1000
             
 

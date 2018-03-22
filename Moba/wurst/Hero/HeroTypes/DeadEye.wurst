@@ -164,7 +164,7 @@ function deathpact()
     let aDef = new AbilityDefinitionRoar(ABILITY_DEATH_PACT)
         ..setLevels(5)
         ..setAnimationNames("spell")
-        ..setupIcon("BTNDeathPact")
+        ..setupIcon("BTNSkullSpirits")
         ..setupWithHotKey("Death Pact", "R")
         ..setArtCaster("Abilities\\Spells\\Undead\\DeathPact\\DeathPactCaster.mdl")
 
@@ -263,12 +263,14 @@ function onSpellCast()
         group nearby = CreateGroup()
         nearby.enumUnitsInRange(caster.getPos(), 300.+100*level)
 
+        let dur = TERROR_DURATION[level-1].bonus(caster.getInt(), TERROR_DURATION_BONUS)
+
         while(not nearby.isEmpty())
             unit target = FirstOfGroup(nearby)
             nearby.removeUnit(target)
             if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
-                target.addBuffReduced( caster, TERROR_DURATION[level-1].bonus(caster.getInt(), TERROR_DURATION_BONUS) , MISS, 1)
-                target.addBuffReduced( caster, TERROR_DURATION[level-1].bonus(caster.getInt(), TERROR_DURATION_BONUS), BUFF_TERROR, level)
+                target.addBuffReduced( caster, dur, MISS, 1)
+                target.addBuffReduced( caster, dur, BUFF_TERROR, level)
 
         nearby.destr()
 

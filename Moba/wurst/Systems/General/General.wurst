@@ -69,23 +69,23 @@ public function int.factor(int statValue, real atHundred) returns real
 public function real.bonus(int statValue, real atHundred) returns real
     return this + atHundred*statValue/100
 
-public function int.bonus(int statValue, real atHundred) returns real
-    return this.toReal().bonus(statValue, atHundred)
+public function int.bonus(int statValue, int atHundred) returns real
+    return this.toReal().bonus(statValue, atHundred.toReal())
 
+public function real.reduce(int stat) returns real
+    return this * (1-( stat*MAGIC_REDUCTION )/( 1 + stat*MAGIC_REDUCTION ))
 
 public function unit.addBuff(unit caster, real duration, BuffType buffType, int level) returns Buff
     return new Buff(this, caster, duration, buffType, level)
 
 public function unit.addBuffReduced(unit caster, real duration, BuffType buffType, int level) returns Buff
-    let wp = GetHeroAgi(this, true)
-    real realDuration =  duration * (1-( wp*MAGIC_REDUCTION )/( 1 + wp*MAGIC_REDUCTION ))
+    //buff reduction only uses half of the wp, so it reduces not as much as it reduces damage
+    real realDuration =  duration.reduce( (this.getWp()/2).toInt() )
     if this.hasItemById(convertItemId(ITEM_ID_ARCANE_SHIELD))
         realDuration = realDuration * 0.85
 
     return new Buff(this, caster, realDuration, buffType, level)
 
-public function real.reduce(int stat) returns real
-    return this * (1-( stat*MAGIC_REDUCTION )/( 1 + stat*MAGIC_REDUCTION ))
 
 public function unit.dealDamage(unit target, real amount, ReductionType reductionType)
     let damageType = reductionType == ReductionType.PHYSICAL ? DAMAGE_TYPE_NORMAL : DAMAGE_TYPE_UNIVERSAL

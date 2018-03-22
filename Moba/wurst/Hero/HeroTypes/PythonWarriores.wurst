@@ -180,7 +180,7 @@ function empoweredStrike()
 constant real array PARALYZING_STRIKE_DAMAGE = [200,240,280,320,360]
 constant real PARALYZING_STRIKE_DAMAGE_BONUS = 300
 constant real array PARALYZING_STRIKE_DURATION = [1.5, 1.75, 2, 2.25, 2.5]
-constant real PARALYZING_STRIKE_DURATION_BONUS = 2
+constant real PARALYZING_STRIKE_DURATION_BONUS = 1
 
 @compiletime
 function paralyzingStrike()
