@@ -282,7 +282,7 @@ function itemWarHorn(int itemId)
     int adBonus = 30
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("Increases nearby unit's attack damage by {0}%.".format(
+            ..setDescription("Increases nearby unit's strength by {0}%.".format(
                 adBonus.toString()
             ))
             ..setGoldCost(2500)
