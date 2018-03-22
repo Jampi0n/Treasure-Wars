@@ -304,13 +304,19 @@ function itemWarHorn(int itemId)
             ..add(WAR_HORN_ABILTIY_ID)
         BUFF_WAR_HORN.setup(abilityList, WAR_HORN_BUFF_ID)
         BUFF_WAR_HORN.addFirstFunction((Buff thisBuff) -> (begin
-            thisBuff.getTarget().wrapper()
-                ..addStatRelativeBonus(Stat.AD, adBonus*10)
+            let target = thisBuff.getTarget()
+            if target.isType(UNIT_TYPE_HERO)
+                target.wrapper().addStatRelativeBonus(Stat.STR, adBonus*10)
+            else
+                target.wrapper().addStatRelativeBonus(Stat.AD, adBonus*10)
         end))
 
         BUFF_WAR_HORN.addEndFunction((Buff thisBuff) -> (begin
-            thisBuff.getTarget().wrapper()
-                ..addStatRelativeBonus(Stat.AD, -adBonus*10)
+            let target = thisBuff.getTarget()
+            if target.isType(UNIT_TYPE_HERO)
+                target.wrapper().addStatRelativeBonus(Stat.STR, -adBonus*10)
+            else
+                target.wrapper().addStatRelativeBonus(Stat.AD, -adBonus*10)
         end))
 
 function itemHeavyHelmet(int itemId)
@@ -329,24 +335,24 @@ function itemHeavyHelmet(int itemId)
             ..addStatBonusAbsolute(Stat.HR, hr)
 
 function itemRavenSword(int itemId)
-    int dmg = 20
+    int voidDmg = 15
     int as = 15
+    int str = 10
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} strength|n+ {1}% attack speed|nDoes not increase attack damage, but deals {0} additional void damage instead.".format(
-                dmg.toString(), as.toString()
+            ..setDescription("+ {0} strength|n+ {1}% attack speed|nDeals {2} additional void damage.".format(
+                str.toString(), as.toString(), voidDmg.toString()
             ))
             ..setGoldCost(1900)
             ..addRequirement(ITEM_ID_DAGGER)
             ..addRequirement(ITEM_ID_GEM_OF_DARKNESS)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.STR, dmg)
-            ..addStatBonusAbsolute(Stat.AD, -dmg)
+            ..addStatBonusAbsolute(Stat.STR, str)
             ..addStatBonusAbsolute(Stat.AS, as)
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             if attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
-                attacker.dealDamage(target, dmg.toReal() * attacker.countItemsOfType(convertItemId(itemId)) , ReductionType.NONE)
+                attacker.dealDamage(target, voidDmg.toReal() * attacker.countItemsOfType(convertItemId(itemId)) , ReductionType.NONE)
                 target.addEffect(Abilities.avengerMissile, "chest").destr()
         end))
 

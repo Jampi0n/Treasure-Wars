@@ -37,7 +37,7 @@ function focus()
                 FOCUS_BONUS.str(), FOCUS_DURATION[lvl-1].str()
             ))
 
-public constant real array CRITICAL_DAMAGE_MULT = [100, 150, 200, 250, 300]
+public constant real array CRITICAL_DAMAGE_MULT = [100, 125, 150, 175, 200]
 
 constant int CRITICAL_BUFF_ID = compiletime(createAuraBuff("Critical Strike", "This unit's next attack will deal more damage.", "BTN_CR_BLOOD"))
 constant int CRITICAL_ABILITY_ID = compiletime(createPositiveBuffAbility(5, CRITICAL_BUFF_ID, "", ""))
@@ -291,15 +291,15 @@ function onSpellCast()
 function setupStats()
     heroType
         //..setStat(Stat.AD, 5, 40)
-        ..setStat(Stat.AR, 7, 21)
-        ..setStat(Stat.AS, 23, 58)
-        ..setStat(Stat.HP, 11, 42)
+        ..setStat(Stat.AR, 7, 19)
+        ..setStat(Stat.AS, 19, 48)
+        ..setStat(Stat.HP, 11, 39)
         ..setStat(Stat.HR, 15, 34)
         ..setStat(Stat.MP, 10, 27)
         ..setStat(Stat.MR, 12, 37)
         ..setStat(Stat.MS, 12, 41)
-        ..setStat(Stat.STR, 17, 78)
-        ..setStat(Stat.AGI, 7, 17)
+        ..setStat(Stat.STR, 17, 69)
+        ..setStat(Stat.AGI, 7, 16)
         ..setStat(Stat.INT, 4, 11)
 
 function initHeroType()
