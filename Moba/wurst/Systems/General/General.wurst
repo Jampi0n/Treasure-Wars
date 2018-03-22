@@ -11,7 +11,9 @@ import UnitType
 import initlater ItemIdGeneration
 import initlater ItemShopSystem
 import public Constants
-
+import Assets
+import DamageDetection
+import HashMap
 
 
 
@@ -67,30 +69,30 @@ public function int.factor(int statValue, real atHundred) returns real
 public function real.bonus(int statValue, real atHundred) returns real
     return this + atHundred*statValue/100
 
-public function int.bonus(int statValue, real atHundred) returns real
-    return this.toReal().bonus(statValue, atHundred)
+public function int.bonus(int statValue, int atHundred) returns real
+    return this.toReal().bonus(statValue, atHundred.toReal())
 
+public function real.reduce(int stat) returns real
+    return this * (1-( stat*MAGIC_REDUCTION )/( 1 + stat*MAGIC_REDUCTION ))
 
 public function unit.addBuff(unit caster, real duration, BuffType buffType, int level) returns Buff
     return new Buff(this, caster, duration, buffType, level)
 
 public function unit.addBuffReduced(unit caster, real duration, BuffType buffType, int level) returns Buff
-    let wp = GetHeroAgi(this, true)
-    real realDuration =  duration * (1-( wp*MAGIC_REDUCTION )/( 1 + wp*MAGIC_REDUCTION ))
+    //buff reduction only uses half of the wp, so it reduces not as much as it reduces damage
+    real realDuration =  duration.reduce( (this.getWp()/2).toInt() )
     if this.hasItemById(convertItemId(ITEM_ID_ARCANE_SHIELD))
         realDuration = realDuration * 0.85
 
     return new Buff(this, caster, realDuration, buffType, level)
 
-public function real.reduce(int amount) returns real
-    return this * (1-( amount*MAGIC_REDUCTION )/( 1 + amount*MAGIC_REDUCTION ))
 
 public function unit.dealDamage(unit target, real amount, ReductionType reductionType)
     let damageType = reductionType == ReductionType.PHYSICAL ? DAMAGE_TYPE_NORMAL : DAMAGE_TYPE_UNIVERSAL
     real newAmount
     if(reductionType == ReductionType.MAGIC and target.isType(UNIT_TYPE_HERO))
         let wp = GetHeroAgi(target, true)
-        newAmount = amount * (1-( wp*MAGIC_REDUCTION )/( 1 + wp*MAGIC_REDUCTION ))
+        newAmount = amount.reduce(wp)
     else
         newAmount = amount
     //print(this.getName()+" damages "+target.getName()+" for "+amount.toString()+" damage.")
@@ -134,6 +136,68 @@ public function player.getFullName() returns string
 
 public function player.getFullColoredName() returns string
     return fromPlayer(this).toColorString()+this.getFullName()+"|r"
+
+
+public class ChannelTeleport
+
+    private unit caster
+    private vec2 targetPos = vec2(0,0)
+    private effect channelEffectCaster
+    private effect channelEffectTarget
+    private static constant unitMap = new HashMap<unit, ChannelTeleport>
+    private boolean alive = true
+    private real maxDamage
+    private real damage = 0
+
+
+    construct(unit caster, vec2 targetPos, real dur, real maxDamage)
+        this.caster = caster
+        this.targetPos = targetPos
+        this.maxDamage = maxDamage
+        create(dur)
+
+    private function create(real dur)
+        this.caster.pause()
+        this.channelEffectCaster = addEffect(Abilities.massTeleportTo, this.caster.getPos())
+        this.channelEffectTarget = addEffect(Abilities.massTeleportTo, this.targetPos)
+        addOnDamageFunc(Condition(function onDamage))
+        unitMap.put(this.caster, this)
+        doAfter(dur, () ->(begin
+            if this.alive
+                this.onTeleport()
+            else
+                destroy this
+        end))
+
+    private static function onDamage()
+        let teleport = unitMap.get(GetTriggerUnit())
+        if teleport == null
+            return
+        teleport.damage += GetEventDamage()
+        if teleport.maxDamage > -0.5 and teleport.damage > teleport.maxDamage
+            teleport.remove()
+        else
+            let u = GetTriggerUnit()
+            if BuffList.hasBuffType(u, STUNNED) or BuffList.hasBuffType(u, SILENCED) or not u.isMovable()
+                teleport.remove()
+        
+    private function onTeleport()
+        addEffect(Abilities.massTeleportCaster, this.caster.getPos()).destr()
+        addEffect(Abilities.massTeleportTarget, this.targetPos).destr()
+        this.caster.setPos(targetPos)
+        this.remove()
+        destroy this
+
+    private function remove()
+        this.alive = false
+        this.channelEffectCaster.destr()
+        this.channelEffectTarget.destr()
+        unitMap.remove(this.caster)
+        this.caster.unpause()
+
+
+
+
 
 init
     Knockback3.destroyDestructableSpeedThreshold = 999999999.

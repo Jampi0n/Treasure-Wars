@@ -2,7 +2,6 @@ package ShopMagical3
 
 import initlater ItemShopSystem
 import ItemShopInitialize
-import Stats
 import ItemIdGeneration
 import Assets
 import General
@@ -116,13 +115,13 @@ function itemBlessedGoblet(int itemId)
             
 
 function itemWandOfDeath(int itemId)
-    int intel = 16
-    int voidDmg = 30
-    int manaDrain = 15
+    int intel = 42
+    int dmgFactor = 2
+    int duration = 10
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} intelligence|nDrains {1} mana and deals {2} void damage per attack.".format(
-                intel.toString(), manaDrain.toString(), voidDmg.toString()
+            ..setDescription("+ {0} intelligence|nDealing damage, reduces the target's willpower by {1}% of the damage dealt for {2} seconds.".format(
+                intel.toString(), dmgFactor.toString(), duration.toString()
             ))
             ..setGoldCost(3900)
             ..addRequirement(ITEM_ID_SCEPTER_OF_THE_TIDES)
@@ -133,26 +132,17 @@ function itemWandOfDeath(int itemId)
             ..addStatBonusAbsolute(Stat.INT, intel)
 
 
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
-                let manaDrained = min(manaDrain.toReal() * target.countItemsOfType(convertItemId(itemId)) , target.getMana())
-                attacker.dealDamage(target, voidDmg.toReal() * attacker.countItemsOfType(convertItemId(itemId)) , ReductionType.NONE)
-                attacker.addMana(manaDrained)
-                target.addMana(-manaDrained)
-                target.addEffect(Abilities.avengerMissile, "chest").destr()
-                target.addEffect(Abilities.arcaneTowerAttack, "chest").destr()
-        end))
+
             
 
 function itemWandOfBlood(int itemId)
-    int intel = 12
-    int hpDrain = 16
-    int manaDrain = 10
+    int intel = 35
+    int lifesteal = 5
     int hp = 200
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} intelligence|n+ {1} hit points|nDrains {2} hit points and {3} mana points per attack.".format(
-                intel.toString(), hp.toString(), hpDrain.toString(), manaDrain.toString()
+            ..setDescription("+ {0} intelligence|n+ {1} hit points|nDealing damage restores hit points equal to {2} of the damage dealt.".format(
+                intel.toString(), hp.toString(), lifesteal.toString()
             ))
             ..setGoldCost(3650)
             ..addRequirement(ITEM_ID_MAGIC_STAFF)
@@ -163,25 +153,16 @@ function itemWandOfBlood(int itemId)
             ..addStatBonusAbsolute(Stat.HP, hp)
             ..addStatBonusAbsolute(Stat.INT, intel)
 
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
-                let manaDrained = min(manaDrain.toReal() * target.countItemsOfType(convertItemId(itemId)) , target.getMana())
-                attacker.dealDamage(target, hpDrain.toReal() * attacker.countItemsOfType(convertItemId(itemId)) , ReductionType.MAGIC)
-                attacker.addHP(hpDrain.toReal())
-                attacker.addMana(manaDrained)
-                target.addMana(-manaDrained)
-                target.addEffect(Abilities.spellBreakerAttack, "chest").destr()
-                target.addEffect(Abilities.arcaneTowerAttack, "chest").destr()
-        end))
             
 function itemArcaneBlade(int itemId)
     int as = 20
     int mp = 250
-    int manaFactor = 6
+    int dmg = 20
+    int manaFactor = 4
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} mana points|n+ {1}% attack speed|nDeals {2}% of your current mana as magic damage.".format(
-                mp.toString(), as.toString(), manaFactor.toString()
+            ..setDescription("+ {0} mana points|n+ {1}% attack speed|nDeals {2} + {3}% of your current mana as magic damage.".format(
+                mp.toString(), as.toString(), dmg.toString(), manaFactor.toString()
             ))
             ..setGoldCost(3800)
             ..addRequirement(ITEM_ID_RAVEN_SWORD)
@@ -193,19 +174,19 @@ function itemArcaneBlade(int itemId)
 
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             if attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
-                attacker.dealDamage(target, attacker.getMana() * manaFactor/100 * attacker.countItemsOfType(convertItemId(itemId)) , ReductionType.MAGIC)
+                attacker.dealDamage(target, (dmg + attacker.getMana() * manaFactor/100) * attacker.countItemsOfType(convertItemId(itemId)) , ReductionType.MAGIC)
                 target.addEffect(Abilities.farseerMissile, "chest").destr()
         end))
 
 function itemVampiricGoblet(int itemId)
-    int intel = 20
+    int intel = 30
     int hp = 150
     int mp = 150
-    int hpFactor = 10 // -> onAttack
-    int manaFactor = 5 // -> onAttack
+    int hpFactor = 30 // -> onAttack
+    int manaFactor = 15 // -> onAttack
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} mana points|n +{1} hit point|n+ {2} intelligence|nDealing ability damage restores {3}% of the damage dealt as hitpoints and {4}% as mana points. This effect does not stack.".format(
+            ..setDescription("+ {0} mana points|n +{1} hit point|n+ {2} intelligence|nDealing ability damage against heroes restores {3}% of the damage dealt as hitpoints and {4}% as mana points. This effect does not stack.".format(
                 mp.toString(), hp.toString(), intel.toString(), hpFactor.toString(), manaFactor.toString()
             ))
             ..setGoldCost(4750)

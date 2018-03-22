@@ -20,16 +20,16 @@ constant ABILITY_ROCKET = 'AZ6R'
 function setupStats()
     heroType
         //..setStat(Stat.AD, 5, 40)
-        ..setStat(Stat.AR, 6, 23)
-        ..setStat(Stat.AS, 24, 63)
-        ..setStat(Stat.HP, 11, 42)
+        ..setStat(Stat.AR, 13, 37)
+        ..setStat(Stat.AS, 14, 32)
+        ..setStat(Stat.HP, 13, 62)
         ..setStat(Stat.HR, 7, 26)
-        ..setStat(Stat.MP, 17, 45)
-        ..setStat(Stat.MR, 14, 36)
-        ..setStat(Stat.MS, 15, 43)
-        ..setStat(Stat.STR, 19, 44)
-        ..setStat(Stat.AGI, 5, 14)
-        ..setStat(Stat.INT, 7, 24)
+        ..setStat(Stat.MP, 17, 47)
+        ..setStat(Stat.MR, 14, 38)
+        ..setStat(Stat.MS, 12, 34)
+        ..setStat(Stat.STR, 20, 54)
+        ..setStat(Stat.AGI, 12, 32)
+        ..setStat(Stat.INT, 6, 21)
 
 constant int array OVERCHARGE_ATTACK_SPEED = [20, 30, 40, 50, 60]
 
@@ -50,7 +50,7 @@ function passive()
             )
 
 constant real array PULL_DAMAGE = [25, 75, 125, 175, 225]
-constant real PULL_DAMAGE_BONUS = 80
+constant real PULL_DAMAGE_BONUS = 120
 constant real array PULL_COOLDOWN = [18, 16, 14, 12, 10]
 
 @compiletime
@@ -86,12 +86,12 @@ function pull()
                 PULL_DAMAGE[lvl-1].str()+PULL_DAMAGE_BONUS.getBonusString(C_STR)
             ))
 
-constant real array SPIKE_BALL_DMG = [40, 60, 80, 100, 120]
-constant real SPIKE_BALL_DMG_BONUS = 50
+constant real array SPIKE_BALL_DMG = [60, 90, 120, 150, 180]
+constant real SPIKE_BALL_DMG_BONUS = 100
 constant real array SPIKE_BALL_STUN = [1.4, 1.7, 2, 2.3, 2.6]
 constant real array SPIKE_BALL_DOT_DURATION = [4, 4, 4, 4, 4]
 constant real array SPIKE_BALL_DOT_DMG = [40, 60, 80, 100, 120]
-constant real SPIKE_BALL_DOT_DMG_BONUS = 50
+constant real SPIKE_BALL_DOT_DMG_BONUS = 60
 
 BuffType buffSpikeBall
 
@@ -136,7 +136,7 @@ function spikeBall()
             ))
 
 constant int array SPEED_BOOST = [20, 35, 50, 65, 80]
-constant real SPEED_BOOST_BONUS = 40
+constant int SPEED_BOOST_BONUS = 40
 constant real array SPEED_BOOST_DURATION = [6, 8, 10, 12, 14]
 
 constant int SPEED_BOOST_BUFF_ID = compiletime(createAuraBuff("Speed Boost", "This unit has increased movement speed.", "BTNGoblinRocketBoots"))
@@ -180,8 +180,8 @@ function speedBoost()
             ))
 
 constant int ROCKET_BUFF_ID = compiletime(createDummyBuff())
-constant real array ROCKET_DMG = [200, 225, 250, 275, 300]
-constant real ROCKET_DMG_BONUS = 200
+constant real array ROCKET_DMG = [200, 240, 280, 320, 360]
+constant real ROCKET_DMG_BONUS = 250
 constant real array ROCKET_RANGE = [2000, 3000, 4000, 5000, 6000]
 constant real array ROCKET_COOLDOWN = [40, 35, 30, 25, 20]
 
@@ -198,6 +198,7 @@ function rocket()
         ..setArtEffect("")
         ..setMissileArt(Abilities.mortarMissile)
         ..setMissileArc(0.15)
+        ..setMissileSpeed(1500)
         ..setArtTarget("")
         ..setLearnString("Fires a rocket at the target enemy unit, dealing damage in an area around the target.", (int lvl) -> (begin
             return "{0} damage, {1} range, {2} seconds cooldown.".format(
@@ -311,11 +312,13 @@ function onSpellCast()
                 group nearby = CreateGroup()
                 nearby.enumUnitsInRange(ballPos, 250)
 
+                let dmg = SPIKE_BALL_DMG[level-1].bonus(caster.getStr(), SPIKE_BALL_DMG_BONUS)
+
                 while(not nearby.isEmpty())
                     unit target = FirstOfGroup(nearby)
                     nearby.removeUnit(target)
                     if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
-                        caster.dealDamage(target, SPIKE_BALL_DMG[level-1].bonus(caster.getStr(), SPIKE_BALL_DMG_BONUS), ReductionType.PHYSICAL)
+                        caster.dealDamage(target, dmg, ReductionType.PHYSICAL)
                         target.addBuffReduced( caster, SPIKE_BALL_STUN[level-1], STUNNED, 1)
                         target.addBuffReduced( caster, SPIKE_BALL_DOT_DURATION[level-1], buffSpikeBall, level)
                 nearby.destr()
@@ -334,11 +337,13 @@ function onDamage()
         group nearby = CreateGroup()
         nearby.enumUnitsInRange(u.getPos(), 250)
 
+        let dmg = ROCKET_DMG[level-1].bonus(caster.getStr(), ROCKET_DMG_BONUS)
+
         while(not nearby.isEmpty())
             unit target = FirstOfGroup(nearby)
             nearby.removeUnit(target)
             if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
-                caster.dealDamage(target, ROCKET_DMG[level-1].bonus(caster.getStr(), ROCKET_DMG_BONUS), ReductionType.PHYSICAL)
+                caster.dealDamage(target, dmg, ReductionType.PHYSICAL)
         nearby.destr()
 
         

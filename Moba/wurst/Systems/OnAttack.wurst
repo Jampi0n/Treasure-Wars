@@ -86,7 +86,7 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
 
 
         // critical strike - TROLL BERSERKER
-        if advanced and source.isType(UNIT_TYPE_HERO) and BuffList.hasBuffType(source, buffCriticalStrike)
+        if advanced and source.isType(UNIT_TYPE_HERO) and BuffList.hasBuffType(source, buffCriticalStrike) and not target.isType(UNIT_TYPE_STRUCTURE)
             let critical = BuffList.getBuffOfType(source, buffCriticalStrike)
             currentDamage = currentDamage * (100 + CRITICAL_DAMAGE_MULT[critical.getLevel()-1])/100
             createCriticalStrikeTextTag(target, currentDamage.toInt())
@@ -108,14 +108,30 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
             currentDamage = currentDamage * (1.-MANA_SHIELD_REDUCTION[level-1])
     
         // vampiric goblet - ITEM
-        if not isAttack and source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_VAMPIRIC_GOBLET))
-            source.addHP(currentDamage * 0.1)
-            source.addMana(currentDamage * 0.05)
-    
+        if not isAttack and source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_VAMPIRIC_GOBLET)) and target.isType(UNIT_TYPE_HERO)
+            source.addHP(currentDamage * 0.3)
+            source.addMana(currentDamage * 0.15)
+
+        // wand of blood - ITEM
+        if source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_WAND_OF_BLOOD)) and not target.isType(UNIT_TYPE_STRUCTURE)
+            source.addHP(currentDamage * 0.05)
+
+        // sacrifical dagger - ITEM
+        if isAttack and source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_SACRIFICIAL_DAGGER)) and not target.isType(UNIT_TYPE_STRUCTURE)
+            source.addHP(currentDamage * 0.10)
+
         // void armor - ITEM
         if target.isType(UNIT_TYPE_HERO) and target.hasItemById(convertItemId(ITEM_ID_VOID_ARMOR))
             target.addMana(currentDamage * 0.05)
             currentDamage *= 0.95
+
+        // wand of death - ITEM
+        if source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_WAND_OF_DEATH)) and target.isType(UNIT_TYPE_HERO)
+            let wp = currentDamage * 0.02
+            let wrapper = target.wrapper()
+            wrapper.addStatAbsoluteBonusReal(Stat.AGI, (-wp*1000).toInt())
+            doAfter(10, () -> wrapper.addStatAbsoluteBonusReal(Stat.AGI, (wp*1000).toInt() ) )
+
 
         //===============================================================================
 

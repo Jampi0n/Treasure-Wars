@@ -1,4 +1,5 @@
 package WaveSpawn
+
 import ClosureTimers
 import UnitTypeConfig
 import PathUnit
@@ -69,7 +70,7 @@ public function startSpawning()
         doPeriodically(SPAWN_INTERVAL, (CallbackPeriodic _) -> spawnWave())
         spawnStarted = true
 
-function spawnUnit( boolean firstTeam, int unitId, vec2 startPos) returns unit
+public function spawnUnit( boolean firstTeam, int unitId, vec2 startPos) returns unit
     let spawnedUnit = createUnit(players[10 + (firstTeam ? 0 : 1)], unitId, firstTeam ? gg_rct_BrownCastle.getRightTop() : gg_rct_GreenCastle.getLeftBot() , angle(45. + (firstTeam ? 0 : 180) ))
         ..setPos(startPos)
     return spawnedUnit
