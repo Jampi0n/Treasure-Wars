@@ -49,8 +49,8 @@ public class Hero
     function setup()
         this.heroType = HeroType.getHeroType(this.hero.getTypeId())
 
-        if this.heroType.getOnInitFunction() != null
-            this.heroType.getOnInitFunction().onInit()
+        
+        this.heroType.initialize()
 
         unitToHero.put(this.hero, this)
         heroes[this.owner.getId()] = this

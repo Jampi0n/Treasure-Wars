@@ -1,3 +1,4 @@
-performance:
-	- buff: only allocate bufflist, when the first buff is applied
-	- hero type: only run hero init function, when the hero is created
+knockback applies default movement speed:
+speed aura effect no longer works after knockback
+reapplying aura solves it
+this is a problem with the knockback system

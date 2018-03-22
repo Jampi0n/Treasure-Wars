@@ -236,6 +236,8 @@ class DivinePunishment
             group nearby = CreateGroup()
             nearby.enumUnitsInRange(this.caster.getPos(), DIVINE_PUNISHMENT_AOE)
 
+            let dmg = DIVINE_PUNISHMENT_DMG[level-1].bonus(this.caster.getInt(), DIVINE_PUNISHMENT_DMG_BONUS)
+
             while(not nearby.isEmpty())
                 unit target = FirstOfGroup(nearby)
                 nearby.removeUnit(target)
@@ -243,7 +245,7 @@ class DivinePunishment
                     
                     target.addEffect("Abilities\\Spells\\Human\\Resurrect\\ResurrectTarget.mdl", "origin").destr()
                     doAfter(0.4, () -> (begin
-                        this.caster.dealDamage(target, DIVINE_PUNISHMENT_DMG[level-1].bonus(this.caster.getInt(), DIVINE_PUNISHMENT_DMG_BONUS), ReductionType.MAGIC)
+                        this.caster.dealDamage(target, dmg, ReductionType.MAGIC)
                     end) )
 
             return
@@ -283,41 +285,46 @@ function onSpellCast()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
 
-    if(spellId == ABILITY_SHIELD_BASH) //shield bash
+    if spellId == ABILITY_SHIELD_BASH //shield bash
         let casterPos = caster.getPos()
         SOUND_SHIELD_BASH.playOnPoint(casterPos.toVec3()).snd.setVolume(150)
         group nearby = CreateGroup()
         nearby.enumUnitsInRange(casterPos.polarOffset(caster.getFacingAngle(), 140), 180)
 
+        let dmg = SHIELD_BASH_DMG[level-1].bonus(caster.getStr(), SHIELD_BASH_DMG_BONUS)
+        let dur = SHIELD_BASH_DURATION[level-1].bonus(caster.getStr(), SHIELD_BASH_DURATION_BONUS)
+
         while(not nearby.isEmpty())
             unit target = FirstOfGroup(nearby)
             nearby.removeUnit(target)
             if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
-                caster.dealDamage(target, SHIELD_BASH_DMG[level-1].bonus(caster.getStr(), SHIELD_BASH_DMG_BONUS), ReductionType.PHYSICAL)
-                target.addBuffReduced( caster, SHIELD_BASH_DURATION[level-1].bonus(caster.getStr(), SHIELD_BASH_DURATION_BONUS), STUNNED, 1)
+                caster.dealDamage(target, dmg, ReductionType.PHYSICAL)
+                target.addBuffReduced( caster, dur, STUNNED, 1)
 
         nearby.destr()
 
-    if(spellId==ABILITY_BATTLE_ROAR) //Battle Roar
+    else if spellId==ABILITY_BATTLE_ROAR //Battle Roar
         group nearby = CreateGroup()
         nearby.enumUnitsInRange(caster.getPos(), BATTLE_ROAR_AOE[level-1])
+
+        let dur = BATTLE_ROAR_DURATION[level-1].bonus(caster.getInt(), BATTLE_ROAR_DURATION_BONUS)
 
         while(not nearby.isEmpty())
             unit target = FirstOfGroup(nearby)
             nearby.removeUnit(target)
             if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), true, false)
-                target.addBuff( caster, BATTLE_ROAR_DURATION[level-1].bonus(caster.getInt(), BATTLE_ROAR_DURATION_BONUS), BATTLE_ROAR, level)
+                target.addBuff( caster, dur, BATTLE_ROAR, level)
 
         nearby.destr()
 
-    if(spellId == ABILITY_HOLY_SHIELD) //holy shield
+    else if spellId == ABILITY_HOLY_SHIELD //holy shield
         let target = GetSpellTargetUnit()
         let dur = HOLY_SHIELD_DURATION[level-1].bonus(caster.getInt(), HOLY_SHIELD_DURATION_BONUS)
         target.addBuff( caster, dur, UNTARGETABLE, 1)
         target.addBuff( caster, dur, BUFF_HOLY_SHIELD, level)
 
 
-    if(spellId == ABILITY_DIVINE_PUNISHMENT) //divine punishment
+    else if spellId == ABILITY_DIVINE_PUNISHMENT //divine punishment
         
         new DivinePunishment(caster)
 

@@ -3,7 +3,6 @@ package ShopPhysical3
 import initlater ItemShopSystem
 import ItemShopInitialize
 import UnitWrapper
-import Stats
 import ItemIdGeneration
 import Buff
 import BuffTypeConfig
@@ -12,7 +11,6 @@ import LinkedList
 import OnAttack
 import General
 import Assets
-import ClosureTimers
 
 constant int BLOOD_SWORD_BUFF_ID = compiletime(createAuraBuff("Blood Sword", "This unit has reduced armor and takes damage over time.", "BTNBarbarianBrutalSlasher"))
 constant int BLOOD_SWORD_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, BLOOD_SWORD_BUFF_ID, "", ""))
@@ -85,7 +83,7 @@ function itemFirehandGauntlets(int itemId)
         end))
 
 function itemSpikedArmor(int itemId)
-    int ar = 25
+    int ar = 30
     int hp = 500
     int spikeDmg = 25
     if compiletime
@@ -110,25 +108,25 @@ function itemSpikedArmor(int itemId)
 function itemCursedSword(int itemId)
     int mana = 10 // trigger
     int hp = 20 // trigger
-    int dmg = 35
+    int str = 30
+    int voidDmg = 20
     int as = 20
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} strength|n+ {1}% attack speed|nDoes not increase attack damage, but deals {0} additional void damage instead.|nRestores {2} hit points and {3} mana points per kill.".format(
-                dmg.toString(), as.toString(), hp.toString(), mana.toString()
+            ..setDescription("+ {0} strength|n+ {1}% attack speed|nDeals {2} additional void damage.|nRestores {3} hit points and {4} mana points per kill.".format(
+                str.toString(), as.toString(), voidDmg.toString(), hp.toString(), mana.toString()
             ))
             ..setGoldCost(4300)
             ..addRequirement(ITEM_ID_RAVEN_SWORD)
             ..addRequirement(ITEM_ID_SKULL_AXE)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.STR, dmg)
-            ..addStatBonusAbsolute(Stat.AD, -dmg)
+            ..addStatBonusAbsolute(Stat.STR, str)
             ..addStatBonusAbsolute(Stat.AS, as)
 
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             if attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
-                attacker.dealDamage(target, dmg.toReal() * attacker.countItemsOfType(convertItemId(itemId)) , ReductionType.NONE)
+                attacker.dealDamage(target, voidDmg.toReal() * attacker.countItemsOfType(convertItemId(itemId)) , ReductionType.NONE)
                 target.addEffect(Abilities.avengerMissile, "chest").destr()
         end))
 
@@ -192,27 +190,27 @@ function itemHelmetOfJustice(int itemId)
             end))
 
 function itemInfernalBow(int itemId)
-    int dmg = 40
-    int mp = 125
-    int hp = 250
+    int magicDmg = 30
+    int str = 25
+    int mp = 150
+    int hp = 300
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} strength|n+ {1} hit points|n+ {2} mana points|nDoes not increase attack damage, but deals {0} additional magic damage instead.".format(
-                dmg.toString(), hp.toString(), mp.toString()
+            ..setDescription("+ {0} strength|n+ {1} hit points|n+ {2} mana points|nDeals {3} additional magic damage.".format(
+                str.toString(), hp.toString(), mp.toString(), magicDmg.toString()
             ))
             ..setGoldCost(3800)
             ..addRequirement(ITEM_ID_MAGMA_CRYSTAL)
             ..addRequirement(ITEM_ID_BOW)
     else
         itemId.getItem()
-        ..addStatBonusAbsolute(Stat.STR, dmg)
-        ..addStatBonusAbsolute(Stat.AD, -dmg)
+        ..addStatBonusAbsolute(Stat.STR, str)
         ..addStatBonusAbsolute(Stat.MP, mp)
         ..addStatBonusAbsolute(Stat.HP, hp)
 
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             if attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
-                attacker.dealDamage(target, dmg.toReal() * attacker.countItemsOfType(convertItemId(itemId)) , ReductionType.MAGIC)
+                attacker.dealDamage(target, magicDmg.toReal() * attacker.countItemsOfType(convertItemId(itemId)) , ReductionType.MAGIC)
                 target.addEffect(Abilities.fireBallMissile, "chest").destr()
         end))
 
@@ -345,14 +343,12 @@ function itemSacrificialDagger(int itemId)
     int str = 15
     int as = 25
     int hp = 250
-    int hr = 35
-    int maxHp = 5 //trigger
-    int dur = 10 //trigger
+    int lifesteal = 10
     if compiletime
         itemId.getTypeDef()
-            ..setDescription(("+ {0} strength|n+ {1}% attack speed|n+ {2} hit points|n+ {3} hit point regeneration per 10 seconds|n"+
-            "Killing a unit increases your maximum hit points by {4}% for {5} seconds.").format(
-                str.toString(), as.toString(), hp.toString(), hr.toString(), maxHp.toString(), dur.toString()
+            ..setDescription(("+ {0} strength|n+ {1}% attack speed|n+ {2} hit points|n"+
+            "Attacks restore {3}% of the damage dealt.").format(
+                str.toString(), as.toString(), hp.toString(), lifesteal.toString()
             ))
             ..setGoldCost(3450)
             ..addRequirement(ITEM_ID_DAGGER)
@@ -363,19 +359,7 @@ function itemSacrificialDagger(int itemId)
             ..addStatBonusAbsolute(Stat.STR, str)
             ..addStatBonusAbsolute(Stat.AS, as)
             ..addStatBonusAbsolute(Stat.HP, hp)
-            ..addStatBonusAbsolute(Stat.HR, hr)
 
-            
-        CreateTrigger()
-            ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
-            ..addAction(() -> (begin
-                let killer = GetKillingUnit()
-                if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and killer.hasItemById(convertItemId(ITEM_ID_SACRIFICIAL_DAGGER))
-                    killer.wrapper().addStatRelativeBonus(Stat.HP, 50)
-                    doAfter(10, () -> (begin
-                        killer.wrapper().addStatRelativeBonus(Stat.HP, -50)
-                    end))
-            end))
 
 
 @compiletime

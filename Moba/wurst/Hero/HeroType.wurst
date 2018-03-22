@@ -51,6 +51,12 @@ public class HeroType
         heroTypes[heroTypeCount] = this
         heroTypeCount++
 
+    //only initialize every herotype once
+    function initialize()
+        if getOnInitFunction() != null
+            getOnInitFunction().onInit()
+            setOnInitFunction(null)
+
     function addMorph(int id)
         unitIdToHeroType.put(id, this)
 
