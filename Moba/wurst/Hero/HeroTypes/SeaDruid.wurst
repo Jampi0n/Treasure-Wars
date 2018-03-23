@@ -199,7 +199,7 @@ function ritualOfTheSeas()
         ..setAnimationNames("spell,channel")
         ..setupIcon("BTNGuardianofTheSea")
         ..setupWithHotKey("Ritual of the Seas", "R")
-        ..setLearnString(CHANNELING_SPELL + "Sends out magical energy, that drains hit points and mana from nearby enemies.|nThe Sea Druid gets {0}% of the hit points and {1}% of the mana drained.".format(
+        ..setLearnString(CHANNELING_SPELL + "Sends out magical energy, that drains hit points and mana from nearby enemies.|nThe Sea Druid gets {0}% of the hit points and {1}% of the mana drained from enemy heroes.".format(
             RITUAL_HP_RATIO.str(),
             RITUAL_MANA_RATIO.str()
         )    
@@ -220,7 +220,7 @@ function ritualOfTheSeas()
             ..setEffects(lvl, "X000")
 
             ..setTargetsAllowed(lvl, "none")
-            ..setTooltipNormalExtended(lvl, CHANNELING_SPELL + "Sends out magical energy, that drain {0} hit points and {1} mana from nearby enemies.|nLasts for {2} waves.|nThe Sea Druid gets {3}% of the hit points and {4}% of the mana drained.".format(
+            ..setTooltipNormalExtended(lvl, CHANNELING_SPELL + "Sends out magical energy, that drain {0} hit points and {1} mana from nearby enemies.|nLasts for {2} waves.|nThe Sea Druid gets {3}% of the hit points and {4}% of the mana drained from enemy heroes.".format(
                 RITUAL_HP_DRAIN[lvl-1].str()+RITUAL_HP_DRAIN_BONUS.getBonusString(C_INT),
                 RITUAL_MANA_DRAIN[lvl-1].str()+RITUAL_MANA_DRAIN_BONUS.getBonusString(C_INT),
                 RITUAL_WAVE_COUNT[lvl-1].str(),
@@ -326,13 +326,13 @@ class RitualOfTheSeas
                         let manaDrained = min( target.getMana(), manaDrain)
                         let hpDrained = min( target.getHP(), hpDrain)
 
+                        if target.isType(UNIT_TYPE_HERO)
+                            caster.addMana(manaDrained.reduceMagic(target.getWp()) * RITUAL_MANA_RATIO/100 )
+                            caster.addHP( hpDrained.reduceMagic(target.getWp()) * RITUAL_HP_RATIO/100 )
 
-                        target.addMana(-manaDrained.reduce(target.getWp()))
-                        caster.addMana(manaDrained.reduce(target.getWp()) * RITUAL_MANA_RATIO/100 )
-
-
+                        target.addMana(-manaDrained.reduceMagic(target.getWp()))
                         caster.dealDamage(target, hpDrained, ReductionType.MAGIC)
-                        caster.addHP( hpDrained.reduce(target.getWp()) * RITUAL_HP_RATIO/100 )
+
 
                     end))
                     
