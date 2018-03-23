@@ -44,11 +44,10 @@ function heavyArmored()
             HEAVY_ARMOED_REDUCTION[lvl-1].str())
             )
 
-constant real array SHIELD_BASH_DMG = [75, 100, 125, 150, 175]
-constant real SHIELD_BASH_DMG_BONUS = 50
+constant real array SHIELD_BASH_DMG = [75, 125, 175, 225, 275]
+constant real SHIELD_BASH_DMG_BONUS = 150
 
 constant real array SHIELD_BASH_DURATION = [1, 1.25, 1.5, 1.75, 2]
-constant real SHIELD_BASH_DURATION_BONUS = 1
 
 @compiletime
 function shieldBash()
@@ -63,7 +62,8 @@ function shieldBash()
         ..setLearnString("Bashes enemies in front of him with his shield, dealing physical damage and stunning them.", (int lvl) -> (begin
             return "{0} damage, {1} seconds stun.".format(
             SHIELD_BASH_DMG[lvl-1].str()+SHIELD_BASH_DMG_BONUS.getBonusString(C_STR),
-            SHIELD_BASH_DURATION[lvl-1].toString()+SHIELD_BASH_DURATION_BONUS.getBonusString(C_STR))
+            SHIELD_BASH_DURATION[lvl-1].toString()
+            )
         end) )
 
     for lvl = 1 to 5
@@ -73,7 +73,8 @@ function shieldBash()
             ..setTargetsAllowed(lvl, "none")
             ..setTooltipNormalExtended(lvl, "Bashes enemies in front of him with his shield, dealing {0} physical damage and stunning them for {1} seconds.".format(
             SHIELD_BASH_DMG[lvl-1].str()+SHIELD_BASH_DMG_BONUS.getBonusString(C_STR),
-            SHIELD_BASH_DURATION[lvl-1].toString()+SHIELD_BASH_DURATION_BONUS.getBonusString(C_STR)))
+            SHIELD_BASH_DURATION[lvl-1].toString()
+        ))
 
 constant real array BATTLE_ROAR_AOE = [600, 700, 800, 900, 1000]
 constant real array BATTLE_ROAR_AS = [30, 35, 40, 45, 50]
@@ -131,8 +132,8 @@ function battleRoar()
             ..setAreaofEffect(lvl, 1)
             ..setBuffs(lvl, int2fourchar(BUFF_ID_BATTLE_ROAR))
 
-constant real array HOLY_SHIELD_DURATION = [4, 5, 6, 7, 8]
-constant real HOLY_SHIELD_DURATION_BONUS = 4
+constant real array HOLY_SHIELD_DURATION = [2, 2.5, 3, 3.5, 4]
+constant real HOLY_SHIELD_DURATION_BONUS = 2
 
 constant int BUFF_ID_HOLY_SHIELD = compiletime(createAuraBuff("Holy Shield", "This unit is protected by Holy Shield; it is untargetable.", "BTNAngelicShield"))
 constant int ABILITY_HOLY_SHIELD_BUFF = compiletime(createPositiveBuffAbility(5, BUFF_ID_HOLY_SHIELD, "Abilities\\Spells\\Human\\DivineShield\\DivineShieldTarget.mdl", "origin"))
@@ -168,13 +169,13 @@ function holyShield()
             ..setTargetType(lvl, 1)
             ..setTargetsAllowed(lvl, "friend,nonancient")
             ..setTooltipNormalExtended(lvl, "Turns the target frendly hero untargetable for {0} seconds.".format(
-            HOLY_SHIELD_DURATION[lvl-1].str()+HOLY_SHIELD_DURATION_BONUS.getBonusString(C_INT)
+            HOLY_SHIELD_DURATION[lvl-1].toString()+HOLY_SHIELD_DURATION_BONUS.getBonusString(C_INT)
             ))
 
 
 constant real DIVINE_PUNISHMENT_AOE = 600
-constant real array DIVINE_PUNISHMENT_DMG = [250, 300, 350, 400, 450]
-constant real DIVINE_PUNISHMENT_DMG_BONUS = 300
+constant real array DIVINE_PUNISHMENT_DMG = [250, 375, 500, 625, 750]
+constant real DIVINE_PUNISHMENT_DMG_BONUS = 400
 
 @compiletime
 function divinePunishment()
@@ -292,7 +293,7 @@ function onSpellCast()
         nearby.enumUnitsInRange(casterPos.polarOffset(caster.getFacingAngle(), 140), 180)
 
         let dmg = SHIELD_BASH_DMG[level-1].bonus(caster.getStr(), SHIELD_BASH_DMG_BONUS)
-        let dur = SHIELD_BASH_DURATION[level-1].bonus(caster.getStr(), SHIELD_BASH_DURATION_BONUS)
+        let dur = SHIELD_BASH_DURATION[level-1]
 
         while(not nearby.isEmpty())
             unit target = FirstOfGroup(nearby)

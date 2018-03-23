@@ -79,8 +79,8 @@ function mistwalk()
                 MISTWALK_DURATION[lvl-1].toString()+MISTWALK_DURATION_BONUS.getBonusString(C_INT)))
 
 constant int array POISON_SPIT_SLOW_MS = [-30, -35, -40, -45, -50]
-constant real array POISON_SPIT_DOT = [15, 20, 25, 30, 35]
-constant real POISON_SPIT_DOT_BONUS = 30.
+constant real array POISON_SPIT_DOT = [20, 28, 36, 44, 52]
+constant real POISON_SPIT_DOT_BONUS = 50.
 constant int array POISON_SPIT_ARMOR_REDUCTION = [-5, -10, -15, -20, -25]
 constant real array POISON_SPIT_DURATION = [6, 7, 8, 9, 10]
 constant real array POISON_SPIT_AOE = [200, 225, 250, 275, 300]
@@ -144,13 +144,13 @@ function poisonSpit()
         aDefArmorReduction
             ..setDefenseBonus(lvl, POISON_SPIT_ARMOR_REDUCTION[lvl-1])
 
-constant real array EMPOWERED_STRIKE_DAMAGE = [50, 75, 100, 125, 150]
-constant real EMPOWERED_STRIKE_DAMAGE_BONUS = 100
+constant real array EMPOWERED_STRIKE_DAMAGE = [75, 150, 225, 300, 375]
+constant real EMPOWERED_STRIKE_DAMAGE_BONUS = 200
 
 @compiletime
 function empoweredStrike()
     int array MANA = [50, 50, 50, 50, 50]
-    real array COOLDOWN = [6, 6, 6, 6, 6]
+    real array COOLDOWN = [5, 5, 5, 5, 5]
 
     let aDef = new AbilityDefinitionSeaWitchForkedLightning(ABILITY_EMPOWERED_STRIKE)
         ..setupIcon("BTNEnchantWeaponGreen")
@@ -177,8 +177,8 @@ function empoweredStrike()
 
 
 
-constant real array PARALYZING_STRIKE_DAMAGE = [200,240,280,320,360]
-constant real PARALYZING_STRIKE_DAMAGE_BONUS = 300
+constant real array PARALYZING_STRIKE_DAMAGE = [200, 250, 300, 350, 400]
+constant real PARALYZING_STRIKE_DAMAGE_BONUS = 350
 constant real array PARALYZING_STRIKE_DURATION = [1.5, 1.75, 2, 2.25, 2.5]
 constant real PARALYZING_STRIKE_DURATION_BONUS = 1
 

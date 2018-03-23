@@ -37,7 +37,7 @@ function focus()
                 FOCUS_BONUS.str(), FOCUS_DURATION[lvl-1].str()
             ))
 
-public constant real array CRITICAL_DAMAGE_MULT = [100, 125, 150, 175, 200]
+public constant real array CRITICAL_DAMAGE_MULT = [100, 130, 160, 190, 220]
 
 constant int CRITICAL_BUFF_ID = compiletime(createAuraBuff("Critical Strike", "This unit's next attack will deal more damage.", "BTN_CR_BLOOD"))
 constant int CRITICAL_ABILITY_ID = compiletime(createPositiveBuffAbility(5, CRITICAL_BUFF_ID, "", ""))
