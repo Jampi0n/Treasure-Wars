@@ -52,13 +52,22 @@ public function unit.isMovable() returns boolean
     return true
 
 public function unit.getStr() returns int
-    return GetHeroStr(this, true)
+    if this.isType(UNIT_TYPE_HERO)
+        return GetHeroStr(this, true)
+    else
+        return this.wrapper().getStatTotalBonus(Stat.STR)
 
 public function unit.getWp() returns int
-    return GetHeroAgi(this, true)
+    if this.isType(UNIT_TYPE_HERO)
+        return GetHeroAgi(this, true)
+    else
+        return this.wrapper().getStatTotalBonus(Stat.AGI)
 
 public function unit.getInt() returns int
-    return GetHeroInt(this, true)
+    if this.isType(UNIT_TYPE_HERO)
+        return GetHeroInt(this, true)
+    else
+        return this.wrapper().getStatTotalBonus(Stat.INT)
 
 public function real.factor(int statValue, real atHundred) returns real
     return this * (atHundred*statValue/100 + 1)
@@ -90,8 +99,8 @@ public function unit.addBuffReduced(unit caster, real duration, BuffType buffTyp
 public function unit.dealDamage(unit target, real amount, ReductionType reductionType)
     let damageType = reductionType == ReductionType.PHYSICAL ? DAMAGE_TYPE_NORMAL : DAMAGE_TYPE_UNIVERSAL
     real newAmount
-    if(reductionType == ReductionType.MAGIC and target.isType(UNIT_TYPE_HERO))
-        let wp = GetHeroAgi(target, true)
+    if reductionType == ReductionType.MAGIC
+        let wp = target.getWp()
         newAmount = amount.reduce(wp)
     else
         newAmount = amount

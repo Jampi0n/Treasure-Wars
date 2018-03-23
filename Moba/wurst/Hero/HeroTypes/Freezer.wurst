@@ -1,0 +1,199 @@
+package Freezer
+//9
+
+import HeroType
+import UnitTypeConfig
+import HeroControl
+
+public constant HERO_FREEZER = 'H00V'
+HeroType heroType
+
+constant ABILITY_FEL_MAGIC = 'AZ9P'
+constant ABILITY_FROST_NOVA = 'AZ9Q'
+constant ABILITY_INFERNAL_METEOR = 'AZ9W'
+constant ABILITY_FROST_WYRM = 'AZ9E'
+constant ABILITY_RAY_OF_DEATH = 'AZ9R'
+
+unit array frostWyrm
+
+function setupStats()
+    heroType
+        //..setStat(Stat.AD, 5, 40)
+        ..setStat(Stat.AR, 7, 18)
+        ..setStat(Stat.AS, 0, 80)
+        ..setStat(Stat.HP, 9, 33)
+        ..setStat(Stat.HR, 4, 12)
+        ..setStat(Stat.MP, 18, 72)
+        ..setStat(Stat.MR, 19, 63)
+        ..setStat(Stat.MS, 7, 43)
+        ..setStat(Stat.STR, 8, 17)
+        ..setStat(Stat.AGI, 13, 23)
+        ..setStat(Stat.INT, 11, 34)
+
+BuffType buffFrostNova
+
+constant real array NOVA_TARGET_DMG =[75, 100, 125, 150, 175]
+constant real NOVA_TARGET_DMG_BONUS = 100
+
+constant real array NOVA_AOE_DMG =[50, 100, 150, 200, 250]
+constant real NOVA_AOE_DMG_BONUS = 150
+
+constant real NOVA_AOE = 200
+
+constant real array NOVA_DURATION = [2, 2.5, 3, 3.5, 4]
+constant real NOVA_DURATION_BONUS = 2
+
+constant int array NOVA_MS = [50, 50, 50, 50, 50]
+constant int array NOVA_AS = [25, 25, 25, 25, 25]
+
+constant int NOVA_BUFF_ID = compiletime(createAuraBuff("Frost Nova", "This unit was hit by Frost Nova; its movement and attack speed are slowed.", Icons.bTNGlacier))
+constant int NOVA_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, NOVA_BUFF_ID, Abilities.frostDamage, "origin"))
+
+@compiletime
+function frostNova()
+    int array MANA = [130, 145, 160, 175, 190]
+    real array COOLDOWN = [10, 10, 10, 10, 10]
+    
+    let aDef = new AbilityDefinitionIllidanChannel(ABILITY_FROST_NOVA)
+        ..setAnimationNames("spell")
+        ..setArtCaster("")
+        ..setArtTarget("")
+        ..setArtSpecial("")
+        ..setArtEffect("")
+        ..setupIcon(Icons.bTNGlacier)
+        ..setupChannel(TargetType.UNIT, "frostnova")
+        ..setupWithHotKey("Frost Nova", "Q")
+        ..setLearnString("Blasts enemy units around a target enemy unit with a wave of damaging frost that slows movement and attack rate.", (int lvl) -> (begin
+            return "{0} target damage, {1} nova damage, {2} seconds.".format(
+                NOVA_TARGET_DMG[lvl-1].str() + NOVA_TARGET_DMG_BONUS.getBonusString(C_INT),
+                NOVA_AOE_DMG[lvl-1].str() + NOVA_AOE_DMG_BONUS.getBonusString(C_INT),
+                NOVA_DURATION[lvl-1].toString() + NOVA_DURATION_BONUS.getBonusString(C_INT)
+            )
+        end) )
+    
+    for lvl = 1 to 5
+        aDef
+            ..setCooldown(lvl, COOLDOWN[lvl-1])
+            ..setManaCost(lvl, MANA[lvl-1])
+            ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic")
+            ..setTooltipNormalExtended(lvl, "Blasts enemy units with a wave of frost that deals {0} damage to the target, and {1} nova damage. Cold damage slows units' movement and attack rate for {2} seconds.".format(
+                NOVA_TARGET_DMG[lvl-1].str() + NOVA_TARGET_DMG_BONUS.getBonusString(C_INT),
+                NOVA_AOE_DMG[lvl-1].str() + NOVA_AOE_DMG_BONUS.getBonusString(C_INT),
+                NOVA_DURATION[lvl-1].toString() + NOVA_DURATION_BONUS.getBonusString(C_INT)
+            ))
+
+
+constant int array FROST_WYRM_HP = [250, 500, 750, 1000, 1250]
+constant int array FROST_WYRM_DMG = [10, 20, 30, 40, 50]
+
+constant int FROST_WYRM_INT_FACTOR = 50
+        
+@compiletime
+function frostWyrm()
+    int array MANA = [200, 250, 300, 350, 400]
+    real array COOLDOWN = [30, 30, 30, 30, 30]
+
+    let aDef = new AbilityDefinitionRoar(ABILITY_FROST_WYRM)
+        ..setAnimationNames("spell")
+        ..setArtCaster("")
+        ..setupIcon(Icons.bTNFrostWyrm)
+        ..setupWithHotKey("Summon Frost Wyrm", "E")
+        ..setLearnString("Summons a powerful Frost Wyrm. The Frost Wyrm's attack speed and hit points scale with the respective stats of the Hero.", (int lvl) -> (begin
+            return "{0} bonus damage, {1} bonus hit points".format(
+                FROST_WYRM_DMG[lvl-1].str() + FROST_WYRM_INT_FACTOR.getBonusString(C_INT),
+                FROST_WYRM_HP[lvl-1].str()
+            )
+        end) )
+
+    for lvl = 1 to 5
+        aDef
+            ..setCooldown(lvl, COOLDOWN[lvl-1])
+            ..setManaCost(lvl, MANA[lvl-1])
+            ..setTargetsAllowed(lvl, "none")
+            ..setTooltipNormalExtended(lvl, "Summons a powerful Frost Wyrm. The Frost Wyrm's attack speed and hit points scale with the respective stats of the Hero. Deals {0} bonus damage and has {1} additional hit points.".format(
+                FROST_WYRM_DMG[lvl-1].str() + FROST_WYRM_INT_FACTOR.getBonusString(C_INT),
+                FROST_WYRM_HP[lvl-1].str()
+            ))
+
+
+function onSpellCast()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+
+    if spellId == ABILITY_FROST_NOVA
+        let target = GetSpellTargetUnit()
+        group nearby = CreateGroup()
+
+        nearby.enumUnitsInRange(target.getPos(), NOVA_AOE)
+        addEffect(Abilities.frostNovaTarget, target.getPos()).destr()
+
+        let dmg = NOVA_AOE_DMG[level-1].bonus(caster.getInt(), NOVA_AOE_DMG_BONUS)
+        let dur = NOVA_DURATION[level-1].bonus(caster.getInt(), NOVA_DURATION_BONUS)
+
+        while(not nearby.isEmpty())
+            unit u = FirstOfGroup(nearby)
+            nearby.removeUnit(u)
+            if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(caster.getOwner(), false, true)
+                caster.dealDamage(u, dmg, ReductionType.MAGIC)
+                u.addBuffReduced(caster, dur, buffFrostNova, level)
+
+        nearby.destr()
+
+        caster.dealDamage(target, NOVA_TARGET_DMG[level-1].bonus(caster.getInt(), NOVA_TARGET_DMG_BONUS), ReductionType.MAGIC)
+
+
+    else if spellId == ABILITY_INFERNAL_METEOR
+
+
+    else if spellId == ABILITY_FROST_WYRM
+        let pId = caster.getOwner().getId()
+        frostWyrm[pId].kill()
+        frostWyrm[pId] = createUnit(caster.getOwner(), FROST_WYRM, caster.getPos(), angle(0))
+        let wrapper = frostWyrm[pId].wrapper()
+        wrapper.addStatAbsoluteBonus(Stat.AS, caster.wrapper().getStatTotalBonus(Stat.AS))
+        wrapper.addStatAbsoluteBonus(Stat.HP, caster.wrapper().getStatTotalBonus(Stat.HP) + FROST_WYRM_HP[level-1] )
+        wrapper.addStatAbsoluteBonus(Stat.AD, ( (FROST_WYRM_INT_FACTOR/100) * caster.getInt() ).toInt()  + FROST_WYRM_DMG[level-1] )
+
+    else if spellId == ABILITY_RAY_OF_DEATH
+
+
+function initHeroType()
+    setupStats()
+    heroType
+        ..addOnSpellCastFunc(function onSpellCast)
+
+    buffFrostNova = new BuffType(false, true)
+
+    var abilityList = new LinkedList<int>
+    ..add(NOVA_ABILTIY_ID)
+    buffFrostNova.setup(abilityList, NOVA_BUFF_ID)
+
+    buffFrostNova.addFirstFunction( (Buff whichBuff) -> (begin
+        let level = whichBuff.getLevel()
+        whichBuff.getTarget().wrapper()
+            ..addStatAbsoluteBonus(Stat.AS, -NOVA_AS[level - 1])
+            ..addStatRelativeBonus(Stat.MS, -NOVA_MS[level - 1]*10)
+    end))
+
+    buffFrostNova.addEndFunction( (Buff whichBuff) -> (begin
+        let level = whichBuff.getLevel()
+        whichBuff.getTarget().wrapper()
+            ..addStatAbsoluteBonus(Stat.AS, NOVA_AS[level - 1])
+            ..addStatRelativeBonus(Stat.MS, NOVA_MS[level - 1]*10)
+    end))
+
+   
+function createHeroType(Hero hero)
+    let pId = hero.toUnit().getOwner().getId()
+
+    frostWyrm[pId] = null
+
+
+
+    
+        
+init
+    heroType = new HeroType(HERO_FREEZER)
+        ..setOnInitFunction(() -> initHeroType())
+        ..setOnCreateFunction((Hero hero) -> createHeroType(hero))
