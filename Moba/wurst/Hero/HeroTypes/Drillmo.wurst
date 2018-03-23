@@ -49,8 +49,8 @@ function passive()
                 OVERCHARGE_ATTACK_SPEED[lvl-1].str())
             )
 
-constant real array PULL_DAMAGE = [25, 75, 125, 175, 225]
-constant real PULL_DAMAGE_BONUS = 120
+constant real array PULL_DAMAGE = [50, 125, 200, 275, 350]
+constant real PULL_DAMAGE_BONUS = 180
 constant real array PULL_COOLDOWN = [18, 16, 14, 12, 10]
 
 @compiletime
@@ -86,12 +86,12 @@ function pull()
                 PULL_DAMAGE[lvl-1].str()+PULL_DAMAGE_BONUS.getBonusString(C_STR)
             ))
 
-constant real array SPIKE_BALL_DMG = [60, 90, 120, 150, 180]
-constant real SPIKE_BALL_DMG_BONUS = 100
+constant real array SPIKE_BALL_DMG = [60, 100, 140, 180, 220]
+constant real SPIKE_BALL_DMG_BONUS = 150
 constant real array SPIKE_BALL_STUN = [1.4, 1.7, 2, 2.3, 2.6]
 constant real array SPIKE_BALL_DOT_DURATION = [4, 4, 4, 4, 4]
-constant real array SPIKE_BALL_DOT_DMG = [40, 60, 80, 100, 120]
-constant real SPIKE_BALL_DOT_DMG_BONUS = 60
+constant real array SPIKE_BALL_DOT_DMG = [40, 70, 100, 130, 160]
+constant real SPIKE_BALL_DOT_DMG_BONUS = 90
 
 BuffType buffSpikeBall
 
@@ -180,7 +180,7 @@ function speedBoost()
             ))
 
 constant int ROCKET_BUFF_ID = compiletime(createDummyBuff())
-constant real array ROCKET_DMG = [200, 240, 280, 320, 360]
+constant real array ROCKET_DMG = [200, 275, 350, 425, 500]
 constant real ROCKET_DMG_BONUS = 250
 constant real array ROCKET_RANGE = [2000, 3000, 4000, 5000, 6000]
 constant real array ROCKET_COOLDOWN = [40, 35, 30, 25, 20]

@@ -39,7 +39,7 @@ function setupCreatedHero(Hero hero)
     player owner = hero.toUnit().getOwner()
     CPlayer cPlayer = owner.getCPlayer()
     if DEBUG_MODE
-        owner.setGold(5000)
+        owner.setGold(100000)
         //SetHeroLevel(hero.toUnit(), 25, true)
     else
         owner.setGold(500)

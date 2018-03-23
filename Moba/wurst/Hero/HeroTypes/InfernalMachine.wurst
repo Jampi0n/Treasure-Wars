@@ -61,7 +61,7 @@ function passive()
                 FIERY_HANDS_DMG[lvl-1].str() + FIERY_HANDS_DMG_BONUS.getBonusString(C_INT)
             ))
 
-public constant int array BASH_DAMAGE_BONUS = [50, 75, 100, 125, 150]
+public constant int array BASH_DAMAGE_BONUS = [50, 100, 150, 200, 250]
 constant real array BASH_STUN_DURATION = [1.5, 1.75, 2, 2.25, 2.5]
 constant real BASH_BUFF_DURATION = 6
 constant int array BASH_MOVEMENT_SPEED = [100, 125, 150, 175, 200]
@@ -151,11 +151,11 @@ function innerFire()
                 INNER_FIRE_DURATION.str()
             ))
 
-constant real array FLAME_THROWER_DAMAGE = [40, 60, 80, 100, 120]
-constant real FLAME_THROWER_DAMAGE_BONUS = 80
+constant real array FLAME_THROWER_DAMAGE = [40, 70, 100, 130, 160]
+constant real FLAME_THROWER_DAMAGE_BONUS = 120
 
-constant real array FLAME_THROWER_DOT = [10, 15, 20, 25, 30]
-constant real FLAME_THROWER_DOT_BONUS = 20
+constant real array FLAME_THROWER_DOT = [15, 25, 35, 45, 55]
+constant real FLAME_THROWER_DOT_BONUS = 40
 
 constant real array FLAME_THROWER_DURATION = [3, 3.5, 4, 4.5, 5]
 

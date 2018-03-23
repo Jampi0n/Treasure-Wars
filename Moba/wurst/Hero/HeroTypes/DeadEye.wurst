@@ -45,8 +45,8 @@ function blackArrow()
             )
 
 
-constant real array PIERCING_SHOT_DAMAGE = [80, 125, 170, 215, 260]
-constant real PIERCING_SHOT_DAMAGE_BONUS = 150
+constant real array PIERCING_SHOT_DAMAGE = [80, 135, 190, 245, 300]
+constant real PIERCING_SHOT_DAMAGE_BONUS = 250
 
 @compiletime
 function piercingShot()
@@ -147,10 +147,10 @@ function boneBrothers()
 
 
         
-constant real array DEATH_COIL_DMG_BASE = [100, 150, 200, 250, 300]
-constant real array DEATH_COIL_DMG_FACTOR = [20, 30, 40, 50, 60]
-constant real DEATH_COIL_DMG_BASE_BONUS = 200
-constant real DEATH_COIL_DMG_FACTOR_BONUS = 20
+constant real array DEATH_COIL_DMG_BASE = [200, 275, 350, 425, 500]
+constant real array DEATH_COIL_DMG_FACTOR = [20, 35, 50, 65, 80]
+constant real DEATH_COIL_DMG_BASE_BONUS = 250
+constant real DEATH_COIL_DMG_FACTOR_BONUS = 60
 constant real DEATH_COIL_DURATION = 10
 
 constant integer BUFF_ID_ON_DEATH_COIL = compiletime(createDummyBuff())

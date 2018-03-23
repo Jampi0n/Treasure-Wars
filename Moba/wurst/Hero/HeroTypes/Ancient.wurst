@@ -93,8 +93,8 @@ function devourUnit()
 
 constant real array ENTANGLE_DURATION = [2, 2.4, 2.8, 3.2, 3.6]
 constant real ENTANGLE_DURATION_BONUS = 3
-constant real array ENTANGLE_HIT_DAMAGE = [50, 75, 100, 125, 150]
-constant real ENTANGLE_HIT_DAMAGE_BONUS = 100
+constant real array ENTANGLE_HIT_DAMAGE = [100, 150, 200, 250, 300]
+constant real ENTANGLE_HIT_DAMAGE_BONUS = 200
 
 constant BuffType BUFF_ENTAGLING_ROOTS = new BuffType(false, true)
 constant int ENTAGLING_ROOTS_BUFF_ID = compiletime(createAuraBuff("Entangling Roots", "This unit was hit by Entangling Roots; it cannot move or attack.", "BTNEntnagle"))
@@ -167,8 +167,8 @@ function root()
 constant int NATURES_WRATH_DUMMY_BUFF = compiletime(createDummyBuff())
 
 constant real array NATURES_WRATH_COOLDOWN = [60, 50, 40, 30, 20]
-constant real array NATURES_WRATH_TOTAL_DAMAGE = [260, 300, 340, 380, 420]
-constant real NATURES_WRATH_TOTAL_DAMAGE_BONUS = 400
+constant real array NATURES_WRATH_TOTAL_DAMAGE = [300, 350, 400, 450, 500]
+constant real NATURES_WRATH_TOTAL_DAMAGE_BONUS = 450
 constant real array NATURES_WRATH_DURATION = [5, 5, 5, 5, 5]
 
 constant real NATURES_WRATH_AOE = 300
