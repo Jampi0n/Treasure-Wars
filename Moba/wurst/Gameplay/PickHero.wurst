@@ -32,6 +32,8 @@ enum PickMode
 ban, reverse pick, same heroes
     */
 
+//debug
+boolean itemCarry = false
 
 function setupCreatedHero(Hero hero)
     player owner = hero.toUnit().getOwner()
@@ -250,6 +252,12 @@ init
                 createRandomHero(getCPlayer(i))
 
                 new CPlayer(players[i], i<=4?Team.TEAM1:Team.TEAM2, PlayerType.HERO)
+
+                if not itemCarry
+                    itemCarry = true
+                    let carry = createUnit(players[0], 'Hmkg', gg_rct_BrownAltar.getLeftBot(), angle(0))
+                    UnitAddType(carry, UNIT_TYPE_ANCIENT)
+                    carry.addBuff(carry, -1, DISARMED, 1)
 
                 SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_VISION, true)
                 SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_CONTROL, true)

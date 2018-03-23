@@ -13,6 +13,7 @@ import Execute
 import ObjectIds
 import ErrorHandling
 import ItemIdGeneration
+import Constants
 
 
 function createShopBuilding(int unitId, boolean first, int position)
@@ -42,8 +43,12 @@ function createShopBuilding(int unitId, boolean first, int position)
     else
         facing = 180
 
-    createUnit(players[11], unitId, posBrown, facing.asAngleDegrees())
-        ..addAbility('A00X')
+    if DEBUG_MODE
+        createUnit(players[10], unitId, posBrown, facing.asAngleDegrees())
+            ..addAbility('A00X')
+    else
+        createUnit(players[11], unitId, posBrown, facing.asAngleDegrees())
+            ..addAbility('A00X')
 
 /*  ==========================================================================================================================
 **
