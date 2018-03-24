@@ -141,7 +141,7 @@ function itemWandOfBlood(int itemId)
     int hp = 200
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} intelligence|n+ {1} hit points|nDealing damage restores hit points equal to {2} of the damage dealt.".format(
+            ..setDescription("+ {0} intelligence|n+ {1} hit points|nDealing damage restores hit points equal to {2}% of the damage dealt.".format(
                 intel.toString(), hp.toString(), lifesteal.toString()
             ))
             ..setGoldCost(3650)

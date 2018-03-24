@@ -7,6 +7,7 @@ import TimerUtils
 import UnitType
 import ClosureTimers
 import HeroControl
+import Fx
 
 
 public constant HERO_TREE = 'H014'
@@ -313,14 +314,14 @@ function onUproot(unit caster, int level) // remove bonus
 class NaturesWrath
 
     unit caster
-    effect model
+    Fx model
     int count
     timer checkTimer
     int level
 
     construct(unit caster, int level)
         this.caster = caster
-        this.model = caster.addEffect("Models\\EarthTornado2NoSound.mdx", "origin")
+        this.model = new Fx(caster.getPos(), "Models\\EarthTornado2NoSound.mdx")
         this.count = 0
         this.level = level
 
@@ -334,26 +335,28 @@ class NaturesWrath
 
         if not this.caster.isAlive() or count >= 5 * 50
             destroy this
-        else if count > 0.5 * 50
-            group nearby = CreateGroup()
-            nearby.enumUnitsInRange(caster.getPos(), NATURES_WRATH_AOE)
+        else
+            this.model.setXY(this.caster.getPos())
+            if count > 0.5 * 50
+                group nearby = CreateGroup()
+                nearby.enumUnitsInRange(caster.getPos(), NATURES_WRATH_AOE)
 
-            let dmg = 0.02 * (NATURES_WRATH_TOTAL_DAMAGE[level-1].bonus(caster.getInt(), NATURES_WRATH_TOTAL_DAMAGE_BONUS))/NATURES_WRATH_DURATION[level-1]
+                let dmg = 0.02 * (NATURES_WRATH_TOTAL_DAMAGE[level-1].bonus(caster.getInt(), NATURES_WRATH_TOTAL_DAMAGE_BONUS))/NATURES_WRATH_DURATION[level-1]
 
-            while(not nearby.isEmpty())
-                unit u = FirstOfGroup(nearby)
-                nearby.removeUnit(u)
-                if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(caster.getOwner(), false, true)
-                    caster.dealDamage(u, dmg, ReductionType.MAGIC)
+                while(not nearby.isEmpty())
+                    unit u = FirstOfGroup(nearby)
+                    nearby.removeUnit(u)
+                    if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(caster.getOwner(), false, true)
+                        caster.dealDamage(u, dmg, ReductionType.MAGIC)
 
-            nearby.destr()
+                nearby.destr()
 
     static function updateStatic()
         (GetExpiredTimer().getData() castTo NaturesWrath).update()
 
     ondestroy
         this.checkTimer.release()
-        this.model.destr()
+        destroy this.model
 
 
 function onAttack(unit attacker, unit target, boolean _isActive)
@@ -409,7 +412,7 @@ function onSpellCast()
                 while(not nearby.isEmpty())
                     unit u = FirstOfGroup(nearby)
                     nearby.removeUnit(u)
-                    if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(caster.getOwner(), false, true)
+                    if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(caster.getOwner(), false, true) and not u.isType(UNIT_TYPE_FLYING)
                         
                         if not BuffList.hasBuffType(u, BUFF_ENTAGLING_ROOTS)
                             caster.dealDamage(u, ENTANGLE_HIT_DAMAGE[level-1].bonus(caster.getInt(), ENTANGLE_HIT_DAMAGE_BONUS), ReductionType.MAGIC)

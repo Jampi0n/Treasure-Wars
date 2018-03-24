@@ -240,10 +240,10 @@ function itemEnchantedBlade(int itemId)
     int as = 15
     int str = 20
     int wp = 10
-    int mBurn = 10
+    int mBurn = 16
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} strength|n+ {1}% attack speed|n+ {2} willpower|nAttacks burn {3}, dealing damage equal to the mana burned.".format(
+            ..setDescription("+ {0} strength|n+ {1}% attack speed|n+ {2} willpower|nAttacks burn {3} mana, dealing damage equal to the mana burned.".format(
                 str.toString(), as.toString(), wp.toString(), mBurn.toString()
             ))
             ..setGoldCost(3600)
@@ -258,7 +258,7 @@ function itemEnchantedBlade(int itemId)
 
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             if attacker.hasItemById(convertItemId(itemId)) and target.getMana() > 0 and not target.isType(UNIT_TYPE_STRUCTURE)
-                let manaBurned = min(mBurn.toReal() * target.countItemsOfType(convertItemId(itemId)) , target.getMana())
+                let manaBurned = min(mBurn.toReal() * attacker.countItemsOfType(convertItemId(itemId)) , target.getMana())
                 target.addMana(-manaBurned)
                 attacker.dealDamage(target, manaBurned, ReductionType.MAGIC)
                 target.addEffect(Abilities.spellBreakerAttack, "chest").destr()

@@ -167,7 +167,7 @@ function holyShield()
             ..setFollowThroughTime(lvl, 0)
             ..setOptions(lvl, 1)
             ..setTargetType(lvl, 1)
-            ..setTargetsAllowed(lvl, "friend,nonancient")
+            ..setTargetsAllowed(lvl, "friend,nonancient,hero")
             ..setTooltipNormalExtended(lvl, "Turns the target frendly hero untargetable for {0} seconds.".format(
             HOLY_SHIELD_DURATION[lvl-1].toString()+HOLY_SHIELD_DURATION_BONUS.getBonusString(C_INT)
             ))

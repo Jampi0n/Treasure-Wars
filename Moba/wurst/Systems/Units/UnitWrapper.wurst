@@ -241,6 +241,9 @@ public class UnitWrapper
     function getStatTotalBonus(Stat whichStat) returns int
         return this.statsTotalBonus[whichStat.toInt()]
 
+    function getStatTotalValue(Stat whichStat) returns int
+        return this.getStatTotalBonus(whichStat) + this.getStatBaseValue(whichStat)
+
 public function unit.wrapper() returns UnitWrapper
     return UnitWrapper.getWrapper(this)
 
