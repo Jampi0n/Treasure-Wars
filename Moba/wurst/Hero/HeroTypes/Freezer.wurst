@@ -125,7 +125,7 @@ constant int ARMOR_SLOW_BUFF_ID = compiletime(createAuraBuff("Slowed", "This uni
 constant int ARMOR_SLOW_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, ARMOR_SLOW_BUFF_ID, Abilities.frostDamage, "chest"))
 
 @compiletime
-function holyShield()
+function frostArmor()
     int array MANA = [100, 100, 100, 100, 100]
     real array COOLDOWN = [5, 5, 5, 5, 5]
     real array RANGE = [700, 700, 700, 700, 700]
@@ -200,8 +200,8 @@ function frostWyrm()
 
 
 constant real FREEZE_AOE = 900
-constant real array FREEZE_DMG = [60, 100, 140, 180, 220]
-constant real FREEZE_DMG_BONUS = 160
+constant real array FREEZE_DMG = [160, 180, 200, 220, 240]
+constant real FREEZE_DMG_BONUS = 200
 
 constant real array FREEZE_DURATION = [2, 2.5, 3, 3.5, 4]
 
@@ -214,8 +214,8 @@ constant int FREEZE_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, FREEZE
 
 @compiletime
 function freeze()
-    int array MANA = [0,0,0,0,0]//[350, 375, 400, 425, 450]
-    real array COOLDOWN = [0,0,0,0,0]//[120, 120, 120, 120, 120]
+    int array MANA = [350, 375, 400, 425, 450]
+    real array COOLDOWN = [120, 120, 120, 120, 120]
 
 
     let aDef = new AbilityDefinitionKeeperoftheGroveTranquility(ABILITY_FREEZE)
