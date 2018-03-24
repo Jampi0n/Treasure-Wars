@@ -201,7 +201,7 @@ function deathpact()
             ..setCastRange(lvl, RANGE[lvl-1])
             ..setManaCost(lvl, 0)
             ..setCooldown(lvl, COOLDOWN[lvl-1])
-            ..setTargetsAllowed(lvl, "air,enemies,ground,neutral,nonancient,organic")
+            ..setTargetsAllowed(lvl, "air,enemies,ground,neutral,nonancient,organic,hero")
             ..setTooltipNormal(lvl, "(R) Learn Death Coil - [|cffffcc00Level "+lvl.toString()+"|r]")
             ..setTooltipNormalExtended(lvl, "Deals {0} magic damage and additional {1} magic damage for every sacrificed skeleton to the target enemy hero.".format(
             DEATH_COIL_DMG_BASE[lvl-1].str()+DEATH_COIL_DMG_BASE_BONUS.getBonusString(C_INT),

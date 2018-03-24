@@ -8,7 +8,6 @@ import ClosureTimers
 import OnUnitEnterLeave
 import SoundUtils
 
-
 constant SOUND_PARALYZING_STRIKE = new SoundDefinition(Sounds.shadowStrikeBirth1, false, true)
 constant SOUND_POISON_SPIT = new SoundDefinition(Sounds.corrosiveBreathMissileTarget1, false, true)
 constant SOUND_EMPOWERED_STRIKE = new SoundDefinition(Sounds.metalHeavySliceFlesh3, false, true)
@@ -178,7 +177,7 @@ function empoweredStrike()
 
 
 constant real array PARALYZING_STRIKE_DAMAGE = [200, 250, 300, 350, 400]
-constant real PARALYZING_STRIKE_DAMAGE_BONUS = 350
+constant real PARALYZING_STRIKE_DAMAGE_BONUS = 300
 constant real array PARALYZING_STRIKE_DURATION = [1.5, 1.75, 2, 2.25, 2.5]
 constant real PARALYZING_STRIKE_DURATION_BONUS = 1
 
@@ -208,7 +207,7 @@ function paralyzingStrike()
             ..setCastRange(lvl, RANGE[lvl-1])
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
-            ..setTargetsAllowed(lvl, "air,enemies,ground,neutral,nonancient,organic")
+            ..setTargetsAllowed(lvl, "air,enemies,ground,neutral,nonancient,organic,hero")
             ..setTooltipNormalExtended(lvl, "Deals {0} magical damage to the target, stunning it for {1} seconds and teleports the Python Warriores behind the target.".format(
             PARALYZING_STRIKE_DAMAGE[lvl-1].str()+PARALYZING_STRIKE_DAMAGE_BONUS.getBonusString(C_INT),
             PARALYZING_STRIKE_DURATION[lvl-1].toString()+PARALYZING_STRIKE_DURATION_BONUS.getBonusString(C_INT)))

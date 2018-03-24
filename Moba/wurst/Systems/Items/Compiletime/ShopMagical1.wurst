@@ -137,7 +137,7 @@ function itemSpellBook(int itemId)
             ..addStatBonusAbsolute(Stat.INT, intel)
 
 function itemMagicStaff(int itemId)
-    int mana = 6
+    int mana = 7
     if compiletime
         itemId.getTypeDef()
             ..setDescription("Attacks drain {0} mana from the target.".format(mana.toString()))
@@ -145,7 +145,7 @@ function itemMagicStaff(int itemId)
     else
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             if attacker.hasItemById(convertItemId(itemId)) and target.getMana() > 0 and not target.isType(UNIT_TYPE_STRUCTURE)
-                let manaDrained = min(mana.toReal() * target.countItemsOfType(convertItemId(itemId)) , target.getMana())
+                let manaDrained = min(mana.toReal() * attacker.countItemsOfType(convertItemId(itemId)) , target.getMana())
                 attacker.addMana(manaDrained)
                 target.addMana(-manaDrained)
                 target.addEffect(Abilities.arcaneTowerAttack, "chest").destr()

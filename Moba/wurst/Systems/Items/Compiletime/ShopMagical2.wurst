@@ -134,7 +134,7 @@ function itemFrostRing(int itemId)
 function itemScepterOfTheTides(int itemId)
     int intel = 9
     int voidDmg = 15
-    int manaDrain = 8
+    int manaDrain = 12
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} intelligence|nDrains {1} mana and deals {2} void damage per attack.".format(
@@ -150,7 +150,7 @@ function itemScepterOfTheTides(int itemId)
 
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             if attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
-                let manaDrained = min(manaDrain.toReal() * target.countItemsOfType(convertItemId(itemId)) , target.getMana())
+                let manaDrained = min(manaDrain.toReal() * attacker.countItemsOfType(convertItemId(itemId)) , target.getMana())
                 attacker.dealDamage(target, voidDmg.toReal() * attacker.countItemsOfType(convertItemId(itemId)) , ReductionType.NONE)
                 attacker.addMana(manaDrained)
                 target.addMana(-manaDrained)
