@@ -56,6 +56,10 @@ public class UnitWrapper
 
     protected BuffList buffList
 
+    static function create(unit assocUnit)
+        if not unitMap.has(assocUnit)
+            new UnitWrapper(assocUnit)
+
     construct(unit assocUnit)
         objectCount++
 
@@ -291,7 +295,7 @@ function regenerate()
                 print(u.wrapper().statsTotalBonus[Stat.MR.toInt()]/100)*/
 
 init
-    onUnitIndex(() -> new UnitWrapper(getIndexedUnit()))
+    onUnitIndex(() -> UnitWrapper.create(getIndexedUnit()))
     onUnitDeindex(() -> getDeindexedUnit().wrapper().destr() )
 
     CreateTrigger()

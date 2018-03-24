@@ -14,6 +14,7 @@ import public Constants
 import Assets
 import DamageDetection
 import HashMap
+import ErrorHandling
 
 
 
@@ -233,7 +234,12 @@ init
     end))
 
     setCreateBuffListFunction( (unit u) -> (begin
-        u.wrapper().createBuffList()
+        if u.wrapper() != null
+            u.wrapper().createBuffList()
+        else
+            error("The unit "+u.getName()+" had no wrapper.")
+            UnitWrapper.create(u)
+            u.wrapper().createBuffList()
     end))
     
     dispelBuffsOnDeath()
