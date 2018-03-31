@@ -24,13 +24,13 @@ function setupStats()
     heroType
         //..setStat(Stat.AD, 5, 40)
         ..setStat(Stat.AR, 7, 18)
-        ..setStat(Stat.AS, 0, 80)
-        ..setStat(Stat.HP, 9, 33)
+        ..setStat(Stat.AS, 0, 26)
+        ..setStat(Stat.HP, 7, 29)
         ..setStat(Stat.HR, 4, 12)
         ..setStat(Stat.MP, 25, 78)
         ..setStat(Stat.MR, 19, 63)
         ..setStat(Stat.MS, 7, 43)
-        ..setStat(Stat.STR, 8, 37)
+        ..setStat(Stat.STR, 11, 57)
         ..setStat(Stat.AGI, 13, 23)
         ..setStat(Stat.INT, 18, 53)
 
@@ -64,8 +64,8 @@ constant real NOVA_AOE = 200
 constant real array NOVA_DURATION = [2, 2.5, 3, 3.5, 4]
 constant real NOVA_DURATION_BONUS = 2
 
-constant int array NOVA_MS = [50, 50, 50, 50, 50]
-constant int array NOVA_AS = [25, 25, 25, 25, 25]
+constant int array NOVA_MS = [30, 30, 30, 30, 30]
+constant int array NOVA_AS = [20, 20, 20, 20, 20]
 
 BuffType buffFrostNova
 
@@ -100,7 +100,7 @@ function frostNova()
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setCastRange(lvl, RANGE[lvl-1])
-            ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic")
+            ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
             ..setTooltipNormalExtended(lvl, "Blasts enemy units with a wave of frost that deals {0} damage to the target, and {1} nova damage. Cold damage slows units' movement and attack rate for {2} seconds.".format(
                 NOVA_TARGET_DMG[lvl-1].str() + NOVA_TARGET_DMG_BONUS.getBonusString(C_INT),
                 NOVA_AOE_DMG[lvl-1].str() + NOVA_AOE_DMG_BONUS.getBonusString(C_INT),
@@ -108,12 +108,12 @@ function frostNova()
             ))
 
 
-constant int array ARMOR_AR = [20, 25, 30, 35, 40]
-constant int ARMOR_AR_BONUS = 20
+constant int array ARMOR_AR = [15, 20, 25, 30, 35]
+constant int ARMOR_AR_BONUS = 15
 constant real ARMOR_DURATION = 10
-constant int array ARMOR_SLOW = [20, 25, 30, 35, 40]
+constant int array ARMOR_SLOW = [25, 25, 25, 25, 25]
 constant real array ARMOR_SLOW_DURATION = [1, 1.25, 1.5, 1.75, 2]
-constant real ARMOR_SLOW_DURATION_BONUS = 1
+constant real ARMOR_SLOW_DURATION_BONUS = 2
 
 BuffType buffFrostArmor
 BuffType buffFrostArmorSlow
@@ -170,6 +170,14 @@ constant int array FROST_WYRM_DMG = [10, 20, 30, 40, 50]
 constant int FROST_WYRM_INT_FACTOR = 50
 
 constant real FROST_WYRM_AOE = 175
+
+constant int array FROST_BREATH_SLOW = [20, 20, 20, 20, 20]
+constant real array FROST_BREATH_DUR = [2, 2.25, 2.5, 2.75, 3]
+
+BuffType buffFrostBreath
+
+constant int FROST_BREATH_BUFF_ID = compiletime(createAuraBuff("Frost Breath", "This unit was hit by a Frost Wyrm; its movement and attack speed are slowed.", Icons.bTNBreathOfFrost))
+constant int FROST_BREATH_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, FROST_BREATH_BUFF_ID, Abilities.frostDamage, "chest"))
         
 @compiletime
 function frostWyrm()
@@ -181,10 +189,12 @@ function frostWyrm()
         ..setArtCaster("")
         ..setupIcon(Icons.bTNFrostWyrm)
         ..setupWithHotKey("Summon Frost Wyrm", "E")
-        ..setLearnString("Summons a powerful Frost Wyrm. The Frost Wyrm's attack speed and hit points scale with the respective stats of the Hero.", (int lvl) -> (begin
-            return "{0} bonus damage, {1} bonus hit points".format(
+        ..setLearnString("Summons a powerful Frost Wyrm. The Frost Wyrm's attack speed and hit points scale with the respective stats of the Hero. The Frost Wyrm's attacks slow the targets.", (int lvl) -> (begin
+            return "{0} bonus damage, {1} bonus hit points, {2}% slow for {3} seconds.".format(
                 FROST_WYRM_DMG[lvl-1].str() + FROST_WYRM_INT_FACTOR.getBonusString(C_INT),
-                FROST_WYRM_HP[lvl-1].str()
+                FROST_WYRM_HP[lvl-1].str(),
+                FROST_BREATH_SLOW[lvl-1].str(),
+                FROST_BREATH_DUR[lvl-1].toString()
             )
         end) )
 
@@ -193,9 +203,11 @@ function frostWyrm()
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setTargetsAllowed(lvl, "none")
-            ..setTooltipNormalExtended(lvl, "Summons a powerful Frost Wyrm. The Frost Wyrm's attack speed and hit points scale with the respective stats of the Hero. Deals {0} bonus damage and has {1} additional hit points.".format(
+            ..setTooltipNormalExtended(lvl, "Summons a powerful Frost Wyrm. The Frost Wyrm's attack speed and hit points scale with the respective stats of the Hero. Deals {0} bonus damage and has {1} additional hit points. The Frost Wyrm's attacks slow the targets by {2}% for {3} seconds.".format(
                 FROST_WYRM_DMG[lvl-1].str() + FROST_WYRM_INT_FACTOR.getBonusString(C_INT),
-                FROST_WYRM_HP[lvl-1].str()
+                FROST_WYRM_HP[lvl-1].str(),
+                FROST_BREATH_SLOW[lvl-1].str(),
+                FROST_BREATH_DUR[lvl-1].toString()
             ))
 
 
@@ -271,7 +283,7 @@ constant int FREEZE_EFFECT = compiletime(UNIT_ID_GEN.next())
     ..setPropulsionWindowdegrees(1.0)
     ..setTooltipBasic("")
     ..setNormalAbilities("Avul,Aloc")
-    ..setScalingValue(0.5)
+    ..setScalingValue(0.75)
 
 class Freeze
 
@@ -382,6 +394,7 @@ function initHeroType()
         whichBuff.getTarget().wrapper()
             ..addStatAbsoluteBonus(Stat.AS, -NOVA_AS[level - 1])
             ..addStatRelativeBonus(Stat.MS, -NOVA_MS[level - 1]*10)
+            ..incBlue()
     end))
 
     buffFrostNova.addEndFunction( (Buff whichBuff) -> (begin
@@ -389,6 +402,7 @@ function initHeroType()
         whichBuff.getTarget().wrapper()
             ..addStatAbsoluteBonus(Stat.AS, NOVA_AS[level - 1])
             ..addStatRelativeBonus(Stat.MS, NOVA_MS[level - 1]*10)
+            ..decBlue()
     end))
 
 
@@ -425,6 +439,7 @@ function initHeroType()
         whichBuff.getTarget().wrapper()
             ..addStatAbsoluteBonus(Stat.AS, -ARMOR_SLOW[level - 1])
             ..addStatRelativeBonus(Stat.MS, -ARMOR_SLOW[level - 1]*10)
+            ..incBlue()
     end))
 
     buffFrostArmorSlow.addEndFunction( (Buff whichBuff) -> (begin
@@ -432,6 +447,28 @@ function initHeroType()
         whichBuff.getTarget().wrapper()
             ..addStatAbsoluteBonus(Stat.AS, ARMOR_SLOW[level - 1])
             ..addStatRelativeBonus(Stat.MS, ARMOR_SLOW[level - 1]*10)
+            ..decBlue()
+    end))
+
+
+    buffFrostBreath = new BuffType(false, true)
+
+    abilityList = new LinkedList<int>
+    ..add(FROST_BREATH_ABILTIY_ID)
+    buffFrostBreath.setup(abilityList, FROST_BREATH_BUFF_ID)
+
+    buffFrostBreath.addFirstFunction( (Buff whichBuff) -> (begin
+        let level = whichBuff.getLevel()
+        whichBuff.getTarget().wrapper()
+            ..addStatRelativeBonus(Stat.MS, -FROST_BREATH_SLOW[level - 1]*10)
+            ..incBlue()
+    end))
+
+    buffFrostBreath.addEndFunction( (Buff whichBuff) -> (begin
+        let level = whichBuff.getLevel()
+        whichBuff.getTarget().wrapper()
+            ..addStatRelativeBonus(Stat.MS, FROST_BREATH_SLOW[level - 1]*10)
+            ..decBlue()
     end))
 
 
@@ -477,11 +514,15 @@ function initHeroType()
             nearby.enumUnitsInRange(target.getPos(), FROST_WYRM_AOE)
 
             let dmg = attacker.wrapper().getStatTotalValue(Stat.AD) * 0.5
+            let level = Hero.getHero(attacker.getOwner()).toUnit().getAbilityLevel(ABILITY_FROST_WYRM)
+
+            target.addBuffReduced(attacker, FROST_BREATH_DUR[level-1], buffFrostBreath, level)
 
             while(not nearby.isEmpty())
                 unit u = FirstOfGroup(nearby)
                 nearby.removeUnit(u)
                 if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(attacker.getOwner(), false, true) and u != target
+                    u.addBuffReduced(attacker, FROST_BREATH_DUR[level-1], buffFrostBreath, level)
                     attacker.dealDamage(u, dmg, ReductionType.PHYSICAL)
 
             nearby.destr()

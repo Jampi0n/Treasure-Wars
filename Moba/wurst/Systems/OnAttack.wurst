@@ -8,6 +8,7 @@ import UnitTypeConfig
 import initlater SeaDruid
 import initlater TrollBerserker
 import StandardTextTags
+import HashMap
 
 import ItemIdGeneration
 import initlater ItemShopSystem
@@ -23,6 +24,9 @@ public constant DEFAULT_ONHIT = 'A008'
 
 
 constant PREVENT_DEATH = compiletime(ABIL_ID_GEN.next())
+
+group afterLifeGroup = CreateGroup()
+constant afterLifeMap = new HashMap<unit,real>
 
 /*unit prevenDeathUnit
 real prevenDeathAfterLife
@@ -56,9 +60,24 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
     let originalDamage = GetEventDamage()
     real currentDamage = originalDamage
     real afterLife
+    real currentActualLife = target.getHP()
+    real currentSupposedLife = currentActualLife
 
     if originalDamage.abs() < 0.000001 //damage very small, just ignore
         return
+
+
+    //previous after life event was not yet finished for this unit
+    //use supposed hp to refer to hp, that the unit should have 
+
+    //instead of completing the previous after life event, this new after life event is altered to
+    //use the life of the previous after life event
+    //the previous after life event never actually happens
+    if afterLifeGroup.contains(target)
+        currentSupposedLife = afterLifeMap.get(target)
+        //print("the previous after life event was not yet finished")
+
+    
 
     //if source.isType(UNIT_TYPE_HERO) or target.isType(UNIT_TYPE_HERO)
         //print(source.getName()+" damages "+target.getName()+": "+currentDamage.toString()+" "+isAttack.toString())
@@ -135,8 +154,7 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
 
         //===============================================================================
 
-
-
+    
     if currentDamage > originalDamage
         source.dealDamageNoEvent(target, currentDamage-originalDamage, ReductionType.NONE)
     else if currentDamage < originalDamage
@@ -145,23 +163,31 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
         //how much life the target is supposed to have after dealing damage
 
 
-        let life = target.getHP()
-
-
-        afterLife = life - currentDamage
+        afterLife = currentSupposedLife - currentDamage
         
         //only do stuff, if the unit is supposed to survive
-        if life - currentDamage > 0.41
+        if afterLife > 0.41
             //if the target would die, even though it is supposed to survive:
-            if life - originalDamage < 0.41
+            if currentActualLife - originalDamage < 0.41
                 target.setHP(target.getMaxHP())
                 target.addAbility(PREVENT_DEATH)
+                //print("target would die")
 
-            
+
+
+            //print(target.getName()+" has "+currentActualLife.toString()+"|"+currentSupposedLife.toString()+" hp. Damage is: "+originalDamage.toString()+"|"+currentDamage.toString()+" afterlife = "+afterLife.toString())
+
+
+            afterLifeGroup.addUnit(target)
+            afterLifeMap.put(target, afterLife)
+            //even with simultaneous damage events, this will always lead to the same result (idempotent)
             doAfter(0, () -> (begin
-                target
-                    ..removeAbility(PREVENT_DEATH)
-                    ..setHP(afterLife)
+                //print(target.getName()+" has now "+target.getHP().toString()+" hp.")
+                if afterLifeGroup.contains(target)
+                    target
+                        ..removeAbility(PREVENT_DEATH)
+                        ..setHP(afterLifeMap.get(target))
+                    afterLifeGroup.removeUnit(target)
             end))
 
 
@@ -193,8 +219,8 @@ public class OnAttack
         var advanced = false
 
         countEvents++
-        if countEvents > 100
-            print("Warning. Very high number of damage events: "+countEvents.toString())
+        if countEvents > 1000
+            print("Warning. Very high number of damage events per second: "+countEvents.toString())
 
         if(localTarget.hasAbility('B005')) or localAttacker.getTypeId() == MORTAR_TEAM //passive
             localTarget.removeAbility('B005')

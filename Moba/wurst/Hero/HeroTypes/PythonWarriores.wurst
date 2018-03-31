@@ -207,7 +207,7 @@ function paralyzingStrike()
             ..setCastRange(lvl, RANGE[lvl-1])
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
-            ..setTargetsAllowed(lvl, "air,enemies,ground,neutral,nonancient,organic,hero")
+            ..setTargetsAllowed(lvl, "enemies,ground,neutral,nonancient,organic,hero")
             ..setTooltipNormalExtended(lvl, "Deals {0} magical damage to the target, stunning it for {1} seconds and teleports the Python Warriores behind the target.".format(
             PARALYZING_STRIKE_DAMAGE[lvl-1].str()+PARALYZING_STRIKE_DAMAGE_BONUS.getBonusString(C_INT),
             PARALYZING_STRIKE_DURATION[lvl-1].toString()+PARALYZING_STRIKE_DURATION_BONUS.getBonusString(C_INT)))

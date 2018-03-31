@@ -1,0 +1,156 @@
+package Creeps
+
+import ClosureTimers
+import UnitTypeConfig
+import UnitWrapper
+import PlayerControl
+import HeroControl
+import Assets
+import SoundUtils
+import Buff
+import ObjectEditingPreset
+import LinkedList
+import OnAttack
+import General
+
+constant REVIVE_TIME = 15.//300.
+constant HYDRA_MAX_LEVEL = 5
+
+constant HYDRA_DEATH = new SoundDefinition(Sounds.hydraDeath1, false)
+
+vec2 array hydraPos
+angle array hydraFacing
+
+int array hydraLevel
+
+constant int array HYDRA_HP = [0, 2000, 4000, 6000, 8000, 10000]
+constant int array HYDRA_DMG = [0, 50, 100, 150, 200, 250]
+
+constant int array HYDRA_ARMOR = [0, 20, 40, 60, 80, 100]
+constant int array HYDRA_WILLPOWER = [100, 120, 140, 160, 180, 200]
+
+constant int array HYDRA_ATTACK_SPEED = [0, 10, 20, 30, 40, 50]
+
+
+constant int ACID_BREATH_ARMOR = 50
+constant int ACID_BREATH_SLOW = 50
+constant real ACID_BREATH_DUR = 5
+
+BuffType buffAcidBreath
+
+
+constant int ACID_BREATH_BUFF_ID = compiletime(createAuraBuff("Acid Breath", "This unit was hit by a Hydra; its movement, attack speed and armor are reduced.", Icons.bTNCorrosiveBreath))
+constant int ACID_BREATH_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, ACID_BREATH_BUFF_ID, Abilities.bottleImpact, "chest"))
+        
+
+
+function onHydraDeath()
+    int hydra
+    unit target = GetTriggerUnit()
+    if target == udg_Hydra[0]
+        hydra = 0
+    else if target == udg_Hydra[1]
+        hydra = 1
+    else
+        return
+
+    HYDRA_DEATH.play().snd.setVolume(150)
+
+    let killer = GetKillingUnit()
+    let killingTeam = CPlayer.getAllyHeroPlayers(killer.getOwner())
+    boolean killedByTeam = true
+
+    string teamName
+    if killer.getOwner().getCPlayer().getTeam() == Team.TEAM1
+        teamName = "Dark Green"
+    else if killer.getOwner().getCPlayer().getTeam() == Team.TEAM2
+        teamName = "Brown"
+    else
+        teamName = ""
+        killedByTeam = false
+
+    if killedByTeam
+        printTimed("Team "+teamName+" has killed a Hydra. Their heroes will gain a permanent stat bonus. The Hydra will respawn in "+REVIVE_TIME.toInt().toString()+" seconds.", 10)
+        PingMinimap(target.getX(), target.getY(), 3)
+
+        for CPlayer killerHero in killingTeam
+            let hero = Hero.getHero(killerHero)
+            if hero != null
+                hero.toUnit().hydraBonus()
+
+    doAfter(REVIVE_TIME, () -> (begin
+        udg_Hydra[hydra] = createUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), HYDRA, hydraPos[hydra], hydraFacing[hydra])
+        SetUnitAcquireRange(udg_Hydra[hydra], 200)
+        if hydraLevel[hydra] < HYDRA_MAX_LEVEL
+            hydraLevel[hydra]++
+
+
+        let lvl = hydraLevel[hydra]
+        udg_Hydra[hydra].wrapper()
+            ..addStatAbsoluteBonus(Stat.AD, HYDRA_DMG[lvl])
+            ..addStatAbsoluteBonus(Stat.HP, HYDRA_HP[lvl])
+            ..addStatAbsoluteBonus(Stat.AR, HYDRA_ARMOR[lvl])
+            ..addStatAbsoluteBonus(Stat.AGI, HYDRA_WILLPOWER[lvl])
+            ..addStatAbsoluteBonus(Stat.AS, HYDRA_ATTACK_SPEED[lvl])
+
+    end))
+
+function unit.hydraBonus()
+    this.wrapper()
+        ..addStatAbsoluteBonus(Stat.AD, 3)
+        ..addStatAbsoluteBonus(Stat.AS, 6)
+        ..addStatAbsoluteBonus(Stat.STR, 3)
+        ..addStatAbsoluteBonus(Stat.AGI, 3)
+        ..addStatAbsoluteBonus(Stat.INT, 3)
+        ..addStatAbsoluteBonus(Stat.AR, 3)
+
+        ..addStatAbsoluteBonus(Stat.HP, 80)
+        ..addStatAbsoluteBonus(Stat.HR, 12)
+        ..addStatAbsoluteBonus(Stat.MP, 40)
+        ..addStatAbsoluteBonus(Stat.MR, 6)
+
+
+init
+    for i = 0 to 1    
+        hydraPos[i] = udg_Hydra[i].getPos()
+        hydraFacing[i] = udg_Hydra[i].getFacingAngle()
+        hydraLevel[i] = 0
+
+        let lvl = hydraLevel[i]
+        doAfter(0) ->
+            udg_Hydra[i].wrapper()
+                ..addStatAbsoluteBonus(Stat.AD, HYDRA_DMG[lvl])
+                ..addStatAbsoluteBonus(Stat.HP, HYDRA_HP[lvl])
+                ..addStatAbsoluteBonus(Stat.AR, HYDRA_ARMOR[lvl])
+                ..addStatAbsoluteBonus(Stat.AGI, HYDRA_WILLPOWER[lvl])
+                ..addStatAbsoluteBonus(Stat.AS, HYDRA_ATTACK_SPEED[lvl])
+
+    CreateTrigger()
+        ..registerPlayerUnitEvent(Player(PLAYER_NEUTRAL_AGGRESSIVE), EVENT_PLAYER_UNIT_DEATH, null)
+        ..addAction(function onHydraDeath)
+
+    buffAcidBreath = new BuffType(false, true)
+
+    var abilityList = new LinkedList<int>
+    ..add(ACID_BREATH_ABILTIY_ID)
+    buffAcidBreath.setup(abilityList, ACID_BREATH_BUFF_ID)
+
+    buffAcidBreath.addFirstFunction( (Buff whichBuff) -> (begin
+        whichBuff.getTarget().wrapper()
+            ..addStatAbsoluteBonus(Stat.AS, -ACID_BREATH_SLOW)
+            ..addStatRelativeBonus(Stat.MS, -ACID_BREATH_SLOW*10)
+            ..addStatAbsoluteBonus(Stat.AR, -ACID_BREATH_ARMOR)
+            
+    end))
+
+    buffAcidBreath.addEndFunction( (Buff whichBuff) -> (begin
+        whichBuff.getTarget().wrapper()
+            ..addStatAbsoluteBonus(Stat.AS, ACID_BREATH_SLOW)
+            ..addStatRelativeBonus(Stat.MS, ACID_BREATH_SLOW*10)
+            ..addStatAbsoluteBonus(Stat.AR, ACID_BREATH_ARMOR)
+    end))
+
+    OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+        if attacker.getTypeId() == HYDRA and not target.isType(UNIT_TYPE_STRUCTURE)
+            target.addBuffReduced(attacker, ACID_BREATH_DUR, buffAcidBreath, 1)
+    end))

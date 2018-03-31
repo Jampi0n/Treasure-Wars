@@ -213,7 +213,7 @@ function rocket()
             ..setCooldown(lvl, ROCKET_COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setCastRange(lvl, ROCKET_RANGE[lvl-1])
-            ..setTargetsAllowed(lvl, "nonancient,enemies,ground")
+            ..setTargetsAllowed(lvl, "nonancient,enemies,ground,air")
             ..setTooltipNormalExtended(lvl,"Fires a rocket at the target enemy unit, dealing {0} damage in an area around the target.".format(
                 ROCKET_DMG[lvl-1].str()+ROCKET_DMG_BONUS.getBonusString(C_STR)
             ))
@@ -259,8 +259,7 @@ class Pull
                 if not hasPulled
                     real minDistance = 100
                     unit minUnit = null
-                    group nearby = CreateGroup()
-                    nearby.enumUnitsInRange(pos, 70)
+                    group nearby = enumUnitsInHitBoxRange(pos, 40)
                 
                     while(not nearby.isEmpty())
                         unit target = FirstOfGroup(nearby)

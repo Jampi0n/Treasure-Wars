@@ -154,6 +154,26 @@ public function player.getFullColoredName() returns string
     return fromPlayer(this).toColorString()+this.getFullName()+"|r"
 
 
+public function unit.hitBoxDistanceTo(vec2 pos) returns real
+    return max(0, this.getPos().distanceTo(pos) - this.getHitBox())
+
+public function enumUnitsInHitBoxRange(vec2 pos, real range) returns group
+    let g = CreateGroup()
+    g.enumUnitsInRange(pos, range + MAX_HIT_BOX)
+    let returnGroup = CreateGroup()
+    while(true)
+        let u = FirstOfGroup(g)
+        if u == null
+            g.destr()
+            return returnGroup
+        g.removeUnit(u)
+        if u.hitBoxDistanceTo(pos) <= range
+            returnGroup.addUnit(u)
+    
+    g.destr()
+    return returnGroup
+
+
 public class ChannelTeleport
 
     private unit caster
@@ -267,3 +287,5 @@ init
                         attacker.issueImmediateOrder("stop")
                 end))
     end))
+
+    Player(PLAYER_NEUTRAL_AGGRESSIVE).setName("Creeps")
