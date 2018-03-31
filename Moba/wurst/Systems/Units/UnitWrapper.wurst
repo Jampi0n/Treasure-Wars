@@ -56,6 +56,8 @@ public class UnitWrapper
 
     protected BuffList buffList
 
+    private int blueCount = 0
+
     static function create(unit assocUnit)
         if not unitMap.has(assocUnit)
             new UnitWrapper(assocUnit)
@@ -247,6 +249,16 @@ public class UnitWrapper
 
     function getStatTotalValue(Stat whichStat) returns int
         return this.getStatTotalBonus(whichStat) + this.getStatBaseValue(whichStat)
+
+    function incBlue()
+        blueCount++
+        if blueCount == 1
+            this.assocUnit.setVertexColor(140, 220, 255, 255)
+
+    function decBlue()
+        blueCount--
+        if blueCount == 0
+            this.assocUnit.setVertexColor(255, 255, 255, 255)
 
 public function unit.wrapper() returns UnitWrapper
     return UnitWrapper.getWrapper(this)

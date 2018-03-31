@@ -165,7 +165,7 @@ function soulburn()
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setCastRange(lvl, RANGE[lvl-1])
-            ..setTargetsAllowed(lvl, "enemies,nonancient,ground,organic")
+            ..setTargetsAllowed(lvl, "enemies,nonancient,ground,organic,air")
             ..setTooltipNormalExtended(lvl, "Deals {0} damage per second to the target enemy unit for {1} seconds. If the unit dies, while under the effect of Soul Burn, nearby enemy units will be affected by Soul Burn. The initial target is silenced for {2} seconds.".format(
                 SOUL_BURN_DAMAGE[lvl-1].str()+SOUL_BURN_DAMAGE_BONUS.getBonusString(C_INT), SOUL_BURN_DURATION[lvl-1].toString(), SOUL_BURN_SILENCE[lvl-1].toString()
             ))

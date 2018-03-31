@@ -75,7 +75,6 @@ function critical()
             ..setMovementSpeedIncrease(lvl, 0)
             ..setBuffs(lvl, int2fourchar(CRITICAL_BUFF_ID))
             ..setDurationHero(lvl, 0.01)
-            ..setTargetsAllowed(lvl, "air,enemies,ground,neutral,nonancient,organic,nonhero")
             ..setTooltipNormalExtended(lvl, "Increases the attack damage of the next attack by {0}%.".format(
                 CRITICAL_DAMAGE_MULT[lvl-1].str()
             ))
