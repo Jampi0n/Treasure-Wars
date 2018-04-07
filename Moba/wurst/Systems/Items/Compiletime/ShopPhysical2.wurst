@@ -242,7 +242,7 @@ function itemWarDrum(int itemId)
             ..setDescription("Increases nearby unit's attack speed by {0}% and movement speed by {1}%. This effect does not stack".format(
                 asBonus.toString(), msBonus.toString()
             ))
-            ..setGoldCost(2500)
+            ..setGoldCost(2900)
             ..addRequirement(ITEM_ID_GLOVES_OF_HASTE)
             ..addRequirement(ITEM_ID_LIGHT_BOOTS)
     else
@@ -279,13 +279,13 @@ function itemWarDrum(int itemId)
     
 
 function itemWarHorn(int itemId)
-    int adBonus = 30
+    int adBonus = 25
     if compiletime
         itemId.getTypeDef()
             ..setDescription("Increases nearby unit's strength by {0}%.".format(
                 adBonus.toString()
             ))
-            ..setGoldCost(2500)
+            ..setGoldCost(2900)
             ..addRequirement(ITEM_ID_HAMMER_OF_STRENGTH)
             ..addRequirement(ITEM_ID_WAR_AXE)
             ..addRequirement(ITEM_ID_BOW)
