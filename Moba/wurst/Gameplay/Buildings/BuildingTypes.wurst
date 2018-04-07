@@ -372,12 +372,10 @@ function onMilitiaDespawn()
     if u.getTypeId() == MILITIA_DEFEND
         if greenRemoveMilita
             if u.getOwner().getCPlayer().getTeam() == Team.TEAM1
-                print("remove at castle")
                 greenMilitia.removeUnit(u)
                 u.remove()
         if brownRemoveMilita
             if u.getOwner().getCPlayer().getTeam() == Team.TEAM2
-                print("remove at castle")
                 brownMilitia.removeUnit(u)
                 u.remove()
 
