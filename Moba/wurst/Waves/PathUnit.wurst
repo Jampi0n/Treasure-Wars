@@ -10,6 +10,15 @@ import Constants
 import PlayerControl
 import initlater WaveSpawn
 
+enum PathState
+    HOME_TOWN
+    RETURNING
+    PATH
+    ENEMY_TOWN
+
+public function rect.contains(vec2 r, real tolerance)returns boolean
+    return r.x > this.getMinX()-tolerance and r.x < this.getMaxX()+tolerance and r.y > this.getMinY()-tolerance and r.y < this.getMaxY()+tolerance
+
 public class PathUnit 
 
     static int operations = 0
@@ -25,8 +34,22 @@ public class PathUnit
     static timer periodicTimer = getTimer()
     private real nextUpdate
     private real lastAttack
+    private PathState pathState
+    private rect returnRect = null
 
     boolean checkEnter = false
+
+    function setPathState(PathState newState)
+        this.pathState = newState
+        if DEBUG_MODE
+            if newState == PathState.HOME_TOWN
+                this.assocUnit.setVertexColor(100,255,100,255)
+            else if newState == PathState.RETURNING
+                this.assocUnit.setVertexColor(100,100,255,255)
+            else if newState == PathState.PATH
+                this.assocUnit.setVertexColor(255,255,255,255)
+            else if newState == PathState.ENEMY_TOWN
+                this.assocUnit.setVertexColor(255,100,100,255)
 
     static function classInit()
         periodicTimer.startPeriodic(0.05, function updateMovementStatic)
@@ -44,6 +67,16 @@ public class PathUnit
         region greenBase = CreateRegion()
             ..addRect(gg_rct_GreenBase) 
 
+        region brownHome = CreateRegion()
+            ..addRect(gg_rct_BrownTopHome)
+            ..addRect(gg_rct_BrownMidHome)
+            ..addRect(gg_rct_BrownBotHome)
+
+        region greenHome = CreateRegion()
+            ..addRect(gg_rct_GreenTopHome)
+            ..addRect(gg_rct_GreenMidHome)
+            ..addRect(gg_rct_GreenBotHome)
+
         CreateTrigger()
             ..registerEnterRegion(brownBase, null)
             ..addAction(function onBaseEnterBrown)
@@ -57,6 +90,13 @@ public class PathUnit
         CreateTrigger()
             ..registerLeaveRegion(greenBase, null)
             ..addAction(function onBaseLeaveGreen)
+
+        CreateTrigger()
+            ..registerEnterRegion(brownHome, null)
+            ..addAction(function onReturnBrown)
+        CreateTrigger()
+            ..registerEnterRegion(greenHome, null)
+            ..addAction(function onReturnGreen)
 
         CreateTrigger()
             ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
@@ -77,6 +117,9 @@ public class PathUnit
             pathUnits.addUnit(this.assocUnit)
             this.nextUpdate = getElapsedGameTime() + GetRandomReal(0, 0.1)
             this.lastAttack = 0
+
+            this.setPathState(PathState.HOME_TOWN)
+
             
             doAfter(0, () -> (this.enableEnterCheck()  ) )
 
@@ -117,10 +160,25 @@ public class PathUnit
     function setPath(Path p)
         this.currentPath = p
 
+        if this.currentPath == GREEN_TOP
+            returnRect = gg_rct_GreenTopHome
+        else if this.currentPath == BROWN_TOP
+            returnRect = gg_rct_BrownTopHome
+        else if this.currentPath == GREEN_MID 
+            returnRect = gg_rct_GreenMidHome
+        else if this.currentPath == BROWN_MID
+            returnRect = gg_rct_BrownMidHome
+        else if this.currentPath == GREEN_BOT
+            returnRect = gg_rct_GreenBotHome      
+        else if this.currentPath == BROWN_BOT
+            returnRect = gg_rct_BrownBotHome
+
     function setPathFirst(Path p)
-        this.currentPath = p
+        this.setPath(p)
         this.assocUnit.issuePointOrder("attack", p.getStartTargetPos())
         this.nextUpdate = gameTime + 15
+
+
         
     function getNextUpdate() returns real
         return GetRandomReal(1.1, 1.6)
@@ -152,128 +210,68 @@ public class PathUnit
        
         //print("continue")
 
-        vec2 v0 = vec2(assocUnit.getX(), assocUnit.getY())
-        vec2 v1
-        vec2 v2
-        real minDistance = -1
-        int newSubPath = -1
-        int moveSubPath
+        if this.pathState == PathState.PATH
+            vec2 v0 = vec2(assocUnit.getX(), assocUnit.getY())
+            vec2 v1
+            vec2 v2
+            real minDistance = -1
+            int newSubPath = -1
+            int moveSubPath
 
 
-        //print(this.currentPath.getSubPathCount()-2)
-        for i=this.currentSubPath to this.currentPath.getSubPathCount()-2
+            //print(this.currentPath.getSubPathCount()-2)
+            for i=this.currentSubPath to this.currentPath.getSubPathCount()-2
 
-            v1 = vec2(this.currentPath.getSubPathX(i), this.currentPath.getSubPathY(i))
-            //print("v1="+v1.toString())
-            v2 = vec2(this.currentPath.getSubPathX(i+1), this.currentPath.getSubPathY(i+1))
-            //print("v2="+v2.toString())
-            real distance = v0.distanceToSegmentSq(v1, v2).pow(0.5)
-            //print("["+i.toString()+"] distance="+distance.toString())
-            //print("minDistance="+minDistance.toString())
-            if(distance <= minDistance+200 or minDistance==-1)
-                minDistance = distance
-                newSubPath = i
-            //if a subpath is far away, there won't come any close subpathes anymore
-            if distance>3000 or minDistance<100
-                break
-        int newOrder
-        //string currentOrder =  OrderId2String(this.assocUnit.getCurrentOrder())
-    
-        //print(minDistance)
+                v1 = vec2(this.currentPath.getSubPathX(i), this.currentPath.getSubPathY(i))
+                //print("v1="+v1.toString())
+                v2 = vec2(this.currentPath.getSubPathX(i+1), this.currentPath.getSubPathY(i+1))
+                //print("v2="+v2.toString())
+                real distance = v0.distanceToSegmentSq(v1, v2).pow(0.5)
+                //print("["+i.toString()+"] distance="+distance.toString())
+                //print("minDistance="+minDistance.toString())
+                if(distance <= minDistance+200 or minDistance==-1)
+                    minDistance = distance
+                    newSubPath = i
+                //if a subpath is far away, there won't come any close subpathes anymore
+                if distance>3000 or minDistance<100
+                    break
+            int newOrder
+            //string currentOrder =  OrderId2String(this.assocUnit.getCurrentOrder())
         
-        //print(currentOrder)
-
-        //move two subpathes forward
-        if(newSubPath+2<=this.currentPath.getSubPathCount()-1)
-            moveSubPath = newSubPath+2
-        else
-            moveSubPath = newSubPath+1
-
-        v2 = vec2(this.currentPath.getSubPathX(moveSubPath), this.currentPath.getSubPathY(moveSubPath))
-
-        //addEffect("Abilities\\Weapons\\FarseerMissile\\FarseerMissile.mdl", v2)
-
-        //print("path: "+this.currentSubPath.toString()+" -> "+newSubPath.toString()+" -> "+moveSubPath.toString())
-
-        if(minDistance>900)
-            newOrder = 1
-        else
-            newOrder = 2
-
-        this.currentSubPath = newSubPath
-
-        //order:
-            //0 = do nothing
-            //1 = move back
-            //2 = continue move
-
-
-        group nearby = CreateGroup()
-        nearby.enumUnitsInRange(v0, 500)
-        
-        
-
-        while(true)
-            unit n = nearby.next()
-            if(n==null)
-                break
-            nearby.removeUnit(n)
-            if(unitToPathUnit.has(n))
-                PathUnit nearbyPathUnit = unitToPathUnit.get(n)
-
-                if(nearbyPathUnit.currentPath == this.currentPath and (nearbyPathUnit.nextUpdate<gameTime or nearbyPathUnit == this) )
-                    
-
-                    if newOrder==1
-                        n.issuePointOrder("move", v2)
-                        //print("move back?")
-                        moveOrders++
-                        nearbyPathUnit.nextUpdate = gameTime + this.getNextUpdate()
-                    else
-                        if(gameTime-nearbyPathUnit.lastAttack > 2)
-                            n.issuePointOrder("attack", v2)
-                            moveOrders++
-                            nearbyPathUnit.nextUpdate = gameTime + this.getNextUpdate()
-                        else
-                            nearbyPathUnit.nextUpdate = gameTime + this.getNextUpdate()
-
-                    
+            //print(minDistance)
             
-        nearby.destr()
+            //print(currentOrder)
 
-        /*
-        if(currentOrder == "move")
-            if(minDistance<200)
-                newOrder = 2
-        if(minDistance>600)
-            newOrder = 1
-            print("move back after attacking: "+minDistance.toString())
-            PingMinimap(this.assocUnit.getX(), this.assocUnit.getY(), 5)
-        if(currentOrder!="attack")
-            if(minDistance>400)
-                if(currentOrder!="move")
-                    newOrder = 1
-                    print("move back after doing something else")
-                    PingMinimap(this.assocUnit.getX(), this.assocUnit.getY(), 5)
+            //move two subpathes forward
+            if(newSubPath+2<=this.currentPath.getSubPathCount()-1)
+                moveSubPath = newSubPath+2
+            else
+                moveSubPath = newSubPath+1
+
+            v2 = vec2(this.currentPath.getSubPathX(moveSubPath), this.currentPath.getSubPathY(moveSubPath))
+
+            //addEffect("Abilities\\Weapons\\FarseerMissile\\FarseerMissile.mdl", v2)
+
+            //print("path: "+this.currentSubPath.toString()+" -> "+newSubPath.toString()+" -> "+moveSubPath.toString())
+
+            if(minDistance>900)
+                newOrder = 1
             else
                 newOrder = 2
-        
-        //print("newOrder ="+newOrder.toString())
-        v2 = vec2(this.currentPath.getSubPathX(newSubPath+1), this.currentPath.getSubPathY(newSubPath+1))
-        if(newOrder==1 or this.currentSubPath>newSubPath)
-            newOrder = 1
-            //this.currentSubPath = newSubPath
-            this.assocUnit.issuePointOrder("move",v2)
-        else
-            if(this.currentSubPath!=newSubPath)
-                newOrder = 0
-                this.assocUnit.issuePointOrder("attack",v2)
-                this.currentSubPath = newSubPath
-        
-        if(newOrder!=0)
+
+            this.currentSubPath = newSubPath
+
+            //order:
+                //0 = do nothing
+                //1 = move back
+                //2 = continue move
+
+
             group nearby = CreateGroup()
             nearby.enumUnitsInRange(v0, 500)
             
+            
+
             while(true)
                 unit n = nearby.next()
                 if(n==null)
@@ -281,17 +279,35 @@ public class PathUnit
                 nearby.removeUnit(n)
                 if(unitToPathUnit.has(n))
                     PathUnit nearbyPathUnit = unitToPathUnit.get(n)
-                    if(nearbyPathUnit.currentPath == this.currentPath and nearbyPathUnit.nextUpdate<gameTime)
-                        if(newOrder==1)
+
+                    if(nearbyPathUnit.currentPath == this.currentPath and (nearbyPathUnit.nextUpdate<gameTime or nearbyPathUnit == this) )
+                        
+
+                        if newOrder==1
                             n.issuePointOrder("move", v2)
-                            nearbyPathUnit.nextUpdate = getElapsedGameTime() + this.getNextUpdate()
+                            //print("move back?")
+                            moveOrders++
+                            nearbyPathUnit.nextUpdate = gameTime + this.getNextUpdate()
                         else
-                            n.issuePointOrder("attack", v2)
-                            nearbyPathUnit.nextUpdate = getElapsedGameTime() + this.getNextUpdate()
+                            if(gameTime-nearbyPathUnit.lastAttack > 2)
+                                n.issuePointOrder("attack", v2)
+                                moveOrders++
+                                nearbyPathUnit.nextUpdate = gameTime + this.getNextUpdate()
+                            else
+                                nearbyPathUnit.nextUpdate = gameTime + this.getNextUpdate()
+
                         
                 
             nearby.destr()
-        */
+        else if this.pathState == PathState.ENEMY_TOWN
+            if this.assocUnit.getOwner() == players[10]
+                this.assocUnit.issuePointOrder("attack", gg_rct_BrownCastle.getCenter())
+            else if this.assocUnit.getOwner() == players[11]
+                this.assocUnit.issuePointOrder("attack", gg_rct_GreenCastle.getCenter())
+        else if this.pathState == PathState.HOME_TOWN
+            this.assocUnit.issuePointOrder("attack", this.returnRect.getCenter())          
+        else if this.pathState == PathState.RETURNING
+            this.assocUnit.issuePointOrder("move", this.returnRect.getCenter())          
                                 
     static function updateMovementGroup()
         var pU = PathUnit.unitToPathUnit.get(GetEnumUnit())
@@ -306,9 +322,18 @@ public class PathUnit
     
     
     function onBaseLeave()
-        this.nextUpdate = 0
+        this.nextUpdate = gameTime + 0.5
+        this.setPathState(PathState.RETURNING)
+        
+
+        if this.returnRect != null
+            if this.returnRect.contains(this.assocUnit.getPos())
+                this.setPathState(PathState.PATH)
+            else
+                this.assocUnit.issuePointOrder("move", this.returnRect.getCenter())
 
     function onBaseEnter()
+        this.setPathState(PathState.ENEMY_TOWN)
         this.nextUpdate = gameTime + 1000
         if this.assocUnit.getOwner() == players[10]
             this.assocUnit.issuePointOrder("attack", gg_rct_BrownCastle.getRightTop())
@@ -320,7 +345,7 @@ public class PathUnit
         let u = GetTriggerUnit()
         if u.getOwner() == players[11]
             let pathUnit = unitToPathUnit.get(u)
-            if pathUnit != null and pathUnit.checkEnter == true
+            if pathUnit != null and pathUnit.checkEnter == true and pathUnit.pathState == PathState.PATH
                 pathUnit.onBaseEnter()
                 //print("onBaseEnterGreen")
 
@@ -328,7 +353,7 @@ public class PathUnit
         let u = GetTriggerUnit()
         if u.getOwner() == players[10]
             let pathUnit = unitToPathUnit.get(u)
-            if pathUnit != null and pathUnit.checkEnter == true
+            if pathUnit != null and pathUnit.checkEnter == true and pathUnit.pathState == PathState.PATH
                 pathUnit.onBaseEnter()
                 //print("onBaseEnterBrown")
 
@@ -338,7 +363,7 @@ public class PathUnit
         let u = GetTriggerUnit()
         if u.getOwner() == players[10]
             let pathUnit = unitToPathUnit.get(u)
-            if pathUnit != null and pathUnit.checkEnter == true
+            if pathUnit != null and pathUnit.checkEnter == true and pathUnit.pathState == PathState.HOME_TOWN
                 pathUnit.onBaseLeave()
                 //print("onBaseLeaveGreen")
 
@@ -347,10 +372,35 @@ public class PathUnit
         let u = GetTriggerUnit()
         if u.getOwner() == players[11]
             let pathUnit = unitToPathUnit.get(u)
-            if pathUnit != null and pathUnit.checkEnter == true
+            if pathUnit != null and pathUnit.checkEnter == true and pathUnit.pathState == PathState.HOME_TOWN
                 pathUnit.onBaseLeave()
                 //print("onBaseLeaveBrown")
 
+    static function onReturnGreen()
+        let u = GetTriggerUnit()
+        if u.getOwner() == players[10]
+            let pathUnit = unitToPathUnit.get(u)
+            if pathUnit.currentPath == GREEN_MID
+                //print("green leaves mid")
+            if pathUnit != null and pathUnit.checkEnter == true and (pathUnit.pathState == PathState.RETURNING or pathUnit.pathState == PathState.HOME_TOWN)
+                if pathUnit.returnRect.contains(pathUnit.assocUnit.getPos(), 64)
+                    pathUnit.setPathState(PathState.PATH)
+                    pathUnit.nextUpdate = 0
+                    //print("green -> true")
+                else
+                    //print("green -> wrong")
+
+    static function onReturnBrown()
+        let u = GetTriggerUnit()
+        if u.getOwner() == players[11]
+            let pathUnit = unitToPathUnit.get(u)
+            if pathUnit != null and pathUnit.checkEnter == true and (pathUnit.pathState == PathState.RETURNING or pathUnit.pathState == PathState.HOME_TOWN)
+                if pathUnit.returnRect.contains(pathUnit.assocUnit.getPos(), 64)
+                    pathUnit.setPathState(PathState.PATH)
+                    pathUnit.nextUpdate = 0
+                    //print("brown -> true")
+                else
+                    //print("brown -> wrong")
 
 
 
