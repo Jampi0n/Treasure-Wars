@@ -13,7 +13,7 @@ import LinkedList
 import OnAttack
 import General
 
-constant REVIVE_TIME = 15.//300.
+constant REVIVE_TIME = 300.
 constant HYDRA_MAX_LEVEL = 5
 
 constant HYDRA_DEATH = new SoundDefinition(Sounds.hydraDeath1, false)
@@ -60,11 +60,12 @@ function onHydraDeath()
     let killingTeam = CPlayer.getAllyHeroPlayers(killer.getOwner())
     boolean killedByTeam = true
 
+
     string teamName
     if killer.getOwner().getCPlayer().getTeam() == Team.TEAM1
-        teamName = "Dark Green"
+        teamName = fromPlayer(Player(10)).toColorString()+"Dark Green"+"|r"
     else if killer.getOwner().getCPlayer().getTeam() == Team.TEAM2
-        teamName = "Brown"
+        teamName = fromPlayer(Player(11)).toColorString()+"Brown"+"|r"
     else
         teamName = ""
         killedByTeam = false
@@ -97,7 +98,6 @@ function onHydraDeath()
 
 function unit.hydraBonus()
     this.wrapper()
-        ..addStatAbsoluteBonus(Stat.AD, 3)
         ..addStatAbsoluteBonus(Stat.AS, 6)
         ..addStatAbsoluteBonus(Stat.STR, 3)
         ..addStatAbsoluteBonus(Stat.AGI, 3)

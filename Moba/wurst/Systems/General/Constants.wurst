@@ -11,6 +11,9 @@ public int objectCount = 0
 
 
 init
+    SetCreepCampFilterState( false )
+    SetAllyColorFilterState( 0 )
+    EnableMinimapFilterButtons( false, false )
     /*CreateTrigger()
         ..registerTimerEvent(5, true)
         ..addAction(() -> (begin

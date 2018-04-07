@@ -238,9 +238,9 @@ function itemRunicArmor(int itemId)
 
 function itemEnchantedBlade(int itemId)
     int as = 15
-    int str = 20
-    int wp = 10
-    int mBurn = 16
+    int str = 25
+    int wp = 12
+    int mBurn = 10
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} strength|n+ {1}% attack speed|n+ {2} willpower|nAttacks burn {3} mana, dealing damage equal to the mana burned.".format(
