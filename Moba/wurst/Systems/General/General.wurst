@@ -89,14 +89,14 @@ public function real.reduceArmor(int stat) returns real
     return this.reduce(stat, ARMOR_REDUCTION)
 
 public function real.reduce(int stat, real reduction) returns real
-    return this * (1-( stat * reduction  )/( 1 + stat * reduction ))
+    return this / ( 1 + stat * reduction )
 
 public function unit.addBuff(unit caster, real duration, BuffType buffType, int level) returns Buff
     return new Buff(this, caster, duration, buffType, level)
 
 public function unit.addBuffReduced(unit caster, real duration, BuffType buffType, int level) returns Buff
-    //buff reduction only uses half of the wp, so it reduces not as much as it reduces damage
-    real realDuration =  duration.reduce( (this.getWp()/2).toInt() , 0.01 )
+    //buff reduction only uses 1/4 of the wp, so it reduces duration not as much as it reduces damage
+    real realDuration =  duration.reduce( (this.getWp()/4).toInt() , 0.01 )
     if this.hasItemById(convertItemId(ITEM_ID_ARCANE_SHIELD))
         realDuration = realDuration * 0.85
 

@@ -137,7 +137,7 @@ function itemSpellBook(int itemId)
             ..addStatBonusAbsolute(Stat.INT, intel)
 
 function itemMagicStaff(int itemId)
-    int mana = 7
+    int mana = 6
     if compiletime
         itemId.getTypeDef()
             ..setDescription("Attacks drain {0} mana from the target.".format(mana.toString()))

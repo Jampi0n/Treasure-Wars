@@ -132,9 +132,9 @@ function itemFrostRing(int itemId)
             ..addStatBonusAbsolute(Stat.MR, mr)
 
 function itemScepterOfTheTides(int itemId)
-    int intel = 9
+    int intel = 12
     int voidDmg = 15
-    int manaDrain = 12
+    int manaDrain = 10
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} intelligence|nDrains {1} mana and deals {2} void damage per attack.".format(
