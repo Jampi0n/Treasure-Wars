@@ -26,7 +26,7 @@ function itemMageAmulet(int itemId)
 
 
 function itemMageGloves(int itemId)
-    int wp = 6
+    int wp = 8
     if compiletime
         itemId.getTypeDef()
         ..setDescription("+ {0} willpower".format(wp.toString()))
@@ -37,7 +37,7 @@ function itemMageGloves(int itemId)
 
 
 function itemManaRing(int itemId)
-    int mr = 15
+    int mr = 20
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} mana point regeneration per 10 seconds".format(mr.toString()))
@@ -50,7 +50,7 @@ function itemManaRing(int itemId)
 function itemMageArmor(int itemId)
     int mp = 50
     int hp = 80
-    int ar = 6
+    int ar = 8
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} mana points|n +{1} hit points|n +{2} armor".format(mp.toString(), hp.toString(), ar.toString()))
@@ -63,7 +63,7 @@ function itemMageArmor(int itemId)
 
 
 function itemWizardsHat(int itemId)
-    int intel = 6
+    int intel = 8
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} intelligence".format(intel.toString()))
@@ -88,7 +88,7 @@ function itemGemOfDarkness(int itemId)
     if compiletime
         itemId.getTypeDef()
             ..setDescription("Attacks deal {0} additional void damage.".format(voidDmg.toString()))
-            ..setGoldCost(650)
+            ..setGoldCost(500)
     else
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             if attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
@@ -98,7 +98,7 @@ function itemGemOfDarkness(int itemId)
 
 
 function itemSkull(int itemId)
-    int mana = 7 // trigger
+    int mana = 8 // trigger
     if compiletime
         itemId.getTypeDef()
             ..setDescription("Restores {0} mana points per kill.".format(mana.toString()))
@@ -109,12 +109,12 @@ function itemSkull(int itemId)
             ..addAction(() -> (begin
                 let killer = GetKillingUnit()
                 if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and killer.hasItemById(convertItemId(ITEM_ID_SKULL))
-                    killer.addMana(7. * killer.countItemsOfType(convertItemId(ITEM_ID_SKULL)))
+                    killer.addMana(8. * killer.countItemsOfType(convertItemId(ITEM_ID_SKULL)))
                     killer.addEffect(Abilities.spiritTouchTarget, "origin").destr()
             end))
 
 function itemVoodooDoll(int itemId)
-    int mp = 4
+    int mp = 5
     if compiletime
         itemId.getTypeDef()
             ..setDescription("Restores {0} mana points everytime you are attacked.".format(mp.toString()))
@@ -127,7 +127,7 @@ function itemVoodooDoll(int itemId)
         end))
 
 function itemSpellBook(int itemId)
-    int intel = 12
+    int intel = 16
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} intelligence".format(intel.toString()))
@@ -137,7 +137,7 @@ function itemSpellBook(int itemId)
             ..addStatBonusAbsolute(Stat.INT, intel)
 
 function itemMagicStaff(int itemId)
-    int mana = 6
+    int mana = 7
     if compiletime
         itemId.getTypeDef()
             ..setDescription("Attacks drain {0} mana from the target.".format(mana.toString()))

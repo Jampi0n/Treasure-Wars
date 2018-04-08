@@ -8,7 +8,7 @@ import OnAttack
 import General
 
 function itemPlatedGauntlets(int itemId)
-    int armor = 6
+    int armor = 8
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} armor".format(armor.toString()))
@@ -19,7 +19,7 @@ function itemPlatedGauntlets(int itemId)
 
 
 function itemHammerOfStrength(int itemId)
-    int str = 6
+    int str = 8
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} strength".format(str.toString()))
@@ -41,7 +41,7 @@ function itemGlovesOfHaste(int itemId)
 
 
 function itemWarAxe(int itemId)
-    int str = 12
+    int str = 16
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} strength".format(str.toString()))
@@ -69,12 +69,12 @@ function itemLightBoots(int itemId)
             end))
 
 function itemLeatherArmor(int itemId)
-    int ar = 8
+    int ar = 10
     int hp = 125
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} armor|n+ {1} hit points".format(ar.toString(), hp.toString()))
-            ..setGoldCost(820)
+            ..setGoldCost(800)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.AR, ar)
@@ -93,8 +93,8 @@ function itemGemOfHealth(int itemId)
             ..addStatBonusAbsolute(Stat.HP, hp)
 
 function itemDagger(int itemId)
-    int str = 7
-    int as = 10
+    int str = 10
+    int as = 8
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} strength|n+ {1}% attack speed".format(str.toString(), as.toString()))
@@ -105,7 +105,7 @@ function itemDagger(int itemId)
             ..addStatBonusAbsolute(Stat.AS, as)
 
 function itemBow(int itemId)
-    int str = 9
+    int str = 12
     int unitDmg = 25
     if compiletime
         itemId.getTypeDef()
@@ -123,7 +123,7 @@ function itemBow(int itemId)
 
 function itemShield(int itemId)
     int ar = 8
-    int block = 10 // -> onAttack
+    int block = 18 // -> onAttack
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} armor|nBlocks {1} damage of incoming attacks.".format(ar.toString(), block.toString()))
@@ -133,7 +133,7 @@ function itemShield(int itemId)
             ..addStatBonusAbsolute(Stat.AR, ar)
 
 function itemRingOfRegen(int itemId)
-    int hr = 30
+    int hr = 40
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} hit point regeneration per 10 seconds".format(hr.toString()))
@@ -143,7 +143,7 @@ function itemRingOfRegen(int itemId)
             ..addStatBonusAbsolute(Stat.HR, hr)
 
 function itemSpikes(int itemId)
-    let spikeDmg = 12
+    let spikeDmg = 15
     if compiletime
         itemId.getTypeDef()
             ..setDescription("Enemies attacking the hero will take {0} damage.".format(spikeDmg.toString()))

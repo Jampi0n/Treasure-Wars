@@ -14,7 +14,7 @@ import Assets
 
 function itemSkullAxe(int itemId)
     int mana = 10 // trigger
-    int hp = 15 // trigger
+    int hp = 16 // trigger
     int str = 15
     if compiletime
         itemId.getTypeDef()
@@ -34,13 +34,13 @@ function itemSkullAxe(int itemId)
                 let count = killer.countItemsOfType(convertItemId(ITEM_ID_SKULL_AXE))
                 if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and count!=0
                     killer.addMana(10. * count)
-                    killer.addHP(15. * count)
+                    killer.addHP(16. * count)
                     killer.addEffect(Abilities.spiritTouchTarget, "origin").destr()
                     killer.addEffect(Abilities.vampiricAuraTarget, "origin").destr()
             end))
 
 function itemGauntletOfProtection(int itemId)
-    int ar = 22
+    int ar = 30
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} armor".format(
@@ -54,17 +54,19 @@ function itemGauntletOfProtection(int itemId)
 
 function itemHeavyBoots(int itemId)
     int ms = 40
-    int ar = 17
+    int ar = 24
+    int hp = 300
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+{1} armor|n+ {0} movement speed|nMovement speed bonus from boots does not stack.".format(
-                ms.toString(), ar.toString()
+            ..setDescription("+{1} armor|m+ {2} hit points|n+ {0} movement speed|nMovement speed bonus from boots does not stack.".format(
+                ms.toString(), ar.toString(), hp.toString()
             ))
-            ..setGoldCost(1500)
+            ..setGoldCost(2400)
             ..addRequirement(ITEM_ID_LIGHT_BOOTS)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.AR, ar)
+            ..addStatBonusAbsolute(Stat.HP, hp)
 
             ..addPickupFunction(()->(begin
                 if isUnique() and hasNot(convertItemId(ITEM_ID_LIGHT_BOOTS)) and hasNot(convertItemId(ITEM_ID_BOOTS_OF_DARKNESS))
@@ -77,9 +79,9 @@ function itemHeavyBoots(int itemId)
             end))
 
 function itemSpikedMail(int itemId)
-    int ar = 9
-    int hp = 140
-    int spikeDmg = 18
+    int ar = 12
+    int hp = 170
+    int spikeDmg = 20
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} armor|n+ {1} hit points|nEnemies attacking the hero will take {2} damage.".format(
@@ -99,7 +101,7 @@ function itemSpikedMail(int itemId)
         end))
 
 function itemHeavyArmor(int itemId)
-    int ar = 15
+    int ar = 20
     int hp = 350
     if compiletime
         itemId.getTypeDef()
@@ -118,8 +120,8 @@ constant int MACE_BUFF_ID = compiletime(createAuraBuff("Bleeding", "This unit is
 constant int MACE_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, MACE_BUFF_ID, "", ""))
 
 function itemMace(int itemId)
-    int str = 20
-    int bleedDmg = 25
+    int str = 25
+    int bleedDmg = 30
     int bleedDuration = 3
     if compiletime
 
@@ -152,8 +154,8 @@ function itemMace(int itemId)
 
 
 function itemSteelArmor(int itemId)
-    int ar = 9
-    int wp = 12
+    int ar = 12
+    int wp = 15
     int hp = 150
     if compiletime
         itemId.getTypeDef()
@@ -174,7 +176,7 @@ constant int HAMMER_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, HAMMER
             
 
 function itemHammerOfMight(int itemId)
-    int str = 24
+    int str = 25
     int armorDmg = 25
     int armorDuration = 6
     if compiletime
@@ -235,14 +237,14 @@ function checkAura()
     nearby.destr()
 
 function itemWarDrum(int itemId)
-    int asBonus = 25
+    int asBonus = 20
     int msBonus = 10
     if compiletime
         itemId.getTypeDef()
             ..setDescription("Increases nearby unit's attack speed by {0}% and movement speed by {1}%. This effect does not stack".format(
                 asBonus.toString(), msBonus.toString()
             ))
-            ..setGoldCost(2900)
+            ..setGoldCost(3100)
             ..addRequirement(ITEM_ID_GLOVES_OF_HASTE)
             ..addRequirement(ITEM_ID_LIGHT_BOOTS)
     else
@@ -285,7 +287,7 @@ function itemWarHorn(int itemId)
             ..setDescription("Increases nearby unit's strength by {0}%.".format(
                 adBonus.toString()
             ))
-            ..setGoldCost(2900)
+            ..setGoldCost(3100)
             ..addRequirement(ITEM_ID_HAMMER_OF_STRENGTH)
             ..addRequirement(ITEM_ID_WAR_AXE)
             ..addRequirement(ITEM_ID_BOW)
@@ -320,8 +322,8 @@ function itemWarHorn(int itemId)
         end))
 
 function itemHeavyHelmet(int itemId)
-    int ar = 12
-    int hr = 50
+    int ar = 15
+    int hr = 70
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} armor|n+ {1} hit point regeneration per 10 seconds".format(
@@ -335,9 +337,9 @@ function itemHeavyHelmet(int itemId)
             ..addStatBonusAbsolute(Stat.HR, hr)
 
 function itemRavenSword(int itemId)
-    int voidDmg = 15
+    int voidDmg = 16
     int as = 15
-    int str = 10
+    int str = 15
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} strength|n+ {1}% attack speed|nDeals {2} additional void damage.".format(

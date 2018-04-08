@@ -348,23 +348,23 @@ function onBuildingAbility()
 
     //stats
     else if itemTypeId == 'I00B' //Strength
-        hero.wrapper().addStatAbsoluteBonus(Stat.STR, 3)
+        hero.wrapper().addStatAbsoluteBonus(Stat.STR, 1)
     else if itemTypeId == 'I00C' //Willpower
-        hero.wrapper().addStatAbsoluteBonus(Stat.AGI, 3)
+        hero.wrapper().addStatAbsoluteBonus(Stat.AGI, 1)
     else if itemTypeId == 'I00D' //Intelligenace
-        hero.wrapper().addStatAbsoluteBonus(Stat.INT, 3)
+        hero.wrapper().addStatAbsoluteBonus(Stat.INT, 1)
     else if itemTypeId == 'I00E' //Armor
-        hero.wrapper().addStatAbsoluteBonus(Stat.AR, 3)
+        hero.wrapper().addStatAbsoluteBonus(Stat.AR, 1)
     else if itemTypeId == 'I00F' //Attack Speed
-        hero.wrapper().addStatAbsoluteBonus(Stat.AS, 6)
+        hero.wrapper().addStatAbsoluteBonus(Stat.AS, 1)
     else if itemTypeId == 'I00G' //Hit Points
-        hero.wrapper().addStatAbsoluteBonus(Stat.HP, 80)
+        hero.wrapper().addStatAbsoluteBonus(Stat.HP, 20)
     else if itemTypeId == 'I00H' //Mana Point
-        hero.wrapper().addStatAbsoluteBonus(Stat.MP, 40)
+        hero.wrapper().addStatAbsoluteBonus(Stat.MP, 10)
     else if itemTypeId == 'I00I' //Hit Point Regeneration
-        hero.wrapper().addStatAbsoluteBonus(Stat.HR, 12)
+        hero.wrapper().addStatAbsoluteBonus(Stat.HR, 4)
     else if itemTypeId == 'I00J' //Mana Point Regeneration
-        hero.wrapper().addStatAbsoluteBonus(Stat.MR, 6)
+        hero.wrapper().addStatAbsoluteBonus(Stat.MR, 2)
 
 
 function onMilitiaDespawn()
