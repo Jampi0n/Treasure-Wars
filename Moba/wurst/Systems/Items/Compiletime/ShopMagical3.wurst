@@ -12,8 +12,8 @@ import UnitWrapper
 function itemEnchantedArmor(int itemId)
     int mp = 200
     int hp = 450
-    int ar = 18
-    int intel = 12
+    int ar = 20
+    int intel = 18
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} mana points|n+ {1} intelligence|n+ {2} hit points|n+ {3} armor".format(
@@ -33,7 +33,7 @@ function itemEnchantedArmor(int itemId)
 function itemEmeraldPendant(int itemId)
     int hp = 350
     int mp = 300
-    int killMana = 15 //trigger
+    int killMana = 18 //trigger
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} mana points|n +{1} hit points|nRestores {2} mana points per kill.".format(
@@ -53,16 +53,16 @@ function itemEmeraldPendant(int itemId)
             ..addAction(() -> (begin
                 let killer = GetKillingUnit()
                 if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and killer.hasItemById(convertItemId(ITEM_ID_SKULL_PENDANT))
-                    killer.addMana(15. * killer.countItemsOfType(convertItemId(ITEM_ID_SKULL_PENDANT)))
+                    killer.addMana(18. * killer.countItemsOfType(convertItemId(ITEM_ID_SKULL_PENDANT)))
                     killer.addEffect(Abilities.spiritTouchTarget, "origin").destr()
             end))
             
     
 
 function itemRingOfDarkness(int itemId)
-    int intel = 30
-    int mr = 25
-    int voidDmg = 20 //trigger
+    int intel = 36
+    int mr = 30
+    int voidDmg = 25 //trigger
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} intelligence|n+ {1} mana point regeneration per 10 seconds|nKilling a unit creates a void explosion, dealing {2} damage to neaby enemies.".format(
@@ -85,10 +85,10 @@ function itemRingOfDarkness(int itemId)
                 if not dyingUnit.isType(UNIT_TYPE_STRUCTURE) and killer.hasItemById(convertItemId(ITEM_ID_RING_OF_DARKNESS))
                     addEffect(Abilities.annihilationMissile, dyingUnit.getPos()).destr()
                     let g = CreateGroup()
-                    g.enumUnitsInRange(dyingUnit.getPos(), 200)
+                    g.enumUnitsInRange(dyingUnit.getPos(), 250)
                     for unit u in g
                         if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(killer.getOwner(), false, true)
-                            killer.dealDamage(u, 20, ReductionType.NONE)
+                            killer.dealDamage(u, 25, ReductionType.NONE)
                     g.destr()
             end))
             
@@ -97,7 +97,7 @@ function itemBlessedGoblet(int itemId)
     int hr = 65
     int mr = 35
     int hp = 300
-    int wp = 20
+    int wp = 25
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} hit points|n+ {1} willpower|n+ {2} hit point regeneration per 10 seconds|n+ {3} mana point regeneration per 10 seconds".format(
@@ -115,12 +115,12 @@ function itemBlessedGoblet(int itemId)
             
 
 function itemWandOfDeath(int itemId)
-    int intel = 42
-    int dmgFactor = 2
-    int duration = 10
+    int intel = 45
+    int dmgFactor = 3 // -> onAttack
+    int duration = 12 // -> onAttack
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} intelligence|nDealing damage, reduces the target's willpower by {1}% of the damage dealt for {2} seconds.".format(
+            ..setDescription("+ {0} intelligence|nDealing damage, reduces the target's willpower by {1}% of the damage dealt for {2} seconds.|nThis effect does not stack.".format(
                 intel.toString(), dmgFactor.toString(), duration.toString()
             ))
             ..setGoldCost(3900)
@@ -137,11 +137,11 @@ function itemWandOfDeath(int itemId)
 
 function itemWandOfBlood(int itemId)
     int intel = 35
-    int lifesteal = 5
+    int lifesteal = 8 // -> onAttack
     int hp = 200
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} intelligence|n+ {1} hit points|nDealing damage restores hit points equal to {2}% of the damage dealt.".format(
+            ..setDescription("+ {0} intelligence|n+ {1} hit points|nDealing damage restores hit points equal to {2}% of the damage dealt.|nThis effect does not stack.".format(
                 intel.toString(), hp.toString(), lifesteal.toString()
             ))
             ..setGoldCost(3650)
@@ -156,12 +156,12 @@ function itemWandOfBlood(int itemId)
             
 function itemArcaneBlade(int itemId)
     int as = 20
-    int mp = 250
+    int mp = 300
     int dmg = 20
-    int manaFactor = 4
+    int manaFactor = 5
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} mana points|n+ {1}% attack speed|nDeals {2} + {3}% of your current mana as magic damage.".format(
+            ..setDescription("+ {0} mana points|n+ {1}% attack speed|nDeals {2} + {3}% of your current mana as magic damage.|nThis effect does not stack.".format(
                 mp.toString(), as.toString(), dmg.toString(), manaFactor.toString()
             ))
             ..setGoldCost(3800)
@@ -174,19 +174,19 @@ function itemArcaneBlade(int itemId)
 
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             if attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
-                attacker.dealDamage(target, (dmg + attacker.getMana() * manaFactor/100) * attacker.countItemsOfType(convertItemId(itemId)) , ReductionType.MAGIC)
+                attacker.dealDamage(target, (dmg + attacker.getMana() * manaFactor/100) , ReductionType.MAGIC)
                 target.addEffect(Abilities.farseerMissile, "chest").destr()
         end))
 
 function itemVampiricGoblet(int itemId)
-    int intel = 30
+    int intel = 50
     int hp = 150
     int mp = 150
-    int hpFactor = 30 // -> onAttack
+    int hpFactor = 20 // -> onAttack
     int manaFactor = 15 // -> onAttack
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} mana points|n +{1} hit point|n+ {2} intelligence|nDealing ability damage against heroes restores {3}% of the damage dealt as hitpoints and {4}% as mana points. This effect does not stack.".format(
+            ..setDescription("+ {0} mana points|n +{1} hit point|n+ {2} intelligence|nDealing damage against heroes restores {3}% of the damage dealt as hitpoints and {4}% as mana points.|nThis effect does not stack.".format(
                 mp.toString(), hp.toString(), intel.toString(), hpFactor.toString(), manaFactor.toString()
             ))
             ..setGoldCost(4750)
@@ -203,13 +203,13 @@ function itemVampiricGoblet(int itemId)
 function itemVoidArmor(int itemId)
     int mp = 150
     int hp = 350
-    int ar = 18
-    int wp = 14
+    int ar = 20
+    int wp = 20
 
     int dmgReduction = 5 // -> onAttack
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} mana points|n+ {1} hit points|n+ {2} armor|n+ {3} willpower|nReduces incoming damage by {4}% and converts it into mana for the hero. This effect does not stack.".format(
+            ..setDescription("+ {0} mana points|n+ {1} hit points|n+ {2} armor|n+ {3} willpower|nReduces incoming damage by {4}% and converts it into mana for the hero.|nThis effect does not stack.".format(
                 mp.toString(), hp.toString(), ar.toString(), wp.toString(), dmgReduction.toString()
             ))
             ..setGoldCost(4250)
@@ -223,7 +223,7 @@ function itemVoidArmor(int itemId)
             ..addStatBonusAbsolute(Stat.AGI, wp)
     
 function itemArcaneShield(int itemId)
-    int hp = 275
+    int hp = 350
     int wp = 40
     int deBuffReduction = 15 // -> General
     if compiletime
@@ -264,10 +264,10 @@ function itemScrollOfConjuration(int itemId)
             end))
 
 function itemBracerOfPower(int itemId)
-    int hp = 250
-    int mp = 125
-    int hr = 80
-    int mr = 40
+    int hp = 300
+    int mp = 150
+    int hr = 90
+    int mr = 45
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} hit points|n+ {1} mana points|n+ {2} hit point regeneration per 10 seconds|n+ {3} mana point regeneration per 10 seconds".format(

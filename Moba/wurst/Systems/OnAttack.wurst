@@ -114,7 +114,7 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
 
         // shield - ITEM
         if isAttack and target.isType(UNIT_TYPE_HERO)
-            currentDamage = currentDamage - 8 * target.countItemsOfType(convertItemId(ITEM_ID_SHIELD))
+            currentDamage = currentDamage - 18 * target.countItemsOfType(convertItemId(ITEM_ID_SHIELD))
 
         // mana shield - SEA DRUID
         if target.isType(UNIT_TYPE_HERO) and BuffList.hasBuffType(target, buffManaShield)
@@ -127,17 +127,17 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
             currentDamage = currentDamage * (1.-MANA_SHIELD_REDUCTION[level-1])
     
         // vampiric goblet - ITEM
-        if not isAttack and source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_VAMPIRIC_GOBLET)) and target.isType(UNIT_TYPE_HERO)
-            source.addHP(currentDamage * 0.3)
+        if source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_VAMPIRIC_GOBLET)) and target.isType(UNIT_TYPE_HERO)
+            source.addHP(currentDamage * 0.2)
             source.addMana(currentDamage * 0.15)
 
         // wand of blood - ITEM
         if source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_WAND_OF_BLOOD)) and not target.isType(UNIT_TYPE_STRUCTURE)
-            source.addHP(currentDamage * 0.05)
+            source.addHP(currentDamage * 0.08)
 
         // sacrifical dagger - ITEM
         if isAttack and source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_SACRIFICIAL_DAGGER)) and not target.isType(UNIT_TYPE_STRUCTURE)
-            source.addHP(currentDamage * 0.10)
+            source.addHP(currentDamage * 0.12)
 
         // void armor - ITEM
         if target.isType(UNIT_TYPE_HERO) and target.hasItemById(convertItemId(ITEM_ID_VOID_ARMOR))
@@ -146,10 +146,10 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
 
         // wand of death - ITEM
         if source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_WAND_OF_DEATH)) and target.isType(UNIT_TYPE_HERO)
-            let wp = currentDamage * 0.02
+            let wp = currentDamage * 0.03
             let wrapper = target.wrapper()
             wrapper.addStatAbsoluteBonusReal(Stat.AGI, (-wp*1000).toInt())
-            doAfter(10, () -> wrapper.addStatAbsoluteBonusReal(Stat.AGI, (wp*1000).toInt() ) )
+            doAfter(12, () -> wrapper.addStatAbsoluteBonusReal(Stat.AGI, (wp*1000).toInt() ) )
 
 
         //===============================================================================
