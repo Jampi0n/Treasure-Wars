@@ -165,6 +165,7 @@ public class Hero
             pos = gg_rct_BrownCastle.getCenter()
             
         this.hero.revive(pos, true)
+        this.upgrade()
         if this.heroGlow != null
             this.heroGlow
                 ..setXY(pos)
