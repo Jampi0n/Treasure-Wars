@@ -70,11 +70,11 @@ function itemLightBoots(int itemId)
 
 function itemLeatherArmor(int itemId)
     int ar = 10
-    int hp = 125
+    int hp = 100
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} armor|n+ {1} hit points".format(ar.toString(), hp.toString()))
-            ..setGoldCost(800)
+            ..setGoldCost(825)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.AR, ar)
@@ -83,7 +83,7 @@ function itemLeatherArmor(int itemId)
 
 
 function itemGemOfHealth(int itemId)
-    int hp = 200
+    int hp = 150
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} hit points".format(hp.toString()))
@@ -133,7 +133,7 @@ function itemShield(int itemId)
             ..addStatBonusAbsolute(Stat.AR, ar)
 
 function itemRingOfRegen(int itemId)
-    int hr = 40
+    int hr = 30
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} hit point regeneration per 10 seconds".format(hr.toString()))

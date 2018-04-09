@@ -135,7 +135,7 @@ public class UnitWrapper
         statBaseValue[Stat.AR.toInt()] = GetPlayerTechCount(this.assocUnit.getOwner(), UPG_AR, true)
         statBaseValue[Stat.AS.toInt()] = 0
         
-        statBaseValue[Stat.HP.toInt()] = 400 + GetPlayerTechCount(this.assocUnit.getOwner(), UPG_HP, true) * 25
+        statBaseValue[Stat.HP.toInt()] = 400 + GetPlayerTechCount(this.assocUnit.getOwner(), UPG_HP, true) * 15
         statBaseValue[Stat.HR.toInt()] = 0
         
         statBaseValue[Stat.MP.toInt()] = 100 + GetPlayerTechCount(this.assocUnit.getOwner(), UPG_MP, true) * 10

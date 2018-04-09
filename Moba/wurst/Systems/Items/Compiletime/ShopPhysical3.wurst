@@ -59,7 +59,7 @@ function itemBloodSword(int itemId)
 
 function itemFirehandGauntlets(int itemId)
     int mp = 150
-    int hp = 300
+    int hp = 225
     int magicDmg = 25
     int ar = 32
     int as = 18
@@ -86,7 +86,7 @@ function itemFirehandGauntlets(int itemId)
 
 function itemSpikedArmor(int itemId)
     int ar = 36
-    int hp = 450
+    int hp = 340
     int spikeDmg = 32
     if compiletime
         itemId.getTypeDef()
@@ -148,7 +148,7 @@ function itemArmorOfCourage(int itemId)
 
     int ar = 36
     int wp = 18
-    int hp = 500
+    int hp = 375
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} armor|n+ {1} willpower|n+ {2} hit points".format(
@@ -165,9 +165,9 @@ function itemArmorOfCourage(int itemId)
 
 function itemHelmetOfJustice(int itemId)
     int intel = 25
-    int killMana = 15 //trigger
+    int killMana = 16 //trigger
     int ar = 20
-    int hr = 75
+    int hr = 60
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} intelligence|n+ {1} armor|n+ {2} hit point regeneration per 10 seconds|nRestores {3} mana points per kill.".format(
@@ -187,15 +187,15 @@ function itemHelmetOfJustice(int itemId)
             ..addAction(() -> (begin
                 let killer = GetKillingUnit()
                 if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and killer.hasItemById(convertItemId(ITEM_ID_HELMET_OF_JUSTICE))
-                    killer.addMana(15. * killer.countItemsOfType(convertItemId(ITEM_ID_HELMET_OF_JUSTICE)))
+                    killer.addMana(16. * killer.countItemsOfType(convertItemId(ITEM_ID_HELMET_OF_JUSTICE)))
                     killer.addEffect(Abilities.spiritTouchTarget, "chest").destr()
             end))
 
 function itemInfernalBow(int itemId)
     int magicDmg = 30
-    int str = 32
+    int str = 34
     int mp = 150
-    int hp = 300
+    int hp = 200
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} strength|n+ {1} hit points|n+ {2} mana points|nDeals {3} additional magic damage.".format(
@@ -217,11 +217,11 @@ function itemInfernalBow(int itemId)
         end))
 
 function itemRunicArmor(int itemId)
-    int hr = 60
+    int hr = 45
     int mr = 30
     int ar = 16
     int wp = 28
-    int hp = 200
+    int hp = 150
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} armor|n+ {1} willpower|n+ {2} hit points|n+ {3} hit point regeneration per 10 seconds|n+ {4} mana point regeneration per 10 seconds".format(
@@ -310,7 +310,7 @@ constant BUFF_HOLY_SHIELD = new BuffType(true, true)
 function itemHolyShield(int itemId)
     int dur = 2 //trigger
     int ar = 18
-    int hp = 300
+    int hp = 225
     int wp = 28
     if compiletime
         itemId.getTypeDef()

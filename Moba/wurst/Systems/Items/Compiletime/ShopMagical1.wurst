@@ -14,11 +14,11 @@ import Assets
 
 function itemMageAmulet(int itemId)
     int mp = 100
-    int hp = 150
+    int hp = 100
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} mana points|n +{1} hit points".format(mp.toString(), hp.toString()))
-            ..setGoldCost(850)
+            ..setGoldCost(825)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.MP, mp)
@@ -44,12 +44,12 @@ function itemManaRing(int itemId)
             ..setGoldCost(500)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.HR, mr)
+            ..addStatBonusAbsolute(Stat.MR, mr)
 
 
 function itemMageArmor(int itemId)
     int mp = 50
-    int hp = 80
+    int hp = 60
     int ar = 8
     if compiletime
         itemId.getTypeDef()
