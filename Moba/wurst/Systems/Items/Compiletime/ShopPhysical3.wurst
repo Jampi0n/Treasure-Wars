@@ -111,11 +111,11 @@ function itemCursedSword(int itemId)
     int mana = 10 // trigger
     int hp = 20 // trigger
     int str = 35
-    int voidDmg = 20
+    real voidDmg = 1.5
     int as = 20
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} strength|n+ {1}% attack speed|nDeals {2} additional void damage.|nRestores {3} hit points and {4} mana points per kill.".format(
+            ..setDescription("+ {0} strength|n+ {1}% attack speed|nDeals {2}% of the target's maximum health as void damage.|nThis effect does not stack.|nRestores {3} hit points and {4} mana points per kill.".format(
                 str.toString(), as.toString(), voidDmg.toString(), hp.toString(), mana.toString()
             ))
             ..setGoldCost(4300)
@@ -128,7 +128,7 @@ function itemCursedSword(int itemId)
 
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             if attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
-                attacker.dealDamage(target, voidDmg.toReal() * attacker.countItemsOfType(convertItemId(itemId)) , ReductionType.NONE)
+                attacker.dealDamage(target, voidDmg * target.getMaxHP() * 0.01 , ReductionType.NONE)
                 target.addEffect(Abilities.avengerMissile, "chest").destr()
         end))
 
@@ -192,8 +192,8 @@ function itemHelmetOfJustice(int itemId)
             end))
 
 function itemInfernalBow(int itemId)
-    int magicDmg = 30
-    int str = 34
+    int magicDmg = 35
+    int str = 30
     int mp = 150
     int hp = 200
     if compiletime
