@@ -10,10 +10,10 @@ import UnitWrapper
 
 
 function itemEnchantedArmor(int itemId)
-    int mp = 200
-    int hp = 450
-    int ar = 20
-    int intel = 18
+    int mp = 125
+    int hp = 350
+    int ar = 25
+    int intel = 20
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} mana points|n+ {1} intelligence|n+ {2} hit points|n+ {3} armor".format(
@@ -31,9 +31,9 @@ function itemEnchantedArmor(int itemId)
             ..addStatBonusAbsolute(Stat.INT, intel)
 
 function itemEmeraldPendant(int itemId)
-    int hp = 350
-    int mp = 300
-    int killMana = 18 //trigger
+    int hp = 275
+    int mp = 275
+    int killMana = 25 //trigger
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} mana points|n +{1} hit points|nRestores {2} mana points per kill.".format(
@@ -53,7 +53,7 @@ function itemEmeraldPendant(int itemId)
             ..addAction(() -> (begin
                 let killer = GetKillingUnit()
                 if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and killer.hasItemById(convertItemId(ITEM_ID_SKULL_PENDANT))
-                    killer.addMana(18. * killer.countItemsOfType(convertItemId(ITEM_ID_SKULL_PENDANT)))
+                    killer.addMana(25. * killer.countItemsOfType(convertItemId(ITEM_ID_SKULL_PENDANT)))
                     killer.addEffect(Abilities.spiritTouchTarget, "origin").destr()
             end))
             
@@ -94,16 +94,16 @@ function itemRingOfDarkness(int itemId)
             
 
 function itemBlessedGoblet(int itemId)
-    int hr = 65
-    int mr = 35
-    int hp = 300
+    int hr = 50
+    int mr = 50
+    int hp = 225
     int wp = 25
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} hit points|n+ {1} willpower|n+ {2} hit point regeneration per 10 seconds|n+ {3} mana point regeneration per 10 seconds".format(
                 hp.toString(), wp.toString(), hr.toString(), mr.toString()
             ))
-            ..setGoldCost(4150)
+            ..setGoldCost(4000)
             ..addRequirement(ITEM_ID_RING_OF_REGEN)
             ..addRequirement(ITEM_ID_ANCIENT_STONE_TABLET)
     else
@@ -116,8 +116,8 @@ function itemBlessedGoblet(int itemId)
 
 function itemWandOfDeath(int itemId)
     int intel = 45
-    int dmgFactor = 3 // -> onAttack
-    int duration = 12 // -> onAttack
+    int dmgFactor = 2 // -> onAttack
+    int duration = 10 // -> onAttack
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} intelligence|nDealing damage, reduces the target's willpower by {1}% of the damage dealt for {2} seconds.|nThis effect does not stack.".format(
@@ -136,13 +136,12 @@ function itemWandOfDeath(int itemId)
             
 
 function itemWandOfBlood(int itemId)
-    int intel = 35
+    int intel = 45
     int lifesteal = 8 // -> onAttack
-    int hp = 200
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} intelligence|n+ {1} hit points|nDealing damage restores hit points equal to {2}% of the damage dealt.|nThis effect does not stack.".format(
-                intel.toString(), hp.toString(), lifesteal.toString()
+            ..setDescription("+ {0} intelligence|nDealing damage restores hit points equal to {2}% of the damage dealt.|nThis effect does not stack.".format(
+                intel.toString(), lifesteal.toString()
             ))
             ..setGoldCost(3650)
             ..addRequirement(ITEM_ID_MAGIC_STAFF)
@@ -150,7 +149,6 @@ function itemWandOfBlood(int itemId)
             ..addRequirement(ITEM_ID_GEM_OF_HEALTH)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.HP, hp)
             ..addStatBonusAbsolute(Stat.INT, intel)
 
             
@@ -180,7 +178,7 @@ function itemArcaneBlade(int itemId)
 
 function itemVampiricGoblet(int itemId)
     int intel = 50
-    int hp = 150
+    int hp = 125
     int mp = 150
     int hpFactor = 20 // -> onAttack
     int manaFactor = 15 // -> onAttack
@@ -202,7 +200,7 @@ function itemVampiricGoblet(int itemId)
 
 function itemVoidArmor(int itemId)
     int mp = 150
-    int hp = 350
+    int hp = 275
     int ar = 20
     int wp = 20
 
@@ -223,7 +221,7 @@ function itemVoidArmor(int itemId)
             ..addStatBonusAbsolute(Stat.AGI, wp)
     
 function itemArcaneShield(int itemId)
-    int hp = 350
+    int hp = 250
     int wp = 40
     int deBuffReduction = 15 // -> General
     if compiletime
@@ -264,9 +262,9 @@ function itemScrollOfConjuration(int itemId)
             end))
 
 function itemBracerOfPower(int itemId)
-    int hp = 300
+    int hp = 225
     int mp = 150
-    int hr = 90
+    int hr = 70
     int mr = 45
     if compiletime
         itemId.getTypeDef()

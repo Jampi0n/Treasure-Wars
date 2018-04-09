@@ -80,7 +80,7 @@ public class Hero
             end))
 
         this.hero.wrapper().addStatAbsoluteBonus(Stat.MR, this.heroType.calculateStat(Stat.MR, 1) * 2 )
-        this.hero.wrapper().addStatAbsoluteBonus(Stat.HR, this.heroType.calculateStat(Stat.HR, 1) * 4 )
+        this.hero.wrapper().addStatAbsoluteBonus(Stat.HR, this.heroType.calculateStat(Stat.HR, 1) * 3 )
 
         this.upgrade()
 
@@ -118,7 +118,7 @@ public class Hero
         //SetPlayerTechResearched(upgradePlayer, UPG_MR , this.heroType.calculateStat(Stat.MR, lvl))
         
         this.hero.wrapper().addStatAbsoluteBonus(Stat.MR, (this.heroType.calculateStat(Stat.MR, newLvl) - this.heroType.calculateStat(Stat.MR, this.level)) * 2 )
-        this.hero.wrapper().addStatAbsoluteBonus(Stat.HR, (this.heroType.calculateStat(Stat.HR, newLvl) - this.heroType.calculateStat(Stat.HR, this.level)) * 4 )
+        this.hero.wrapper().addStatAbsoluteBonus(Stat.HR, (this.heroType.calculateStat(Stat.HR, newLvl) - this.heroType.calculateStat(Stat.HR, this.level)) * 3 )
 
 
         SetPlayerTechResearched(upgradePlayer, UPG_MS , this.heroType.calculateStat(Stat.MS, newLvl))

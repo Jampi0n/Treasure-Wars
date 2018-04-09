@@ -55,10 +55,10 @@ function itemGauntletOfProtection(int itemId)
 function itemHeavyBoots(int itemId)
     int ms = 40
     int ar = 24
-    int hp = 300
+    int hp = 225
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+{1} armor|m+ {2} hit points|n+ {0} movement speed|nMovement speed bonus from boots does not stack.".format(
+            ..setDescription("+{1} armor|n+ {2} hit points|n+ {0} movement speed|nMovement speed bonus from boots does not stack.".format(
                 ms.toString(), ar.toString(), hp.toString()
             ))
             ..setGoldCost(2400)
@@ -80,7 +80,7 @@ function itemHeavyBoots(int itemId)
 
 function itemSpikedMail(int itemId)
     int ar = 12
-    int hp = 170
+    int hp = 130
     int spikeDmg = 20
     if compiletime
         itemId.getTypeDef()
@@ -102,7 +102,7 @@ function itemSpikedMail(int itemId)
 
 function itemHeavyArmor(int itemId)
     int ar = 20
-    int hp = 350
+    int hp = 260
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} armor|n+ {1} hit points".format(
@@ -156,7 +156,7 @@ function itemMace(int itemId)
 function itemSteelArmor(int itemId)
     int ar = 12
     int wp = 15
-    int hp = 150
+    int hp = 115
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} armor|n+ {1} willpower|n+ {2} hit points".format(
@@ -322,8 +322,8 @@ function itemWarHorn(int itemId)
         end))
 
 function itemHeavyHelmet(int itemId)
-    int ar = 15
-    int hr = 70
+    int ar = 16
+    int hr = 50
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} armor|n+ {1} hit point regeneration per 10 seconds".format(

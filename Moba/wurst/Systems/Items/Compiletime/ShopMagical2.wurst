@@ -9,7 +9,7 @@ import General
 import Assets
 
 function itemSkullPendant(int itemId)
-    int hp = 150
+    int hp = 125
     int mp = 150
     int killMana = 15 //trigger
     if compiletime
@@ -37,7 +37,7 @@ function itemSkullPendant(int itemId)
 
 function itemVisionWard(int itemId)
     int mp = 200
-    int hp = 300
+    int hp = 225
     int intel = 20
     if compiletime
 
@@ -85,7 +85,7 @@ function itemVoodooMask(int itemId)
 
 function itemGhostHood(int itemId)
     int mp = 80
-    int hp = 100
+    int hp = 75
     int ar = 8
     int wp = 16
     if compiletime
@@ -93,7 +93,7 @@ function itemGhostHood(int itemId)
             ..setDescription("+ {0} mana points|n+ {1} hit points|n+ {2} armor|n+ {3} willpower".format(
                 mp.toString(), hp.toString(), ar.toString(), wp.toString()
             ))
-            ..setGoldCost(1840)
+            ..setGoldCost(1825)
             ..addRequirement(ITEM_ID_MAGE_ARMOR)
             ..addRequirement(ITEM_ID_MAGE_GLOVES)
     else
@@ -118,7 +118,7 @@ function itemEvilBook(int itemId)
             ..addStatBonusAbsolute(Stat.INT, intel)
             
 function itemFrostRing(int itemId)
-    int hr = 80
+    int hr = 60
     int mr = 40
     if compiletime
         itemId.getTypeDef()
@@ -194,7 +194,7 @@ function itemBootsOfDarkness(int itemId)
 
 function itemMagmaCrystal(int itemId)
     int mp = 125
-    int hp = 250
+    int hp = 190
     int magicDmg = 20
     if compiletime
         itemId.getTypeDef()
@@ -242,7 +242,7 @@ function itemCursedMask(int itemId)
 
 
 function itemAncientStoneTablet(int itemId)
-    int hp = 250
+    int hp = 175
     int wp = 25
     if compiletime
         itemId.getTypeDef()
@@ -259,7 +259,7 @@ function itemAncientStoneTablet(int itemId)
 
 function itemBattlemageArmor(int itemId)
     int mp = 75
-    int hp = 250
+    int hp = 180
     int ar = 15
     if compiletime
         itemId.getTypeDef()
