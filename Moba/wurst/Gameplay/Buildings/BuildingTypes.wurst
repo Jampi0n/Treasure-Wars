@@ -25,11 +25,11 @@ constant integer HERO_TOWER = 'h000'
 constant integer WORKSHOP = 'h00A'
 constant int WORKSHOP_REBUILD = 'h01A'
 
-public boolean array greenBarracksAlive = [true, true, true]
-public boolean array brownBarracksAlive = [true, true, true]
+public boolean array barracksAliveTeam1 = [true, true, true]
+public boolean array barracksAliveTeam2 = [true, true, true]
 
-public boolean array greenWorkshopAlive = [true, true]
-public boolean array brownWorkshopAlive = [true, true]
+public boolean array workshopAliveTeam1 = [true, true]
+public boolean array workshopAliveTeam2 = [true, true]
 
 constant real BARRACKS_REBUILD_TIME = 180
 constant real WORKSHOP_REBUILD_TIME = 60
@@ -37,10 +37,10 @@ constant real WORKSHOP_REBUILD_TIME = 60
 constant int SHOP_SHARING = 'Aall'
 
 int birth = 0
-group greenMilitia = CreateGroup()
-group brownMilitia = CreateGroup()
-boolean greenRemoveMilita = true
-boolean brownRemoveMilita = true
+group militiaTeam1 = CreateGroup()
+group militiaTeam2 = CreateGroup()
+boolean removeMilitaTeam1 = true
+boolean removeMilitaTeam2 = true
 
 
 
@@ -85,22 +85,22 @@ function onBuildingDeath()
             
             if(building==udg_GreenBarracks[i])
                 udg_GreenBarracks[i] = newBuilding
-                greenBarracksAlive[i] = false
+                barracksAliveTeam1[i] = false
                 doAfter(BARRACKS_REBUILD_TIME, () -> (begin
                     newBuilding
                         ..setAnimation("stand")
                         ..setTimeScale(1)
-                    greenBarracksAlive[i] = true
+                    barracksAliveTeam1[i] = true
                     UnitRemoveType(newBuilding, UNIT_TYPE_ANCIENT)
                 end))
             else if(building==udg_BrownBarracks[i])
                 udg_BrownBarracks[i] = newBuilding
-                brownBarracksAlive[i] = false
+                barracksAliveTeam2[i] = false
                 doAfter(BARRACKS_REBUILD_TIME, () -> (begin
                     newBuilding
                         ..setAnimation("stand")
                         ..setTimeScale(1)
-                    brownBarracksAlive[i] = true
+                    barracksAliveTeam2[i] = true
                     UnitRemoveType(newBuilding, UNIT_TYPE_ANCIENT)
                 end))
 
@@ -116,10 +116,10 @@ function onBuildingDeath()
         for i=0 to 1
             if(building==udg_GreenWorkShop[i])
                 udg_GreenWorkShop[i] = newBuilding
-                greenWorkshopAlive[i] = false
+                workshopAliveTeam1[i] = false
 
             else if(building==udg_BrownWorkShop[i])
-                brownWorkshopAlive[i] = false
+                workshopAliveTeam2[i] = false
                 udg_BrownWorkShop[i] = newBuilding
 
 
@@ -162,14 +162,14 @@ function onBuildingAbility()
             UnitRemoveType(building, UNIT_TYPE_ANCIENT)
             for i = 0 to 1
                 if building == udg_BrownWorkShop[i]
-                    brownWorkshopAlive[i] = true
+                    workshopAliveTeam2[i] = true
                     let owner = building.getOwner()
                     let pos = building.getPos()
                     building.remove()
                     udg_BrownWorkShop[i] = createUnit(owner, WORKSHOP, pos, (270).fromDeg())
                     break
                 if building == udg_GreenWorkShop[i]
-                    greenWorkshopAlive[i] = true
+                    workshopAliveTeam1[i] = true
                     let owner = building.getOwner()
                     let pos = building.getPos()
                     building.remove()
@@ -248,72 +248,72 @@ function onBuildingAbility()
     else if itemTypeId == 'I006' //Call to Arms
 
         if building.getOwner().getCPlayer().getTeam() == Team.TEAM1
-            greenRemoveMilita = false
+            removeMilitaTeam1 = false
             for i = 0 to 15
                 let spawnedUnit = spawnUnit(true, MILITIA_DEFEND, gg_rct_GreenCastle.getCenter())
-                greenMilitia.addUnit(spawnedUnit)
+                militiaTeam1.addUnit(spawnedUnit)
             doAfter(45, () -> (begin
-                greenRemoveMilita = true
-                ForGroup(greenMilitia, () -> (begin
+                removeMilitaTeam1 = true
+                ForGroup(militiaTeam1, () -> (begin
                     let u = GetEnumUnit()
                     u.addBuff(u, -1, DISARMED, 1)
                     u.issuePointOrder("move", gg_rct_GreenCastle.getCenter())
                     if gg_rct_GreenMilitiaDespawn.contains(u.getPos())
-                        greenMilitia.removeUnit(u)
+                        militiaTeam1.removeUnit(u)
                         u.remove()
                 end))
             end))
             doAfter(50, () -> (begin
-                greenRemoveMilita = true
-                ForGroup(greenMilitia, () -> (begin
+                removeMilitaTeam1 = true
+                ForGroup(militiaTeam1, () -> (begin
                     let u = GetEnumUnit()
                     u.addBuff(u, -1, DISARMED, 1)
                     u.issuePointOrder("move", gg_rct_GreenCastle.getCenter())
                     if gg_rct_GreenMilitiaDespawn.contains(u.getPos())
-                        greenMilitia.removeUnit(u)
+                        militiaTeam1.removeUnit(u)
                         u.remove()
                 end))
             end))
             doAfter(89, () -> (begin
-                ForGroup(greenMilitia, () -> (begin
+                ForGroup(militiaTeam1, () -> (begin
                     let u = GetEnumUnit()
-                    greenMilitia.removeUnit(u)
+                    militiaTeam1.removeUnit(u)
                     u.remove()
                     print("remove after 60")
                 end))
             end))
 
         else if building.getOwner().getCPlayer().getTeam() == Team.TEAM2
-            brownRemoveMilita = false
+            removeMilitaTeam2 = false
             for i = 0 to 15
                 let spawnedUnit = spawnUnit(false, MILITIA_DEFEND, gg_rct_BrownCastle.getCenter())
-                brownMilitia.addUnit(spawnedUnit)
+                militiaTeam2.addUnit(spawnedUnit)
             doAfter(45, () -> (begin
-                brownRemoveMilita = true
-                ForGroup(brownMilitia, () -> (begin
+                removeMilitaTeam2 = true
+                ForGroup(militiaTeam2, () -> (begin
                     let u = GetEnumUnit()
                     u.addBuff(u, -1, DISARMED, 1)
                     u.issuePointOrder("move", gg_rct_BrownCastle.getCenter())
                     if gg_rct_BrownMilitiaDespawn.contains(u.getPos())
-                        brownMilitia.removeUnit(u)
+                        militiaTeam2.removeUnit(u)
                         u.remove()
                 end))
             end))
             doAfter(50, () -> (begin
-                brownRemoveMilita = true
-                ForGroup(brownMilitia, () -> (begin
+                removeMilitaTeam2 = true
+                ForGroup(militiaTeam2, () -> (begin
                     let u = GetEnumUnit()
                     u.addBuff(u, -1, DISARMED, 1)
                     u.issuePointOrder("move", gg_rct_BrownCastle.getCenter())
                     if gg_rct_BrownMilitiaDespawn.contains(u.getPos())
-                        brownMilitia.removeUnit(u)
+                        militiaTeam2.removeUnit(u)
                         u.remove()
                 end))
             end))
             doAfter(89, () -> (begin
-                ForGroup(brownMilitia, () -> (begin
+                ForGroup(militiaTeam2, () -> (begin
                     let u = GetEnumUnit()
-                    brownMilitia.removeUnit(u)
+                    militiaTeam2.removeUnit(u)
                     u.remove()
                 end))
             end))
@@ -370,13 +370,13 @@ function onBuildingAbility()
 function onMilitiaDespawn()
     let u = GetTriggerUnit()
     if u.getTypeId() == MILITIA_DEFEND
-        if greenRemoveMilita
+        if removeMilitaTeam1
             if u.getOwner().getCPlayer().getTeam() == Team.TEAM1
-                greenMilitia.removeUnit(u)
+                militiaTeam1.removeUnit(u)
                 u.remove()
-        if brownRemoveMilita
+        if removeMilitaTeam2
             if u.getOwner().getCPlayer().getTeam() == Team.TEAM2
-                brownMilitia.removeUnit(u)
+                militiaTeam2.removeUnit(u)
                 u.remove()
 
 

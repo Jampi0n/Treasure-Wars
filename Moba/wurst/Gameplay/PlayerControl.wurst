@@ -48,29 +48,34 @@ public class ScoreTable
     static function updateHeader(boolean firstTeam)
         let row = (firstTeam ? 0 : CPlayer.team1HeroCount + 1)
         string teamName = firstTeam ?
-        playercolors[MAX_HERO_COUNT].toColorString() +   "Green|r" :
-        playercolors[MAX_HERO_COUNT+1].toColorString() + "Brown|r"
+        playercolors[TEAM_PLAYER_TEAM_1].toColorString() + TEAM_NAME_TEAM_1 + "|r" :
+        playercolors[TEAM_PLAYER_TEAM_2].toColorString() + TEAM_NAME_TEAM_2 + "|r"
         
         mBoard.getItem(row, 0)
             ..setStyle(true, false)
             ..setValue(teamName)
             ..setWidth(0.08)
+            ..release() 
         mBoard.getItem(row, 1)
             ..setStyle(false, true)
             ..setValue("H")
             ..setIcon(Icons.bTNHelmutPurple)
+            ..release() 
         mBoard.getItem(row, 2)
             ..setStyle(false, true)
             ..setValue("D")
             ..setIcon(Icons.bTNSkeletonWarrior)
+            ..release() 
         mBoard.getItem(row, 3)
             ..setStyle(false, true)
             ..setValue("A")
             ..setIcon(Icons.bTNStatUp)
+            ..release() 
         mBoard.getItem(row, 4)
             ..setStyle(false, true)
             ..setValue("U")
             ..setIcon(Icons.bTNFootman)
+            ..release() 
 
     static function update()
         int index = 0
@@ -87,18 +92,23 @@ public class ScoreTable
                 ..setStyle(true, false)
                 ..setValue(p.getPlayer().getNameColored())
                 ..setWidth(0.08)
+                ..release() 
             mBoard.getItem(row, 1)
                 ..setStyle(true, false)
                 ..setValue(p.getHeroKills().toString()) 
+                ..release() 
             mBoard.getItem(row, 2)
                 ..setStyle(true, false)
                 ..setValue(p.getDeaths().toString()) 
+                ..release() 
             mBoard.getItem(row, 3)
                 ..setStyle(true, false)
                 ..setValue(p.getAssists().toString()) 
+                ..release() 
             mBoard.getItem(row, 4)
                 ..setStyle(true, false)
                 ..setValue(p.getUnitKills().toString())
+                ..release() 
             index++
 
     static function updatePlayerHeroKills(CPlayer p)
@@ -106,40 +116,49 @@ public class ScoreTable
         mBoard.getItem(row, 1)
             ..setStyle(true, false)
             ..setValue(p.getHeroKills().toString()) 
+            ..release() 
 
         mBoard.setTitle("Score: "+
-        playercolors[MAX_HERO_COUNT].toColorString()+team1Kills.toString()+"|r / "+
-        playercolors[MAX_HERO_COUNT+1].toColorString()+team2Kills.toString()+"|r"  )
+        playercolors[TEAM_PLAYER_TEAM_1].toColorString()+team1Kills.toString()+"|r / "+
+        playercolors[TEAM_PLAYER_TEAM_2].toColorString()+team2Kills.toString()+"|r"  )
 
     static function updatePlayerDeaths(CPlayer p)
         let row = playerToRow[p.getId()]
         mBoard.getItem(row, 2)
             ..setStyle(true, false)
             ..setValue(p.getDeaths().toString()) 
+            ..release() 
 
     static function updatePlayerAssists(CPlayer p)
         let row = playerToRow[p.getId()]
         mBoard.getItem(row, 3)
             ..setStyle(true, false)
             ..setValue(p.getAssists().toString()) 
+            ..release() 
             
     static function updatePlayerUnitKills(CPlayer p)
         let row = playerToRow[p.getId()]
         mBoard.getItem(row, 4)
             ..setStyle(true, false)
             ..setValue(p.getUnitKills().toString())
+            ..release() 
+
+    static function display()
+    
+        print("displaying score")
+        mBoard.display(true)
 
     static function create()
         mBoard = CreateMultiboard()
             ..setColumnCount(5)
             ..setRowCount(2)
+            ..setItemsStyle(true, false)
+            ..setTitle("Score: "+playercolors[MAX_HERO_COUNT].toColorString()+"0|r / "+playercolors[MAX_HERO_COUNT+1].toColorString()+"0|r"  )
             ..display(true)
             ..minimalize(true)
         doAfter(0.02, () -> mBoard.minimalize(false))
 
-        mBoard.setItemsStyle(true, false)
-        mBoard.setTitle("Score: "+playercolors[MAX_HERO_COUNT].toColorString()+"0|r / "+playercolors[MAX_HERO_COUNT+1].toColorString()+"0|r"  )
-
+        
 
     static function addPlayer(CPlayer p)
         doAfter(0.01, () -> (begin
@@ -285,7 +304,7 @@ public class CPlayer
         var admin = false
         for i = 0 to MAX_HERO_COUNT-1
             player p = players[i]
-            Team t = i <= (MAX_HERO_COUNT/2)-1 ?Team.TEAM1:Team.TEAM2
+            Team t = i <= HERO_PLAYER_TEAM_1_LAST ?Team.TEAM1:Team.TEAM2
             if( p.getSlotState()==PLAYER_SLOT_STATE_PLAYING )
                 new CPlayer(p, t, PlayerType.HERO)
                 if(not admin)
@@ -295,17 +314,21 @@ public class CPlayer
                 new CPlayer(p, t, PlayerType.NONE)
     
 
-        new CPlayer(players[MAX_HERO_COUNT], Team.TEAM1, PlayerType.ARMY)
-        new CPlayer(players[MAX_HERO_COUNT+1], Team.TEAM2, PlayerType.ARMY)
+        new CPlayer(players[TEAM_PLAYER_TEAM_1], Team.TEAM1, PlayerType.ARMY)
+        new CPlayer(players[TEAM_PLAYER_TEAM_2], Team.TEAM2, PlayerType.ARMY)
 
         new CPlayer(players[PLAYER_NEUTRAL_AGGRESSIVE], Team.NEUTRAL_HOSTILE, PlayerType.NEUTRAL)
         for i=PLAYER_NEUTRAL_AGGRESSIVE+1 to PLAYER_NEUTRAL_PASSIVE
             new CPlayer(players[i], Team.NEUTRAL_PASSIVE, PlayerType.NEUTRAL)
     
-        for i=0 to MAX_HERO_COUNT+1
-            for j=0 to MAX_HERO_COUNT+1
-                if(i!=j and getCPlayer(i).getTeam()==getCPlayer(j).getTeam())
-                    SetPlayerAllianceStateBJ(players[i],players[j], bj_ALLIANCE_ALLIED_VISION)
+        for i=0 to TEAM_PLAYER_TEAM_2
+            for j=0 to TEAM_PLAYER_TEAM_2
+
+                if i < MAX_HERO_COUNT or i == TEAM_PLAYER_TEAM_1 or i == TEAM_PLAYER_TEAM_2
+                    if j < MAX_HERO_COUNT or j == TEAM_PLAYER_TEAM_1 or j == TEAM_PLAYER_TEAM_2
+
+                        if(i!=j and getCPlayer(i).getTeam()==getCPlayer(j).getTeam())
+                            SetPlayerAllianceStateBJ(players[i],players[j], bj_ALLIANCE_ALLIED_VISION)
                     
 
 

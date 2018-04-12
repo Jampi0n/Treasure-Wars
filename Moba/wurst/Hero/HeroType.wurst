@@ -23,8 +23,8 @@ public constant HERO_MAX_LEVEL = 25
 
 public class HeroType
 
-    private int array[11] statsBase
-    private int array[11] statsMax
+    private int array[STAT_COUNT] statsBase
+    private int array[STAT_COUNT] statsMax
 
     private static constant unitIdToHeroType = new HashMap<integer, HeroType>
     private int unitId
@@ -44,7 +44,7 @@ public class HeroType
         objectCount++
         unitIdToHeroType.put(id, this)
         this.unitId = id
-        for i = 0 to 10
+        for i = 0 to STAT_COUNT-1
             statsBase[i]=0
             statsMax[i]=0
 

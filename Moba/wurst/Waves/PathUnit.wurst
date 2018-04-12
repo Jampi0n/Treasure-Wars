@@ -300,9 +300,9 @@ public class PathUnit
                 
             nearby.destr()
         else if this.pathState == PathState.ENEMY_TOWN
-            if this.assocUnit.getOwner() == players[10]
+            if this.assocUnit.getOwner() == players[TEAM_PLAYER_TEAM_1]
                 this.assocUnit.issuePointOrder("attack", gg_rct_BrownCastle.getCenter())
-            else if this.assocUnit.getOwner() == players[11]
+            else if this.assocUnit.getOwner() == players[TEAM_PLAYER_TEAM_2]
                 this.assocUnit.issuePointOrder("attack", gg_rct_GreenCastle.getCenter())
         else if this.pathState == PathState.HOME_TOWN
             this.assocUnit.issuePointOrder("attack", this.returnRect.getCenter())          
@@ -335,7 +335,7 @@ public class PathUnit
     function onBaseEnter()
         this.setPathState(PathState.ENEMY_TOWN)
         this.nextUpdate = gameTime + 1000
-        if this.assocUnit.getOwner() == players[10]
+        if this.assocUnit.getOwner() == players[TEAM_PLAYER_TEAM_1]
             this.assocUnit.issuePointOrder("attack", gg_rct_BrownCastle.getRightTop())
         else
             this.assocUnit.issuePointOrder("attack", gg_rct_GreenCastle.getLeftBot())
@@ -343,7 +343,7 @@ public class PathUnit
     //A path unit enters the enemy base
     static function onBaseEnterGreen()
         let u = GetTriggerUnit()
-        if u.getOwner() == players[11]
+        if u.getOwner() == players[TEAM_PLAYER_TEAM_2]
             let pathUnit = unitToPathUnit.get(u)
             if pathUnit != null and pathUnit.checkEnter == true and pathUnit.pathState == PathState.PATH
                 pathUnit.onBaseEnter()
@@ -351,7 +351,7 @@ public class PathUnit
 
     static function onBaseEnterBrown()
         let u = GetTriggerUnit()
-        if u.getOwner() == players[10]
+        if u.getOwner() == players[TEAM_PLAYER_TEAM_1]
             let pathUnit = unitToPathUnit.get(u)
             if pathUnit != null and pathUnit.checkEnter == true and pathUnit.pathState == PathState.PATH
                 pathUnit.onBaseEnter()
@@ -361,7 +361,7 @@ public class PathUnit
 
     static function onBaseLeaveGreen()
         let u = GetTriggerUnit()
-        if u.getOwner() == players[10]
+        if u.getOwner() == players[TEAM_PLAYER_TEAM_1]
             let pathUnit = unitToPathUnit.get(u)
             if pathUnit != null and pathUnit.checkEnter == true and pathUnit.pathState == PathState.HOME_TOWN
                 pathUnit.onBaseLeave()
@@ -370,7 +370,7 @@ public class PathUnit
 
     static function onBaseLeaveBrown()
         let u = GetTriggerUnit()
-        if u.getOwner() == players[11]
+        if u.getOwner() == players[TEAM_PLAYER_TEAM_2]
             let pathUnit = unitToPathUnit.get(u)
             if pathUnit != null and pathUnit.checkEnter == true and pathUnit.pathState == PathState.HOME_TOWN
                 pathUnit.onBaseLeave()
@@ -378,7 +378,7 @@ public class PathUnit
 
     static function onReturnGreen()
         let u = GetTriggerUnit()
-        if u.getOwner() == players[10]
+        if u.getOwner() == players[TEAM_PLAYER_TEAM_1]
             let pathUnit = unitToPathUnit.get(u)
             if pathUnit.currentPath == GREEN_MID
                 //print("green leaves mid")
@@ -392,7 +392,7 @@ public class PathUnit
 
     static function onReturnBrown()
         let u = GetTriggerUnit()
-        if u.getOwner() == players[11]
+        if u.getOwner() == players[TEAM_PLAYER_TEAM_2]
             let pathUnit = unitToPathUnit.get(u)
             if pathUnit != null and pathUnit.checkEnter == true and (pathUnit.pathState == PathState.RETURNING or pathUnit.pathState == PathState.HOME_TOWN)
                 if pathUnit.returnRect.contains(pathUnit.assocUnit.getPos(), 64)
