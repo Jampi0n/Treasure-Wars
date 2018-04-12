@@ -3,7 +3,24 @@ package Constants
 public constant MAGIC_REDUCTION = 0.02
 public constant ARMOR_REDUCTION = 0.02
 public constant DEBUG_MODE = true
+
+public constant STAT_COUNT = 11
+
+//the first MAX_HERO_COUNT are hero players
 public constant MAX_HERO_COUNT = 10
+
+public constant HERO_PLAYER_TEAM_1_FIRST = 0
+public constant HERO_PLAYER_TEAM_1_LAST = 4
+
+public constant HERO_PLAYER_TEAM_2_FIRST = 5
+public constant HERO_PLAYER_TEAM_2_LAST = 9
+
+public constant TEAM_PLAYER_TEAM_1 = 10
+public constant TEAM_PLAYER_TEAM_2 = 11
+
+public constant TEAM_NAME_TEAM_1 = "Green"
+public constant TEAM_NAME_TEAM_2 = "Brown"
+
 public constant MAX_HIT_BOX = 200.
 
 public int objectCount = 0

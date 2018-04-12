@@ -63,9 +63,9 @@ function onHydraDeath()
 
     string teamName
     if killer.getOwner().getCPlayer().getTeam() == Team.TEAM1
-        teamName = fromPlayer(Player(10)).toColorString()+"Dark Green"+"|r"
+        teamName = fromPlayer(Player(TEAM_PLAYER_TEAM_1)).toColorString()+TEAM_NAME_TEAM_1+"|r"
     else if killer.getOwner().getCPlayer().getTeam() == Team.TEAM2
-        teamName = fromPlayer(Player(11)).toColorString()+"Brown"+"|r"
+        teamName = fromPlayer(Player(TEAM_PLAYER_TEAM_2)).toColorString()+TEAM_NAME_TEAM_2+"|r"
     else
         teamName = ""
         killedByTeam = false
