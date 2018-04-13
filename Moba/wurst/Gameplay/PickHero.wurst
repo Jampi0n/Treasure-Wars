@@ -135,9 +135,11 @@ function allPick()
     pickTimer = getTimer()
         ..start(pickTime.toReal(), function allPickEnd)
 
-    timerWindow = CreateTimerDialog(pickTimer)
-    TimerDialogSetTitle(timerWindow,"Pick hero:")
-    TimerDialogDisplay(timerWindow, true)
+    doAfter(1, () -> (begin
+        timerWindow = CreateTimerDialog(pickTimer)
+        TimerDialogSetTitle(timerWindow,"Pick hero:")
+        TimerDialogDisplay(timerWindow, true)
+    end))
 
 function onPick()
     unit pickedUnit = GetTriggerUnit()
@@ -226,9 +228,12 @@ function startPickMode()
     chooseModeTimer= getTimer()
         ..start(30, function endPickMode)
 
-    timerWindow = CreateTimerDialog(chooseModeTimer)
-    TimerDialogSetTitle(timerWindow,"Choose pick mode:")
-    TimerDialogDisplay(timerWindow, true)
+    doAfter(1, () -> (begin
+        if pickMode == PickMode.UNDECIDED
+            timerWindow = CreateTimerDialog(chooseModeTimer)
+            TimerDialogSetTitle(timerWindow,"Choose pick mode:")
+            TimerDialogDisplay(timerWindow, true)
+    end))
 
     print("|cffffcc00"+players[adminPlayer].getName()+" has 30 seconds to pick a mode!|r")
 
