@@ -8,7 +8,6 @@ import UnitTypeConfig
 import initlater SeaDruid
 import initlater TrollBerserker
 import StandardTextTags
-import HashMap
 
 import ItemIdGeneration
 import initlater ItemShopSystem
@@ -21,21 +20,6 @@ public constant DEFAULT_ONHIT = 'A008'
     ADVANCED_ONHIT will trigger all effects DEFAULT_ONHIT triggers, but can be used to trigger additional effects
     Every hero should only have one ability utilizing ADVANCED_ONHIT (more abilities would be repetitive anyways)
 */
-
-
-constant PREVENT_DEATH = compiletime(ABIL_ID_GEN.next())
-
-group afterLifeGroup = CreateGroup()
-constant afterLifeMap = new HashMap<unit,real>
-
-/*unit prevenDeathUnit
-real prevenDeathAfterLife
-timer preventDeathTimer = getTimer()*/
-
-@compiletime
-function setupPreventDeath()
-    new AbilityDefinitionMaxLifeBonusGreater(PREVENT_DEATH)
-        ..setMaxLifeGained(1, 100000)
 
 
 function unit.dealDamageNoEvent(unit target, real amount, ReductionType reductionType)
@@ -59,38 +43,14 @@ function unit.dealDamageNoEvent(unit target, real amount, ReductionType reductio
 function handleDamageAmount(unit source, unit target, boolean isAttack, boolean _isActive, boolean advanced)
     let originalDamage = GetEventDamage()
     real currentDamage = originalDamage
-    real afterLife
-    real currentActualLife = target.getHP()
-    real currentSupposedLife = currentActualLife
 
     if originalDamage.abs() < 0.000001 //damage very small, just ignore
         return
 
 
-    //previous after life event was not yet finished for this unit
-    //use supposed hp to refer to hp, that the unit should have 
 
-    //instead of completing the previous after life event, this new after life event is altered to
-    //use the life of the previous after life event
-    //the previous after life event never actually happens
-    if afterLifeGroup.contains(target)
-        currentSupposedLife = afterLifeMap.get(target)
-        //print("the previous after life event was not yet finished")
 
-    
 
-    //if source.isType(UNIT_TYPE_HERO) or target.isType(UNIT_TYPE_HERO)
-        //print(source.getName()+" damages "+target.getName()+": "+currentDamage.toString()+" "+isAttack.toString())
-
-    // if damage events are at the same time e.g spikes, this will cause problems
-    // always use delayed unitSetAfterLife()
-    /*if prevenDeathUnit != null
-        print("- - -")
-        unitSetAfterLife()
-        print("+ + +")*/
-
-    //example:
-    //currentDamage = currentDamage/2
 
     /*
         untargetable -> damage = 0 and no further damage handling
@@ -100,6 +60,9 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
     if target.isType(UNIT_TYPE_ANCIENT) and isAttack 
         currentDamage = 0
     else
+
+        //example:
+        //currentDamage = currentDamage/2
 
         //===============================================================================
 
@@ -154,41 +117,7 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
 
         //===============================================================================
 
-    
-    if currentDamage > originalDamage
-        source.dealDamageNoEvent(target, currentDamage-originalDamage, ReductionType.NONE)
-    else if currentDamage < originalDamage
-        if currentDamage < 0
-            currentDamage = 0
-        //how much life the target is supposed to have after dealing damage
-
-
-        afterLife = currentSupposedLife - currentDamage
-        
-        //only do stuff, if the unit is supposed to survive
-        if afterLife > 0.41
-            //if the target would die, even though it is supposed to survive:
-            if currentActualLife - originalDamage < 0.41
-                target.setHP(target.getMaxHP())
-                target.addAbility(PREVENT_DEATH)
-                //print("target would die")
-
-
-
-            //print(target.getName()+" has "+currentActualLife.toString()+"|"+currentSupposedLife.toString()+" hp. Damage is: "+originalDamage.toString()+"|"+currentDamage.toString()+" afterlife = "+afterLife.toString())
-
-
-            afterLifeGroup.addUnit(target)
-            afterLifeMap.put(target, afterLife)
-            //even with simultaneous damage events, this will always lead to the same result (idempotent)
-            doAfter(0, () -> (begin
-                //print(target.getName()+" has now "+target.getHP().toString()+" hp.")
-                if afterLifeGroup.contains(target)
-                    target
-                        ..removeAbility(PREVENT_DEATH)
-                        ..setHP(afterLifeMap.get(target))
-                    afterLifeGroup.removeUnit(target)
-            end))
+    BlzSetEventDamage(currentDamage)
 
 
 public interface OnAttackFunction

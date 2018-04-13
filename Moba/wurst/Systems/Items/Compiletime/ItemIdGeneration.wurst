@@ -3,7 +3,7 @@ package ItemIdGeneration
 import ItemShopInitialize
 import ObjectIdGenerator
 
-public constant SHOP_ID_MAGICAL_1= UNIT_ID_GEN.next()
+public constant SHOP_ID_MAGICAL_1 = compiletime(UNIT_ID_GEN.next())
 public constant SHOP_MAGICAL_1 = compiletime(new Shop(SHOP_ID_MAGICAL_1, "SHOP 4", 1.1, "units\\human\\HeroArchMage\\HeroArchMage") castTo int)
 
 public constant ITEM_ID_MAGE_ARMOR = compiletime(newItem("Mage Armor", SHOP_MAGICAL_1, false, "BTNINV_Chest_Plate07"))
@@ -20,7 +20,7 @@ public constant ITEM_ID_MAGIC_STAFF = compiletime(newItem("Magic Staff", SHOP_MA
 public constant ITEM_ID_APPRENTICES_SCROLL = compiletime(newItem("Apprentice's Scroll", SHOP_MAGICAL_1, false, "BTNAdept01"))
 
 
-public constant SHOP_ID_MAGICAL_2= UNIT_ID_GEN.next()
+public constant SHOP_ID_MAGICAL_2 = compiletime(UNIT_ID_GEN.next())
 public constant SHOP_MAGICAL_2 = compiletime(new Shop(SHOP_ID_MAGICAL_2, "SHOP 5", 1.3, "units\\human\\HeroBloodElf\\HeroBloodElf") castTo int)
 
 public constant ITEM_ID_SKULL_PENDANT = compiletime(newItem("Skull Pendant", SHOP_MAGICAL_2, true, "BTNAncientAmulet"))
@@ -36,7 +36,7 @@ public constant ITEM_ID_CURSED_MASK = compiletime(newItem("Cursed Mask", SHOP_MA
 public constant ITEM_ID_ANCIENT_STONE_TABLET = compiletime(newItem("Ancient Stone Tablet", SHOP_MAGICAL_2, true, "BTNINV_Misc_StoneTablet_05"))
 public constant ITEM_ID_BATTLEMAGE_ARMOR = compiletime(newItem("Battle Mage Armor", SHOP_MAGICAL_2, true, "BTNBattlemageArmor"))
 
-public constant SHOP_ID_MAGICAL_3= UNIT_ID_GEN.next()
+public constant SHOP_ID_MAGICAL_3 = compiletime(UNIT_ID_GEN.next())
 public constant SHOP_MAGICAL_3 = compiletime(new Shop(SHOP_ID_MAGICAL_3, "SHOP 6", 1.6, "units\\human\\Jaina\\Jaina") castTo int)
 
 public constant ITEM_ID_ENCHANTED_ARMOR = compiletime(newItem("Enchanted Armor", SHOP_MAGICAL_3, true, "BTNSuperiorMageRobe"))
@@ -53,7 +53,7 @@ public constant ITEM_ID_ARCANE_SHIELD  = compiletime(newItem("Arcane Shield", SH
 public constant ITEM_ID_SCROLL_OF_CONJURATION  = compiletime(newItem("Scroll of Conjuration", SHOP_MAGICAL_3, true, "BTNAdept003"))
 
 
-public constant SHOP_ID_PHYSICAL_1 = UNIT_ID_GEN.next()
+public constant SHOP_ID_PHYSICAL_1 = compiletime(UNIT_ID_GEN.next())
 public constant SHOP_PHYSICAL_1 = compiletime(new Shop(SHOP_ID_PHYSICAL_1, "SHOP 1", 1.2,  "units\\human\\HeroPaladin\\HeroPaladin") castTo int)
 
 public constant ITEM_ID_PLATED_GAUNTLETS = compiletime(newItem("Plated Gauntlets", SHOP_PHYSICAL_1, false, "BTNPlatedGauntlet2"))
@@ -70,7 +70,7 @@ public constant ITEM_ID_DAGGER = compiletime(newItem("Dagger", SHOP_PHYSICAL_1, 
 public constant ITEM_ID_RING_OF_HEALTH = compiletime(newItem("Ring of Health", SHOP_PHYSICAL_1, false, "BTNINV_Jewelry_Ring_09"))
 
 
-public constant SHOP_ID_PHYSICAL_2= UNIT_ID_GEN.next()
+public constant SHOP_ID_PHYSICAL_2 = compiletime(UNIT_ID_GEN.next())
 public constant SHOP_PHYSICAL_2 = compiletime(new Shop(SHOP_ID_PHYSICAL_2, "SHOP 2", 1.4,  "units\\human\\HeroMountainKing\\HeroMountainKing") castTo int)
 
 public constant ITEM_ID_SKULL_AXE = compiletime(newItem("Skull Axe", SHOP_PHYSICAL_2, true, "BTNINV_Axe_09"))
@@ -87,7 +87,7 @@ public constant ITEM_ID_MACE = compiletime(newItem("Mace", SHOP_PHYSICAL_2, true
 public constant ITEM_ID_RAVEN_SWORD = compiletime(newItem("Raven Sword", SHOP_PHYSICAL_2, true, "BTNRaven_Sword"))
 
 
-public constant SHOP_ID_PHYSICAL_3= UNIT_ID_GEN.next()
+public constant SHOP_ID_PHYSICAL_3 = compiletime(UNIT_ID_GEN.next())
 public constant SHOP_PHYSICAL_3 = compiletime(new Shop(SHOP_ID_PHYSICAL_3, "SHOP 3", 1.2, "units\\human\\ArthaswithSword\\ArthaswithSword") castTo int)
 
 public constant ITEM_ID_CURSED_SWORD = compiletime(newItem("Cursed Sword", SHOP_PHYSICAL_3, true, "BTNCursedSword"))
