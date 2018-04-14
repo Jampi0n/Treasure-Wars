@@ -119,7 +119,7 @@ function itemEvilBook(int itemId)
             
 function itemFrostRing(int itemId)
     int hr = 60
-    int mr = 40
+    int mr = 20
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} hit point regeneration per 10 seconds|n+ {1} mana point regeneration per 10 seconds".format(

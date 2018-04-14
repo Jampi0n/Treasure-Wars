@@ -364,7 +364,7 @@ function onBuildingAbility()
     else if itemTypeId == 'I00I' //Hit Point Regeneration
         hero.wrapper().addStatAbsoluteBonus(Stat.HR, 3)
     else if itemTypeId == 'I00J' //Mana Point Regeneration
-        hero.wrapper().addStatAbsoluteBonus(Stat.MR, 2)
+        hero.wrapper().addStatAbsoluteBonus(Stat.MR, 1)
 
 
 function onMilitiaDespawn()

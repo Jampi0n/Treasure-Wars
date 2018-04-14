@@ -37,7 +37,7 @@ function itemMageGloves(int itemId)
 
 
 function itemManaRing(int itemId)
-    int mr = 20
+    int mr = 10
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} mana point regeneration per 10 seconds".format(mr.toString()))
