@@ -61,7 +61,7 @@ function itemEmeraldPendant(int itemId)
 
 function itemRingOfDarkness(int itemId)
     int intel = 36
-    int mr = 30
+    int mr = 15
     int voidDmg = 25 //trigger
     if compiletime
         itemId.getTypeDef()
@@ -95,7 +95,7 @@ function itemRingOfDarkness(int itemId)
 
 function itemBlessedGoblet(int itemId)
     int hr = 50
-    int mr = 50
+    int mr = 25
     int hp = 225
     int wp = 25
     if compiletime
@@ -265,7 +265,7 @@ function itemBracerOfPower(int itemId)
     int hp = 225
     int mp = 150
     int hr = 70
-    int mr = 45
+    int mr = 25
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} hit points|n+ {1} mana points|n+ {2} hit point regeneration per 10 seconds|n+ {3} mana point regeneration per 10 seconds".format(
