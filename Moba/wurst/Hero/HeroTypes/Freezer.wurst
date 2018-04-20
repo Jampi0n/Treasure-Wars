@@ -53,13 +53,13 @@ function coldHand()
                 COLD_HAND_MP[lvl-1].str())
             )
 
-constant real array NOVA_TARGET_DMG =[75, 100, 125, 150, 175]
-constant real NOVA_TARGET_DMG_BONUS = 120
+constant real array NOVA_TARGET_DMG =[60, 80, 100, 120, 140]
+constant real NOVA_TARGET_DMG_BONUS = 80
 
-constant real array NOVA_AOE_DMG =[50, 100, 150, 200, 250]
-constant real NOVA_AOE_DMG_BONUS = 160
+constant real array NOVA_AOE_DMG =[60, 100, 140, 180, 220]
+constant real NOVA_AOE_DMG_BONUS = 125
 
-constant real NOVA_AOE = 200
+constant real NOVA_AOE = 250
 
 constant real array NOVA_DURATION = [2, 2.5, 3, 3.5, 4]
 constant real NOVA_DURATION_BONUS = 2
@@ -182,7 +182,7 @@ constant int FROST_BREATH_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, 
 @compiletime
 function frostWyrm()
     int array MANA = [200, 250, 300, 350, 400]
-    real array COOLDOWN = [30, 30, 30, 30, 30]
+    real array COOLDOWN = [45, 45, 45, 45, 45]
 
     let aDef = new AbilityDefinitionRoar(ABILITY_FROST_WYRM)
         ..setAnimationNames("spell")
@@ -212,8 +212,8 @@ function frostWyrm()
 
 
 constant real FREEZE_AOE = 900
-constant real array FREEZE_DMG = [160, 180, 200, 220, 240]
-constant real FREEZE_DMG_BONUS = 200
+constant real array FREEZE_DMG = [120, 140, 160, 180, 200]
+constant real FREEZE_DMG_BONUS = 125
 
 constant real array FREEZE_DURATION = [2, 2.5, 3, 3.5, 4]
 
@@ -516,7 +516,8 @@ function initHeroType()
             let dmg = attacker.wrapper().getStatTotalValue(Stat.AD) * 0.5
             let level = Hero.getHero(attacker.getOwner()).toUnit().getAbilityLevel(ABILITY_FROST_WYRM)
 
-            target.addBuffReduced(attacker, FROST_BREATH_DUR[level-1], buffFrostBreath, level)
+            if not target.isType(UNIT_TYPE_STRUCTURE)
+                target.addBuffReduced(attacker, FROST_BREATH_DUR[level-1], buffFrostBreath, level)
 
             while(not nearby.isEmpty())
                 unit u = FirstOfGroup(nearby)
