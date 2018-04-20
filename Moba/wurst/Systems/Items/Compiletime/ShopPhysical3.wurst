@@ -217,26 +217,22 @@ function itemInfernalBow(int itemId)
         end))
 
 function itemRunicArmor(int itemId)
-    int hr = 45
-    int mr = 15
-    int ar = 16
-    int wp = 28
-    int hp = 150
+    int ar = 15
+    int wp = 45
+    int hp = 350
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} armor|n+ {1} willpower|n+ {2} hit points|n+ {3} hit point regeneration per 10 seconds|n+ {4} mana point regeneration per 10 seconds".format(
-                ar.toString(), wp.toString(), hp.toString(), hr.toString(), mr.toString()
+            ..setDescription("+ {0} armor|n+ {1} willpower|n+ {2} hit points".format(
+                ar.toString(), wp.toString(), hp.toString()
             ))
             ..setGoldCost(4150)
             ..addRequirement(ITEM_ID_STEEL_ARMOR)
-            ..addRequirement(ITEM_ID_RING_OF_REGEN)
+            ..addRequirement(ITEM_ID_ANCIENT_STONE_TABLET)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.AR, ar)
             ..addStatBonusAbsolute(Stat.AGI, wp)
             ..addStatBonusAbsolute(Stat.HP, hp)
-            ..addStatBonusAbsolute(Stat.HR, hr)
-            ..addStatBonusAbsolute(Stat.MR, mr)
 
 function itemEnchantedBlade(int itemId)
     int as = 15

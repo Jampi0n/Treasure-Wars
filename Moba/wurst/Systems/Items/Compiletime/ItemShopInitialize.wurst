@@ -97,6 +97,7 @@ function createShop(int newId, string name, real size, string model) returns Bui
         ..setName(name)
         ..setSelectionScale(2)
         ..setScalingValue(size)
+        ..setPlacementRequires("")
     return bDef
 
 /*  ==========================================================================================================================

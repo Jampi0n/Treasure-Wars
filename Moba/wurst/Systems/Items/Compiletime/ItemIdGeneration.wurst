@@ -4,7 +4,7 @@ import ItemShopInitialize
 import ObjectIdGenerator
 
 public constant SHOP_ID_MAGICAL_1 = compiletime(UNIT_ID_GEN.next())
-public constant SHOP_MAGICAL_1 = compiletime(new Shop(SHOP_ID_MAGICAL_1, "SHOP 4", 1.1, "units\\human\\HeroArchMage\\HeroArchMage") castTo int)
+public constant SHOP_MAGICAL_1 = compiletime(new Shop(SHOP_ID_MAGICAL_1, "Wizard's Store", 1.1, "units\\human\\HeroArchMage\\HeroArchMage") castTo int)
 
 public constant ITEM_ID_MAGE_ARMOR = compiletime(newItem("Mage Armor", SHOP_MAGICAL_1, false, "BTNINV_Chest_Plate07"))
 public constant ITEM_ID_MAGE_AMULET = compiletime(newItem("Mage Amulet", SHOP_MAGICAL_1, false, "BTNEmptyAmulet"))
@@ -21,7 +21,7 @@ public constant ITEM_ID_APPRENTICES_SCROLL = compiletime(newItem("Apprentice's S
 
 
 public constant SHOP_ID_MAGICAL_2 = compiletime(UNIT_ID_GEN.next())
-public constant SHOP_MAGICAL_2 = compiletime(new Shop(SHOP_ID_MAGICAL_2, "SHOP 5", 1.3, "units\\human\\HeroBloodElf\\HeroBloodElf") castTo int)
+public constant SHOP_MAGICAL_2 = compiletime(new Shop(SHOP_ID_MAGICAL_2, "Enchanted Items", 1.3, "units\\human\\HeroBloodElf\\HeroBloodElf") castTo int)
 
 public constant ITEM_ID_SKULL_PENDANT = compiletime(newItem("Skull Pendant", SHOP_MAGICAL_2, true, "BTNAncientAmulet"))
 public constant ITEM_ID_VISION_WARD = compiletime(newItem("Vision Ward", SHOP_MAGICAL_2, true, "BTNVisionWand"))
@@ -37,7 +37,7 @@ public constant ITEM_ID_ANCIENT_STONE_TABLET = compiletime(newItem("Ancient Ston
 public constant ITEM_ID_BATTLEMAGE_ARMOR = compiletime(newItem("Battle Mage Armor", SHOP_MAGICAL_2, true, "BTNBattlemageArmor"))
 
 public constant SHOP_ID_MAGICAL_3 = compiletime(UNIT_ID_GEN.next())
-public constant SHOP_MAGICAL_3 = compiletime(new Shop(SHOP_ID_MAGICAL_3, "SHOP 6", 1.6, "units\\human\\Jaina\\Jaina") castTo int)
+public constant SHOP_MAGICAL_3 = compiletime(new Shop(SHOP_ID_MAGICAL_3, "Magical Artifacts", 1.6, "units\\human\\Jaina\\Jaina") castTo int)
 
 public constant ITEM_ID_ENCHANTED_ARMOR = compiletime(newItem("Enchanted Armor", SHOP_MAGICAL_3, true, "BTNSuperiorMageRobe"))
 public constant ITEM_ID_EMERALD_PENDANT = compiletime(newItem("Emerald Pendant", SHOP_MAGICAL_3, true, "BTNAmulet"))
@@ -54,7 +54,7 @@ public constant ITEM_ID_SCROLL_OF_CONJURATION  = compiletime(newItem("Scroll of 
 
 
 public constant SHOP_ID_PHYSICAL_1 = compiletime(UNIT_ID_GEN.next())
-public constant SHOP_PHYSICAL_1 = compiletime(new Shop(SHOP_ID_PHYSICAL_1, "SHOP 1", 1.2,  "units\\human\\HeroPaladin\\HeroPaladin") castTo int)
+public constant SHOP_PHYSICAL_1 = compiletime(new Shop(SHOP_ID_PHYSICAL_1, "Blacksmith", 1.2,  "units\\human\\HeroPaladin\\HeroPaladin") castTo int)
 
 public constant ITEM_ID_PLATED_GAUNTLETS = compiletime(newItem("Plated Gauntlets", SHOP_PHYSICAL_1, false, "BTNPlatedGauntlet2"))
 public constant ITEM_ID_HAMMER_OF_STRENGTH = compiletime(newItem("Hammer of Strength", SHOP_PHYSICAL_1, false, "BTNINV_Hammer_15"))
@@ -71,7 +71,7 @@ public constant ITEM_ID_RING_OF_HEALTH = compiletime(newItem("Ring of Health", S
 
 
 public constant SHOP_ID_PHYSICAL_2 = compiletime(UNIT_ID_GEN.next())
-public constant SHOP_PHYSICAL_2 = compiletime(new Shop(SHOP_ID_PHYSICAL_2, "SHOP 2", 1.4,  "units\\human\\HeroMountainKing\\HeroMountainKing") castTo int)
+public constant SHOP_PHYSICAL_2 = compiletime(new Shop(SHOP_ID_PHYSICAL_2, "Weaponry", 1.4,  "units\\human\\HeroMountainKing\\HeroMountainKing") castTo int)
 
 public constant ITEM_ID_SKULL_AXE = compiletime(newItem("Skull Axe", SHOP_PHYSICAL_2, true, "BTNINV_Axe_09"))
 public constant ITEM_ID_GAUNTLET_OF_PROTECTION = compiletime(newItem("Gauntlet of Protection", SHOP_PHYSICAL_2, true, "BTNPlatedGauntlet"))
@@ -88,7 +88,7 @@ public constant ITEM_ID_RAVEN_SWORD = compiletime(newItem("Raven Sword", SHOP_PH
 
 
 public constant SHOP_ID_PHYSICAL_3 = compiletime(UNIT_ID_GEN.next())
-public constant SHOP_PHYSICAL_3 = compiletime(new Shop(SHOP_ID_PHYSICAL_3, "SHOP 3", 1.2, "units\\human\\ArthaswithSword\\ArthaswithSword") castTo int)
+public constant SHOP_PHYSICAL_3 = compiletime(new Shop(SHOP_ID_PHYSICAL_3, "Forged Artifacts", 1.2, "units\\human\\ArthaswithSword\\ArthaswithSword") castTo int)
 
 public constant ITEM_ID_CURSED_SWORD = compiletime(newItem("Cursed Sword", SHOP_PHYSICAL_3, true, "BTNCursedSword"))
 public constant ITEM_ID_INFERNAL_BOW = compiletime(newItem("Infernal Bow", SHOP_PHYSICAL_3, true, "BTNInfernalbow"))
