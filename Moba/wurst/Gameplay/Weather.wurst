@@ -1,0 +1,31 @@
+package Weather
+
+//Makes it rain from time to time.
+
+import WeatherEffects
+import MapBounds
+
+constant MIN_TIME = 40.
+constant MAX_TIME = 80.
+
+weathereffect rainingEffect
+timer weatherTimer = CreateTimer()
+
+
+
+
+function changeWeather()
+    let random = GetRandomInt(0, 100)
+    if random <= 70
+        EnableWeatherEffect(rainingEffect, false)
+    else
+        EnableWeatherEffect(rainingEffect, true)
+
+    weatherTimer.start(GetRandomReal(MIN_TIME, MAX_TIME), function changeWeather)
+
+
+init
+    rainingEffect = AddWeatherEffect(boundRect, WeatherEffects.ashenvaleRainLight)
+    weatherTimer.start(GetRandomReal(MIN_TIME, MAX_TIME), function changeWeather)
+
+
