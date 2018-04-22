@@ -10,6 +10,8 @@ import Constants
 import PlayerControl
 import initlater WaveSpawn
 
+constant SHOW_STATE_COLORS = false
+
 enum PathState
     HOME_TOWN
     RETURNING
@@ -41,7 +43,7 @@ public class PathUnit
 
     function setPathState(PathState newState)
         this.pathState = newState
-        if DEBUG_MODE
+        if SHOW_STATE_COLORS
             if newState == PathState.HOME_TOWN
                 this.assocUnit.setVertexColor(100,255,100,255)
             else if newState == PathState.RETURNING
