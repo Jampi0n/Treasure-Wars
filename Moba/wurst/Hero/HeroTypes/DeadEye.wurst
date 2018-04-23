@@ -229,11 +229,13 @@ function onDamage()
     let target = GetTriggerUnit()
     if(target.hasAbility(BUFF_ID_ON_DEATH_COIL))
         target.removeAbility(BUFF_ID_ON_DEATH_COIL)
+
         let caster = GetEventDamageSource()
-        let level = caster.getAbilityLevel(ABILITY_DEATH_PACT)
-        GetEventDamageSource().dealDamage(target, 
-        DEATH_COIL_DMG_BASE[level-1].bonus(caster.getInt(), DEATH_COIL_DMG_BASE_BONUS)+
-        skeletonCount*DEATH_COIL_DMG_FACTOR[level-1].bonus(caster.getInt(), DEATH_COIL_DMG_FACTOR_BONUS), ReductionType.MAGIC)
+        if target.isTargetable(caster.getOwner(), false, true)
+            let level = caster.getAbilityLevel(ABILITY_DEATH_PACT)
+            GetEventDamageSource().dealDamage(target, 
+            DEATH_COIL_DMG_BASE[level-1].bonus(caster.getInt(), DEATH_COIL_DMG_BASE_BONUS)+
+            skeletonCount*DEATH_COIL_DMG_FACTOR[level-1].bonus(caster.getInt(), DEATH_COIL_DMG_FACTOR_BONUS), ReductionType.MAGIC)
         doAfter(1, () -> (begin
             caster.removeAbility(ABILITY_DEATH_COIL)
             caster.getOwner().setAbilityAvailable(ABILITY_DEATH_PACT, true)
