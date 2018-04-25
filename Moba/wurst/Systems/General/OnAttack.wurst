@@ -2,6 +2,7 @@ package OnAttack
 
 import DamageDetection
 import initlater HeroType
+import PlayerControl
 import ClosureTimers
 //import TimerUtils
 import UnitTypeConfig
@@ -57,7 +58,7 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
         only for attacks, because every other damage will be dealt in code and there I can decide individually, if I want to deal damage
     */
 
-    if target.isType(UNIT_TYPE_ANCIENT) and isAttack 
+    if (target.isType(UNIT_TYPE_ANCIENT) and isAttack) or gameOver
         currentDamage = 0
     else
 
@@ -86,25 +87,25 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
             let level = manaShield.getLevel()
 
             
-            manaShield.getTarget().addMana( - MANA_SHIELD_REDUCTION[level-1] * MANA_PER_DAMAGE[level-1] * currentDamage)
+            manaShield.getTarget().damageMana(manaShield.getTarget(), - MANA_SHIELD_REDUCTION[level-1] * MANA_PER_DAMAGE[level-1] * currentDamage, ReductionType.NONE)
             currentDamage = currentDamage * (1.-MANA_SHIELD_REDUCTION[level-1])
     
         // vampiric goblet - ITEM
         if source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_VAMPIRIC_GOBLET)) and target.isType(UNIT_TYPE_HERO)
-            source.addHP(currentDamage * 0.2)
-            source.addMana(currentDamage * 0.15)
+            source.healHP(source, currentDamage * 0.2)
+            source.healMana(source, currentDamage * 0.15)
 
         // wand of blood - ITEM
         if source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_WAND_OF_BLOOD)) and not target.isType(UNIT_TYPE_STRUCTURE)
-            source.addHP(currentDamage * 0.08)
+            source.healHP(source, currentDamage * 0.08)
 
         // sacrifical dagger - ITEM
         if isAttack and source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_SACRIFICIAL_DAGGER)) and not target.isType(UNIT_TYPE_STRUCTURE)
-            source.addHP(currentDamage * 0.12)
+            source.healHP(source, currentDamage * 0.12)
 
         // void armor - ITEM
         if target.isType(UNIT_TYPE_HERO) and target.hasItemById(convertItemId(ITEM_ID_VOID_ARMOR))
-            target.addMana(currentDamage * 0.05)
+            target.healMana(target, currentDamage * 0.05)
             currentDamage *= 0.95
 
         // wand of death - ITEM
@@ -116,6 +117,9 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
 
 
         //===============================================================================
+
+    target.getOwner().getCPlayer().statDamageTaken += min(currentDamage, target.getHP())
+    source.getOwner().getCPlayer().statDamageDealt += min(currentDamage, target.getHP())
 
     BlzSetEventDamage(currentDamage)
 

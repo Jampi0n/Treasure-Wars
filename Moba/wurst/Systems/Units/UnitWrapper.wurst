@@ -290,8 +290,8 @@ function regenerate()
         if hero != null
             let heroUnit = hero.toUnit()
             if heroUnit.isAlive()
-                heroUnit.healHP(heroUnit.wrapper().statsTotalBonus[Stat.HR.toInt()]/100)
-                heroUnit.healMana(heroUnit.wrapper().statsTotalBonus[Stat.MR.toInt()]/100)
+                heroUnit.healHP(heroUnit, heroUnit.wrapper().statsTotalBonus[Stat.HR.toInt()]/100)
+                heroUnit.healMana(heroUnit, heroUnit.wrapper().statsTotalBonus[Stat.MR.toInt()]/100)
 
 
     /*for i = 0 to UnitWrapper.unitWrapperCount-1

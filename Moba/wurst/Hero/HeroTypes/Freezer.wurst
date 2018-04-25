@@ -331,7 +331,7 @@ function onAttack(unit attacker, unit target)
     if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(attacker.getOwner(), false, true)
         let level = attacker.getAbilityLevel(ABILITY_COLD_HAND)
         if level != 0
-            attacker.addMana(COLD_HAND_MP[level-1].toReal())
+            attacker.healMana(attacker, COLD_HAND_MP[level-1].toReal())
 
 function onSpellCast()
     let spellId = GetSpellAbilityId()
@@ -547,6 +547,6 @@ function createHeroType(Hero hero)
     
         
 init
-    heroType = new HeroType(HERO_FREEZER)
+    heroType = new HeroType(HERO_FREEZER, Icons.bTNFrostArmor)
         ..setOnInitFunction(() -> initHeroType())
         ..setOnCreateFunction((Hero hero) -> createHeroType(hero))

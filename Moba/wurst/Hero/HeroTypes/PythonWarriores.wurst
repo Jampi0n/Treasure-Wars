@@ -378,7 +378,7 @@ function initHeroType()
 
 
 init
-    heroType = new HeroType(HERO_PYTHON_WARRIORES)
+    heroType = new HeroType(HERO_PYTHON_WARRIORES, "BTNGreenViper")
         ..setOnInitFunction(() -> initHeroType())
     
 

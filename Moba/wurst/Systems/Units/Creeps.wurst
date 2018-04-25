@@ -63,9 +63,9 @@ function onHydraDeath()
 
     string teamName
     if killer.getOwner().getCPlayer().getTeam() == Team.TEAM1
-        teamName = fromPlayer(Player(TEAM_PLAYER_TEAM_1)).toColorString()+TEAM_NAME_TEAM_1+"|r"
+        teamName = Player(TEAM_PLAYER_TEAM_1).getFullColoredName()
     else if killer.getOwner().getCPlayer().getTeam() == Team.TEAM2
-        teamName = fromPlayer(Player(TEAM_PLAYER_TEAM_2)).toColorString()+TEAM_NAME_TEAM_2+"|r"
+        teamName = Player(TEAM_PLAYER_TEAM_2).getFullColoredName()
     else
         teamName = ""
         killedByTeam = false
@@ -78,6 +78,8 @@ function onHydraDeath()
             let hero = Hero.getHero(killerHero)
             if hero != null
                 hero.toUnit().hydraBonus()
+
+        killer.getOwner().getCPlayer().statHydrasKilled++
 
     doAfter(REVIVE_TIME, () -> (begin
         udg_Hydra[hydra] = createUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), HYDRA, hydraPos[hydra], hydraFacing[hydra])

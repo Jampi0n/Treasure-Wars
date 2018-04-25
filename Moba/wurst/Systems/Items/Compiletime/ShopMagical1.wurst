@@ -109,7 +109,7 @@ function itemSkull(int itemId)
             ..addAction(() -> (begin
                 let killer = GetKillingUnit()
                 if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and killer.hasItemById(convertItemId(ITEM_ID_SKULL))
-                    killer.addMana(8. * killer.countItemsOfType(convertItemId(ITEM_ID_SKULL)))
+                    killer.healMana(killer, 8. * killer.countItemsOfType(convertItemId(ITEM_ID_SKULL)))
                     killer.addEffect(Abilities.spiritTouchTarget, "origin").destr()
             end))
 
@@ -122,7 +122,7 @@ function itemVoodooDoll(int itemId)
     else
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             if target.hasItemById(convertItemId(itemId)) and not attacker.isType(UNIT_TYPE_STRUCTURE)
-                target.addMana(mp.toReal() * target.countItemsOfType(convertItemId(itemId)))
+                target.healMana(target, mp.toReal() * target.countItemsOfType(convertItemId(itemId)))
                 target.addEffect(Abilities.spiritTouchTarget, "origin").destr()
         end))
 
@@ -146,8 +146,8 @@ function itemMagicStaff(int itemId)
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             if attacker.hasItemById(convertItemId(itemId)) and target.getMana() > 0 and not target.isType(UNIT_TYPE_STRUCTURE)
                 let manaDrained = min(mana.toReal() * attacker.countItemsOfType(convertItemId(itemId)) , target.getMana())
-                attacker.addMana(manaDrained)
-                target.addMana(-manaDrained)
+                attacker.healMana(attacker, manaDrained)
+                attacker.damageMana(target, -manaDrained, ReductionType.NONE)
                 target.addEffect(Abilities.arcaneTowerAttack, "chest").destr()
         end))
 
@@ -164,7 +164,7 @@ function itemApprenticeScroll(int itemId)
             ..addAction(() -> (begin
                 let hero = GetTriggerUnit()
                 if hero.hasItemById(convertItemId(ITEM_ID_APPRENTICES_SCROLL))
-                    hero.addMana(hero.getMaxMana()*0.35)
+                    hero.healMana(hero, hero.getMaxMana()*0.35)
                     hero.addEffect(Abilities.aImaTarget, "chest").destr()
         end))
 
