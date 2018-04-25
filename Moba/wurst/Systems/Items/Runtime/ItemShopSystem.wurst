@@ -206,6 +206,7 @@ public class Recipe extends Item
                 GetItemOfTypeFromUnitBJ(hero, itemType[req].itemTypeId).remove()
             hero.addItem(recipe.resultItem.itemTypeId)
         else
+            //do not use addGoldEx, because this is not considered gaining gold
             owner.addGold(recipe.gold)
             printTimedToPlayer("You are missing: "+missingItems, 5, owner)
             printTimedToPlayer("Item price refunded.", 5, owner)

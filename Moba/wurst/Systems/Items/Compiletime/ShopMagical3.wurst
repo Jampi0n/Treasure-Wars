@@ -53,7 +53,7 @@ function itemEmeraldPendant(int itemId)
             ..addAction(() -> (begin
                 let killer = GetKillingUnit()
                 if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and killer.hasItemById(convertItemId(ITEM_ID_SKULL_PENDANT))
-                    killer.addMana(25. * killer.countItemsOfType(convertItemId(ITEM_ID_SKULL_PENDANT)))
+                    killer.healMana(killer, 25. * killer.countItemsOfType(convertItemId(ITEM_ID_SKULL_PENDANT)))
                     killer.addEffect(Abilities.spiritTouchTarget, "origin").destr()
             end))
             

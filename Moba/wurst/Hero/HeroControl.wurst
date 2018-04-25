@@ -234,8 +234,9 @@ public class Hero
                 ), 10)
 
                 if killer.getId() < MAX_HERO_COUNT
-                    killer.addGold(bounty)
-                    killer.getCPlayer().addHeroKill()
+                    killer.getCPlayer()
+                    ..addGoldEx(bounty)
+                    ..addHeroKill()
             else
                 printTimed("{0} was killed by {1} for {3} gold. {2} get{5} {4} gold for helping.".format(
                     this.owner.getPlayer().getFullColoredName(), 
@@ -247,11 +248,12 @@ public class Hero
                 ), 10)
 
                 if killer.getId() < MAX_HERO_COUNT
-                    killer.addGold(bounty)
-                    killer.getCPlayer().addHeroKill()
+                    killer.getCPlayer()
+                    ..addGoldEx(bounty)
+                    ..addHeroKill()
                     
                 for CPlayer p in assistList
-                    p.getPlayer().addGold(assistBounty)
+                    p.addGoldEx(assistBounty)
                     p.addAssist()
             
             //+" |cffffcc00( +"+(bounty/(2*size)).toInt().toString()+")|r"
@@ -326,17 +328,17 @@ public class Hero
         return getHero(owner.getId())
 
 
-    function addGold(real gold)
-        this.sharedGold += gold
-        let intGold = this.sharedGold.toInt()
-        this.owner.getPlayer().addGold(intGold)
-        this.sharedGold -= intGold
-
     function addXp(real xp)
         this.sharedXp += xp
         let intXp = this.sharedXp.toInt()
         this.hero.addXp(intXp, true)
         this.sharedXp -= intXp
+
+    //once the game is over
+    function destroyTimer()
+        TimerDialogDisplay(this.reviveWindow, false)
+        DestroyTimerDialog(this.reviveWindow)
+        this.reviveTimer.release()
 
         
 init

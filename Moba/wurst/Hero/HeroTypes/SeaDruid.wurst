@@ -327,10 +327,10 @@ class RitualOfTheSeas
                         let hpDrained = min( target.getHP(), hpDrain)
 
                         if target.isType(UNIT_TYPE_HERO)
-                            caster.addMana(manaDrained.reduceMagic(target.getWp()) * RITUAL_MANA_RATIO/100 )
-                            caster.addHP( hpDrained.reduceMagic(target.getWp()) * RITUAL_HP_RATIO/100 )
+                            caster.healMana(caster, manaDrained.reduceMagic(target.getWp()) * RITUAL_MANA_RATIO/100 )
+                            caster.healHP(caster, hpDrained.reduceMagic(target.getWp()) * RITUAL_HP_RATIO/100 )
 
-                        target.addMana(-manaDrained.reduceMagic(target.getWp()))
+                        caster.damageMana(target, -manaDrained.reduceMagic(target.getWp()), ReductionType.NONE)
                         caster.dealDamage(target, hpDrained, ReductionType.MAGIC)
 
 
@@ -432,7 +432,7 @@ function initHeroType()
     end))
 
 init
-    heroType = new HeroType(HERO_SEA_DRUID)
+    heroType = new HeroType(HERO_SEA_DRUID, "BTNSeaDruid")
         ..setOnInitFunction(() -> initHeroType())
       
 

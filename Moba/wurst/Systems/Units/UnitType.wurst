@@ -87,7 +87,7 @@ function onUnitDeath()
 
         // killer reward
         if killerExists == 1
-            killingPlayer.addGold(bounty)
+            killingPlayer.getCPlayer().addGoldEx(bounty)
             if killingPlayer.getId() < MAX_HERO_COUNT
                 killingPlayer.getCPlayer().addUnitKill()
             createGoldBountyTextTag(dyingUnit, bounty, killingPlayer)
@@ -114,7 +114,7 @@ function onUnitDeath()
                 let hero = Hero.getHero(p)
                 if hero != null
                     hero.addXp( teamXp)
-                    hero.addGold(teamBounty)
+                    cPlayer.addGoldEx(teamBounty)
         
     
     

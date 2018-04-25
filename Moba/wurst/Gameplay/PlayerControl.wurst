@@ -5,6 +5,7 @@ import ErrorHandling
 import ClosureTimers
 import Constants
 import Assets
+import initlater HeroControl
 /*
 * This package handles players
 *
@@ -12,8 +13,6 @@ import Assets
 */
 
 public int adminPlayer
-
-
 
 public enum Team
     TEAM1
@@ -43,6 +42,8 @@ public class ScoreTable
     static CPlayer array rowToPlayer
     static int array playerToRow
 
+    private static real array width
+
     static constant playerList = new LinkedList<CPlayer>
 
     static function updateHeader(boolean firstTeam)
@@ -54,27 +55,41 @@ public class ScoreTable
         mBoard.getItem(row, 0)
             ..setStyle(true, false)
             ..setValue(teamName)
-            ..setWidth(0.08)
+            ..setWidth(width[0])
             ..release() 
         mBoard.getItem(row, 1)
             ..setStyle(false, true)
             ..setValue("H")
             ..setIcon(Icons.bTNHelmutPurple)
+            ..setWidth(width[1])
             ..release() 
         mBoard.getItem(row, 2)
             ..setStyle(false, true)
             ..setValue("D")
             ..setIcon(Icons.bTNSkeletonWarrior)
+            ..setWidth(width[2])
             ..release() 
         mBoard.getItem(row, 3)
             ..setStyle(false, true)
             ..setValue("A")
             ..setIcon(Icons.bTNStatUp)
+            ..setWidth(width[3])
             ..release() 
         mBoard.getItem(row, 4)
             ..setStyle(false, true)
             ..setValue("U")
             ..setIcon(Icons.bTNFootman)
+            ..setWidth(width[4])
+            ..release() 
+
+    static function addIcon(CPlayer p)
+        let row = playerToRow[p.getId()]
+
+        let hero = Hero.getHero(p)
+        let icon = hero == null ? "ReplaceableTextures\\CommandButtons\\BTNSelectHeroOn.blp" : hero.getHeroType().getIcon()
+
+        mBoard.getItem(row, 0)
+            ..setIcon(icon)
             ..release() 
 
     static function update()
@@ -88,33 +103,41 @@ public class ScoreTable
             let row = 1 + index + (p.getTeam() == Team.TEAM2 ? 1: 0)
             rowToPlayer[row] = p
             playerToRow[p.getId()] = row
+
+            let hero = Hero.getHero(p)
+            let icon = hero == null ? "ReplaceableTextures\\CommandButtons\\BTNSelectHeroOn.blp" : hero.getHeroType().getIcon()
+
             mBoard.getItem(row, 0)
-                ..setStyle(true, false)
+                ..setStyle(true, true)
                 ..setValue(p.getPlayer().getNameColored())
-                ..setWidth(0.08)
+                ..setIcon(icon)
+                ..setWidth(width[0])
                 ..release() 
             mBoard.getItem(row, 1)
                 ..setStyle(true, false)
                 ..setValue(p.getHeroKills().toString()) 
+                ..setWidth(width[1])
                 ..release() 
             mBoard.getItem(row, 2)
                 ..setStyle(true, false)
                 ..setValue(p.getDeaths().toString()) 
+                ..setWidth(width[2])
                 ..release() 
             mBoard.getItem(row, 3)
                 ..setStyle(true, false)
                 ..setValue(p.getAssists().toString()) 
+                ..setWidth(width[3])
                 ..release() 
             mBoard.getItem(row, 4)
                 ..setStyle(true, false)
                 ..setValue(p.getUnitKills().toString())
+                ..setWidth(width[4])
                 ..release() 
             index++
 
     static function updatePlayerHeroKills(CPlayer p)
         let row = playerToRow[p.getId()]
         mBoard.getItem(row, 1)
-            ..setStyle(true, false)
             ..setValue(p.getHeroKills().toString()) 
             ..release() 
 
@@ -125,21 +148,18 @@ public class ScoreTable
     static function updatePlayerDeaths(CPlayer p)
         let row = playerToRow[p.getId()]
         mBoard.getItem(row, 2)
-            ..setStyle(true, false)
             ..setValue(p.getDeaths().toString()) 
             ..release() 
 
     static function updatePlayerAssists(CPlayer p)
         let row = playerToRow[p.getId()]
         mBoard.getItem(row, 3)
-            ..setStyle(true, false)
             ..setValue(p.getAssists().toString()) 
             ..release() 
             
     static function updatePlayerUnitKills(CPlayer p)
         let row = playerToRow[p.getId()]
         mBoard.getItem(row, 4)
-            ..setStyle(true, false)
             ..setValue(p.getUnitKills().toString())
             ..release() 
 
@@ -149,6 +169,19 @@ public class ScoreTable
         mBoard.display(true)
 
     static function create()
+        width[0] = 0.1
+        width[1] = 0.03
+        width[2] = 0.03
+        width[3] = 0.03
+        width[4] = 0.03
+
+        width[5] = 0.09
+        width[6] = 0.09
+        width[7] = 0.06
+        width[8] = 0.07
+        width[9] = 0.09
+        width[10] = 0.09
+
         mBoard = CreateMultiboard()
             ..setColumnCount(5)
             ..setRowCount(2)
@@ -157,7 +190,6 @@ public class ScoreTable
             ..display(true)
             ..minimalize(true)
         doAfter(0.02, () -> mBoard.minimalize(false))
-
         
 
     static function addPlayer(CPlayer p)
@@ -167,6 +199,121 @@ public class ScoreTable
             mBoard.setRowCount(mBoard.getRowCount()+1)
             update()
         end))
+
+    static function extendToStatTable()
+        mBoard.setTitle("Stats - Score: "+
+        playercolors[TEAM_PLAYER_TEAM_1].toColorString()+team1Kills.toString()+"|r / "+
+        playercolors[TEAM_PLAYER_TEAM_2].toColorString()+team2Kills.toString()+"|r"  )
+
+        mBoard
+            ..minimalize(true)
+            ..setColumnCount(11)
+
+        for i = 0 to mBoard.getRowCount()
+            for j = 0 to mBoard.getColumnCount()
+                mBoard.getItem(i, j)
+                    ..setWidth(width[j])
+                    ..release()
+
+        for second = 0 to 1
+             let row = (second == 0 ? 0 : CPlayer.team1HeroCount + 1)
+            string teamName = second == 0 ?
+            playercolors[TEAM_PLAYER_TEAM_1].toColorString() + TEAM_NAME_TEAM_1 + "|r" :
+            playercolors[TEAM_PLAYER_TEAM_2].toColorString() + TEAM_NAME_TEAM_2 + "|r"
+            
+            mBoard.getItem(row, 0)
+                ..setStyle(true, false)
+                ..setValue(teamName)
+                ..release() 
+            mBoard.getItem(row, 1)
+                ..setStyle(false, true)
+                ..setValue("H")
+                ..setIcon(Icons.bTNHelmutPurple)
+                ..release() 
+            mBoard.getItem(row, 2)
+                ..setStyle(false, true)
+                ..setValue("D")
+                ..setIcon(Icons.bTNSkeletonWarrior)
+                ..release() 
+            mBoard.getItem(row, 3)
+                ..setStyle(false, true)
+                ..setValue("A")
+                ..setIcon(Icons.bTNStatUp)
+                ..release() 
+            mBoard.getItem(row, 4)
+                ..setStyle(false, true)
+                ..setValue("U")
+                ..setIcon(Icons.bTNFootman)
+                ..release() 
+
+            mBoard.getItem(row, 5)
+                ..setStyle(true, false)
+                ..setValue("damage dealt")
+                ..release() 
+
+            mBoard.getItem(row, 6)
+                ..setStyle(true, false)
+                ..setValue("damage taken")
+                ..release() 
+
+            mBoard.getItem(row, 7)
+                ..setStyle(true, false)
+                ..setValue("hp healed")
+                ..release() 
+
+            mBoard.getItem(row, 8)
+                ..setStyle(true, false)
+                ..setValue("gold gained")
+                ..release() 
+
+            mBoard.getItem(row, 9)
+                ..setStyle(true, false)
+                ..setValue("buildings razed")
+                ..release() 
+
+            mBoard.getItem(row, 10)
+                ..setStyle(true, false)
+                ..setValue("hydra's killed")
+                ..release() 
+
+        int index = 0
+        for CPlayer p in playerList
+            let row = 1 + index + (p.getTeam() == Team.TEAM2 ? 1: 0)
+            rowToPlayer[row] = p
+            playerToRow[p.getId()] = row
+
+
+            mBoard.getItem(row, 5)
+                ..setStyle(true, false)
+                ..setValue(p.statDamageDealt.round().toString())
+                ..release() 
+
+            mBoard.getItem(row, 6)
+                ..setStyle(true, false)
+                ..setValue(p.statDamageTaken.round().toString())
+                ..release() 
+
+            mBoard.getItem(row, 7)
+                ..setStyle(true, false)
+                ..setValue(p.statHPHealed.round().toString())
+                ..release() 
+
+            mBoard.getItem(row, 8)
+                ..setStyle(true, false)
+                ..setValue(p.statGoldGained.toString())
+                ..release() 
+
+            mBoard.getItem(row, 9)
+                ..setStyle(true, false)
+                ..setValue(p.statBuildingsRazed.toString())
+                ..release() 
+
+            mBoard.getItem(row, 10)
+                ..setStyle(true, false)
+                ..setValue(p.statHydrasKilled.toString())
+                ..release() 
+
+            index++
 
         
 
@@ -187,6 +334,15 @@ public class CPlayer
     private int heroKills = 0
     private int deaths = 0
     private int assists = 0
+
+    private real realGold = 0
+    int statGoldGained = 0
+    real statDamageDealt = 0
+    real statDamageTaken = 0
+    real statHPHealed = 0
+    real statManaHealed = 0
+    int statHydrasKilled = 0
+    int statBuildingsRazed = 0
 
     protected static CPlayer array idToPlayer
     private Team team
@@ -330,6 +486,18 @@ public class CPlayer
                         if(i!=j and getCPlayer(i).getTeam()==getCPlayer(j).getTeam())
                             SetPlayerAllianceStateBJ(players[i],players[j], bj_ALLIANCE_ALLIED_VISION)
                     
+
+    function addGoldEx(real gold)
+        this.realGold += gold
+        let intGold = this.realGold.toInt()
+        this.addGoldEx(intGold)
+        this.realGold -= intGold
+
+    function addGoldEx(int gold)
+        this.getPlayer().addGold(gold)
+        this.statGoldGained += gold
+
+
 
 
 init

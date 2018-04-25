@@ -10,6 +10,8 @@ import Path
 import General
 import BuffTypeConfig
 import UnitWrapper
+import ErrorHandling
+import HeroControl
 
 constant integer ALTAR = 'h002'
 constant integer ARCANE_SANCTUM = 'h008'
@@ -36,12 +38,76 @@ constant real WORKSHOP_REBUILD_TIME = 60
 
 constant int SHOP_SHARING = 'Aall'
 
+
+enum VictoryState
+    UNDECIDED
+    WIN_TEAM1
+    WIN_TEAM2
+
+VictoryState victoryState
+
+
 int birth = 0
 group militiaTeam1 = CreateGroup()
 group militiaTeam2 = CreateGroup()
 boolean removeMilitaTeam1 = true
 boolean removeMilitaTeam2 = true
 
+
+function setVictoryState(VictoryState newState)
+    victoryState = newState
+
+    if newState != VictoryState.UNDECIDED
+        gameOver = true
+
+        //stops heroes from reviving
+        for i = 0 to MAX_HERO_COUNT-1
+            let hero = Hero.getHero(i)
+            if hero != null
+                hero.destroyTimer()
+
+
+        let g = CreateGroup()
+        for i = 0 to bj_MAX_PLAYER_SLOTS-1
+            GroupEnumUnitsOfPlayer(g, players[i], null)
+            unit u
+            while true
+                u = FirstOfGroup(g)
+                if u == null
+                    break
+                g.removeUnit(u)
+                u.pause()
+
+        g.destr()
+                 
+        boolean winTeam1
+        string teamName
+        if newState == VictoryState.WIN_TEAM1
+            teamName = Player(TEAM_PLAYER_TEAM_1).getFullColoredName()
+            winTeam1 = true
+        else
+            teamName = Player(TEAM_PLAYER_TEAM_2).getFullColoredName()
+            winTeam1 = false
+
+
+        printTimed("Team "+teamName+" has destroyed the enemy castle and wins the game!", 60)
+
+        ScoreTable.extendToStatTable()
+
+        if false
+            doAfter(5, -> (begin
+                let winList = CPlayer.getAllyHeroPlayers(winTeam1 ? players[TEAM_PLAYER_TEAM_1] : players[TEAM_PLAYER_TEAM_2] ) 
+                let defeatList = CPlayer.getAllyHeroPlayers(winTeam1 ? players[TEAM_PLAYER_TEAM_2] : players[TEAM_PLAYER_TEAM_1] )
+
+                for CPlayer p in winList
+                    CustomVictoryBJ( p.getPlayer() , false, true )
+
+                for CPlayer p in defeatList
+                    CustomDefeatBJ( p.getPlayer(), "Your team's castle has been destroyed." )
+            end))
+
+
+        
 
 
 function onBuildingDeath()
@@ -134,19 +200,28 @@ function onBuildingDeath()
     else if unitId == CASTLE
         bounty = 1000
         globalBounty = 1000
+
+        if victoryState == VictoryState.UNDECIDED
+            if building.getOwner() == players[TEAM_PLAYER_TEAM_1]
+                setVictoryState(VictoryState.WIN_TEAM2)
+            else if building.getOwner() == players[TEAM_PLAYER_TEAM_2]
+                setVictoryState(VictoryState.WIN_TEAM1)
+            else
+                error("Castle killed for player "+building.getOwner().getId().toString())
         
     if bounty + globalBounty > 0
         let team = building.getOwner().getCPlayer().getTeam()
 
         if killer.getCPlayer().getTeam() == CPlayer.invertTeam(team)
-            killer.addGold(bounty + globalBounty)
+            killer.getCPlayer().addGoldEx(bounty + globalBounty)
+            killer.getCPlayer().statBuildingsRazed++
             createGoldBountyTextTag(building, bounty + globalBounty, killer)
 
         
         for CPlayer cp in CPlayer.getEnemyHeroPlayers(team)
             let p = cp.getPlayer()
             if cp.getTeam() == CPlayer.invertTeam(team) and p!=killer
-                p.addGold(globalBounty)
+                cp.addGoldEx(globalBounty)
                 createGoldBountyTextTag(building, globalBounty, p)
 
 

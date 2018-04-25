@@ -5,6 +5,7 @@ import BuffTypeConfig
 import Missile
 import UnitWrapper
 import initlater HeroControl
+import initlater PlayerControl
 import ClosureTimers
 import Knockback3
 import UnitType
@@ -16,6 +17,8 @@ import DamageDetection
 import HashMap
 import ErrorHandling
 
+
+public boolean gameOver = false
 
 
 
@@ -111,14 +114,30 @@ public function unit.dealDamage(unit target, real amount, ReductionType reductio
         newAmount = amount.reduceMagic(wp)
     else
         newAmount = amount
-    //print(this.getName()+" damages "+target.getName()+" for "+amount.toString()+" damage.")
+
     UnitDamageTarget(this, target, newAmount, false, true, ATTACK_TYPE_NORMAL, damageType, WEAPON_TYPE_WHOKNOWS)
 
-public function unit.healHP(real amount)
-    this.setHP(this.getHP() + amount)
+public function unit.damageMana(unit target, real amount, ReductionType reductionType)
+    real newAmount
+    if reductionType == ReductionType.MAGIC
+        let wp = target.getWp()
+        newAmount = amount.reduceMagic(wp)
+    else if reductionType == ReductionType.PHYSICAL
+        let ar = target.getArmor().round()
+        newAmount = amount.reduceMagic(ar)
+    else
+        newAmount = amount
+    target.addMana(-newAmount)
 
-public function unit.healMana(real amount)
-    this.setMana(this.getMana() + amount)
+public function unit.healHP(unit target, real amount)
+    target.setHP(target.getHP() + amount)
+
+    target.getOwner().getCPlayer().statHPHealed += min(amount, target.getMaxHP()-target.getHP())
+
+public function unit.healMana(unit target, real amount)
+    target.setMana(target.getMana() + amount)
+
+    target.getOwner().getCPlayer().statManaHealed += min(amount, target.getMaxMana()-target.getMana())
 
 public function unit.dispelMagicalBuffs(boolean positive, boolean negative)
     let buffList = this.getBuffList()

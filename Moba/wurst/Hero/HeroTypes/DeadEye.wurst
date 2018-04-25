@@ -347,5 +347,5 @@ function initHeroType()
     
 init
     
-    heroType = new HeroType(HERO_DEADEYE)
+    heroType = new HeroType(HERO_DEADEYE, Icons.bTNSkeletonArcher)
         ..setOnInitFunction(() -> initHeroType())

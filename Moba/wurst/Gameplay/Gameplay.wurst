@@ -1,7 +1,8 @@
 package Gameplay
 
 import WaveSpawn
-
+import PlayerControl
+import Constants
 
 public function allHeroesPicked()
     startSpawning()
@@ -10,6 +11,8 @@ public function allHeroesPicked()
         udg_Gate[i]..kill().setAnimation("death alternate")
 
 
+    for i = 0 to MAX_HERO_COUNT - 1
+        ScoreTable.addIcon(getCPlayer(i))
 
 
 

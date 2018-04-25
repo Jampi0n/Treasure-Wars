@@ -40,13 +40,24 @@ public class HeroType
     static HeroType array heroTypes 
     static int heroTypeCount = 0
 
-    construct(int id)
+    private string icon = "ReplaceableTextures\\CommandButtons\\BTNSelectHeroOn.blp"
+
+    construct(int id, string icon)
         objectCount++
         unitIdToHeroType.put(id, this)
         this.unitId = id
         for i = 0 to STAT_COUNT-1
             statsBase[i]=0
             statsMax[i]=0
+
+        string realIcon = icon
+        if icon.length() < 20 or not icon.startsWith("ReplaceableTextures")
+            realIcon = "ReplaceableTextures\\CommandButtons\\" + realIcon
+        if not icon.endsWith(".blp")
+            realIcon += ".blp"
+
+        this.icon = realIcon
+
 
         heroTypes[heroTypeCount] = this
         heroTypeCount++
@@ -137,4 +148,5 @@ public class HeroType
     function getOnInitFunction() returns OnInitFunction
         return this.onInitFunction
 
-        
+    function getIcon() returns string
+        return this.icon

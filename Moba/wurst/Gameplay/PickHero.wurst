@@ -52,7 +52,7 @@ function setupCreatedHero(Hero hero)
     else
         pos = gg_rct_BrownCastle.getCenter()
 
-       
+    
     
     hero.toUnit().setPos(pos)
     if GetLocalPlayer() == hero.toUnit().getOwner()
