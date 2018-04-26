@@ -39,10 +39,10 @@ function passive()
                 REGENERATION_HIT_POINT_REGEN[lvl-1].str())
             )
 
-constant real array DEVOUR_HEAL = [100, 150, 200, 250, 300]
+constant real array DEVOUR_HEAL = [150, 225, 300, 375, 400]
 constant real DEVOUR_HEAL_BONUS = 200
 
-constant real array DEVOUR_COOLDOWN = [25, 22, 19, 16, 13]
+constant real array DEVOUR_COOLDOWN = [20, 17, 14, 11, 8]
 
 @compiletime
 function rootDummy()
@@ -62,7 +62,7 @@ function rootDummy()
 
 @compiletime
 function devourUnit()
-    int array MANA = [120, 115, 110, 105, 100]
+    int array MANA = [120, 110, 100, 90, 80]
 
     let aDef = new AbilityDefinitionFarseerChainLightning(ABILITY_EAT_UNIT)
         ..setupIcon("BTNStrengthofNature")
@@ -437,9 +437,9 @@ function setupStats()
         ..setStat(Stat.AR, 8, 39)
         ..setStat(Stat.AS, 0, 8)
         ..setStat(Stat.HP, 13, 79)
-        ..setStat(Stat.HR, 13, 34)
-        ..setStat(Stat.MP, 15, 42)
-        ..setStat(Stat.MR, 12, 38)
+        ..setStat(Stat.HR, 18, 44)
+        ..setStat(Stat.MP, 16, 47)
+        ..setStat(Stat.MR, 18, 58)
         ..setStat(Stat.MS, 0, 6)
         ..setStat(Stat.STR, 22, 51)
         ..setStat(Stat.AGI, 7, 36)

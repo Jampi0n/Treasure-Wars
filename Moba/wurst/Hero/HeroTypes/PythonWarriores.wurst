@@ -143,8 +143,8 @@ function poisonSpit()
         aDefArmorReduction
             ..setDefenseBonus(lvl, POISON_SPIT_ARMOR_REDUCTION[lvl-1])
 
-constant real array EMPOWERED_STRIKE_DAMAGE = [75, 150, 225, 300, 375]
-constant real EMPOWERED_STRIKE_DAMAGE_BONUS = 200
+constant real array EMPOWERED_STRIKE_DAMAGE = [80, 140, 200, 260, 320]
+constant real EMPOWERED_STRIKE_DAMAGE_BONUS = 150
 
 @compiletime
 function empoweredStrike()
@@ -177,8 +177,8 @@ function empoweredStrike()
 
 
 constant real array PARALYZING_STRIKE_DAMAGE = [200, 250, 300, 350, 400]
-constant real PARALYZING_STRIKE_DAMAGE_BONUS = 300
-constant real array PARALYZING_STRIKE_DURATION = [1.5, 1.75, 2, 2.25, 2.5]
+constant real PARALYZING_STRIKE_DAMAGE_BONUS = 200
+constant real array PARALYZING_STRIKE_DURATION = [1.6, 1.8, 2, 2.2, 2.4]
 constant real PARALYZING_STRIKE_DURATION_BONUS = 1
 
 @compiletime

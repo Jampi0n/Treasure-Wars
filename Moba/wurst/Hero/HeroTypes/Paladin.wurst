@@ -24,7 +24,7 @@ constant SOUND_DIVINE_PUNISHMENT = new SoundDefinition(Sounds.holyBolt, false, t
 
 //Balancing and Object Editing
 
-constant real array HEAVY_ARMOED_REDUCTION = [4, 6, 8, 10, 12]
+constant real array HEAVY_ARMOED_REDUCTION = [10, 15, 20, 25, 30]
 
 @compiletime
 function heavyArmored()
@@ -44,7 +44,7 @@ function heavyArmored()
             HEAVY_ARMOED_REDUCTION[lvl-1].str())
             )
 
-constant real array SHIELD_BASH_DMG = [75, 125, 175, 225, 275]
+constant real array SHIELD_BASH_DMG = [60, 100, 140, 180, 220]
 constant real SHIELD_BASH_DMG_BONUS = 100
 
 constant real array SHIELD_BASH_DURATION = [1, 1.25, 1.5, 1.75, 2]
