@@ -93,6 +93,7 @@ function setVictoryState(VictoryState newState)
         printTimed("Team "+teamName+" has destroyed the enemy castle and wins the game!", 60)
 
         //ScoreTable.extendToStatTable()
+        stopSpawning()
         StatTable.create()
 
         if false
@@ -232,7 +233,7 @@ function onBuildingAbility()
     if itemTypeId == 'I000' //Rebuild Workshop
         building.removeAbility(SHOP_SHARING)
         building.setTimeScale(60/WORKSHOP_REBUILD_TIME)
-        doAfter(BARRACKS_REBUILD_TIME, () -> (begin
+        doAfter(WORKSHOP_REBUILD_TIME, () -> (begin
             UnitRemoveType(building, UNIT_TYPE_ANCIENT)
             for i = 0 to 1
                 if building == udg_BrownWorkShop[i]
@@ -247,7 +248,7 @@ function onBuildingAbility()
                     let owner = building.getOwner()
                     let pos = building.getPos()
                     building.remove()
-                    udg_BrownWorkShop[i] = createUnit(owner, WORKSHOP, pos, (270).fromDeg())
+                    udg_GreenWorkShop[i] = createUnit(owner, WORKSHOP, pos, (270).fromDeg())
                     break
         end))
     else if itemTypeId == 'I001' //Siege Engine
