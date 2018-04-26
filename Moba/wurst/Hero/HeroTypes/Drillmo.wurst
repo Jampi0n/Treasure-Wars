@@ -181,7 +181,7 @@ function speedBoost()
 
 constant int ROCKET_BUFF_ID = compiletime(createDummyBuff())
 constant real array ROCKET_DMG = [200, 275, 350, 425, 500]
-constant real ROCKET_DMG_BONUS = 250
+constant real ROCKET_DMG_BONUS = 200
 constant real array ROCKET_RANGE = [2000, 3000, 4000, 5000, 6000]
 constant real array ROCKET_COOLDOWN = [40, 35, 30, 25, 20]
 

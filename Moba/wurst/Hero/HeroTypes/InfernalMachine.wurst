@@ -61,7 +61,7 @@ function passive()
                 FIERY_HANDS_DMG[lvl-1].str() + FIERY_HANDS_DMG_BONUS.getBonusString(C_INT)
             ))
 
-public constant int array BASH_DAMAGE_BONUS = [50, 100, 150, 200, 250]
+public constant int array BASH_DAMAGE_BONUS = [60, 100, 140, 180, 220]
 constant real array BASH_STUN_DURATION = [1.5, 1.75, 2, 2.25, 2.5]
 constant real BASH_BUFF_DURATION = 4
 constant int array BASH_MOVEMENT_SPEED = [100, 125, 150, 175, 200]
