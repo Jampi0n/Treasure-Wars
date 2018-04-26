@@ -236,6 +236,7 @@ function startPickMode()
     end))
 
     print("|cffffcc00"+players[adminPlayer].getName()+" has 30 seconds to pick a mode!|r")
+    print("|cffffcc00Available modes are all random (-ar) and all pick (-ap).|r")
 
 init
     doAfter(0, ()-> startPickMode())

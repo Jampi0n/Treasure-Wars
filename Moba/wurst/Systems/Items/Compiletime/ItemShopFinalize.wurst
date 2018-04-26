@@ -147,10 +147,10 @@ function createItemDescritptions()
 
 
             compItemDefinition[i].setDescription(compItemDesc[i-1] + recipeDesc)
-            compItemDefinition[i].setTooltipExtended(compItemGoldCost[i-1].toString() +"|n"+ compItemDesc[i-1] + recipeDesc)
+            compItemDefinition[i].setTooltipExtended("Total price: " + compItemGoldCost[i-1].toString() +"|n"+ compItemDesc[i-1] + recipeDesc)
         else
             compItemDefinition[i].setDescription(compItemDesc[i])
-            compItemDefinition[i].setTooltipExtended(compItemGoldCost[i].toString() +"|n"+ compItemDesc[i])
+            compItemDefinition[i].setTooltipExtended("Price: " + compItemGoldCost[i].toString() +"|n"+ compItemDesc[i])
 
 @compiletime
 public function itemShopFinalize()

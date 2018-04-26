@@ -12,6 +12,7 @@ import PlayerControl
 
 constant real SPAWN_INTERVAL = 50
 boolean spawnStarted = false
+boolean spawnStopped = false
 
 constant topUnits = new LinkedList<int>()
 constant midUnits = new LinkedList<int>()
@@ -67,8 +68,16 @@ public function startSpawning()
         if DEBUG_MODE
             spawnWave()
 
-        doPeriodically(SPAWN_INTERVAL, (CallbackPeriodic _) -> spawnWave())
+        doPeriodically(SPAWN_INTERVAL, (CallbackPeriodic cb) -> (begin
+            if spawnStopped
+                destroy cb
+            else
+                spawnWave()
+        end))
         spawnStarted = true
+
+public function stopSpawning()
+    spawnStopped = true
 
 public function spawnUnit( boolean firstTeam, int unitId, vec2 startPos) returns unit
     let spawnedUnit = createUnit(players[firstTeam ? TEAM_PLAYER_TEAM_1 : TEAM_PLAYER_TEAM_2], unitId, firstTeam ? gg_rct_BrownCastle.getRightTop() : gg_rct_GreenCastle.getLeftBot() , angle(45. + (firstTeam ? 0 : 180) ))
@@ -107,6 +116,10 @@ function setupSpawnUnits()
     botUnitsSize = botUnits.size()
 
 function spawnWave()
+
+    if spawnStopped
+        return
+
     int counter
 
     int i
@@ -141,19 +154,19 @@ function spawnWave()
     counter = 0
     for int unitId in topUnits
         doAfter(counter*0.25, () -> (begin
-            
-            unit spawnedUnit
-            PathUnit pathUnit
-            if barracksAliveTeam1[0]
-                spawnedUnit = spawnUnit(true, unitId, gg_rct_GreenSpawnTop.getCenter())
-                pathUnit = new PathUnit(spawnedUnit)
-                pathUnit.setPathFirst(GREEN_TOP)
-                addLaneUnitCount(Team.TEAM1, Lane.TOP, 1)
-            if barracksAliveTeam2[0]
-                spawnedUnit = spawnUnit(false, unitId, gg_rct_BrownSpawnTop.getCenter())
-                pathUnit = new PathUnit(spawnedUnit)
-                pathUnit.setPathFirst(BROWN_TOP)
-                addLaneUnitCount(Team.TEAM2, Lane.TOP, 1)
+            if not spawnStopped
+                unit spawnedUnit
+                PathUnit pathUnit
+                if barracksAliveTeam1[0]
+                    spawnedUnit = spawnUnit(true, unitId, gg_rct_GreenSpawnTop.getCenter())
+                    pathUnit = new PathUnit(spawnedUnit)
+                    pathUnit.setPathFirst(GREEN_TOP)
+                    addLaneUnitCount(Team.TEAM1, Lane.TOP, 1)
+                if barracksAliveTeam2[0]
+                    spawnedUnit = spawnUnit(false, unitId, gg_rct_BrownSpawnTop.getCenter())
+                    pathUnit = new PathUnit(spawnedUnit)
+                    pathUnit.setPathFirst(BROWN_TOP)
+                    addLaneUnitCount(Team.TEAM2, Lane.TOP, 1)
         end))
         counter++
 
@@ -162,13 +175,14 @@ function spawnWave()
     i = 1
     while greenCountTop < brownCountTop - i
         doAfter(counter*0.25, () -> (begin
-            if barracksAliveTeam1[0]
-                unit spawnedUnit
-                PathUnit pathUnit
-                spawnedUnit = spawnUnit(true, MILITIA, gg_rct_GreenSpawnTop.getCenter())
-                pathUnit = new PathUnit(spawnedUnit)
-                pathUnit.setPathFirst(GREEN_TOP)
-                addLaneUnitCount(Team.TEAM1, Lane.TOP, 1)
+            if not spawnStopped
+                if barracksAliveTeam1[0]
+                    unit spawnedUnit
+                    PathUnit pathUnit
+                    spawnedUnit = spawnUnit(true, MILITIA, gg_rct_GreenSpawnTop.getCenter())
+                    pathUnit = new PathUnit(spawnedUnit)
+                    pathUnit.setPathFirst(GREEN_TOP)
+                    addLaneUnitCount(Team.TEAM1, Lane.TOP, 1)
         end))
         counter++
         i += 2
@@ -177,13 +191,14 @@ function spawnWave()
     i = 1
     while brownCountTop < greenCountTop - i
         doAfter(counter*0.25, () -> (begin
-            if barracksAliveTeam2[0]
-                unit spawnedUnit
-                PathUnit pathUnit
-                spawnedUnit = spawnUnit(false, MILITIA, gg_rct_BrownSpawnTop.getCenter())
-                pathUnit = new PathUnit(spawnedUnit)
-                pathUnit.setPathFirst(BROWN_TOP)
-                addLaneUnitCount(Team.TEAM2, Lane.TOP, 1)
+            if not spawnStopped
+                if barracksAliveTeam2[0]
+                    unit spawnedUnit
+                    PathUnit pathUnit
+                    spawnedUnit = spawnUnit(false, MILITIA, gg_rct_BrownSpawnTop.getCenter())
+                    pathUnit = new PathUnit(spawnedUnit)
+                    pathUnit.setPathFirst(BROWN_TOP)
+                    addLaneUnitCount(Team.TEAM2, Lane.TOP, 1)
         end))
         counter++
         i += 2
@@ -194,18 +209,19 @@ function spawnWave()
     counter = 0
     for int unitId in midUnits
         doAfter(counter*0.25, () -> (begin
-            unit spawnedUnit
-            PathUnit pathUnit
-            if barracksAliveTeam1[1]
-                spawnedUnit = spawnUnit(true, unitId, gg_rct_GreenSpawnMid.getCenter())
-                pathUnit = new PathUnit(spawnedUnit)
-                pathUnit.setPathFirst(GREEN_MID)
-                addLaneUnitCount(Team.TEAM1, Lane.MID, 1)
-            if barracksAliveTeam2[1]
-                spawnedUnit = spawnUnit(false, unitId, gg_rct_BrownSpawnMid.getCenter())
-                pathUnit = new PathUnit(spawnedUnit)
-                pathUnit.setPathFirst(BROWN_MID)
-                addLaneUnitCount(Team.TEAM2, Lane.MID, 1)
+            if not spawnStopped
+                unit spawnedUnit
+                PathUnit pathUnit
+                if barracksAliveTeam1[1]
+                    spawnedUnit = spawnUnit(true, unitId, gg_rct_GreenSpawnMid.getCenter())
+                    pathUnit = new PathUnit(spawnedUnit)
+                    pathUnit.setPathFirst(GREEN_MID)
+                    addLaneUnitCount(Team.TEAM1, Lane.MID, 1)
+                if barracksAliveTeam2[1]
+                    spawnedUnit = spawnUnit(false, unitId, gg_rct_BrownSpawnMid.getCenter())
+                    pathUnit = new PathUnit(spawnedUnit)
+                    pathUnit.setPathFirst(BROWN_MID)
+                    addLaneUnitCount(Team.TEAM2, Lane.MID, 1)
         end))
         counter++
 
@@ -215,13 +231,14 @@ function spawnWave()
     i = 1
     while greenCountMid < brownCountMid - i
         doAfter(counter*0.25, () -> (begin
-            if barracksAliveTeam1[1]
-                unit spawnedUnit
-                PathUnit pathUnit
-                spawnedUnit = spawnUnit(true, MILITIA, gg_rct_GreenSpawnMid.getCenter())
-                pathUnit = new PathUnit(spawnedUnit)
-                pathUnit.setPathFirst(GREEN_MID)
-                addLaneUnitCount(Team.TEAM1, Lane.MID, 1)
+            if not spawnStopped
+                if barracksAliveTeam1[1]
+                    unit spawnedUnit
+                    PathUnit pathUnit
+                    spawnedUnit = spawnUnit(true, MILITIA, gg_rct_GreenSpawnMid.getCenter())
+                    pathUnit = new PathUnit(spawnedUnit)
+                    pathUnit.setPathFirst(GREEN_MID)
+                    addLaneUnitCount(Team.TEAM1, Lane.MID, 1)
         end))
         counter++
         i += 2
@@ -229,13 +246,14 @@ function spawnWave()
     i = 1        
     while brownCountMid < greenCountMid - i
         doAfter(counter*0.25, () -> (begin
-            if barracksAliveTeam2[1]
-                unit spawnedUnit
-                PathUnit pathUnit
-                spawnedUnit = spawnUnit(false, MILITIA, gg_rct_BrownSpawnMid.getCenter())
-                pathUnit = new PathUnit(spawnedUnit)
-                pathUnit.setPathFirst(BROWN_MID)
-                addLaneUnitCount(Team.TEAM2, Lane.MID, 1)
+            if not spawnStopped
+                if barracksAliveTeam2[1]
+                    unit spawnedUnit
+                    PathUnit pathUnit
+                    spawnedUnit = spawnUnit(false, MILITIA, gg_rct_BrownSpawnMid.getCenter())
+                    pathUnit = new PathUnit(spawnedUnit)
+                    pathUnit.setPathFirst(BROWN_MID)
+                    addLaneUnitCount(Team.TEAM2, Lane.MID, 1)
         end))
         counter++
         i += 2
@@ -244,18 +262,19 @@ function spawnWave()
     counter = 0
     for int unitId in botUnits
         doAfter(counter*0.25, () -> (begin
-            unit spawnedUnit
-            PathUnit pathUnit
-            if barracksAliveTeam1[2]
-                spawnedUnit = spawnUnit(true, unitId, gg_rct_GreenSpawnBot.getCenter())
-                pathUnit = new PathUnit(spawnedUnit)
-                pathUnit.setPathFirst(GREEN_BOT)
-                addLaneUnitCount(Team.TEAM1, Lane.BOT, 1)
-            if barracksAliveTeam2[2]
-                spawnedUnit = spawnUnit(false, unitId, gg_rct_BrownSpawnBot.getCenter())
-                pathUnit = new PathUnit(spawnedUnit)
-                pathUnit.setPathFirst(BROWN_BOT)
-                addLaneUnitCount(Team.TEAM2, Lane.BOT, 1)
+            if not spawnStopped
+                unit spawnedUnit
+                PathUnit pathUnit
+                if barracksAliveTeam1[2]
+                    spawnedUnit = spawnUnit(true, unitId, gg_rct_GreenSpawnBot.getCenter())
+                    pathUnit = new PathUnit(spawnedUnit)
+                    pathUnit.setPathFirst(GREEN_BOT)
+                    addLaneUnitCount(Team.TEAM1, Lane.BOT, 1)
+                if barracksAliveTeam2[2]
+                    spawnedUnit = spawnUnit(false, unitId, gg_rct_BrownSpawnBot.getCenter())
+                    pathUnit = new PathUnit(spawnedUnit)
+                    pathUnit.setPathFirst(BROWN_BOT)
+                    addLaneUnitCount(Team.TEAM2, Lane.BOT, 1)
         end))
         counter++
 
@@ -265,13 +284,14 @@ function spawnWave()
     i = 1
     while greenCountBot < brownCountBot - i
         doAfter(counter*0.25, () -> (begin
-            if barracksAliveTeam1[2]
-                unit spawnedUnit
-                PathUnit pathUnit
-                spawnedUnit = spawnUnit(true, MILITIA, gg_rct_GreenSpawnBot.getCenter())
-                pathUnit = new PathUnit(spawnedUnit)
-                pathUnit.setPathFirst(GREEN_BOT)
-                addLaneUnitCount(Team.TEAM1, Lane.BOT, 1)
+            if not spawnStopped
+                if barracksAliveTeam1[2]
+                    unit spawnedUnit
+                    PathUnit pathUnit
+                    spawnedUnit = spawnUnit(true, MILITIA, gg_rct_GreenSpawnBot.getCenter())
+                    pathUnit = new PathUnit(spawnedUnit)
+                    pathUnit.setPathFirst(GREEN_BOT)
+                    addLaneUnitCount(Team.TEAM1, Lane.BOT, 1)
         end))
         counter++
         i += 2
@@ -279,42 +299,44 @@ function spawnWave()
     i = 1
     while brownCountBot < greenCountBot - i
         doAfter(counter*0.25, () -> (begin
-            if barracksAliveTeam2[2]
-                unit spawnedUnit
-                PathUnit pathUnit
-                spawnedUnit = spawnUnit(false, MILITIA, gg_rct_BrownSpawnBot.getCenter())
-                pathUnit = new PathUnit(spawnedUnit)
-                pathUnit.setPathFirst(BROWN_BOT)
-                addLaneUnitCount(Team.TEAM2, Lane.BOT, 1)
+            if not spawnStopped
+                if barracksAliveTeam2[2]
+                    unit spawnedUnit
+                    PathUnit pathUnit
+                    spawnedUnit = spawnUnit(false, MILITIA, gg_rct_BrownSpawnBot.getCenter())
+                    pathUnit = new PathUnit(spawnedUnit)
+                    pathUnit.setPathFirst(BROWN_BOT)
+                    addLaneUnitCount(Team.TEAM2, Lane.BOT, 1)
         end))
         counter++
         i += 2
 
 
     doAfter(6, () -> (begin
-        unit spawnedUnit
-        PathUnit pathUnit
-        if workshopAliveTeam1[0]
-            spawnedUnit = spawnUnit(true, MORTAR_TEAM, gg_rct_GreenWorkShopTop.getCenter())
-            pathUnit = new PathUnit(spawnedUnit)
-            pathUnit.setPathFirst(GREEN_TOP)
-            addLaneUnitCount(Team.TEAM1, Lane.TOP, 1)
-        if workshopAliveTeam1[1]
-            spawnedUnit = spawnUnit(true, MORTAR_TEAM, gg_rct_GreenWorkShopBot.getCenter())
-            pathUnit = new PathUnit(spawnedUnit)
-            pathUnit.setPathFirst(GREEN_BOT)
-            addLaneUnitCount(Team.TEAM1, Lane.BOT, 1)
+        if not spawnStopped
+            unit spawnedUnit
+            PathUnit pathUnit
+            if workshopAliveTeam1[0]
+                spawnedUnit = spawnUnit(true, MORTAR_TEAM, gg_rct_GreenWorkShopTop.getCenter())
+                pathUnit = new PathUnit(spawnedUnit)
+                pathUnit.setPathFirst(GREEN_TOP)
+                addLaneUnitCount(Team.TEAM1, Lane.TOP, 1)
+            if workshopAliveTeam1[1]
+                spawnedUnit = spawnUnit(true, MORTAR_TEAM, gg_rct_GreenWorkShopBot.getCenter())
+                pathUnit = new PathUnit(spawnedUnit)
+                pathUnit.setPathFirst(GREEN_BOT)
+                addLaneUnitCount(Team.TEAM1, Lane.BOT, 1)
 
-        if workshopAliveTeam2[0]
-            spawnedUnit = spawnUnit(false, MORTAR_TEAM, gg_rct_BrownWorkShopTop.getCenter())
-            pathUnit = new PathUnit(spawnedUnit)
-            pathUnit.setPathFirst(BROWN_TOP)
-            addLaneUnitCount(Team.TEAM2, Lane.TOP, 1)
-        if workshopAliveTeam2[1]
-            spawnedUnit = spawnUnit(false, MORTAR_TEAM, gg_rct_BrownWorkShopBot.getCenter())
-            pathUnit = new PathUnit(spawnedUnit)
-            pathUnit.setPathFirst(BROWN_BOT)
-            addLaneUnitCount(Team.TEAM2, Lane.BOT, 1)
+            if workshopAliveTeam2[0]
+                spawnedUnit = spawnUnit(false, MORTAR_TEAM, gg_rct_BrownWorkShopTop.getCenter())
+                pathUnit = new PathUnit(spawnedUnit)
+                pathUnit.setPathFirst(BROWN_TOP)
+                addLaneUnitCount(Team.TEAM2, Lane.TOP, 1)
+            if workshopAliveTeam2[1]
+                spawnedUnit = spawnUnit(false, MORTAR_TEAM, gg_rct_BrownWorkShopBot.getCenter())
+                pathUnit = new PathUnit(spawnedUnit)
+                pathUnit.setPathFirst(BROWN_BOT)
+                addLaneUnitCount(Team.TEAM2, Lane.BOT, 1)
     end))
     
 
