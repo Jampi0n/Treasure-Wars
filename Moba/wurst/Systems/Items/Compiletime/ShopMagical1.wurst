@@ -147,7 +147,7 @@ function itemMagicStaff(int itemId)
             if attacker.hasItemById(convertItemId(itemId)) and target.getMana() > 0 and not target.isType(UNIT_TYPE_STRUCTURE)
                 let manaDrained = min(mana.toReal() * attacker.countItemsOfType(convertItemId(itemId)) , target.getMana())
                 attacker.healMana(attacker, manaDrained)
-                attacker.damageMana(target, -manaDrained, ReductionType.NONE)
+                attacker.damageMana(target, manaDrained, ReductionType.NONE)
                 target.addEffect(Abilities.arcaneTowerAttack, "chest").destr()
         end))
 

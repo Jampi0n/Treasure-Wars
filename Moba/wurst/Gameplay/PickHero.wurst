@@ -259,9 +259,11 @@ init
 
                 if i >= 0 and i<=MAX_HERO_COUNT-1 and Hero.getHero(i) == null
 
-                    createRandomHero(getCPlayer(i))
+                    
 
                     new CPlayer(players[i], i<=4?Team.TEAM1:Team.TEAM2, PlayerType.HERO)
+                    createRandomHero(getCPlayer(i))
+
 
                     if not itemCarry
                         itemCarry = true
@@ -290,6 +292,17 @@ init
                 let hero = Hero.getHero(0)
                 if hero != null
                     hero.toUnit().setXY(gg_rct_CenterMid.getCenter())
+            end))
+
+        CreateTrigger()
+            ..registerPlayerChatEvent(players[0], "castle", true)
+            ..addAction(() -> (begin
+                let hero = Hero.getHero(0)
+                if hero != null
+                    hero.toUnit().setXY(gg_rct_BrownCastle.getCenter())
+                    hero.toUnit().wrapper().addStatAbsoluteBonus(Stat.STR, 10000)
+                    hero.toUnit().wrapper().addStatAbsoluteBonus(Stat.AS, 200)
+                    hero.toUnit().wrapper().addStatAbsoluteBonus(Stat.HP, 10000)
             end))
 
         CreateTrigger()

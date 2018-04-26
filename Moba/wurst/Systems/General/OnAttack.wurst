@@ -4,11 +4,13 @@ import DamageDetection
 import initlater HeroType
 import PlayerControl
 import ClosureTimers
-//import TimerUtils
+import TimerUtils
 import UnitTypeConfig
 import initlater SeaDruid
 import initlater TrollBerserker
 import StandardTextTags
+import HashMap
+import GameTimer
 
 import ItemIdGeneration
 import initlater ItemShopSystem
@@ -87,7 +89,7 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
             let level = manaShield.getLevel()
 
             
-            manaShield.getTarget().damageMana(manaShield.getTarget(), - MANA_SHIELD_REDUCTION[level-1] * MANA_PER_DAMAGE[level-1] * currentDamage, ReductionType.NONE)
+            manaShield.getTarget().damageMana(manaShield.getTarget(), MANA_SHIELD_REDUCTION[level-1] * MANA_PER_DAMAGE[level-1] * currentDamage, ReductionType.NONE)
             currentDamage = currentDamage * (1.-MANA_SHIELD_REDUCTION[level-1])
     
         // vampiric goblet - ITEM
@@ -121,8 +123,85 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
     target.getOwner().getCPlayer().statDamageTaken += min(currentDamage, target.getHP())
     source.getOwner().getCPlayer().statDamageDealt += min(currentDamage, target.getHP())
 
+    if target.isType(UNIT_TYPE_HERO) and source.getOwner().getId() < MAX_HERO_COUNT
+        /*let factor = currentDamage.pow(0.3)*4
+        CreateTextTag()..setText(currentDamage.round().toString(), factor/2+4)
+                             ..setColor(200, 50, 25, 255)
+                             ..setPos(target.getX(), target.getY(), 0)
+                             ..setFadepoint(0)
+                             ..setLifespan(factor/20+0.4)
+                             ..setPermanent(false)
+                             ..setVisibility(true)
+                             ..setVelocity(GetRandomReal(-0.02, 0.02), 0.04)*/
+
+        //DamageTag.addDamage(target, currentDamage)
+
     BlzSetEventDamage(currentDamage)
 
+
+
+class DamageTag
+
+    private real timeout
+    private timer periodicTimer
+    private unit target
+    private texttag tag
+    private real damage
+    
+
+    private static constant unitMap = new HashMap<unit, DamageTag>()
+    private static constant objectList = new LinkedList<DamageTag>()
+
+
+
+    static function addDamage(unit target, real damage)
+        DamageTag damageTag = unitMap.get(target)
+        if damageTag == null
+            new DamageTag(target, damage)
+        else
+            if damageTag.timeout < getElapsedGameTime()
+                destroy damageTag
+                new DamageTag(target, damage)
+            else
+                damageTag.timeout = getElapsedGameTime() + 1
+                damageTag.damage += damage
+                damageTag.tag.setAge(0)
+                damageTag.tag.setText(damageTag.damage.round().toString(), 0.024 / 0.0023)
+
+    static function updateStatic()
+        let t = GetExpiredTimer()
+        (t.getData() castTo DamageTag).update()
+
+    function update()
+        this.tag.setPos(target.getX(), target.getY(), 40)
+        if this.timeout < getElapsedGameTime()
+            destroy this
+
+    construct(unit target, real damage)
+        this.target = target
+        this.damage = damage
+        this.timeout = getElapsedGameTime() + 1
+        this.periodicTimer = getTimer()
+            ..startPeriodic(0.02, function updateStatic)
+            ..setData(this castTo int)
+        this.tag = CreateTextTag()..setText(damage.round().toString(), 0.024 / 0.0023)
+                             ..setColor(200, 50, 25, 255)
+                             ..setPos(target.getX(), target.getY(), 40)
+                             ..setFadepoint(1.)
+                             ..setLifespan(1.5)
+                             ..setPermanent(false)
+                             ..setVisibility(true)
+        
+        
+        unitMap.put(target, this)
+        objectList.add(this)
+
+    ondestroy
+        this.periodicTimer.release()
+        objectList.remove(this)
+        unitMap.remove(this.target)
+    
+    
 
 public interface OnAttackFunction
     function onAttack(unit attacker, unit target, boolean isActive)

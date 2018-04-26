@@ -130,14 +130,17 @@ public function unit.damageMana(unit target, real amount, ReductionType reductio
     target.addMana(-newAmount)
 
 public function unit.healHP(unit target, real amount)
+    let realAmount = min(amount, target.getMaxHP()-target.getHP())
     target.setHP(target.getHP() + amount)
 
-    target.getOwner().getCPlayer().statHPHealed += min(amount, target.getMaxHP()-target.getHP())
+    target.getOwner().getCPlayer().statHealingReceived += realAmount
+    this.getOwner().getCPlayer().statHealingDone += realAmount
 
 public function unit.healMana(unit target, real amount)
+    let realAmount = min(amount, target.getMaxMana()-target.getMana())
     target.setMana(target.getMana() + amount)
 
-    target.getOwner().getCPlayer().statManaHealed += min(amount, target.getMaxMana()-target.getMana())
+    target.getOwner().getCPlayer().statManaHealed += realAmount
 
 public function unit.dispelMagicalBuffs(boolean positive, boolean negative)
     let buffList = this.getBuffList()

@@ -92,7 +92,8 @@ function setVictoryState(VictoryState newState)
 
         printTimed("Team "+teamName+" has destroyed the enemy castle and wins the game!", 60)
 
-        ScoreTable.extendToStatTable()
+        //ScoreTable.extendToStatTable()
+        StatTable.create()
 
         if false
             doAfter(5, -> (begin
@@ -198,8 +199,6 @@ function onBuildingDeath()
         globalBounty = 150
 
     else if unitId == CASTLE
-        bounty = 1000
-        globalBounty = 1000
 
         if victoryState == VictoryState.UNDECIDED
             if building.getOwner() == players[TEAM_PLAYER_TEAM_1]

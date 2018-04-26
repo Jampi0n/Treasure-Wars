@@ -78,6 +78,7 @@ function itemFirehandGauntlets(int itemId)
             ..addStatBonusAbsolute(Stat.MP, mp)
             ..addStatBonusAbsolute(Stat.HP, hp)
             ..addStatBonusAbsolute(Stat.AR, ar)
+            ..addStatBonusAbsolute(Stat.AS, as)
 
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             if attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
@@ -258,7 +259,7 @@ function itemEnchantedBlade(int itemId)
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             if attacker.hasItemById(convertItemId(itemId)) and target.getMana() > 0 and not target.isType(UNIT_TYPE_STRUCTURE)
                 let manaBurned = min(mBurn.toReal() , target.getMana())
-                attacker.damageMana(target, -manaBurned, ReductionType.NONE)
+                attacker.damageMana(target, manaBurned, ReductionType.NONE)
                 attacker.dealDamage(target, manaBurned, ReductionType.MAGIC)
                 target.addEffect(Abilities.spellBreakerAttack, "chest").destr()
         end))

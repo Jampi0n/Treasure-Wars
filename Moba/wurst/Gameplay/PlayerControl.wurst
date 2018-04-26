@@ -32,6 +32,171 @@ public function player.getCPlayer() returns CPlayer
 public function getCPlayer(int id) returns CPlayer
     return CPlayer.idToPlayer[id]
 
+
+public function int.toStatString() returns string
+    if this < 1000
+        return this.toString()
+    return this.toReal().toStatString()
+
+
+function real.getPrecision() returns int
+    if this >= 99.95
+        return 0
+    if this >= 9.995
+        return 1
+    return 2
+
+public function real.toStatString() returns string
+    real amount = this
+    int prec
+    if amount >= 1000000000
+        amount /= 1000000000
+        prec = amount.getPrecision()
+        if prec > 0
+            return amount.toString(amount.getPrecision())+"G"
+        return amount.round().toString()+"G"
+    if amount >= 1000000
+        amount /= 1000000
+        prec = amount.getPrecision()
+        if prec > 0
+            return amount.toString(prec)+"M"
+        return amount.round().toString()+"M"
+        
+    if amount >= 1000
+        amount /= 1000
+        prec = amount.getPrecision()
+        if prec > 0
+            return amount.toString(amount.getPrecision())+"k"
+        return amount.round().toString()+"k"
+
+    prec = amount.getPrecision()
+    if prec > 0
+        return amount.toString(prec)
+    return amount.round().toString()
+
+
+
+
+
+public class StatTable
+
+    static protected multiboard mBoard
+
+    static CPlayer array columnToPlayer
+    static int array playerToColumn
+
+    static int rowCount = 0
+
+    static constant playerList = new LinkedList<CPlayer>
+
+    static function setStatTitle(int row, string title)
+        mBoard.getItem(row, 0)
+            ..setValue(title)
+            ..release()
+
+        rowCount++
+
+    static function setStatTitles()
+        setStatTitle(rowCount, "Players >")
+        setStatTitle(rowCount, "Stats v")
+        setStatTitle(rowCount, "Heroes killed:")
+        setStatTitle(rowCount, "Deaths:")
+        setStatTitle(rowCount, "Assists:")
+        setStatTitle(rowCount, "Units killed:")
+        setStatTitle(rowCount, "Damage dealt:")
+        setStatTitle(rowCount, "Damage taken:")
+        setStatTitle(rowCount, "Healing done:")
+        setStatTitle(rowCount, "Healing received:")
+        setStatTitle(rowCount, "Gold earned:")
+        setStatTitle(rowCount, "Hydra's slain:")
+        setStatTitle(rowCount, "Buildings razed:")
+
+    static function setRowStat(int row, int column, string value)
+        mBoard.getItem(row, column)
+            ..setValue(value)
+            ..release()
+
+        rowCount++
+
+    static function setRowStats(int column)
+        let cPlayer = columnToPlayer[column]
+        let tmp = rowCount
+        rowCount = 2
+        setRowStat(rowCount, column, cPlayer.heroKills.toString())
+        setRowStat(rowCount, column, cPlayer.deaths.toString())
+        setRowStat(rowCount, column, cPlayer.assists.toString())
+        setRowStat(rowCount, column, cPlayer.unitKills.toString())
+        setRowStat(rowCount, column, cPlayer.statDamageDealt.toStatString())
+        setRowStat(rowCount, column, cPlayer.statDamageTaken.toStatString())
+        setRowStat(rowCount, column, cPlayer.statHealingDone.toStatString())
+        setRowStat(rowCount, column, cPlayer.statHealingReceived.toStatString())
+        setRowStat(rowCount, column, cPlayer.statGoldGained.toString())
+        setRowStat(rowCount, column, cPlayer.statHydrasKilled.toString())
+        setRowStat(rowCount, column, cPlayer.statBuildingsRazed.toString())
+
+        rowCount = tmp
+
+    static function create()
+        int count = 2
+        columnToPlayer[1] = getCPlayer(TEAM_PLAYER_TEAM_1)
+        playerToColumn[TEAM_PLAYER_TEAM_1] = 1
+        for i = 0 to MAX_HERO_COUNT-1
+            if Hero.getHero(i) != null
+                columnToPlayer[count] = getCPlayer(i)
+                playerToColumn[i] = count
+                count++
+
+            if i == HERO_PLAYER_TEAM_1_LAST
+                columnToPlayer[count] = getCPlayer(TEAM_PLAYER_TEAM_2)
+                playerToColumn[TEAM_PLAYER_TEAM_2] = count
+                count++
+
+        mBoard = CreateMultiboard()
+            ..setColumnCount(count)
+            ..setRowCount(13)
+            ..setItemsStyle(true, false)
+            ..setTitle("Stats")
+            ..display(true)
+            ..minimalize(true)
+
+        for j = 0 to mBoard.getRowCount() - 1
+            for i = 1 to mBoard.getColumnCount() - 1 
+                mBoard.getItem(j, i)
+                    ..setWidth(0.07)
+                    ..release()
+            mBoard.getItem(j, 0)
+                ..setWidth(0.16)
+                ..release()
+
+        for i = 1 to mBoard.getColumnCount() - 1 
+            let cPlayer = columnToPlayer[i]
+            let color = fromPlayer(cPlayer.getPlayer())
+            string icon
+
+            let hero = Hero.getHero(cPlayer)
+            if hero != null
+                icon = hero.getHeroType().getIcon()
+            else
+                icon = Icons.bTNCastle
+
+            string name = cPlayer.getPlayer().getName().substring(0, 7)
+
+            mBoard.getItem(0, i)
+                ..setValueColor(color.red, color.green, color.blue, 255)
+                ..setStyle(true, true)
+                ..setValue(name)
+                ..setIcon(icon)
+                ..release()
+
+            mBoard.getItem(1, i)
+                ..setValueColor(color.red, color.green, color.blue, 255)
+                ..setValue("xxxxxxxx")
+                ..release()
+
+            setRowStats(i)
+
+        setStatTitles()
+
 public class ScoreTable
 
     static protected multiboard mBoard
@@ -200,121 +365,6 @@ public class ScoreTable
             update()
         end))
 
-    static function extendToStatTable()
-        mBoard.setTitle("Stats - Score: "+
-        playercolors[TEAM_PLAYER_TEAM_1].toColorString()+team1Kills.toString()+"|r / "+
-        playercolors[TEAM_PLAYER_TEAM_2].toColorString()+team2Kills.toString()+"|r"  )
-
-        mBoard
-            ..minimalize(true)
-            ..setColumnCount(11)
-
-        for i = 0 to mBoard.getRowCount()
-            for j = 0 to mBoard.getColumnCount()
-                mBoard.getItem(i, j)
-                    ..setWidth(width[j])
-                    ..release()
-
-        for second = 0 to 1
-             let row = (second == 0 ? 0 : CPlayer.team1HeroCount + 1)
-            string teamName = second == 0 ?
-            playercolors[TEAM_PLAYER_TEAM_1].toColorString() + TEAM_NAME_TEAM_1 + "|r" :
-            playercolors[TEAM_PLAYER_TEAM_2].toColorString() + TEAM_NAME_TEAM_2 + "|r"
-            
-            mBoard.getItem(row, 0)
-                ..setStyle(true, false)
-                ..setValue(teamName)
-                ..release() 
-            mBoard.getItem(row, 1)
-                ..setStyle(false, true)
-                ..setValue("H")
-                ..setIcon(Icons.bTNHelmutPurple)
-                ..release() 
-            mBoard.getItem(row, 2)
-                ..setStyle(false, true)
-                ..setValue("D")
-                ..setIcon(Icons.bTNSkeletonWarrior)
-                ..release() 
-            mBoard.getItem(row, 3)
-                ..setStyle(false, true)
-                ..setValue("A")
-                ..setIcon(Icons.bTNStatUp)
-                ..release() 
-            mBoard.getItem(row, 4)
-                ..setStyle(false, true)
-                ..setValue("U")
-                ..setIcon(Icons.bTNFootman)
-                ..release() 
-
-            mBoard.getItem(row, 5)
-                ..setStyle(true, false)
-                ..setValue("damage dealt")
-                ..release() 
-
-            mBoard.getItem(row, 6)
-                ..setStyle(true, false)
-                ..setValue("damage taken")
-                ..release() 
-
-            mBoard.getItem(row, 7)
-                ..setStyle(true, false)
-                ..setValue("hp healed")
-                ..release() 
-
-            mBoard.getItem(row, 8)
-                ..setStyle(true, false)
-                ..setValue("gold gained")
-                ..release() 
-
-            mBoard.getItem(row, 9)
-                ..setStyle(true, false)
-                ..setValue("buildings razed")
-                ..release() 
-
-            mBoard.getItem(row, 10)
-                ..setStyle(true, false)
-                ..setValue("hydra's killed")
-                ..release() 
-
-        int index = 0
-        for CPlayer p in playerList
-            let row = 1 + index + (p.getTeam() == Team.TEAM2 ? 1: 0)
-            rowToPlayer[row] = p
-            playerToRow[p.getId()] = row
-
-
-            mBoard.getItem(row, 5)
-                ..setStyle(true, false)
-                ..setValue(p.statDamageDealt.round().toString())
-                ..release() 
-
-            mBoard.getItem(row, 6)
-                ..setStyle(true, false)
-                ..setValue(p.statDamageTaken.round().toString())
-                ..release() 
-
-            mBoard.getItem(row, 7)
-                ..setStyle(true, false)
-                ..setValue(p.statHPHealed.round().toString())
-                ..release() 
-
-            mBoard.getItem(row, 8)
-                ..setStyle(true, false)
-                ..setValue(p.statGoldGained.toString())
-                ..release() 
-
-            mBoard.getItem(row, 9)
-                ..setStyle(true, false)
-                ..setValue(p.statBuildingsRazed.toString())
-                ..release() 
-
-            mBoard.getItem(row, 10)
-                ..setStyle(true, false)
-                ..setValue(p.statHydrasKilled.toString())
-                ..release() 
-
-            index++
-
         
 
 
@@ -330,16 +380,17 @@ public class CPlayer
     protected static int team1HeroCount = 0
     protected static int team2HeroCount = 0
 
-    private int unitKills = 0
-    private int heroKills = 0
-    private int deaths = 0
-    private int assists = 0
+    protected int unitKills = 0
+    protected int heroKills = 0
+    protected int deaths = 0
+    protected int assists = 0
 
     private real realGold = 0
     int statGoldGained = 0
     real statDamageDealt = 0
     real statDamageTaken = 0
-    real statHPHealed = 0
+    real statHealingReceived = 0
+    real statHealingDone = 0
     real statManaHealed = 0
     int statHydrasKilled = 0
     int statBuildingsRazed = 0
@@ -370,14 +421,16 @@ public class CPlayer
         this.unitKills++
         ScoreTable.updatePlayerUnitKills(this)
 
-    function addHeroKill()
+    function addHeroKill(boolean byHero)
         this.heroKills++
-        if this.team == Team.TEAM1
-            ScoreTable.team1Kills++
-        else if this.team == Team.TEAM2
-            ScoreTable.team2Kills++
 
-        ScoreTable.updatePlayerHeroKills(this)
+        if byHero
+            if this.team == Team.TEAM1
+                ScoreTable.team1Kills++
+            else if this.team == Team.TEAM2
+                ScoreTable.team2Kills++
+
+            ScoreTable.updatePlayerHeroKills(this)
 
     function addDeath()
         this.deaths++

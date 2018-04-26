@@ -233,10 +233,11 @@ public class Hero
                     "|cffffcc00"+bounty.toString()+"|r"
                 ), 10)
 
-                if killer.getId() < MAX_HERO_COUNT
-                    killer.getCPlayer()
+                killer.getCPlayer()
                     ..addGoldEx(bounty)
-                    ..addHeroKill()
+                    ..addHeroKill(killer.getId() < MAX_HERO_COUNT)
+
+
             else
                 printTimed("{0} was killed by {1} for {3} gold. {2} get{5} {4} gold for helping.".format(
                     this.owner.getPlayer().getFullColoredName(), 
@@ -247,10 +248,9 @@ public class Hero
                     size==1?"s":""
                 ), 10)
 
-                if killer.getId() < MAX_HERO_COUNT
-                    killer.getCPlayer()
+                killer.getCPlayer()
                     ..addGoldEx(bounty)
-                    ..addHeroKill()
+                    ..addHeroKill(killer.getId() < MAX_HERO_COUNT)
                     
                 for CPlayer p in assistList
                     p.addGoldEx(assistBounty)
