@@ -80,29 +80,31 @@ function onUnitDeath()
             The killing team gets bountyAllyFactor/xpAllyFactor of the full gold / xp evenly shared amongst all players except the killer.
         */
 
-        int killerExists = 0
+        boolean killerIsEnemy = killingPlayer.getCPlayer().getTeam() == CPlayer.invertTeam(dyingCPlayer.getTeam())
+        int killerIsHero = 0
         //the killing player belongs to the enemy team
-        if killingPlayer.getCPlayer().getTeam() == CPlayer.invertTeam(dyingCPlayer.getTeam()) and killingPlayer.getId() < 10
-            killerExists = 1
+        if killerIsEnemy and killingPlayer.getId() < MAX_HERO_COUNT
+            killerIsHero = 1
 
         // killer reward
-        if killerExists == 1
-            killingPlayer.getCPlayer().addGoldEx(bounty)
-            if killingPlayer.getId() < MAX_HERO_COUNT
-                killingPlayer.getCPlayer().addUnitKill()
-            createGoldBountyTextTag(dyingUnit, bounty, killingPlayer)
-            //xp
+        if killerIsEnemy
+            killingPlayer.getCPlayer()
+                ..addGoldEx(bounty)
+                ..addUnitKill()
+            if killerIsHero == 1
+                createGoldBountyTextTag(dyingUnit, bounty, killingPlayer)
+                //xp
 
-            let killingHero = Hero.getHero(killingPlayer)
-            if killingHero != null
-                killingHero.toUnit().addXp(xp, true)
+                let killingHero = Hero.getHero(killingPlayer)
+                if killingHero != null
+                    killingHero.toUnit().addXp(xp, true)
 
         // killer team reward
 
         // enemy team of dying unit
         let killingAllies = CPlayer.getEnemyHeroPlayers(dyingUnit.getOwner())
         // size of enemy team without killing player and without the army player
-        let killingAlliesSize = CPlayer.getTeamHeroCount(CPlayer.invertTeam(dyingCPlayer.getTeam()) ) - killerExists
+        let killingAlliesSize = CPlayer.getTeamHeroCount(CPlayer.invertTeam(dyingCPlayer.getTeam()) ) - killerIsHero
         
         let teamBounty = bounty * bountyAllyFactor / killingAlliesSize
         let teamXp = xp * xpAllyFactor / killingAlliesSize
