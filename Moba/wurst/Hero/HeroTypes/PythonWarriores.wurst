@@ -185,7 +185,7 @@ constant real PARALYZING_STRIKE_DURATION_BONUS = 1
 function paralyzingStrike()
     real array RANGE = [500, 600, 700, 800, 900]
     int array MANA = [180, 190, 200, 210, 220]
-    real array COOLDOWN = [60, 60, 60, 60, 60]
+    real array COOLDOWN = [75, 75, 75, 75, 75]
 
     let aDef = new AbilityDefinitionFarseerChainLightning(ABILITY_PARALYZING_STRIKE)
         ..setupIcon("BTNINV_ThrowingKnife_04")

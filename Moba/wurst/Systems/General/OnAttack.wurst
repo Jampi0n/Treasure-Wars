@@ -107,8 +107,8 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
 
         // void armor - ITEM
         if target.isType(UNIT_TYPE_HERO) and target.hasItemById(convertItemId(ITEM_ID_VOID_ARMOR))
-            target.healMana(target, currentDamage * 0.05)
-            currentDamage *= 0.95
+            target.healMana(target, currentDamage * 0.1)
+            currentDamage *= 0.9
 
         // wand of death - ITEM
         if source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_WAND_OF_DEATH)) and target.isType(UNIT_TYPE_HERO)

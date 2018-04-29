@@ -134,7 +134,7 @@ constant real array SOUL_BURN_SILENCE = [2, 2.25, 2.5, 2.75, 3]
 
 constant real SOUL_BURN_AOE = 700
 
-constant BUFF_ID_SOUL_BURN = compiletime(createAuraBuff("Soul Burn", "", "BTNSoulBurn2"))
+constant BUFF_ID_SOUL_BURN = compiletime(createAuraBuff("Soul Burn", "This unit is under the effect of Soulburn; it takes damage over time.", "BTNSoulBurn2"))
 constant ABILITY_ID_SOUL_BURN = compiletime(createNegativeBuffAbility(5, BUFF_ID_SOUL_BURN, Abilities.immolationDamage, "head"))
 
 BuffType buffSoulBurn
@@ -170,7 +170,7 @@ function soulburn()
                 SOUL_BURN_DAMAGE[lvl-1].str()+SOUL_BURN_DAMAGE_BONUS.getBonusString(C_INT), SOUL_BURN_DURATION[lvl-1].toString(), SOUL_BURN_SILENCE[lvl-1].toString()
             ))
 
-constant BUFF_ID_RAY_OF_DEATH = compiletime(createBasicBuff("Ray of Death", "", "BTNNetherBolt", "", ""))
+constant BUFF_ID_RAY_OF_DEATH = compiletime(createBasicBuff("Ray of Death", "This unit is under the effect of Ray of Death; it is disabled and takes damage over time.", "BTNNetherBolt", "", ""))
 
 constant real array RAY_OF_DEATH_DURATION = [2, 2.25, 2.5, 2.75, 3]
 constant real array RAY_OF_DEATH_DAMAGE = [60, 80, 100, 120, 140]
@@ -184,7 +184,7 @@ constant real RAY_OF_DEATH_AFTER_AOE = 250
 @compiletime
 function rayOfDeath()
     int array MANA = [300, 325, 350, 375, 400]
-    real array COOLDOWN = [90, 85, 80, 75, 70]
+    real array COOLDOWN = [120, 120, 120, 120, 120]
     real array RANGE = [600, 600, 600, 600, 600]
 
     let aDef = new AbilityDefinitionAerialShackles(ABILITY_RAY_OF_DEATH)

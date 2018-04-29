@@ -192,7 +192,7 @@ constant int RITUAL_MANA_RATIO = 25
 @compiletime
 function ritualOfTheSeas()
     int array MANA = [250, 300, 350, 400, 450]
-    real array COOLDOWN = [90, 90, 90, 90, 90]
+    real array COOLDOWN = [120, 120, 120, 120, 120]
 
 
     let aDef = new AbilityDefinitionKeeperoftheGroveTranquility(ABILITY_RITUAL_OF_THE_SEAS)
