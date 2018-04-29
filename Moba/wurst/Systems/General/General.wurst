@@ -130,15 +130,23 @@ public function unit.damageMana(unit target, real amount, ReductionType reductio
     target.addMana(-newAmount)
 
 public function unit.healHP(unit target, real amount)
-    let realAmount = min(amount, target.getMaxHP()-target.getHP())
-    target.setHP(target.getHP() + amount)
+    real realAmount = amount
+    if this.hasItemById(convertItemId(ITEM_ID_BRACER_OF_POWER))
+        realAmount *= 1.15
+
+    realAmount = min(realAmount, target.getMaxHP()-target.getHP())
+    target.setHP(target.getHP() + realAmount)
 
     target.getOwner().getCPlayer().statHealingReceived += realAmount
     this.getOwner().getCPlayer().statHealingDone += realAmount
 
 public function unit.healMana(unit target, real amount)
-    let realAmount = min(amount, target.getMaxMana()-target.getMana())
-    target.setMana(target.getMana() + amount)
+    real realAmount = amount
+    if this.hasItemById(convertItemId(ITEM_ID_BRACER_OF_POWER))
+        realAmount *= 1.15
+
+    realAmount = min(realAmount, target.getMaxMana()-target.getMana())
+    target.setMana(target.getMana() + realAmount)
 
     target.getOwner().getCPlayer().statManaHealed += realAmount
 

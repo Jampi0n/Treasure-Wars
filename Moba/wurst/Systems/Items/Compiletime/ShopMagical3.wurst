@@ -93,25 +93,47 @@ function itemRingOfDarkness(int itemId)
             end))
             
 
+group blessedHeroes = CreateGroup()
+
+function blessedRegeneration()
+    unit blessedHero = GetEnumUnit()
+    let missingMana = blessedHero.getMaxMana() - blessedHero.getMana()
+    blessedHero.healMana(blessedHero, missingMana * 0.01 * 0.25)
+
 function itemBlessedGoblet(int itemId)
-    int hr = 50
-    int mr = 25
-    int hp = 225
-    int wp = 25
+    int mp = 300
+    int hp = 150
+    int mr = 1 //trigger ^
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} hit points|n+ {1} willpower|n+ {2} hit point regeneration per 10 seconds|n+ {3} mana point regeneration per 10 seconds".format(
-                hp.toString(), wp.toString(), hr.toString(), mr.toString()
+            ..setDescription("+ {0} hit points|n+ {1} mana points|nRegenerates {2}% of your missing mana per second.".format(
+                hp.toString(), mp.toString(), mr.toString()
             ))
             ..setGoldCost(4000)
             ..addRequirement(ITEM_ID_RING_OF_REGEN)
-            ..addRequirement(ITEM_ID_ANCIENT_STONE_TABLET)
+            ..addRequirement(ITEM_ID_GEM_OF_HEALTH)
+            ..addRequirement(ITEM_ID_GEM_OF_MANA)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.HR, hr)
-            ..addStatBonusAbsolute(Stat.MR, mr)
+            ..addStatBonusAbsolute(Stat.MP, mp)
             ..addStatBonusAbsolute(Stat.HP, hp)
-            ..addStatBonusAbsolute(Stat.AGI, wp)
+
+        itemId.getItem()
+            ..addPickupFunction(() -> (begin
+                if isUnique()
+                    blessedHeroes.addUnit(getTriggerHero())
+            end))
+            ..addDropFunction(() -> (begin
+                if isUnique()
+                    blessedHeroes.removeUnit(getTriggerHero())
+            end))
+
+        CreateTrigger()
+            ..registerTimerEvent(0.25, true)
+            ..addAction(() -> (begin
+            ForGroup(blessedHeroes, function blessedRegeneration)
+        end) )
+    
             
 
 function itemWandOfDeath(int itemId)
@@ -262,19 +284,20 @@ function itemScrollOfConjuration(int itemId)
             end))
 
 function itemBracerOfPower(int itemId)
-    int hp = 225
-    int mp = 150
-    int hr = 70
-    int mr = 25
+    int hp = 200
+    int mp = 200
+    int hr = 30
+    int mr = 30
+    int bonus = 15 //trigger -> General
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} hit points|n+ {1} mana points|n+ {2} hit point regeneration per 10 seconds|n+ {3} mana point regeneration per 10 seconds".format(
-                hp.toString(), mp.toString(), hr.toString(), mr.toString()
+            ..setDescription("+ {0} hit points|n+ {1} mana points|n+ {2} hit point regeneration per 10 seconds|n+ {3} mana point regeneration per 10 seconds|nIncreases all incoming effects that restore hit points or mana points by {4}%.".format(
+                hp.toString(), mp.toString(), hr.toString(), mr.toString(), bonus.toString()
             ))
             ..setGoldCost(3700)
             ..addRequirement(ITEM_ID_RING_OF_REGEN)
             ..addRequirement(ITEM_ID_GEM_OF_HEALTH)
-            ..addRequirement(ITEM_ID_GEM_OF_MANA)
+            ..addRequirement(ITEM_ID_RING_OF_HEALTH)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.HP, hp)

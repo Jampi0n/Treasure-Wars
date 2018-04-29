@@ -43,7 +43,7 @@ function itemVisionWard(int itemId)
 
         itemId.getTypeDef()
             ..setDescription("+ {0} mana points|n+ {1} hit points|n+ {2} intelligence|nActive:|nSummons an invulnerable and immovable ward that provides vision in an area.".format(
-                mp.toString(), hp.toString()
+                mp.toString(), hp.toString(), intel.toString()
             ))
             ..setGoldCost(3200)
             ..addRequirement(ITEM_ID_MAGIC_STAFF)
@@ -118,19 +118,19 @@ function itemEvilBook(int itemId)
             ..addStatBonusAbsolute(Stat.INT, intel)
             
 function itemFrostRing(int itemId)
-    int hr = 60
+    int mp = 200
     int mr = 20
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} hit point regeneration per 10 seconds|n+ {1} mana point regeneration per 10 seconds".format(
-                hr.toString(), mr.toString()
+            ..setDescription("+ {0} mana points|n+ {1} mana point regeneration per 10 seconds".format(
+                mp.toString(), mr.toString()
             ))
             ..setGoldCost(1900)
+            ..addRequirement(ITEM_ID_GEM_OF_MANA)
             ..addRequirement(ITEM_ID_MANA_RING)
-            ..addRequirement(ITEM_ID_RING_OF_HEALTH)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.HR, hr)
+            ..addStatBonusAbsolute(Stat.MP, mp)
             ..addStatBonusAbsolute(Stat.MR, mr)
 
 function itemScepterOfTheTides(int itemId)
