@@ -302,11 +302,35 @@ function onBuildingAbility()
             SetPlayerTechMaxAllowed(building.getOwner(), itemTypeId, 0)
         SetPlayerTechResearched(building.getOwner(), 'R000', current + 1)
 
+        let g = CreateGroup()
+        GroupEnumUnitsOfPlayer(g, building.getOwner(), null)
+        unit u
+        while(true)
+            u = FirstOfGroup(g)
+            if u == null
+                break
+            g.removeUnit(u)
+            if not u.isType(UNIT_TYPE_STRUCTURE)
+                u.wrapper().updateBaseStatsUnits()
+        g.destr()
+
     else if itemTypeId == 'I003' //Ranged Attack
         let current = GetPlayerTechCount(building.getOwner(), 'R001', true)
         if current == 4
             SetPlayerTechMaxAllowed(building.getOwner(), itemTypeId, 0)
         SetPlayerTechResearched(building.getOwner(), 'R001', current + 1)
+
+        let g = CreateGroup()
+        GroupEnumUnitsOfPlayer(g, building.getOwner(), null)
+        unit u
+        while(true)
+            u = FirstOfGroup(g)
+            if u == null
+                break
+            g.removeUnit(u)
+            if not u.isType(UNIT_TYPE_STRUCTURE)
+                u.wrapper().updateBaseStatsUnits()
+        g.destr()
 
     else if itemTypeId == 'I004' //Heavy Armor
         let current = GetPlayerTechCount(building.getOwner(), 'R002', true)
@@ -314,11 +338,35 @@ function onBuildingAbility()
             SetPlayerTechMaxAllowed(building.getOwner(), itemTypeId, 0)
         SetPlayerTechResearched(building.getOwner(), 'R002', current + 1)
 
+        let g = CreateGroup()
+        GroupEnumUnitsOfPlayer(g, building.getOwner(), null)
+        unit u
+        while(true)
+            u = FirstOfGroup(g)
+            if u == null
+                break
+            g.removeUnit(u)
+            if not u.isType(UNIT_TYPE_STRUCTURE)
+                u.wrapper().updateBaseStatsUnits()
+        g.destr()
+
     else if itemTypeId == 'I005' //Light Armor
         let current = GetPlayerTechCount(building.getOwner(), 'R003', true)
         if current == 4
             SetPlayerTechMaxAllowed(building.getOwner(), itemTypeId, 0)
         SetPlayerTechResearched(building.getOwner(), 'R003', current + 1)
+
+        let g = CreateGroup()
+        GroupEnumUnitsOfPlayer(g, building.getOwner(), null)
+        unit u
+        while(true)
+            u = FirstOfGroup(g)
+            if u == null
+                break
+            g.removeUnit(u)
+            if not u.isType(UNIT_TYPE_STRUCTURE)
+                u.wrapper().updateBaseStatsUnits()
+        g.destr()
 
     else if itemTypeId == 'I006' //Call to Arms
 
