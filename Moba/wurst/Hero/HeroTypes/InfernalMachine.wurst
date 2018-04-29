@@ -62,7 +62,7 @@ function passive()
             ))
 
 public constant int array BASH_DAMAGE_BONUS = [60, 100, 140, 180, 220]
-constant real array BASH_STUN_DURATION = [1.5, 1.75, 2, 2.25, 2.5]
+constant real array BASH_STUN_DURATION = [1.2, 1.4, 1.6, 1.8, 2]
 constant real BASH_BUFF_DURATION = 4
 constant int array BASH_MOVEMENT_SPEED = [100, 125, 150, 175, 200]
 
@@ -116,7 +116,7 @@ constant int INNER_FIRE_DEF_BONUS = 20
 
 constant real INNER_FIRE_DURATION = 10
 
-constant int INNER_FIRE_BUFF_ID = compiletime(createAuraBuff("Inenr Fire", "This unit's strength, armor and willpower are increased", Icons.bTNInnerFire))
+constant int INNER_FIRE_BUFF_ID = compiletime(createAuraBuff("Inenr Fire", "This unit's strength, armor and willpower are increased.", Icons.bTNInnerFire))
 constant int INNER_FIRE_ABILITY_ID = compiletime(createPositiveBuffAbility(5, INNER_FIRE_BUFF_ID, Abilities.innerFireTarget, "overhead"))
 
 constant real INNER_FIRE_AOE = 900
@@ -208,14 +208,14 @@ function flameThrower()
 
 constant int array RAPID_FIRE_ATTACK_SPEED = [80, 120, 160, 200, 240]
 constant real RAPID_FIRE_DURATION = 3
-constant real array RAPID_FIRE_STUN_DURATION = [0.3, 0.35, 0.4, 0.45, 0.5]
+constant real array RAPID_FIRE_STUN_DURATION = [0.2, 0.2, 0.2, 0.2, 0.2]
 
 constant int RAPID_FIRE_BUFF_ID = createBasicBuff("Rapid Fire", "", "", "", "")
 
 @compiletime
 function switchWeapons()
     int array MANA = [150, 165, 180, 195, 210]
-    real array COOLDOWN = [90, 90, 90, 90, 90]
+    real array COOLDOWN = [120, 120, 120, 120, 120]
 
     let aDef = new AbilityDefinitionAlchemistChemicalRage(ABILITY_RAPID_FIRE)
         ..setupIcon(Icons.bTNHumanMissileUpThree)

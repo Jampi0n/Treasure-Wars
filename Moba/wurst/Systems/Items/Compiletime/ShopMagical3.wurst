@@ -204,7 +204,7 @@ function itemVoidArmor(int itemId)
     int ar = 20
     int wp = 20
 
-    int dmgReduction = 5 // -> onAttack
+    int dmgReduction = 10 // -> onAttack
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} mana points|n+ {1} hit points|n+ {2} armor|n+ {3} willpower|nReduces incoming damage by {4}% and converts it into mana for the hero.|nThis effect does not stack.".format(

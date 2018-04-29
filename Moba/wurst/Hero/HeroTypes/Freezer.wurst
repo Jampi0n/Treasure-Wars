@@ -227,7 +227,7 @@ constant int FREEZE_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, FREEZE
 @compiletime
 function freeze()
     int array MANA = [350, 375, 400, 425, 450]
-    real array COOLDOWN = [120, 120, 120, 120, 120]
+    real array COOLDOWN = [150, 150, 150, 150, 150]
 
 
     let aDef = new AbilityDefinitionKeeperoftheGroveTranquility(ABILITY_FREEZE)
