@@ -32,8 +32,8 @@ constant int array HYDRA_WILLPOWER = [100, 120, 140, 160, 180, 200]
 constant int array HYDRA_ATTACK_SPEED = [0, 10, 20, 30, 40, 50]
 
 
-constant int ACID_BREATH_ARMOR = 50
-constant int ACID_BREATH_SLOW = 50
+constant int ACID_BREATH_ARMOR = 20
+constant int ACID_BREATH_SLOW = 40
 constant real ACID_BREATH_DUR = 5
 
 BuffType buffAcidBreath
@@ -142,14 +142,23 @@ init
             ..addStatAbsoluteBonus(Stat.AS, -ACID_BREATH_SLOW)
             ..addStatRelativeBonus(Stat.MS, -ACID_BREATH_SLOW*10)
             ..addStatAbsoluteBonus(Stat.AR, -ACID_BREATH_ARMOR)
-            
+        whichBuff.setData(1)
     end))
 
+    buffAcidBreath.addStackFunction( (Buff whichBuff) -> (begin
+        let stacks = whichBuff.getData() + 1
+        whichBuff.setData(stacks)
+        whichBuff.getTarget().wrapper()
+            ..addStatAbsoluteBonus(Stat.AR, -ACID_BREATH_ARMOR)
+    end))
+
+
     buffAcidBreath.addEndFunction( (Buff whichBuff) -> (begin
+        let stacks = whichBuff.getData()
         whichBuff.getTarget().wrapper()
             ..addStatAbsoluteBonus(Stat.AS, ACID_BREATH_SLOW)
             ..addStatRelativeBonus(Stat.MS, ACID_BREATH_SLOW*10)
-            ..addStatAbsoluteBonus(Stat.AR, ACID_BREATH_ARMOR)
+            ..addStatAbsoluteBonus(Stat.AR, ACID_BREATH_ARMOR * stacks)
     end))
 
     OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
