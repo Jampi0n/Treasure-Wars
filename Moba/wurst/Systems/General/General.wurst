@@ -59,19 +59,19 @@ public function unit.getStr() returns int
     if this.isType(UNIT_TYPE_HERO)
         return GetHeroStr(this, true)
     else
-        return this.wrapper().getStatTotalBonus(Stat.STR)
+        return this.wrapper().getStatTotalBonus(Stat.STR) + this.wrapper().getStatBaseValue(Stat.STR)
 
 public function unit.getWp() returns int
     if this.isType(UNIT_TYPE_HERO)
         return GetHeroAgi(this, true)
     else
-        return this.wrapper().getStatTotalBonus(Stat.AGI)
+        return this.wrapper().getStatTotalBonus(Stat.AGI) + this.wrapper().getStatBaseValue(Stat.AGI)
 
 public function unit.getInt() returns int
     if this.isType(UNIT_TYPE_HERO)
         return GetHeroInt(this, true)
     else
-        return this.wrapper().getStatTotalBonus(Stat.INT)
+        return this.wrapper().getStatTotalBonus(Stat.INT) + this.wrapper().getStatBaseValue(Stat.INT)
 
 public function real.factor(int statValue, real atHundred) returns real
     return this * (atHundred*statValue/100 + 1)

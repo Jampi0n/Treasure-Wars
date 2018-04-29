@@ -94,8 +94,7 @@ public class UnitWrapper
         let uType = UnitType.getUnitType(this.assocUnit.getTypeId())
 
         if uType != null
-            statBaseValue[Stat.AD.toInt()] = uType.getBaseAttack()
-            statBaseValue[Stat.AR.toInt()] = uType.getBaseArmor()
+            updateBaseStatsUnits()
         else if this.assocUnit.isType(UNIT_TYPE_HERO)
             statBaseValue[Stat.AD.toInt()] = 17 + statBaseValue[Stat.STR.toInt()]
             statBaseValue[Stat.AR.toInt()] = 0
@@ -124,7 +123,15 @@ public class UnitWrapper
             statsRelativeBonus[i] = 0
             statsTotalBonus[i] = 0
 
-    function updateBaseStats()
+    function updateBaseStatsUnits()
+        let uType = UnitType.getUnitType(this.assocUnit.getTypeId())
+        if uType != null
+            statBaseValue[Stat.AD.toInt()] = uType.getBaseAttack() + uType.getUpgradeAttack(this.assocUnit.getOwner())
+            statBaseValue[Stat.AR.toInt()] = uType.getBaseArmor() + uType.getUpgradeArmor(this.assocUnit.getOwner())
+            //willpower is same as armor
+            statBaseValue[Stat.AGI.toInt()] = uType.getBaseArmor() + uType.getUpgradeArmor(this.assocUnit.getOwner())
+
+    function updateBaseStatsHero()
         if not this.assocUnit.isType(UNIT_TYPE_HERO)
             print("Base stats for non-hero units are constant and must not be updated.")
         statBaseValue[Stat.STR.toInt()] = this.assocUnit.getStr(false)

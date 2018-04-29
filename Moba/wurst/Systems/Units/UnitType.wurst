@@ -6,12 +6,16 @@ import initlater HeroControl
 import PlayerControl
 import Constants
 
+public function createUnitType(int unitId, int bounty, int baseAttack, int upgradeAttack, int attackUpgradeId, int baseArmor, int upgradeArmor, int armorUpgradeId, int hitBox, string modelPath) returns int
+    new UnitType(unitId, bounty, baseAttack, upgradeAttack, attackUpgradeId, baseArmor, upgradeArmor, armorUpgradeId, hitBox, modelPath)
+    return unitId
+
 public function createUnitType(int unitId, int bounty, int baseAttack, int baseArmor, int hitBox, string modelPath) returns int
-    new UnitType(unitId, bounty, baseAttack, baseArmor, hitBox, modelPath)
+    new UnitType(unitId, bounty, baseAttack, 0, 0, baseArmor, 0, 0, hitBox, modelPath)
     return unitId
 
 public function createUnitType(int unitId) returns int
-    new UnitType(unitId, 0, 0, 0, 32, "")
+    new UnitType(unitId, 0, 0, 0, 0, 0, 0, 0, 32, "")
     return unitId
 
 public class UnitType
@@ -24,15 +28,25 @@ public class UnitType
     private int baseAttack
     private int baseArmor
 
+    private int upgradeAttack
+    private int upgradeArmor
+
+    private int attackUpgradeId
+    private int armorUpgradeId
+
     private int hitBox
 
     private string modelPath
 
-    construct(int unitId, int bounty, int baseAttack, int baseArmor, int hitBox, string modelPath)
+    construct(int unitId, int bounty, int baseAttack, int upgradeAttack, int attackUpgradeId, int baseArmor, int upgradeArmor, int armorUpgradeId, int hitBox, string modelPath)
         objectCount++
         this.unitId = unitId
         this.bounty = bounty
         this.baseAttack = baseAttack
+        this.upgradeAttack = upgradeAttack
+        this.attackUpgradeId = attackUpgradeId
+        this.upgradeArmor = upgradeArmor
+        this.armorUpgradeId = armorUpgradeId
         this.baseArmor = baseArmor
         this.hitBox = hitBox
         this.modelPath = modelPath
@@ -52,6 +66,18 @@ public class UnitType
 
     function getBaseArmor() returns int
         return this.baseArmor
+
+    function getUpgradeAttack(player owner) returns int
+        if this.upgradeAttack != 0
+            return this.upgradeAttack * GetPlayerTechCount(owner, this.attackUpgradeId, true)
+        else
+            return 0
+
+    function getUpgradeArmor(player owner) returns int
+        if this.upgradeArmor != 0
+            return this.upgradeArmor * GetPlayerTechCount(owner, this.armorUpgradeId, true)
+        else
+            return 0
 
     function getHitBox() returns int
         return this.hitBox

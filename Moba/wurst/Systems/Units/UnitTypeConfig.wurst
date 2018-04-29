@@ -6,6 +6,11 @@ import initlater OnAttack
 import ClosureTimers
 import General
 
+constant ATTACK_MELEE = 'R000'
+constant ATTACK_RANGED = 'R001'
+constant ARMOR_HEAVY = 'R002'
+constant ARMOR_LIGHT = 'R003'
+
 /*
     EAT UNIT: every unit that can be eaten needs a version modelName+NoDeath.mdx that has invisible death animation
 */
@@ -13,16 +18,16 @@ import General
 
 public constant PATRON = createUnitType('n006')
 
-public constant FOOTMAN = createUnitType('h00C', 15, 20, 35, 32, Units.footman1)
-public constant RIFLEMAN = createUnitType('h00B', 20, 30, 20, 48, Units.rifleman1)
-public constant KNIGHT = createUnitType('h00D', 50, 60, 50, 64, Units.knight1)
-public constant MORTAR_TEAM = createUnitType('h00E', 35, 80, 25, 48, Units.mortarTeam1)
-public constant MILITIA = createUnitType('h00F', 10, 25, 25, 32, Units.militia)
-public constant MILITIA_DEFEND = createUnitType('h01B', 10, 25, 25, 16, Units.militia)
+public constant FOOTMAN = createUnitType('h00C', 15, 20, 2, ATTACK_MELEE, 35, 10, ARMOR_HEAVY, 32, Units.footman1)
+public constant RIFLEMAN = createUnitType('h00B', 20, 30, 3, ATTACK_RANGED, 20, 10, ARMOR_LIGHT, 48, Units.rifleman1)
+public constant KNIGHT = createUnitType('h00D', 50, 60, 5, ATTACK_MELEE, 50, 10, ARMOR_HEAVY, 64, Units.knight1)
+public constant MORTAR_TEAM = createUnitType('h00E', 35, 80, 6, ATTACK_RANGED, 25, 10, ARMOR_LIGHT, 48, Units.mortarTeam1)
+public constant MILITIA = createUnitType('h00F', 10, 25, 3, ATTACK_MELEE, 25, 10, ARMOR_HEAVY, 32, Units.militia)
+public constant MILITIA_DEFEND = createUnitType('h01B', 10, 25, 3, ATTACK_MELEE, 25, 10, ARMOR_HEAVY, 16, Units.militia)
 public constant PEASANT_DEFEND = createUnitType('h01C', 10, 0, 10, 16, Units.militia)
 
 
-public constant TANK = createUnitType('h019', 250, 100, 90, 48, Units.warWagon)
+public constant TANK = createUnitType('h019', 250, 150, 15, ATTACK_RANGED, 90, 10, ARMOR_HEAVY, 48, Units.warWagon)
 
 public constant HYDRA = createUnitType('n00I', 0, 300, 100, 160, Units.hydra)
 
