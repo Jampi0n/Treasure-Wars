@@ -189,6 +189,7 @@ public class Recipe extends Item
         let owner = hero.getOwner()
         var missingItems = ""
         var hasAll = true
+        var missingGold = 0
         if recipe != null
             for int req in recipe.requiredItems
                 if not UnitHasItemOfTypeBJ(hero, itemType[req].itemTypeId)
@@ -196,20 +197,33 @@ public class Recipe extends Item
                     if(missingItems!="")
                         missingItems += ", "
                     missingItems += GetObjectName(itemType[req].itemTypeId)
+                    missingGold += itemGoldCost[req]
                   
 
         hero.removeItem(whichItem)
         whichItem.remove()
-        if hasAll or DEBUG_MODE
+        if hasAll
             
             for int req in recipe.requiredItems
                 GetItemOfTypeFromUnitBJ(hero, itemType[req].itemTypeId).remove()
             hero.addItem(recipe.resultItem.itemTypeId)
         else
             //do not use addGoldEx, because this is not considered gaining gold
-            owner.addGold(recipe.gold)
-            printTimedToPlayer("You are missing: "+missingItems, 5, owner)
-            printTimedToPlayer("Item price refunded.", 5, owner)
+
+            if owner.getGold() >= missingGold
+                //quick buy
+                for int req in recipe.requiredItems
+                    let itemInInventory = GetItemOfTypeFromUnitBJ(hero, itemType[req].itemTypeId)
+                    if itemInInventory != null
+                        itemInInventory.remove()
+                hero.addItem(recipe.resultItem.itemTypeId)
+                owner.addGold(-missingGold)
+                printTimedToPlayer("You have enough gold, so the item was bought directly.", 5, owner)
+            else
+                //remove
+                owner.addGold(recipe.gold)
+                printTimedToPlayer("You are missing: "+missingItems, 5, owner)
+                printTimedToPlayer("Item price refunded.", 5, owner)
 
     
     protected static function onItemGetTrigger()
