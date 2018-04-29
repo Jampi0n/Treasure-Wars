@@ -221,20 +221,20 @@ group auraHeroes = CreateGroup()
 function checkAura()
     unit auraHero = GetEnumUnit()
 
+    if auraHero.isAlive()
+        group nearby = CreateGroup()
+        nearby.enumUnitsInRange(auraHero.getPos(), 900)
 
-    group nearby = CreateGroup()
-    nearby.enumUnitsInRange(auraHero.getPos(), 900)
+        while(not nearby.isEmpty())
+            unit target = FirstOfGroup(nearby)
+            nearby.removeUnit(target)
+            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(auraHero.getOwner(), true, false)
+                if auraHero.hasItemById(convertItemId(ITEM_ID_WAR_DRUM))
+                    target.addBuff( auraHero, 0.5, BUFF_WAR_DRUM, 1)
+                if auraHero.hasItemById(convertItemId(ITEM_ID_WAR_HORN))
+                    target.addBuff( auraHero, 0.5, BUFF_WAR_HORN, 1)
 
-    while(not nearby.isEmpty())
-        unit target = FirstOfGroup(nearby)
-        nearby.removeUnit(target)
-        if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(auraHero.getOwner(), true, false)
-            if auraHero.hasItemById(convertItemId(ITEM_ID_WAR_DRUM))
-                target.addBuff( auraHero, 0.5, BUFF_WAR_DRUM, 1)
-            if auraHero.hasItemById(convertItemId(ITEM_ID_WAR_HORN))
-                target.addBuff( auraHero, 0.5, BUFF_WAR_HORN, 1)
-
-    nearby.destr()
+        nearby.destr()
 
 function itemWarDrum(int itemId)
     int asBonus = 20
