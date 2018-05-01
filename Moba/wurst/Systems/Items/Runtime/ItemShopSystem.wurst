@@ -206,7 +206,7 @@ public class Recipe extends Item
             
             for int req in recipe.requiredItems
                 GetItemOfTypeFromUnitBJ(hero, itemType[req].itemTypeId).remove()
-            hero.addItem(recipe.resultItem.itemTypeId)
+            hero.addItemById(recipe.resultItem.itemTypeId)
         else
             //do not use addGoldEx, because this is not considered gaining gold
 
@@ -216,7 +216,7 @@ public class Recipe extends Item
                     let itemInInventory = GetItemOfTypeFromUnitBJ(hero, itemType[req].itemTypeId)
                     if itemInInventory != null
                         itemInInventory.remove()
-                hero.addItem(recipe.resultItem.itemTypeId)
+                hero.addItemById(recipe.resultItem.itemTypeId)
                 owner.addGold(-missingGold)
                 printTimedToPlayer("You have enough gold, so the item was bought directly.", 5, owner)
             else

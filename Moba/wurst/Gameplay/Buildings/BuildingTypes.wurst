@@ -96,6 +96,8 @@ function setVictoryState(VictoryState newState)
         stopSpawning()
         StatTable.create()
 
+        printTimed("You can now view player stats on the Stats-Multiboard.", 60)
+
         if false
             doAfter(5, -> (begin
                 let winList = CPlayer.getAllyHeroPlayers(winTeam1 ? players[TEAM_PLAYER_TEAM_1] : players[TEAM_PLAYER_TEAM_2] ) 

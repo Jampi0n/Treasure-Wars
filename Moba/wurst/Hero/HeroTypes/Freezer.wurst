@@ -494,9 +494,12 @@ function initHeroType()
         let caster = whichBuff.getCaster()
         let level = whichBuff.getLevel()
         let fx = Freeze.effectMap.get(whichBuff.getData())
-        fx.setXY(target.getPos())
-        target.addBuff(whichBuff.getCaster(), 0.1, STUNNED, 1)
-        caster.dealDamage(target, 0.05 * FREEZE_DMG[level-1].bonus(caster.getInt(), FREEZE_DMG_BONUS), ReductionType.MAGIC)
+        if target.isTargetable(caster.getOwner(), false, true)
+            fx.setXY(target.getPos())
+            target.addBuff(whichBuff.getCaster(), 0.1, STUNNED, 1)
+            caster.dealDamage(target, 0.05 * FREEZE_DMG[level-1].bonus(caster.getInt(), FREEZE_DMG_BONUS), ReductionType.MAGIC)
+        else
+            whichBuff.dispel()
     end))
 
     buffFreeze.addEndFunction( (Buff whichBuff) -> (begin

@@ -155,7 +155,9 @@ public class StatTable
             ..setColumnCount(count)
             ..setRowCount(13)
             ..setItemsStyle(true, false)
-            ..setTitle("Stats")
+            ..setTitle("Stats: "+
+                playercolors[TEAM_PLAYER_TEAM_1].toColorString()+ScoreTable.team1Kills.toString()+"|r / "+
+                playercolors[TEAM_PLAYER_TEAM_2].toColorString()+ScoreTable.team2Kills.toString()+"|r"  )
             ..display(true)
             ..minimalize(true)
 
