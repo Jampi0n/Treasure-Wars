@@ -298,7 +298,7 @@ function initHeroType()
         ..addPeriodicFunction((Buff whichBuff) ->(begin
             let target = whichBuff.getTarget()
             let caster = whichBuff.getCaster()
-            if not caster.getCurrentOrder() == OrderId("magicleash")
+            if not caster.getCurrentOrder() == OrderId("magicleash") or not target.isTargetable(caster.getOwner(), false, true)
                 whichBuff.dispel()
             else
                 caster.dealDamage(target, 0.1 * RAY_OF_DEATH_DAMAGE[caster.getAbilityLevel(ABILITY_RAY_OF_DEATH)-1].bonus(caster.getInt(), RAY_OF_DEATH_DAMAGE_BONUS), ReductionType.MAGIC)
@@ -314,7 +314,8 @@ function initHeroType()
         ..addPeriodicFunction((Buff whichBuff) ->(begin
             let target = whichBuff.getTarget()
             let caster = whichBuff.getCaster()
-            caster.dealDamage(target, 0.5 * SOUL_BURN_DAMAGE[caster.getAbilityLevel(ABILITY_SOUL_BURN)-1].bonus(caster.getInt(), SOUL_BURN_DAMAGE_BONUS), ReductionType.MAGIC)
+            if target.isTargetable(caster.getOwner(), false, true)
+                caster.dealDamage(target, 0.5 * SOUL_BURN_DAMAGE[caster.getAbilityLevel(ABILITY_SOUL_BURN)-1].bonus(caster.getInt(), SOUL_BURN_DAMAGE_BONUS), ReductionType.MAGIC)
         end))
 
     CreateTrigger()

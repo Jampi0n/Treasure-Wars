@@ -210,7 +210,7 @@ constant int array RAPID_FIRE_ATTACK_SPEED = [80, 120, 160, 200, 240]
 constant real RAPID_FIRE_DURATION = 3
 constant real array RAPID_FIRE_STUN_DURATION = [0.2, 0.2, 0.2, 0.2, 0.2]
 
-constant int RAPID_FIRE_BUFF_ID = createBasicBuff("Rapid Fire", "", "", "", "")
+constant int RAPID_FIRE_BUFF_ID = compiletime(createDummyBuff("Rapid Fire"))
 
 @compiletime
 function switchWeapons()
@@ -488,7 +488,9 @@ function initHeroType()
     buffFlameThrower.setPeriodicTime(0.25)
     buffFlameThrower.addPeriodicFunction((Buff whichBuff) -> (begin
         let caster = whichBuff.getCaster()
-        caster.dealDamage(whichBuff.getTarget(), 0.25 * FLAME_THROWER_DOT[whichBuff.getLevel()-1].bonus(caster.getInt(), FLAME_THROWER_DOT_BONUS), ReductionType.MAGIC)
+        let target = whichBuff.getTarget()
+        if target.isTargetable(caster.getOwner(), false, true)
+            caster.dealDamage(target, 0.25 * FLAME_THROWER_DOT[whichBuff.getLevel()-1].bonus(caster.getInt(), FLAME_THROWER_DOT_BONUS), ReductionType.MAGIC)
     end))
 
     ArtilleryDetection.registerArtilleryHit(FLAME_THROWER_IMPACT, (unit impact) ->(begin

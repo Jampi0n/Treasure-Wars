@@ -136,14 +136,14 @@ function giantFish()
 constant int MANA_SHIELD_BUFF_ID = compiletime(createBasicBuff("Mana Shield", "Uses mana to reduce incoming damage.", Icons.bTNNeutralManaShield, Abilities.manaShieldCaster, "origin"))
 
 public constant real array MANA_SHIELD_REDUCTION = [0.2, 0.3, 0.4, 0.5, 0.6]
-public constant real array MANA_PER_DAMAGE = [0.5, 0.45, 0.4, 0.35, 0.3]
+public constant real array MANA_PER_DAMAGE = [0.7, 0.7, 0.7, 0.7, 0.7]
 
 public BuffType buffManaShield // the actual effect is in OnAttack
 
 @compiletime
 function manaShield()
     int array MANA = [50, 50, 50, 50, 50]
-    real array MANA_PER_SECOND = [7, 8.5, 10, 11.5, 13]
+    real array MANA_PER_SECOND = [8, 11, 14, 17, 20]
     real array COOLDOWN = [5, 5, 5, 5, 5]
 
 
@@ -259,7 +259,7 @@ function onSpellCast()
             nearby.removeUnit(target)
             if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
                 caster.dealDamage(target, hitDmg, ReductionType.PHYSICAL)
-                if target.isMovable()
+                if target.isMovable() and not target.isType(UNIT_TYPE_FLYING)
                     Knockback3.add(target, caster.getPos().polarOffset(caster.getPos().angleTo(target.getPos()), 500), 500)
 
                 new Missile(caster, caster.getPos().withZ(80), 900, caster.getPos().angleTo(target.getPos()), Abilities.crushingWaveMissile)

@@ -106,7 +106,7 @@ public function unit.addBuffReduced(unit caster, real duration, BuffType buffTyp
     return new Buff(this, caster, realDuration, buffType, level)
 
 
-public function unit.dealDamage(unit target, real amount, ReductionType reductionType)
+public function unit.dealDamageAlways(unit target, real amount, ReductionType reductionType)
     let damageType = reductionType == ReductionType.PHYSICAL ? DAMAGE_TYPE_NORMAL : DAMAGE_TYPE_UNIVERSAL
     real newAmount
     if reductionType == ReductionType.MAGIC
@@ -116,6 +116,11 @@ public function unit.dealDamage(unit target, real amount, ReductionType reductio
         newAmount = amount
 
     UnitDamageTarget(this, target, newAmount, false, true, ATTACK_TYPE_NORMAL, damageType, WEAPON_TYPE_WHOKNOWS)
+
+public function unit.dealDamage(unit target, real amount, ReductionType reductionType)
+    if target.isTargetable(this.getOwner(), false, true)
+        this.dealDamageAlways(target, amount, reductionType)
+
 
 public function unit.damageMana(unit target, real amount, ReductionType reductionType)
     real newAmount

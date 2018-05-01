@@ -78,6 +78,7 @@ function onHydraDeath()
             let hero = Hero.getHero(killerHero)
             if hero != null
                 hero.toUnit().hydraBonus()
+                hero.addXp(250)
 
         killer.getOwner().getCPlayer().statHydrasKilled++
 
