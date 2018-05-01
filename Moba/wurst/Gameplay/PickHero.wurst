@@ -110,12 +110,12 @@ function allPick()
 
     tavern[0] = createUnit(players[PLAYER_NEUTRAL_PASSIVE], 'n002', gg_rct_Tavern0.getCenter(), angle(0) )
     tavern[0].setColor(PLAYER_COLOR_RED)
-    tavern[1] = createUnit(players[PLAYER_NEUTRAL_PASSIVE], 'n003', gg_rct_Tavern1.getCenter(), angle(0) )
+    /*tavern[1] = createUnit(players[PLAYER_NEUTRAL_PASSIVE], 'n003', gg_rct_Tavern1.getCenter(), angle(0) )
     tavern[1].setColor(PLAYER_COLOR_BLUE)
     tavern[2] = createUnit(players[PLAYER_NEUTRAL_PASSIVE], 'n004', gg_rct_Tavern2.getCenter(), angle(0) )
     tavern[2].setColor(PLAYER_COLOR_YELLOW)
     tavern[3] = createUnit(players[PLAYER_NEUTRAL_PASSIVE], 'n005', gg_rct_Tavern3.getCenter(), angle(0) )
-    tavern[3].setColor(PLAYER_COLOR_GREEN)
+    tavern[3].setColor(PLAYER_COLOR_GREEN)*/
     for i = 0 to MAX_HERO_COUNT-1
         if(getCPlayer(i).getPlayerType()==PlayerType.HERO)
             patron[i] = createUnit(players[i], 'n006', gg_rct_CenterMid.getCenter(), angle(0))
@@ -157,7 +157,7 @@ function allPickEnd()
     pickTimer.release()
     timerWindow = null
     pickRegion.destr()
-    for i = 0 to 3
+    for i = 0 to 0//3
         tavern[i].remove()
         tavern[i]=null
     for i = 0 to MAX_HERO_COUNT-1
