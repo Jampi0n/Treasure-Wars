@@ -520,7 +520,7 @@ function createHeroType(Hero hero)
     new AttackOrderTrack(hero.toUnit())
 
 init
-    heroType = new HeroType(HERO_INFERNAL_MACHINE, Icons.bTNInfernalCannon)
+    heroType = new HeroType(HERO_INFERNAL_MACHINE, Icons.bTNInfernalCannon, 8)
         ..setOnInitFunction(() -> initHeroType())
         ..setOnCreateFunction((Hero hero) -> createHeroType(hero))
 

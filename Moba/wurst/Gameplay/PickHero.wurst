@@ -277,6 +277,51 @@ init
                     SetPlayerAlliance(players[0], players[i], ALLIANCE_SHARED_CONTROL, true)
                     SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_ADVANCED_CONTROL, true)
             end))
+
+
+        CreateTrigger()
+        ..registerPlayerChatEvent(players[0], "ai ", false)
+        ..addAction(() -> (begin
+            let i = GetEventPlayerChatString().substring(3).toInt()
+
+
+
+            if i >= 0 and i<=MAX_HERO_COUNT-1 and Hero.getHero(i) == null
+
+                
+
+                if i!= 0
+                    new CPlayer(players[i], i<=4?Team.TEAM1:Team.TEAM2, PlayerType.HERO)
+
+                Hero hero = new Hero(createUnit(players[i], 'H00X', gg_rct_CenterMid.getCenter(), angle(0)))
+                setupCreatedHero(hero)
+
+                removeHeroType(hero.getHeroType())
+
+                new HeroAI(getCPlayer(i))
+
+                SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_VISION, true)
+                SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_CONTROL, true)
+                SetPlayerAlliance(players[0], players[i], ALLIANCE_SHARED_CONTROL, true)
+                SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_ADVANCED_CONTROL, true)
+
+        end))
+
+        CreateTrigger()
+        ..registerPlayerChatEvent(players[0], "pause ", false)
+        ..addAction(() -> (begin
+            let i = GetEventPlayerChatString().substring(6).toInt()
+
+
+
+            if i >= 0 and i<=MAX_HERO_COUNT-1 and HeroAI.heroAIs[i]!=null
+                HeroAI.heroAIs[i].togglePause()
+                
+
+
+
+        end))
+
         // teleport heroes mid
         CreateTrigger()
             ..registerPlayerChatEvent(players[0], "mid ", false)

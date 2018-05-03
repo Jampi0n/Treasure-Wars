@@ -1,5 +1,7 @@
 package Paladin
 
+//2
+
 import HeroType
 import DummyRecycler
 import TimerUtils
@@ -360,6 +362,6 @@ function initHeroType()
 
 
 init
-    heroType = new HeroType(HERO_PALADIN, Icons.bTNHeroPaladin)
+    heroType = new HeroType(HERO_PALADIN, Icons.bTNHeroPaladin, 2)
         ..setOnInitFunction(() -> initHeroType())
   

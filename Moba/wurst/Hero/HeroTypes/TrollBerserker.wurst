@@ -246,9 +246,10 @@ function onSwitchToRanged(unit caster, int level) // remove bonus
 
 function onAttack(unit attacker, unit _target, boolean _isActive)
     let level = attacker.getAbilityLevel(ABILITY_FOCUS)
-    let wrapper = attacker.wrapper()
-    wrapper.addStatAbsoluteBonus(Stat.STR, FOCUS_BONUS)
-    doAfter(FOCUS_DURATION[level-1], () -> (wrapper.addStatAbsoluteBonus(Stat.STR, -FOCUS_BONUS)))
+    if level > 0
+        let wrapper = attacker.wrapper()
+        wrapper.addStatAbsoluteBonus(Stat.STR, FOCUS_BONUS)
+        doAfter(FOCUS_DURATION[level-1], () -> (wrapper.addStatAbsoluteBonus(Stat.STR, -FOCUS_BONUS)))
     
 
 
@@ -301,6 +302,43 @@ function setupStats()
         ..setStat(Stat.AGI, 7, 26)
         ..setStat(Stat.INT, 4, 11)
 
+function retreatAI(HeroAI ai)
+    ai.issue("blink", ai.getHomeLoc())
+
+function attackAI(HeroAI ai)
+    let ulti = HeroAI.getAbilityId(ai.getHero().getHeroType().getHeroId(), AbilitySlot.R)
+    let hero = ai.getHeroUnit()
+    if hero.getAbilityLevel(ulti) > 0 and hero.getAbilityCooldownRemaining(ulti) <= 0
+        let g = CreateGroup()
+        unit u
+        int count = 0
+        g.enumUnitsInRange(hero.getPos(), GROWTH_FEAR_AOE)
+        while(true)
+            u = FirstOfGroup(g)
+            if u == null
+                break
+            g.removeUnit(u)
+            if u.isTargetable(hero.getOwner(), false, true)
+                if u.isType(UNIT_TYPE_HERO)
+                    count+=5
+                else
+                    count++
+        g.destr()
+        if count >= 10
+            if ai.issue("roar")
+                return
+
+        
+    unit target = ai.getHeroUnit().findTarget(800, AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH)
+    if target == null
+        target = ai.getHeroUnit().findTarget(800, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_HEALTH)
+    if target != null
+
+        hero.issueImmediateOrder("berserk")
+
+        if not ai.getAttacking()
+            ai.attack(target)
+
 function initHeroType()
     setupStats()
 
@@ -308,6 +346,8 @@ function initHeroType()
         ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
         ..addOnSpellCastFunc(function onSpellCast)
         ..addMorph('H018')
+        ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
+        ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
 
     buffCriticalStrike = new BuffType(true, false)
 
@@ -381,7 +421,7 @@ function initHeroType()
         end))
 
 init
-    heroType = new HeroType(HERO_TROLL_BERSERKER, Icons.bTNForestTroll)
+    heroType = new HeroType(HERO_TROLL_BERSERKER, Icons.bTNForestTroll, 7)
         ..setOnInitFunction(() -> initHeroType())
 
    

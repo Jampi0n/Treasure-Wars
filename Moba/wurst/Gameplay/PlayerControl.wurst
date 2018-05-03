@@ -164,10 +164,10 @@ public class StatTable
         for j = 0 to mBoard.getRowCount() - 1
             for i = 1 to mBoard.getColumnCount() - 1 
                 mBoard.getItem(j, i)
-                    ..setWidth(0.07)
+                    ..setWidth(0.05)
                     ..release()
             mBoard.getItem(j, 0)
-                ..setWidth(0.16)
+                ..setWidth(0.14)
                 ..release()
 
         for i = 1 to mBoard.getColumnCount() - 1 
@@ -181,7 +181,7 @@ public class StatTable
             else
                 icon = Icons.bTNCastle
 
-            string name = cPlayer.getPlayer().getName().substring(0, 7)
+            string name = cPlayer.getPlayer().getName().substring(0, 5)
 
             mBoard.getItem(0, i)
                 ..setValueColor(color.red, color.green, color.blue, 255)
@@ -192,7 +192,7 @@ public class StatTable
 
             mBoard.getItem(1, i)
                 ..setValueColor(color.red, color.green, color.blue, 255)
-                ..setValue("xxxxxxxx")
+                ..setValue("xxxxxx")
                 ..release()
 
             setRowStats(i)

@@ -11,7 +11,11 @@ import public HeroObjectEditing
 import public Assets
 import public AbilityObjEditing
 import public LinkedList
+import public initlater HeroAI
 import initlater HeroControl
+
+public interface AIBehaviour
+    function run(HeroAI ai)
 
 public interface OnCreateFunction
     function onCreate(Hero hero)
@@ -28,12 +32,16 @@ public class HeroType
 
     private static constant unitIdToHeroType = new HashMap<integer, HeroType>
     private int unitId
+    private int heroId
     private trigger onSpellCastTrigger = CreateTrigger()
     private OnAttackFunctionAdvanced onAttack = null
     private CalculateTotalBonus bonusCalculation = null
 
     private OnCreateFunction onCreateFunction = null
     private OnInitFunction onInitFunction = null
+
+    private AIBehaviour attackAI = null
+    private AIBehaviour retreatAI = null
 
     private boolean useHeroGlow = false
 
@@ -42,10 +50,11 @@ public class HeroType
 
     private string icon = "ReplaceableTextures\\CommandButtons\\BTNSelectHeroOn.blp"
 
-    construct(int id, string icon)
+    construct(int unitId, string icon, int heroId)
         objectCount++
-        unitIdToHeroType.put(id, this)
-        this.unitId = id
+        unitIdToHeroType.put(unitId, this)
+        this.unitId = unitId
+        this.heroId = heroId
         for i = 0 to STAT_COUNT-1
             statsBase[i]=0
             statsMax[i]=0
@@ -150,3 +159,20 @@ public class HeroType
 
     function getIcon() returns string
         return this.icon
+
+    function getHeroId() returns int
+        return this.heroId
+
+    function setRetreatAI(AIBehaviour ai)
+        this.retreatAI = ai
+
+    function setAttackAI(AIBehaviour ai)
+        this.attackAI = ai
+
+    function retreatAI(HeroAI ai)
+        if this.retreatAI != null
+            this.retreatAI.run(ai)
+
+    function attackAI(HeroAI ai)
+        if this.attackAI != null
+            this.attackAI.run(ai)
