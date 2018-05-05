@@ -42,6 +42,7 @@ public class HeroType
 
     private AIBehaviour attackAI = null
     private AIBehaviour retreatAI = null
+    private AIBehaviour teamFightAI = null
 
     private boolean useHeroGlow = false
 
@@ -169,6 +170,9 @@ public class HeroType
     function setAttackAI(AIBehaviour ai)
         this.attackAI = ai
 
+    function setTeamFightAI(AIBehaviour ai)
+        this.teamFightAI = ai
+
     function retreatAI(HeroAI ai)
         if this.retreatAI != null
             this.retreatAI.run(ai)
@@ -176,3 +180,7 @@ public class HeroType
     function attackAI(HeroAI ai)
         if this.attackAI != null
             this.attackAI.run(ai)
+
+    function teamFightAI(HeroAI ai)
+        if this.teamFightAI != null
+            this.teamFightAI.run(ai)

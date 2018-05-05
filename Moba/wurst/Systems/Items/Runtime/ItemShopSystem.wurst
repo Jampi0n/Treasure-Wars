@@ -82,12 +82,29 @@ onPickup: the hero has not boots 2 and picked up his first boots 1 => add unique
 onDrop: the hero has not boots 2 and dropped his last boots 1 => remove unique boots bonus
 
 */
-
+/**
+Returns the object id for an item id.
+**/
 public function convertItemId(int itemId) returns int
     return itemIdArray[itemId]
 
+/**
+Returns the item id for an object id.
+**/
+public function convertItemTypeId(int itemTypeId) returns int
+    return Item.itemMap.get(itemTypeId).getId()
+
+/**
+Returns the item for an item id.
+**/
 public function int.getItem() returns Item
-    return Item.itemMap.get(itemIdArray[this])
+    return Item.itemMap.get(convertItemId(this))
+
+/**
+Returns the item for an object id.
+**/
+public function int.getItemFromObject() returns Item
+    return Item.itemMap.get(this)
 
 public class Item
     protected constant int itemTypeId

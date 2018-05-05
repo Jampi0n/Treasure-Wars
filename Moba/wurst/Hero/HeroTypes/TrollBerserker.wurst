@@ -306,6 +306,17 @@ function retreatAI(HeroAI ai)
     ai.issue("blink", ai.getHomeLoc())
 
 function attackAI(HeroAI ai)
+    let hero = ai.getHeroUnit()
+
+    unit target = ai.getHeroUnit().findTarget(800, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_HEALTH)
+    if target != null
+
+        hero.issueImmediateOrder("berserk")
+
+        if not ai.getAttacking()
+            ai.attack(target)
+
+function teamFightAI(HeroAI ai)
     let ulti = HeroAI.getAbilityId(ai.getHero().getHeroType().getHeroId(), AbilitySlot.R)
     let hero = ai.getHeroUnit()
     if hero.getAbilityLevel(ulti) > 0 and hero.getAbilityCooldownRemaining(ulti) <= 0
@@ -320,18 +331,15 @@ function attackAI(HeroAI ai)
             g.removeUnit(u)
             if u.isTargetable(hero.getOwner(), false, true)
                 if u.isType(UNIT_TYPE_HERO)
-                    count+=5
-                else
                     count++
+
         g.destr()
-        if count >= 10
+        if count != 0
             if ai.issue("roar")
                 return
 
         
-    unit target = ai.getHeroUnit().findTarget(800, AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH)
-    if target == null
-        target = ai.getHeroUnit().findTarget(800, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_HEALTH)
+    unit target = ai.getTeamFightTarget()
     if target != null
 
         hero.issueImmediateOrder("berserk")
@@ -348,6 +356,7 @@ function initHeroType()
         ..addMorph('H018')
         ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
         ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
+        ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
 
     buffCriticalStrike = new BuffType(true, false)
 

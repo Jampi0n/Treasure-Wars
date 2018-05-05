@@ -38,11 +38,7 @@ boolean itemCarry = false
 function setupCreatedHero(Hero hero)
     player owner = hero.toUnit().getOwner()
     CPlayer cPlayer = owner.getCPlayer()
-    if DEBUG_MODE
-        owner.setGold(100000)
-        //SetHeroLevel(hero.toUnit(), 25, true)
-    else
-        owner.setGold(500)
+    owner.setGold(500)
         
     vec2 pos// = gg_rct_CenterMid.getCenter()
     patron[owner.getId()].remove()
@@ -338,6 +334,12 @@ init
                 let hero = Hero.getHero(0)
                 if hero != null
                     hero.toUnit().setXY(gg_rct_CenterMid.getCenter())
+            end))
+
+        CreateTrigger()
+            ..registerPlayerChatEvent(players[0], "g", true)
+            ..addAction(() -> (begin
+                players[0].addGold(100000)
             end))
 
         CreateTrigger()
