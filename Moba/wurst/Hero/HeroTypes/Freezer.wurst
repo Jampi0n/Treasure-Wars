@@ -135,6 +135,7 @@ function frostArmor()
         ..setArtCaster("")
         ..setArtTarget("")
         ..setArtEffect("")
+        ..setupChannel(TargetType.UNIT, "frostarmor")
         ..setupIcon("BTNSpell_Frost_ChillingArmor")
         ..setupWithHotKey("Frost Armor", "W")
         ..setLearnString("Creates a shield of frost around a target friendly unit. The shield adds armor and slows units that attack it. Lasts {0} seconds.".format(ARMOR_DURATION.str()), (int lvl) -> (begin
@@ -150,12 +151,6 @@ function frostArmor()
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setCastRange(lvl, RANGE[lvl-1])
-            ..setArtDuration(lvl, 0)
-            ..setBaseOrderID(lvl, "channel")
-            ..setDisableOtherAbilities(lvl, false)
-            ..setFollowThroughTime(lvl, 0)
-            ..setOptions(lvl, 1)
-            ..setTargetType(lvl, 1)
             ..setTargetsAllowed(lvl, "friend,nonancient,self")
             ..setTooltipNormalExtended(lvl, "Creates a shield of frost around a target friendly unit. The shield adds {0} armor and slows units that attack it by {1}% for {2} seconds. Lasts {3} seconds.".format(
                 ARMOR_AR[lvl-1].toString() + ARMOR_AR_BONUS.getBonusString(C_INT),
@@ -377,11 +372,88 @@ function onSpellCast()
         new Freeze(caster, level)
 
 
+function retreatAI(HeroAI _ai)
+
+function attackAI(HeroAI ai)
+    let hero = ai.getHeroUnit()
+
+    if not frostWyrm[hero.getOwner().getId()].isAlive()
+        ai.issue("roar")
+
+    unit target = hero.findTarget(800, AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
+    if target != null
+        ai.issue("frostnova", target)
+
+    target = hero.findTarget(600, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_HEALTH, null)
+    if target != null
+        if not ai.getAttacking()
+            ai.attack(target)
+
+    if frostWyrm[hero.getOwner().getId()].getCurrentOrder() != OrderId("patrol")
+        frostWyrm[hero.getOwner().getId()].issueTargetOrder("patrol", hero)
+ 
+function teamFightAI(HeroAI ai)
+    let ulti = HeroAI.getAbilityId(ai.getHero().getHeroType().getHeroId(), AbilitySlot.R)
+    let hero = ai.getHeroUnit()
+
+
+    if not frostWyrm[hero.getOwner().getId()].isAlive()
+        ai.issue("roar")
+
+
+    ai.issue("frostnova", ai.getTeamFightTarget())
+
+    if hero.getAbilityLevel(ulti) > 0
+        let g = CreateGroup()
+        unit u
+        int count = 0
+        g.enumUnitsInRange(hero.getPos(), FREEZE_AOE)
+        while(true)
+            u = FirstOfGroup(g)
+            if u == null
+                break
+            g.removeUnit(u)
+            if u.isTargetable(hero.getOwner(), false, true)
+                if u.isType(UNIT_TYPE_HERO)
+                    count++
+
+        g.destr()
+        if count > 1
+            if ai.issue("tranquility")
+                return
+
+        
+    unit target = hero.findTarget(600, AbilityTargetFocus.FRIEND_HERO, AbilityTargetPriority.HIGH_HEALTH, (unit u) -> (begin
+        return not BuffList.hasBuffType(u, buffFrostArmor)
+    end))
+    if target != null
+        ai.issue("frostarmor", target)
+
+    target = ai.getTeamFightTarget()
+    if target != null
+
+
+        if not ai.getAttacking()
+            ai.attack(target)
+
+        if frostWyrm[hero.getOwner().getId()].getCurrentOrder() != OrderId("attack")
+            frostWyrm[hero.getOwner().getId()].issueTargetOrder("attack", target)
+
 function initHeroType()
     setupStats()
     heroType
         ..addOnSpellCastFunc(function onSpellCast)
         ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target))
+        ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
+        ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
+        ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+        ..setSkillBuild("EQWQQQQEWEWEWEW")
+        ..addItem(ITEM_ID_BOOTS_OF_DARKNESS)
+        ..addItem(ITEM_ID_ENCHANTED_ARMOR)
+        ..addItem(ITEM_ID_BLESSED_GOBLET)
+        ..addItem(ITEM_ID_SCROLL_OF_CONJURATION)
+        ..addItem(ITEM_ID_VAMPIRIC_GOBLET)
+        ..addItem(ITEM_ID_RUNIC_ARMOR)
 
     buffFrostNova = new BuffType(false, true)
 

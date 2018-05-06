@@ -308,11 +308,12 @@ function retreatAI(HeroAI ai)
 function attackAI(HeroAI ai)
     let hero = ai.getHeroUnit()
 
-    unit target = ai.getHeroUnit().findTarget(800, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_HEALTH)
+    unit target = hero.findTarget(700, AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
     if target != null
+        ai.issue("attackonce", target)
 
-        hero.issueImmediateOrder("berserk")
-
+    target = hero.findTarget(600, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_HEALTH, null)
+    if target != null
         if not ai.getAttacking()
             ai.attack(target)
 
@@ -357,6 +358,13 @@ function initHeroType()
         ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
         ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
         ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+        ..setSkillBuild("QWQWQWQWQWEEEEE")
+        ..addItem(ITEM_ID_HEAVY_BOOTS)
+        ..addItem(ITEM_ID_BLOOD_SWORD)
+        ..addItem(ITEM_ID_INFERNAL_BOW)
+        ..addItem(ITEM_ID_RUNIC_ARMOR)
+        ..addItem(ITEM_ID_SACRIFICIAL_DAGGER)
+        ..addItem(ITEM_ID_CURSED_SWORD)
 
     buffCriticalStrike = new BuffType(true, false)
 

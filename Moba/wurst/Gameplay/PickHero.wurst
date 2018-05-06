@@ -310,8 +310,8 @@ init
 
 
 
-            if i >= 0 and i<=MAX_HERO_COUNT-1 and HeroAI.heroAIs[i]!=null
-                HeroAI.heroAIs[i].togglePause()
+            if i >= 0 and i<=MAX_HERO_COUNT-1 and getAI(i)!=null
+                getAI(i).togglePause()
                 
 
 

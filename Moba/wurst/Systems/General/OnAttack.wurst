@@ -12,7 +12,6 @@ import StandardTextTags
 import HashMap
 import GameTimer
 
-import ItemIdGeneration
 import initlater ItemShopSystem
 
 public constant ADVANCED_ONHIT =  'A00I'
@@ -123,7 +122,11 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
     target.getOwner().getCPlayer().statDamageTaken += min(currentDamage, target.getHP())
     source.getOwner().getCPlayer().statDamageDealt += min(currentDamage, target.getHP())
 
-    if target.isType(UNIT_TYPE_HERO) and source.getOwner().getId() < MAX_HERO_COUNT
+    let ai = getAI(target.getOwner().getId())
+    if ai != null and target.isType(UNIT_TYPE_HERO)
+        ai.onDamage(currentDamage)
+
+    //if target.isType(UNIT_TYPE_HERO) and source.getOwner().getId() < MAX_HERO_COUNT
         /*let factor = currentDamage.pow(0.3)*4
         CreateTextTag()..setText(currentDamage.round().toString(), factor/2+4)
                              ..setColor(200, 50, 25, 255)
@@ -212,9 +215,6 @@ public interface OnAttackFunctionAdvanced
 
 public class OnAttack
 
-    private static unit target
-    private static unit attacker
-    private static boolean active
     private static trigger onAttackTrigger = CreateTrigger()
     private static constant onAttackFunctionList = new LinkedList<OnAttackFunction>()
     private static constant onAttackFunctionListAdvanced = new LinkedList<OnAttackFunctionAdvanced>()
@@ -248,9 +248,6 @@ public class OnAttack
             localAttacked = true
 
 
-        target = localTarget
-        attacker = localAttacker
-        active = localActive
         handleDamageAmount(localAttacker, localTarget, localAttacked, localActive, advanced)
 
         //use a list with arguments, as a onAttack function could trigger an onAttack event and overwrite the variables

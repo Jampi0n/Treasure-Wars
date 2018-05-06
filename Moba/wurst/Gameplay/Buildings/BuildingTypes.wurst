@@ -13,19 +13,19 @@ import UnitWrapper
 import ErrorHandling
 import HeroControl
 
-constant integer ALTAR = 'h002'
-constant integer ARCANE_SANCTUM = 'h008'
-constant integer ARCANE_VAULT = 'h005'
-constant integer BARRACKS = 'h003'
-constant integer BASE_TOWER = 'h009'
-constant integer BLACKSMITH = 'h004'
-constant integer CASTLE = 'h001'
-constant integer FARM = 'h007'
-constant integer OUTER_TOWER = 'h016'
-constant integer GATE_TOWER = 'h006'
-constant integer HERO_TOWER = 'h000'
-constant integer WORKSHOP = 'h00A'
-constant int WORKSHOP_REBUILD = 'h01A'
+public constant integer ALTAR = 'h002'
+public constant integer ARCANE_SANCTUM = 'h008'
+public constant integer ARCANE_VAULT = 'h005'
+public constant integer BARRACKS = 'h003'
+public constant integer BASE_TOWER = 'h009'
+public constant integer BLACKSMITH = 'h004'
+public constant integer CASTLE = 'h001'
+public constant integer FARM = 'h007'
+public constant integer OUTER_TOWER = 'h016'
+public constant integer GATE_TOWER = 'h006'
+public constant integer HERO_TOWER = 'h000'
+public constant integer WORKSHOP = 'h00A'
+public constant int WORKSHOP_REBUILD = 'h01A'
 
 public boolean array barracksAliveTeam1 = [true, true, true]
 public boolean array barracksAliveTeam2 = [true, true, true]

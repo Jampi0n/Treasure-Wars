@@ -445,6 +445,54 @@ function setupStats()
         ..setStat(Stat.AGI, 7, 36)
         ..setStat(Stat.INT, 12, 31)
 
+function retreatAI(HeroAI _ai)
+
+function attackAI(HeroAI ai)
+    let hero = ai.getHeroUnit()
+
+    unit target = hero.findTarget(600, AbilityTargetFocus.ENEMY, AbilityTargetPriority.HIGH_VALUE, null)
+    if target != null
+        ai.issue("chainlightning", target)
+
+    target = hero.findTarget(500, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_DISTANCE, null)
+    if not ai.getAttacking() and target != null
+        ai.attack(target)
+
+function teamFightAI(HeroAI ai)
+
+    let hero = ai.getHeroUnit()
+
+    if ai.getTeamFightTarget().getPos().distanceTo(hero.getPos()) < 500
+        ai.issue("carrionswarm", ai.getTeamFightTarget().getPos())
+
+    let ulti = HeroAI.getAbilityId(ai.getHero().getHeroType().getHeroId(), AbilitySlot.R)
+    
+    if hero.getAbilityLevel(ulti) > 0 and hero.getAbilityCooldownRemaining(ulti) <= 0
+        let g = CreateGroup()
+        unit u
+        int count = 0
+        g.enumUnitsInRange(hero.getPos(), NATURES_WRATH_AOE)
+        while(true)
+            u = FirstOfGroup(g)
+            if u == null
+                break
+            g.removeUnit(u)
+            if u.isTargetable(hero.getOwner(), false, true)
+                if u.isType(UNIT_TYPE_HERO)
+                    count++
+
+        g.destr()
+        if count != 0
+            if ai.issue("berserk")
+                return
+
+        
+    unit target = ai.getTeamFightTarget()
+    if target != null
+
+        if not ai.getAttacking()
+            ai.attack(target)
+
 function initHeroType()
     setupStats()
 
@@ -453,6 +501,16 @@ function initHeroType()
         ..addOnSpellCastFunc(function onSpellCast)
         ..useHeroGlow()
         ..addMorph('H015')
+        ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
+        ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
+        ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+        ..setSkillBuild("QWQWQWQWQWEEEEE")
+        ..addItem(ITEM_ID_HEAVY_BOOTS)
+        ..addItem(ITEM_ID_RUNIC_ARMOR)
+        ..addItem(ITEM_ID_FIREHAND_GAUNTLETS)
+        ..addItem(ITEM_ID_BLESSED_GOBLET)
+        ..addItem(ITEM_ID_ARCANE_SHIELD)
+        ..addItem(ITEM_ID_WAR_DRUM)
 
     var abilityList = new LinkedList<int>
         ..add(ENTAGLING_ROOTS_ABILITY_ID)

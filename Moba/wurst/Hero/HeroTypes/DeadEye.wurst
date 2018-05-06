@@ -329,9 +329,74 @@ function onSpellCast()
             caster.getOwner().setAbilityAvailable(ABILITY_DEATH_PACT, true)
         end))
 
+
+function retreatAI(HeroAI _ai)
+
+function attackAI(HeroAI ai)
+    let hero = ai.getHeroUnit()
+
+    unit target = hero.findTarget(500, AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
+    if target != null
+        ai.issue("channel", target.getPos())
+
+    target = hero.findTarget(600, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_HEALTH, null)
+    if target != null
+
+        if not ai.getAttacking()
+            ai.attack(target)
+
+function teamFightAI(HeroAI ai)
+    let ulti = HeroAI.getAbilityId(ai.getHero().getHeroType().getHeroId(), AbilitySlot.R)
+    let hero = ai.getHeroUnit()
+
+    if hero.getAbilityLevel(ulti) > 0
+        ai.issue("roar")
+        ai.issue("acidbomb", ai.getTeamFightTarget())
+
+    if ai.getTeamFightTarget().getPos().distanceTo(hero.getPos()) < 600
+        ai.issue("channel", ai.getTeamFightTarget().getPos())
+
+    let g = CreateGroup()
+    unit u
+    int count = 0
+    g.enumUnitsInRange(hero.getPos(), TERROR_AOE[hero.getAbilityLevel(ABILITY_TERROR)])
+    while(true)
+        u = FirstOfGroup(g)
+        if u == null
+            break
+        g.removeUnit(u)
+        if u.isTargetable(hero.getOwner(), false, true)
+            if u.isType(UNIT_TYPE_HERO)
+                count++
+
+    g.destr()
+    if count != 0
+        if ai.issue("howlofterror")
+            return
+
+        
+    unit target = ai.getTeamFightTarget()
+    if target != null
+
+
+        if not ai.getAttacking()
+            ai.attack(target)
+            
+
 function initHeroType()
-    heroType.setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
-    heroType.addOnSpellCastFunc(function onSpellCast)
+    heroType
+        ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
+        ..addOnSpellCastFunc(function onSpellCast)
+        ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
+        ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
+        ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+        ..setSkillBuild("QWQWQWQWQWEEEEE")
+        ..addItem(ITEM_ID_HEAVY_BOOTS)
+        ..addItem(ITEM_ID_BLOOD_SWORD)
+        ..addItem(ITEM_ID_INFERNAL_BOW)
+        ..addItem(ITEM_ID_RUNIC_ARMOR)
+        ..addItem(ITEM_ID_SACRIFICIAL_DAGGER)
+        ..addItem(ITEM_ID_CURSED_SWORD)
 
     onLeave(() -> (begin
         skeletons.removeUnit(getEnterLeaveUnit())
@@ -349,3 +414,4 @@ init
     
     heroType = new HeroType(HERO_DEADEYE, Icons.bTNSkeletonArcher, 1)
         ..setOnInitFunction(() -> initHeroType())
+        
