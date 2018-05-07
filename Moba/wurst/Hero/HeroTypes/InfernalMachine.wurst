@@ -116,7 +116,7 @@ constant int INNER_FIRE_DEF_BONUS = 20
 
 constant real INNER_FIRE_DURATION = 10
 
-constant int INNER_FIRE_BUFF_ID = compiletime(createAuraBuff("Inenr Fire", "This unit's strength, armor and willpower are increased.", Icons.bTNInnerFire))
+constant int INNER_FIRE_BUFF_ID = compiletime(createAuraBuff("Inner Fire", "This unit's strength, armor and willpower are increased.", Icons.bTNInnerFire))
 constant int INNER_FIRE_ABILITY_ID = compiletime(createPositiveBuffAbility(5, INNER_FIRE_BUFF_ID, Abilities.innerFireTarget, "overhead"))
 
 constant real INNER_FIRE_AOE = 900
@@ -386,6 +386,44 @@ function setupStats()
         ..setStat(Stat.AGI, 10, 35)
         ..setStat(Stat.INT, 6, 16)
 
+
+
+
+function retreatAI(HeroAI ai)
+    ai.issue("berserk")
+
+function attackAI(HeroAI ai)
+    let hero = ai.getHeroUnit()
+
+    unit target = hero.findTarget(700, AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
+    if target != null
+        ai.issue("shockwave", target.getPos())
+
+    target = hero.findTarget(500, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_DISTANCE, null)
+    if not ai.getAttacking() and target != null
+        ai.attack(target)
+
+function teamFightAI(HeroAI ai)
+    let hero = ai.getHeroUnit()
+
+    unit target = ai.getTeamFightTarget()
+
+
+
+
+
+    if hero.getTypeId() == HERO_INFERNAL_MACHINE
+        if target.getPos().distanceTo(hero.getPos()) < 600
+            ai.issue("chemicalrage")
+            ai.issue("berserk")
+        ai.issue("roar")
+        ai.issue("shockwave", target.getPos())
+        
+
+    if target != null
+        if not ai.getAttacking()
+            ai.attack(target)
+
 function initHeroType()
     setupStats()
 
@@ -393,6 +431,16 @@ function initHeroType()
         ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive, advanced))
         ..addOnSpellCastFunc(function onSpellCast)
         ..addMorph(HERO_INFERNAL_MACHINE_MORPH)
+        ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
+        ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
+        ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+        ..setSkillBuild("QEWQQWQEQWEWEWE")
+        ..addItem(ITEM_ID_HEAVY_BOOTS)
+        ..addItem(ITEM_ID_RUNIC_ARMOR)
+        ..addItem(ITEM_ID_FIREHAND_GAUNTLETS)
+        ..addItem(ITEM_ID_AXE_OF_DECAY)
+        ..addItem(ITEM_ID_WAR_DRUM)
+        ..addItem(ITEM_ID_ARCANE_SHIELD)
 
 
     CreateTrigger()

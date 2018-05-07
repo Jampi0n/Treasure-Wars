@@ -346,10 +346,61 @@ function onDamage()
         nearby.destr()
 
         
+function retreatAI(HeroAI ai)
+    let hero = ai.getHeroUnit()
+    unit target = hero.findTarget(ROCKET_RANGE[hero.getAbilityLevel(ABILITY_ROCKET)-1], AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
+    if target != null
+        ai.issue("acidbomb", target)
 
+    ai.issue("berserk")
+
+function attackAI(HeroAI ai)
+    let hero = ai.getHeroUnit()
+
+    unit target = hero.findTarget(ROCKET_RANGE[hero.getAbilityLevel(ABILITY_ROCKET)-1], AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
+    if target != null
+        ai.issue("acidbomb", target)
+
+    target = hero.findTarget(500, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_DISTANCE, null)
+    if not ai.getAttacking() and target != null
+        ai.attack(target)
+
+function teamFightAI(HeroAI ai)
+    let ulti = HeroAI.getAbilityId(ai.getHero().getHeroType().getHeroId(), AbilitySlot.R)
+    let hero = ai.getHeroUnit()
+
+    unit target = ai.getTeamFightTarget()
+
+    if hero.getAbilityLevel(ulti) > 0
+        ai.issue("acidbomb", target)
+
+    if target.getPos().distanceTo(hero.getPos()) < 200
+        ai.issue("thunderclap")
+
+    if target.getPos().distanceTo(hero.getPos()) < 600
+        ai.issue("thunderbolt", target.getPos())
+
+
+    
+    if target != null
+
+
+        if not ai.getAttacking()
+            ai.attack(target)
 
 function initHeroType()
-    heroType.addOnSpellCastFunc(function onSpellCast)
+    heroType
+        ..addOnSpellCastFunc(function onSpellCast)
+        ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
+        ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
+        ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+        ..setSkillBuild("WQEWQWWQWQQEEEE")
+        ..addItem(ITEM_ID_HEAVY_BOOTS)
+        ..addItem(ITEM_ID_RUNIC_ARMOR)
+        ..addItem(ITEM_ID_FIREHAND_GAUNTLETS)
+        ..addItem(ITEM_ID_BLOOD_SWORD)
+        ..addItem(ITEM_ID_SPIKED_ARMOR)
+        ..addItem(ITEM_ID_CURSED_SWORD)
     setupStats()
 
     buffSpikeBall = new BuffType(false, false)

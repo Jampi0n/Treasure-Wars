@@ -153,6 +153,7 @@ public class HeroAI
     private string castOrder = ""
     private boolean attacking = false
     private vec2 currentTargetLoc
+    private vec2 currentRetreatLoc
     private vec2 teamFightLoc
     private Lane lane
 
@@ -160,7 +161,7 @@ public class HeroAI
     //keeps track of the damage against the hero over the last 4 seconds
     //if a lot of damage is take outside of a team fight, the hero should retreat
     private int damageIndex = 0
-    private static constant damageMax = 40
+    private static constant damageMax = 20
     private real array[damageMax] damageCount
     private real damageSum = 0
     private real damageCurrent = 0
@@ -219,14 +220,26 @@ public class HeroAI
     function updateTargetLoc()
         if lane == Lane.TOP
             currentTargetLoc = gg_rct_CornerTop.getCenter()
-            if this.heroUnit.getPos().distanceTo(this.targetLoc) < 9000
+            if this.heroUnit.getPos().distanceTo(this.targetLoc) < 9500
                 this.currentTargetLoc = this.targetLoc  
         else if lane == Lane.BOT
             currentTargetLoc = gg_rct_CornerBot.getCenter()
-            if this.heroUnit.getPos().distanceTo(this.targetLoc) < 9000
+            if this.heroUnit.getPos().distanceTo(this.targetLoc) < 9500
                 this.currentTargetLoc = this.targetLoc  
         else
             currentTargetLoc = targetLoc
+
+    function updateRetreatLoc()
+        if lane == Lane.TOP
+            currentRetreatLoc = gg_rct_CornerTop.getCenter()
+            if this.heroUnit.getPos().distanceTo(this.homeLoc) < 9500
+                this.currentRetreatLoc = this.homeLoc  
+        else if lane == Lane.BOT
+            currentRetreatLoc = gg_rct_CornerBot.getCenter()
+            if this.heroUnit.getPos().distanceTo(this.homeLoc) < 9500
+                this.currentRetreatLoc = this.homeLoc  
+        else
+            currentRetreatLoc = this.homeLoc
 
     static function classInit()
 
@@ -463,7 +476,8 @@ public class HeroAI
                 if not casting
                     this.heroType.retreatAI(this)
                 if this.heroUnit.getCurrentOrder() != OrderId("move") and not casting
-                    this.heroUnit.issuePointOrder("move", this.homeLoc)
+                    updateRetreatLoc()
+                    this.heroUnit.issuePointOrder("move", this.currentRetreatLoc)
 
         else if this.state == AIState.HEAL
             if this.heroUnit.getHP() >= this.heroUnit.getMaxHP()*0.9
@@ -601,7 +615,8 @@ public class HeroAI
                     if not casting
                         this.heroType.retreatAI(this)
                     if this.heroUnit.getCurrentOrder() != OrderId("move") and not casting
-                        this.heroUnit.issuePointOrder("move", this.homeLoc)
+                        updateRetreatLoc()
+                        this.heroUnit.issuePointOrder("move", this.currentRetreatLoc)
 
 
 
@@ -785,7 +800,7 @@ function determineHeroStrength(unit hero) returns real
         if itm != null
             itemValue += itm.getTypeId().getItemFromObject().getGoldCost()
 
-    let result = (0.25 + 0.25 * mana + 0.25 + 1.25 * hp)/2 * (5 + lvl)/30
+    let result = (0.25 + 0.25 * mana + 0.25 + 1.25 * hp)/2 * (5 + lvl)/30 * (0.2 + 0.8 * hp)
 
     let ai = HeroAI.heroAIs[hero.getOwner().getId()]
     if ai != null

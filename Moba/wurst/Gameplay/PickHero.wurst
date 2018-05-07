@@ -289,7 +289,7 @@ init
                 if i!= 0
                     new CPlayer(players[i], i<=4?Team.TEAM1:Team.TEAM2, PlayerType.HERO)
 
-                Hero hero = new Hero(createUnit(players[i], 'H00X', gg_rct_CenterMid.getCenter(), angle(0)))
+                Hero hero = new Hero(createUnit(players[i], 'H017', gg_rct_CenterMid.getCenter(), angle(0)))
                 setupCreatedHero(hero)
 
                 removeHeroType(hero.getHeroType())
