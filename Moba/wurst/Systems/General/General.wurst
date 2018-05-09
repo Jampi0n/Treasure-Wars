@@ -32,6 +32,8 @@ public function printWarning(string warning)
         //print(warning)
 
 public function unit.isTargetable(player source, boolean allowFriends, boolean allowEnemies) returns boolean
+    if this == null
+        return false
     if not this.isAlive()
         return false
     if this.isType(UNIT_TYPE_ANCIENT)

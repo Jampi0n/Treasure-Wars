@@ -380,12 +380,14 @@ function attackAI(HeroAI ai)
     if not frostWyrm[hero.getOwner().getId()].isAlive()
         ai.issue("roar")
 
-    unit target = hero.findTarget(800, AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
-    if target != null
-        ai.issue("frostnova", target)
+    unit target
+    if hero.getMana()/hero.getMaxMana() > 0.5
+        target = hero.findTarget(800, AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
+        if target.isTargetable(hero.getOwner(), false, true)
+            ai.issue("frostnova", target)
 
     target = hero.findTarget(600, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_HEALTH, null)
-    if target != null
+    if target.isTargetable(hero.getOwner(), false, true)
         if not ai.getAttacking()
             ai.attack(target)
 
@@ -426,11 +428,11 @@ function teamFightAI(HeroAI ai)
     unit target = hero.findTarget(600, AbilityTargetFocus.FRIEND_HERO, AbilityTargetPriority.HIGH_HEALTH, (unit u) -> (begin
         return not BuffList.hasBuffType(u, buffFrostArmor)
     end))
-    if target != null
+    if target.isTargetable(hero.getOwner(), true, false)
         ai.issue("frostarmor", target)
 
     target = ai.getTeamFightTarget()
-    if target != null
+    if target.isTargetable(hero.getOwner(), false, true)
 
 
         if not ai.getAttacking()

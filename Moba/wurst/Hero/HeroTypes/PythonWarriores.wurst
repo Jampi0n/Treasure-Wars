@@ -298,10 +298,60 @@ function poisonSpitPeriodic()
 
     nearby.destr()
 
+
+
+
+function retreatAI(HeroAI ai)
+    ai.issue("roar")
+
+function attackAI(HeroAI ai)
+    let hero = ai.getHeroUnit()
+
+    unit target
+    if hero.getMana()/hero.getMaxMana() > 0.5
+        let targetPos = hero.findAreaTarget(800, POISON_SPIT_AOE[hero.getAbilityLevel(ABILITY_POISON_SPIT)-1], 3)
+        if targetPos.getValue() >= 6
+            ai.issue("silence", targetPos.getPos())
+
+        target = hero.findTarget(300, AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
+        if target.isTargetable(hero.getOwner(), false, true)
+            ai.issue("forkedlightning", target)
+
+    target = hero.findTarget(500, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_DISTANCE, null)
+    if target.isTargetable(hero.getOwner(), false, true)
+        ai.attack(target)
+
+function teamFightAI(HeroAI ai)
+    let hero = ai.getHeroUnit()
+
+    unit target = ai.getTeamFightTarget()
+
+    if target.isTargetable(hero.getOwner(), false, true)
+
+        print(hero.getOwner().getName()+" "+target.getOwner().getName())
+        ai.issue("silence", target.getPos())
+        ai.issue("chainlightning", target)
+        if target.getPos().distanceTo(hero.getPos()) < 300
+            ai.issue("forkedlightning", target)
+
+        if not ai.getAttacking()
+            ai.attack(target)
+
 function initHeroType()
     setupStats()
 
-    heroType.setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
+    heroType
+        ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
+        ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
+        ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
+        ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+        ..setSkillBuild("WEQEEWEWEWWQQQQ")
+        ..addItem(ITEM_ID_BOOTS_OF_DARKNESS)
+        ..addItem(ITEM_ID_ENCHANTED_ARMOR)
+        ..addItem(ITEM_ID_WAND_OF_DEATH)
+        ..addItem(ITEM_ID_RUNIC_ARMOR)
+        ..addItem(ITEM_ID_SCROLL_OF_CONJURATION)
+        ..addItem(ITEM_ID_BLESSED_GOBLET)
 
     var abilityList = new LinkedList<int>
         ..add('A009')

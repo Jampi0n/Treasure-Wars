@@ -331,8 +331,106 @@ function onSpellCast()
         
         new DivinePunishment(caster)
 
+
+
+
+function retreatAI(HeroAI ai)
+    ai.issue("roar")
+
+
+function attackAI(HeroAI ai)
+    let hero = ai.getHeroUnit()
+
+    if hero.getMana()/hero.getMaxMana() > 0.5
+        let g = CreateGroup()
+        unit u
+        int count = 0
+        g.enumUnitsInRange(hero.getPos().polarOffset(hero.getFacingAngle(), 140), 180)
+        while(true)
+            u = FirstOfGroup(g)
+            if u == null
+                break
+            g.removeUnit(u)
+            if u.isTargetable(hero.getOwner(), false, true) and not u.isType(UNIT_TYPE_STRUCTURE)
+                if u.isType(UNIT_TYPE_HERO)
+                    count += 5
+                else
+                    count ++
+
+        if count >= 5
+            if ai.issue("howlofterror")
+                return
+
+    unit target = hero.findTarget(500, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_DISTANCE, null)
+    if target.isTargetable(hero.getOwner(), false, true)
+        ai.attack(target)
+
+function teamFightAI(HeroAI ai)
+
+    let hero = ai.getHeroUnit()
+
+    ai.issue("roar")
+
+    unit target = hero.findTarget(800, AbilityTargetFocus.ALLY_HERO, AbilityTargetPriority.LOW_HEALTH, (unit u) -> (begin
+        return not BuffList.hasBuffType(u, BUFF_HOLY_SHIELD)
+    end))
+    if target.isTargetable(hero.getOwner(), true, false)
+        ai.issue("channel", target)
+
+    
+    let g = CreateGroup()
+    unit u
+    int count = 0
+    g.enumUnitsInRange(hero.getPos().polarOffset(hero.getFacingAngle(), 140), 180)
+    while(true)
+        u = FirstOfGroup(g)
+        if u == null
+            break
+        g.removeUnit(u)
+        if u.isTargetable(hero.getOwner(), false, true)
+            if u.isType(UNIT_TYPE_HERO)
+                count++
+
+    if count != 0
+        if ai.issue("howlofterror")
+            return
+
+
+    count = 0
+    g.enumUnitsInRange(hero.getPos(), DIVINE_PUNISHMENT_AOE)
+    while(true)
+        u = FirstOfGroup(g)
+        if u == null
+            break
+        g.removeUnit(u)
+        if u.isTargetable(hero.getOwner(), false, true)
+            if u.isType(UNIT_TYPE_HERO)
+                count++
+
+    g.destr()
+    if count > 1
+        if ai.issue("tranquility")
+            return
+
+        
+    target = ai.getTeamFightTarget()
+    if target.isTargetable(hero.getOwner(), false, true)
+        if not ai.getAttacking()
+            ai.attack(target)
+
 function initHeroType()
-    heroType.addOnSpellCastFunc(function onSpellCast)
+    heroType
+        ..addOnSpellCastFunc(function onSpellCast)
+        ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
+        ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
+        ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+        ..setSkillBuild("QWEQQWEQQWEWEWE")
+        ..addItem(ITEM_ID_HEAVY_BOOTS)
+        ..addItem(ITEM_ID_RUNIC_ARMOR)
+        ..addItem(ITEM_ID_WAR_HORN)
+        ..addItem(ITEM_ID_ARMOR_OF_COURAGE)
+        ..addItem(ITEM_ID_ARCANE_SHIELD)
+        ..addItem(ITEM_ID_WAR_DRUM)
 
     var abilityList = new LinkedList<int>
         ..add(ABILITY_HOLY_SHIELD_BUFF)

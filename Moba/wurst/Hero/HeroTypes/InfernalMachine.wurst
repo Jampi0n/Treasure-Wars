@@ -395,12 +395,13 @@ function retreatAI(HeroAI ai)
 function attackAI(HeroAI ai)
     let hero = ai.getHeroUnit()
 
-    unit target = hero.findTarget(700, AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
-    if target != null
-        ai.issue("shockwave", target.getPos())
+    if hero.getMana()/hero.getMaxMana() > 0.5
+        let targetPos = hero.findAreaTarget(800, FLAME_THROWER_AOE[hero.getAbilityLevel(ABILITY_FLAME_THROWER)-1], 3)
+        if targetPos.getValue() >= 6
+            ai.issue("shockwave", targetPos.getPos())
 
-    target = hero.findTarget(500, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_DISTANCE, null)
-    if not ai.getAttacking() and target != null
+    unit target = hero.findTarget(500, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_DISTANCE, null)
+    if target.isTargetable(hero.getOwner(), false, true)
         ai.attack(target)
 
 function teamFightAI(HeroAI ai)
@@ -409,18 +410,15 @@ function teamFightAI(HeroAI ai)
     unit target = ai.getTeamFightTarget()
 
 
+    if target.isTargetable(hero.getOwner(), false, true)
 
+        if hero.getTypeId() == HERO_INFERNAL_MACHINE
+            if target.getPos().distanceTo(hero.getPos()) < 600
+                ai.issue("chemicalrage")
+                ai.issue("berserk")
+            ai.issue("roar")
+            ai.issue("shockwave", target.getPos())
 
-
-    if hero.getTypeId() == HERO_INFERNAL_MACHINE
-        if target.getPos().distanceTo(hero.getPos()) < 600
-            ai.issue("chemicalrage")
-            ai.issue("berserk")
-        ai.issue("roar")
-        ai.issue("shockwave", target.getPos())
-        
-
-    if target != null
         if not ai.getAttacking()
             ai.attack(target)
 

@@ -335,12 +335,14 @@ function retreatAI(HeroAI _ai)
 function attackAI(HeroAI ai)
     let hero = ai.getHeroUnit()
 
-    unit target = hero.findTarget(500, AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
-    if target != null
-        ai.issue("channel", target.getPos())
+    unit target
+    if hero.getMana()/hero.getMaxMana() > 0.5
+        target = hero.findTarget(500, AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
+        if target.isTargetable(hero.getOwner(), false, true)
+            ai.issue("channel", target.getPos())
 
     target = hero.findTarget(600, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_HEALTH, null)
-    if target != null
+    if target.isTargetable(hero.getOwner(), false, true)
 
         if not ai.getAttacking()
             ai.attack(target)
@@ -376,7 +378,7 @@ function teamFightAI(HeroAI ai)
 
         
     unit target = ai.getTeamFightTarget()
-    if target != null
+    if target.isTargetable(hero.getOwner(), false, true)
 
 
         if not ai.getAttacking()

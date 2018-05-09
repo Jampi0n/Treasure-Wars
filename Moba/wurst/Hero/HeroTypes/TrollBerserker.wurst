@@ -309,11 +309,11 @@ function attackAI(HeroAI ai)
     let hero = ai.getHeroUnit()
 
     unit target = hero.findTarget(700, AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
-    if target != null
+    if target.isTargetable(hero.getOwner(), false, true)
         ai.issue("attackonce", target)
 
     target = hero.findTarget(600, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_HEALTH, null)
-    if target != null
+    if target.isTargetable(hero.getOwner(), false, true)
         if not ai.getAttacking()
             ai.attack(target)
 
@@ -341,7 +341,7 @@ function teamFightAI(HeroAI ai)
 
         
     unit target = ai.getTeamFightTarget()
-    if target != null
+    if target.isTargetable(hero.getOwner(), false, true)
 
         hero.issueImmediateOrder("berserk")
 

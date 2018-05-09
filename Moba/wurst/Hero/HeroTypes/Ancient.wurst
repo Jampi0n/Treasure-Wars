@@ -450,12 +450,14 @@ function retreatAI(HeroAI _ai)
 function attackAI(HeroAI ai)
     let hero = ai.getHeroUnit()
 
-    unit target = hero.findTarget(600, AbilityTargetFocus.ENEMY, AbilityTargetPriority.HIGH_VALUE, null)
-    if target != null
-        ai.issue("chainlightning", target)
+    unit target
+    if hero.getMana()/hero.getMaxMana() > 0.5
+        target = hero.findTarget(600, AbilityTargetFocus.ENEMY, AbilityTargetPriority.HIGH_VALUE, null)
+        if target.isTargetable(hero.getOwner(), false, true)
+            ai.issue("chainlightning", target)
 
     target = hero.findTarget(500, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_DISTANCE, null)
-    if not ai.getAttacking() and target != null
+    if target.isTargetable(hero.getOwner(), false, true)
         ai.attack(target)
 
 function teamFightAI(HeroAI ai)
@@ -488,7 +490,7 @@ function teamFightAI(HeroAI ai)
 
         
     unit target = ai.getTeamFightTarget()
-    if target != null
+    if target.isTargetable(hero.getOwner(), false, true)
 
         if not ai.getAttacking()
             ai.attack(target)
