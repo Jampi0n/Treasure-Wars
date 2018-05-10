@@ -33,6 +33,9 @@ public boolean array barracksAliveTeam2 = [true, true, true]
 public boolean array workshopAliveTeam1 = [true, true]
 public boolean array workshopAliveTeam2 = [true, true]
 
+int farmsTeam1 = 26
+int farmsTeam2 = farmsTeam1
+
 constant real BARRACKS_REBUILD_TIME = 180
 constant real WORKSHOP_REBUILD_TIME = 60
 
@@ -128,6 +131,10 @@ function onBuildingDeath()
     if unitId == FARM
         bounty = 50
         globalBounty = 50
+        if building.getOwner().getId() == TEAM_PLAYER_TEAM_1
+            farmsTeam1--
+        else
+            farmsTeam2--
 
     else if unitId == OUTER_TOWER
         bounty = 75
@@ -505,6 +512,13 @@ function onMilitiaDespawn()
                 u.remove()
 
 
+public function income()
+    for i = 0 to MAX_HERO_COUNT-1
+        let farms = i <= HERO_PLAYER_TEAM_1_LAST ? farmsTeam1 : farmsTeam2
+        let gold = 5 * farms
+        printTimedToPlayer("You get |cffffcc00"+gold.toString()+"|r gold (|cffffcc00+5|r for every Farm).", 8, players[i])
+        getCPlayer(i).addGoldEx(gold)
+    
 
 init
     CreateTrigger()
