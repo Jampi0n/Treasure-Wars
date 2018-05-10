@@ -43,7 +43,8 @@ public enum AbilityTargetPriority
 enum AIState
     ATTACK //attack moves towards the enemy base, focus is on pushing/killing minions
     RETREAT //retreats fully to heal up
-    RETREAT_TOWER //retreats to the next tower, should be initiated, if a bad fight is assumed
+    RETREAT_TEMP //retreats to the next tower, should be initiated, if a bad fight is assumed
+    RETREAT_TEMP_AI //retreats to the next tower, should be initiated, if a bad fight is assumed
     HEAL //waits at the altar to be fully healed
     TEAM_FIGHT //engages against nearby enemies, should be initiated, if a favoured fight is assumed
 
@@ -192,7 +193,7 @@ public class TeamFight
 
         this.heroAIs = new LinkedList<HeroAI>
         activeTeamFights.add(this)
-        print("teamfights: "+activeTeamFights.size().toString())
+        //print("teamfights: "+activeTeamFights.size().toString())
 
         this.center = new Fx(this.teamFightLoc, Units.monsterLure)
 
@@ -210,7 +211,7 @@ public class TeamFight
         activeTeamFights.remove(this)
         destroy this.center
         destroy this.heroAIs
-        print("teamfights: "+activeTeamFights.size().toString())
+        //print("teamfights: "+activeTeamFights.size().toString())
 
     static function updateStatic()
         for TeamFight tf in activeTeamFights
@@ -245,7 +246,7 @@ public class TeamFight
             let allAIs = heroAIs.copy()
 
             for HeroAI ai in allAIs
-                ai.retreatTemporarily(25)
+                ai.retreatTemporarily(25, true)
                 ai.endTeamFight()
         
             destroy allAIs
@@ -253,7 +254,10 @@ public class TeamFight
             let allAIs = heroAIs.copy()
 
             for HeroAI ai in allAIs
-                ai.state = AIState.ATTACK
+                if chance > 0.6
+                    ai.changeState(AIState.ATTACK)
+                else
+                    ai.retreatTemporarily(25, true)
                 ai.endTeamFight()
         
             destroy allAIs
@@ -273,6 +277,7 @@ public class TeamFight
                         let nextValue = determineHeroOffensiveStrength(heroUnit)/determineHeroDefensiveStrength(heroUnit)
                         if nextValue > currentValue
                             currentTarget = heroUnit
+                            currentValue = nextValue
 
         this.target = currentTarget
 
@@ -409,19 +414,33 @@ public class HeroAI
                 ai.levelUp()
         end))
 
-        /*attackedByTower = CreateTrigger()
+        attackedByTower = CreateTrigger()
             ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_ATTACKED)
             ..addAction(() ->(begin
             let ai = heroAIs[GetTriggerUnit().getOwner().getId()]
             if ai != null
                 let attacker = GetAttacker()
-                if ai.state == AIState.ATTACK and attacker.isType(UNIT_TYPE_STRUCTURE)
-                    let towerPos = attacker.getPos()
-                    let pos = ai.heroUnit.getPos()
-                    let retreatPos = towerPos.polarOffset(towerPos.angleTo(pos), 950)
-                    ai.aiMessage("attacked by tower, retreat")
-                    ai.issue("move", retreatPos)
-        end))*/
+                if (ai.state == AIState.ATTACK or ai.state == AIState.RETREAT_TEMP)  and attacker.isType(UNIT_TYPE_STRUCTURE)
+                    let g = CreateGroup()
+                    unit u
+                    int count = 0
+                    let owner = ai.heroUnit.getOwner()
+                    g.enumUnitsInRange(ai.heroUnit.getPos(), 1000)
+                    while(true)
+                        u = FirstOfGroup(g)
+                        if u == null
+                            break
+                        g.removeUnit(u)
+                        if IsUnitAlly(u, owner)
+                            if not u.isType(UNIT_TYPE_HERO)
+                                count++
+
+                    g.destr()
+                    if count < 5
+                        ai.retreatTemporarily(50, false)
+                    else
+                        ai.retreatTemporarily(15, false)
+        end))
     
 
     construct(CPlayer owner)
@@ -478,9 +497,14 @@ public class HeroAI
         else if slot == AbilitySlot.PASSIVE
             id += 80
 
-        //print(int2fourchar(id))
+        //print(id.toRawCode())
         return id
         
+    function changeState(AIState newState)
+        if this.state != newState
+            this.state = newState
+            //this.casting = false
+            //this.attacking = false
 
 
     function buySpecificItem(Item whichItem)
@@ -600,7 +624,7 @@ public class HeroAI
 
         this.endTeamFight()
 
-        this.state = AIState.TEAM_FIGHT
+        this.changeState(AIState.TEAM_FIGHT)
         this.teamFight = teamFight
         this.teamFight.addAI(this)
         aiMessage("teamfight")
@@ -613,8 +637,11 @@ public class HeroAI
     function onDamage(real damage)
         this.damageCurrent += damage
 
-    function retreatTemporarily(int counter)
-        this.state = AIState.RETREAT_TOWER
+    function retreatTemporarily(int counter, boolean useAI)
+        if useAI
+            this.changeState(AIState.RETREAT_TEMP_AI)
+        else
+            this.changeState(AIState.RETREAT_TEMP)
         this.retreatCounter = counter
 
 
@@ -641,7 +668,7 @@ public class HeroAI
 
             let dist = this.heroUnit.getPos().distanceTo(this.homeLoc)
             if dist<300
-                this.state = AIState.HEAL
+                this.changeState(AIState.HEAL)
                 this.buyItems()
             else
                 if not casting
@@ -651,8 +678,8 @@ public class HeroAI
                     this.heroUnit.issuePointOrder("move", this.currentRetreatLoc)
 
         else if this.state == AIState.HEAL
-            if this.heroUnit.getHP() >= this.heroUnit.getMaxHP()*0.9
-                this.state = AIState.ATTACK
+            if this.heroUnit.getHP() >= this.heroUnit.getMaxHP()*0.9 and this.heroUnit.getMana() >= this.heroUnit.getMaxMana()*0.9
+                this.changeState(AIState.ATTACK)
                 let rand = GetRandomInt(1, 3)
                 if rand == 1
                     this.lane = Lane.TOP
@@ -665,10 +692,11 @@ public class HeroAI
 
         else if this.state == AIState.ATTACK
             if this.heroUnit.getHP() <= this.heroUnit.getMaxHP()*0.4
-                this.state = AIState.RETREAT
+                this.changeState(AIState.RETREAT)
+
             if this.damageSum > this.heroUnit.getMaxHP()*0.15
                 aiMessage("taking too much damage, retreat: "+damageSum.toString())
-                this.retreatTemporarily(10)
+                this.retreatTemporarily(10, false)
             else
                 updateTargetLoc()  
 
@@ -710,7 +738,7 @@ public class HeroAI
                                                 ai.startTeamFight(newTeamFight)
                         return
                     if chance < 0.4
-                        this.retreatTemporarily(20)
+                        this.retreatTemporarily(20, true)
                         return
 
                 if not casting
@@ -720,7 +748,7 @@ public class HeroAI
 
         else if this.state == AIState.TEAM_FIGHT
             if this.heroUnit.getHP() <= this.heroUnit.getMaxHP()*0.4
-                this.state = AIState.RETREAT
+                this.changeState(AIState.RETREAT)
                 this.endTeamFight()
                 aiMessage("solo retreat")
             else
@@ -730,20 +758,23 @@ public class HeroAI
                     this.heroUnit.issueTargetOrder("attack", this.getTeamFightTarget())
 
 
-        else if this.state == AIState.RETREAT_TOWER
+        else if this.state == AIState.RETREAT_TEMP or this.state == AIState.RETREAT_TEMP_AI
             let dist = this.heroUnit.getPos().distanceTo(this.homeLoc)
             if dist<300
-                this.state = AIState.HEAL
+                this.changeState(AIState.HEAL)
                 this.buyItems()
+            else if this.heroUnit.getHP() <= this.heroUnit.getMaxHP()*0.4
+                this.changeState(AIState.RETREAT)
             else
                 
 
                 if retreatCounter <= 0
-                    this.state = AIState.ATTACK
+                    this.changeState(AIState.ATTACK)
                 else
                     retreatCounter--
-                    //if not casting
-                        //this.heroType.retreatAI(this)
+                    if this.state == AIState.RETREAT_TEMP_AI
+                        if not casting
+                            //this.heroType.retreatAI(this)
                     if this.heroUnit.getCurrentOrder() != OrderId("move") and not casting
                         updateRetreatLoc()
                         this.heroUnit.issuePointOrder("move", this.currentRetreatLoc)
@@ -831,16 +862,28 @@ function determineWinChance(boolean firstTeam, vec2 pos) returns real
                         towerStrength2 += 100000
                 else
                     if u.isType(UNIT_TYPE_ATTACKS_GROUND) and u.getPos().distanceTo(pos) < 1000 // tower
-                        if uTeam1
-                            if firstTeam
-                                towerStrength1 += 100
-                            else
-                                towerStrength1 += 400
-                        else if uTeam2
-                            if firstTeam
-                                towerStrength2 += 400
-                            else
-                                towerStrength2 += 100
+                        if u.getTypeId() == OUTER_TOWER
+                            if uTeam1
+                                if firstTeam
+                                    towerStrength1 += 100
+                                else
+                                    towerStrength1 += 400
+                            else if uTeam2
+                                if firstTeam
+                                    towerStrength2 += 400
+                                else
+                                    towerStrength2 += 100
+                        else if u.getTypeId() == GATE_TOWER or u.getTypeId() == BASE_TOWER
+                            if uTeam1
+                                if firstTeam
+                                    towerStrength1 += 150
+                                else
+                                    towerStrength1 += 600
+                            else if uTeam2
+                                if firstTeam
+                                    towerStrength2 += 600
+                                else
+                                    towerStrength2 += 150
 
             else if u.isType(UNIT_TYPE_HERO)
                 if uTeam1
@@ -907,7 +950,7 @@ function determineHeroStrength(unit hero) returns real
 
     let ai = HeroAI.heroAIs[hero.getOwner().getId()]
     if ai != null
-        if ai.state == AIState.RETREAT or ai.state == AIState.RETREAT_TOWER
+        if ai.state == AIState.RETREAT or ai.state == AIState.RETREAT_TEMP or ai.state == AIState.RETREAT_TEMP_AI
             return 0
 
 

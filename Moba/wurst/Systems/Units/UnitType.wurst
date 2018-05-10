@@ -98,7 +98,7 @@ function onUnitDeath()
     // army unit dies
     if dyingCPlayer.getTeam() == Team.TEAM1 or dyingCPlayer.getTeam() == Team.TEAM2
         let bounty = dyingType.getBounty()
-        let xp = dyingUnit.getLevel()*10
+        let xp = dyingUnit.getLevel()*25
         let xpAllyFactor = 0.5
         let bountyAllyFactor = 0.25
         /*

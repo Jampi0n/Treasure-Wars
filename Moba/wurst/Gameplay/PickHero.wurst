@@ -48,7 +48,8 @@ function setupCreatedHero(Hero hero)
     else
         pos = gg_rct_BrownCastle.getCenter()
 
-    
+    if hero.toUnit().getOwner().getController() == MAP_CONTROL_COMPUTER and hero.toUnit().getOwner().getSlotState() == PLAYER_SLOT_STATE_PLAYING
+        new HeroAI(cPlayer)
     
     hero.toUnit().setPos(pos)
     if GetLocalPlayer() == hero.toUnit().getOwner()
@@ -289,10 +290,11 @@ init
                 if i!= 0
                     new CPlayer(players[i], i<=4?Team.TEAM1:Team.TEAM2, PlayerType.HERO)
 
-                Hero hero = new Hero(createUnit(players[i], 'H00J', gg_rct_CenterMid.getCenter(), angle(0)))
-                setupCreatedHero(hero)
+                //Hero hero = new Hero(createUnit(players[i], 'H00H', gg_rct_CenterMid.getCenter(), angle(0)))
+                createRandomHero(getCPlayer(i))
+                //setupCreatedHero(hero)
 
-                removeHeroType(hero.getHeroType())
+                //removeHeroType(hero.getHeroType())
 
                 new HeroAI(getCPlayer(i))
 

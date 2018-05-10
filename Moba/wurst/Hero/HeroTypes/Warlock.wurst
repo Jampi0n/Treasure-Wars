@@ -265,10 +265,61 @@ function onSpellCast()
         target.addBuffReduced(caster, RAY_OF_DEATH_DURATION[level-1], buffRayOfDeath, level)
 
 
+
+
+function retreatAI(HeroAI _ai)
+
+function attackAI(HeroAI ai)
+    let hero = ai.getHeroUnit()
+
+    unit target
+    if hero.getMana()/hero.getMaxMana() > 0.5
+        let targetPos = hero.findAreaTarget(800, METEOR_AOE[hero.getAbilityLevel(ABILITY_INFERNAL_METEOR)-1], 3)
+        if targetPos.getValue() >= 6
+            ai.issue("inferno", targetPos.getPos())
+
+        target = hero.findTarget(800, AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
+        if target.isTargetable(hero.getOwner(), false, true)
+            ai.issue("soulburn", target)
+
+        target = hero.findTarget(800, AbilityTargetFocus.ENEMY_UNIT, AbilityTargetPriority.LOW_HEALTH, null)
+        if target.isTargetable(hero.getOwner(), false, true)
+            ai.issue("soulburn", target)
+
+    target = hero.findTarget(600, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_HEALTH, null)
+    if target.isTargetable(hero.getOwner(), false, true)
+        ai.attack(target)
+
+function teamFightAI(HeroAI ai)
+    let hero = ai.getHeroUnit()
+
+    unit target = ai.getTeamFightTarget()
+
+    if target.isTargetable(hero.getOwner(), false, true)
+
+        ai.issue("soulburn", target)
+        ai.issue("magicleash", target)
+        ai.issue("inferno", target.getPos())
+        if target.getPos().distanceTo(hero.getPos()) < 500
+            ai.issue("shockwave", target)
+
+        if not ai.getAttacking()
+            ai.attack(target)
+
 function initHeroType()
     setupStats()
     heroType
         ..addOnSpellCastFunc(function onSpellCast)
+        ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
+        ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
+        ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+        ..setSkillBuild("WEQEWEWEWEWQQQQ")
+        ..addItem(ITEM_ID_BOOTS_OF_DARKNESS)
+        ..addItem(ITEM_ID_ENCHANTED_ARMOR)
+        ..addItem(ITEM_ID_BLESSED_GOBLET)
+        ..addItem(ITEM_ID_SCROLL_OF_CONJURATION)
+        ..addItem(ITEM_ID_WAND_OF_DEATH)
+        ..addItem(ITEM_ID_RUNIC_ARMOR)
 
     buffRayOfDeath = new BuffType(false, true)
         ..addEndFunction((Buff whichBuff) ->(begin

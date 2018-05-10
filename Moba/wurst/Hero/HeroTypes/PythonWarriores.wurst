@@ -274,7 +274,7 @@ function onSpellCast()
 
 function onAttack(unit attacker, unit target, boolean _isActive)
     let level = attacker.getAbilityLevel(ABILITY_ENVENOMED_BLADES)
-    if level != 0
+    if level != 0 and target.isTargetable(attacker.getOwner(), false, true) and not target.isType(UNIT_TYPE_STRUCTURE)
         target.addBuffReduced( attacker, ENVENOMED_BLADES_DURATION[level-1], BUFF_ENVENOMED_BLADES, level)
 
 
@@ -328,7 +328,6 @@ function teamFightAI(HeroAI ai)
 
     if target.isTargetable(hero.getOwner(), false, true)
 
-        print(hero.getOwner().getName()+" "+target.getOwner().getName())
         ai.issue("silence", target.getPos())
         ai.issue("chainlightning", target)
         if target.getPos().distanceTo(hero.getPos()) < 300
@@ -358,9 +357,12 @@ function initHeroType()
     BUFF_ENVENOMED_BLADES.setup(abilityList, 'B007')
     BUFF_ENVENOMED_BLADES.setPeriodicTime(1)
     BUFF_ENVENOMED_BLADES.addPeriodicFunction((Buff thisBuff)-> (begin
-        thisBuff.getCaster().dealDamage(thisBuff.getTarget(), 
-        (ENVENOMED_BLADES_DAMAGE[thisBuff.getLevel()-1]).bonus(thisBuff.getCaster().getInt(), ENVENOMED_BLADES_DAMAGE_BONUS)
-        , ReductionType.MAGIC)
+        let target = thisBuff.getTarget()
+        let caster = thisBuff.getCaster()
+        if target.isTargetable(caster.getOwner(), false, true)
+            caster.dealDamage(target, 
+            (ENVENOMED_BLADES_DAMAGE[thisBuff.getLevel()-1]).bonus(caster.getInt(), ENVENOMED_BLADES_DAMAGE_BONUS)
+            , ReductionType.MAGIC)
     end) )
     
 

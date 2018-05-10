@@ -226,7 +226,7 @@ public class Hero
         
 
         if killer.getId() < PLAYER_NEUTRAL_AGGRESSIVE
-            let bounty = 200
+            let bounty = 240
             int assistBounty = (bounty/(2*(size+1))).toInt()
 
             int killBounty = (bounty/2 + bounty/(2*(size+1))).toInt()
@@ -264,7 +264,7 @@ public class Hero
             //+" |cffffcc00( +"+(bounty/(2*size)).toInt().toString()+")|r"
 
             //xp
-            let xp = 50.
+            let xp = (this.level + 5) * 10.
 
             for CPlayer cPLayer in CPlayer.getEnemyHeroPlayers(this.owner.getTeam())
                 let hero = Hero.getHero(cPLayer)

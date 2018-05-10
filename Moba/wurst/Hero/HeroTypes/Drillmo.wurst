@@ -349,7 +349,8 @@ function onDamage()
 function retreatAI(HeroAI ai)
     let hero = ai.getHeroUnit()
     unit target = hero.findTarget(ROCKET_RANGE[hero.getAbilityLevel(ABILITY_ROCKET)-1], AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
-    if target.isTargetable(hero.getOwner(), false, true)
+    let rocketLvl = hero.getAbilityLevel(ABILITY_ROCKET)-1
+    if target.isTargetable(hero.getOwner(), false, true) and target.getHP()*(1+ARMOR_REDUCTION*target.getArmor()) <= 0.9 * ROCKET_DMG[rocketLvl].bonus(hero.getStr(), ROCKET_DMG_BONUS)
         ai.issue("acidbomb", target)
 
     ai.issue("berserk")
@@ -359,8 +360,9 @@ function attackAI(HeroAI ai)
 
     unit target
     if hero.getMana()/hero.getMaxMana() > 0.5
-        target = hero.findTarget(ROCKET_RANGE[hero.getAbilityLevel(ABILITY_ROCKET)-1], AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
-        if target.isTargetable(hero.getOwner(), false, true)
+        let rocketLvl = hero.getAbilityLevel(ABILITY_ROCKET)-1
+        target = hero.findTarget(ROCKET_RANGE[rocketLvl], AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
+        if target.isTargetable(hero.getOwner(), false, true) and target.getHP()*(1+ARMOR_REDUCTION*target.getArmor()) <= 0.9 * ROCKET_DMG[rocketLvl].bonus(hero.getStr(), ROCKET_DMG_BONUS)
             ai.issue("acidbomb", target)
 
     target = hero.findTarget(500, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_DISTANCE, null)
