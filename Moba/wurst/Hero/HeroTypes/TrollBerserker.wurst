@@ -8,6 +8,8 @@ import OnAttack
 
 
 public constant HERO_TROLL_BERSERKER = 'H00X'
+public constant HERO_TROLL_BERSERKER_MELEE = 'H018'
+
 HeroType heroType
 
 
@@ -73,7 +75,7 @@ function critical()
             ..setAttackSpeedIncrease(lvl, 0)
             ..setDamageTakenIncrease(lvl, 0)
             ..setMovementSpeedIncrease(lvl, 0)
-            ..setBuffs(lvl, int2fourchar(CRITICAL_BUFF_ID))
+            ..setBuffs(lvl, CRITICAL_BUFF_ID.toRawCode())
             ..setDurationHero(lvl, 0.01)
             ..setTooltipNormalExtended(lvl, "Increases the attack damage of the next attack by {0}%.".format(
                 CRITICAL_DAMAGE_MULT[lvl-1].str()
@@ -135,8 +137,8 @@ function switchWeapons()
         aDef
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
-            ..setNormalFormUnit(lvl, int2fourchar('H00X'))
-            ..setAlternateFormUnit(lvl, int2fourchar('H018'))
+            ..setNormalFormUnit(lvl, HERO_TROLL_BERSERKER.toRawCode())
+            ..setAlternateFormUnit(lvl, HERO_TROLL_BERSERKER_MELEE.toRawCode())
             ..setDurationNormal(lvl, SWITCH_DURATION)
             ..setTooltipTurnOff(lvl, "(E) Switch to Ranged - [|cffffcc00Level "+lvl.toString()+"|r]")
             ..setTooltipNormalExtended(lvl, "Turnes the Troll Berserker into a melee fighter, increasing attack damage by {0} and movement speed by {1}.".format(
@@ -182,7 +184,7 @@ function growth()
             ..setAreaofEffect(i, 1)
             ..setMovementSpeedIncrease(i, 0)
             ..setLifeRegenerationIncrease(i, 0)
-            ..setBuffs(i, int2fourchar(GROWTH_BUFF_ID))
+            ..setBuffs(i, GROWTH_BUFF_ID.toRawCode())
 
 
     let aDef = new AbilityDefinitionRoar(ABILITY_GROWTH)
@@ -354,7 +356,7 @@ function initHeroType()
     heroType
         ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
         ..addOnSpellCastFunc(function onSpellCast)
-        ..addMorph('H018')
+        ..addMorph(HERO_TROLL_BERSERKER_MELEE)
         ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
         ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
         ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
@@ -417,7 +419,7 @@ function initHeroType()
     CreateTrigger()
         ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
         ..addAction(() -> (begin
-            if GetTriggerUnit().getTypeId() == 'H018' 
+            if GetTriggerUnit().getTypeId() == HERO_TROLL_BERSERKER_MELEE
                 let u = GetTriggerUnit()
                 onSwitchToRanged(u, u.getAbilityLevel(ABILITY_SWITCH_WEAPONS))
 
@@ -431,7 +433,7 @@ function initHeroType()
 
                 
 
-            if GetLearnedSkill() == ABILITY_SWITCH_WEAPONS and u.getTypeId() == 'H018' 
+            if GetLearnedSkill() == ABILITY_SWITCH_WEAPONS and u.getTypeId() == HERO_TROLL_BERSERKER_MELEE
                 let newLevel = u.getAbilityLevel(ABILITY_SWITCH_WEAPONS)
                 onRangedStats(u, newLevel - 1)
                 onMeleeStats(u, newLevel)

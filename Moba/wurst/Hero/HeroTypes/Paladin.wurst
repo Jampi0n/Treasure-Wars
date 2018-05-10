@@ -132,7 +132,7 @@ function battleRoar()
             ..setMovementSpeedIncrease(lvl, 0)
             ..setTargetsAllowed(lvl, "invulnerable,self,vulnerable")
             ..setAreaofEffect(lvl, 1)
-            ..setBuffs(lvl, int2fourchar(BUFF_ID_BATTLE_ROAR))
+            ..setBuffs(lvl, BUFF_ID_BATTLE_ROAR.toRawCode())
 
 constant real array HOLY_SHIELD_DURATION = [2, 2.5, 3, 3.5, 4]
 constant real HOLY_SHIELD_DURATION_BONUS = 2

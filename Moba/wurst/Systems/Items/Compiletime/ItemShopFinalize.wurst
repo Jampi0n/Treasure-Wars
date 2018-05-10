@@ -267,7 +267,7 @@ function setupArrayItemId()
         
     executeWhile(10, ()->(stringPos < stringLength), () -> (begin
         string currentString = stringArray.substring(stringPos, stringPos+3)
-        itemIdArray[currentIndex] = fourchar2int("I"+currentString)
+        itemIdArray[currentIndex] = ("I"+currentString).fromRawCode()
 
         stringPos += 3
         currentIndex++

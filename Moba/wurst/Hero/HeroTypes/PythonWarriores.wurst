@@ -133,7 +133,7 @@ function poisonSpit()
             ..setMovementSpeedFactor(lvl, 0)
             ..setTargetsAllowed(lvl, "invulnerable,self,vulnerable")
             ..setAreaofEffect(lvl, 1)
-            ..setBuffs(lvl, int2fourchar(BUFF_ID_POISON_SPIT))
+            ..setBuffs(lvl, BUFF_ID_POISON_SPIT.toRawCode())
 
     let aDefArmorReduction = new AbilityDefinitionDefenseBonusPlus1(ABILITY_POISON_SPIT_ARMOR_REDUCED)
         ..setLevels(5)

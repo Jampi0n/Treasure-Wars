@@ -188,7 +188,7 @@ public function player.getFullName() returns string
         return this.getName()
 
 public function player.getFullColoredName() returns string
-    return fromPlayer(this).toColorString()+this.getFullName()+"|r"
+    return this.getColor().toColor().toColorString()+this.getFullName()+"|r"
 
 
 public function unit.hitBoxDistanceTo(vec2 pos) returns real

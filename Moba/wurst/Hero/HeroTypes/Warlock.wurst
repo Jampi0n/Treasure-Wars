@@ -210,7 +210,7 @@ function rayOfDeath()
             ..setCastRange(lvl, RANGE[lvl-1])
             ..setDurationHero(lvl, 60)
             ..setDurationNormal(lvl, 60)
-            ..setBuffs(lvl, "Bmlc,"+int2fourchar(BUFF_ID_RAY_OF_DEATH))
+            ..setBuffs(lvl, "Bmlc,"+BUFF_ID_RAY_OF_DEATH.toRawCode())
             ..setTargetsAllowed(lvl, "enemies,nonancient,ground,organic,hero")
             ..setTooltipNormalExtended(lvl, CHANNELING_SPELL + "Channels a powerful ray at the target enemy hero, disabling the target and dealing {0} damage per second. If he channels for the full duration, he summons an explosion at the target's location dealing {1} additional damage.|nLasts {2} seconds.".format(
                 RAY_OF_DEATH_DAMAGE[lvl-1].str()+RAY_OF_DEATH_DAMAGE_BONUS.getBonusString(C_INT), RAY_OF_DEATH_AFTER_DAMAGE[lvl-1].str()+RAY_OF_DEATH_AFTER_DAMAGE_BONUS.getBonusString(C_INT), RAY_OF_DEATH_DURATION[lvl-1].toString()

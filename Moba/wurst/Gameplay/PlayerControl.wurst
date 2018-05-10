@@ -156,8 +156,8 @@ public class StatTable
             ..setRowCount(13)
             ..setItemsStyle(true, false)
             ..setTitle("Stats: "+
-                playercolors[TEAM_PLAYER_TEAM_1].toColorString()+ScoreTable.team1Kills.toString()+"|r / "+
-                playercolors[TEAM_PLAYER_TEAM_2].toColorString()+ScoreTable.team2Kills.toString()+"|r"  )
+                players[TEAM_PLAYER_TEAM_1].getColor().toColor().toColorString()+ScoreTable.team1Kills.toString()+"|r / "+
+                players[TEAM_PLAYER_TEAM_2].getColor().toColor().toColorString()+ScoreTable.team2Kills.toString()+"|r"  )
             ..display(true)
             ..minimalize(true)
 
@@ -172,7 +172,7 @@ public class StatTable
 
         for i = 1 to mBoard.getColumnCount() - 1 
             let cPlayer = columnToPlayer[i]
-            let color = fromPlayer(cPlayer.getPlayer())
+            let color = cPlayer.getPlayer().getColor().toColor()
             string icon
 
             let hero = Hero.getHero(cPlayer)
@@ -216,8 +216,8 @@ public class ScoreTable
     static function updateHeader(boolean firstTeam)
         let row = (firstTeam ? 0 : CPlayer.team1HeroCount + 1)
         string teamName = firstTeam ?
-        playercolors[TEAM_PLAYER_TEAM_1].toColorString() + TEAM_NAME_TEAM_1 + "|r" :
-        playercolors[TEAM_PLAYER_TEAM_2].toColorString() + TEAM_NAME_TEAM_2 + "|r"
+        players[TEAM_PLAYER_TEAM_1].getColor().toColor().toColorString() + TEAM_NAME_TEAM_1 + "|r" :
+        players[TEAM_PLAYER_TEAM_2].getColor().toColor().toColorString() + TEAM_NAME_TEAM_2 + "|r"
         
         mBoard.getItem(row, 0)
             ..setStyle(true, false)
@@ -309,8 +309,8 @@ public class ScoreTable
             ..release() 
 
         mBoard.setTitle("Score: "+
-        playercolors[TEAM_PLAYER_TEAM_1].toColorString()+team1Kills.toString()+"|r / "+
-        playercolors[TEAM_PLAYER_TEAM_2].toColorString()+team2Kills.toString()+"|r"  )
+        players[TEAM_PLAYER_TEAM_1].getColor().toColor().toColorString()+team1Kills.toString()+"|r / "+
+        players[TEAM_PLAYER_TEAM_2].getColor().toColor().toColorString()+team2Kills.toString()+"|r"  )
 
     static function updatePlayerDeaths(CPlayer p)
         let row = playerToRow[p.getId()]
@@ -353,7 +353,7 @@ public class ScoreTable
             ..setColumnCount(5)
             ..setRowCount(2)
             ..setItemsStyle(true, false)
-            ..setTitle("Score: "+playercolors[MAX_HERO_COUNT].toColorString()+"0|r / "+playercolors[MAX_HERO_COUNT+1].toColorString()+"0|r"  )
+            ..setTitle("Score: "+players[TEAM_PLAYER_TEAM_1].getColor().toColor().toColorString()+"0|r / "+players[TEAM_PLAYER_TEAM_2].getColor().toColor().toColorString()+"0|r"  )
             ..display(true)
             ..minimalize(true)
         doAfter(0.02, () -> mBoard.minimalize(false))
