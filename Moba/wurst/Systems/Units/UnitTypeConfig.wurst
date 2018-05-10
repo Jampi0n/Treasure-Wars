@@ -18,12 +18,12 @@ constant ARMOR_LIGHT = 'R003'
 
 public constant PATRON = createUnitType('n006')
 
-public constant FOOTMAN = createUnitType('h00C', 20, 20, 2, ATTACK_MELEE, 35, 10, ARMOR_HEAVY, 32, Units.footman1)
-public constant RIFLEMAN = createUnitType('h00B', 30, 30, 3, ATTACK_RANGED, 20, 10, ARMOR_LIGHT, 48, Units.rifleman1)
-public constant KNIGHT = createUnitType('h00D', 50, 75, 5, ATTACK_MELEE, 50, 10, ARMOR_HEAVY, 64, Units.knight1)
-public constant MORTAR_TEAM = createUnitType('h00E', 50, 80, 6, ATTACK_RANGED, 25, 10, ARMOR_LIGHT, 48, Units.mortarTeam1)
-public constant MILITIA = createUnitType('h00F', 10, 25, 3, ATTACK_MELEE, 25, 10, ARMOR_HEAVY, 32, Units.militia)
-public constant MILITIA_DEFEND = createUnitType('h01B', 10, 25, 3, ATTACK_MELEE, 25, 10, ARMOR_HEAVY, 16, Units.militia)
+public constant FOOTMAN = createUnitType('h00C', 20, 15, 2, ATTACK_MELEE, 35, 10, ARMOR_HEAVY, 32, Units.footman1)
+public constant RIFLEMAN = createUnitType('h00B', 30, 25, 3, ATTACK_RANGED, 20, 10, ARMOR_LIGHT, 48, Units.rifleman1)
+public constant KNIGHT = createUnitType('h00D', 75, 45, 4, ATTACK_MELEE, 50, 10, ARMOR_HEAVY, 64, Units.knight1)
+public constant MORTAR_TEAM = createUnitType('h00E', 50, 45, 5, ATTACK_RANGED, 25, 10, ARMOR_LIGHT, 48, Units.mortarTeam1)
+public constant MILITIA = createUnitType('h00F', 10, 20, 2, ATTACK_MELEE, 25, 10, ARMOR_HEAVY, 32, Units.militia)
+public constant MILITIA_DEFEND = createUnitType('h01B', 10, 20, 2, ATTACK_MELEE, 25, 10, ARMOR_HEAVY, 16, Units.militia)
 public constant PEASANT_DEFEND = createUnitType('h01C', 10, 0, 10, 16, Units.militia)
 
 

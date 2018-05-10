@@ -9,6 +9,7 @@ import TimerUtils
 import ClosureTimers
 
 constant HP_PER_LEVEL = 15
+constant STRENGTH_BONUS = 30
 
 public class Hero
 
@@ -131,7 +132,7 @@ public class Hero
 
         //this.hero.wrapper().addStatAbsoluteBonus(Stat.MS, this.heroType.calculateStat(Stat.MS, lvl) - this.heroType.calculateStat(Stat.MS, lvl-1))
 
-        SetHeroStr(this.hero, this.heroType.calculateStat(Stat.STR, newLvl), true)
+        SetHeroStr(this.hero, this.heroType.calculateStat(Stat.STR, newLvl) + STRENGTH_BONUS , true)
         SetHeroAgi(this.hero, this.heroType.calculateStat(Stat.AGI, newLvl), true)
         SetHeroInt(this.hero, this.heroType.calculateStat(Stat.INT, newLvl), true)
 
