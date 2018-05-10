@@ -9,8 +9,6 @@ import ItemShopSystem
 import UnitType
 import BuildingTypes
 
-import Fx
-
 constant team1AIs = new LinkedList<HeroAI>
 constant team2AIs = new LinkedList<HeroAI>
 
@@ -184,7 +182,7 @@ public class TeamFight
     private static constant updateTimer = getTimer()
     private static constant  activeTeamFights = new LinkedList<TeamFight>
 
-    private Fx center
+    //private Fx center
 
     construct(vec2 pos, boolean firstTeam)
         this.teamFightLoc = pos
@@ -195,7 +193,7 @@ public class TeamFight
         activeTeamFights.add(this)
         //print("teamfights: "+activeTeamFights.size().toString())
 
-        this.center = new Fx(this.teamFightLoc, Units.monsterLure)
+        //this.center = new Fx(this.teamFightLoc, Units.monsterLure)
 
 
     static function classInit()
@@ -209,7 +207,7 @@ public class TeamFight
 
     ondestroy
         activeTeamFights.remove(this)
-        destroy this.center
+        //destroy this.center
         destroy this.heroAIs
         //print("teamfights: "+activeTeamFights.size().toString())
 
@@ -232,7 +230,7 @@ public class TeamFight
             y+=ai.getHeroUnit().getPos().y
 
         this.teamFightLoc = vec2(x/count, y/count)
-        this.center.setXY(this.teamFightLoc)
+        //this.center.setXY(this.teamFightLoc)
 
         determineTarget()
 
