@@ -71,7 +71,7 @@ function onHydraDeath()
         killedByTeam = false
 
     if killedByTeam
-        printTimed("Team "+teamName+" has killed a Hydra. Their heroes will gain a permanent stat bonus. The Hydra will respawn in "+REVIVE_TIME.toInt().toString()+" seconds.", 10)
+        printTimed("Team "+teamName+" has killed a Hydra. Their heroes gain 3 stat upgrades for every stat. The Hydra will respawn in "+REVIVE_TIME.toInt().toString()+" seconds.", 10)
         PingMinimap(target.getX(), target.getY(), 3)
 
         for CPlayer killerHero in killingTeam
