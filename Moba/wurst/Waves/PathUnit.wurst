@@ -201,115 +201,115 @@ public class PathUnit
 
     function updateMovement()
         //print("updateMovement "+this.assocUnit.getName() + " " +this.assocUnit.getHandleId().toString() )
-        if(assocUnit==null)
-            destroy(this)
-            return
+        if assocUnit == null
+            destroy this
+        else
         
-        this.nextUpdate = gameTime + this.getNextUpdate()
+            this.nextUpdate = gameTime + this.getNextUpdate()
 
-        if(currentPath==null)
-            return
-       
-        //print("continue")
-
-        if this.pathState == PathState.PATH
-            vec2 v0 = vec2(assocUnit.getX(), assocUnit.getY())
-            vec2 v1
-            vec2 v2
-            real minDistance = -1
-            int newSubPath = -1
-            int moveSubPath
-
-
-            //print(this.currentPath.getSubPathCount()-2)
-            for i=this.currentSubPath to this.currentPath.getSubPathCount()-2
-
-                v1 = vec2(this.currentPath.getSubPathX(i), this.currentPath.getSubPathY(i))
-                //print("v1="+v1.toString())
-                v2 = vec2(this.currentPath.getSubPathX(i+1), this.currentPath.getSubPathY(i+1))
-                //print("v2="+v2.toString())
-                real distance = v0.distanceToSegmentSq(v1, v2).pow(0.5)
-                //print("["+i.toString()+"] distance="+distance.toString())
-                //print("minDistance="+minDistance.toString())
-                if(distance <= minDistance+200 or minDistance==-1)
-                    minDistance = distance
-                    newSubPath = i
-                //if a subpath is far away, there won't come any close subpathes anymore
-                if distance>3000 or minDistance<100
-                    break
-            int newOrder
-            //string currentOrder =  OrderId2String(this.assocUnit.getCurrentOrder())
+            if currentPath != null
         
-            //print(minDistance)
-            
-            //print(currentOrder)
 
-            //move two subpathes forward
-            if(newSubPath+2<=this.currentPath.getSubPathCount()-1)
-                moveSubPath = newSubPath+2
-            else
-                moveSubPath = newSubPath+1
+                //print("continue")
 
-            v2 = vec2(this.currentPath.getSubPathX(moveSubPath), this.currentPath.getSubPathY(moveSubPath))
-
-            //addEffect("Abilities\\Weapons\\FarseerMissile\\FarseerMissile.mdl", v2)
-
-            //print("path: "+this.currentSubPath.toString()+" -> "+newSubPath.toString()+" -> "+moveSubPath.toString())
-
-            if(minDistance>900)
-                newOrder = 1
-            else
-                newOrder = 2
-
-            this.currentSubPath = newSubPath
-
-            //order:
-                //0 = do nothing
-                //1 = move back
-                //2 = continue move
+                if this.pathState == PathState.PATH
+                    vec2 v0 = vec2(assocUnit.getX(), assocUnit.getY())
+                    vec2 v1
+                    vec2 v2
+                    real minDistance = -1
+                    int newSubPath = -1
+                    int moveSubPath
 
 
-            group nearby = CreateGroup()
-            nearby.enumUnitsInRange(v0, 500)
-            
-            
+                    //print(this.currentPath.getSubPathCount()-2)
+                    for i=this.currentSubPath to this.currentPath.getSubPathCount()-2
 
-            while(true)
-                unit n = nearby.next()
-                if(n==null)
-                    break
-                nearby.removeUnit(n)
-                if(unitToPathUnit.has(n))
-                    PathUnit nearbyPathUnit = unitToPathUnit.get(n)
-
-                    if(nearbyPathUnit.currentPath == this.currentPath and (nearbyPathUnit.nextUpdate<gameTime or nearbyPathUnit == this) )
-                        
-
-                        if newOrder==1
-                            n.issuePointOrder("move", v2)
-                            //print("move back?")
-                            moveOrders++
-                            nearbyPathUnit.nextUpdate = gameTime + this.getNextUpdate()
-                        else
-                            if(gameTime-nearbyPathUnit.lastAttack > 2)
-                                n.issuePointOrder("attack", v2)
-                                moveOrders++
-                                nearbyPathUnit.nextUpdate = gameTime + this.getNextUpdate()
-                            else
-                                nearbyPathUnit.nextUpdate = gameTime + this.getNextUpdate()
-
-                        
+                        v1 = vec2(this.currentPath.getSubPathX(i), this.currentPath.getSubPathY(i))
+                        //print("v1="+v1.toString())
+                        v2 = vec2(this.currentPath.getSubPathX(i+1), this.currentPath.getSubPathY(i+1))
+                        //print("v2="+v2.toString())
+                        real distance = v0.distanceToSegmentSq(v1, v2).pow(0.5)
+                        //print("["+i.toString()+"] distance="+distance.toString())
+                        //print("minDistance="+minDistance.toString())
+                        if(distance <= minDistance+200 or minDistance==-1)
+                            minDistance = distance
+                            newSubPath = i
+                        //if a subpath is far away, there won't come any close subpathes anymore
+                        if distance>3000 or minDistance<100
+                            break
+                    int newOrder
+                    //string currentOrder =  OrderId2String(this.assocUnit.getCurrentOrder())
                 
-            nearby.destr()
-        else if this.pathState == PathState.ENEMY_TOWN
-            if this.assocUnit.getOwner() == players[TEAM_PLAYER_TEAM_1]
-                this.assocUnit.issuePointOrder("attack", gg_rct_BrownCastle.getCenter())
-            else if this.assocUnit.getOwner() == players[TEAM_PLAYER_TEAM_2]
-                this.assocUnit.issuePointOrder("attack", gg_rct_GreenCastle.getCenter())
-        else if this.pathState == PathState.HOME_TOWN
-            this.assocUnit.issuePointOrder("attack", this.returnRect.getCenter())          
-        else if this.pathState == PathState.RETURNING
-            this.assocUnit.issuePointOrder("move", this.returnRect.getCenter())          
+                    //print(minDistance)
+                    
+                    //print(currentOrder)
+
+                    //move two subpathes forward
+                    if(newSubPath+2<=this.currentPath.getSubPathCount()-1)
+                        moveSubPath = newSubPath+2
+                    else
+                        moveSubPath = newSubPath+1
+
+                    v2 = vec2(this.currentPath.getSubPathX(moveSubPath), this.currentPath.getSubPathY(moveSubPath))
+
+                    //addEffect("Abilities\\Weapons\\FarseerMissile\\FarseerMissile.mdl", v2)
+
+                    //print("path: "+this.currentSubPath.toString()+" -> "+newSubPath.toString()+" -> "+moveSubPath.toString())
+
+                    if(minDistance>900)
+                        newOrder = 1
+                    else
+                        newOrder = 2
+
+                    this.currentSubPath = newSubPath
+
+                    //order:
+                        //0 = do nothing
+                        //1 = move back
+                        //2 = continue move
+
+
+                    group nearby = CreateGroup()
+                    nearby.enumUnitsInRange(v0, 500)
+                    
+                    
+
+                    while(true)
+                        unit n = nearby.next()
+                        if(n==null)
+                            break
+                        nearby.removeUnit(n)
+                        if(unitToPathUnit.has(n))
+                            PathUnit nearbyPathUnit = unitToPathUnit.get(n)
+
+                            if(nearbyPathUnit.currentPath == this.currentPath and (nearbyPathUnit.nextUpdate<gameTime or nearbyPathUnit == this) )
+                                
+
+                                if newOrder==1
+                                    n.issuePointOrder("move", v2)
+                                    //print("move back?")
+                                    moveOrders++
+                                    nearbyPathUnit.nextUpdate = gameTime + this.getNextUpdate()
+                                else
+                                    if(gameTime-nearbyPathUnit.lastAttack > 2)
+                                        n.issuePointOrder("attack", v2)
+                                        moveOrders++
+                                        nearbyPathUnit.nextUpdate = gameTime + this.getNextUpdate()
+                                    else
+                                        nearbyPathUnit.nextUpdate = gameTime + this.getNextUpdate()
+
+                                
+                        
+                    nearby.destr()
+                else if this.pathState == PathState.ENEMY_TOWN
+                    if this.assocUnit.getOwner() == players[TEAM_PLAYER_TEAM_1]
+                        this.assocUnit.issuePointOrder("attack", gg_rct_BrownCastle.getCenter())
+                    else if this.assocUnit.getOwner() == players[TEAM_PLAYER_TEAM_2]
+                        this.assocUnit.issuePointOrder("attack", gg_rct_GreenCastle.getCenter())
+                else if this.pathState == PathState.HOME_TOWN
+                    this.assocUnit.issuePointOrder("attack", this.returnRect.getCenter())          
+                else if this.pathState == PathState.RETURNING
+                    this.assocUnit.issuePointOrder("move", this.returnRect.getCenter())          
                                 
     static function updateMovementGroup()
         var pU = PathUnit.unitToPathUnit.get(GetEnumUnit())

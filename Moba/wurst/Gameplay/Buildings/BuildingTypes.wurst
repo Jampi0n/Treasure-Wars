@@ -120,129 +120,128 @@ function setVictoryState(VictoryState newState)
 
 function onBuildingDeath()
     let building = GetTriggerUnit()
-    if not building.isType(UNIT_TYPE_STRUCTURE)
-        return
+    if building.isType(UNIT_TYPE_STRUCTURE)
 
-    let unitId = building.getTypeId()
-    let killer = GetKillingUnit().getOwner()
+        let unitId = building.getTypeId()
+        let killer = GetKillingUnit().getOwner()
 
-    int bounty = 0
-    int globalBounty = 0
+        int bounty = 0
+        int globalBounty = 0
 
-    if unitId == FARM
-        bounty = 50
-        globalBounty = 50
-        if building.getOwner().getId() == TEAM_PLAYER_TEAM_1
-            farmsTeam1--
-        else
-            farmsTeam2--
-
-    else if unitId == OUTER_TOWER
-        bounty = 75
-        globalBounty = 75
-
-    else if unitId == GATE_TOWER
-        bounty = 100
-        globalBounty = 100
-
-    else if unitId == BASE_TOWER
-        bounty = 100
-        globalBounty = 100
-
-    else if unitId == BARRACKS
-        bounty = 250
-        globalBounty = 250
-
-        let newBuilding = createUnit(building.getOwner(), BARRACKS_REBUILD, building.getPos(), (270).fromDeg())
-            ..setAnimation("birth")
-            ..setTimeScale(60/BARRACKS_REBUILD_TIME)
-            ..setHP(0.5)
-        UnitAddType(newBuilding, UNIT_TYPE_ANCIENT)
-        
-
-        for i=0 to 2
-            
-            let count = (BARRACKS_REBUILD_TIME / 0.1 +0.5).toInt()
-
-            if(building==udg_GreenBarracks[i])
-                udg_GreenBarracks[i] = newBuilding
-                barracksAliveTeam1[i] = false
-                doPeriodicallyCounted(0.1, count, (CallbackCounted cb) -> (begin
-                    if cb.isLast()
-                        let owner = newBuilding.getOwner()
-                        let pos = newBuilding.getPos()
-                        newBuilding.remove()
-                        udg_GreenBarracks[i] = createUnit(owner, BARRACKS, pos, (270).fromDeg())
-                        barracksAliveTeam1[i] = true
-                    else
-                        newBuilding.setHP(max(0.5, (1-cb.getCount()/count) * newBuilding.getMaxHP() ) )
-                end))
-            else if(building==udg_BrownBarracks[i])
-                udg_BrownBarracks[i] = newBuilding
-                barracksAliveTeam2[i] = false
-                doPeriodicallyCounted(0.1, count, (CallbackCounted cb) -> (begin
-                    if cb.isLast()
-                        let owner = newBuilding.getOwner()
-                        let pos = newBuilding.getPos()
-                        newBuilding.remove()
-                        udg_BrownBarracks[i] = createUnit(owner, BARRACKS, pos, (270).fromDeg())
-                        barracksAliveTeam2[i] = true
-                    else
-                        newBuilding.setHP(max(0.5, (1-cb.getCount()/count) * newBuilding.getMaxHP() ) )
-                end))
-
-    else if unitId == WORKSHOP
-        bounty = 150
-        globalBounty = 150
-
-        let newBuilding = createUnit(building.getOwner(), WORKSHOP_REBUILD, building.getPos(), (270).fromDeg())
-            ..setAnimation("birth")
-            ..setTimeScale(0)
-            ..setHP(0.5)
-        UnitAddType(newBuilding, UNIT_TYPE_ANCIENT)
-
-        for i=0 to 1
-            if(building==udg_GreenWorkShop[i])
-                udg_GreenWorkShop[i] = newBuilding
-                workshopAliveTeam1[i] = false
-
-            else if(building==udg_BrownWorkShop[i])
-                workshopAliveTeam2[i] = false
-                udg_BrownWorkShop[i] = newBuilding
-
-
-    else if unitId == ARCANE_VAULT
-        bounty = 100
-        globalBounty = 100
-
-    else if unitId == BLACKSMITH
-        bounty = 150
-        globalBounty = 150
-
-    else if unitId == CASTLE
-
-        if victoryState == VictoryState.UNDECIDED
-            if building.getOwner() == players[TEAM_PLAYER_TEAM_1]
-                setVictoryState(VictoryState.WIN_TEAM2)
-            else if building.getOwner() == players[TEAM_PLAYER_TEAM_2]
-                setVictoryState(VictoryState.WIN_TEAM1)
+        if unitId == FARM
+            bounty = 50
+            globalBounty = 50
+            if building.getOwner().getId() == TEAM_PLAYER_TEAM_1
+                farmsTeam1--
             else
-                error("Castle killed for player "+building.getOwner().getId().toString())
-        
-    if bounty + globalBounty > 0
-        let team = building.getOwner().getCPlayer().getTeam()
+                farmsTeam2--
 
-        if killer.getCPlayer().getTeam() == CPlayer.invertTeam(team)
-            killer.getCPlayer().addGoldEx(bounty + globalBounty)
-            killer.getCPlayer().statBuildingsRazed++
-            createGoldBountyTextTag(building, bounty + globalBounty, killer)
+        else if unitId == OUTER_TOWER
+            bounty = 75
+            globalBounty = 75
 
-        
-        for CPlayer cp in CPlayer.getEnemyHeroPlayers(team)
-            let p = cp.getPlayer()
-            if cp.getTeam() == CPlayer.invertTeam(team) and p!=killer
-                cp.addGoldEx(globalBounty)
-                createGoldBountyTextTag(building, globalBounty, p)
+        else if unitId == GATE_TOWER
+            bounty = 100
+            globalBounty = 100
+
+        else if unitId == BASE_TOWER
+            bounty = 100
+            globalBounty = 100
+
+        else if unitId == BARRACKS
+            bounty = 250
+            globalBounty = 250
+
+            let newBuilding = createUnit(building.getOwner(), BARRACKS_REBUILD, building.getPos(), (270).fromDeg())
+                ..setAnimation("birth")
+                ..setTimeScale(60/BARRACKS_REBUILD_TIME)
+                ..setHP(0.5)
+            UnitAddType(newBuilding, UNIT_TYPE_ANCIENT)
+            
+
+            for i=0 to 2
+                
+                let count = (BARRACKS_REBUILD_TIME / 0.1 +0.5).toInt()
+
+                if(building==udg_GreenBarracks[i])
+                    udg_GreenBarracks[i] = newBuilding
+                    barracksAliveTeam1[i] = false
+                    doPeriodicallyCounted(0.1, count, (CallbackCounted cb) -> (begin
+                        if cb.isLast()
+                            let owner = newBuilding.getOwner()
+                            let pos = newBuilding.getPos()
+                            newBuilding.remove()
+                            udg_GreenBarracks[i] = createUnit(owner, BARRACKS, pos, (270).fromDeg())
+                            barracksAliveTeam1[i] = true
+                        else
+                            newBuilding.setHP(max(0.5, (1-cb.getCount()/count) * newBuilding.getMaxHP() ) )
+                    end))
+                else if(building==udg_BrownBarracks[i])
+                    udg_BrownBarracks[i] = newBuilding
+                    barracksAliveTeam2[i] = false
+                    doPeriodicallyCounted(0.1, count, (CallbackCounted cb) -> (begin
+                        if cb.isLast()
+                            let owner = newBuilding.getOwner()
+                            let pos = newBuilding.getPos()
+                            newBuilding.remove()
+                            udg_BrownBarracks[i] = createUnit(owner, BARRACKS, pos, (270).fromDeg())
+                            barracksAliveTeam2[i] = true
+                        else
+                            newBuilding.setHP(max(0.5, (1-cb.getCount()/count) * newBuilding.getMaxHP() ) )
+                    end))
+
+        else if unitId == WORKSHOP
+            bounty = 150
+            globalBounty = 150
+
+            let newBuilding = createUnit(building.getOwner(), WORKSHOP_REBUILD, building.getPos(), (270).fromDeg())
+                ..setAnimation("birth")
+                ..setTimeScale(0)
+                ..setHP(0.5)
+            UnitAddType(newBuilding, UNIT_TYPE_ANCIENT)
+
+            for i=0 to 1
+                if(building==udg_GreenWorkShop[i])
+                    udg_GreenWorkShop[i] = newBuilding
+                    workshopAliveTeam1[i] = false
+
+                else if(building==udg_BrownWorkShop[i])
+                    workshopAliveTeam2[i] = false
+                    udg_BrownWorkShop[i] = newBuilding
+
+
+        else if unitId == ARCANE_VAULT
+            bounty = 100
+            globalBounty = 100
+
+        else if unitId == BLACKSMITH
+            bounty = 150
+            globalBounty = 150
+
+        else if unitId == CASTLE
+
+            if victoryState == VictoryState.UNDECIDED
+                if building.getOwner() == players[TEAM_PLAYER_TEAM_1]
+                    setVictoryState(VictoryState.WIN_TEAM2)
+                else if building.getOwner() == players[TEAM_PLAYER_TEAM_2]
+                    setVictoryState(VictoryState.WIN_TEAM1)
+                else
+                    error("Castle killed for player "+building.getOwner().getId().toString())
+            
+        if bounty + globalBounty > 0
+            let team = building.getOwner().getCPlayer().getTeam()
+
+            if killer.getCPlayer().getTeam() == CPlayer.invertTeam(team)
+                killer.getCPlayer().addGoldEx(bounty + globalBounty)
+                killer.getCPlayer().statBuildingsRazed++
+                createGoldBountyTextTag(building, bounty + globalBounty, killer)
+
+            
+            for CPlayer cp in CPlayer.getEnemyHeroPlayers(team)
+                let p = cp.getPlayer()
+                if cp.getTeam() == CPlayer.invertTeam(team) and p!=killer
+                    cp.addGoldEx(globalBounty)
+                    createGoldBountyTextTag(building, globalBounty, p)
 
 
 

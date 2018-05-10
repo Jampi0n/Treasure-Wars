@@ -203,11 +203,13 @@ function naturesWrath()
 
 
 function string.findLastCharacter(string char) returns int
+    int ret = -1
     for i = this.length()-1 downto 0
         if this.charAt(i) == char
-            return i
+            ret = i
+            break
     
-    return -1
+    return ret
 
 
 unit array uprooted_dummy
@@ -271,7 +273,6 @@ class EatTreeAnimation
 
         if this.caster.getCurrentOrder()!= OrderId("chainlightning")
             destroy this
-            return
     
     static function updateStatic()
         (GetExpiredTimer().getData() castTo EatTreeAnimation).update()

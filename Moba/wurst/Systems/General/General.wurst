@@ -32,18 +32,19 @@ public function printWarning(string warning)
         //print(warning)
 
 public function unit.isTargetable(player source, boolean allowFriends, boolean allowEnemies) returns boolean
+    boolean ret = true
     if this == null
-        return false
-    if not this.isAlive()
-        return false
-    if this.isType(UNIT_TYPE_ANCIENT)
-        return false
-    if not allowEnemies and IsUnitEnemy(this, source) 
-        return false
-    if not allowFriends and IsUnitAlly(this, source) 
-        return false
+        ret = false
+    else if not this.isAlive()
+        ret = false
+    else if this.isType(UNIT_TYPE_ANCIENT)
+        ret =  false
+    else if not allowEnemies and IsUnitEnemy(this, source) 
+        ret =  false
+    else if not allowFriends and IsUnitAlly(this, source) 
+        ret = false
     
-    return true
+    return ret
 
 public function unit.isVisible(player source) returns boolean
     return IsUnitVisible(this, source)
@@ -58,22 +59,28 @@ public function unit.isMovable() returns boolean
     return true
 
 public function unit.getStr() returns int
+    int ret
     if this.isType(UNIT_TYPE_HERO)
-        return GetHeroStr(this, true)
+        ret = GetHeroStr(this, true)
     else
-        return this.wrapper().getStatTotalBonus(Stat.STR) + this.wrapper().getStatBaseValue(Stat.STR)
+        ret = this.wrapper().getStatTotalBonus(Stat.STR) + this.wrapper().getStatBaseValue(Stat.STR)
+    return ret
 
 public function unit.getWp() returns int
+    int ret
     if this.isType(UNIT_TYPE_HERO)
-        return GetHeroAgi(this, true)
+        ret = GetHeroAgi(this, true)
     else
-        return this.wrapper().getStatTotalBonus(Stat.AGI) + this.wrapper().getStatBaseValue(Stat.AGI)
+        ret = this.wrapper().getStatTotalBonus(Stat.AGI) + this.wrapper().getStatBaseValue(Stat.AGI)
+    return ret
 
 public function unit.getInt() returns int
+    int ret
     if this.isType(UNIT_TYPE_HERO)
-        return GetHeroInt(this, true)
+        ret = GetHeroInt(this, true)
     else
-        return this.wrapper().getStatTotalBonus(Stat.INT) + this.wrapper().getStatBaseValue(Stat.INT)
+        ret = this.wrapper().getStatTotalBonus(Stat.INT) + this.wrapper().getStatBaseValue(Stat.INT)
+    return ret
 
 public function real.factor(int statValue, real atHundred) returns real
     return this * (atHundred*statValue/100 + 1)
@@ -201,8 +208,7 @@ public function enumUnitsInHitBoxRange(vec2 pos, real range) returns group
     while(true)
         let u = FirstOfGroup(g)
         if u == null
-            g.destr()
-            return returnGroup
+            break
         g.removeUnit(u)
         if u.hitBoxDistanceTo(pos) <= range
             returnGroup.addUnit(u)
@@ -244,15 +250,14 @@ public class ChannelTeleport
 
     private static function onDamage()
         let teleport = unitMap.get(GetTriggerUnit())
-        if teleport == null
-            return
-        teleport.damage += GetEventDamage()
-        if teleport.maxDamage > -0.5 and teleport.damage > teleport.maxDamage
-            teleport.remove()
-        else
-            let u = GetTriggerUnit()
-            if BuffList.hasBuffType(u, STUNNED) or BuffList.hasBuffType(u, SILENCED) or not u.isMovable()
+        if teleport != null
+            teleport.damage += GetEventDamage()
+            if teleport.maxDamage > -0.5 and teleport.damage > teleport.maxDamage
                 teleport.remove()
+            else
+                let u = GetTriggerUnit()
+                if BuffList.hasBuffType(u, STUNNED) or BuffList.hasBuffType(u, SILENCED) or not u.isMovable()
+                    teleport.remove()
         
     private function onTeleport()
         addEffect(Abilities.massTeleportCaster, this.caster.getPos()).destr()

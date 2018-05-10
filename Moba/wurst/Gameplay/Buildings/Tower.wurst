@@ -22,9 +22,7 @@ class TowerPos
         let deltaX = whichUnit.getX() - x
         let deltaY = whichUnit.getY() - y
         let dist = deltaX*deltaX + deltaY*deltaY
-        if dist < range * range
-            return true
-        return false
+        return dist < range * range
 
 
 public class Tower

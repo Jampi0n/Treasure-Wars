@@ -46,100 +46,100 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
     let originalDamage = GetEventDamage()
     real currentDamage = originalDamage
 
-    if originalDamage.abs() < 0.000001 //damage very small, just ignore
-        return
+    if originalDamage.abs() >= 0.000001 //damage very small, just ignore
 
 
 
 
 
 
-    /*
-        untargetable -> damage = 0 and no further damage handling
-        only for attacks, because every other damage will be dealt in code and there I can decide individually, if I want to deal damage
-    */
 
-    if (target.isType(UNIT_TYPE_ANCIENT) and isAttack) or gameOver
-        currentDamage = 0
-    else
+        /*
+            untargetable -> damage = 0 and no further damage handling
+            only for attacks, because every other damage will be dealt in code and there I can decide individually, if I want to deal damage
+        */
 
-        //example:
-        //currentDamage = currentDamage/2
+        if (target.isType(UNIT_TYPE_ANCIENT) and isAttack) or gameOver
+            currentDamage = 0
+        else
 
-        //===============================================================================
+            //example:
+            //currentDamage = currentDamage/2
 
-
-        // critical strike - TROLL BERSERKER
-        if advanced and source.isType(UNIT_TYPE_HERO) and BuffList.hasBuffType(source, buffCriticalStrike) and not target.isType(UNIT_TYPE_STRUCTURE)
-            let critical = BuffList.getBuffOfType(source, buffCriticalStrike)
-            currentDamage = currentDamage * (100 + CRITICAL_DAMAGE_MULT[critical.getLevel()-1])/100
-            createCriticalStrikeTextTag(target, currentDamage.toInt())
-            critical.dispel()
+            //===============================================================================
 
 
-        // shield - ITEM
-        if isAttack and target.isType(UNIT_TYPE_HERO)
-            currentDamage = currentDamage - 18 * target.countItemsOfType(convertItemId(ITEM_ID_SHIELD))
-
-        // mana shield - SEA DRUID
-        if target.isType(UNIT_TYPE_HERO) and BuffList.hasBuffType(target, buffManaShield)
-            
-            let manaShield = BuffList.getBuffOfType(target, buffManaShield)
-            let level = manaShield.getLevel()
-
-            
-            manaShield.getTarget().damageMana(manaShield.getTarget(), MANA_SHIELD_REDUCTION[level-1] * MANA_PER_DAMAGE[level-1] * currentDamage, ReductionType.NONE)
-            currentDamage = currentDamage * (1.-MANA_SHIELD_REDUCTION[level-1])
-    
-        // vampiric goblet - ITEM
-        if source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_VAMPIRIC_GOBLET)) and target.isType(UNIT_TYPE_HERO)
-            source.healHP(source, currentDamage * 0.2)
-            source.healMana(source, currentDamage * 0.15)
-
-        // wand of blood - ITEM
-        if source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_WAND_OF_BLOOD)) and not target.isType(UNIT_TYPE_STRUCTURE)
-            source.healHP(source, currentDamage * 0.08)
-
-        // sacrifical dagger - ITEM
-        if isAttack and source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_SACRIFICIAL_DAGGER)) and not target.isType(UNIT_TYPE_STRUCTURE)
-            source.healHP(source, currentDamage * 0.12)
-
-        // void armor - ITEM
-        if target.isType(UNIT_TYPE_HERO) and target.hasItemById(convertItemId(ITEM_ID_VOID_ARMOR))
-            target.healMana(target, currentDamage * 0.1)
-            currentDamage *= 0.9
-
-        // wand of death - ITEM
-        if source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_WAND_OF_DEATH)) and target.isType(UNIT_TYPE_HERO)
-            let wp = currentDamage * 0.02
-            let wrapper = target.wrapper()
-            wrapper.addStatAbsoluteBonusReal(Stat.AGI, (-wp*1000).toInt())
-            doAfter(10, () -> wrapper.addStatAbsoluteBonusReal(Stat.AGI, (wp*1000).toInt() ) )
+            // critical strike - TROLL BERSERKER
+            if advanced and source.isType(UNIT_TYPE_HERO) and BuffList.hasBuffType(source, buffCriticalStrike) and not target.isType(UNIT_TYPE_STRUCTURE)
+                let critical = BuffList.getBuffOfType(source, buffCriticalStrike)
+                currentDamage = currentDamage * (100 + CRITICAL_DAMAGE_MULT[critical.getLevel()-1])/100
+                createCriticalStrikeTextTag(target, currentDamage.toInt())
+                critical.dispel()
 
 
-        //===============================================================================
+            // shield - ITEM
+            if isAttack and target.isType(UNIT_TYPE_HERO)
+                currentDamage = currentDamage - 18 * target.countItemsOfType(convertItemId(ITEM_ID_SHIELD))
 
-    target.getOwner().getCPlayer().statDamageTaken += min(currentDamage, target.getHP())
-    source.getOwner().getCPlayer().statDamageDealt += min(currentDamage, target.getHP())
+            // mana shield - SEA DRUID
+            if target.isType(UNIT_TYPE_HERO) and BuffList.hasBuffType(target, buffManaShield)
+                
+                let manaShield = BuffList.getBuffOfType(target, buffManaShield)
+                let level = manaShield.getLevel()
 
-    let ai = getAI(target.getOwner().getId())
-    if ai != null and target.isType(UNIT_TYPE_HERO)
-        ai.onDamage(currentDamage)
+                
+                manaShield.getTarget().damageMana(manaShield.getTarget(), MANA_SHIELD_REDUCTION[level-1] * MANA_PER_DAMAGE[level-1] * currentDamage, ReductionType.NONE)
+                currentDamage = currentDamage * (1.-MANA_SHIELD_REDUCTION[level-1])
+        
+            // vampiric goblet - ITEM
+            if source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_VAMPIRIC_GOBLET)) and target.isType(UNIT_TYPE_HERO)
+                source.healHP(source, currentDamage * 0.2)
+                source.healMana(source, currentDamage * 0.15)
 
-    //if target.isType(UNIT_TYPE_HERO) and source.getOwner().getId() < MAX_HERO_COUNT
-        /*let factor = currentDamage.pow(0.3)*4
-        CreateTextTag()..setText(currentDamage.round().toString(), factor/2+4)
-                             ..setColor(200, 50, 25, 255)
-                             ..setPos(target.getX(), target.getY(), 0)
-                             ..setFadepoint(0)
-                             ..setLifespan(factor/20+0.4)
-                             ..setPermanent(false)
-                             ..setVisibility(true)
-                             ..setVelocity(GetRandomReal(-0.02, 0.02), 0.04)*/
+            // wand of blood - ITEM
+            if source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_WAND_OF_BLOOD)) and not target.isType(UNIT_TYPE_STRUCTURE)
+                source.healHP(source, currentDamage * 0.08)
 
-        //DamageTag.addDamage(target, currentDamage)
+            // sacrifical dagger - ITEM
+            if isAttack and source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_SACRIFICIAL_DAGGER)) and not target.isType(UNIT_TYPE_STRUCTURE)
+                source.healHP(source, currentDamage * 0.12)
 
-    BlzSetEventDamage(currentDamage)
+            // void armor - ITEM
+            if target.isType(UNIT_TYPE_HERO) and target.hasItemById(convertItemId(ITEM_ID_VOID_ARMOR))
+                target.healMana(target, currentDamage * 0.1)
+                currentDamage *= 0.9
+
+            // wand of death - ITEM
+            if source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_WAND_OF_DEATH)) and target.isType(UNIT_TYPE_HERO)
+                let wp = currentDamage * 0.02
+                let wrapper = target.wrapper()
+                wrapper.addStatAbsoluteBonusReal(Stat.AGI, (-wp*1000).toInt())
+                doAfter(10, () -> wrapper.addStatAbsoluteBonusReal(Stat.AGI, (wp*1000).toInt() ) )
+
+
+            //===============================================================================
+
+        target.getOwner().getCPlayer().statDamageTaken += min(currentDamage, target.getHP())
+        source.getOwner().getCPlayer().statDamageDealt += min(currentDamage, target.getHP())
+
+        let ai = getAI(target.getOwner().getId())
+        if ai != null and target.isType(UNIT_TYPE_HERO)
+            ai.onDamage(currentDamage)
+
+        //if target.isType(UNIT_TYPE_HERO) and source.getOwner().getId() < MAX_HERO_COUNT
+            /*let factor = currentDamage.pow(0.3)*4
+            CreateTextTag()..setText(currentDamage.round().toString(), factor/2+4)
+                                ..setColor(200, 50, 25, 255)
+                                ..setPos(target.getX(), target.getY(), 0)
+                                ..setFadepoint(0)
+                                ..setLifespan(factor/20+0.4)
+                                ..setPermanent(false)
+                                ..setVisibility(true)
+                                ..setVelocity(GetRandomReal(-0.02, 0.02), 0.04)*/
+
+            //DamageTag.addDamage(target, currentDamage)
+
+        BlzSetEventDamage(currentDamage)
 
 
 
