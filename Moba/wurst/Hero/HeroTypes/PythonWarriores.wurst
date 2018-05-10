@@ -88,6 +88,9 @@ constant integer ABILITY_POISON_SPIT_SLOWED = compiletime(ABIL_ID_GEN.next())
 constant integer ABILITY_POISON_SPIT_ARMOR_REDUCED = compiletime(ABIL_ID_GEN.next())
 constant integer BUFF_ID_POISON_SPIT = 'B00B'
 
+constant POISON_SPIT_BUFF_ID = compiletime(createAuraBuff("Poison Spit", "This unit stands inside Poison Spit. It has slowed movement speed, reduced armor and takes damage over time.", "BTNSlowSpellGreen"))
+constant POISON_SPIT_ABILITY_ID = compiletime(createNegativeBuffAbility(5, POISON_SPIT_BUFF_ID, "Units\\Undead\\PlagueCloud\\PlagueCloudtarget.mdl", "chest"))
+
 constant BUFF_POISON_SPIT = new BuffType(false, true)
 
 @compiletime
@@ -122,26 +125,6 @@ function poisonSpit()
             ..setTooltipNormalExtended(lvl, "Spits poison at the target area. Enemies within the area of effect are slowed by {0}, have their armor reduced by {1} and take {2} damage per second.|nLasts {3} seconds.".format(
             (-POISON_SPIT_SLOW_MS[lvl-1]).str()+"%", (-POISON_SPIT_ARMOR_REDUCTION[lvl-1]).str(), POISON_SPIT_DOT[lvl-1].str()+POISON_SPIT_DOT_BONUS.getBonusString(C_INT), POISON_SPIT_DURATION[lvl-1].str()))
 
-    let aDefSlowAura = new AbilityDefinitionAuraSlow(ABILITY_POISON_SPIT_SLOWED)
-        ..setLevels(5)
-        ..hideIcon()
-        ..setArtTarget("Units\\Undead\\PlagueCloud\\PlagueCloudtarget.mdl")
-        ..setTargetAttachmentPoint("chest")
-    for lvl = 1 to 5
-        aDefSlowAura
-            //..setMovementSpeedFactor(lvl, POISON_SPIT_SLOW_MS[lvl-1]) movement speed will be handled via trigger
-            ..setMovementSpeedFactor(lvl, 0)
-            ..setTargetsAllowed(lvl, "invulnerable,self,vulnerable")
-            ..setAreaofEffect(lvl, 1)
-            ..setBuffs(lvl, BUFF_ID_POISON_SPIT.toRawCode())
-
-    let aDefArmorReduction = new AbilityDefinitionDefenseBonusPlus1(ABILITY_POISON_SPIT_ARMOR_REDUCED)
-        ..setLevels(5)
-        ..hideIcon()
-        ..setItemAbility(false)
-    for lvl = 1 to 5
-        aDefArmorReduction
-            ..setDefenseBonus(lvl, POISON_SPIT_ARMOR_REDUCTION[lvl-1])
 
 constant real array EMPOWERED_STRIKE_DAMAGE = [80, 140, 200, 260, 320]
 constant real EMPOWERED_STRIKE_DAMAGE_BONUS = 150
@@ -377,11 +360,15 @@ function initHeroType()
         , ReductionType.MAGIC)
     end) )
     BUFF_POISON_SPIT.addFirstFunction( (Buff thisBuff) -> (begin
-        thisBuff.getTarget().wrapper().addStatRelativeBonus( Stat.MS, POISON_SPIT_SLOW_MS[thisBuff.getLevel()-1]*10 )
+        let wrapper = thisBuff.getTarget().wrapper()
+        wrapper.addStatRelativeBonus( Stat.MS, POISON_SPIT_SLOW_MS[thisBuff.getLevel()-1]*10 )
+        wrapper.addStatAbsoluteBonus( Stat.AR, POISON_SPIT_ARMOR_REDUCTION[thisBuff.getLevel()-1] )
     end) )
 
     BUFF_POISON_SPIT.addEndFunction( (Buff thisBuff) -> (begin
-        thisBuff.getTarget().wrapper().addStatRelativeBonus( Stat.MS, -POISON_SPIT_SLOW_MS[thisBuff.getLevel()-1]*10 )
+        let wrapper = thisBuff.getTarget().wrapper()
+        wrapper.addStatRelativeBonus( Stat.MS, -POISON_SPIT_SLOW_MS[thisBuff.getLevel()-1]*10 )
+        wrapper.addStatAbsoluteBonus( Stat.AR, -POISON_SPIT_ARMOR_REDUCTION[thisBuff.getLevel()-1] )
     end) )
 
     onEnter(() -> (begin
