@@ -49,7 +49,9 @@ function setupCreatedHero(Hero hero)
         pos = gg_rct_BrownCastle.getCenter()
 
     if hero.toUnit().getOwner().getController() == MAP_CONTROL_COMPUTER and hero.toUnit().getOwner().getSlotState() == PLAYER_SLOT_STATE_PLAYING
-        new HeroAI(cPlayer)
+        let ai = new HeroAI(cPlayer)
+        ai.togglePause()
+        doAfter(50, () -> ai.togglePause())
     
     hero.toUnit().setPos(pos)
     if GetLocalPlayer() == hero.toUnit().getOwner()
