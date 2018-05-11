@@ -49,7 +49,7 @@ function passive()
 
     for lvl = 1 to 5
         aDef
-            ..setTooltipNormalExtended(lvl, "Increases the Warlock's intelligence by {0}%.".format(
+            ..setDescriptionString(false, lvl, "Increases the Warlock's intelligence by {0}%.".format(
                 FEL_MAGIC_INTEL[lvl-1].str())
             )
 
@@ -81,7 +81,7 @@ function firebolt()
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setCastRange(lvl, RANGE[lvl-1])
-            ..setTooltipNormalExtended(lvl, "Summons a ball to fly to the target direction, dealing {0} magic damage to the first unit it hits.".format(
+            ..setDescriptionString(true, lvl, "Summons a ball to fly to the target direction, dealing {0} magic damage to the first unit it hits.".format(
                 FIREBOLT_DAMAGE[lvl-1].str()+FIREBOLT_DAMAGE_BONUS.getBonusString(C_INT))
             )
 
@@ -119,7 +119,7 @@ function infernalMeteor()
             ..setManaCost(lvl, MANA[lvl-1])
             ..setCastRange(lvl, RANGE[lvl-1])
             ..setAreaofEffect(lvl, METEOR_AOE[lvl-1])
-            ..setTooltipNormalExtended(lvl, "Calls down a burning meteor from the sky dealing {0} magic damage and stunning enemies in the target area for {1} seconds.".format(
+            ..setDescriptionString(true, lvl, "Calls down a burning meteor from the sky dealing {0} magic damage and stunning enemies in the target area for {1} seconds.".format(
                 METEOR_DAMAGE[lvl-1].str()+METEOR_DAMAGE_BONUS.getBonusString(C_INT), METEOR_STUN_DURATION[lvl-1].toString()
             ))
 
@@ -166,7 +166,7 @@ function soulburn()
             ..setManaCost(lvl, MANA[lvl-1])
             ..setCastRange(lvl, RANGE[lvl-1])
             ..setTargetsAllowed(lvl, "enemies,nonancient,ground,organic,air")
-            ..setTooltipNormalExtended(lvl, "Deals {0} damage per second to the target enemy unit for {1} seconds. If the unit dies, while under the effect of Soul Burn, nearby enemy units will be affected by Soul Burn. The initial target is silenced for {2} seconds.".format(
+            ..setDescriptionString(true, lvl, "Deals {0} damage per second to the target enemy unit for {1} seconds. If the unit dies, while under the effect of Soul Burn, nearby enemy units will be affected by Soul Burn. The initial target is silenced for {2} seconds.".format(
                 SOUL_BURN_DAMAGE[lvl-1].str()+SOUL_BURN_DAMAGE_BONUS.getBonusString(C_INT), SOUL_BURN_DURATION[lvl-1].toString(), SOUL_BURN_SILENCE[lvl-1].toString()
             ))
 
@@ -212,7 +212,7 @@ function rayOfDeath()
             ..setDurationNormal(lvl, 60)
             ..setBuffs(lvl, "Bmlc,"+BUFF_ID_RAY_OF_DEATH.toRawCode())
             ..setTargetsAllowed(lvl, "enemies,nonancient,ground,organic,hero")
-            ..setTooltipNormalExtended(lvl, CHANNELING_SPELL + "Channels a powerful ray at the target enemy hero, disabling the target and dealing {0} damage per second. If he channels for the full duration, he summons an explosion at the target's location dealing {1} additional damage.|nLasts {2} seconds.".format(
+            ..setDescriptionString(true, lvl, CHANNELING_SPELL + "Channels a powerful ray at the target enemy hero, disabling the target and dealing {0} damage per second. If he channels for the full duration, he summons an explosion at the target's location dealing {1} additional damage.|nLasts {2} seconds.".format(
                 RAY_OF_DEATH_DAMAGE[lvl-1].str()+RAY_OF_DEATH_DAMAGE_BONUS.getBonusString(C_INT), RAY_OF_DEATH_AFTER_DAMAGE[lvl-1].str()+RAY_OF_DEATH_AFTER_DAMAGE_BONUS.getBonusString(C_INT), RAY_OF_DEATH_DURATION[lvl-1].toString()
             ))
 

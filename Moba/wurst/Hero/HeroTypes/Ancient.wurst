@@ -37,7 +37,7 @@ function passive()
 
     for lvl = 1 to 5
         aDef
-            ..setTooltipNormalExtended(lvl, "Increases the Ancient's hit point regeneration by {0}%.".format(
+            ..setDescriptionString(true, lvl, "Increases the Ancient's hit point regeneration by {0}%.".format(
                 REGENERATION_HIT_POINT_REGEN[lvl-1].str())
             )
 
@@ -90,7 +90,7 @@ function devourUnit()
             ..setCastRange(lvl, 150)
             ..setDurationNormal(lvl, 0.1)
             ..setTargetsAllowed(lvl, "air,enemies,ground,neutral,nonancient,organic,nonhero")
-            ..setTooltipNormalExtended(lvl, CHANNELING_SPELL + "Grabs the target enemy unit to devour it and heals the hero for {0} hit points.".format(
+            ..setDescriptionString(true, lvl, CHANNELING_SPELL + "Grabs the target enemy unit to devour it and heals the hero for {0} hit points.".format(
                 DEVOUR_HEAL[lvl-1].str()+DEVOUR_HEAL_BONUS.getBonusString(C_INT)
             ))
 
@@ -127,7 +127,7 @@ function entanglingRoots()
             ..setManaCost(lvl, MANA[lvl-1])
             ..setCastRange(lvl, 800)
             ..setTargetsAllowed(lvl, "none")
-            ..setTooltipNormalExtended(lvl, "Releases thorns in a line, dealing {0} damage and entangling every enemy unit they pass through for {1} seconds.".format(
+            ..setDescriptionString(true, lvl, "Releases thorns in a line, dealing {0} damage and entangling every enemy unit they pass through for {1} seconds.".format(
                 ENTANGLE_HIT_DAMAGE[lvl-1].str()+ENTANGLE_HIT_DAMAGE_BONUS.getBonusString(C_INT), ENTANGLE_DURATION[lvl-1].toString()+ENTANGLE_DURATION_BONUS.getBonusString(C_INT)
             ))
 
@@ -162,7 +162,7 @@ function root()
             ..setAlternateFormUnit(lvl, HERO_TREE_ROOTED.toRawCode())
             ..setDurationNormal(lvl, ROOT_DURATION)
             ..setTooltipTurnOff(lvl, "(E) Uproot - [|cffffcc00Level "+lvl.toString()+"|r]")
-            ..setTooltipNormalExtended(lvl, "Burrows the Ancient's roots into the ground, rendering it immobile, but allowing to hurl enormous rocks dealing {0} area of effect damage. The Ancient's armor and willpower are increased by {1} while rooted.".format(
+            ..setDescriptionString(false, lvl, "Burrows the Ancient's roots into the ground, rendering it immobile, but allowing to hurl enormous rocks dealing {0} area of effect damage. The Ancient's armor and willpower are increased by {1} while rooted.".format(
                 ROOT_AOE_DAMAGE[lvl-1].str()+ROOT_AOE_DAMAGE_BONUS.getBonusString(C_STR), ROOT_RESISTANCE[lvl-1].str()
             ))
             ..setTooltipTurnOffExtended(lvl, "Allows the Ancient to pull itself up out of the ground so that it can move and engage units in melee combat.")
@@ -197,7 +197,7 @@ function naturesWrath()
             ..setDamageTakenIncrease(lvl, 0)
             ..setAttackSpeedIncrease(lvl, 0)
             ..setMovementSpeedIncrease(lvl, 0)
-            ..setTooltipNormalExtended(lvl, "Covers the ancient in a storm of sharp leaves, that deal {0} damage to nearby enemies over {1} seconds.".format(
+            ..setDescriptionString(true, lvl, "Covers the ancient in a storm of sharp leaves, that deal {0} damage to nearby enemies over {1} seconds.".format(
                 NATURES_WRATH_TOTAL_DAMAGE[lvl-1].str()+NATURES_WRATH_TOTAL_DAMAGE_BONUS.getBonusString(C_INT), NATURES_WRATH_DURATION[lvl-1].str()
             ))
 

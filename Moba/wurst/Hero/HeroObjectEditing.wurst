@@ -42,8 +42,14 @@ public function AbilityDefinition.setLearnString(string intro, LevelString level
     for i = 1 to 5
         learnString += getLevelString(i) + levelString.getString(i)
 
-    this.setTooltipLearnExtended(learnString)
+    this.setTooltipLearnExtended(learnString +"|n ")
 
+
+public function AbilityDefinition.setDescriptionString(boolean showCooldown, int lvl, string description)
+    if showCooldown
+        this.setTooltipNormalExtended(lvl, description+ "|n" + "Cooldown: " + "<" + this.getNewId().toRawCode() + ",Cool"+lvl.toString()+">" + "|n ")
+    else
+        this.setTooltipNormalExtended(lvl, description+ "|n ")
 
 public function getLevelString(int level) returns string
     return " |n|cffffcc00Level "+level.toString()+"|r - "

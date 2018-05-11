@@ -45,7 +45,7 @@ function passive()
 
     for lvl = 1 to 5
         aDef
-            ..setTooltipNormalExtended(lvl, "Increases the hero's attack speed by {0}%.".format(
+            ..setDescriptionString(false, lvl, "Increases the hero's attack speed by {0}%.".format(
                 OVERCHARGE_ATTACK_SPEED[lvl-1].str())
             )
 
@@ -82,7 +82,7 @@ function pull()
             ..setCastRange(lvl, RANGE)
             ..setTargetsAllowed(lvl, "none")
             ..setFollowThroughTime(lvl, 1.5)
-            ..setTooltipNormalExtended(lvl, CHANNELING_SPELL + "Sends out his hand to deal {0} damage to a target and pull it to him. While being pulled, the target is stunned, but cannot be targeted.|nThe first target hit once the hand returns will be pulled.".format(
+            ..setDescriptionString(true, lvl, CHANNELING_SPELL + "Sends out his hand to deal {0} damage to a target and pull it to him. While being pulled, the target is stunned, but cannot be targeted.|nThe first target hit once the hand returns will be pulled.".format(
                 PULL_DAMAGE[lvl-1].str()+PULL_DAMAGE_BONUS.getBonusString(C_STR)
             ))
 
@@ -128,7 +128,7 @@ function spikeBall()
             ..setManaCost(lvl, MANA[lvl-1])
             ..setTargetsAllowed(lvl, "none")
             ..setFollowThroughTime(lvl, 0.8)
-            ..setTooltipNormalExtended(lvl, CHANNELING_SPELL + "Slams the ground with a massive spike ball, dealing {0} damage stunning targets in an area in front of the hero for {1} seconds. After that targets will be bleeding and take additional {2} damage over {3}.".format(
+            ..setDescriptionString(true, lvl, CHANNELING_SPELL + "Slams the ground with a massive spike ball, dealing {0} damage stunning targets in an area in front of the hero for {1} seconds. After that targets will be bleeding and take additional {2} damage over {3}.".format(
                 SPIKE_BALL_DMG[lvl-1].str()+SPIKE_BALL_DMG_BONUS.getBonusString(C_STR),
                 SPIKE_BALL_STUN[lvl-1].toString(),
                 SPIKE_BALL_DOT_DMG[lvl-1].str()+SPIKE_BALL_DOT_DMG_BONUS.getBonusString(C_STR),
@@ -174,7 +174,7 @@ function speedBoost()
             ..setMovementSpeedIncrease(lvl, 0)
             ..setBuffs(lvl, SPEED_BOOST_BUFF_ID.toRawCode())
             ..setDurationHero(lvl, 0.01)
-            ..setTooltipNormalExtended(lvl, "Increases the hero's movement speed by {0}% for {1} seconds.".format(
+            ..setDescriptionString(true, lvl, "Increases the hero's movement speed by {0}% for {1} seconds.".format(
                 SPEED_BOOST[lvl-1].toString() + SPEED_BOOST_BONUS.getBonusString(C_INT),
                 SPEED_BOOST_DURATION[lvl-1].str()
             ))
@@ -214,7 +214,7 @@ function rocket()
             ..setManaCost(lvl, MANA[lvl-1])
             ..setCastRange(lvl, ROCKET_RANGE[lvl-1])
             ..setTargetsAllowed(lvl, "nonancient,enemies,ground,air")
-            ..setTooltipNormalExtended(lvl,"Fires a rocket at the target enemy unit, dealing {0} damage in an area around the target.".format(
+            ..setDescriptionString(true, lvl,"Fires a rocket at the target enemy unit, dealing {0} damage in an area around the target.".format(
                 ROCKET_DMG[lvl-1].str()+ROCKET_DMG_BONUS.getBonusString(C_STR)
             ))
 

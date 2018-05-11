@@ -39,7 +39,7 @@ function blackArrow()
 
     for lvl = 1 to 5
         aDef
-            ..setTooltipNormalExtended(lvl, "Increases the damage of killing attacks against enemies by {0} and spawns a skeleton for {1} seconds.".format( 
+            ..setDescriptionString(false, lvl, "Increases the damage of killing attacks against enemies by {0} and spawns a skeleton for {1} seconds.".format( 
             BLACK_ARROW_THRESHOLD[lvl-1].str(), 
             BLACK_ARROW_DURATION[lvl-1].str())
             )
@@ -78,7 +78,7 @@ function piercingShot()
             ..setDisableOtherAbilities(lvl, false)
             ..setBaseOrderID(lvl, "channel")
             ..setCastRange(lvl, RANGE[lvl-1])
-            ..setTooltipNormalExtended(lvl, "Shoots an arrow towards the target direction, dealing {0} damage to enemies it strikes through.".format(
+            ..setDescriptionString(true, lvl, "Shoots an arrow towards the target direction, dealing {0} damage to enemies it strikes through.".format(
             PIERCING_SHOT_DAMAGE[lvl-1].str()+PIERCING_SHOT_DAMAGE_BONUS.getBonusString(C_STR))
             )
 
@@ -109,7 +109,7 @@ function terror()
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setTargetsAllowed(lvl, "none")
-            ..setTooltipNormalExtended(lvl, "Terrifies enemies within {0} range, making them miss on their attacks for {1} seconds.".format(
+            ..setDescriptionString(true, lvl, "Terrifies enemies within {0} range, making them miss on their attacks for {1} seconds.".format(
             TERROR_AOE[lvl-1].str(), TERROR_DURATION[lvl-1].toString()+TERROR_DURATION_BONUS.getBonusString(C_INT)))
 
 
@@ -143,7 +143,7 @@ function boneBrothers()
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setTargetsAllowed(lvl, "nonancient,player")
-            ..setTooltipNormalExtended(lvl, "Switches position with one of his skeletons." )
+            ..setDescriptionString(true, lvl, "Switches position with one of his skeletons." )
 
 
         
@@ -179,7 +179,7 @@ function deathpact()
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setTargetsAllowed(lvl, "none")
-            ..setTooltipNormalExtended(lvl, "Sacrifices all his skeletons to unlock the power of Death Coil for {0} seconds.|nDeath Coil deals {1} plus {2} for every sacrificed skeleton magic damage to the target enemy hero.".format(
+            ..setDescriptionString(true, lvl, "Sacrifices all his skeletons to unlock the power of Death Coil for {0} seconds.|nDeath Coil deals {1} plus {2} for every sacrificed skeleton magic damage to the target enemy hero.".format(
             DEATH_COIL_DURATION.str(),
             DEATH_COIL_DMG_BASE[lvl-1].str()+DEATH_COIL_DMG_BASE_BONUS.getBonusString(C_INT),
             DEATH_COIL_DMG_FACTOR[lvl-1].str()+DEATH_COIL_DMG_FACTOR_BONUS.getBonusString(C_INT)))
@@ -203,7 +203,7 @@ function deathpact()
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setTargetsAllowed(lvl, "air,enemies,ground,neutral,nonancient,organic,hero")
             ..setTooltipNormal(lvl, "(R) Learn Death Coil - [|cffffcc00Level "+lvl.toString()+"|r]")
-            ..setTooltipNormalExtended(lvl, "Deals {0} magic damage and additional {1} magic damage for every sacrificed skeleton to the target enemy hero.".format(
+            ..setDescriptionString(true, lvl, "Deals {0} magic damage and additional {1} magic damage for every sacrificed skeleton to the target enemy hero.".format(
             DEATH_COIL_DMG_BASE[lvl-1].str()+DEATH_COIL_DMG_BASE_BONUS.getBonusString(C_INT),
             DEATH_COIL_DMG_FACTOR[lvl-1].str()+DEATH_COIL_DMG_FACTOR_BONUS.getBonusString(C_INT)))
         

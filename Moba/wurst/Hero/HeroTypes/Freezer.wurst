@@ -49,7 +49,7 @@ function coldHand()
 
     for lvl = 1 to 5
         aDef
-            ..setTooltipNormalExtended(lvl, "Attacking restores {0} mana points.".format(
+            ..setDescriptionString(false, lvl, "Attacking restores {0} mana points.".format(
                 COLD_HAND_MP[lvl-1].str())
             )
 
@@ -101,7 +101,7 @@ function frostNova()
             ..setManaCost(lvl, MANA[lvl-1])
             ..setCastRange(lvl, RANGE[lvl-1])
             ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
-            ..setTooltipNormalExtended(lvl, "Blasts enemy units with a wave of frost that deals {0} damage to the target, and {1} nova damage. Cold damage slows units' movement and attack rate for {2} seconds.".format(
+            ..setDescriptionString(true, lvl, "Blasts enemy units with a wave of frost that deals {0} damage to the target, and {1} nova damage. Cold damage slows units' movement and attack rate for {2} seconds.".format(
                 NOVA_TARGET_DMG[lvl-1].str() + NOVA_TARGET_DMG_BONUS.getBonusString(C_INT),
                 NOVA_AOE_DMG[lvl-1].str() + NOVA_AOE_DMG_BONUS.getBonusString(C_INT),
                 NOVA_DURATION[lvl-1].toString() + NOVA_DURATION_BONUS.getBonusString(C_INT)
@@ -152,7 +152,7 @@ function frostArmor()
             ..setManaCost(lvl, MANA[lvl-1])
             ..setCastRange(lvl, RANGE[lvl-1])
             ..setTargetsAllowed(lvl, "friend,nonancient,self")
-            ..setTooltipNormalExtended(lvl, "Creates a shield of frost around a target friendly unit. The shield adds {0} armor and slows units that attack it by {1}% for {2} seconds. Lasts {3} seconds.".format(
+            ..setDescriptionString(true, lvl, "Creates a shield of frost around a target friendly unit. The shield adds {0} armor and slows units that attack it by {1}% for {2} seconds. Lasts {3} seconds.".format(
                 ARMOR_AR[lvl-1].toString() + ARMOR_AR_BONUS.getBonusString(C_INT),
                 ARMOR_SLOW[lvl-1].toString(),
                 ARMOR_SLOW_DURATION[lvl-1].toString() + ARMOR_SLOW_DURATION_BONUS.getBonusString(C_INT),
@@ -198,7 +198,7 @@ function frostWyrm()
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setTargetsAllowed(lvl, "none")
-            ..setTooltipNormalExtended(lvl, "Summons a powerful Frost Wyrm. The Frost Wyrm's attack speed and hit points scale with the respective stats of the Hero. Deals {0} bonus damage and has {1} additional hit points. The Frost Wyrm's attacks slow the targets by {2}% for {3} seconds.".format(
+            ..setDescriptionString(true, lvl, "Summons a powerful Frost Wyrm. The Frost Wyrm's attack speed and hit points scale with the respective stats of the Hero. Deals {0} bonus damage and has {1} additional hit points. The Frost Wyrm's attacks slow the targets by {2}% for {3} seconds.".format(
                 FROST_WYRM_DMG[lvl-1].str() + FROST_WYRM_INT_FACTOR.getBonusString(C_INT),
                 FROST_WYRM_HP[lvl-1].str(),
                 FROST_BREATH_SLOW[lvl-1].str(),
@@ -245,7 +245,7 @@ function freeze()
             ..setEffects(lvl, "X000")
 
             ..setTargetsAllowed(lvl, "none")
-            ..setTooltipNormalExtended(lvl, CHANNELING_SPELL + "Freezes nearby enemies, disabling them for up to {1} seconds and dealing {0} damage per second. However, targets covered with ice have their armor and willpower increased by {2}.".format(
+            ..setDescriptionString(true, lvl, CHANNELING_SPELL + "Freezes nearby enemies, disabling them for up to {1} seconds and dealing {0} damage per second. However, targets covered with ice have their armor and willpower increased by {2}.".format(
                 FREEZE_DMG[lvl-1].str()+FREEZE_DMG_BONUS.getBonusString(C_INT),
                 FREEZE_DURATION[lvl-1].toString(),
                 FREEZE_DEF.str()

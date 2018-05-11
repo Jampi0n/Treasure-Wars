@@ -57,7 +57,7 @@ function passive()
 
     for lvl = 1 to 5
         aDef
-            ..setTooltipNormalExtended(lvl, "Killing a unit creates a fire explosion, dealing {0} magic damage to nearby targets.".format(
+            ..setDescriptionString(false, lvl, "Killing a unit creates a fire explosion, dealing {0} magic damage to nearby targets.".format(
                 FIERY_HANDS_DMG[lvl-1].str() + FIERY_HANDS_DMG_BONUS.getBonusString(C_INT)
             ))
 
@@ -103,7 +103,7 @@ function bash()
             ..setBuffs(lvl, BASH_BUFF_ID.toRawCode())
             ..setDurationHero(lvl, 0.01)
             ..setTargetsAllowed(lvl, "air,enemies,ground,neutral,nonancient,organic,nonhero")
-            ..setTooltipNormalExtended(lvl, "Increases the movement speed of the Infernal Machine and causes the next attack to stun the target for {0} seconds and deal {1} bonus bonus damage. Lasts {2} seconds.".format(
+            ..setDescriptionString(true, lvl, "Increases the movement speed of the Infernal Machine and causes the next attack to stun the target for {0} seconds and deal {1} bonus bonus damage. Lasts {2} seconds.".format(
                 BASH_STUN_DURATION[lvl-1].toString(), BASH_DAMAGE_BONUS[lvl-1].str(), BASH_BUFF_DURATION.str()
             ))
 
@@ -145,7 +145,7 @@ function innerFire()
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setTargetsAllowed(lvl, "none")
-            ..setTooltipNormalExtended(lvl, "Increases nearby units' strength by {0}% and armor and willpower by {1} for {2} seconds.".format(
+            ..setDescriptionString(true, lvl, "Increases nearby units' strength by {0}% and armor and willpower by {1} for {2} seconds.".format(
                 INNER_FIRE_DMG[lvl-1].str()+INNER_FIRE_DMG_BONUS.getBonusString(C_INT),
                 INNER_FIRE_DEF[lvl-1].str()+INNER_FIRE_DEF_BONUS.getBonusString(C_INT),
                 INNER_FIRE_DURATION.str()
@@ -200,7 +200,7 @@ function flameThrower()
             ..setManaCost(lvl, MANA[lvl-1])
             ..setCastRange(lvl, RANGE[lvl-1])
             ..setAreaofEffect(lvl, FLAME_THROWER_AOE[lvl-1])
-            ..setTooltipNormalExtended(lvl, "Launches a fiery missile at the target location that deals {0} initial damage and ignites the targets, dealing {1} damage per second for {2} seconds.".format(
+            ..setDescriptionString(true, lvl, "Launches a fiery missile at the target location that deals {0} initial damage and ignites the targets, dealing {1} damage per second for {2} seconds.".format(
                 FLAME_THROWER_DAMAGE[lvl-1].str()+FLAME_THROWER_DAMAGE_BONUS.getBonusString(C_INT),
                 FLAME_THROWER_DOT[lvl-1].str()+FLAME_THROWER_DOT_BONUS.getBonusString(C_INT),
                 FLAME_THROWER_DURATION[lvl-1].str()
@@ -237,7 +237,7 @@ function switchWeapons()
             ..setAttackSpeedBonusInfoPanelOnly(lvl, 0.8)
             ..setMoveSpeedBonusInfoPanelOnly(lvl, 0)
             ..setBuffs(lvl, RAPID_FIRE_BUFF_ID.toRawCode())
-            ..setTooltipNormalExtended(lvl, "Enables a rapid firing ranged attack with {0}% faster attack speed for the Infernal Machine, that stuns enemies it hits for {1} seconds. Bash is disabled while under the effect of Rapid Fire.|nLasts {2} seconds.".format(
+            ..setDescriptionString(true, lvl, "Enables a rapid firing ranged attack with {0}% faster attack speed for the Infernal Machine, that stuns enemies it hits for {1} seconds. Bash is disabled while under the effect of Rapid Fire.|nLasts {2} seconds.".format(
                 RAPID_FIRE_ATTACK_SPEED[lvl-1].str(), RAPID_FIRE_STUN_DURATION[lvl-1].toString(), RAPID_FIRE_DURATION.str()
             ))
 

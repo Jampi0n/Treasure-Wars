@@ -35,7 +35,7 @@ function focus()
 
     for lvl = 1 to 5
         aDef
-            ..setTooltipNormalExtended(lvl, "Every attack increases the Troll Berserker's strength by {0} for {1} seconds.".format(
+            ..setDescriptionString(false, lvl, "Every attack increases the Troll Berserker's strength by {0} for {1} seconds.".format(
                 FOCUS_BONUS.str(), FOCUS_DURATION[lvl-1].str()
             ))
 
@@ -77,7 +77,7 @@ function critical()
             ..setMovementSpeedIncrease(lvl, 0)
             ..setBuffs(lvl, CRITICAL_BUFF_ID.toRawCode())
             ..setDurationHero(lvl, 0.01)
-            ..setTooltipNormalExtended(lvl, "Increases the attack damage of the next attack by {0}%.".format(
+            ..setDescriptionString(true, lvl, "Increases the attack damage of the next attack by {0}%.".format(
                 CRITICAL_DAMAGE_MULT[lvl-1].str()
             ))
 
@@ -111,7 +111,7 @@ function blink()
             ..setManaCost(lvl, MANA[lvl-1])
             ..setMinimumRange(lvl, 250)
             ..setMaximumRange(lvl, BLINK_MAX_RANGE[lvl-1])
-            ..setTooltipNormalExtended(lvl, "Teleports the Troll Berserker a short distance.")
+            ..setDescriptionString(true, lvl, "Teleports the Troll Berserker a short distance.")
 
 constant int array SWITCH_DMG = [5, 10, 15, 20, 25]
 constant int array SWITCH_MOVE_SPEED = [10, 15, 20, 25, 30]
@@ -141,7 +141,7 @@ function switchWeapons()
             ..setAlternateFormUnit(lvl, HERO_TROLL_BERSERKER_MELEE.toRawCode())
             ..setDurationNormal(lvl, SWITCH_DURATION)
             ..setTooltipTurnOff(lvl, "(E) Switch to Ranged - [|cffffcc00Level "+lvl.toString()+"|r]")
-            ..setTooltipNormalExtended(lvl, "Turnes the Troll Berserker into a melee fighter, increasing attack damage by {0} and movement speed by {1}.".format(
+            ..setDescriptionString(true, lvl, "Turnes the Troll Berserker into a melee fighter, increasing attack damage by {0} and movement speed by {1}.".format(
                 SWITCH_DMG[lvl-1].str(), SWITCH_MOVE_SPEED[lvl-1].str()
             ))
             ..setTooltipTurnOffExtended(lvl, "Turnes the Troll Berserker back into a ranged fighter.")
@@ -212,7 +212,7 @@ function growth()
             ..setManaCost(lvl, MANA[lvl-1])
 
             ..setTargetsAllowed(lvl, "none")
-            ..setTooltipNormalExtended(lvl, "Increases the Troll Berserker's maximum hit points by {0} and hit point regeneration by {1} hit points per second for {2} seconds. When activated, the Troll Berserker petrifies nearby enemies making them unable to move for {3} seconds.".format(
+            ..setDescriptionString(true, lvl, "Increases the Troll Berserker's maximum hit points by {0} and hit point regeneration by {1} hit points per second for {2} seconds. When activated, the Troll Berserker petrifies nearby enemies making them unable to move for {3} seconds.".format(
                 GROWTH_HP[lvl-1].str() + GROWTH_HP_BONUS.getBonusString(C_INT),
                 GROWTH_HP_REGEN[lvl-1].str(),
                 GROWTH_DURATION[lvl-1].str(),

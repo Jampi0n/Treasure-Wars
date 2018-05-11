@@ -42,7 +42,7 @@ function envenomedBlades()
 
     for lvl = 1 to 5
         aDef
-            ..setTooltipNormalExtended(lvl, "Attacks deal {0} poison damage every second for {1} seconds.".format(
+            ..setDescriptionString(false, lvl, "Attacks deal {0} poison damage every second for {1} seconds.".format(
             ENVENOMED_BLADES_DAMAGE[lvl-1].str()+ENVENOMED_BLADES_DAMAGE_BONUS.getBonusString(C_INT), 
             ENVENOMED_BLADES_DURATION[lvl-1].str())
             )
@@ -73,7 +73,7 @@ function mistwalk()
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setTargetsAllowed(lvl, "none")
-            ..setTooltipNormalExtended(lvl,
+            ..setDescriptionString(true, lvl,
                 "Turns the Python Warriores invisibile for {0} seconds.".format(
                 MISTWALK_DURATION[lvl-1].toString()+MISTWALK_DURATION_BONUS.getBonusString(C_INT)))
 
@@ -122,7 +122,7 @@ function poisonSpit()
             ..setAreaofEffect(lvl, POISON_SPIT_AOE[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setTargetsAllowed(lvl, "none")
-            ..setTooltipNormalExtended(lvl, "Spits poison at the target area. Enemies within the area of effect are slowed by {0}, have their armor reduced by {1} and take {2} damage per second.|nLasts {3} seconds.".format(
+            ..setDescriptionString(true, lvl, "Spits poison at the target area. Enemies within the area of effect are slowed by {0}, have their armor reduced by {1} and take {2} damage per second.|nLasts {3} seconds.".format(
             (-POISON_SPIT_SLOW_MS[lvl-1]).str()+"%", (-POISON_SPIT_ARMOR_REDUCTION[lvl-1]).str(), POISON_SPIT_DOT[lvl-1].str()+POISON_SPIT_DOT_BONUS.getBonusString(C_INT), POISON_SPIT_DURATION[lvl-1].str()))
 
 
@@ -154,7 +154,7 @@ function empoweredStrike()
             ..setCastRange(lvl, 150)
             ..setDurationNormal(lvl, 0.1)
             ..setTargetsAllowed(lvl, "air,enemies,ground,neutral,nonancient,organic")
-            ..setTooltipNormalExtended(lvl, "Strikes the target enemy unit with a powerful melee attack dealing {0} physical damage.".format( 
+            ..setDescriptionString(true, lvl, "Strikes the target enemy unit with a powerful melee attack dealing {0} physical damage.".format( 
             EMPOWERED_STRIKE_DAMAGE[lvl-1].str()+EMPOWERED_STRIKE_DAMAGE_BONUS.getBonusString(C_STR)))
 
 
@@ -191,7 +191,7 @@ function paralyzingStrike()
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setTargetsAllowed(lvl, "enemies,ground,neutral,nonancient,organic,hero")
-            ..setTooltipNormalExtended(lvl, "Deals {0} magical damage to the target, stunning it for {1} seconds and teleports the Python Warriores behind the target.".format(
+            ..setDescriptionString(true, lvl, "Deals {0} magical damage to the target, stunning it for {1} seconds and teleports the Python Warriores behind the target.".format(
             PARALYZING_STRIKE_DAMAGE[lvl-1].str()+PARALYZING_STRIKE_DAMAGE_BONUS.getBonusString(C_INT),
             PARALYZING_STRIKE_DURATION[lvl-1].toString()+PARALYZING_STRIKE_DURATION_BONUS.getBonusString(C_INT)))
 

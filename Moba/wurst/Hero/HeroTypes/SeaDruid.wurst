@@ -37,7 +37,7 @@ function ancientKnowledge()
 
     for lvl = 1 to 5
         aDef
-            ..setTooltipNormalExtended(lvl, ("Increases maximum hit points by 1 for every {0} points of his maximum mana points and "+
+            ..setDescriptionString(false, lvl, ("Increases maximum hit points by 1 for every {0} points of his maximum mana points and "+
             "increases his maximum mana points by 1 for every {1} points of his maximum hit points.").format(
                 ANCIENT_KNOWLEDGE_HP_BONUS[lvl-1].toString(), ANCIENT_KNOWLEDGE_MP_BONUS[lvl-1].toString())
             )
@@ -71,7 +71,7 @@ function tidalFury()
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setTargetsAllowed(lvl, "none")
-            ..setTooltipNormalExtended(lvl, "Knocks nearby enemy units back, dealing {0} damage and releasing a crushing wave for every enemy unit hit. The wave deals {1} damage to every enemy it passes through.".format(
+            ..setDescriptionString(true, lvl, "Knocks nearby enemy units back, dealing {0} damage and releasing a crushing wave for every enemy unit hit. The wave deals {1} damage to every enemy it passes through.".format(
             TIDAL_FURY_HIT_DMG[lvl-1].str()+TIDAL_FURY_HIT_DMG_BONUS.getBonusString(C_STR),
             TIDAL_FURY_WAVE_DMG[lvl-1].str()+TIDAL_FURY_WAVE_DMG_BONUS.getBonusString(C_INT)))
 
@@ -127,7 +127,7 @@ function giantFish()
             ..setManaCost(lvl, MANA[lvl-1])
             ..setCastRange(lvl, RANGE[lvl-1])
             ..setAreaofEffect(lvl, FISH_AOE[lvl-1])
-            ..setTooltipNormalExtended(lvl, "Throws a giant fish at the target location, dealing {0} magic damage and slowing attack speed by {1}% and movement speed by {2}% for {3} seconds.".format(
+            ..setDescriptionString(true, lvl, "Throws a giant fish at the target location, dealing {0} magic damage and slowing attack speed by {1}% and movement speed by {2}% for {3} seconds.".format(
                 FISH_DAMAGE[lvl-1].str()+FISH_DAMAGE_BONUS.getBonusString(C_INT),
                 FISH_ATTACK_SPEED[lvl-1].str(),
                 FISH_MOVE_SPEED[lvl-1].str(),
@@ -172,7 +172,7 @@ function manaShield()
             ..setTooltipTurnOff(lvl, "(E) Deactivate Mana Shield - [|cffffcc00Level "+lvl.toString()+"|r]")
             ..setTooltipTurnOffExtended(lvl, "Deactivate Mana Shield to stop draining mana.")
             ..setTargetsAllowed(lvl, "none")
-            ..setTooltipNormalExtended(lvl, "Reduces incoming damage by {0}%, by spending {1} mana points for every blocked point of damage. Also drains mana while activated.".format(
+            ..setDescriptionString(true, lvl, "Reduces incoming damage by {0}%, by spending {1} mana points for every blocked point of damage. Also drains mana while activated.".format(
                 (MANA_SHIELD_REDUCTION[lvl-1]*100).str(), MANA_PER_DAMAGE[lvl-1].toString()
             ))
 
@@ -222,7 +222,7 @@ function ritualOfTheSeas()
             ..setEffects(lvl, "X000")
 
             ..setTargetsAllowed(lvl, "none")
-            ..setTooltipNormalExtended(lvl, CHANNELING_SPELL + "Sends out magical energy, that drain {0} hit points and {1} mana from nearby enemies.|nLasts for {2} waves.|nThe Sea Druid gets {3}% of the hit points and {4}% of the mana drained from enemy heroes.".format(
+            ..setDescriptionString(true, lvl, CHANNELING_SPELL + "Sends out magical energy, that drain {0} hit points and {1} mana from nearby enemies.|nLasts for {2} waves.|nThe Sea Druid gets {3}% of the hit points and {4}% of the mana drained from enemy heroes.".format(
                 RITUAL_HP_DRAIN[lvl-1].str()+RITUAL_HP_DRAIN_BONUS.getBonusString(C_INT),
                 RITUAL_MANA_DRAIN[lvl-1].str()+RITUAL_MANA_DRAIN_BONUS.getBonusString(C_INT),
                 RITUAL_WAVE_COUNT[lvl-1].str(),
