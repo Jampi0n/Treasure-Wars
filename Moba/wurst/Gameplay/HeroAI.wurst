@@ -8,6 +8,7 @@ import ClosureTimers
 import ItemShopSystem
 import UnitType
 import BuildingTypes
+import OnAttack
 
 constant team1AIs = new LinkedList<HeroAI>
 constant team2AIs = new LinkedList<HeroAI>
@@ -214,6 +215,7 @@ public class TeamFight
     static function updateStatic()
         for TeamFight tf in activeTeamFights
             tf.update()
+            
 
     function update()
 
@@ -306,7 +308,7 @@ public class HeroAI
     private boolean firstTeam
     private boolean casting = false
     private string castOrder = ""
-    private boolean attacking = false
+    protected boolean attacking = false
     private vec2 currentTargetLoc
     private vec2 currentRetreatLoc
     
@@ -462,8 +464,8 @@ public class HeroAI
 
 
 
-
-        this.buyItems()
+        
+        
 
         let rand = GetRandomInt(1, 3)
         if rand == 1
@@ -474,7 +476,9 @@ public class HeroAI
             this.lane = Lane.MID
 
         updateTargetLoc()
-        selectSkills()
+        //should not happen for everyone at the same time (lag)
+        doAfter(GetRandomReal(0.1, 0.3), -> this.buyItems() )
+        doAfter(GetRandomReal(0.1, 0.3), -> this.selectSkills() )
 
     static function getAbilityId(int heroId, AbilitySlot slot) returns int
         int id = 256 * 256 * 256 * 65 //A
@@ -609,10 +613,14 @@ public class HeroAI
 
 
     static function updateStatic()
+        int i = 0
         for HeroAI ai in team1AIs
-            ai.update()
+            doAfter(i * 0.05, -> ai.update())
+            i++
+        i = 0
         for HeroAI ai in team2AIs
-            ai.update()
+            doAfter(i * 0.05, -> ai.update())
+            i++
 
     function startTeamFight(TeamFight teamFight)
 
@@ -802,9 +810,6 @@ public class HeroAI
         boolean ret = false
         if not casting and not attacking
             attacking = this.heroUnit.issueTargetOrder("attack", targetWidget)
-            doAfter(0.6, () -> (begin
-                this.attacking = false
-            end))
             ret = attacking
         return ret
 
@@ -968,4 +973,11 @@ init
         let ai = HeroAI.heroAIs[0]
         if ai != null
             ai.buyItems()
+    end))
+
+    OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+        if attacker.isType(UNIT_TYPE_HERO)
+            let ai = HeroAI.heroAIs[attacker.getOwner().getId()]
+            if ai != null
+                ai.attacking = false
     end))
