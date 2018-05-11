@@ -8,6 +8,7 @@ import TimerUtils
 import UnitTypeConfig
 import initlater SeaDruid
 import initlater TrollBerserker
+import initlater Paladin
 import StandardTextTags
 import HashMap
 import GameTimer
@@ -76,6 +77,9 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
                 createCriticalStrikeTextTag(target, currentDamage.toInt())
                 critical.dispel()
 
+            //heavy armored
+            if isAttack and target.getAbilityLevel(ABILITY_HEAVY_ARMORED) > 0
+                currentDamage -= HEAVY_ARMOED_REDUCTION[target.getAbilityLevel(ABILITY_HEAVY_ARMORED) - 1]
 
             // shield - ITEM
             if isAttack and target.isType(UNIT_TYPE_HERO)
@@ -118,6 +122,8 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
 
 
             //===============================================================================
+
+        currentDamage = max(0, currentDamage)
 
         target.getOwner().getCPlayer().statDamageTaken += min(currentDamage, target.getHP())
         source.getOwner().getCPlayer().statDamageDealt += min(currentDamage, target.getHP())

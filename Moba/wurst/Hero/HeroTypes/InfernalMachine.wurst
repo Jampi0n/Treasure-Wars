@@ -46,7 +46,7 @@ constant real FIERY_HANDS_DMG_BONUS = 30
 
 @compiletime
 function passive()
-    let aDef =createNoEffectAbiltiy(ABILITY_FIERY_HANDS)
+    let aDef = createNoEffectAbiltiy(ABILITY_FIERY_HANDS)
         ..setupWithHotKey("Fiery Hands", "D")
         ..setupIcon("PASFierySoul")
         ..setLearnString("Killing a unit creates a fire explosion, dealing magic damage to nearby targets.", (int lvl) -> (begin

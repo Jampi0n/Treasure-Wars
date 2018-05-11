@@ -12,7 +12,7 @@ import SoundUtils
 public constant HERO_PALADIN = 'H000'
 HeroType heroType
 
-constant ABILITY_HEAVY_ARMORED = 'AZ2P'
+public constant ABILITY_HEAVY_ARMORED = 'AZ2P'
 constant ABILITY_SHIELD_BASH = 'AZ2Q'
 constant ABILITY_BATTLE_ROAR = 'AZ2W'
 constant ABILITY_HOLY_SHIELD = 'AZ2E'
@@ -26,13 +26,11 @@ constant SOUND_DIVINE_PUNISHMENT = new SoundDefinition(Sounds.holyBolt, false, t
 
 //Balancing and Object Editing
 
-constant real array HEAVY_ARMOED_REDUCTION = [10, 15, 20, 25, 30]
+public constant real array HEAVY_ARMOED_REDUCTION = [10, 15, 20, 25, 30] // onAttack
 
 @compiletime
 function heavyArmored()
-    let aDef = new AbilityDefinitionHardenedSkin(ABILITY_HEAVY_ARMORED)
-        ..setCheckDependencies(false)
-        ..setRequirements("")
+    let aDef = createNoEffectAbiltiy(ABILITY_HEAVY_ARMORED)
         ..setupIcon("PASHolyArmor")
         ..setupWithHotKey("Heavy Armored", "D")
         ..setLearnString("Reduces damage from incoming attacks.", (int lvl) -> (begin
