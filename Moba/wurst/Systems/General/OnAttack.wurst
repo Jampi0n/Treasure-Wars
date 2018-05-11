@@ -83,7 +83,10 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
 
             // shield - ITEM
             if isAttack and target.isType(UNIT_TYPE_HERO)
-                currentDamage = currentDamage - 18 * target.countItemsOfType(convertItemId(ITEM_ID_SHIELD))
+                currentDamage = currentDamage - 15 * target.countItemsOfType(convertItemId(ITEM_ID_SHIELD))
+
+            if isAttack and target.isType(UNIT_TYPE_HERO)
+                currentDamage = currentDamage - 20 * target.countItemsOfType(convertItemId(ITEM_ID_HOLY_SHIELD))
 
             // mana shield - SEA DRUID
             if target.isType(UNIT_TYPE_HERO) and BuffList.hasBuffType(target, buffManaShield)

@@ -238,10 +238,10 @@ function checkAura()
 
 function itemWarDrum(int itemId)
     int asBonus = 20
-    int msBonus = 10
+    int msBonus = 40
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("Increases nearby unit's attack speed by {0}% and movement speed by {1}%. This effect does not stack".format(
+            ..setDescription("Increases nearby unit's attack speed by {0}% and movement speed by {1}. This effect does not stack".format(
                 asBonus.toString(), msBonus.toString()
             ))
             ..setGoldCost(3100)
@@ -263,13 +263,13 @@ function itemWarDrum(int itemId)
         BUFF_WAR_DRUM.setup(abilityList, WAR_DRUM_BUFF_ID)
         BUFF_WAR_DRUM.addFirstFunction((Buff thisBuff) -> (begin
             thisBuff.getTarget().wrapper()
-                ..addStatRelativeBonus(Stat.MS, msBonus*10)
+                ..addStatAbsoluteBonus(Stat.MS, msBonus)
                 ..addStatAbsoluteBonus(Stat.AS, asBonus)
         end))
 
         BUFF_WAR_DRUM.addEndFunction((Buff thisBuff) -> (begin
             thisBuff.getTarget().wrapper()
-                ..addStatRelativeBonus(Stat.MS, -msBonus*10)
+                ..addStatAbsoluteBonus(Stat.MS, -msBonus)
                 ..addStatAbsoluteBonus(Stat.AS, -asBonus)
         end))
 
@@ -282,10 +282,12 @@ function itemWarDrum(int itemId)
 
 function itemWarHorn(int itemId)
     int adBonus = 25
+    int str = 20
+    int unitDmg = 25
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("Increases nearby unit's strength by {0}%.".format(
-                adBonus.toString()
+            ..setDescription("+{0} strength|nDeals {1} additional damage to units.|nIncreases nearby unit's strength by {2}%.".format(
+                str.toString(), unitDmg.toString(), adBonus.toString()
             ))
             ..setGoldCost(3100)
             ..addRequirement(ITEM_ID_HAMMER_OF_STRENGTH)
@@ -293,6 +295,7 @@ function itemWarHorn(int itemId)
             ..addRequirement(ITEM_ID_BOW)
     else
         itemId.getItem()
+            ..addStatBonusAbsolute(Stat.STR, str)
             ..addPickupFunction(() -> (begin
                 if isUnique() and hasNot(convertItemId(ITEM_ID_WAR_DRUM))
                     auraHeroes.addUnit(getTriggerHero())
@@ -319,6 +322,12 @@ function itemWarHorn(int itemId)
                 target.wrapper().addStatRelativeBonus(Stat.STR, -adBonus*10)
             else
                 target.wrapper().addStatRelativeBonus(Stat.AD, -adBonus*10)
+        end))
+
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if not target.isType(UNIT_TYPE_HERO) and not target.isType(UNIT_TYPE_STRUCTURE) and attacker.isType(UNIT_TYPE_HERO)
+                let dmg = attacker.countItemsOfType(convertItemId(itemId)) * unitDmg
+                attacker.dealDamage(target, dmg.toReal(), ReductionType.PHYSICAL)
         end))
 
 function itemHeavyHelmet(int itemId)
