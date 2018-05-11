@@ -3,6 +3,8 @@ package InfernalMachine
 import HeroControl
 import OnAttack
 
+import Fx
+
 //8
 
 import HeroType
@@ -165,7 +167,7 @@ constant int FLAME_THROWER_BUFF_ID = compiletime(createAuraBuff("Flame Thrower",
 constant int FLAME_THROWER_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, FLAME_THROWER_BUFF_ID, Abilities.breathOfFireDamage, "origin"))
 
 constant int FLAME_THROWER_IMPACT = compiletime(ArtilleryDetection.createDetectionDummy())
-constant int FLAME_THROWER_ARTILLERY = compiletime(ArtilleryDetection.createArtilleryDummy(30, 20, 210, 2, Abilities.redDragonMissile, 900, 0.3, FLAME_THROWER_IMPACT))
+constant int FLAME_THROWER_ARTILLERY = compiletime(ArtilleryDetection.createArtilleryDummy(30, 20, 210, 2.5, Abilities.redDragonMissile, 900, 0.3, FLAME_THROWER_IMPACT))
 
 
 BuffType buffFlameThrower
@@ -544,6 +546,17 @@ function initHeroType()
         let caster = Hero.getHero(impact.getOwner()).toUnit()
         let level = caster.getAbilityLevel(ABILITY_FLAME_THROWER)
         nearby.enumUnitsInRange(impact.getPos(), FLAME_THROWER_AOE[level-1])
+
+        
+        var fx = new Fx(impact.getPos(), Abilities.liquidfire)
+        fx.setScale(3.5)
+        doAfter(1, () -> destroy fx)
+
+        for i = 0 to 10
+            fx = new Fx(impact.getPos().polarOffset(GetRandomDirectionDeg().fromDeg(), GetRandomReal(0, 300)), Abilities.flameStrikeEmbers)
+            fx.setScale(2)
+            doAfter(0.5, () -> destroy fx)
+            
 
         let dmg = (FLAME_THROWER_DAMAGE[level-1]).bonus(caster.getInt(), FLAME_THROWER_DAMAGE_BONUS)
         while(not nearby.isEmpty())

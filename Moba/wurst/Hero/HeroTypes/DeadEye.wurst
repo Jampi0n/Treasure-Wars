@@ -277,9 +277,12 @@ function onSpellCast()
         nearby.destr()
 
     if(spellId==ABILITY_PIERCING_SHOT)
-        new Missile(caster, caster.getPos().withZ(80), 1500, caster.getPos().angleTo(vec2(GetSpellTargetX(), GetSpellTargetY())), "Abilities\\Weapons\\BallistaMissile\\BallistaMissile.mdl")
+        let facing = caster.getPos().angleTo(vec2(GetSpellTargetX(), GetSpellTargetY()))
+        new Missile(caster, caster.getPos().withZ(80), 1500, facing, "Abilities\\Weapons\\BallistaMissile\\BallistaMissile.mdl")
             ..hitOnce()
             ..setSize(75)
+            ..setScale(1.2)
+            ..addModel(Abilities.avengerMissile)
             ..setHitCondition((Missile missile, unit target) -> (begin
             return not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(missile.getOwner().getOwner(), false, true)
         end) )
