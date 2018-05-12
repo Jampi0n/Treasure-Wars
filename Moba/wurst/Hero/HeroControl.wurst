@@ -7,6 +7,7 @@ import HeroType
 import Upgrades
 import TimerUtils
 import ClosureTimers
+import Execute
 
 constant HP_PER_LEVEL = 15
 constant STRENGTH_BONUS = 30
@@ -52,9 +53,9 @@ public class Hero
     function setup()
         this.heroType = HeroType.getHeroType(this.hero.getTypeId())
 
-        
-        this.heroType.initialize()
 
+        execute( -> this.heroType.initialize())
+        
         unitToHero.put(this.hero, this)
         heroes[this.owner.getId()] = this
         onDamageTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DAMAGED)

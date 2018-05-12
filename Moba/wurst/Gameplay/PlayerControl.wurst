@@ -534,9 +534,11 @@ public class CPlayer
         for i = 0 to MAX_HERO_COUNT-1
             player p = players[i]
             Team t = i <= HERO_PLAYER_TEAM_1_LAST ?Team.TEAM1:Team.TEAM2
-            if( p.getSlotState()==PLAYER_SLOT_STATE_PLAYING )
+            if p.getSlotState()==PLAYER_SLOT_STATE_PLAYING
                 new CPlayer(p, t, PlayerType.HERO)
-                if(not admin)
+                if p.getController() == MAP_CONTROL_COMPUTER
+                    PauseCompAI(players[i], true)
+                if not admin and p.getController() == MAP_CONTROL_USER
                     admin = true
                     adminPlayer = i
             else

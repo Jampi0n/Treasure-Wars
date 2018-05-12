@@ -477,8 +477,11 @@ public class HeroAI
 
         updateTargetLoc()
         //should not happen for everyone at the same time (lag)
-        doAfter(GetRandomReal(0.1, 0.3), -> this.buyItems() )
-        doAfter(GetRandomReal(0.1, 0.3), -> this.selectSkills() )
+        doAfter(GetRandomReal(0.1, 0.3), () -> (begin
+            if not this.paused
+                this.buyItems()
+                this.selectSkills()
+        end))
 
     static function getAbilityId(int heroId, AbilitySlot slot) returns int
         int id = 256 * 256 * 256 * 65 //A
