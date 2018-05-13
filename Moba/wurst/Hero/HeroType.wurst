@@ -6,6 +6,7 @@ import public Stats
 import public Buff
 import public BuffTypeConfig
 import public General
+import public UtilityFunctions
 import public UnitWrapper
 import public HeroObjectEditing
 import public Assets
@@ -83,6 +84,7 @@ public class HeroType
     function initialize()
         if getOnInitFunction() != null
             getOnInitFunction().onInit()
+            destroy getOnInitFunction()
             setOnInitFunction(null)
 
     function addMorph(int id)

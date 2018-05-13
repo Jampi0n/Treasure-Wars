@@ -143,6 +143,7 @@ public function unit.findTarget(real range, AbilityTargetFocus focus, AbilityTar
 
         if filter != null
             valid = valid and filter.filter(u)
+            destroy filter
 
         if valid
             if priority == AbilityTargetPriority.LOW_HEALTH

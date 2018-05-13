@@ -424,8 +424,56 @@ function teamFightAI(HeroAI ai)
         if not ai.getAttacking()
             ai.attack(target)
 
+function setupTooltips()
+    DynamicTooltip tooltip = new DynamicTooltip(ABILITY_FIERY_HANDS)
+    tooltip.setLearnString("Killing a unit creates a fire explosion, dealing magic damage to nearby targets.", (int lvl) -> (begin
+        return "{0}{I0} damage".format(FIERY_HANDS_DMG[lvl-1].str())
+    end))
+    tooltip.setReplaceIntelligence(FIERY_HANDS_DMG_BONUS)
+    for lvl = 1 to 5
+        tooltip.setNormalString(false, lvl, "Killing a unit creates a fire explosion, dealing {0}{I0} magic damage to nearby targets.".format(
+            FIERY_HANDS_DMG[lvl-1].str()
+        ))
+    heroType.addDynamicTooltipIntelligence(tooltip)
+
+    tooltip = new DynamicTooltip(ABILITY_INNER_FIRE)
+    tooltip.setLearnString("Increases nearby units strength, armor and willpower.", (int lvl) -> (begin
+        return "+{0}{I0}% strength, +{1}{I1} armor and willpower, {2} seconds".format(
+        INNER_FIRE_DMG[lvl-1].str(),
+        INNER_FIRE_DEF[lvl-1].str(),
+        INNER_FIRE_DURATION.str()
+        )
+    end) )
+    tooltip.setReplaceIntelligence(INNER_FIRE_DMG_BONUS.toReal(), INNER_FIRE_DEF_BONUS.toReal())
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, "Increases nearby units' strength by {0}{I0}% and armor and willpower by {1}{I1} for {2} seconds.".format(
+            INNER_FIRE_DMG[lvl-1].str(),
+            INNER_FIRE_DEF[lvl-1].str(),
+            INNER_FIRE_DURATION.str()
+        ))
+    heroType.addDynamicTooltipIntelligence(tooltip)
+
+    tooltip = new DynamicTooltip(ABILITY_FLAME_THROWER)
+    tooltip.setLearnString("Launches a fiery missile at the target location that deals large initial damage and ignites the targets, dealing additional damage over time.", (int lvl) -> (begin
+        return "{0}{I0} initial damage, {1}{I1} damage per second for {2} seconds.".format(
+            FLAME_THROWER_DAMAGE[lvl-1].str()+FLAME_THROWER_DAMAGE_BONUS.getBonusString(C_INT),
+            FLAME_THROWER_DOT[lvl-1].str()+FLAME_THROWER_DOT_BONUS.getBonusString(C_INT),
+            FLAME_THROWER_DURATION[lvl-1].str()
+        )
+    end) )
+    tooltip.setReplaceIntelligence(FLAME_THROWER_DAMAGE_BONUS, FLAME_THROWER_DOT_BONUS)
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, "Launches a fiery missile at the target location that deals {0}{I0} initial damage and ignites the targets, dealing {1}{I1} damage per second for {2} seconds.".format(
+            FLAME_THROWER_DAMAGE[lvl-1].str()+FLAME_THROWER_DAMAGE_BONUS.getBonusString(C_INT),
+            FLAME_THROWER_DOT[lvl-1].str()+FLAME_THROWER_DOT_BONUS.getBonusString(C_INT),
+            FLAME_THROWER_DURATION[lvl-1].str()
+        ))
+    heroType.addDynamicTooltipIntelligence(tooltip)
+
+
 function initHeroType()
     setupStats()
+    setupTooltips()
 
     heroType
         ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive, advanced))
@@ -443,16 +491,7 @@ function initHeroType()
         ..addItem(ITEM_ID_ARCANE_SHIELD)
 
 
-    DynamicTooltip tooltip = new DynamicTooltip(ABILITY_FIERY_HANDS)
-    tooltip.setLearnString("Killing a unit creates a fire explosion, dealing magic damage to nearby targets.", (int lvl) -> (begin
-        return "{0}{I0} damage".format(FIERY_HANDS_DMG[lvl-1].str())
-    end))
-    tooltip.setReplaceIntelligence((i)-> ((0).bonus(i, FIERY_HANDS_DMG_BONUS).toString()))
-    for lvl = 1 to 5
-        tooltip.setNormalString(lvl, "Killing a unit creates a fire explosion, dealing {0}{I0} magic damage to nearby targets.".format(
-            FIERY_HANDS_DMG[lvl-1].str()
-        ))
-    heroType.addDynamicTooltipIntelligence(tooltip)
+
 
 
     CreateTrigger()

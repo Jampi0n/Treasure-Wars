@@ -1,10 +1,11 @@
 package PlayerControl
 
+import UtilityFunctions
 import LinkedList
 import ErrorHandling
 import ClosureTimers
-import Constants
 import Assets
+import Constants
 import initlater HeroControl
 /*
 * This package handles players
@@ -31,56 +32,6 @@ public function player.getCPlayer() returns CPlayer
 
 public function getCPlayer(int id) returns CPlayer
     return CPlayer.idToPlayer[id]
-
-
-public function int.toStatString() returns string
-    string ret
-    if this < 1000
-        ret= this.toString()
-    else
-        ret = this.toReal().toStatString()
-    return ret
-
-
-function real.getPrecision() returns int
-    int ret
-    if this >= 99.95
-        ret = 0
-    else if this >= 9.995
-        ret = 1
-    else
-        ret = 2
-    return ret
-
-public function real.toStatString() returns string
-    real amount = this
-    int prec
-    if amount >= 1000000000
-        amount /= 1000000000
-        prec = amount.getPrecision()
-        if prec > 0
-            return amount.toString(amount.getPrecision())+"G"
-        return amount.round().toString()+"G"
-    if amount >= 1000000
-        amount /= 1000000
-        prec = amount.getPrecision()
-        if prec > 0
-            return amount.toString(prec)+"M"
-        return amount.round().toString()+"M"
-        
-    if amount >= 1000
-        amount /= 1000
-        prec = amount.getPrecision()
-        if prec > 0
-            return amount.toString(amount.getPrecision())+"k"
-        return amount.round().toString()+"k"
-
-    prec = amount.getPrecision()
-    if prec > 0
-        return amount.toString(prec)
-    return amount.round().toString()
-
-
 
 
 
