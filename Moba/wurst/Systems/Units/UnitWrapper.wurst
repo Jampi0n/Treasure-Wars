@@ -192,6 +192,16 @@ public class UnitWrapper
     function applyTotalStatBonus(Stat whichStat)
         if whichStat != Stat.MS and whichStat != Stat.HR and whichStat!= Stat.MR
             this.toUnit().setBonus(whichStat, this.statsTotalBonus[whichStat.toInt()])
+            //update ability tooltips
+            if this.toUnit().isType(UNIT_TYPE_HERO) and (whichStat == Stat.STR or whichStat == Stat.INT)
+                let hero = Hero.getHero(this.toUnit())
+                if hero != null
+                    let hType = hero.getHeroType()
+                    if whichStat == Stat.STR
+                        hType.updateTooltipsStr(this.toUnit())
+                    else
+                        hType.updateTooltipsInt(this.toUnit())
+                    
         else
             if whichStat == Stat.MS
                 this.toUnit().setMovementSpeed( this.getStatBaseValue(whichStat) + this.statsTotalBonus[whichStat.toInt()].toReal() )

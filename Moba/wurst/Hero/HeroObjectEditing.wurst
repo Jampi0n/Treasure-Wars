@@ -1,5 +1,7 @@
 package HeroObjectEditing
 
+import LinkedList
+import General
 import AbilityObjEditing
 import public ObjectEditingPreset
 import public ObjectIds
@@ -177,3 +179,70 @@ public function AbilityDefinition.setupWithHotKey(string name, string hotkey)
         return
 
     print("!")
+
+
+public function bonus(int statValue, real atHundred) returns string
+    return (atHundred*statValue/100).toString()
+
+public function string.evaluateIntelligence(LinkedList<DynamicInteger> replacers, int intelligance) returns string
+    var result = this
+    var i = 0
+    for dynamicInteger in replacers
+        result = result.replace("{I" + i.toString() + "}", C_INT.toColorString()+" (+"+dynamicInteger.get(intelligance)+")|r " )
+        i++
+    return result
+
+public function string.evaluateStrength(LinkedList<DynamicInteger> replacers, int strength) returns string
+    var result = this
+    var i = 0
+    for dynamicInteger in replacers
+        result = result.replace("{S" + i.toString() + "}", C_STR.toColorString()+" (+"+dynamicInteger.get(strength)+")|r ")
+        i++
+    return result
+
+public function string.evaluateBonus(LinkedList<DynamicInteger> replaceStrength, int strength, LinkedList<DynamicInteger> replaceIntelligence, int intelligence) returns string
+    return this.evaluateStrength(replaceStrength, strength).evaluateIntelligence(replaceIntelligence, intelligence)
+
+public interface DynamicInteger
+    function get(int i) returns string
+
+public class DynamicTooltip
+    
+    private int abilityTypeId
+    private string array[5] normalString
+    private string learnString
+
+    private constant replaceIntelligence = new LinkedList<DynamicInteger>
+    private constant replaceStrength = new LinkedList<DynamicInteger>
+
+    function getAbilityTypeId() returns int
+        return this.abilityTypeId
+
+    construct(int abilityTypeId)
+        this.abilityTypeId = abilityTypeId
+
+    function setReplaceIntelligence(vararg DynamicInteger replacements)
+        for replacement in replacements
+            replaceIntelligence.add(replacement)
+
+    function setReplaceStrength(vararg DynamicInteger replacements)
+        for replacement in replacements
+            replaceStrength.add(replacement)
+
+
+
+    function setLearnString(string intro, LevelString levelString)
+        this.learnString = intro + "|n"
+
+        for i = 1 to 5
+            this.learnString += getLevelString(i) + levelString.getString(i)
+
+    function evaluateLearnString(unit whichUnit) returns string
+        return this.learnString.evaluateBonus(replaceStrength, whichUnit.getStr(), replaceIntelligence, whichUnit.getInt())
+
+    function setNormalString(int level, string normalString)
+        this.normalString[level-1] = normalString
+
+    function evaluateNormalString(unit whichUnit) returns string
+        let lvl = whichUnit.getAbilityLevel(this.abilityTypeId)
+        return this.normalString[lvl].evaluateBonus(replaceStrength, whichUnit.getStr(), replaceIntelligence, whichUnit.getInt())

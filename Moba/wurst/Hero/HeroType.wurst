@@ -55,6 +55,9 @@ public class HeroType
 
     private string icon = "ReplaceableTextures\\CommandButtons\\BTNSelectHeroOn.blp"
 
+    private constant dynamicIntelligence = new LinkedList<DynamicTooltip>
+    private constant dynamicStrength = new LinkedList<DynamicTooltip>
+
     construct(int unitId, string icon, int heroId)
         objectCount++
         unitIdToHeroType.put(unitId, this)
@@ -207,3 +210,21 @@ public class HeroType
         else
             this.skillBuild = skillBuild
             
+
+    function updateTooltipsStr(unit whichUnit)
+        for dynamicTooltip in dynamicStrength
+            let abilityTypeId = dynamicTooltip.getAbilityTypeId()
+            BlzSetAbilityExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateNormalString(whichUnit), whichUnit.getAbilityLevel(abilityTypeId))
+            BlzSetAbilityResearchExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateLearnString(whichUnit), 1)
+
+    function updateTooltipsInt(unit whichUnit)
+        for dynamicTooltip in dynamicIntelligence
+            let abilityTypeId = dynamicTooltip.getAbilityTypeId()
+            BlzSetAbilityExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateNormalString(whichUnit), whichUnit.getAbilityLevel(abilityTypeId))
+            BlzSetAbilityResearchExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateLearnString(whichUnit), 1)
+
+    function addDynamicTooltipStrength(DynamicTooltip tooltip)
+        this.dynamicStrength.add(tooltip)
+
+    function addDynamicTooltipIntelligence(DynamicTooltip tooltip)
+        this.dynamicIntelligence.add(tooltip)

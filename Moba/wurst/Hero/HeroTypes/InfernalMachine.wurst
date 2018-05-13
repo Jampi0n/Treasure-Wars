@@ -443,6 +443,18 @@ function initHeroType()
         ..addItem(ITEM_ID_ARCANE_SHIELD)
 
 
+    DynamicTooltip tooltip = new DynamicTooltip(ABILITY_FIERY_HANDS)
+    tooltip.setLearnString("Killing a unit creates a fire explosion, dealing magic damage to nearby targets.", (int lvl) -> (begin
+        return "{0}{I0} damage".format(FIERY_HANDS_DMG[lvl-1].str())
+    end))
+    tooltip.setReplaceIntelligence((i)-> ((0).bonus(i, FIERY_HANDS_DMG_BONUS).toString()))
+    for lvl = 1 to 5
+        tooltip.setNormalString(lvl, "Killing a unit creates a fire explosion, dealing {0}{I0} magic damage to nearby targets.".format(
+            FIERY_HANDS_DMG[lvl-1].str()
+        ))
+    heroType.addDynamicTooltipIntelligence(tooltip)
+
+
     CreateTrigger()
         ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
         ..addAction(() -> (begin
