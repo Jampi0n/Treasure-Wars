@@ -197,14 +197,14 @@ function growth()
         ..setArtSpecial("")
         ..setLightningEffects("")
         ..setCheckDependencies(true)
-        ..setLearnString("Increases the Troll Berserker's maximum hit points and hit point regeneration. When activated, the Troll Berserker petrifies nearby enemies making them unable to move for a short time.", (int lvl) -> (begin
+        /*..setLearnString("Increases the Troll Berserker's maximum hit points and hit point regeneration. When activated, the Troll Berserker petrifies nearby enemies making them unable to move for a short time.", (int lvl) -> (begin
             return "{0} hit points, {1} hit point regeneration per second, lasts {2} seconds, {3} seconds fear.".format(
                 GROWTH_HP[lvl-1].str() + GROWTH_HP_BONUS.getBonusString(C_INT),
                 GROWTH_HP_REGEN[lvl-1].str(),
                 GROWTH_DURATION[lvl-1].str(),
                 GROWTH_FEAR_DURATION[lvl-1].toSmartString()
                 )
-        end) )
+        end) )*/
 
     for lvl = 1 to 5
         aDef
@@ -212,12 +212,12 @@ function growth()
             ..setManaCost(lvl, MANA[lvl-1])
 
             ..setTargetsAllowed(lvl, "none")
-            ..setDescriptionString(true, lvl, "Increases the Troll Berserker's maximum hit points by {0} and hit point regeneration by {1} hit points per second for {2} seconds. When activated, the Troll Berserker petrifies nearby enemies making them unable to move for {3} seconds.".format(
+            /*..setDescriptionString(true, lvl, "Increases the Troll Berserker's maximum hit points by {0} and hit point regeneration by {1} hit points per second for {2} seconds. When activated, the Troll Berserker petrifies nearby enemies making them unable to move for {3} seconds.".format(
                 GROWTH_HP[lvl-1].str() + GROWTH_HP_BONUS.getBonusString(C_INT),
                 GROWTH_HP_REGEN[lvl-1].str(),
                 GROWTH_DURATION[lvl-1].str(),
                 GROWTH_FEAR_DURATION[lvl-1].toSmartString()
-            ))
+            ))*/
 
             
 
@@ -358,10 +358,10 @@ function setupTooltips()
         return "{0}{I0} hit points, {1} hit point regeneration per second, lasts {2} seconds, {3} seconds fear.".format(
             GROWTH_HP[lvl-1].str(), GROWTH_HP_REGEN[lvl-1].str(), GROWTH_DURATION[lvl-1].str(), GROWTH_FEAR_DURATION[lvl-1].toSmartString())
     end) )
-    tooltip.setReplaceIntelligence(GROWTH_HP_BONUS)
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, "Increases the Troll Berserker's maximum hit points by {0}{I0} and hit point regeneration by {1} hit points per second for {2} seconds. When activated, the Troll Berserker petrifies nearby enemies making them unable to move for {3} seconds.".format(
             GROWTH_HP[lvl-1].str(), GROWTH_HP_REGEN[lvl-1].str(), GROWTH_DURATION[lvl-1].str(), GROWTH_FEAR_DURATION[lvl-1].toSmartString()))
+    tooltip.setReplaceIntelligence(GROWTH_HP_BONUS)
     heroType.addDynamicTooltipIntelligence(tooltip)
 
 

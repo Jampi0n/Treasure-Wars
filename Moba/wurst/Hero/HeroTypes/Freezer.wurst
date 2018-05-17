@@ -87,13 +87,13 @@ function frostNova()
         ..setupIcon(Icons.bTNGlacier)
         ..setupChannel(TargetType.UNIT, "frostnova")
         ..setupWithHotKey("Frost Nova", "Q")
-        ..setLearnString("Blasts enemy units around a target enemy unit with a wave of damaging frost that slows movement and attack rate.", (int lvl) -> (begin
+        /*..setLearnString("Blasts enemy units around a target enemy unit with a wave of damaging frost that slows movement and attack rate.", (int lvl) -> (begin
             return "{0} target damage, {1} nova damage, {2} seconds.".format(
                 NOVA_TARGET_DMG[lvl-1].str() + NOVA_TARGET_DMG_BONUS.getBonusString(C_INT),
                 NOVA_AOE_DMG[lvl-1].str() + NOVA_AOE_DMG_BONUS.getBonusString(C_INT),
                 NOVA_DURATION[lvl-1].toString() + NOVA_DURATION_BONUS.getBonusString(C_INT)
             )
-        end) )
+        end) )*/
     
     for lvl = 1 to 5
         aDef
@@ -101,11 +101,11 @@ function frostNova()
             ..setManaCost(lvl, MANA[lvl-1])
             ..setCastRange(lvl, RANGE[lvl-1])
             ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
-            ..setDescriptionString(true, lvl, "Blasts enemy units with a wave of frost that deals {0} damage to the target, and {1} nova damage. Cold damage slows units' movement and attack rate for {2} seconds.".format(
+            /*..setDescriptionString(true, lvl, "Blasts enemy units with a wave of frost that deals {0} damage to the target, and {1} nova damage. Cold damage slows units' movement and attack rate for {2} seconds.".format(
                 NOVA_TARGET_DMG[lvl-1].str() + NOVA_TARGET_DMG_BONUS.getBonusString(C_INT),
                 NOVA_AOE_DMG[lvl-1].str() + NOVA_AOE_DMG_BONUS.getBonusString(C_INT),
                 NOVA_DURATION[lvl-1].toString() + NOVA_DURATION_BONUS.getBonusString(C_INT)
-            ))
+            ))*/
 
 
 constant int array ARMOR_AR = [15, 20, 25, 30, 35]
@@ -138,13 +138,13 @@ function frostArmor()
         ..setupChannel(TargetType.UNIT, "frostarmor")
         ..setupIcon("BTNSpell_Frost_ChillingArmor")
         ..setupWithHotKey("Frost Armor", "W")
-        ..setLearnString("Creates a shield of frost around a target friendly unit. The shield adds armor and slows units that attack it. Lasts {0} seconds.".format(ARMOR_DURATION.str()), (int lvl) -> (begin
+        /*..setLearnString("Creates a shield of frost around a target friendly unit. The shield adds armor and slows units that attack it. Lasts {0} seconds.".format(ARMOR_DURATION.str()), (int lvl) -> (begin
             return "{0} armor, {1} slow for {2} seconds.".format(
                 ARMOR_AR[lvl-1].toString() + ARMOR_AR_BONUS.getBonusString(C_INT),
                 ARMOR_SLOW[lvl-1].toString(),
                 ARMOR_SLOW_DURATION[lvl-1].toString() + ARMOR_SLOW_DURATION_BONUS.getBonusString(C_INT)
             )
-        end) )
+        end) )*/
 
     for lvl = 1 to 5
         aDef
@@ -152,12 +152,12 @@ function frostArmor()
             ..setManaCost(lvl, MANA[lvl-1])
             ..setCastRange(lvl, RANGE[lvl-1])
             ..setTargetsAllowed(lvl, "friend,nonancient,self")
-            ..setDescriptionString(true, lvl, "Creates a shield of frost around a target friendly unit. The shield adds {0} armor and slows units that attack it by {1}% for {2} seconds. Lasts {3} seconds.".format(
+            /*..setDescriptionString(true, lvl, "Creates a shield of frost around a target friendly unit. The shield adds {0} armor and slows units that attack it by {1}% for {2} seconds. Lasts {3} seconds.".format(
                 ARMOR_AR[lvl-1].toString() + ARMOR_AR_BONUS.getBonusString(C_INT),
                 ARMOR_SLOW[lvl-1].toString(),
                 ARMOR_SLOW_DURATION[lvl-1].toString() + ARMOR_SLOW_DURATION_BONUS.getBonusString(C_INT),
                 ARMOR_DURATION.str()
-            ))
+            ))*/
 
 constant int array FROST_WYRM_HP = [250, 500, 750, 1000, 1250]
 constant int array FROST_WYRM_DMG = [10, 20, 30, 40, 50]
@@ -184,26 +184,26 @@ function frostWyrm()
         ..setArtCaster("")
         ..setupIcon(Icons.bTNFrostWyrm)
         ..setupWithHotKey("Summon Frost Wyrm", "E")
-        ..setLearnString("Summons a powerful Frost Wyrm. The Frost Wyrm's attack speed and hit points scale with the respective stats of the Hero. The Frost Wyrm's attacks slow the targets.", (int lvl) -> (begin
+        /*..setLearnString("Summons a powerful Frost Wyrm. The Frost Wyrm's attack speed and hit points scale with the respective stats of the Hero. The Frost Wyrm's attacks slow the targets.", (int lvl) -> (begin
             return "{0} bonus damage, {1} bonus hit points, {2}% slow for {3} seconds.".format(
                 FROST_WYRM_DMG[lvl-1].str() + FROST_WYRM_INT_FACTOR.getBonusString(C_INT),
                 FROST_WYRM_HP[lvl-1].str(),
                 FROST_BREATH_SLOW[lvl-1].str(),
                 FROST_BREATH_DUR[lvl-1].toString()
             )
-        end) )
+        end) )*/
 
     for lvl = 1 to 5
         aDef
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setTargetsAllowed(lvl, "none")
-            ..setDescriptionString(true, lvl, "Summons a powerful Frost Wyrm. The Frost Wyrm's attack speed and hit points scale with the respective stats of the Hero. Deals {0} bonus damage and has {1} additional hit points. The Frost Wyrm's attacks slow the targets by {2}% for {3} seconds.".format(
+            /*..setDescriptionString(true, lvl, "Summons a powerful Frost Wyrm. The Frost Wyrm's attack speed and hit points scale with the respective stats of the Hero. Deals {0} bonus damage and has {1} additional hit points. The Frost Wyrm's attacks slow the targets by {2}% for {3} seconds.".format(
                 FROST_WYRM_DMG[lvl-1].str() + FROST_WYRM_INT_FACTOR.getBonusString(C_INT),
                 FROST_WYRM_HP[lvl-1].str(),
                 FROST_BREATH_SLOW[lvl-1].str(),
                 FROST_BREATH_DUR[lvl-1].toString()
-            ))
+            ))*/
 
 
 constant real FREEZE_AOE = 900
@@ -229,12 +229,12 @@ function freeze()
         ..setAnimationNames("spell,channel")
         ..setupIcon(Icons.bTNFreezingBreath)
         ..setupWithHotKey("Freeze", "R")
-        ..setLearnString(CHANNELING_SPELL + "Freezes nearby enemies, disabling them and dealing damage over time. However, targets covered with ice have their armor and willpower increased by {0}.".format(FREEZE_DEF.str()), (int lvl) -> (begin
+        /*..setLearnString(CHANNELING_SPELL + "Freezes nearby enemies, disabling them and dealing damage over time. However, targets covered with ice have their armor and willpower increased by {0}.".format(FREEZE_DEF.str()), (int lvl) -> (begin
             return "{0} damage per second, lasts {1} seconds.".format(
                 FREEZE_DMG[lvl-1].str()+FREEZE_DMG_BONUS.getBonusString(C_INT),
                 FREEZE_DURATION[lvl-1].toString()
                 )
-        end) )
+        end) )*/
 
     for lvl = 1 to 5
         aDef
@@ -245,11 +245,11 @@ function freeze()
             ..setEffects(lvl, "X000")
 
             ..setTargetsAllowed(lvl, "none")
-            ..setDescriptionString(true, lvl, CHANNELING_SPELL + "Freezes nearby enemies, disabling them for up to {1} seconds and dealing {0} damage per second. However, targets covered with ice have their armor and willpower increased by {2}.".format(
+            /*..setDescriptionString(true, lvl, CHANNELING_SPELL + "Freezes nearby enemies, disabling them for up to {1} seconds and dealing {0} damage per second. However, targets covered with ice have their armor and willpower increased by {2}.".format(
                 FREEZE_DMG[lvl-1].str()+FREEZE_DMG_BONUS.getBonusString(C_INT),
                 FREEZE_DURATION[lvl-1].toString(),
                 FREEZE_DEF.str()
-            ))
+            ))*/
 
 constant int FREEZE_EFFECT = compiletime(UNIT_ID_GEN.next())
 
@@ -449,12 +449,12 @@ function setupTooltips()
             NOVA_AOE_DMG[lvl-1].str(),
             NOVA_DURATION[lvl-1].toSmartString())
     end) )
-    tooltip.setReplaceIntelligence(NOVA_TARGET_DMG_BONUS, NOVA_AOE_DMG_BONUS, NOVA_DURATION_BONUS)
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, "Blasts enemy units with a wave of frost that deals {0}{I0} damage to the target, and {1}{I1} nova damage. Cold damage slows units' movement and attack rate for {2}{I2} seconds.".format(
             NOVA_TARGET_DMG[lvl-1].str(),
             NOVA_AOE_DMG[lvl-1].str(),
             NOVA_DURATION[lvl-1].toSmartString()))
+    tooltip.setReplaceIntelligence(NOVA_TARGET_DMG_BONUS, NOVA_AOE_DMG_BONUS, NOVA_DURATION_BONUS)
     heroType.addDynamicTooltipIntelligence(tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_FROST_ARMOR)
@@ -465,13 +465,13 @@ function setupTooltips()
             ARMOR_SLOW_DURATION[lvl-1].toSmartString())
     end) )
 
-    tooltip.setReplaceIntelligence(ARMOR_AR_BONUS.toReal(), ARMOR_SLOW_DURATION_BONUS)
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, "Creates a shield of frost around a target friendly unit. The shield adds {0}{I0} armor and slows units that attack it by {1}% for {2}{I1} seconds. Lasts {3} seconds.".format(
             ARMOR_AR[lvl-1].str(),
             ARMOR_SLOW[lvl-1].str(),
             ARMOR_SLOW_DURATION[lvl-1].toSmartString(),
             ARMOR_DURATION.str()))
+    tooltip.setReplaceIntelligence(ARMOR_AR_BONUS.toReal(), ARMOR_SLOW_DURATION_BONUS)
     heroType.addDynamicTooltipIntelligence(tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_FROST_WYRM)
@@ -483,7 +483,7 @@ function setupTooltips()
             FROST_BREATH_DUR[lvl-1].toSmartString()
         )
     end) )
-    tooltip.setReplaceIntelligence(FROST_WYRM_INT_FACTOR.toReal())
+    
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, "Summons a powerful Frost Wyrm. The Frost Wyrm's attack speed and hit points scale with the respective stats of the Hero. Deals {0}{I0} bonus damage and has {1} additional hit points. The Frost Wyrm's attacks slow the targets by {2}% for {3} seconds.".format(
             FROST_WYRM_DMG[lvl-1].str(),
@@ -491,6 +491,7 @@ function setupTooltips()
             FROST_BREATH_SLOW[lvl-1].str(),
             FROST_BREATH_DUR[lvl-1].toSmartString()
         ))
+    tooltip.setReplaceIntelligence(FROST_WYRM_INT_FACTOR.toReal())        
     heroType.addDynamicTooltipIntelligence(tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_FREEZE)
@@ -500,13 +501,14 @@ function setupTooltips()
             FREEZE_DURATION[lvl-1].toSmartString()
             )
     end) )
-    tooltip.setReplaceIntelligence(FREEZE_DMG_BONUS)
+    
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, CHANNELING_SPELL + "Freezes nearby enemies, disabling them for up to {1} seconds and dealing {0}{I0} damage per second. However, targets covered with ice have their armor and willpower increased by {2}.".format(
             FREEZE_DMG[lvl-1].str(),
             FREEZE_DURATION[lvl-1].toSmartString(),
             FREEZE_DEF.str()
         ))
+    tooltip.setReplaceIntelligence(FREEZE_DMG_BONUS)
     heroType.addDynamicTooltipIntelligence(tooltip)
 
 function initHeroType()

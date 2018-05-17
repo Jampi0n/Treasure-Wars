@@ -140,8 +140,9 @@ public function AbilityDefinition.setupWithHotKey(string name, string hotkey)
     this.setRequirements("")
     this.setCheckDependencies(false)
     this.setTooltipLearn("("+hotkey+")"+" Learn "+name+" - [|cffffcc00Level %d|r]")
-    this.setTooltipLearnExtended("jampion")
+    this.setTooltipLearnExtended("<description missing>")
     for i = 1 to 5
+        this.setTooltipNormalExtended(i, "<description missing>")
         this.setTooltipNormal(i, "("+hotkey+") "+name+" - [|cffffcc00Level "+i.toString()+"|r]")
         
     if(hotkey=="Q")
@@ -270,6 +271,7 @@ public class DynamicTooltip
     function evaluateNormalString(unit whichUnit) returns string
         let lvl = whichUnit.getAbilityLevel(this.abilityTypeId)
         string ret = ""
+        print("level of dyn = "+lvl.toString())
         if lvl != 0
             ret = this.normalString[lvl-1].evaluateBonus(replaceStrength, whichUnit.getStr(), replaceIntelligence, whichUnit.getInt())
         return ret
