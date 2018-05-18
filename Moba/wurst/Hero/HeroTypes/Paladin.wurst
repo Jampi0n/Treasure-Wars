@@ -404,13 +404,13 @@ function setupTooltips()
     tooltip.setLearnString("Bashes enemies in front of him with his shield, dealing physical damage and stunning them.", (int lvl) -> (begin
         return "{0}{S0} damage, {1} seconds stun.".format(
         SHIELD_BASH_DMG[lvl-1].str(),
-        SHIELD_BASH_DURATION[lvl-1].toSmartString()
+        SHIELD_BASH_DURATION[lvl-1].toExactString()
         )
     end) )
     for lvl = 1 to 5
         tooltip.setNormalString(false, lvl, "Bashes enemies in front of him with his shield, dealing {0}{S0} physical damage and stunning them for {1} seconds.".format(
             SHIELD_BASH_DMG[lvl-1].str(),
-            SHIELD_BASH_DURATION[lvl-1].toSmartString()))
+            SHIELD_BASH_DURATION[lvl-1].toExactString()))
     tooltip.setReplaceStrength(SHIELD_BASH_DMG_BONUS)
     heroType.addDynamicTooltipStrength(tooltip)
 
@@ -419,24 +419,24 @@ function setupTooltips()
         return "{0} attack speed, {1} movement speed, {2}{I0} seconds".format(
         BATTLE_ROAR_AS[lvl-1].str()+"%",
         BATTLE_ROAR_MS[lvl-1].str()+"%",
-        BATTLE_ROAR_DURATION[lvl-1].toSmartString())
+        BATTLE_ROAR_DURATION[lvl-1].toExactString())
     end) )
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, "Increases nearby units' attack speed by {0} and movement speed by {1} for {2}{I0} seconds.".format(
             BATTLE_ROAR_AS[lvl-1].str()+"%",
             BATTLE_ROAR_MS[lvl-1].str()+"%",
-            BATTLE_ROAR_DURATION[lvl-1].str()))
+            BATTLE_ROAR_DURATION[lvl-1].toExactString()))
     tooltip.setReplaceIntelligence(BATTLE_ROAR_DURATION_BONUS)
     heroType.addDynamicTooltipIntelligence(tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_HOLY_SHIELD)
     tooltip.setLearnString("Turns the target frendly hero untargetable.", (int lvl) -> (begin
         return "{0}{I0} seconds.".format(
-        HOLY_SHIELD_DURATION[lvl-1].toSmartString())
+        HOLY_SHIELD_DURATION[lvl-1].toExactString())
     end) )
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, "Turns the target frendly hero untargetable for {0}{I0} seconds.".format(
-            HOLY_SHIELD_DURATION[lvl-1].toSmartString()
+            HOLY_SHIELD_DURATION[lvl-1].toExactString()
             ))
     tooltip.setReplaceIntelligence(HOLY_SHIELD_DURATION_BONUS)
     heroType.addDynamicTooltipIntelligence(tooltip)

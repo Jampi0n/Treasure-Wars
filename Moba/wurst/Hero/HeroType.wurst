@@ -222,7 +222,6 @@ public class HeroType
     function updateTooltipsInt(unit whichUnit)
         for dynamicTooltip in dynamicIntelligence
             let abilityTypeId = dynamicTooltip.getAbilityTypeId()
-            print("level of abil = "+whichUnit.getAbilityLevel(abilityTypeId).toString())
             BlzSetAbilityExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateNormalString(whichUnit), whichUnit.getAbilityLevel(abilityTypeId))
             BlzSetAbilityResearchExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateLearnString(whichUnit), 1)
 

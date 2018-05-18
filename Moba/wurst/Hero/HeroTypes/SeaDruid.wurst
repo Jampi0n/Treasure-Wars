@@ -32,14 +32,14 @@ function ancientKnowledge()
         ..setLearnString("Increases his maximum hit points for a portion of his maximum mana ponits and increases his maximum mana points by "+
         "a portion of his maximum hit points.", (int lvl) -> (begin
             return "1 hit point for every {0} mana points, 1 mana point for every {1} hit points".format(
-            ANCIENT_KNOWLEDGE_HP_BONUS[lvl-1].toSmartString(), ANCIENT_KNOWLEDGE_MP_BONUS[lvl-1].toSmartString())
+            ANCIENT_KNOWLEDGE_HP_BONUS[lvl-1].toExactString(), ANCIENT_KNOWLEDGE_MP_BONUS[lvl-1].toExactString())
         end) )
 
     for lvl = 1 to 5
         aDef
             ..setDescriptionString(false, lvl, ("Increases maximum hit points by 1 for every {0} points of his maximum mana points and "+
             "increases his maximum mana points by 1 for every {1} points of his maximum hit points.").format(
-                ANCIENT_KNOWLEDGE_HP_BONUS[lvl-1].toSmartString(), ANCIENT_KNOWLEDGE_MP_BONUS[lvl-1].toSmartString())
+                ANCIENT_KNOWLEDGE_HP_BONUS[lvl-1].toExactString(), ANCIENT_KNOWLEDGE_MP_BONUS[lvl-1].toExactString())
             )
 
 constant real array TIDAL_FURY_HIT_DMG = [75, 125, 175, 225, 275]
@@ -156,7 +156,7 @@ function manaShield()
         ..setupWithHotKey("Mana Shield", "E")
         ..setLearnString("Reduces incoming damage at the cost of mana. Also drains mana while activated.", (int lvl) -> (begin
             return "{0}% reduction, {1} mana points per blocked damage point.".format(
-                (MANA_SHIELD_REDUCTION[lvl-1]*100).str(), MANA_PER_DAMAGE[lvl-1].toSmartString()
+                (MANA_SHIELD_REDUCTION[lvl-1]*100).str(), MANA_PER_DAMAGE[lvl-1].toExactString()
             )
         end) )
 
@@ -173,7 +173,7 @@ function manaShield()
             ..setTooltipTurnOffExtended(lvl, "Deactivate Mana Shield to stop draining mana.")
             ..setTargetsAllowed(lvl, "none")
             ..setDescriptionString(true, lvl, "Reduces incoming damage by {0}%, by spending {1} mana points for every blocked point of damage. Also drains mana while activated.".format(
-                (MANA_SHIELD_REDUCTION[lvl-1]*100).str(), MANA_PER_DAMAGE[lvl-1].toSmartString()
+                (MANA_SHIELD_REDUCTION[lvl-1]*100).str(), MANA_PER_DAMAGE[lvl-1].toExactString()
             ))
 
 

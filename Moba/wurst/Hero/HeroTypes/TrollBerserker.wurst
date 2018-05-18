@@ -356,11 +356,11 @@ function setupTooltips()
     DynamicTooltip tooltip = new DynamicTooltip(ABILITY_GROWTH)
     tooltip.setLearnString("Increases the Troll Berserker's maximum hit points and hit point regeneration. When activated, the Troll Berserker petrifies nearby enemies making them unable to move for a short time.", (int lvl) -> (begin
         return "{0}{I0} hit points, {1} hit point regeneration per second, lasts {2} seconds, {3} seconds fear.".format(
-            GROWTH_HP[lvl-1].str(), GROWTH_HP_REGEN[lvl-1].str(), GROWTH_DURATION[lvl-1].str(), GROWTH_FEAR_DURATION[lvl-1].toSmartString())
+            GROWTH_HP[lvl-1].str(), GROWTH_HP_REGEN[lvl-1].str(), GROWTH_DURATION[lvl-1].str(), GROWTH_FEAR_DURATION[lvl-1].toExactString())
     end) )
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, "Increases the Troll Berserker's maximum hit points by {0}{I0} and hit point regeneration by {1} hit points per second for {2} seconds. When activated, the Troll Berserker petrifies nearby enemies making them unable to move for {3} seconds.".format(
-            GROWTH_HP[lvl-1].str(), GROWTH_HP_REGEN[lvl-1].str(), GROWTH_DURATION[lvl-1].str(), GROWTH_FEAR_DURATION[lvl-1].toSmartString()))
+            GROWTH_HP[lvl-1].str(), GROWTH_HP_REGEN[lvl-1].str(), GROWTH_DURATION[lvl-1].str(), GROWTH_FEAR_DURATION[lvl-1].toExactString()))
     tooltip.setReplaceIntelligence(GROWTH_HP_BONUS)
     heroType.addDynamicTooltipIntelligence(tooltip)
 

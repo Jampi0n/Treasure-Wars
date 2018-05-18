@@ -394,7 +394,7 @@ function setupTooltips()
     DynamicTooltip tooltip = new DynamicTooltip(ABILITY_PULL)
     tooltip.setLearnString(CHANNELING_SPELL + "Sends out his hand to damage and pull an enemy to him. While being pulled, the target is stunned, but cannot be targeted.|nThe first target hit once the hand returns will be pulled.", (int lvl) -> (begin
         return "{0}{S0} damage, {1} seconds cooldown.".format(
-            PULL_DAMAGE[lvl-1].str()
+            PULL_DAMAGE[lvl-1].str(), PULL_COOLDOWN[lvl-1].str()
         )
     end) )
     
@@ -442,7 +442,7 @@ function setupTooltips()
     tooltip = new DynamicTooltip(ABILITY_ROCKET)
     tooltip.setLearnString("Fires a rocket at the target enemy unit, dealing damage in an area around the target.", (int lvl) -> (begin
         return "{0}{S0} damage, {1} range, {2} seconds cooldown.".format(
-            ROCKET_DMG[lvl-1].str()+ROCKET_DMG_BONUS.getBonusString(C_STR),
+            ROCKET_DMG[lvl-1].str(),
             ROCKET_RANGE[lvl-1].str(),
             ROCKET_COOLDOWN[lvl-1].str()
         )

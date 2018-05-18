@@ -197,7 +197,6 @@ public class UnitWrapper
                 let hero = Hero.getHero(this.toUnit())
                 if hero != null
                     let hType = hero.getHeroType()
-                    print("update "+this.toUnit().getName())
                     if whichStat == Stat.STR
                         hType.updateTooltipsStr(this.toUnit())
                     else

@@ -62,7 +62,7 @@ constant real NOVA_AOE_DMG_BONUS = 125
 constant real NOVA_AOE = 250
 
 constant real array NOVA_DURATION = [2, 2.5, 3, 3.5, 4]
-constant real NOVA_DURATION_BONUS = 2
+constant real NOVA_DURATION_BONUS = 1
 
 constant int array NOVA_MS = [30, 30, 30, 30, 30]
 constant int array NOVA_AS = [20, 20, 20, 20, 20]
@@ -113,7 +113,7 @@ constant int ARMOR_AR_BONUS = 15
 constant real ARMOR_DURATION = 10
 constant int array ARMOR_SLOW = [25, 25, 25, 25, 25]
 constant real array ARMOR_SLOW_DURATION = [1, 1.25, 1.5, 1.75, 2]
-constant real ARMOR_SLOW_DURATION_BONUS = 2
+constant real ARMOR_SLOW_DURATION_BONUS = 1
 
 BuffType buffFrostArmor
 BuffType buffFrostArmorSlow
@@ -447,13 +447,13 @@ function setupTooltips()
         return "{0}{I0} target damage, {1}{I1} nova damage, {2}{I2} seconds.".format(
             NOVA_TARGET_DMG[lvl-1].str(),
             NOVA_AOE_DMG[lvl-1].str(),
-            NOVA_DURATION[lvl-1].toSmartString())
+            NOVA_DURATION[lvl-1].toExactString())
     end) )
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, "Blasts enemy units with a wave of frost that deals {0}{I0} damage to the target, and {1}{I1} nova damage. Cold damage slows units' movement and attack rate for {2}{I2} seconds.".format(
             NOVA_TARGET_DMG[lvl-1].str(),
             NOVA_AOE_DMG[lvl-1].str(),
-            NOVA_DURATION[lvl-1].toSmartString()))
+            NOVA_DURATION[lvl-1].toExactString()))
     tooltip.setReplaceIntelligence(NOVA_TARGET_DMG_BONUS, NOVA_AOE_DMG_BONUS, NOVA_DURATION_BONUS)
     heroType.addDynamicTooltipIntelligence(tooltip)
 
@@ -462,14 +462,14 @@ function setupTooltips()
         return "{0}{I0} armor, {1} slow for {2}{I1} seconds.".format(
             ARMOR_AR[lvl-1].str(),
             ARMOR_SLOW[lvl-1].str(),
-            ARMOR_SLOW_DURATION[lvl-1].toSmartString())
+            ARMOR_SLOW_DURATION[lvl-1].toExactString())
     end) )
 
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, "Creates a shield of frost around a target friendly unit. The shield adds {0}{I0} armor and slows units that attack it by {1}% for {2}{I1} seconds. Lasts {3} seconds.".format(
             ARMOR_AR[lvl-1].str(),
             ARMOR_SLOW[lvl-1].str(),
-            ARMOR_SLOW_DURATION[lvl-1].toSmartString(),
+            ARMOR_SLOW_DURATION[lvl-1].toExactString(),
             ARMOR_DURATION.str()))
     tooltip.setReplaceIntelligence(ARMOR_AR_BONUS.toReal(), ARMOR_SLOW_DURATION_BONUS)
     heroType.addDynamicTooltipIntelligence(tooltip)
@@ -480,7 +480,7 @@ function setupTooltips()
             FROST_WYRM_DMG[lvl-1].str(),
             FROST_WYRM_HP[lvl-1].str(),
             FROST_BREATH_SLOW[lvl-1].str(),
-            FROST_BREATH_DUR[lvl-1].toSmartString()
+            FROST_BREATH_DUR[lvl-1].toExactString()
         )
     end) )
     
@@ -489,7 +489,7 @@ function setupTooltips()
             FROST_WYRM_DMG[lvl-1].str(),
             FROST_WYRM_HP[lvl-1].str(),
             FROST_BREATH_SLOW[lvl-1].str(),
-            FROST_BREATH_DUR[lvl-1].toSmartString()
+            FROST_BREATH_DUR[lvl-1].toExactString()
         ))
     tooltip.setReplaceIntelligence(FROST_WYRM_INT_FACTOR.toReal())        
     heroType.addDynamicTooltipIntelligence(tooltip)
@@ -498,14 +498,14 @@ function setupTooltips()
     tooltip.setLearnString(CHANNELING_SPELL + "Freezes nearby enemies, disabling them and dealing damage over time. However, targets covered with ice have their armor and willpower increased by {0}.".format(FREEZE_DEF.str()), (int lvl) -> (begin
         return "{0}{I0} damage per second, lasts {1} seconds.".format(
             FREEZE_DMG[lvl-1].str(),
-            FREEZE_DURATION[lvl-1].toSmartString()
+            FREEZE_DURATION[lvl-1].toExactString()
             )
     end) )
     
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, CHANNELING_SPELL + "Freezes nearby enemies, disabling them for up to {1} seconds and dealing {0}{I0} damage per second. However, targets covered with ice have their armor and willpower increased by {2}.".format(
             FREEZE_DMG[lvl-1].str(),
-            FREEZE_DURATION[lvl-1].toSmartString(),
+            FREEZE_DURATION[lvl-1].toExactString(),
             FREEZE_DEF.str()
         ))
     tooltip.setReplaceIntelligence(FREEZE_DMG_BONUS)
@@ -513,6 +513,7 @@ function setupTooltips()
 
 function initHeroType()
     setupStats()
+    setupTooltips()
     heroType
         ..addOnSpellCastFunc(function onSpellCast)
         ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target))
