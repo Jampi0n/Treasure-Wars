@@ -322,6 +322,13 @@ public class ScoreTable
             playerList.sortWith( (CPlayer p1, CPlayer p2) -> (p1.getId() - p2.getId()) )
             mBoard.setRowCount(mBoard.getRowCount()+1)
             update()
+            for cp in playerList
+                if cp.getTeam() == Team.TEAM1
+                    cp.getPlayer().setState(PLAYER_STATE_RESOURCE_FOOD_USED, CPlayer.team1HeroCount)
+                    cp.getPlayer().setState(PLAYER_STATE_RESOURCE_FOOD_CAP, CPlayer.team2HeroCount)
+                else
+                    cp.getPlayer().setState(PLAYER_STATE_RESOURCE_FOOD_USED, CPlayer.team2HeroCount)
+                    cp.getPlayer().setState(PLAYER_STATE_RESOURCE_FOOD_CAP, CPlayer.team1HeroCount)
         end))
 
         

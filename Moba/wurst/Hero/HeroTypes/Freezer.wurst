@@ -216,7 +216,7 @@ constant int FREEZE_DEF = 100
 
 BuffType buffFreeze
 
-constant int FREEZE_BUFF_ID = compiletime(createAuraBuff("Freeze", "This unit is under the effect of freeze; it is stunned, but has increased armor and willpower.", Icons.bTNFreezingBreath))
+constant int FREEZE_BUFF_ID = compiletime(createAuraBuff("Freeze", "This unit is under the effect of freeze; it is stunned; but has increased armor and willpower.", Icons.bTNFreezingBreath))
 constant int FREEZE_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, FREEZE_BUFF_ID, "", ""))
 
 @compiletime

@@ -39,7 +39,7 @@ constant real ACID_BREATH_DUR = 5
 BuffType buffAcidBreath
 
 
-constant int ACID_BREATH_BUFF_ID = compiletime(createAuraBuff("Acid Breath", "This unit was hit by a Hydra; its movement, attack speed and armor are reduced.", Icons.bTNCorrosiveBreath))
+constant int ACID_BREATH_BUFF_ID = compiletime(createAuraBuff("Acid Breath", "This unit was hit by a Hydra; it moves and attacks slower and has reduced armor.", Icons.bTNCorrosiveBreath))
 constant int ACID_BREATH_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, ACID_BREATH_BUFF_ID, Abilities.bottleImpact, "chest"))
         
 
