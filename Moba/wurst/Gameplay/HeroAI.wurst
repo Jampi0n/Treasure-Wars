@@ -480,11 +480,11 @@ public class HeroAI
         skillBuild = this.heroType.getSkillBuild()
 
         if firstTeam
-            this.homeLoc = gg_rct_GreenAltar.getCenter()
-            this.targetLoc = gg_rct_BrownAltar.getCenter()
+            this.homeLoc = gg_rct_GreenCastle.getCenter()
+            this.targetLoc = gg_rct_BrownCastle.getCenter()
         else
-            this.homeLoc = gg_rct_BrownAltar.getCenter()
-            this.targetLoc = gg_rct_GreenAltar.getCenter()
+            this.homeLoc = gg_rct_BrownCastle.getCenter()
+            this.targetLoc = gg_rct_GreenCastle.getCenter()
 
 
 
