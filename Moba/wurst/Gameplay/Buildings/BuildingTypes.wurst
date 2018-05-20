@@ -533,12 +533,12 @@ public function income()
     int factorTeam1 = 5
     int factorTeam2 = 5
 
-    let difference = CPlayer.getTeamHeroCount(Team.TEAM1) - CPlayer.getTeamHeroCount(Team.TEAM2)
+    /*let difference = CPlayer.getTeamHeroCount(Team.TEAM1) - CPlayer.getTeamHeroCount(Team.TEAM2)
 
     if difference > 0
         factorTeam1 -= max(1, difference)
     else if difference < 0
-        factorTeam2 -= max(1, -difference)
+        factorTeam2 -= max(1, -difference)*/
 
     for i = 0 to MAX_HERO_COUNT-1
         let farms = i <= HERO_PLAYER_TEAM_1_LAST ? farmsTeam1 : farmsTeam2

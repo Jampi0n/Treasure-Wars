@@ -167,11 +167,12 @@ public class Hero
         TimerDialogDisplay(this.reviveWindow, false)
         vec2 pos
         if this.owner.getTeam() == Team.TEAM1
-            pos = gg_rct_GreenCastle.getCenter()
+            pos = gg_rct_GreenAltar.getCenter()+vec2(128,128)
         else
-            pos = gg_rct_BrownCastle.getCenter()
+            pos = gg_rct_BrownAltar.getCenter()-vec2(128,128)
             
         this.hero.revive(pos, true)
+        this.hero.setMana(this.hero.getMaxMana())
         this.upgrade()
         if this.heroGlow != null
             this.heroGlow

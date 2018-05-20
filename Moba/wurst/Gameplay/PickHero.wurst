@@ -44,9 +44,9 @@ function setupCreatedHero(Hero hero)
     patron[owner.getId()].remove()
 
     if(cPlayer.getTeam()==Team.TEAM1)
-        pos = gg_rct_GreenCastle.getCenter()
+        pos = gg_rct_GreenAltar.getCenter()+vec2(128,128)
     else
-        pos = gg_rct_BrownCastle.getCenter()
+        pos = gg_rct_BrownAltar.getCenter()-vec2(128,128)
 
     if hero.toUnit().getOwner().getController() == MAP_CONTROL_COMPUTER and hero.toUnit().getOwner().getSlotState() == PLAYER_SLOT_STATE_PLAYING
         doAfter(GetRandomReal(1, 3), () -> ( begin
