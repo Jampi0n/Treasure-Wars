@@ -138,7 +138,7 @@ public class UnitWrapper
         statBaseValue[Stat.AGI.toInt()] = this.assocUnit.getAgi(false)
         statBaseValue[Stat.INT.toInt()] = this.assocUnit.getInt(false)
 
-        statBaseValue[Stat.AD.toInt()] = 17 + statBaseValue[Stat.STR.toInt()] + GetPlayerTechCount(this.assocUnit.getOwner(), UPG_AD, true)
+        statBaseValue[Stat.AD.toInt()] = statBaseValue[Stat.STR.toInt()] + GetPlayerTechCount(this.assocUnit.getOwner(), UPG_AD, true)
         statBaseValue[Stat.AR.toInt()] = GetPlayerTechCount(this.assocUnit.getOwner(), UPG_AR, true)
         statBaseValue[Stat.AS.toInt()] = 0
         
