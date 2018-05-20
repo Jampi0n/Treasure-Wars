@@ -17,6 +17,12 @@ import initlater ItemShopSystem
 
 public constant ADVANCED_ONHIT =  'A00I'
 public constant DEFAULT_ONHIT = 'A008'
+
+boolean magicDamage
+
+public function setMagicDamage(boolean magic)
+    magicDamage = magic
+
 /*
     ADVANCED_ONHIT can temporarily replace the default on hit abiltiy to get a temporary special attack, that depends
     on the time when the attack is fired and not when it is hit (so only relevant for ranged attacks)
@@ -25,7 +31,7 @@ public constant DEFAULT_ONHIT = 'A008'
 */
 
 
-function unit.dealDamageNoEvent(unit target, real amount, ReductionType reductionType)
+public function unit.dealDamageNoEvent(unit target, real amount, ReductionType reductionType)
     disableDamageDetect()
     this.dealDamage(target, amount, reductionType)
     enableDamageDetect()
@@ -149,6 +155,7 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
             //DamageTag.addDamage(target, currentDamage)
 
         BlzSetEventDamage(currentDamage)
+        setMagicDamage(false)
 
 
 

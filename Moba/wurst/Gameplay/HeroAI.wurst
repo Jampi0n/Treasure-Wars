@@ -143,7 +143,6 @@ public function unit.findTarget(real range, AbilityTargetFocus focus, AbilityTar
 
         if filter != null
             valid = valid and filter.filter(u)
-            destroy filter
 
         if valid
             if priority == AbilityTargetPriority.LOW_HEALTH
@@ -167,7 +166,8 @@ public function unit.findTarget(real range, AbilityTargetFocus focus, AbilityTar
 
 
         
-
+    if filter != null
+        destroy filter
 
 
     g.destr()
@@ -399,6 +399,28 @@ public class HeroAI
         else
             currentRetreatLoc = this.homeLoc
 
+    function attackedByTower()
+        if (this.state == AIState.ATTACK or this.state == AIState.RETREAT_TEMP)
+            let g = CreateGroup()
+            unit u
+            int count = 0
+            let owner = this.heroUnit.getOwner()
+            g.enumUnitsInRange(this.heroUnit.getPos(), 1000)
+            while(true)
+                u = FirstOfGroup(g)
+                if u == null
+                    break
+                g.removeUnit(u)
+                if IsUnitAlly(u, owner)
+                    if not u.isType(UNIT_TYPE_HERO)
+                        count++
+
+            g.destr()
+            if count < 5
+                this.retreatTemporarily(50, false)
+            else
+                this.retreatTemporarily(15, false)
+
     static function classInit()
 
         updateTimer.startPeriodic(0.1, function updateStatic)
@@ -411,7 +433,8 @@ public class HeroAI
                 ai.levelUp()
         end))
 
-        attackedByTower = CreateTrigger()
+        //moved to tower
+        /*attackedByTower = CreateTrigger()
             ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_ATTACKED)
             ..addAction(() ->(begin
             let ai = heroAIs[GetTriggerUnit().getOwner().getId()]
@@ -437,7 +460,7 @@ public class HeroAI
                         ai.retreatTemporarily(50, false)
                     else
                         ai.retreatTemporarily(15, false)
-        end))
+        end))*/
     
 
     construct(CPlayer owner)
@@ -486,8 +509,10 @@ public class HeroAI
 
     static function getAbilityId(int heroId, AbilitySlot slot) returns int
         int id = 256 * 256 * 256 * 65 //A
-        id += 256 * 256 * 90 //Z
-        id += 256 * (48 + heroId)
+        let second = (heroId/10).toInt()
+        id += 256 * 256 * (90-second) //Z,Y
+
+        id += 256 * (48 + heroId - 10*second)
         if slot == AbilitySlot.Q
             id += 81
         else if slot == AbilitySlot.W

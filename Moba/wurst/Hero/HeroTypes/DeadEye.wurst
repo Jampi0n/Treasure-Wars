@@ -263,7 +263,7 @@ function onSpellCast()
 
     if(spellId==ABILITY_TERROR)
         group nearby = CreateGroup()
-        nearby.enumUnitsInRange(caster.getPos(), 300.+100*level)
+        nearby.enumUnitsInRange(caster.getPos(), TERROR_AOE[level-1])
 
         let dur = TERROR_DURATION[level-1].bonus(caster.getInt(), TERROR_DURATION_BONUS)
 

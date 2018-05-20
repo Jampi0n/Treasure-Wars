@@ -137,6 +137,11 @@ public class Tower
                 if currentTarget == null
                     currentTarget = attacked
 
+                if currentTarget.isType(UNIT_TYPE_HERO)
+                    let ai = getAI(currentTarget.getOwner().getId())
+                    if ai != null
+                        ai.attackedByTower()
+
     //a hero inside the tower range damages an allied hero
     function attackHero(unit targetHero)
         if not this.heroFocus
