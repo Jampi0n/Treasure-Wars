@@ -1,0 +1,110 @@
+package Creeps
+
+import LinkedList
+import UnitTypeConfig
+import HashMap
+import ClosureTimers
+
+
+class Creep
+    int unitTypeId
+    vec2 spawnPos
+    angle facing
+
+    construct(unit baseUnit)
+        this.unitTypeId = baseUnit.getTypeId()
+        this.spawnPos = baseUnit.getPos()
+        this.facing = baseUnit.getFacingAngle()
+
+    construct(int unitTypeId, vec2 spawnPos, angle facing)
+        this.unitTypeId = unitTypeId
+        this.spawnPos = spawnPos
+        this.facing = facing
+
+
+
+public class CreepCamp
+
+
+
+    private static constant unitToCamp = new HashMap<unit, CreepCamp>
+    private static constant allCreeps = CreateGroup()
+    private static constant creepCamps = new LinkedList<CreepCamp>
+    //private LinkedList<unit> creepUnits
+    private LinkedList<Creep> creepTypes
+
+    private int alive
+    private real respawnDuration = 10
+
+    construct()
+        alive = 0
+        creepCamps.add(this)
+        creepTypes = new LinkedList<Creep>
+
+    private function addUnitInit(unit creepUnit)
+        addUnitRespawn(creepUnit)
+        creepTypes.add(new Creep(creepUnit))
+    
+    private function addUnitRespawn(unit creepUnit)
+        SetUnitAcquireRange(creepUnit, 200)
+        allCreeps.addUnit(creepUnit)
+        alive++
+        //creepUnits.add(creepUnit)
+        unitToCamp.put(creepUnit, this)
+
+    private function respawn()
+        print("respawned")
+        for c in creepTypes
+            let creepUnit = createUnit(players[PLAYER_NEUTRAL_AGGRESSIVE], c.unitTypeId, c.spawnPos, c.facing)
+            addUnitRespawn(creepUnit)
+
+    private static function onDeath()
+        let u = GetTriggerUnit()
+        let camp = unitToCamp.get(u)
+        if camp != null
+            unitToCamp.remove(u)
+            allCreeps.removeUnit(u)
+            camp.alive--
+            if camp.alive == 0
+                print("start respawn")
+                doAfter(camp.respawnDuration, -> camp.respawn())
+
+
+    private static function initCreep(unit creepUnit, CreepCamp camp)
+        if not allCreeps.contains(creepUnit)
+
+            CreepCamp newCamp = camp == null ? new CreepCamp : camp
+            newCamp.addUnitInit(creepUnit)
+
+            group g = CreateGroup()
+            g.enumUnitsInRange(creepUnit.getPos(), 500)
+            unit u
+            
+            while true
+                u = FirstOfGroup(g)
+                if u == null
+                    break
+                g.removeUnit(u)
+                initCreep(u, newCamp)
+            
+            g.destr()
+
+
+    protected static function initialize()
+
+        GroupEnumUnitsOfPlayer(ENUM_GROUP, players[PLAYER_NEUTRAL_AGGRESSIVE], null)
+        unit u
+        while true
+            u = FirstOfGroup(ENUM_GROUP)
+            if u == null
+                break
+            ENUM_GROUP.removeUnit(u)
+            if u.getTypeId() != HYDRA and u.getTypeId() != DRAGON_TURTLE
+                initCreep(u, null)
+
+        CreateTrigger()
+        ..registerPlayerUnitEvent(players[PLAYER_NEUTRAL_AGGRESSIVE], EVENT_PLAYER_UNIT_DEATH, null)
+        ..addAction(function onDeath)
+
+init
+    CreepCamp.initialize()

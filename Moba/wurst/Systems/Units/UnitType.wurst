@@ -95,17 +95,6 @@ function onUnitDeath()
 
     if dyingType != null
 
-
-        string modelPath
-        let uType = UnitType.getUnitType(dyingUnit.getTypeId())
-        if uType != null
-            modelPath = uType.getModel()
-
-
-            modelPath = modelPath.substring(modelPath.findLastCharacter("\\")+1, modelPath.length()-4)+"NoDeath"+".mdx"
-            addEffect(modelPath, dyingUnit.getPos()).destr()
-
-
         // army unit dies
         if dyingCPlayer.getTeam() == Team.TEAM1 or dyingCPlayer.getTeam() == Team.TEAM2
             let bounty = dyingType.getBounty()
