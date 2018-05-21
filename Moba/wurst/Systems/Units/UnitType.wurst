@@ -5,6 +5,7 @@ import StandardTextTags
 import initlater HeroControl
 import PlayerControl
 import Constants
+import UtilityFunctions
 
 public function createUnitType(int unitId, int bounty, int baseAttack, int upgradeAttack, int attackUpgradeId, int baseArmor, int upgradeArmor, int armorUpgradeId, int hitBox, string modelPath) returns int
     new UnitType(unitId, bounty, baseAttack, upgradeAttack, attackUpgradeId, baseArmor, upgradeArmor, armorUpgradeId, hitBox, modelPath)
@@ -93,6 +94,17 @@ function onUnitDeath()
     let dyingCPlayer = dyingUnit.getOwner().getCPlayer()
 
     if dyingType != null
+
+
+        string modelPath
+        let uType = UnitType.getUnitType(dyingUnit.getTypeId())
+        if uType != null
+            modelPath = uType.getModel()
+
+
+            modelPath = modelPath.substring(modelPath.findLastCharacter("\\")+1, modelPath.length()-4)+"NoDeath"+".mdx"
+            addEffect(modelPath, dyingUnit.getPos()).destr()
+
 
         // army unit dies
         if dyingCPlayer.getTeam() == Team.TEAM1 or dyingCPlayer.getTeam() == Team.TEAM2

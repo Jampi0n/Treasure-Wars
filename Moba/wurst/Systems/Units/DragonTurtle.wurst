@@ -1,0 +1,117 @@
+package DragonTurtle
+
+import ClosureTimers
+import UnitTypeConfig
+import UnitWrapper
+import PlayerControl
+import HeroControl
+import Assets
+import SoundUtils
+import Buff
+import ObjectEditingPreset
+import LinkedList
+import OnAttack
+import General
+
+constant REVIVE_TIME = 300.
+constant MAX_LEVEL = 5
+constant DEATH_SOUND = new SoundDefinition(Sounds.giantSeaTurtleDeath1, false)
+
+vec2 spawnPos
+angle facing
+
+int creepLevel
+
+constant int array HP = [0, 2000, 4000, 6000, 8000, 10000]
+constant int array DMG = [0, 50, 100, 150, 200, 250]
+
+constant int array ARMOR = [0, 20, 40, 60, 80, 100]
+constant int array WILLPOWER = [100, 120, 140, 160, 180, 200]
+
+constant int array ATTACK_SPEED = [0, 10, 20, 30, 40, 50]
+
+
+    
+
+function onDragonTurtleDeath()
+    unit target = GetTriggerUnit()
+
+    if target == udg_DragonTurtle
+
+        DEATH_SOUND.play().snd.setVolume(150)
+
+        let killer = GetKillingUnit()
+        let killingTeam = CPlayer.getAllyHeroPlayers(killer.getOwner())
+        boolean killedByTeam = true
+
+
+        string teamName
+        if killer.getOwner().getCPlayer().getTeam() == Team.TEAM1
+            teamName = Player(TEAM_PLAYER_TEAM_1).getFullColoredName()
+        else if killer.getOwner().getCPlayer().getTeam() == Team.TEAM2
+            teamName = Player(TEAM_PLAYER_TEAM_2).getFullColoredName()
+        else
+            teamName = ""
+            killedByTeam = false
+
+        if killedByTeam
+            printTimed("Team "+teamName+" has killed a Dragon Turtle. Their heroes gain 3 stat upgrades for every stat. The Dragon Turtle will respawn in "+REVIVE_TIME.toInt().toString()+" seconds.", 10)
+            PingMinimap(target.getX(), target.getY(), 3)
+
+            for CPlayer killerHero in killingTeam
+                let hero = Hero.getHero(killerHero)
+                if hero != null
+                    hero.toUnit().dragonTurtleBonus()
+                    hero.addXp(250)
+
+            killer.getOwner().getCPlayer().statDragonTurtlesKilled++
+
+        doAfter(REVIVE_TIME, () -> (begin
+            udg_DragonTurtle = createUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), DRAGON_TURTLE, spawnPos, facing)
+            SetUnitAcquireRange(udg_DragonTurtle, 200)
+            if creepLevel < MAX_LEVEL
+                creepLevel++
+
+
+            let lvl = creepLevel
+            udg_DragonTurtle.wrapper()
+                ..addStatAbsoluteBonus(Stat.AD, DMG[lvl])
+                ..addStatAbsoluteBonus(Stat.HP, HP[lvl])
+                ..addStatAbsoluteBonus(Stat.AR, ARMOR[lvl])
+                ..addStatAbsoluteBonus(Stat.AGI, WILLPOWER[lvl])
+                ..addStatAbsoluteBonus(Stat.AS, ATTACK_SPEED[lvl])
+
+        end))
+
+function unit.dragonTurtleBonus()
+    this.wrapper()
+        ..addStatAbsoluteBonus(Stat.AS, 6)
+        ..addStatAbsoluteBonus(Stat.STR, 3)
+        ..addStatAbsoluteBonus(Stat.AGI, 3)
+        ..addStatAbsoluteBonus(Stat.INT, 3)
+        ..addStatAbsoluteBonus(Stat.AR, 3)
+
+        ..addStatAbsoluteBonus(Stat.HP, 45)
+        ..addStatAbsoluteBonus(Stat.HR, 9)
+        ..addStatAbsoluteBonus(Stat.MP, 30)
+        ..addStatAbsoluteBonus(Stat.MR, 3)
+
+
+init
+ 
+    spawnPos = udg_DragonTurtle.getPos()
+    facing = udg_DragonTurtle.getFacingAngle()
+    creepLevel = 0
+
+    let lvl = creepLevel
+    doAfter(0) ->
+        udg_DragonTurtle.wrapper()
+            ..addStatAbsoluteBonus(Stat.AD, DMG[lvl])
+            ..addStatAbsoluteBonus(Stat.HP, HP[lvl])
+            ..addStatAbsoluteBonus(Stat.AR, ARMOR[lvl])
+            ..addStatAbsoluteBonus(Stat.AGI, WILLPOWER[lvl])
+            ..addStatAbsoluteBonus(Stat.AS, ATTACK_SPEED[lvl])
+
+    CreateTrigger()
+        ..registerPlayerUnitEvent(Player(PLAYER_NEUTRAL_AGGRESSIVE), EVENT_PLAYER_UNIT_DEATH, null)
+        ..addAction(function onDragonTurtleDeath)

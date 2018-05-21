@@ -29,7 +29,6 @@ public constant PEASANT_DEFEND = createUnitType('h01C', 10, 0, 10, 16, Units.mil
 
 public constant TANK = createUnitType('h019', 250, 150, 15, ATTACK_RANGED, 90, 10, ARMOR_HEAVY, 48, Units.warWagon)
 
-public constant HYDRA = createUnitType('n00I', 0, 300, 100, 160, Units.hydra)
 
 public constant DARK_MINION_1 = createUnitType('n00C', 10, 25, 20, 32, Units.skeleton1)
 public constant DARK_MINION_2 = createUnitType('n00D', 10, 30, 25, 32, Units.skeleton1)
@@ -39,7 +38,31 @@ public constant DARK_MINION_5 = createUnitType('n00G', 10, 45, 40, 32, Units.ske
 
 public constant FROST_WYRM = createUnitType('u001', 100, 50, 0, 64, Units.frostWyrm1)
 
+public constant HYDRA = createUnitType('n00I', 0, 300, 100, 160, Units.hydra)
+public constant DRAGON_TURTLE = createUnitType('n00K', 0, 300, 100, 160, Units.dragonSeaTurtleRange)
 
+
+public constant JUNGLE_BEAST = createUnitType('n00L', 0, 300, 100, 160, Units.jungleBeast1)
+public constant JUNGLE_BEAST_ELDER = createUnitType('n00V', 0, 300, 100, 160, Units.jungleBeast1)
+
+public constant TURTLE_GIANT = createUnitType('n00Z', 0, 300, 100, 160, Units.giantSeaTurtle1)
+public constant TURTLE_GARGANTUAN = createUnitType('n00Y', 0, 300, 100, 160, Units.seaTurtle1)
+
+public constant MAKRURA_LORD = createUnitType('n00R', 0, 300, 100, 160, Units.lobstrokkgreen)
+public constant MAKRURA_SNAPPER = createUnitType('n00P', 0, 300, 100, 160, Units.lobstrokkred)
+
+public constant MURGUL_MAGE = createUnitType('n00Q', 0, 300, 100, 160, Units.murgulShadowcaster1)
+public constant MURGUL_MELEE = createUnitType('n00S', 0, 300, 100, 160, Units.murgulTidewarrior1)
+
+public constant REVENANT = createUnitType('n00J', 0, 300, 100, 160, Units.revenantOfTheWaves1)
+public constant REVENANT_BOSS = createUnitType('n00T', 0, 300, 100, 160, Units.revenantOfTheWaves1)
+
+public constant SEA_ELEMENTAL = createUnitType('n00M', 0, 300, 100, 160, Units.seaElemental)
+
+public constant SEA_GIANT = createUnitType('n00W', 0, 300, 100, 160, Units.seaGiantGreen1)
+public constant STORMREAVER = createUnitType('n00X', 0, 300, 100, 160, Units.orcWarlock1)
+
+public constant SKELETAL_ORC = createUnitType('n00U', 0, 300, 100, 160, Units.skeletonOrc1)
 
 init
     doAfter(0, () -> (begin

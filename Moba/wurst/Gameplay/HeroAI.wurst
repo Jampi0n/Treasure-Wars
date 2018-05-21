@@ -14,6 +14,7 @@ constant team1AIs = new LinkedList<HeroAI>
 constant team2AIs = new LinkedList<HeroAI>
 
 public constant real TEAM_FIGHT_RANGE = 1200
+constant real HALF_DISTANCE = 9800
 
 public enum AbilityTargetType
     INSTANT
@@ -377,12 +378,14 @@ public class HeroAI
 
     function updateTargetLoc()
         if lane == Lane.TOP
+            print(this.heroUnit.getPos().distanceTo(this.targetLoc))
             currentTargetLoc = gg_rct_CornerTop.getCenter()
-            if this.heroUnit.getPos().distanceTo(this.targetLoc) < 9000
+            if this.heroUnit.getPos().distanceTo(this.targetLoc) < HALF_DISTANCE
                 this.currentTargetLoc = this.targetLoc  
         else if lane == Lane.BOT
+            print(this.heroUnit.getPos().distanceTo(this.targetLoc))
             currentTargetLoc = gg_rct_CornerBot.getCenter()
-            if this.heroUnit.getPos().distanceTo(this.targetLoc) < 9000
+            if this.heroUnit.getPos().distanceTo(this.targetLoc) < HALF_DISTANCE
                 this.currentTargetLoc = this.targetLoc  
         else
             currentTargetLoc = targetLoc
@@ -390,11 +393,11 @@ public class HeroAI
     function updateRetreatLoc()
         if lane == Lane.TOP
             currentRetreatLoc = gg_rct_CornerTop.getCenter()
-            if this.heroUnit.getPos().distanceTo(this.homeLoc) < 9000
+            if this.heroUnit.getPos().distanceTo(this.homeLoc) < HALF_DISTANCE
                 this.currentRetreatLoc = this.homeLoc  
         else if lane == Lane.BOT
             currentRetreatLoc = gg_rct_CornerBot.getCenter()
-            if this.heroUnit.getPos().distanceTo(this.homeLoc) < 9000
+            if this.heroUnit.getPos().distanceTo(this.homeLoc) < HALF_DISTANCE
                 this.currentRetreatLoc = this.homeLoc  
         else
             currentRetreatLoc = this.homeLoc

@@ -94,3 +94,13 @@ public function real.toStatString() returns string
     if prec > 0
         return amount.toString(prec)
     return amount.round().toString()
+
+
+public function string.findLastCharacter(string char) returns int
+    int ret = -1
+    for i = this.length()-1 downto 0
+        if this.charAt(i) == char
+            ret = i
+            break
+    
+    return ret
