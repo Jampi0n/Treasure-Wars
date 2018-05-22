@@ -520,6 +520,11 @@ public class CPlayer
                         if(i!=j and getCPlayer(i).getTeam()==getCPlayer(j).getTeam())
                             SetPlayerAllianceStateBJ(players[i],players[j], bj_ALLIANCE_ALLIED_VISION)
                     
+        //armies do not fight vs creeps
+        SetPlayerAlliance(players[TEAM_PLAYER_TEAM_1], players[PLAYER_NEUTRAL_AGGRESSIVE], ALLIANCE_PASSIVE, true)
+        SetPlayerAlliance(players[TEAM_PLAYER_TEAM_2], players[PLAYER_NEUTRAL_AGGRESSIVE], ALLIANCE_PASSIVE, true)
+        SetPlayerAlliance(players[PLAYER_NEUTRAL_AGGRESSIVE], players[TEAM_PLAYER_TEAM_1], ALLIANCE_PASSIVE, true)
+        SetPlayerAlliance(players[PLAYER_NEUTRAL_AGGRESSIVE], players[TEAM_PLAYER_TEAM_2], ALLIANCE_PASSIVE, true)
 
     function addGoldEx(real gold)
         this.realGold += gold

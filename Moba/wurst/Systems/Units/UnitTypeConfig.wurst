@@ -42,27 +42,27 @@ public constant HYDRA = createUnitType('n00I', 0, 300, 100, 160, Units.hydra)
 public constant DRAGON_TURTLE = createUnitType('n00K', 0, 300, 100, 160, Units.dragonSeaTurtleRange)
 
 
-public constant JUNGLE_BEAST = createUnitType('n00L', 0, 300, 100, 160, Units.jungleBeast1)
-public constant JUNGLE_BEAST_ELDER = createUnitType('n00V', 0, 300, 100, 160, Units.jungleBeast1)
+public constant JUNGLE_BEAST = createUnitType('n00L', 20, 20, 15, 32, Units.jungleBeast1)
+public constant JUNGLE_BEAST_ELDER = createUnitType('n00V', 40, 51, 30, 48, Units.jungleBeast1)
 
-public constant TURTLE_GIANT = createUnitType('n00Z', 0, 300, 100, 160, Units.giantSeaTurtle1)
-public constant TURTLE_GARGANTUAN = createUnitType('n00Y', 0, 300, 100, 160, Units.seaTurtle1)
+public constant TURTLE_GIANT = createUnitType('n00Z', 30, 25, 40, 48, Units.giantSeaTurtle1)
+public constant TURTLE_GARGANTUAN = createUnitType('n00Y', 40, 43, 55, 48, Units.seaTurtle1)
 
-public constant MAKRURA_LORD = createUnitType('n00R', 0, 300, 100, 160, Units.lobstrokkgreen)
-public constant MAKRURA_SNAPPER = createUnitType('n00P', 0, 300, 100, 160, Units.lobstrokkred)
+public constant MAKRURA_LORD = createUnitType('n00R', 40, 46, 75, 48, Units.lobstrokkgreen)
+public constant MAKRURA_SNAPPER = createUnitType('n00P', 20, 22, 60, 32, Units.lobstrokkred)
 
-public constant MURGUL_MAGE = createUnitType('n00Q', 0, 300, 100, 160, Units.murgulShadowcaster1)
-public constant MURGUL_MELEE = createUnitType('n00S', 0, 300, 100, 160, Units.murgulTidewarrior1)
+public constant MURGUL_MAGE = createUnitType('n00Q', 25, 28, 15, 16, Units.murgulShadowcaster1)
+public constant MURGUL_MELEE = createUnitType('n00S', 20, 17, 20, 16, Units.murgulTidewarrior1)
 
-public constant REVENANT = createUnitType('n00J', 0, 300, 100, 160, Units.revenantOfTheWaves1)
-public constant REVENANT_BOSS = createUnitType('n00T', 0, 300, 100, 160, Units.revenantOfTheWaves1)
+public constant REVENANT = createUnitType('n00J', 35, 30, 40, 32, Units.revenantOfTheWaves1)
+public constant REVENANT_BOSS = createUnitType('n00T', 75, 80, 55, 32, Units.revenantOfTheWaves1)
 
-public constant SEA_ELEMENTAL = createUnitType('n00M', 0, 300, 100, 160, Units.seaElemental)
+public constant SEA_ELEMENTAL = createUnitType('n00M', 35, 48, 0, 32, Units.seaElemental)
 
-public constant SEA_GIANT = createUnitType('n00W', 0, 300, 100, 160, Units.seaGiantGreen1)
-public constant STORMREAVER = createUnitType('n00X', 0, 300, 100, 160, Units.orcWarlock1)
+public constant SEA_GIANT = createUnitType('n00W', 40, 52, 25, 48, Units.seaGiantGreen1)
+public constant STORMREAVER = createUnitType('n00X', 15, 15, 30, 16, Units.orcWarlock1)
 
-public constant SKELETAL_ORC = createUnitType('n00U', 0, 300, 100, 160, Units.skeletonOrc1)
+public constant SKELETAL_ORC = createUnitType('n00U', 15, 24, 10, 16, Units.skeletonOrc1)
 
 init
     doAfter(0, () -> (begin
