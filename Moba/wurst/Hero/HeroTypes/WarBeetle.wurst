@@ -445,10 +445,10 @@ function initHeroType()
         ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
         ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
         ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
-        ..setSkillBuild("QWQWQWQWQWEEEEE")
+        ..setSkillBuild("QWEQWQWQWQWEEEE")
         ..addItem(ITEM_ID_HEAVY_BOOTS)
         ..addItem(ITEM_ID_RUNIC_ARMOR)
-        ..addItem(ITEM_ID_FIREHAND_GAUNTLETS)
+        ..addItem(ITEM_ID_AXE_OF_DECAY)
         ..addItem(ITEM_ID_BLESSED_GOBLET)
         ..addItem(ITEM_ID_ARCANE_SHIELD)
         ..addItem(ITEM_ID_WAR_DRUM)
@@ -468,7 +468,7 @@ function initHeroType()
 
 
 init
-    heroType = new HeroType(HERO_WAR_BEETLE, Icons.bTNHeroCryptLord, 10)
+    heroType = new HeroType(HERO_WAR_BEETLE, "BTNWarBeetle.blp", 10)
         ..setOnInitFunction(() -> initHeroType())
 
    
