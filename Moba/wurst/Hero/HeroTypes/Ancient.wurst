@@ -11,6 +11,8 @@ import Fx
 
 
 public constant HERO_TREE = 'H014'
+public constant HERO_TREE_ROOTED = 'H015'
+
 HeroType heroType
 
 constant UPROOTED = compiletime(UNIT_ID_GEN.next())
@@ -35,7 +37,7 @@ function passive()
 
     for lvl = 1 to 5
         aDef
-            ..setTooltipNormalExtended(lvl, "Increases the Ancient's hit point regeneration by {0}%.".format(
+            ..setDescriptionString(true, lvl, "Increases the Ancient's hit point regeneration by {0}%.".format(
                 REGENERATION_HIT_POINT_REGEN[lvl-1].str())
             )
 
@@ -73,11 +75,11 @@ function devourUnit()
         ..setMissileArt("")
         ..setArtSpecial("")
         ..setLightningEffects("")
-        ..setRequirements(int2fourchar(UPROOTED))
+        ..setRequirements(UPROOTED.toRawCode())
         ..setCheckDependencies(true)
-        ..setLearnString(CHANNELING_SPELL + "Grabs the target enemy unit to devour it and heals the hero.", (int lvl) -> (begin
+        /*..setLearnString(CHANNELING_SPELL + "Grabs the target enemy unit to devour it and heals the hero.", (int lvl) -> (begin
             return "{0} hit points healed, {1} seconds cooldown.".format( DEVOUR_HEAL[lvl-1].str()+DEVOUR_HEAL_BONUS.getBonusString(C_INT), DEVOUR_COOLDOWN[lvl-1].str())
-        end) )
+        end) )*/
 
     for lvl = 1 to 5
         aDef
@@ -88,12 +90,12 @@ function devourUnit()
             ..setCastRange(lvl, 150)
             ..setDurationNormal(lvl, 0.1)
             ..setTargetsAllowed(lvl, "air,enemies,ground,neutral,nonancient,organic,nonhero")
-            ..setTooltipNormalExtended(lvl, CHANNELING_SPELL + "Grabs the target enemy unit to devour it and heals the hero for {0} hit points.".format(
+            /*..setDescriptionString(true, lvl, CHANNELING_SPELL + "Grabs the target enemy unit to devour it and heals the hero for {0} hit points.".format(
                 DEVOUR_HEAL[lvl-1].str()+DEVOUR_HEAL_BONUS.getBonusString(C_INT)
-            ))
+            ))*/
 
 constant real array ENTANGLE_DURATION = [2, 2.4, 2.8, 3.2, 3.6]
-constant real ENTANGLE_DURATION_BONUS = 2
+constant real ENTANGLE_DURATION_BONUS = 1
 constant real array ENTANGLE_HIT_DAMAGE = [100, 150, 200, 250, 300]
 constant real ENTANGLE_HIT_DAMAGE_BONUS = 150
 
@@ -113,11 +115,11 @@ function entanglingRoots()
         ..setAnimationNames("attack,2")
         ..setupWithHotKey("Entangling Roots", "W")
         ..setMissileArt("")
-        //..setRequirements(int2fourchar(UPROOTED))
+        //..setRequirements(UPROOTED.toRawCode())
         //..setCheckDependencies(true)
-        ..setLearnString("Releases thorns in a line, damaging and entangling every enemy unit they pass through.", (int lvl) -> (begin
+        /*..setLearnString("Releases thorns in a line, damaging and entangling every enemy unit they pass through.", (int lvl) -> (begin
             return "{0} damage, {1} second.".format( ENTANGLE_HIT_DAMAGE[lvl-1].str()+ENTANGLE_HIT_DAMAGE_BONUS.getBonusString(C_INT), ENTANGLE_DURATION[lvl-1].toString()+ENTANGLE_DURATION_BONUS.getBonusString(C_INT) )
-        end) )
+        end) )*/
 
     for lvl = 1 to 5
         aDef
@@ -125,9 +127,9 @@ function entanglingRoots()
             ..setManaCost(lvl, MANA[lvl-1])
             ..setCastRange(lvl, 800)
             ..setTargetsAllowed(lvl, "none")
-            ..setTooltipNormalExtended(lvl, "Releases thorns in a line, dealing {0} damage and entangling every enemy unit they pass through for {1} seconds.".format(
+            /*..setDescriptionString(true, lvl, "Releases thorns in a line, dealing {0} damage and entangling every enemy unit they pass through for {1} seconds.".format(
                 ENTANGLE_HIT_DAMAGE[lvl-1].str()+ENTANGLE_HIT_DAMAGE_BONUS.getBonusString(C_INT), ENTANGLE_DURATION[lvl-1].toString()+ENTANGLE_DURATION_BONUS.getBonusString(C_INT)
-            ))
+            ))*/
 
 
 
@@ -148,21 +150,21 @@ function root()
         ..setupIcon(Icons.bTNRoot)
         ..setIconTurnOff(Icons.bTNUproot)
         ..setupWithHotKey("Root", "E")
-        ..setLearnString("Burrows the Ancient's roots into the ground, rendering it immobile, but allowing to hurl enormous rocks dealing area of effect damage. The Ancient's armor and willpower are increased while rooted.", (int lvl) -> (begin
+        /*..setLearnString("Burrows the Ancient's roots into the ground, rendering it immobile, but allowing to hurl enormous rocks dealing area of effect damage. The Ancient's armor and willpower are increased while rooted.", (int lvl) -> (begin
             return "{0} area of effect damage, {1} bonus armor and willpower.".format( ROOT_AOE_DAMAGE[lvl-1].str()+ROOT_AOE_DAMAGE_BONUS.getBonusString(C_STR), ROOT_RESISTANCE[lvl-1].str())
-        end) )
+        end) )*/
 
     for lvl = 1 to 5
         aDef
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
-            ..setNormalFormUnit(lvl, int2fourchar('H014'))
-            ..setAlternateFormUnit(lvl, int2fourchar('H015'))
+            ..setNormalFormUnit(lvl, HERO_TREE.toRawCode())
+            ..setAlternateFormUnit(lvl, HERO_TREE_ROOTED.toRawCode())
             ..setDurationNormal(lvl, ROOT_DURATION)
             ..setTooltipTurnOff(lvl, "(E) Uproot - [|cffffcc00Level "+lvl.toString()+"|r]")
-            ..setTooltipNormalExtended(lvl, "Burrows the Ancient's roots into the ground, rendering it immobile, but allowing to hurl enormous rocks dealing {0} area of effect damage. The Ancient's armor and willpower are increased by {1} while rooted.".format(
+            /*..setDescriptionString(false, lvl, "Burrows the Ancient's roots into the ground, rendering it immobile, but allowing to hurl enormous rocks dealing {0} area of effect damage. The Ancient's armor and willpower are increased by {1} while rooted.".format(
                 ROOT_AOE_DAMAGE[lvl-1].str()+ROOT_AOE_DAMAGE_BONUS.getBonusString(C_STR), ROOT_RESISTANCE[lvl-1].str()
-            ))
+            ))*/
             ..setTooltipTurnOffExtended(lvl, "Allows the Ancient to pull itself up out of the ground so that it can move and engage units in melee combat.")
 
 constant int NATURES_WRATH_DUMMY_BUFF = compiletime(createDummyBuff())
@@ -181,31 +183,24 @@ function naturesWrath()
     let aDef = new AbilityDefinitionBeserk(ABILITY_NATURES_WRATH)
         ..setupIcon("BTNNaturesWrath")
         ..setupWithHotKey("Nature's Wrath", "R")
-        ..setLearnString("Covers the ancient in a storm of sharp leaves, that deal damage to nearby enemies.", (int lvl) -> (begin
+        /*..setLearnString("Covers the ancient in a storm of sharp leaves, that deal damage to nearby enemies.", (int lvl) -> (begin
             return "{0} damage per second, lasts {1} seconds, {2} seconds cooldown.".format( 
                 NATURES_WRATH_TOTAL_DAMAGE[lvl-1].str()+NATURES_WRATH_TOTAL_DAMAGE_BONUS.getBonusString(C_INT), NATURES_WRATH_DURATION[lvl-1].str(), NATURES_WRATH_COOLDOWN[lvl-1].str()
             )
-        end) )
+        end) )*/
 
     for lvl = 1 to 5
         aDef
             ..setCooldown(lvl, NATURES_WRATH_COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
-            ..setBuffs(lvl, int2fourchar(NATURES_WRATH_DUMMY_BUFF))
+            ..setBuffs(lvl, NATURES_WRATH_DUMMY_BUFF.toRawCode())
             ..setDamageTakenIncrease(lvl, 0)
             ..setAttackSpeedIncrease(lvl, 0)
             ..setMovementSpeedIncrease(lvl, 0)
-            ..setTooltipNormalExtended(lvl, "Covers the ancient in a storm of sharp leaves, that deal {0} damage to nearby enemies over {1} seconds.".format(
+            /*..setDescriptionString(true, lvl, "Covers the ancient in a storm of sharp leaves, that deal {0} damage to nearby enemies over {1} seconds.".format(
                 NATURES_WRATH_TOTAL_DAMAGE[lvl-1].str()+NATURES_WRATH_TOTAL_DAMAGE_BONUS.getBonusString(C_INT), NATURES_WRATH_DURATION[lvl-1].str()
-            ))
+            ))*/
 
-
-function string.findLastCharacter(string char) returns int
-    for i = this.length()-1 downto 0
-        if this.charAt(i) == char
-            return i
-    
-    return -1
 
 
 unit array uprooted_dummy
@@ -269,7 +264,6 @@ class EatTreeAnimation
 
         if this.caster.getCurrentOrder()!= OrderId("chainlightning")
             destroy this
-            return
     
     static function updateStatic()
         (GetExpiredTimer().getData() castTo EatTreeAnimation).update()
@@ -366,7 +360,7 @@ class NaturesWrath
 
 function onAttack(unit attacker, unit target, boolean _isActive)
     let level = attacker.getAbilityLevel(ABILITY_ROOT)
-    if level != 0 and attacker.getTypeId() == 'H015'
+    if level != 0 and attacker.getTypeId() == HERO_TREE_ROOTED
         group nearby = CreateGroup()
         nearby.enumUnitsInRange(target.getPos(), ROOT_AOE_RANGE[level-1])
 
@@ -445,14 +439,125 @@ function setupStats()
         ..setStat(Stat.AGI, 7, 36)
         ..setStat(Stat.INT, 12, 31)
 
+function retreatAI(HeroAI _ai)
+
+function attackAI(HeroAI ai)
+    let hero = ai.getHeroUnit()
+
+    unit target
+    if hero.getMana()/hero.getMaxMana() > 0.5
+        target = hero.findTarget(600, AbilityTargetFocus.ENEMY, AbilityTargetPriority.HIGH_VALUE, null)
+        if target.isTargetable(hero.getOwner(), false, true)
+            ai.issue("chainlightning", target)
+
+    target = hero.findTarget(500, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_DISTANCE, null)
+    if target.isTargetable(hero.getOwner(), false, true)
+        ai.attack(target)
+
+function teamFightAI(HeroAI ai)
+
+    let hero = ai.getHeroUnit()
+
+    if ai.getTeamFightTarget().getPos().distanceTo(hero.getPos()) < 500
+        ai.issue("carrionswarm", ai.getTeamFightTarget().getPos())
+
+    let ulti = HeroAI.getAbilityId(ai.getHero().getHeroType().getHeroId(), AbilitySlot.R)
+    
+    if hero.getAbilityLevel(ulti) > 0 and hero.getAbilityCooldownRemaining(ulti) <= 0
+        let g = CreateGroup()
+        unit u
+        int count = 0
+        g.enumUnitsInRange(hero.getPos(), NATURES_WRATH_AOE)
+        while(true)
+            u = FirstOfGroup(g)
+            if u == null
+                break
+            g.removeUnit(u)
+            if u.isTargetable(hero.getOwner(), false, true)
+                if u.isType(UNIT_TYPE_HERO)
+                    count++
+
+        g.destr()
+        if count != 0
+            if ai.issue("berserk")
+                return
+
+        
+    unit target = ai.getTeamFightTarget()
+    if target.isTargetable(hero.getOwner(), false, true)
+
+        if not ai.getAttacking()
+            ai.attack(target)
+
+function setupTooltips()
+    DynamicTooltip tooltip = new DynamicTooltip(ABILITY_EAT_UNIT)
+    tooltip.setLearnString(CHANNELING_SPELL + "Grabs the target enemy unit to devour it, healing the hero.", (int lvl) -> (begin
+        return "{0}{I0} hit points healed, {1} seconds cooldown.".format( DEVOUR_HEAL[lvl-1].str(), DEVOUR_COOLDOWN[lvl-1].str())
+    end) )
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, CHANNELING_SPELL + "Grabs the target enemy unit to devour it, healing the hero for {0}{I0} hit points.".format(
+            DEVOUR_HEAL[lvl-1].str()
+        ))
+    tooltip.setReplaceIntelligence(DEVOUR_HEAL_BONUS)
+    heroType.addDynamicTooltipIntelligence(tooltip)
+
+    tooltip = new DynamicTooltip(ABILITY_IMPALE)
+    tooltip.setLearnString("Releases thorns in a line, damaging and entangling every enemy unit they pass through.", (int lvl) -> (begin
+        return "{0}{I0} damage, {1}{I1} second.".format( ENTANGLE_HIT_DAMAGE[lvl-1].str(), ENTANGLE_DURATION[lvl-1].toString() )
+    end) )
+
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, "Releases thorns in a line, dealing {0}{I0} damage and entangling every enemy unit they pass through for {1}{I1} seconds.".format(
+            ENTANGLE_HIT_DAMAGE[lvl-1].str(), ENTANGLE_DURATION[lvl-1].toString()
+        ))
+    tooltip.setReplaceIntelligence(ENTANGLE_HIT_DAMAGE_BONUS, ENTANGLE_DURATION_BONUS)
+    heroType.addDynamicTooltipIntelligence(tooltip)
+
+    tooltip = new DynamicTooltip(ABILITY_ROOT)
+    tooltip.setLearnString("Burrows the Ancient's roots into the ground, rendering it immobile, but allowing to hurl enormous rocks dealing area of effect damage. The Ancient's armor and willpower are increased while rooted.", (int lvl) -> (begin
+        return "{0}{S0} area of effect damage, {1} bonus armor and willpower.".format( ROOT_AOE_DAMAGE[lvl-1].str(), ROOT_RESISTANCE[lvl-1].str())
+    end) )
+    
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, "Burrows the Ancient's roots into the ground, rendering it immobile, but allowing to hurl enormous rocks dealing {0}{S0} area of effect damage. The Ancient's armor and willpower are increased by {1} while rooted.".format(
+            ROOT_AOE_DAMAGE[lvl-1].str(), ROOT_RESISTANCE[lvl-1].str()
+        ))
+    tooltip.setReplaceStrength(ROOT_AOE_DAMAGE_BONUS)        
+    heroType.addDynamicTooltipStrength(tooltip)
+
+    tooltip = new DynamicTooltip(ABILITY_NATURES_WRATH)
+    tooltip.setLearnString("Covers the ancient in a storm of sharp leaves, that deal damage to nearby enemies.", (int lvl) -> (begin
+        return "{0}{I0} damage over {1} seconds, {2} seconds cooldown.".format( 
+            NATURES_WRATH_TOTAL_DAMAGE[lvl-1].str(), NATURES_WRATH_DURATION[lvl-1].str(), NATURES_WRATH_COOLDOWN[lvl-1].str()
+        )
+    end) )
+    
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, "Covers the ancient in a storm of sharp leaves, that deal {0}{I0} damage to nearby enemies over {1} seconds.".format(
+            NATURES_WRATH_TOTAL_DAMAGE[lvl-1].str(), NATURES_WRATH_DURATION[lvl-1].str()
+        ))
+    tooltip.setReplaceIntelligence(NATURES_WRATH_TOTAL_DAMAGE_BONUS)
+    heroType.addDynamicTooltipIntelligence(tooltip)
+
 function initHeroType()
     setupStats()
+    setupTooltips()
 
     heroType
         ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
         ..addOnSpellCastFunc(function onSpellCast)
         ..useHeroGlow()
-        ..addMorph('H015')
+        ..addMorph(HERO_TREE_ROOTED)
+        ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
+        ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
+        ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+        ..setSkillBuild("QWQWQWQWQWEEEEE")
+        ..addItem(ITEM_ID_HEAVY_BOOTS)
+        ..addItem(ITEM_ID_RUNIC_ARMOR)
+        ..addItem(ITEM_ID_FIREHAND_GAUNTLETS)
+        ..addItem(ITEM_ID_BLESSED_GOBLET)
+        ..addItem(ITEM_ID_ARCANE_SHIELD)
+        ..addItem(ITEM_ID_WAR_DRUM)
 
     var abilityList = new LinkedList<int>
         ..add(ENTAGLING_ROOTS_ABILITY_ID)
@@ -474,7 +579,7 @@ function initHeroType()
 
                 
 
-            else if GetLearnedSkill() == ABILITY_ROOT and u.getTypeId() == 'H015' 
+            else if GetLearnedSkill() == ABILITY_ROOT and u.getTypeId() == HERO_TREE_ROOTED
                 let newLevel = u.getAbilityLevel(ABILITY_ROOT)
                 onUprootStats(u, newLevel - 1)
                 onRootStats(u, newLevel)
@@ -483,7 +588,7 @@ function initHeroType()
     CreateTrigger()
         ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
         ..addAction(() -> (begin
-            if GetTriggerUnit().getTypeId() == 'H015' 
+            if GetTriggerUnit().getTypeId() == HERO_TREE_ROOTED
                 let u = GetTriggerUnit()
                 onUproot(u, u.getAbilityLevel(ABILITY_ROOT))
 
@@ -496,13 +601,13 @@ function createHeroType(Hero hero)
         ..registerUnitEvent(hero.toUnit(), EVENT_UNIT_ISSUED_POINT_ORDER)
         ..addAction(() ->(begin
             let u = GetTriggerUnit()
-            if GetIssuedOrderId() == OrderId("smart") and u.getTypeId() == 'H015'
+            if GetIssuedOrderId() == OrderId("smart") and u.getTypeId() == HERO_TREE_ROOTED
                 let pos = vec2( GetOrderPointX(), GetOrderPointY() )
                 doAfter(0, () -> u.issuePointOrder("attack", pos))
     end))
 
 init
-    heroType = new HeroType(HERO_TREE, Icons.bTNTreant)
+    heroType = new HeroType(HERO_TREE, Icons.bTNTreant, 4)
         ..setOnInitFunction(() -> initHeroType())
         ..setOnCreateFunction((Hero hero) -> createHeroType(hero))
 

@@ -1,0 +1,106 @@
+package UtilityFunctions
+
+
+
+function string.cutOffZeroes() returns string
+    string str = this
+    while true
+        let strEnd = str.charAt(str.length()-1)
+        if strEnd != "0" and strEnd != "."
+            break
+        str = str.substring(0, str.length()-1)
+    return str
+
+/**
+    This function aims to convert a real into a beautiful string. This means decimals are cut off, if the number is high.
+    Also ending zeroes will be cut off.
+    Useful for values with unknown values: 1.624583; 6346.00
+**/
+public function real.toSmartString() returns string
+    let prec = this.getPrecision()
+    string ret
+    if prec == 0
+        ret = this.round().toString()
+    else
+        ret = this.toString(prec).cutOffZeroes()
+
+    return ret
+
+public function real.toSmartString(int maxPrec) returns string
+    let prec = this.getPrecision(maxPrec)
+    string ret
+    if prec == 0
+        ret = this.round().toString()
+    else
+        ret = this.toString(prec).cutOffZeroes()
+
+    return ret
+
+/**
+    Returns a string with up to 5 decimals, not showing ending zeroes.
+    Useful for constant values: 1; 1.25; 1.5
+**/
+public function real.toExactString() returns string
+    return this.toString(5).cutOffZeroes() 
+
+public function int.toStatString() returns string
+    string ret
+    if this < 1000
+        ret= this.toString()
+    else
+        ret = this.toReal().toStatString()
+    return ret
+
+
+public function real.getPrecision(int maxPrec) returns int
+    int ret
+    if this >= 99.95
+        ret = -3
+    else if this >= 9.995
+        ret = -2
+    else if this >= 0.995
+        ret = -1
+    else
+        ret = 0
+    return max(0,ret + maxPrec)
+
+public function real.getPrecision() returns int
+    return this.getPrecision(2)
+
+public function real.toStatString() returns string
+    real amount = this
+    int prec
+    if amount >= 1000000000
+        amount /= 1000000000
+        prec = amount.getPrecision()
+        if prec > 0
+            return amount.toString(amount.getPrecision())+"G"
+        return amount.round().toString()+"G"
+    if amount >= 1000000
+        amount /= 1000000
+        prec = amount.getPrecision()
+        if prec > 0
+            return amount.toString(prec)+"M"
+        return amount.round().toString()+"M"
+        
+    if amount >= 1000
+        amount /= 1000
+        prec = amount.getPrecision()
+        if prec > 0
+            return amount.toString(amount.getPrecision())+"k"
+        return amount.round().toString()+"k"
+
+    prec = amount.getPrecision()
+    if prec > 0
+        return amount.toString(prec)
+    return amount.round().toString()
+
+
+public function string.findLastCharacter(string char) returns int
+    int ret = -1
+    for i = this.length()-1 downto 0
+        if this.charAt(i) == char
+            ret = i
+            break
+    
+    return ret

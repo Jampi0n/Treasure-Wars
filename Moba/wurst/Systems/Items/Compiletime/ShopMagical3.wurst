@@ -52,30 +52,44 @@ function itemEmeraldPendant(int itemId)
             ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
             ..addAction(() -> (begin
                 let killer = GetKillingUnit()
-                if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and killer.hasItemById(convertItemId(ITEM_ID_SKULL_PENDANT))
-                    killer.healMana(killer, 25. * killer.countItemsOfType(convertItemId(ITEM_ID_SKULL_PENDANT)))
+                if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and killer.hasItemById(convertItemId(ITEM_ID_EMERALD_PENDANT))
+                    killer.healMana(killer, 25. * killer.countItemsOfType(convertItemId(ITEM_ID_EMERALD_PENDANT)))
                     killer.addEffect(Abilities.spiritTouchTarget, "origin").destr()
             end))
             
     
 
 function itemRingOfDarkness(int itemId)
-    int intel = 36
+    int intel = 25
     int mr = 15
-    int voidDmg = 25 //trigger
+
+    int mp = 12
+    int voidDmg = 16
+
+    int voidExplosion = 30 //trigger
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} intelligence|n+ {1} mana point regeneration per 10 seconds|nKilling a unit creates a void explosion, dealing {2} damage to neaby enemies.".format(
-                intel.toString(), mr.toString(), voidDmg.toString()
+            ..setDescription("+ {0} intelligence|n+ {1} mana point regeneration per 10 seconds|nAttacks deal {2} additional void damage.|nRestores {3} mana points everytime you are attacked.|nKilling a unit creates a void explosion, dealing {4} damage to neaby enemies.".format(
+                intel.toString(), mr.toString(), voidDmg.toString(), mp.toString(), voidExplosion.toString()
             ))
-            ..setGoldCost(3400)
-            ..addRequirement(ITEM_ID_GEM_OF_DARKNESS)
+            ..setGoldCost(3700)
             ..addRequirement(ITEM_ID_MANA_RING)
             ..addRequirement(ITEM_ID_VOODOO_MASK)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.INT, intel)
             ..addStatBonusAbsolute(Stat.MR, mr)
+
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if target.hasItemById(convertItemId(itemId)) and not attacker.isType(UNIT_TYPE_STRUCTURE)
+                target.healMana(target, mp.toReal() * target.countItemsOfType(convertItemId(itemId)))
+                target.addEffect(Abilities.spiritTouchTarget, "origin").destr()
+        end))
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
+                attacker.dealDamage(target, voidDmg.toReal() * attacker.countItemsOfType(convertItemId(itemId)) , ReductionType.NONE)
+                target.addEffect(Abilities.avengerMissile, "chest").destr()
+        end))
 
         CreateTrigger()
             ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
@@ -88,7 +102,7 @@ function itemRingOfDarkness(int itemId)
                     g.enumUnitsInRange(dyingUnit.getPos(), 250)
                     for unit u in g
                         if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(killer.getOwner(), false, true)
-                            killer.dealDamage(u, 25, ReductionType.NONE)
+                            killer.dealDamage(u, 30, ReductionType.NONE)
                     g.destr()
             end))
             
@@ -137,13 +151,17 @@ function itemBlessedGoblet(int itemId)
             
 
 function itemWandOfDeath(int itemId)
-    int intel = 45
+    int intel = 35
+
+    int voidDmg = 20
+    int manaDrain = 10
+
     int dmgFactor = 2 // -> onAttack
     int duration = 10 // -> onAttack
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} intelligence|nDealing damage, reduces the target's willpower by {1}% of the damage dealt for {2} seconds.|nThis effect does not stack.".format(
-                intel.toString(), dmgFactor.toString(), duration.toString()
+            ..setDescription("+ {0} intelligence|nDrains {1} mana and deals {2} void damage per attack.|nDealing damage, reduces the target's willpower by {3}% of the damage dealt for {4} seconds.|nThis effect does not stack.".format(
+                intel.toString(), manaDrain.toString(), voidDmg.toString(), dmgFactor.toString(), duration.toString()
             ))
             ..setGoldCost(3900)
             ..addRequirement(ITEM_ID_SCEPTER_OF_THE_TIDES)
@@ -153,17 +171,27 @@ function itemWandOfDeath(int itemId)
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.INT, intel)
 
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
+                let manaDrained = min(manaDrain.toReal() * attacker.countItemsOfType(convertItemId(itemId)) , target.getMana())
+                attacker.dealDamage(target, voidDmg.toReal() * attacker.countItemsOfType(convertItemId(itemId)) , ReductionType.NONE)
+                attacker.healMana(attacker, manaDrained)
+                attacker.damageMana(target, manaDrained, ReductionType.NONE)
+                target.addEffect(Abilities.avengerMissile, "chest").destr()
+                target.addEffect(Abilities.arcaneTowerAttack, "chest").destr()
+        end))
 
 
             
 
 function itemWandOfBlood(int itemId)
-    int intel = 45
+    int intel = 35
+    int hr = 40
     int lifesteal = 8 // -> onAttack
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} intelligence|nDealing damage restores hit points equal to {1}% of the damage dealt.|nThis effect does not stack.".format(
-                intel.toString(), lifesteal.toString()
+            ..setDescription("+ {0} intelligence|n+ {1} hit point regeneration per 10 seconds|nDealing damage restores hit points equal to {2}% of the damage dealt.|nThis effect does not stack.".format(
+                intel.toString(), hr.toString(), lifesteal.toString()
             ))
             ..setGoldCost(3650)
             ..addRequirement(ITEM_ID_MAGIC_STAFF)
@@ -172,6 +200,7 @@ function itemWandOfBlood(int itemId)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.INT, intel)
+            ..addStatBonusAbsolute(Stat.HR, hr)
 
             
 function itemArcaneBlade(int itemId)
@@ -199,15 +228,17 @@ function itemArcaneBlade(int itemId)
         end))
 
 function itemVampiricGoblet(int itemId)
-    int intel = 50
-    int hp = 125
+    int intel = 40
+    int hp = 150
     int mp = 150
     int hpFactor = 20 // -> onAttack
     int manaFactor = 15 // -> onAttack
+
+    int killMana = 30 //trigger
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} mana points|n +{1} hit point|n+ {2} intelligence|nDealing damage against heroes restores {3}% of the damage dealt as hitpoints and {4}% as mana points.|nThis effect does not stack.".format(
-                mp.toString(), hp.toString(), intel.toString(), hpFactor.toString(), manaFactor.toString()
+            ..setDescription("+ {0} mana points|n +{1} hit point|n+ {2} intelligence|nRestores {3} mana points per kill.|nDealing damage against heroes restores {4}% of the damage dealt as hitpoints and {5}% as mana points.|nThis effect does not stack.".format(
+                mp.toString(), hp.toString(), intel.toString(), killMana.toString(), hpFactor.toString(), manaFactor.toString()
             ))
             ..setGoldCost(4750)
             ..addRequirement(ITEM_ID_SKULL_PENDANT)
@@ -217,6 +248,15 @@ function itemVampiricGoblet(int itemId)
             ..addStatBonusAbsolute(Stat.INT, intel)
             ..addStatBonusAbsolute(Stat.HP, hp)
             ..addStatBonusAbsolute(Stat.MP, mp)
+
+        CreateTrigger()
+            ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
+            ..addAction(() -> (begin
+                let killer = GetKillingUnit()
+                if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and killer.hasItemById(convertItemId(ITEM_ID_VAMPIRIC_GOBLET))
+                    killer.healMana(killer, 30. * killer.countItemsOfType(convertItemId(ITEM_ID_VAMPIRIC_GOBLET)))
+                    killer.addEffect(Abilities.spiritTouchTarget, "origin").destr()
+            end))
 
 
 
@@ -259,11 +299,11 @@ function itemArcaneShield(int itemId)
             ..addStatBonusAbsolute(Stat.AGI, wp)
 
 function itemScrollOfConjuration(int itemId)
-    int intel = 45
+    int intel = 40
     int intelFactor = 20
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} intelligence|nIncreases your intelligence by {1}%.|nThis effect does not stack.".format(
+            ..setDescription("+ {0} intelligence|nIncreases your intelligence by {1}%.|nThis effect does not stack.|nRestores all of your mana, when you level up.".format(
                 intel.toString(), intelFactor.toString()
             ))
             ..setGoldCost(4300)
@@ -282,6 +322,15 @@ function itemScrollOfConjuration(int itemId)
                 if isUnique()
                     getTriggerHero().wrapper().addStatRelativeBonus(Stat.INT,  -intelFactor*10)
             end))
+
+        CreateTrigger()
+            ..registerAnyUnitEvent(EVENT_PLAYER_HERO_LEVEL)
+            ..addAction(() -> (begin
+                let hero = GetTriggerUnit()
+                if hero.hasItemById(convertItemId(ITEM_ID_SCROLL_OF_CONJURATION))
+                    hero.healMana(hero, hero.getMaxMana())
+                    hero.addEffect(Abilities.aImaTarget, "chest").destr()
+        end))
 
 function itemBracerOfPower(int itemId)
     int hp = 200

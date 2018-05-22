@@ -6,12 +6,18 @@ import public Stats
 import public Buff
 import public BuffTypeConfig
 import public General
+import public UtilityFunctions
 import public UnitWrapper
 import public HeroObjectEditing
 import public Assets
 import public AbilityObjEditing
 import public LinkedList
+import public initlater HeroAI
 import initlater HeroControl
+import public ItemIdGeneration
+
+public interface AIBehaviour
+    function run(HeroAI ai)
 
 public interface OnCreateFunction
     function onCreate(Hero hero)
@@ -28,6 +34,7 @@ public class HeroType
 
     private static constant unitIdToHeroType = new HashMap<integer, HeroType>
     private int unitId
+    private int heroId
     private trigger onSpellCastTrigger = CreateTrigger()
     private OnAttackFunctionAdvanced onAttack = null
     private CalculateTotalBonus bonusCalculation = null
@@ -35,17 +42,28 @@ public class HeroType
     private OnCreateFunction onCreateFunction = null
     private OnInitFunction onInitFunction = null
 
+    private AIBehaviour attackAI = null
+    private AIBehaviour retreatAI = null
+    private AIBehaviour teamFightAI = null
+
     private boolean useHeroGlow = false
 
     static HeroType array heroTypes 
     static int heroTypeCount = 0
 
+    private LinkedList<int> itemBuild = new LinkedList<int>
+    private string skillBuild = ""
+
     private string icon = "ReplaceableTextures\\CommandButtons\\BTNSelectHeroOn.blp"
 
-    construct(int id, string icon)
+    private constant dynamicIntelligence = new LinkedList<DynamicTooltip>
+    private constant dynamicStrength = new LinkedList<DynamicTooltip>
+
+    construct(int unitId, string icon, int heroId)
         objectCount++
-        unitIdToHeroType.put(id, this)
-        this.unitId = id
+        unitIdToHeroType.put(unitId, this)
+        this.unitId = unitId
+        this.heroId = heroId
         for i = 0 to STAT_COUNT-1
             statsBase[i]=0
             statsMax[i]=0
@@ -66,6 +84,7 @@ public class HeroType
     function initialize()
         if getOnInitFunction() != null
             getOnInitFunction().onInit()
+            destroy getOnInitFunction()
             setOnInitFunction(null)
 
     function addMorph(int id)
@@ -108,11 +127,10 @@ public class HeroType
 
     /** Calulates the stat of the hero type for a given level */
     function calculateStat(Stat stat, integer level) returns integer
-        if level == 0
-            return 0
+        int result = 0
+        if level != 0
+            result = getBase(stat) + ( ( this.getMax(stat) - getBase(stat) ) *( (level - 1 )/(HERO_MAX_LEVEL - 1) ) ).toInt()
 
-        let result = getBase(stat) + ( ( this.getMax(stat) - getBase(stat) ) *( (level - 1 )/(HERO_MAX_LEVEL - 1) ) ).toInt()
-        //print(stat.toString()+" -> "+result.toString())
         return result
     
     function setBonusCalculation(CalculateTotalBonus bonusCalculation)
@@ -150,3 +168,65 @@ public class HeroType
 
     function getIcon() returns string
         return this.icon
+
+    function getHeroId() returns int
+        return this.heroId
+
+    function setRetreatAI(AIBehaviour ai)
+        this.retreatAI = ai
+
+    function setAttackAI(AIBehaviour ai)
+        this.attackAI = ai
+
+    function setTeamFightAI(AIBehaviour ai)
+        this.teamFightAI = ai
+
+    function retreatAI(HeroAI ai)
+        if this.retreatAI != null
+            this.retreatAI.run(ai)
+
+    function attackAI(HeroAI ai)
+        if this.attackAI != null
+            this.attackAI.run(ai)
+
+    function teamFightAI(HeroAI ai)
+        if this.teamFightAI != null
+            this.teamFightAI.run(ai)
+
+    function getItemBuild() returns LinkedList<int>
+        return this.itemBuild
+    function getSkillBuild() returns string
+        return this.skillBuild
+
+    function addItem(int itemId)
+        this.itemBuild.add(itemId)
+
+    function setSkillBuild(string skillBuild)
+        if skillBuild.length() != 25
+            if skillBuild.length() == 15
+                //only QWE are set, R and P have priority, P starting at 4
+                // XXXPP RXXRP XRXPR XXRPX XXXXX
+                this.skillBuild = skillBuild.substring(0, 3) + "PPR" + skillBuild.substring(3, 5) + "RP" + skillBuild.substring(5, 6) + "R" + skillBuild.substring(6, 7) + "PR" + skillBuild.substring(7, 9) + "RP" +skillBuild.substring(9)
+            else
+                print("SkillBuild must contain 25 or 15 skills: "+this.getHeroId().toString())
+        else
+            this.skillBuild = skillBuild
+            
+
+    function updateTooltipsStr(unit whichUnit)
+        for dynamicTooltip in dynamicStrength
+            let abilityTypeId = dynamicTooltip.getAbilityTypeId()
+            BlzSetAbilityExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateNormalString(whichUnit), whichUnit.getAbilityLevel(abilityTypeId))
+            BlzSetAbilityResearchExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateLearnString(whichUnit), 1)
+
+    function updateTooltipsInt(unit whichUnit)
+        for dynamicTooltip in dynamicIntelligence
+            let abilityTypeId = dynamicTooltip.getAbilityTypeId()
+            BlzSetAbilityExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateNormalString(whichUnit), whichUnit.getAbilityLevel(abilityTypeId))
+            BlzSetAbilityResearchExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateLearnString(whichUnit), 1)
+
+    function addDynamicTooltipStrength(DynamicTooltip tooltip)
+        this.dynamicStrength.add(tooltip)
+
+    function addDynamicTooltipIntelligence(DynamicTooltip tooltip)
+        this.dynamicIntelligence.add(tooltip)

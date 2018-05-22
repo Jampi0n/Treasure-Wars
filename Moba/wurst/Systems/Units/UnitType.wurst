@@ -5,6 +5,7 @@ import StandardTextTags
 import initlater HeroControl
 import PlayerControl
 import Constants
+import UtilityFunctions
 
 public function createUnitType(int unitId, int bounty, int baseAttack, int upgradeAttack, int attackUpgradeId, int baseArmor, int upgradeArmor, int armorUpgradeId, int hitBox, string modelPath) returns int
     new UnitType(unitId, bounty, baseAttack, upgradeAttack, attackUpgradeId, baseArmor, upgradeArmor, armorUpgradeId, hitBox, modelPath)
@@ -92,57 +93,56 @@ function onUnitDeath()
     let killingPlayer = killingUnit.getOwner()
     let dyingCPlayer = dyingUnit.getOwner().getCPlayer()
 
-    if dyingType == null
-        return
-    
-    // army unit dies
-    if dyingCPlayer.getTeam() == Team.TEAM1 or dyingCPlayer.getTeam() == Team.TEAM2
-        let bounty = dyingType.getBounty()
-        let xp = dyingUnit.getLevel()*10
-        let xpAllyFactor = 0.5
-        let bountyAllyFactor = 0.25
-        /*
-            The killer (if exists) gets full gold / xp.
-            The killing team gets bountyAllyFactor/xpAllyFactor of the full gold / xp evenly shared amongst all players except the killer.
-        */
+    if dyingType != null
 
-        boolean killerIsEnemy = killingPlayer.getCPlayer().getTeam() == CPlayer.invertTeam(dyingCPlayer.getTeam())
-        int killerIsHero = 0
-        //the killing player belongs to the enemy team
-        if killerIsEnemy and killingPlayer.getId() < MAX_HERO_COUNT
-            killerIsHero = 1
+        // army unit dies
+        if dyingCPlayer.getTeam() == Team.TEAM1 or dyingCPlayer.getTeam() == Team.TEAM2
+            let bounty = dyingType.getBounty()
+            let xp = dyingUnit.getLevel()*10
+            let xpAllyFactor = 0.5
+            let bountyAllyFactor = 0.25
+            /*
+                The killer (if exists) gets full gold / xp.
+                The killing team gets bountyAllyFactor/xpAllyFactor of the full gold / xp evenly shared amongst all players except the killer.
+            */
 
-        // killer reward
-        if killerIsEnemy
-            killingPlayer.getCPlayer()
-                ..addGoldEx(bounty)
-                ..addUnitKill()
-            if killerIsHero == 1
-                createGoldBountyTextTag(dyingUnit, bounty, killingPlayer)
-                //xp
+            boolean killerIsEnemy = killingPlayer.getCPlayer().getTeam() == CPlayer.invertTeam(dyingCPlayer.getTeam())
+            int killerIsHero = 0
+            //the killing player belongs to the enemy team
+            if killerIsEnemy and killingPlayer.getId() < MAX_HERO_COUNT and killingUnit != null
+                killerIsHero = 1
 
-                let killingHero = Hero.getHero(killingPlayer)
-                if killingHero != null
-                    killingHero.toUnit().addXp(xp, true)
+            // killer reward
+            if killerIsEnemy
+                killingPlayer.getCPlayer()
+                    ..addGoldEx(bounty)
+                    ..addUnitKill()
+                if killerIsHero == 1
+                    createGoldBountyTextTag(dyingUnit, bounty, killingPlayer)
+                    //xp
 
-        // killer team reward
+                    let killingHero = Hero.getHero(killingPlayer)
+                    if killingHero != null
+                        killingHero.toUnit().addXp(xp, true)
 
-        // enemy team of dying unit
-        let killingAllies = CPlayer.getEnemyHeroPlayers(dyingUnit.getOwner())
-        // size of enemy team without killing player and without the army player
-        let killingAlliesSize = CPlayer.getTeamHeroCount(CPlayer.invertTeam(dyingCPlayer.getTeam()) ) - killerIsHero
-        
-        let teamBounty = bounty * bountyAllyFactor / killingAlliesSize
-        let teamXp = xp * xpAllyFactor / killingAlliesSize
+            // killer team reward
 
-        if killingAllies != null
-        for CPlayer cPlayer in killingAllies
-            player p = cPlayer.getPlayer()
-            if p != killingPlayer
-                let hero = Hero.getHero(p)
-                if hero != null
-                    hero.addXp( teamXp)
-                    cPlayer.addGoldEx(teamBounty)
+            // enemy team of dying unit
+            let killingAllies = CPlayer.getEnemyHeroPlayers(dyingUnit.getOwner())
+            // size of enemy team without killing player and without the army player
+            let killingAlliesSize = CPlayer.getTeamHeroCount(CPlayer.invertTeam(dyingCPlayer.getTeam()) ) - killerIsHero
+            
+            let teamBounty = bounty * bountyAllyFactor / killingAlliesSize
+            let teamXp = xp * xpAllyFactor / killingAlliesSize
+
+            if killingAllies != null
+            for CPlayer cPlayer in killingAllies
+                player p = cPlayer.getPlayer()
+                if p != killingPlayer
+                    let hero = Hero.getHero(p)
+                    if hero != null
+                        hero.addXp( teamXp)
+                        cPlayer.addGoldEx(teamBounty)
         
     
     

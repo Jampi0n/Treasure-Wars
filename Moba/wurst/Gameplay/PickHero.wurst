@@ -38,72 +38,93 @@ boolean itemCarry = false
 function setupCreatedHero(Hero hero)
     player owner = hero.toUnit().getOwner()
     CPlayer cPlayer = owner.getCPlayer()
-    if DEBUG_MODE
-        owner.setGold(100000)
-        //SetHeroLevel(hero.toUnit(), 25, true)
-    else
-        owner.setGold(500)
+    owner.setGold(500)
         
     vec2 pos// = gg_rct_CenterMid.getCenter()
     patron[owner.getId()].remove()
 
     if(cPlayer.getTeam()==Team.TEAM1)
-        pos = gg_rct_GreenCastle.getCenter()
+        pos = gg_rct_GreenAltar.getCenter()+vec2(128,128)
     else
-        pos = gg_rct_BrownCastle.getCenter()
+        pos = gg_rct_BrownAltar.getCenter()-vec2(128,128)
 
-    
+    if hero.toUnit().getOwner().getController() == MAP_CONTROL_COMPUTER and hero.toUnit().getOwner().getSlotState() == PLAYER_SLOT_STATE_PLAYING
+        doAfter(GetRandomReal(1, 3), () -> ( begin
+            let ai = new HeroAI(cPlayer)
+            ai.togglePause()
+            doAfter(50, () -> (begin
+                ai.togglePause()
+                doAfter(GetRandomReal(0.1, 0.3), -> ai.buyItems() )
+                doAfter(GetRandomReal(0.1, 0.3), -> ai.selectSkills() )
+            end))
+        end))
+
     
     hero.toUnit().setPos(pos)
     if GetLocalPlayer() == hero.toUnit().getOwner()
         PanCameraTo(pos.x, pos.y)
 
 //creates a random hero for a player
-function createRandomHero(CPlayer cPlayer)
+function createRandomHero(CPlayer cPlayer, boolean removeFromTavern)
     var random = GetRandomInt(0, remainingHeroTypesCount-1)
+
+    /*print("remaining:")
+    for i = 0 to remainingHeroTypesCount-1
+        print(remainingHeroTypes[i].getUnitId().toRawCode())
+
+    print("pick: "+remainingHeroTypes[random].getUnitId().toRawCode())*/
 
     Hero hero = new Hero(cPlayer, remainingHeroTypes[random].getUnitId() , gg_rct_CenterMid.getCenter(), angle(0))
     setupCreatedHero(hero)
 
 
 
-    for i = 0 to MAX_HERO_COUNT-1
-        if(getCPlayer(i).getPlayerType()==PlayerType.HERO)
-            SetPlayerTechMaxAllowed(players[i],  remainingHeroTypes[random].getUnitId(), 0)
 
+
+
+
+    removeHeroType(remainingHeroTypes[random], removeFromTavern)
+
+    /*if removeFromTavern
+        for i = 0 to MAX_HERO_COUNT-1
+            if(getCPlayer(i).getPlayerType()==PlayerType.HERO)
+                SetPlayerTechMaxAllowed(players[i],  remainingHeroTypes[random].getUnitId(), 0)
 
     heroTypeIndex.put(remainingHeroTypes[random], heroTypeIndex.get(remainingHeroTypes[remainingHeroTypesCount-1]))
     heroTypeIndex.remove(remainingHeroTypes[remainingHeroTypesCount-1])
 
     remainingHeroTypes[random] = remainingHeroTypes[remainingHeroTypesCount-1]
     remainingHeroTypes[remainingHeroTypesCount-1]=null
-    remainingHeroTypesCount--
+    remainingHeroTypesCount--*/
 
 
 
-function removeHeroType(HeroType herotype)
+function removeHeroType(HeroType herotype, boolean removeFromTavern)
     let index = heroTypeIndex.get(herotype)
 
-    heroTypeIndex.put(remainingHeroTypes[index], heroTypeIndex.get(remainingHeroTypes[remainingHeroTypesCount-1]))
-    heroTypeIndex.remove(remainingHeroTypes[remainingHeroTypesCount-1])
+    //print("remove: "+herotype.getUnitId().toRawCode()+ "at index "+index.toString())
+
+    heroTypeIndex.put(remainingHeroTypes[remainingHeroTypesCount-1], index)
+    heroTypeIndex.remove(remainingHeroTypes[index])
 
     remainingHeroTypes[index] = remainingHeroTypes[remainingHeroTypesCount-1]
     remainingHeroTypes[remainingHeroTypesCount-1]=null
     remainingHeroTypesCount--
 
-    for i = 0 to MAX_HERO_COUNT-1
-        if(getCPlayer(i).getPlayerType()==PlayerType.HERO)
-            SetPlayerTechMaxAllowed(players[i], herotype.getUnitId(), 0)
+    if removeFromTavern
+        for i = 0 to MAX_HERO_COUNT-1
+            if(getCPlayer(i).getPlayerType()==PlayerType.HERO)
+                SetPlayerTechMaxAllowed(players[i], herotype.getUnitId(), 0)
         
 
 
 function allRandom()
     for i = 0 to MAX_HERO_COUNT-1
         if(getCPlayer(i).getPlayerType()==PlayerType.HERO)
-            createRandomHero(getCPlayer(i))
+            createRandomHero(getCPlayer(i), false)
 
     allHeroesPicked()
-
+    
 function allPick()
     int pickTime = DEBUG_MODE?10:60
     print("|cffffcc00All Pick was chosen. You have " + pickTime.toString() + " seconds to pick a Hero!|r")
@@ -150,7 +171,7 @@ function onPick()
                 Hero hero = new Hero(pickedUnit)
                 setupCreatedHero(hero)
 
-                removeHeroType(hero.getHeroType())
+                removeHeroType(hero.getHeroType(), true)
 
 function allPickEnd()
     DestroyTimerDialog(timerWindow)
@@ -167,18 +188,16 @@ function allPickEnd()
             if(Hero.getHero(getCPlayer(i))==null)
                 if(GetLocalPlayer()==players[i])
                     print("|cffffcc00You have not picked a hero in time. You will get a random one.")
-                createRandomHero(getCPlayer(i))
+                createRandomHero(getCPlayer(i), false)
 
             FogModifierStop(tavernVision[i])
             DestroyFogModifier(tavernVision[i])
 
     onPickTrigger
         ..clearActions()
-        ..destr()
+        ..destr()   
 
     allHeroesPicked()
-
-
 
 function endPickMode()
     
@@ -263,7 +282,7 @@ init
                     
 
                     new CPlayer(players[i], i<=4?Team.TEAM1:Team.TEAM2, PlayerType.HERO)
-                    createRandomHero(getCPlayer(i))
+                    createRandomHero(getCPlayer(i), false)
 
 
                     if not itemCarry
@@ -277,6 +296,52 @@ init
                     SetPlayerAlliance(players[0], players[i], ALLIANCE_SHARED_CONTROL, true)
                     SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_ADVANCED_CONTROL, true)
             end))
+
+
+        CreateTrigger()
+        ..registerPlayerChatEvent(players[0], "ai ", false)
+        ..addAction(() -> (begin
+            let i = GetEventPlayerChatString().substring(3).toInt()
+
+
+
+            if i >= 0 and i<=MAX_HERO_COUNT-1 and Hero.getHero(i) == null
+
+                
+
+                if i!= 0
+                    new CPlayer(players[i], i<=4?Team.TEAM1:Team.TEAM2, PlayerType.HERO)
+
+                //Hero hero = new Hero(createUnit(players[i], 'H00H', gg_rct_CenterMid.getCenter(), angle(0)))
+                createRandomHero(getCPlayer(i), false)
+                //setupCreatedHero(hero)
+
+                //removeHeroType(hero.getHeroType())
+
+                new HeroAI(getCPlayer(i))
+
+                SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_VISION, true)
+                SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_CONTROL, true)
+                SetPlayerAlliance(players[0], players[i], ALLIANCE_SHARED_CONTROL, true)
+                SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_ADVANCED_CONTROL, true)
+
+        end))
+
+        CreateTrigger()
+        ..registerPlayerChatEvent(players[0], "pause ", false)
+        ..addAction(() -> (begin
+            let i = GetEventPlayerChatString().substring(6).toInt()
+
+
+
+            if i >= 0 and i<=MAX_HERO_COUNT-1 and getAI(i)!=null
+                getAI(i).togglePause()
+                
+
+
+
+        end))
+
         // teleport heroes mid
         CreateTrigger()
             ..registerPlayerChatEvent(players[0], "mid ", false)
@@ -293,6 +358,12 @@ init
                 let hero = Hero.getHero(0)
                 if hero != null
                     hero.toUnit().setXY(gg_rct_CenterMid.getCenter())
+            end))
+
+        CreateTrigger()
+            ..registerPlayerChatEvent(players[0], "g", true)
+            ..addAction(() -> (begin
+                players[0].addGold(100000)
             end))
 
         CreateTrigger()

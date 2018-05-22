@@ -37,9 +37,9 @@ Item array itemType
 public function setupItems()
     for i = 0 to MAX_ITEM_ID
         if itemIsRecipe[i]
-            itemType[i] = new Recipe(itemIdArray[i], itemGoldCost[i], itemRequiredItems[i], itemType[i-1])
+            itemType[i] = new Recipe(i, itemIdArray[i], itemGoldCost[i], itemRequiredItems[i], itemType[i-1])
         else
-            itemType[i] = new Item(itemIdArray[i], itemGoldCost[i])
+            itemType[i] = new Item(i, itemIdArray[i], itemGoldCost[i])
 
 interface ItemPickUp
     function onItemPickUp()
@@ -82,16 +82,36 @@ onPickup: the hero has not boots 2 and picked up his first boots 1 => add unique
 onDrop: the hero has not boots 2 and dropped his last boots 1 => remove unique boots bonus
 
 */
-
+/**
+Returns the object id for an item id.
+**/
 public function convertItemId(int itemId) returns int
     return itemIdArray[itemId]
 
+/**
+Returns the item id for an object id.
+**/
+public function convertItemTypeId(int itemTypeId) returns int
+    return Item.itemMap.get(itemTypeId).getId()
+
+/**
+Returns the item for an item id.
+**/
 public function int.getItem() returns Item
-    return Item.itemMap.get(itemIdArray[this])
+    return Item.itemMap.get(convertItemId(this))
+
+/**
+Returns the item for an object id.
+**/
+public function int.getItemFromObject() returns Item
+    return Item.itemMap.get(this)
 
 public class Item
     protected constant int itemTypeId
     protected constant int gold
+    protected int id
+
+    protected Recipe recipe = null
 
     protected static HashMap<int, Item> itemMap
     private static trigger onItemPickUp = CreateTrigger()
@@ -99,9 +119,11 @@ public class Item
     private constant onPickUp = new LinkedList<ItemPickUp>
     private constant onDrop = new LinkedList<ItemDrop>
 
-    construct(int itemTypeId, int gold)
+
+    construct(int id, int itemTypeId, int gold)
         objectCount++
         this.itemTypeId = itemTypeId
+        this.id = id
         this.gold = gold
         if itemMap == null
             print("still null")
@@ -160,6 +182,17 @@ public class Item
     function getTypeId() returns int
         return this.itemTypeId
 
+    function getId() returns int
+        return this.id
+
+    function getGoldCost() returns int
+        return this.gold
+
+    static function getItem(int id) returns Item
+        return itemType[id]
+
+    function getRecipe() returns Recipe
+        return this.recipe
 
     
 
@@ -168,14 +201,15 @@ public class Recipe extends Item
 
     protected LinkedList<int> requiredItems
     
-    protected constant Item resultItem
+    protected Item resultItem
 
-    construct(int itemTypeId, int gold, string requiredItems, Item resultItem)
-        super(itemTypeId, gold)
+    construct(int id, int itemTypeId, int gold, string requiredItems, Item resultItem)
+        super(id, itemTypeId, gold)
         this.requiredItems = stringToList(requiredItems, ",")
         this.resultItem = resultItem
+        this.resultItem.recipe = this
 
-    private static function onItemGet(unit hero, item whichItem)
+    static function onItemGet(unit hero, item whichItem)
         let itemTypeId = whichItem.getTypeId()
         let itm = itemMap.get(itemTypeId)
       
@@ -190,14 +224,32 @@ public class Recipe extends Item
         var missingItems = ""
         var hasAll = true
         var missingGold = 0
+        let requiredRequirements = new LinkedList<Item>
         if recipe != null
             for int req in recipe.requiredItems
-                if not UnitHasItemOfTypeBJ(hero, itemType[req].itemTypeId)
+                let required = Item.getItem(req)
+                if not UnitHasItemOfTypeBJ(hero, required.itemTypeId)
                     hasAll = false
                     if(missingItems!="")
                         missingItems += ", "
-                    missingItems += GetObjectName(itemType[req].itemTypeId)
-                    missingGold += itemGoldCost[req]
+                    missingItems += GetObjectName(required.itemTypeId)
+                    missingGold += required.getGoldCost()
+
+                    //if the required item is an recipe itself, there could already be items from its requirements
+                    let requiredRecipe = required.getRecipe()
+                    if requiredRecipe != null
+                        for int req2 in requiredRecipe.getRequiredItems()
+                            let required2 = Item.getItem(req2)
+                            //some items require one item several times
+                            if hero.hasItemById(required2.getTypeId())
+
+                                if requiredRequirements.contains(required2) or recipe.requiredItems.contains(required2.getId()) //already in list
+                                    if hero.countItemsOfType(required2.getTypeId()) > 1
+                                        missingGold -= required2.getGoldCost()
+                                        requiredRequirements.add(required2)
+                                else
+                                    missingGold -= required2.getGoldCost()
+                                    requiredRequirements.add(required2)
                   
 
         hero.removeItem(whichItem)
@@ -206,6 +258,7 @@ public class Recipe extends Item
             
             for int req in recipe.requiredItems
                 GetItemOfTypeFromUnitBJ(hero, itemType[req].itemTypeId).remove()
+
             hero.addItemById(recipe.resultItem.itemTypeId)
         else
             //do not use addGoldEx, because this is not considered gaining gold
@@ -213,9 +266,13 @@ public class Recipe extends Item
             if owner.getGold() >= missingGold
                 //quick buy
                 for int req in recipe.requiredItems
-                    let itemInInventory = GetItemOfTypeFromUnitBJ(hero, itemType[req].itemTypeId)
-                    if itemInInventory != null
-                        itemInInventory.remove()
+                    GetItemOfTypeFromUnitBJ(hero, itemType[req].itemTypeId).remove()
+
+                for req2 in requiredRequirements
+                    GetItemOfTypeFromUnitBJ(hero, req2.getTypeId()).remove()
+    
+                destroy requiredRequirements
+
                 hero.addItemById(recipe.resultItem.itemTypeId)
                 owner.addGold(-missingGold)
                 printTimedToPlayer("You have enough gold, so the item was bought directly.", 5, owner)
@@ -230,6 +287,12 @@ public class Recipe extends Item
         let hero = GetTriggerUnit()
         let whichItem = GetManipulatedItem()
         doAfter(0, () -> onItemGet(hero, whichItem))
+
+    function getRequiredItems() returns LinkedList<int>
+        return this.requiredItems
+
+    function getResultItem() returns Item
+        return this.resultItem
 
 
 init
