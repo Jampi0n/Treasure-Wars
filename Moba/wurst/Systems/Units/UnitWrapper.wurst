@@ -96,7 +96,7 @@ public class UnitWrapper
         if uType != null
             updateBaseStatsUnits()
         else if this.assocUnit.isType(UNIT_TYPE_HERO)
-            statBaseValue[Stat.AD.toInt()] = 17 + statBaseValue[Stat.STR.toInt()]
+            statBaseValue[Stat.AD.toInt()] = statBaseValue[Stat.STR.toInt()]
             statBaseValue[Stat.AR.toInt()] = 0
         else
             if not this.assocUnit.isType(UNIT_TYPE_STRUCTURE)

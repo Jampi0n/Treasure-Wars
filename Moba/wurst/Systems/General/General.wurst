@@ -72,7 +72,7 @@ public function unit.getWp() returns int
     if this.isType(UNIT_TYPE_HERO)
         ret = GetHeroAgi(this, true)
     else
-        ret = this.wrapper().getStatTotalBonus(Stat.AGI) + this.wrapper().getStatBaseValue(Stat.AGI)
+        ret = this.wrapper().getStatTotalValue(Stat.AGI)
     return ret
 
 public function unit.getInt() returns int
@@ -274,7 +274,8 @@ public class ChannelTeleport
         this.channelEffectCaster.destr()
         this.channelEffectTarget.destr()
         unitMap.remove(this.caster)
-        this.caster.unpause()
+        doAfter(0.5) -> 
+            this.caster.unpause()
 
 
 

@@ -123,7 +123,7 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
                 currentDamage *= 0.9
 
             // wand of death - ITEM
-            if source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_WAND_OF_DEATH)) and target.isType(UNIT_TYPE_HERO)
+            if source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_WAND_OF_DEATH))
                 let wp = currentDamage * 0.02
                 let wrapper = target.wrapper()
                 wrapper.addStatAbsoluteBonusReal(Stat.AGI, (-wp*1000).toInt())
