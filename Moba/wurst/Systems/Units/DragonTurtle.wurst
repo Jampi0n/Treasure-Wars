@@ -13,7 +13,7 @@ import LinkedList
 import OnAttack
 import General
 
-constant REVIVE_TIME = 300.
+constant REVIVE_TIME = 150.
 constant MAX_LEVEL = 5
 constant DEATH_SOUND = new SoundDefinition(Sounds.giantSeaTurtleDeath1, false)
 
@@ -22,13 +22,13 @@ angle facing
 
 int creepLevel
 
-constant int array HP = [0, 2000, 4000, 6000, 8000, 10000]
-constant int array DMG = [0, 50, 100, 150, 200, 250]
+constant int array HP = [0, 500, 1000, 1500, 2000, 2500]
+constant int array DMG = [0, 30, 60, 90, 120, 150]
 
 constant int array ARMOR = [0, 20, 40, 60, 80, 100]
-constant int array WILLPOWER = [100, 120, 140, 160, 180, 200]
+constant int array WILLPOWER = [0, 20, 40, 60, 80, 100]
 
-constant int array ATTACK_SPEED = [0, 10, 20, 30, 40, 50]
+constant int array ATTACK_SPEED = [0, 5, 10, 15, 20, 25]
 
 
     
@@ -55,14 +55,14 @@ function onDragonTurtleDeath()
             killedByTeam = false
 
         if killedByTeam
-            printTimed("Team "+teamName+" has killed a Dragon Turtle. Their heroes gain 3 stat upgrades for every stat. The Dragon Turtle will respawn in "+REVIVE_TIME.toInt().toString()+" seconds.", 10)
+            printTimed("Team "+teamName+" has killed a Dragon Turtle. All heroes get 300 gold. The Dragon Turtle will respawn in "+REVIVE_TIME.toInt().toString()+" seconds.", 10)
             PingMinimap(target.getX(), target.getY(), 3)
 
             for CPlayer killerHero in killingTeam
                 let hero = Hero.getHero(killerHero)
                 if hero != null
-                    hero.toUnit().dragonTurtleBonus()
-                    hero.addXp(250)
+                    killerHero.dragonTurtleBonus()
+                    hero.addXp(150)
 
             killer.getOwner().getCPlayer().statDragonTurtlesKilled++
 
@@ -83,18 +83,10 @@ function onDragonTurtleDeath()
 
         end))
 
-function unit.dragonTurtleBonus()
-    this.wrapper()
-        ..addStatAbsoluteBonus(Stat.AS, 6)
-        ..addStatAbsoluteBonus(Stat.STR, 3)
-        ..addStatAbsoluteBonus(Stat.AGI, 3)
-        ..addStatAbsoluteBonus(Stat.INT, 3)
-        ..addStatAbsoluteBonus(Stat.AR, 3)
+function CPlayer.dragonTurtleBonus()
+    int gold = 300
+    this.addGoldEx( gold )
 
-        ..addStatAbsoluteBonus(Stat.HP, 45)
-        ..addStatAbsoluteBonus(Stat.HR, 9)
-        ..addStatAbsoluteBonus(Stat.MP, 30)
-        ..addStatAbsoluteBonus(Stat.MR, 3)
 
 
 init

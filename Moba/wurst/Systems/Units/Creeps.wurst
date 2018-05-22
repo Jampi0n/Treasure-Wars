@@ -4,7 +4,23 @@ import LinkedList
 import UnitTypeConfig
 import HashMap
 import ClosureTimers
+import Assets
+import AbilityObjEditing
+import ObjectEditingPreset
+import DamageDetection
+import General
+import HeroControl
+import UnitWrapper
+import PlayerControl
+import UnitType
+import StandardTextTags
 
+constant int DUMMY_CASTER = compiletime(UNIT_ID_GEN.next())
+constant int HEAL_BUFF_ID = compiletime(createDummyBuff())
+
+constant int MAX_CAMP_LEVEL = 20
+
+unit DUMMY_HEALER
 
 class Creep
     int unitTypeId
@@ -34,41 +50,79 @@ public class CreepCamp
     private LinkedList<Creep> creepTypes
 
     private int alive
+    private int totalLevel
     private real respawnDuration = 10
+    private int campLevel = 0
 
     construct()
         alive = 0
+        totalLevel = 0
         creepCamps.add(this)
         creepTypes = new LinkedList<Creep>
 
     private function addUnitInit(unit creepUnit)
-        addUnitRespawn(creepUnit)
+        SetUnitAcquireRange(creepUnit, 200)
+        allCreeps.addUnit(creepUnit)
+        alive++
+        unitToCamp.put(creepUnit, this)
         creepTypes.add(new Creep(creepUnit))
+        totalLevel += creepUnit.getLevel()
     
     private function addUnitRespawn(unit creepUnit)
         SetUnitAcquireRange(creepUnit, 200)
         allCreeps.addUnit(creepUnit)
         alive++
-        //creepUnits.add(creepUnit)
         unitToCamp.put(creepUnit, this)
+        creepUnit.wrapper().addStatRelativeBonus(Stat.AD, campLevel*200)
+        creepUnit.wrapper().addStatRelativeBonus(Stat.HP, campLevel*200)
 
     private function respawn()
-        print("respawned")
+        if campLevel < MAX_CAMP_LEVEL
+            campLevel++
         for c in creepTypes
             let creepUnit = createUnit(players[PLAYER_NEUTRAL_AGGRESSIVE], c.unitTypeId, c.spawnPos, c.facing)
             addUnitRespawn(creepUnit)
 
+
+    private static function onKill(unit u, unit killer)
+        DUMMY_HEALER
+            ..setPos(u.getPos())
+        //for i = 1 to count
+        DUMMY_HEALER.issueTargetOrder("acidbomb", killer)
+
+        let bounty = UnitType.getUnitType(u.getTypeId()).getBounty()
+        createGoldBountyTextTag(u, bounty, killer.getOwner())
+        killer.getOwner().getCPlayer()
+            ..addUnitKill()
+            ..addGoldEx(bounty)
+
+        Hero.getHero(killer).addXp(u.getLevel()*4.)
+    
+
     private static function onDeath()
         let u = GetTriggerUnit()
-        let camp = unitToCamp.get(u)
-        if camp != null
-            unitToCamp.remove(u)
-            allCreeps.removeUnit(u)
-            camp.alive--
-            if camp.alive == 0
-                print("start respawn")
-                doAfter(camp.respawnDuration, -> camp.respawn())
+        if u.getTypeId() != HYDRA and u.getTypeId() != DRAGON_TURTLE
+            let camp = unitToCamp.get(u)
+            if camp != null
+                unitToCamp.remove(u)
+                allCreeps.removeUnit(u)
+                camp.alive--
+                if camp.alive == 0
+                    doAfter(camp.respawnDuration, -> camp.respawn())
 
+            let killer = GetKillingUnit()
+            if killer != null
+                let pId = killer.getOwner().getId()
+                if pId <= HERO_PLAYER_TEAM_2_LAST
+                    onKill(u, Hero.getHero(pId).toUnit())
+
+
+    private static function onDamage()
+        let target = GetTriggerUnit()
+        if(target.hasAbility(HEAL_BUFF_ID))
+            target.removeAbility(HEAL_BUFF_ID)
+            target.healHP(target, target.getMaxHP()*0.05)
+            target.healMana(target, target.getMaxMana()*0.05)
 
     private static function initCreep(unit creepUnit, CreepCamp camp)
         if not allCreeps.contains(creepUnit)
@@ -106,5 +160,46 @@ public class CreepCamp
         ..registerPlayerUnitEvent(players[PLAYER_NEUTRAL_AGGRESSIVE], EVENT_PLAYER_UNIT_DEATH, null)
         ..addAction(function onDeath)
 
+        addOnDamageFunc(Condition(function onDamage))
+
+        DUMMY_HEALER = createUnit(DUMMY_PLAYER, DUMMY_CASTER, gg_rct_CenterMid.getCenter(), angle(0))
+
+        for c in creepCamps
+            c.respawnDuration = c.totalLevel * 4.
+
 init
     CreepCamp.initialize()
+
+
+@compiletime
+function objectData()
+    let dummy = new UnitDefinition(DUMMY_CASTER, 'hfoo')
+    let rootId = ABIL_ID_GEN.next()
+    let root = new AbilityDefinitionRootAncientProtector(rootId)
+    let missileId = ABIL_ID_GEN.next()
+    let healMissile = createTargetMissile(missileId, HEAL_BUFF_ID)
+
+    dummy
+        ..setNormalAbilities(asList('Aloc', rootId, missileId))
+        ..setAnimationCastBackswing(0)
+        ..setAnimationCastPoint(0)
+        ..setAttacksEnabled(0)
+        ..setCollisionSize(0)
+        ..setFoodCost(0)
+        ..setUnitSoundSet("")
+        ..setShadowImageUnit("")
+        ..setModelFile("")
+
+    root
+        ..setRootedWeapons(1, "0")
+        ..setUprootedWeapons(1, "0")
+
+    healMissile
+        ..setMissileArc(0)
+        ..setMissileArt(Abilities.targetArtLumber)
+        ..setLevels(1)
+        ..setManaCost(1, 0)
+        ..setCooldown(1, 0)
+        ..setCastRange(1, 92083)
+        ..setHeroAbility(false)
+        ..setTargetsAllowed(1, "air,enemies,friend,ground,invulnerable,neutral,structure,vulnerable")
