@@ -14,7 +14,7 @@ constant team1AIs = new LinkedList<HeroAI>
 constant team2AIs = new LinkedList<HeroAI>
 
 public constant real TEAM_FIGHT_RANGE = 1200
-constant real HALF_DISTANCE = 9800
+constant real HALF_DISTANCE = 11200
 
 public enum AbilityTargetType
     INSTANT
@@ -378,12 +378,12 @@ public class HeroAI
 
     function updateTargetLoc()
         if lane == Lane.TOP
-            print(this.heroUnit.getPos().distanceTo(this.targetLoc))
+            //print(this.heroUnit.getPos().distanceTo(this.targetLoc))
             currentTargetLoc = gg_rct_CornerTop.getCenter()
             if this.heroUnit.getPos().distanceTo(this.targetLoc) < HALF_DISTANCE
                 this.currentTargetLoc = this.targetLoc  
         else if lane == Lane.BOT
-            print(this.heroUnit.getPos().distanceTo(this.targetLoc))
+            //print(this.heroUnit.getPos().distanceTo(this.targetLoc))
             currentTargetLoc = gg_rct_CornerBot.getCenter()
             if this.heroUnit.getPos().distanceTo(this.targetLoc) < HALF_DISTANCE
                 this.currentTargetLoc = this.targetLoc  
@@ -483,11 +483,11 @@ public class HeroAI
         skillBuild = this.heroType.getSkillBuild()
 
         if firstTeam
-            this.homeLoc = gg_rct_GreenCastle.getCenter()
-            this.targetLoc = gg_rct_BrownCastle.getCenter()
+            this.homeLoc = gg_rct_GreenAltar.getCenter()
+            this.targetLoc = gg_rct_BrownAltar.getCenter()
         else
-            this.homeLoc = gg_rct_BrownCastle.getCenter()
-            this.targetLoc = gg_rct_GreenCastle.getCenter()
+            this.homeLoc = gg_rct_BrownAltar.getCenter()
+            this.targetLoc = gg_rct_GreenAltar.getCenter()
 
 
 
@@ -533,6 +533,12 @@ public class HeroAI
     function changeState(AIState newState)
         if this.state != newState
             this.state = newState
+
+        if newState == AIState.RETREAT
+            if casting or attacking
+                this.heroUnit.issueImmediateOrder("stop")
+                casting = false
+                attacking = false
             //this.casting = false
             //this.attacking = false
 
@@ -674,6 +680,10 @@ public class HeroAI
     function retreatTemporarily(int counter, boolean useAI)
         if useAI
             this.changeState(AIState.RETREAT_TEMP_AI)
+            if casting or attacking
+                this.heroUnit.issueImmediateOrder("stop")
+                casting = false
+                attacking = false
         else
             this.changeState(AIState.RETREAT_TEMP)
         this.retreatCounter = counter
