@@ -1,5 +1,7 @@
 package Paladin
 
+//2
+
 import HeroType
 import DummyRecycler
 import TimerUtils
@@ -10,7 +12,7 @@ import SoundUtils
 public constant HERO_PALADIN = 'H000'
 HeroType heroType
 
-constant ABILITY_HEAVY_ARMORED = 'AZ2P'
+public constant ABILITY_HEAVY_ARMORED = 'AZ2P'
 constant ABILITY_SHIELD_BASH = 'AZ2Q'
 constant ABILITY_BATTLE_ROAR = 'AZ2W'
 constant ABILITY_HOLY_SHIELD = 'AZ2E'
@@ -24,13 +26,11 @@ constant SOUND_DIVINE_PUNISHMENT = new SoundDefinition(Sounds.holyBolt, false, t
 
 //Balancing and Object Editing
 
-constant real array HEAVY_ARMOED_REDUCTION = [10, 15, 20, 25, 30]
+public constant real array HEAVY_ARMOED_REDUCTION = [10, 15, 20, 25, 30] // onAttack
 
 @compiletime
 function heavyArmored()
-    let aDef = new AbilityDefinitionHardenedSkin(ABILITY_HEAVY_ARMORED)
-        ..setCheckDependencies(false)
-        ..setRequirements("")
+    let aDef = createNoEffectAbiltiy(ABILITY_HEAVY_ARMORED)
         ..setupIcon("PASHolyArmor")
         ..setupWithHotKey("Heavy Armored", "D")
         ..setLearnString("Reduces damage from incoming attacks.", (int lvl) -> (begin
@@ -40,7 +40,7 @@ function heavyArmored()
 
     for lvl = 1 to 5
         aDef
-            ..setTooltipNormalExtended(lvl, "Reduces damage from incoming attacks by {0}.".format(
+            ..setDescriptionString(false, lvl, "Reduces damage from incoming attacks by {0}.".format(
             HEAVY_ARMOED_REDUCTION[lvl-1].str())
             )
 
@@ -59,32 +59,31 @@ function shieldBash()
         ..setupIcon("BTNAbility_Warrior_ShieldBash")
         ..setupWithHotKey("Shield Bash", "Q")
         ..setArtCaster("")
-        ..setLearnString("Bashes enemies in front of him with his shield, dealing physical damage and stunning them.", (int lvl) -> (begin
+        /*..setLearnString("Bashes enemies in front of him with his shield, dealing physical damage and stunning them.", (int lvl) -> (begin
             return "{0} damage, {1} seconds stun.".format(
             SHIELD_BASH_DMG[lvl-1].str()+SHIELD_BASH_DMG_BONUS.getBonusString(C_STR),
-            SHIELD_BASH_DURATION[lvl-1].toString()
+            SHIELD_BASH_DURATION[lvl-1].toSmartString()
             )
-        end) )
+        end) )*/
 
     for lvl = 1 to 5
         aDef
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setTargetsAllowed(lvl, "none")
-            ..setTooltipNormalExtended(lvl, "Bashes enemies in front of him with his shield, dealing {0} physical damage and stunning them for {1} seconds.".format(
+            /*..setDescriptionString(true, lvl, "Bashes enemies in front of him with his shield, dealing {0} physical damage and stunning them for {1} seconds.".format(
             SHIELD_BASH_DMG[lvl-1].str()+SHIELD_BASH_DMG_BONUS.getBonusString(C_STR),
-            SHIELD_BASH_DURATION[lvl-1].toString()
-        ))
+            SHIELD_BASH_DURATION[lvl-1].toSmartString()
+        ))*/
 
 constant real array BATTLE_ROAR_AOE = [600, 700, 800, 900, 1000]
-constant real array BATTLE_ROAR_AS = [30, 35, 40, 45, 50]
+constant int array BATTLE_ROAR_AS = [30, 35, 40, 45, 50]
 constant int array BATTLE_ROAR_MS = [30, 35, 40, 45, 50]
 constant real array BATTLE_ROAR_DURATION = [5, 6, 7, 8, 9]
 constant real BATTLE_ROAR_DURATION_BONUS = 2
 
-constant integer ABILITY_BATTLE_ROAR_BUFF = compiletime(ABIL_ID_GEN.next())
-
 constant integer BUFF_ID_BATTLE_ROAR = compiletime(createAuraBuff("Battle Roar", "This unit is under the effect of Battle Roar; it attacks and moves faster.", "BTNBattleRoar"))
+constant integer ABILITY_BATTLE_ROAR_BUFF = compiletime(createPositiveBuffAbility(5, BUFF_ID_BATTLE_ROAR, Abilities.roarTarget, "overhead"))
 
 constant BATTLE_ROAR = new BuffType(true, true)
 
@@ -98,39 +97,23 @@ function battleRoar()
         ..setAnimationNames("spell")
         ..setupIcon("BTNBattleRoar")
         ..setupWithHotKey("Battle Roar", "W")
-        ..setLearnString("Increases nearby units' attack and movement speed.", (int lvl) -> (begin
+        /*..setLearnString("Increases nearby units' attack and movement speed.", (int lvl) -> (begin
             return "{0} attack speed, {1} movement speed, {2} seconds".format(
             BATTLE_ROAR_AS[lvl-1].str()+"%",
             BATTLE_ROAR_MS[lvl-1].str()+"%",
-            BATTLE_ROAR_DURATION[lvl-1].toString()+BATTLE_ROAR_DURATION_BONUS.getBonusString(C_INT))
-        end) )
+            BATTLE_ROAR_DURATION[lvl-1].toSmartString()+BATTLE_ROAR_DURATION_BONUS.getBonusString(C_INT))
+        end) )*/
 
     for lvl = 1 to 5
         aDef
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setTargetsAllowed(lvl, "none")
-            ..setTooltipNormalExtended(lvl, "Increases nearby units' attack speed by {0} and movement speed by {1} for {2} seconds.".format(
+            /*..setDescriptionString(true, lvl, "Increases nearby units' attack speed by {0} and movement speed by {1} for {2} seconds.".format(
             BATTLE_ROAR_AS[lvl-1].str()+"%",
             BATTLE_ROAR_MS[lvl-1].str()+"%",
             BATTLE_ROAR_DURATION[lvl-1].str()+BATTLE_ROAR_DURATION_BONUS.getBonusString(C_INT)
-            ))
-
-    let aDefAura = new AbilityDefinitionAuraEnduranceCreep(ABILITY_BATTLE_ROAR_BUFF)
-        ..setButtonPositionNormalX(0)
-        ..setButtonPositionNormalY(-11)
-        ..setArtTarget("Abilities\\Spells\\NightElf\\BattleRoar\\RoarTarget.mdl")
-        ..setTargetAttachmentPoint("overhead")
-        ..setLevels(5)
-
-    for lvl = 1 to 5
-        aDefAura
-            ..setAttackSpeedIncrease(lvl, BATTLE_ROAR_AS[lvl-1]/100)
-            //..setMovementSpeedIncrease(lvl, BATTLE_ROAR_MS[lvl-1]/100)
-            ..setMovementSpeedIncrease(lvl, 0)
-            ..setTargetsAllowed(lvl, "invulnerable,self,vulnerable")
-            ..setAreaofEffect(lvl, 1)
-            ..setBuffs(lvl, int2fourchar(BUFF_ID_BATTLE_ROAR))
+            ))*/
 
 constant real array HOLY_SHIELD_DURATION = [2, 2.5, 3, 3.5, 4]
 constant real HOLY_SHIELD_DURATION_BONUS = 2
@@ -151,10 +134,10 @@ function holyShield()
         ..setArtEffect("")
         ..setupIcon("BTNAngelicShield")
         ..setupWithHotKey("Holy Shield", "E")
-        ..setLearnString("Turns the target frendly hero untargetable.", (int lvl) -> (begin
+        /*..setLearnString("Turns the target frendly hero untargetable.", (int lvl) -> (begin
             return "{0} seconds.".format(
-            HOLY_SHIELD_DURATION[lvl-1].toString()+HOLY_SHIELD_DURATION_BONUS.getBonusString(C_INT))
-        end) )
+            HOLY_SHIELD_DURATION[lvl-1].toSmartString()+HOLY_SHIELD_DURATION_BONUS.getBonusString(C_INT))
+        end) )*/
 
     for lvl = 1 to 5
         aDef
@@ -168,9 +151,9 @@ function holyShield()
             ..setOptions(lvl, 1)
             ..setTargetType(lvl, 1)
             ..setTargetsAllowed(lvl, "friend,nonancient,hero")
-            ..setTooltipNormalExtended(lvl, "Turns the target frendly hero untargetable for {0} seconds.".format(
-            HOLY_SHIELD_DURATION[lvl-1].toString()+HOLY_SHIELD_DURATION_BONUS.getBonusString(C_INT)
-            ))
+            /*..setDescriptionString(true, lvl, "Turns the target frendly hero untargetable for {0} seconds.".format(
+            HOLY_SHIELD_DURATION[lvl-1].toSmartString()+HOLY_SHIELD_DURATION_BONUS.getBonusString(C_INT)
+            ))*/
 
 
 constant real DIVINE_PUNISHMENT_AOE = 600
@@ -187,10 +170,10 @@ function divinePunishment()
         ..setAnimationNames("spell,channel")
         ..setupIcon("BTNHolyBan")
         ..setupWithHotKey("Divine Punishment", "R")
-        ..setLearnString(CHANNELING_SPELL + "Calls upon the power of the gods. After two seconds of channeling nearby enemies will be struck by divine magic.", (int lvl) -> (begin
+        /*..setLearnString(CHANNELING_SPELL + "Calls upon the power of the gods. After two seconds of channeling nearby enemies will be struck by divine magic.", (int lvl) -> (begin
             return "{0} damage.".format(
             DIVINE_PUNISHMENT_DMG[lvl-1].str()+DIVINE_PUNISHMENT_DMG_BONUS.getBonusString(C_INT))
-        end) )
+        end) )*/
 
     for lvl = 1 to 5
         aDef
@@ -201,9 +184,9 @@ function divinePunishment()
             ..setEffects(lvl, "X000")
 
             ..setTargetsAllowed(lvl, "none")
-            ..setTooltipNormalExtended(lvl, CHANNELING_SPELL + "Calls upon the power of the gods. After two seconds of channeling nearby enemies will be struck by divine magic and take {0} damage.".format(
+            /*..setDescriptionString(true, lvl, CHANNELING_SPELL + "Calls upon the power of the gods. After two seconds of channeling nearby enemies will be struck by divine magic and take {0} damage.".format(
             DIVINE_PUNISHMENT_DMG[lvl-1].str()+DIVINE_PUNISHMENT_DMG_BONUS.getBonusString(C_INT)
-            ))
+            ))*/
         
 
 class DivinePunishment
@@ -329,8 +312,160 @@ function onSpellCast()
         
         new DivinePunishment(caster)
 
+
+
+
+function retreatAI(HeroAI ai)
+    ai.issue("roar")
+
+
+function attackAI(HeroAI ai)
+    let hero = ai.getHeroUnit()
+
+    if hero.getMana()/hero.getMaxMana() > 0.5
+        let g = CreateGroup()
+        unit u
+        int count = 0
+        g.enumUnitsInRange(hero.getPos().polarOffset(hero.getFacingAngle(), 140), 180)
+        while(true)
+            u = FirstOfGroup(g)
+            if u == null
+                break
+            g.removeUnit(u)
+            if u.isTargetable(hero.getOwner(), false, true) and not u.isType(UNIT_TYPE_STRUCTURE)
+                if u.isType(UNIT_TYPE_HERO)
+                    count += 5
+                else
+                    count ++
+
+        if count >= 5
+            if ai.issue("howlofterror")
+                return
+
+    unit target = hero.findTarget(500, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_DISTANCE, null)
+    if target.isTargetable(hero.getOwner(), false, true)
+        ai.attack(target)
+
+function teamFightAI(HeroAI ai)
+
+    let hero = ai.getHeroUnit()
+
+    ai.issue("roar")
+
+    unit target = hero.findTarget(800, AbilityTargetFocus.ALLY_HERO, AbilityTargetPriority.LOW_HEALTH, (unit u) -> (begin
+        return not BuffList.hasBuffType(u, BUFF_HOLY_SHIELD)
+    end))
+    if target.isTargetable(hero.getOwner(), true, false)
+        ai.issue("channel", target)
+
+    
+    let g = CreateGroup()
+    unit u
+    int count = 0
+    g.enumUnitsInRange(hero.getPos().polarOffset(hero.getFacingAngle(), 140), 180)
+    while(true)
+        u = FirstOfGroup(g)
+        if u == null
+            break
+        g.removeUnit(u)
+        if u.isTargetable(hero.getOwner(), false, true)
+            if u.isType(UNIT_TYPE_HERO)
+                count++
+
+    if count != 0
+        if ai.issue("howlofterror")
+            return
+
+
+    count = 0
+    g.enumUnitsInRange(hero.getPos(), DIVINE_PUNISHMENT_AOE)
+    while(true)
+        u = FirstOfGroup(g)
+        if u == null
+            break
+        g.removeUnit(u)
+        if u.isTargetable(hero.getOwner(), false, true)
+            if u.isType(UNIT_TYPE_HERO)
+                count++
+
+    g.destr()
+    if count > 1
+        if ai.issue("tranquility")
+            return
+
+        
+    target = ai.getTeamFightTarget()
+    if target.isTargetable(hero.getOwner(), false, true)
+        if not ai.getAttacking()
+            ai.attack(target)
+
+function setupTooltips()
+    DynamicTooltip tooltip = new DynamicTooltip(ABILITY_SHIELD_BASH)
+    tooltip.setLearnString("Bashes enemies in front of him with his shield, dealing physical damage and stunning them.", (int lvl) -> (begin
+        return "{0}{S0} damage, {1} seconds stun.".format(
+        SHIELD_BASH_DMG[lvl-1].str(),
+        SHIELD_BASH_DURATION[lvl-1].toExactString()
+        )
+    end) )
+    for lvl = 1 to 5
+        tooltip.setNormalString(false, lvl, "Bashes enemies in front of him with his shield, dealing {0}{S0} physical damage and stunning them for {1} seconds.".format(
+            SHIELD_BASH_DMG[lvl-1].str(),
+            SHIELD_BASH_DURATION[lvl-1].toExactString()))
+    tooltip.setReplaceStrength(SHIELD_BASH_DMG_BONUS)
+    heroType.addDynamicTooltipStrength(tooltip)
+
+    tooltip = new DynamicTooltip(ABILITY_BATTLE_ROAR)
+    tooltip.setLearnString("Increases nearby units' attack and movement speed.", (int lvl) -> (begin
+        return "{0} attack speed, {1} movement speed, {2}{I0} seconds".format(
+        BATTLE_ROAR_AS[lvl-1].str()+"%",
+        BATTLE_ROAR_MS[lvl-1].str()+"%",
+        BATTLE_ROAR_DURATION[lvl-1].toExactString())
+    end) )
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, "Increases nearby units' attack speed by {0} and movement speed by {1} for {2}{I0} seconds.".format(
+            BATTLE_ROAR_AS[lvl-1].str()+"%",
+            BATTLE_ROAR_MS[lvl-1].str()+"%",
+            BATTLE_ROAR_DURATION[lvl-1].toExactString()))
+    tooltip.setReplaceIntelligence(BATTLE_ROAR_DURATION_BONUS)
+    heroType.addDynamicTooltipIntelligence(tooltip)
+
+    tooltip = new DynamicTooltip(ABILITY_HOLY_SHIELD)
+    tooltip.setLearnString("Turns the target frendly hero untargetable.", (int lvl) -> (begin
+        return "{0}{I0} seconds.".format(
+        HOLY_SHIELD_DURATION[lvl-1].toExactString())
+    end) )
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, "Turns the target frendly hero untargetable for {0}{I0} seconds.".format(
+            HOLY_SHIELD_DURATION[lvl-1].toExactString()
+            ))
+    tooltip.setReplaceIntelligence(HOLY_SHIELD_DURATION_BONUS)
+    heroType.addDynamicTooltipIntelligence(tooltip)
+
+    tooltip = new DynamicTooltip(ABILITY_DIVINE_PUNISHMENT)
+    tooltip.setLearnString(CHANNELING_SPELL + "Calls upon the power of the gods. After two seconds of channeling nearby enemies will be struck by divine magic.", (int lvl) -> (begin
+        return "{0}{I0} damage.".format(
+        DIVINE_PUNISHMENT_DMG[lvl-1].str())
+    end) )
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, CHANNELING_SPELL + "Calls upon the power of the gods. After two seconds of channeling nearby enemies will be struck by divine magic and take {0}{I0} damage.".format(
+            DIVINE_PUNISHMENT_DMG[lvl-1].str()
+        ))
+    tooltip.setReplaceIntelligence(DIVINE_PUNISHMENT_DMG_BONUS)
+    heroType.addDynamicTooltipIntelligence(tooltip)
+
 function initHeroType()
-    heroType.addOnSpellCastFunc(function onSpellCast)
+    heroType
+        ..addOnSpellCastFunc(function onSpellCast)
+        ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
+        ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
+        ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+        ..setSkillBuild("QWEQQWEQQWEWEWE")
+        ..addItem(ITEM_ID_HEAVY_BOOTS)
+        ..addItem(ITEM_ID_RUNIC_ARMOR)
+        ..addItem(ITEM_ID_WAR_HORN)
+        ..addItem(ITEM_ID_ARMOR_OF_COURAGE)
+        ..addItem(ITEM_ID_ARCANE_SHIELD)
+        ..addItem(ITEM_ID_WAR_DRUM)
 
     var abilityList = new LinkedList<int>
         ..add(ABILITY_HOLY_SHIELD_BUFF)
@@ -340,26 +475,22 @@ function initHeroType()
         ..add(ABILITY_BATTLE_ROAR_BUFF)
     BATTLE_ROAR.setup(abilityList, BUFF_ID_BATTLE_ROAR)
     BATTLE_ROAR.addFirstFunction( (Buff thisBuff) -> (begin
-        thisBuff.getTarget().wrapper().addStatRelativeBonus( Stat.MS, BATTLE_ROAR_MS[thisBuff.getLevel()-1]*10 )
+        thisBuff.getTarget().wrapper()
+            ..addStatRelativeBonus( Stat.MS, BATTLE_ROAR_MS[thisBuff.getLevel()-1]*10 )
+            ..addStatAbsoluteBonus( Stat.AS, BATTLE_ROAR_AS[thisBuff.getLevel()-1] )
     end) )
     BATTLE_ROAR.addEndFunction( (Buff thisBuff) -> (begin
-        if thisBuff == null
-            print("thisBuff = null")
-
-        if thisBuff.getTarget() == null
-            print("target = null")
-
-        if thisBuff.getTarget().wrapper() == null
-            print("wrapper = null")
-
-        thisBuff.getTarget().wrapper().addStatRelativeBonus( Stat.MS, -BATTLE_ROAR_MS[thisBuff.getLevel()-1]*10 )
+        thisBuff.getTarget().wrapper()
+            ..addStatRelativeBonus( Stat.MS, -BATTLE_ROAR_MS[thisBuff.getLevel()-1]*10 )
+            ..addStatAbsoluteBonus( Stat.AS, -BATTLE_ROAR_AS[thisBuff.getLevel()-1] )
     end) )
 
     setupStats()
+    setupTooltips()
 
 
 
 init
-    heroType = new HeroType(HERO_PALADIN, Icons.bTNHeroPaladin)
+    heroType = new HeroType(HERO_PALADIN, Icons.bTNHeroPaladin, 2)
         ..setOnInitFunction(() -> initHeroType())
   

@@ -1,5 +1,8 @@
 package HeroObjectEditing
 
+import UtilityFunctions
+import LinkedList
+import General
 import AbilityObjEditing
 import public ObjectEditingPreset
 import public ObjectIds
@@ -42,8 +45,16 @@ public function AbilityDefinition.setLearnString(string intro, LevelString level
     for i = 1 to 5
         learnString += getLevelString(i) + levelString.getString(i)
 
-    this.setTooltipLearnExtended(learnString)
+    this.setTooltipLearnExtended(learnString +"|n ")
 
+    destroy levelString
+
+
+public function AbilityDefinition.setDescriptionString(boolean showCooldown, int lvl, string description)
+    if showCooldown
+        this.setTooltipNormalExtended(lvl, description+ "|n" + "Cooldown: " + "<" + this.getNewId().toRawCode() + ",Cool"+lvl.toString()+">" + "|n ")
+    else
+        this.setTooltipNormalExtended(lvl, description+ "|n ")
 
 public function getLevelString(int level) returns string
     return " |n|cffffcc00Level "+level.toString()+"|r - "
@@ -129,7 +140,9 @@ public function AbilityDefinition.setupWithHotKey(string name, string hotkey)
     this.setRequirements("")
     this.setCheckDependencies(false)
     this.setTooltipLearn("("+hotkey+")"+" Learn "+name+" - [|cffffcc00Level %d|r]")
+    this.setTooltipLearnExtended("<description missing>")
     for i = 1 to 5
+        this.setTooltipNormalExtended(i, "<description missing>")
         this.setTooltipNormal(i, "("+hotkey+") "+name+" - [|cffffcc00Level "+i.toString()+"|r]")
         
     if(hotkey=="Q")
@@ -171,3 +184,93 @@ public function AbilityDefinition.setupWithHotKey(string name, string hotkey)
         return
 
     print("!")
+
+public function bonus(int statValue, real atHundred) returns string
+    return (atHundred*statValue/100).toString()
+
+public function string.evaluateIntelligence(LinkedList<real> replacers, int intelligence) returns string
+    var result = this
+    var i = 0
+    for dynamicInteger in replacers
+        result = result.replace("{I" + i.toString() + "}", C_INT.toColorString()+" (+"+(intelligence * dynamicInteger/100).toSmartString()+")|r " )
+        i++
+    return result
+
+public function string.evaluateStrength(LinkedList<real> replacers, int strength) returns string
+    var result = this
+    var i = 0
+    for dynamicInteger in replacers
+        result = result.replace("{S" + i.toString() + "}", C_STR.toColorString()+" (+"+(strength * dynamicInteger/100).toSmartString()+")|r ")
+        i++
+    return result
+
+public function string.evaluateBonus(LinkedList<real> replaceStrength, int strength, LinkedList<real> replaceIntelligence, int intelligence) returns string
+    return this.evaluateStrength(replaceStrength, strength).evaluateIntelligence(replaceIntelligence, intelligence)
+    
+public class DynamicTooltip
+    
+    private int abilityTypeId
+    private string array[5] normalString
+    private string learnString
+
+    private constant replaceIntelligence = new LinkedList<real>
+    private constant replaceStrength = new LinkedList<real>
+
+    function getAbilityTypeId() returns int
+        return this.abilityTypeId
+
+    construct(int abilityTypeId)
+        this.abilityTypeId = abilityTypeId
+
+    function setReplaceIntelligence(vararg real replacements)
+        for replacement in replacements
+            replaceIntelligence.add(replacement)
+
+    function setReplaceStrength(vararg real replacements)
+        for replacement in replacements
+            replaceStrength.add(replacement)
+
+    function format(vararg string replacements)
+        var result = this.learnString
+        var i = 0
+        for replacement in replacements
+            result = result.replace("{N" + i.toString() + "}", replacement)
+            i++
+        this.learnString = result
+
+        for j=1 to 5
+            result = this.normalString[j]
+            i = 0
+            for replacement in replacements
+                result = result.replace("{N" + i.toString() + "}", replacement)
+                i++
+            this.normalString[j] = result
+
+
+
+    function setLearnString(string intro, LevelString levelString)
+        this.learnString = intro + "|n"
+
+        for i = 1 to 5
+            this.learnString += getLevelString(i) + levelString.getString(i)
+
+        destroy levelString
+        this.learnString += "|n "
+
+    function evaluateLearnString(unit whichUnit) returns string
+        return this.learnString.evaluateBonus(replaceStrength, whichUnit.getStr(), replaceIntelligence, whichUnit.getInt())
+
+    function setNormalString(boolean showCooldown, int level, string normalString)
+        this.normalString[level-1] = normalString
+
+        if showCooldown
+            this.normalString[level - 1] += "|n" + "Cooldown: " + "<" + this.getAbilityTypeId().toRawCode() + ",Cool"+level.toString()+">" + "|n "
+        else
+            this.normalString[level - 1] += "|n "
+
+    function evaluateNormalString(unit whichUnit) returns string
+        let lvl = whichUnit.getAbilityLevel(this.abilityTypeId)
+        string ret = ""
+        if lvl != 0
+            ret = this.normalString[lvl-1].evaluateBonus(replaceStrength, whichUnit.getStr(), replaceIntelligence, whichUnit.getInt())
+        return ret

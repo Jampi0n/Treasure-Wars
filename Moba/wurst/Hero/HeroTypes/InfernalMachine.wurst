@@ -3,6 +3,8 @@ package InfernalMachine
 import HeroControl
 import OnAttack
 
+import Fx
+
 //8
 
 import HeroType
@@ -46,7 +48,7 @@ constant real FIERY_HANDS_DMG_BONUS = 30
 
 @compiletime
 function passive()
-    let aDef =createNoEffectAbiltiy(ABILITY_FIERY_HANDS)
+    let aDef = createNoEffectAbiltiy(ABILITY_FIERY_HANDS)
         ..setupWithHotKey("Fiery Hands", "D")
         ..setupIcon("PASFierySoul")
         ..setLearnString("Killing a unit creates a fire explosion, dealing magic damage to nearby targets.", (int lvl) -> (begin
@@ -57,7 +59,7 @@ function passive()
 
     for lvl = 1 to 5
         aDef
-            ..setTooltipNormalExtended(lvl, "Killing a unit creates a fire explosion, dealing {0} magic damage to nearby targets.".format(
+            ..setDescriptionString(false, lvl, "Killing a unit creates a fire explosion, dealing {0} magic damage to nearby targets.".format(
                 FIERY_HANDS_DMG[lvl-1].str() + FIERY_HANDS_DMG_BONUS.getBonusString(C_INT)
             ))
 
@@ -86,7 +88,7 @@ function bash()
         ..setArtSpecial("")
         ..setLightningEffects("")
         ..setCheckDependencies(true)
-        ..setRequirements(int2fourchar(MELEE))
+        ..setRequirements(MELEE.toRawCode())
         ..setLearnString("Increases the movement speed of the Infernal Machine and causes the next attack to stun the target and deal bonus damage. Lasts {0} seconds.".format(BASH_BUFF_DURATION.str()), (int lvl) -> (begin
             return "{0} bonus damage, {1} seconds stun.".format(
                 BASH_DAMAGE_BONUS[lvl-1].str(), BASH_STUN_DURATION[lvl-1].toString()
@@ -100,10 +102,10 @@ function bash()
             ..setAttackSpeedIncrease(lvl, 0)
             ..setDamageTakenIncrease(lvl, 0)
             ..setMovementSpeedIncrease(lvl, 0)
-            ..setBuffs(lvl, int2fourchar(BASH_BUFF_ID))
+            ..setBuffs(lvl, BASH_BUFF_ID.toRawCode())
             ..setDurationHero(lvl, 0.01)
             ..setTargetsAllowed(lvl, "air,enemies,ground,neutral,nonancient,organic,nonhero")
-            ..setTooltipNormalExtended(lvl, "Increases the movement speed of the Infernal Machine and causes the next attack to stun the target for {0} seconds and deal {1} bonus bonus damage. Lasts {2} seconds.".format(
+            ..setDescriptionString(true, lvl, "Increases the movement speed of the Infernal Machine and causes the next attack to stun the target for {0} seconds and deal {1} bonus bonus damage. Lasts {2} seconds.".format(
                 BASH_STUN_DURATION[lvl-1].toString(), BASH_DAMAGE_BONUS[lvl-1].str(), BASH_BUFF_DURATION.str()
             ))
 
@@ -116,7 +118,7 @@ constant int INNER_FIRE_DEF_BONUS = 20
 
 constant real INNER_FIRE_DURATION = 10
 
-constant int INNER_FIRE_BUFF_ID = compiletime(createAuraBuff("Inenr Fire", "This unit's strength, armor and willpower are increased.", Icons.bTNInnerFire))
+constant int INNER_FIRE_BUFF_ID = compiletime(createAuraBuff("Inner Fire", "This unit's strength and armor and willpower are increased.", Icons.bTNInnerFire))
 constant int INNER_FIRE_ABILITY_ID = compiletime(createPositiveBuffAbility(5, INNER_FIRE_BUFF_ID, Abilities.innerFireTarget, "overhead"))
 
 constant real INNER_FIRE_AOE = 900
@@ -145,7 +147,7 @@ function innerFire()
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setTargetsAllowed(lvl, "none")
-            ..setTooltipNormalExtended(lvl, "Increases nearby units' strength by {0}% and armor and willpower by {1} for {2} seconds.".format(
+            ..setDescriptionString(true, lvl, "Increases nearby units' strength by {0}% and armor and willpower by {1} for {2} seconds.".format(
                 INNER_FIRE_DMG[lvl-1].str()+INNER_FIRE_DMG_BONUS.getBonusString(C_INT),
                 INNER_FIRE_DEF[lvl-1].str()+INNER_FIRE_DEF_BONUS.getBonusString(C_INT),
                 INNER_FIRE_DURATION.str()
@@ -165,7 +167,7 @@ constant int FLAME_THROWER_BUFF_ID = compiletime(createAuraBuff("Flame Thrower",
 constant int FLAME_THROWER_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, FLAME_THROWER_BUFF_ID, Abilities.breathOfFireDamage, "origin"))
 
 constant int FLAME_THROWER_IMPACT = compiletime(ArtilleryDetection.createDetectionDummy())
-constant int FLAME_THROWER_ARTILLERY = compiletime(ArtilleryDetection.createArtilleryDummy(30, 20, 210, 2, Abilities.redDragonMissile, 900, 0.3, FLAME_THROWER_IMPACT))
+constant int FLAME_THROWER_ARTILLERY = compiletime(ArtilleryDetection.createArtilleryDummy(30, 20, 210, 2.5, Abilities.redDragonMissile, 900, 0.3, FLAME_THROWER_IMPACT))
 
 
 BuffType buffFlameThrower
@@ -200,7 +202,7 @@ function flameThrower()
             ..setManaCost(lvl, MANA[lvl-1])
             ..setCastRange(lvl, RANGE[lvl-1])
             ..setAreaofEffect(lvl, FLAME_THROWER_AOE[lvl-1])
-            ..setTooltipNormalExtended(lvl, "Launches a fiery missile at the target location that deals {0} initial damage and ignites the targets, dealing {1} damage per second for {2} seconds.".format(
+            ..setDescriptionString(true, lvl, "Launches a fiery missile at the target location that deals {0} initial damage and ignites the targets, dealing {1} damage per second for {2} seconds.".format(
                 FLAME_THROWER_DAMAGE[lvl-1].str()+FLAME_THROWER_DAMAGE_BONUS.getBonusString(C_INT),
                 FLAME_THROWER_DOT[lvl-1].str()+FLAME_THROWER_DOT_BONUS.getBonusString(C_INT),
                 FLAME_THROWER_DURATION[lvl-1].str()
@@ -230,14 +232,14 @@ function switchWeapons()
         aDef
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
-            ..setNormalFormUnit(lvl, int2fourchar(HERO_INFERNAL_MACHINE))
-            ..setAlternateFormUnit(lvl, int2fourchar(HERO_INFERNAL_MACHINE_MORPH))
+            ..setNormalFormUnit(lvl, HERO_INFERNAL_MACHINE.toRawCode())
+            ..setAlternateFormUnit(lvl, HERO_INFERNAL_MACHINE_MORPH.toRawCode())
             ..setDurationNormal(lvl, 0)
             ..setDurationHero(lvl, RAPID_FIRE_DURATION)
             ..setAttackSpeedBonusInfoPanelOnly(lvl, 0.8)
             ..setMoveSpeedBonusInfoPanelOnly(lvl, 0)
-            ..setBuffs(lvl, int2fourchar(RAPID_FIRE_BUFF_ID))
-            ..setTooltipNormalExtended(lvl, "Enables a rapid firing ranged attack with {0}% faster attack speed for the Infernal Machine, that stuns enemies it hits for {1} seconds. Bash is disabled while under the effect of Rapid Fire.|nLasts {2} seconds.".format(
+            ..setBuffs(lvl, RAPID_FIRE_BUFF_ID.toRawCode())
+            ..setDescriptionString(true, lvl, "Enables a rapid firing ranged attack with {0}% faster attack speed for the Infernal Machine, that stuns enemies it hits for {1} seconds. Bash is disabled while under the effect of Rapid Fire.|nLasts {2} seconds.".format(
                 RAPID_FIRE_ATTACK_SPEED[lvl-1].str(), RAPID_FIRE_STUN_DURATION[lvl-1].toString(), RAPID_FIRE_DURATION.str()
             ))
 
@@ -386,13 +388,110 @@ function setupStats()
         ..setStat(Stat.AGI, 10, 35)
         ..setStat(Stat.INT, 6, 16)
 
+
+
+
+function retreatAI(HeroAI ai)
+    ai.issue("berserk")
+
+function attackAI(HeroAI ai)
+    let hero = ai.getHeroUnit()
+
+    if hero.getMana()/hero.getMaxMana() > 0.5
+        let targetPos = hero.findAreaTarget(800, FLAME_THROWER_AOE[hero.getAbilityLevel(ABILITY_FLAME_THROWER)-1], 3)
+        if targetPos.getValue() >= 6
+            ai.issue("shockwave", targetPos.getPos())
+
+    unit target = hero.findTarget(500, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_DISTANCE, null)
+    if target.isTargetable(hero.getOwner(), false, true)
+        ai.attack(target)
+
+function teamFightAI(HeroAI ai)
+    let hero = ai.getHeroUnit()
+
+    unit target = ai.getTeamFightTarget()
+
+
+    if target.isTargetable(hero.getOwner(), false, true)
+
+        if hero.getTypeId() == HERO_INFERNAL_MACHINE
+            if target.getPos().distanceTo(hero.getPos()) < 600
+                ai.issue("chemicalrage")
+                ai.issue("berserk")
+            ai.issue("roar")
+            ai.issue("shockwave", target.getPos())
+
+        if not ai.getAttacking()
+            ai.attack(target)
+
+function setupTooltips()
+    DynamicTooltip tooltip = new DynamicTooltip(ABILITY_FIERY_HANDS)
+    tooltip.setLearnString("Killing a unit creates a fire explosion, dealing magic damage to nearby targets.", (int lvl) -> (begin
+        return "{0}{I0} damage".format(FIERY_HANDS_DMG[lvl-1].str())
+    end))
+    for lvl = 1 to 5
+        tooltip.setNormalString(false, lvl, "Killing a unit creates a fire explosion, dealing {0}{I0} magic damage to nearby targets.".format(
+            FIERY_HANDS_DMG[lvl-1].str()
+        ))
+    tooltip.setReplaceIntelligence(FIERY_HANDS_DMG_BONUS)
+    heroType.addDynamicTooltipIntelligence(tooltip)
+
+    tooltip = new DynamicTooltip(ABILITY_INNER_FIRE)
+    tooltip.setLearnString("Increases nearby units strength, armor and willpower.", (int lvl) -> (begin
+        return "+{0}{I0}% strength, +{1}{I1} armor and willpower, {2} seconds".format(
+        INNER_FIRE_DMG[lvl-1].str(),
+        INNER_FIRE_DEF[lvl-1].str(),
+        INNER_FIRE_DURATION.str()
+        )
+    end) )
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, "Increases nearby units' strength by {0}{I0}% and armor and willpower by {1}{I1} for {2} seconds.".format(
+            INNER_FIRE_DMG[lvl-1].str(),
+            INNER_FIRE_DEF[lvl-1].str(),
+            INNER_FIRE_DURATION.str()
+        ))
+    tooltip.setReplaceIntelligence(INNER_FIRE_DMG_BONUS.toReal(), INNER_FIRE_DEF_BONUS.toReal())
+    heroType.addDynamicTooltipIntelligence(tooltip)
+
+    tooltip = new DynamicTooltip(ABILITY_FLAME_THROWER)
+    tooltip.setLearnString("Launches a fiery missile at the target location that deals large initial damage and ignites the targets, dealing additional damage over time.", (int lvl) -> (begin
+        return "{0}{I0} initial damage, {1}{I1} damage per second for {2} seconds.".format(
+            FLAME_THROWER_DAMAGE[lvl-1].str(),
+            FLAME_THROWER_DOT[lvl-1].str(),
+            FLAME_THROWER_DURATION[lvl-1].str()
+        )
+    end) )
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, "Launches a fiery missile at the target location that deals {0}{I0} initial damage and ignites the targets, dealing {1}{I1} damage per second for {2} seconds.".format(
+            FLAME_THROWER_DAMAGE[lvl-1].str(),
+            FLAME_THROWER_DOT[lvl-1].str(),
+            FLAME_THROWER_DURATION[lvl-1].str()
+        ))
+    tooltip.setReplaceIntelligence(FLAME_THROWER_DAMAGE_BONUS, FLAME_THROWER_DOT_BONUS)
+    heroType.addDynamicTooltipIntelligence(tooltip)
+
+
 function initHeroType()
     setupStats()
+    setupTooltips()
 
     heroType
         ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive, advanced))
         ..addOnSpellCastFunc(function onSpellCast)
         ..addMorph(HERO_INFERNAL_MACHINE_MORPH)
+        ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
+        ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
+        ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+        ..setSkillBuild("QEWQQWQEQWEWEWE")
+        ..addItem(ITEM_ID_HEAVY_BOOTS)
+        ..addItem(ITEM_ID_RUNIC_ARMOR)
+        ..addItem(ITEM_ID_FIREHAND_GAUNTLETS)
+        ..addItem(ITEM_ID_AXE_OF_DECAY)
+        ..addItem(ITEM_ID_WAR_DRUM)
+        ..addItem(ITEM_ID_ARCANE_SHIELD)
+
+
+
 
 
     CreateTrigger()
@@ -499,6 +598,17 @@ function initHeroType()
         let level = caster.getAbilityLevel(ABILITY_FLAME_THROWER)
         nearby.enumUnitsInRange(impact.getPos(), FLAME_THROWER_AOE[level-1])
 
+        
+        var fx = new Fx(impact.getPos(), Abilities.liquidfire)
+        fx.setScale(3.5)
+        doAfter(1, () -> destroy fx)
+
+        for i = 0 to 10
+            fx = new Fx(impact.getPos().polarOffset(GetRandomDirectionDeg().fromDeg(), GetRandomReal(0, 300)), Abilities.flameStrikeEmbers)
+            fx.setScale(2)
+            doAfter(0.5, () -> destroy fx)
+            
+
         let dmg = (FLAME_THROWER_DAMAGE[level-1]).bonus(caster.getInt(), FLAME_THROWER_DAMAGE_BONUS)
         while(not nearby.isEmpty())
             unit target = FirstOfGroup(nearby)
@@ -520,7 +630,7 @@ function createHeroType(Hero hero)
     new AttackOrderTrack(hero.toUnit())
 
 init
-    heroType = new HeroType(HERO_INFERNAL_MACHINE, Icons.bTNInfernalCannon)
+    heroType = new HeroType(HERO_INFERNAL_MACHINE, Icons.bTNInfernalCannon, 8)
         ..setOnInitFunction(() -> initHeroType())
         ..setOnCreateFunction((Hero hero) -> createHeroType(hero))
 

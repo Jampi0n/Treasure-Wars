@@ -25,7 +25,10 @@ HeroType heroType
 constant real array ENVENOMED_BLADES_DAMAGE = [5, 10, 15, 20, 25]
 constant real ENVENOMED_BLADES_DAMAGE_BONUS = 20
 constant real array ENVENOMED_BLADES_DURATION = [5, 5 ,5 ,5 ,5 ]
+
 constant BUFF_ENVENOMED_BLADES = new BuffType(false, true)
+constant ENVENOMED_BLADES_BUFF_ID = compiletime(createAuraBuff("Envenomed Blades", "This unit was hit by Envenomed Blades; it is slowed and takes damage over time.", "BTNPoisonBlades"))
+constant ENVENOMED_BLADES_ABILITY_ID = compiletime(createNegativeBuffAbility(5, ENVENOMED_BLADES_BUFF_ID, Abilities.poisonStingTarget, "chest"))
 
 
 
@@ -42,7 +45,7 @@ function envenomedBlades()
 
     for lvl = 1 to 5
         aDef
-            ..setTooltipNormalExtended(lvl, "Attacks deal {0} poison damage every second for {1} seconds.".format(
+            ..setDescriptionString(false, lvl, "Attacks deal {0} poison damage every second for {1} seconds.".format(
             ENVENOMED_BLADES_DAMAGE[lvl-1].str()+ENVENOMED_BLADES_DAMAGE_BONUS.getBonusString(C_INT), 
             ENVENOMED_BLADES_DURATION[lvl-1].str())
             )
@@ -64,18 +67,18 @@ function mistwalk()
         ..setArtEffect("")
         ..setMissileArt("")
         ..setArtTarget("")
-        ..setLearnString("Turns the Python Warriores invisibile.", (int lvl) -> (begin
-            return "{0} seconds.".format( MISTWALK_DURATION[lvl-1].toString()+MISTWALK_DURATION_BONUS.getBonusString(C_INT))
-        end) )
+        /*..setLearnString("Turns the Python Warriores invisibile.", (int lvl) -> (begin
+            return "{0} seconds.".format( MISTWALK_DURATION[lvl-1].toSmartString()+MISTWALK_DURATION_BONUS.getBonusString(C_INT))
+        end) )*/
 
     for lvl = 1 to 5
         aDef
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setTargetsAllowed(lvl, "none")
-            ..setTooltipNormalExtended(lvl,
+            /*..setDescriptionString(true, lvl,
                 "Turns the Python Warriores invisibile for {0} seconds.".format(
-                MISTWALK_DURATION[lvl-1].toString()+MISTWALK_DURATION_BONUS.getBonusString(C_INT)))
+                MISTWALK_DURATION[lvl-1].toSmartString()+MISTWALK_DURATION_BONUS.getBonusString(C_INT)))*/
 
 constant int array POISON_SPIT_SLOW_MS = [-30, -35, -40, -45, -50]
 constant real array POISON_SPIT_DOT = [20, 28, 36, 44, 52]
@@ -87,6 +90,9 @@ constant real array POISON_SPIT_AOE = [200, 225, 250, 275, 300]
 constant integer ABILITY_POISON_SPIT_SLOWED = compiletime(ABIL_ID_GEN.next())
 constant integer ABILITY_POISON_SPIT_ARMOR_REDUCED = compiletime(ABIL_ID_GEN.next())
 constant integer BUFF_ID_POISON_SPIT = 'B00B'
+
+constant POISON_SPIT_BUFF_ID = compiletime(createAuraBuff("Poison Spit", "This unit stands inside Poison Spit. It has slowed movement speed reduced armor. The poison deals damage over time.", "BTNSlowSpellGreen"))
+constant POISON_SPIT_ABILITY_ID = compiletime(createNegativeBuffAbility(5, POISON_SPIT_BUFF_ID, "Units\\Undead\\PlagueCloud\\PlagueCloudtarget.mdl", "chest"))
 
 constant BUFF_POISON_SPIT = new BuffType(false, true)
 
@@ -104,14 +110,14 @@ function poisonSpit()
         ..setArtEffect("")
         ..setMissileArt("")
         ..setArtTarget("")
-        ..setLearnString("Spits poison at the target area. Enemies within the area of effect are slowed, have reduced armor and take damage over time.",
+        /*..setLearnString("Spits poison at the target area. Enemies within the area of effect are slowed, have reduced armor and take damage over time.",
         (int lvl) -> (begin
             return "{0} damage per second, {1} slow, {2} armor, lasts {3} seconds.".format(
             POISON_SPIT_DOT[lvl-1].str()+POISON_SPIT_DOT_BONUS.getBonusString(C_INT), 
             (-POISON_SPIT_SLOW_MS[lvl-1]).str()+"%",
             (-POISON_SPIT_ARMOR_REDUCTION[lvl-1]).str(),
             POISON_SPIT_DURATION[lvl-1].str())
-        end) )
+        end) )*/
 
     for lvl = 1 to 5
         aDef
@@ -119,29 +125,9 @@ function poisonSpit()
             ..setAreaofEffect(lvl, POISON_SPIT_AOE[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setTargetsAllowed(lvl, "none")
-            ..setTooltipNormalExtended(lvl, "Spits poison at the target area. Enemies within the area of effect are slowed by {0}, have their armor reduced by {1} and take {2} damage per second.|nLasts {3} seconds.".format(
+            /*..setDescriptionString(true, lvl, "Spits poison at the target area. Enemies within the area of effect are slowed by {0}, have their armor reduced by {1} and take {2} damage per second.|nLasts {3} seconds.".format(
             (-POISON_SPIT_SLOW_MS[lvl-1]).str()+"%", (-POISON_SPIT_ARMOR_REDUCTION[lvl-1]).str(), POISON_SPIT_DOT[lvl-1].str()+POISON_SPIT_DOT_BONUS.getBonusString(C_INT), POISON_SPIT_DURATION[lvl-1].str()))
-
-    let aDefSlowAura = new AbilityDefinitionAuraSlow(ABILITY_POISON_SPIT_SLOWED)
-        ..setLevels(5)
-        ..hideIcon()
-        ..setArtTarget("Units\\Undead\\PlagueCloud\\PlagueCloudtarget.mdl")
-        ..setTargetAttachmentPoint("chest")
-    for lvl = 1 to 5
-        aDefSlowAura
-            //..setMovementSpeedFactor(lvl, POISON_SPIT_SLOW_MS[lvl-1]) movement speed will be handled via trigger
-            ..setMovementSpeedFactor(lvl, 0)
-            ..setTargetsAllowed(lvl, "invulnerable,self,vulnerable")
-            ..setAreaofEffect(lvl, 1)
-            ..setBuffs(lvl, int2fourchar(BUFF_ID_POISON_SPIT))
-
-    let aDefArmorReduction = new AbilityDefinitionDefenseBonusPlus1(ABILITY_POISON_SPIT_ARMOR_REDUCED)
-        ..setLevels(5)
-        ..hideIcon()
-        ..setItemAbility(false)
-    for lvl = 1 to 5
-        aDefArmorReduction
-            ..setDefenseBonus(lvl, POISON_SPIT_ARMOR_REDUCTION[lvl-1])
+            */
 
 constant real array EMPOWERED_STRIKE_DAMAGE = [80, 140, 200, 260, 320]
 constant real EMPOWERED_STRIKE_DAMAGE_BONUS = 150
@@ -158,9 +144,9 @@ function empoweredStrike()
         ..setLightningEffects("")
         ..setArtSpecial("")
         ..setLightningEffects("")
-        ..setLearnString("Strikes the target enemy unit with a powerful melee attack dealing physical damage.", (int lvl) -> (begin
+        /*..setLearnString("Strikes the target enemy unit with a powerful melee attack dealing physical damage.", (int lvl) -> (begin
             return "{0} damage.".format( EMPOWERED_STRIKE_DAMAGE[lvl-1].str()+EMPOWERED_STRIKE_DAMAGE_BONUS.getBonusString(C_STR))
-        end) )
+        end) )*/
 
     for lvl = 1 to 5
         aDef
@@ -171,15 +157,15 @@ function empoweredStrike()
             ..setCastRange(lvl, 150)
             ..setDurationNormal(lvl, 0.1)
             ..setTargetsAllowed(lvl, "air,enemies,ground,neutral,nonancient,organic")
-            ..setTooltipNormalExtended(lvl, "Strikes the target enemy unit with a powerful melee attack dealing {0} physical damage.".format( 
-            EMPOWERED_STRIKE_DAMAGE[lvl-1].str()+EMPOWERED_STRIKE_DAMAGE_BONUS.getBonusString(C_STR)))
+            /*..setDescriptionString(true, lvl, "Strikes the target enemy unit with a powerful melee attack dealing {0} physical damage.".format( 
+            EMPOWERED_STRIKE_DAMAGE[lvl-1].str()+EMPOWERED_STRIKE_DAMAGE_BONUS.getBonusString(C_STR)))*/
 
 
 
 constant real array PARALYZING_STRIKE_DAMAGE = [200, 250, 300, 350, 400]
 constant real PARALYZING_STRIKE_DAMAGE_BONUS = 200
 constant real array PARALYZING_STRIKE_DURATION = [1.6, 1.8, 2, 2.2, 2.4]
-constant real PARALYZING_STRIKE_DURATION_BONUS = 1
+constant real PARALYZING_STRIKE_DURATION_BONUS = 0.4
 
 @compiletime
 function paralyzingStrike()
@@ -196,7 +182,7 @@ function paralyzingStrike()
         ..setArtTarget("")
         ..setLearnString("Deals massive magical damage to the target, stunning it and teleports the Python Warriores behind the target.", (int lvl) -> (begin
             return "{0} damage, {1} seconds stun.".format( PARALYZING_STRIKE_DAMAGE[lvl-1].str()+PARALYZING_STRIKE_DAMAGE_BONUS.getBonusString(C_INT),
-            PARALYZING_STRIKE_DURATION[lvl-1].toString()+PARALYZING_STRIKE_DURATION_BONUS.getBonusString(C_INT))
+            PARALYZING_STRIKE_DURATION[lvl-1].toSmartString()+PARALYZING_STRIKE_DURATION_BONUS.getBonusString(C_INT))
         end) )
 
     for lvl = 1 to 5
@@ -208,9 +194,9 @@ function paralyzingStrike()
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setTargetsAllowed(lvl, "enemies,ground,neutral,nonancient,organic,hero")
-            ..setTooltipNormalExtended(lvl, "Deals {0} magical damage to the target, stunning it for {1} seconds and teleports the Python Warriores behind the target.".format(
+            ..setDescriptionString(true, lvl, "Deals {0} magical damage to the target, stunning it for {1} seconds and teleports the Python Warriores behind the target.".format(
             PARALYZING_STRIKE_DAMAGE[lvl-1].str()+PARALYZING_STRIKE_DAMAGE_BONUS.getBonusString(C_INT),
-            PARALYZING_STRIKE_DURATION[lvl-1].toString()+PARALYZING_STRIKE_DURATION_BONUS.getBonusString(C_INT)))
+            PARALYZING_STRIKE_DURATION[lvl-1].toSmartString()+PARALYZING_STRIKE_DURATION_BONUS.getBonusString(C_INT)))
 
 
 
@@ -274,7 +260,7 @@ function onSpellCast()
 
 function onAttack(unit attacker, unit target, boolean _isActive)
     let level = attacker.getAbilityLevel(ABILITY_ENVENOMED_BLADES)
-    if level != 0
+    if level != 0 and target.isTargetable(attacker.getOwner(), false, true) and not target.isType(UNIT_TYPE_STRUCTURE)
         target.addBuffReduced( attacker, ENVENOMED_BLADES_DURATION[level-1], BUFF_ENVENOMED_BLADES, level)
 
 
@@ -298,19 +284,136 @@ function poisonSpitPeriodic()
 
     nearby.destr()
 
+
+
+
+function retreatAI(HeroAI ai)
+    ai.issue("roar")
+
+function attackAI(HeroAI ai)
+    let hero = ai.getHeroUnit()
+
+    unit target
+    if hero.getMana()/hero.getMaxMana() > 0.5
+        let targetPos = hero.findAreaTarget(800, POISON_SPIT_AOE[hero.getAbilityLevel(ABILITY_POISON_SPIT)-1], 3)
+        if targetPos.getValue() >= 6
+            ai.issue("silence", targetPos.getPos())
+
+        target = hero.findTarget(300, AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
+        if target.isTargetable(hero.getOwner(), false, true)
+            ai.issue("forkedlightning", target)
+
+    target = hero.findTarget(500, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_DISTANCE, null)
+    if target.isTargetable(hero.getOwner(), false, true)
+        ai.attack(target)
+
+function teamFightAI(HeroAI ai)
+    let hero = ai.getHeroUnit()
+
+    unit target = ai.getTeamFightTarget()
+
+    if target.isTargetable(hero.getOwner(), false, true)
+
+        ai.issue("silence", target.getPos())
+        ai.issue("chainlightning", target)
+        if target.getPos().distanceTo(hero.getPos()) < 300
+            ai.issue("forkedlightning", target)
+
+        if not ai.getAttacking()
+            ai.attack(target)
+
+function setupTooltips()
+    DynamicTooltip tooltip = new DynamicTooltip(ABILITY_ENVENOMED_BLADES)
+    tooltip.setLearnString("Attacks deal poison damage every second.", (int lvl) -> (begin
+        return "{0}{I0} damage, {1} seconds.".format(
+        ENVENOMED_BLADES_DAMAGE[lvl-1].str(), 
+        ENVENOMED_BLADES_DURATION[lvl-1].str())
+    end) )
+    for lvl = 1 to 5
+        tooltip.setNormalString(false, lvl, "Attacks deal {0}{I0} poison damage every second for {1} seconds.".format(
+            ENVENOMED_BLADES_DAMAGE[lvl-1].str()+ENVENOMED_BLADES_DAMAGE_BONUS.getBonusString(C_INT), 
+            ENVENOMED_BLADES_DURATION[lvl-1].str())
+            )
+    tooltip.setReplaceIntelligence(ENVENOMED_BLADES_DAMAGE_BONUS)
+    heroType.addDynamicTooltipIntelligence(tooltip)
+
+    tooltip = new DynamicTooltip(ABILITY_MISTWALK)
+    tooltip.setLearnString("Turns the Python Warriores invisibile.", (int lvl) -> (begin
+        return "{0}{I0} seconds.".format( MISTWALK_DURATION[lvl-1].toExactString())
+    end) )
+    
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, "Turns the Python Warriores invisibile for {0}{I0} seconds.".format(
+            MISTWALK_DURATION[lvl-1].toExactString()))
+    tooltip.setReplaceIntelligence(MISTWALK_DURATION_BONUS)
+    heroType.addDynamicTooltipIntelligence(tooltip)
+
+    tooltip = new DynamicTooltip(ABILITY_POISON_SPIT)
+    tooltip.setLearnString("Spits poison at the target area. Enemies within the area of effect are slowed, have reduced armor and take damage over time.",
+        (int lvl) -> (begin
+            return "{0}{I0} damage per second, {1} slow, {2} armor, lasts {3} seconds.".format(
+            POISON_SPIT_DOT[lvl-1].str(), 
+            (-POISON_SPIT_SLOW_MS[lvl-1]).str()+"%",
+            (-POISON_SPIT_ARMOR_REDUCTION[lvl-1]).str(),
+            POISON_SPIT_DURATION[lvl-1].str())
+        end) )
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, "Spits poison at the target area. Enemies within the area of effect are slowed by {0}, have their armor reduced by {1} and take {2}{I0} damage per second.|nLasts {3} seconds.".format(
+            (-POISON_SPIT_SLOW_MS[lvl-1]).str()+"%", (-POISON_SPIT_ARMOR_REDUCTION[lvl-1]).str(), POISON_SPIT_DOT[lvl-1].str(), POISON_SPIT_DURATION[lvl-1].str()))
+    tooltip.setReplaceIntelligence(POISON_SPIT_DOT_BONUS)
+    heroType.addDynamicTooltipIntelligence(tooltip)
+
+    tooltip = new DynamicTooltip(ABILITY_EMPOWERED_STRIKE)
+    tooltip.setLearnString("Strikes the target enemy unit with a powerful melee attack dealing physical damage.", (int lvl) -> (begin
+        return "{0}{S0} damage.".format( EMPOWERED_STRIKE_DAMAGE[lvl-1].str())
+    end) )
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, "Strikes the target enemy unit with a powerful melee attack dealing {0}{S0} physical damage.".format( 
+            EMPOWERED_STRIKE_DAMAGE[lvl-1].str()))
+    tooltip.setReplaceStrength(EMPOWERED_STRIKE_DAMAGE_BONUS)
+    heroType.addDynamicTooltipStrength(tooltip)
+
+    tooltip = new DynamicTooltip(ABILITY_PARALYZING_STRIKE)
+    tooltip.setLearnString("Deals massive magical damage to the target, stunning it and teleports the Python Warriores behind the target.", (int lvl) -> (begin
+        return "{0}{I0} damage, {1}{I1} seconds stun.".format(
+        PARALYZING_STRIKE_DAMAGE[lvl-1].str(),
+        PARALYZING_STRIKE_DURATION[lvl-1].toExactString())
+    end) )
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, "Deals {0}{I0} magical damage to the target, stunning it for {1}{I1} seconds and teleports the Python Warriores behind the target.".format(
+            PARALYZING_STRIKE_DAMAGE[lvl-1].str(),
+            PARALYZING_STRIKE_DURATION[lvl-1].toExactString()))
+    tooltip.setReplaceIntelligence(PARALYZING_STRIKE_DAMAGE_BONUS, PARALYZING_STRIKE_DURATION_BONUS)
+    heroType.addDynamicTooltipIntelligence(tooltip)
+
 function initHeroType()
     setupStats()
+    setupTooltips()
 
-    heroType.setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
+    heroType
+        ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
+        ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
+        ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
+        ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+        ..setSkillBuild("WEQEEWEWEWWQQQQ")
+        ..addItem(ITEM_ID_BOOTS_OF_DARKNESS)
+        ..addItem(ITEM_ID_ENCHANTED_ARMOR)
+        ..addItem(ITEM_ID_WAND_OF_DEATH)
+        ..addItem(ITEM_ID_RUNIC_ARMOR)
+        ..addItem(ITEM_ID_SCROLL_OF_CONJURATION)
+        ..addItem(ITEM_ID_BLESSED_GOBLET)
 
     var abilityList = new LinkedList<int>
-        ..add('A009')
-    BUFF_ENVENOMED_BLADES.setup(abilityList, 'B007')
+        ..add(ENVENOMED_BLADES_ABILITY_ID)
+    BUFF_ENVENOMED_BLADES.setup(abilityList, ENVENOMED_BLADES_BUFF_ID)
     BUFF_ENVENOMED_BLADES.setPeriodicTime(1)
     BUFF_ENVENOMED_BLADES.addPeriodicFunction((Buff thisBuff)-> (begin
-        thisBuff.getCaster().dealDamage(thisBuff.getTarget(), 
-        (ENVENOMED_BLADES_DAMAGE[thisBuff.getLevel()-1]).bonus(thisBuff.getCaster().getInt(), ENVENOMED_BLADES_DAMAGE_BONUS)
-        , ReductionType.MAGIC)
+        let target = thisBuff.getTarget()
+        let caster = thisBuff.getCaster()
+        if target.isTargetable(caster.getOwner(), false, true)
+            caster.dealDamage(target, 
+            (ENVENOMED_BLADES_DAMAGE[thisBuff.getLevel()-1]).bonus(caster.getInt(), ENVENOMED_BLADES_DAMAGE_BONUS)
+            , ReductionType.MAGIC)
     end) )
     
 
@@ -325,11 +428,15 @@ function initHeroType()
         , ReductionType.MAGIC)
     end) )
     BUFF_POISON_SPIT.addFirstFunction( (Buff thisBuff) -> (begin
-        thisBuff.getTarget().wrapper().addStatRelativeBonus( Stat.MS, POISON_SPIT_SLOW_MS[thisBuff.getLevel()-1]*10 )
+        let wrapper = thisBuff.getTarget().wrapper()
+        wrapper.addStatRelativeBonus( Stat.MS, POISON_SPIT_SLOW_MS[thisBuff.getLevel()-1]*10 )
+        wrapper.addStatAbsoluteBonus( Stat.AR, POISON_SPIT_ARMOR_REDUCTION[thisBuff.getLevel()-1] )
     end) )
 
     BUFF_POISON_SPIT.addEndFunction( (Buff thisBuff) -> (begin
-        thisBuff.getTarget().wrapper().addStatRelativeBonus( Stat.MS, -POISON_SPIT_SLOW_MS[thisBuff.getLevel()-1]*10 )
+        let wrapper = thisBuff.getTarget().wrapper()
+        wrapper.addStatRelativeBonus( Stat.MS, -POISON_SPIT_SLOW_MS[thisBuff.getLevel()-1]*10 )
+        wrapper.addStatAbsoluteBonus( Stat.AR, -POISON_SPIT_ARMOR_REDUCTION[thisBuff.getLevel()-1] )
     end) )
 
     onEnter(() -> (begin
@@ -378,7 +485,7 @@ function initHeroType()
 
 
 init
-    heroType = new HeroType(HERO_PYTHON_WARRIORES, "BTNGreenViper")
+    heroType = new HeroType(HERO_PYTHON_WARRIORES, "BTNGreenViper", 0)
         ..setOnInitFunction(() -> initHeroType())
     
 

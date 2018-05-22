@@ -8,15 +8,21 @@ import TimerUtils
 import UnitTypeConfig
 import initlater SeaDruid
 import initlater TrollBerserker
+import initlater Paladin
 import StandardTextTags
 import HashMap
 import GameTimer
 
-import ItemIdGeneration
 import initlater ItemShopSystem
 
 public constant ADVANCED_ONHIT =  'A00I'
 public constant DEFAULT_ONHIT = 'A008'
+
+boolean magicDamage
+
+public function setMagicDamage(boolean magic)
+    magicDamage = magic
+
 /*
     ADVANCED_ONHIT can temporarily replace the default on hit abiltiy to get a temporary special attack, that depends
     on the time when the attack is fired and not when it is hit (so only relevant for ranged attacks)
@@ -25,7 +31,7 @@ public constant DEFAULT_ONHIT = 'A008'
 */
 
 
-function unit.dealDamageNoEvent(unit target, real amount, ReductionType reductionType)
+public function unit.dealDamageNoEvent(unit target, real amount, ReductionType reductionType)
     disableDamageDetect()
     this.dealDamage(target, amount, reductionType)
     enableDamageDetect()
@@ -47,96 +53,109 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
     let originalDamage = GetEventDamage()
     real currentDamage = originalDamage
 
-    if originalDamage.abs() < 0.000001 //damage very small, just ignore
-        return
+    if originalDamage.abs() >= 0.000001 //damage very small, just ignore
 
 
 
 
 
 
-    /*
-        untargetable -> damage = 0 and no further damage handling
-        only for attacks, because every other damage will be dealt in code and there I can decide individually, if I want to deal damage
-    */
 
-    if (target.isType(UNIT_TYPE_ANCIENT) and isAttack) or gameOver
-        currentDamage = 0
-    else
+        /*
+            untargetable -> damage = 0 and no further damage handling
+            only for attacks, because every other damage will be dealt in code and there I can decide individually, if I want to deal damage
+        */
 
-        //example:
-        //currentDamage = currentDamage/2
+        if (target.isType(UNIT_TYPE_ANCIENT) and isAttack) or gameOver
+            currentDamage = 0
+        else
 
-        //===============================================================================
+            //example:
+            //currentDamage = currentDamage/2
 
-
-        // critical strike - TROLL BERSERKER
-        if advanced and source.isType(UNIT_TYPE_HERO) and BuffList.hasBuffType(source, buffCriticalStrike) and not target.isType(UNIT_TYPE_STRUCTURE)
-            let critical = BuffList.getBuffOfType(source, buffCriticalStrike)
-            currentDamage = currentDamage * (100 + CRITICAL_DAMAGE_MULT[critical.getLevel()-1])/100
-            createCriticalStrikeTextTag(target, currentDamage.toInt())
-            critical.dispel()
+            //===============================================================================
 
 
-        // shield - ITEM
-        if isAttack and target.isType(UNIT_TYPE_HERO)
-            currentDamage = currentDamage - 18 * target.countItemsOfType(convertItemId(ITEM_ID_SHIELD))
+            // critical strike - TROLL BERSERKER
+            if advanced and source.isType(UNIT_TYPE_HERO) and BuffList.hasBuffType(source, buffCriticalStrike) and not target.isType(UNIT_TYPE_STRUCTURE)
+                let critical = BuffList.getBuffOfType(source, buffCriticalStrike)
+                currentDamage = currentDamage * (100 + CRITICAL_DAMAGE_MULT[critical.getLevel()-1])/100
+                createCriticalStrikeTextTag(target, currentDamage.toInt())
+                critical.dispel()
 
-        // mana shield - SEA DRUID
-        if target.isType(UNIT_TYPE_HERO) and BuffList.hasBuffType(target, buffManaShield)
-            
-            let manaShield = BuffList.getBuffOfType(target, buffManaShield)
-            let level = manaShield.getLevel()
+            //heavy armored
+            if isAttack and target.getAbilityLevel(ABILITY_HEAVY_ARMORED) > 0
+                currentDamage -= HEAVY_ARMOED_REDUCTION[target.getAbilityLevel(ABILITY_HEAVY_ARMORED) - 1]
 
-            
-            manaShield.getTarget().damageMana(manaShield.getTarget(), MANA_SHIELD_REDUCTION[level-1] * MANA_PER_DAMAGE[level-1] * currentDamage, ReductionType.NONE)
-            currentDamage = currentDamage * (1.-MANA_SHIELD_REDUCTION[level-1])
-    
-        // vampiric goblet - ITEM
-        if source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_VAMPIRIC_GOBLET)) and target.isType(UNIT_TYPE_HERO)
-            source.healHP(source, currentDamage * 0.2)
-            source.healMana(source, currentDamage * 0.15)
+            // shield - ITEM
+            if isAttack and target.isType(UNIT_TYPE_HERO)
+                currentDamage = currentDamage - 15 * target.countItemsOfType(convertItemId(ITEM_ID_SHIELD))
 
-        // wand of blood - ITEM
-        if source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_WAND_OF_BLOOD)) and not target.isType(UNIT_TYPE_STRUCTURE)
-            source.healHP(source, currentDamage * 0.08)
+            if isAttack and target.isType(UNIT_TYPE_HERO)
+                currentDamage = currentDamage - 20 * target.countItemsOfType(convertItemId(ITEM_ID_HOLY_SHIELD))
 
-        // sacrifical dagger - ITEM
-        if isAttack and source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_SACRIFICIAL_DAGGER)) and not target.isType(UNIT_TYPE_STRUCTURE)
-            source.healHP(source, currentDamage * 0.12)
+            // mana shield - SEA DRUID
+            if target.isType(UNIT_TYPE_HERO) and BuffList.hasBuffType(target, buffManaShield)
+                
+                let manaShield = BuffList.getBuffOfType(target, buffManaShield)
+                let level = manaShield.getLevel()
 
-        // void armor - ITEM
-        if target.isType(UNIT_TYPE_HERO) and target.hasItemById(convertItemId(ITEM_ID_VOID_ARMOR))
-            target.healMana(target, currentDamage * 0.1)
-            currentDamage *= 0.9
+                
+                manaShield.getTarget().damageMana(manaShield.getTarget(), MANA_SHIELD_REDUCTION[level-1] * MANA_PER_DAMAGE[level-1] * currentDamage, ReductionType.NONE)
+                currentDamage = currentDamage * (1.-MANA_SHIELD_REDUCTION[level-1])
+        
+            // vampiric goblet - ITEM
+            if source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_VAMPIRIC_GOBLET)) and target.isType(UNIT_TYPE_HERO)
+                source.healHP(source, currentDamage * 0.2)
+                source.healMana(source, currentDamage * 0.15)
 
-        // wand of death - ITEM
-        if source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_WAND_OF_DEATH)) and target.isType(UNIT_TYPE_HERO)
-            let wp = currentDamage * 0.02
-            let wrapper = target.wrapper()
-            wrapper.addStatAbsoluteBonusReal(Stat.AGI, (-wp*1000).toInt())
-            doAfter(10, () -> wrapper.addStatAbsoluteBonusReal(Stat.AGI, (wp*1000).toInt() ) )
+            // wand of blood - ITEM
+            if source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_WAND_OF_BLOOD)) and not target.isType(UNIT_TYPE_STRUCTURE)
+                source.healHP(source, currentDamage * 0.08)
+
+            // sacrifical dagger - ITEM
+            if isAttack and source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_SACRIFICIAL_DAGGER)) and not target.isType(UNIT_TYPE_STRUCTURE)
+                source.healHP(source, currentDamage * 0.12)
+
+            // void armor - ITEM
+            if target.isType(UNIT_TYPE_HERO) and target.hasItemById(convertItemId(ITEM_ID_VOID_ARMOR))
+                target.healMana(target, currentDamage * 0.1)
+                currentDamage *= 0.9
+
+            // wand of death - ITEM
+            if source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_WAND_OF_DEATH)) and target.isType(UNIT_TYPE_HERO)
+                let wp = currentDamage * 0.02
+                let wrapper = target.wrapper()
+                wrapper.addStatAbsoluteBonusReal(Stat.AGI, (-wp*1000).toInt())
+                doAfter(10, () -> wrapper.addStatAbsoluteBonusReal(Stat.AGI, (wp*1000).toInt() ) )
 
 
-        //===============================================================================
+            //===============================================================================
 
-    target.getOwner().getCPlayer().statDamageTaken += min(currentDamage, target.getHP())
-    source.getOwner().getCPlayer().statDamageDealt += min(currentDamage, target.getHP())
+        currentDamage = max(0, currentDamage)
 
-    if target.isType(UNIT_TYPE_HERO) and source.getOwner().getId() < MAX_HERO_COUNT
-        /*let factor = currentDamage.pow(0.3)*4
-        CreateTextTag()..setText(currentDamage.round().toString(), factor/2+4)
-                             ..setColor(200, 50, 25, 255)
-                             ..setPos(target.getX(), target.getY(), 0)
-                             ..setFadepoint(0)
-                             ..setLifespan(factor/20+0.4)
-                             ..setPermanent(false)
-                             ..setVisibility(true)
-                             ..setVelocity(GetRandomReal(-0.02, 0.02), 0.04)*/
+        target.getOwner().getCPlayer().statDamageTaken += min(currentDamage, target.getHP())
+        source.getOwner().getCPlayer().statDamageDealt += min(currentDamage, target.getHP())
 
-        //DamageTag.addDamage(target, currentDamage)
+        let ai = getAI(target.getOwner().getId())
+        if ai != null and target.isType(UNIT_TYPE_HERO)
+            ai.onDamage(currentDamage)
 
-    BlzSetEventDamage(currentDamage)
+        //if target.isType(UNIT_TYPE_HERO) and source.getOwner().getId() < MAX_HERO_COUNT
+            /*let factor = currentDamage.pow(0.3)*4
+            CreateTextTag()..setText(currentDamage.round().toString(), factor/2+4)
+                                ..setColor(200, 50, 25, 255)
+                                ..setPos(target.getX(), target.getY(), 0)
+                                ..setFadepoint(0)
+                                ..setLifespan(factor/20+0.4)
+                                ..setPermanent(false)
+                                ..setVisibility(true)
+                                ..setVelocity(GetRandomReal(-0.02, 0.02), 0.04)*/
+
+            //DamageTag.addDamage(target, currentDamage)
+
+        BlzSetEventDamage(currentDamage)
+        setMagicDamage(false)
 
 
 
@@ -212,9 +231,6 @@ public interface OnAttackFunctionAdvanced
 
 public class OnAttack
 
-    private static unit target
-    private static unit attacker
-    private static boolean active
     private static trigger onAttackTrigger = CreateTrigger()
     private static constant onAttackFunctionList = new LinkedList<OnAttackFunction>()
     private static constant onAttackFunctionListAdvanced = new LinkedList<OnAttackFunctionAdvanced>()
@@ -248,9 +264,6 @@ public class OnAttack
             localAttacked = true
 
 
-        target = localTarget
-        attacker = localAttacker
-        active = localActive
         handleDamageAmount(localAttacker, localTarget, localAttacked, localActive, advanced)
 
         //use a list with arguments, as a onAttack function could trigger an onAttack event and overwrite the variables

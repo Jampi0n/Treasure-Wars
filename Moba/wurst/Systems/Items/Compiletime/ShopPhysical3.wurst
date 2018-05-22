@@ -269,19 +269,33 @@ constant int AXE_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, AXE_BUFF_
                     
 
 function itemAxeOfDecay(int itemId)
-    int str = 45
-    int slow = 20
+    int mana = 12 // trigger
+    int hp = 16 // trigger
+    int str = 38
+    int slow = 25
     int slowDur = 2
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} strength|nAttacks slow the target's movement speed by {1}% for {2} seconds.|nThis effect does not stack.".format(
-                str.toString(), slow.toString(), slowDur.toString()
+            ..setDescription("+ {0} strength|nRestores {1} hit points and {2} mana points per kill.|nAttacks slow the target's movement speed by {3}% for {4} seconds.|nThis effect does not stack.".format(
+                str.toString(), hp.toString(), mana.toString(), slow.toString(), slowDur.toString()
             ))
             ..setGoldCost(3600)
             ..addRequirement(ITEM_ID_SKULL_AXE)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.STR, str)
+
+        CreateTrigger()
+            ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
+            ..addAction(() -> (begin
+                let killer = GetKillingUnit()
+                let count = killer.countItemsOfType(convertItemId(ITEM_ID_AXE_OF_DECAY))
+                if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and count!=0
+                    killer.healMana(killer, 12. * count)
+                    killer.healHP(killer, 16. * count)
+                    killer.addEffect(Abilities.spiritTouchTarget, "origin").destr()
+                    killer.addEffect(Abilities.vampiricAuraTarget, "origin").destr()
+            end))
 
         BuffType axeBuff = new BuffType(false, false)
         var abilityList = new LinkedList<int>
@@ -307,13 +321,14 @@ constant BUFF_HOLY_SHIELD = new BuffType(true, true)
 
 function itemHolyShield(int itemId)
     int dur = 2 //trigger
-    int ar = 18
+    int ar = 15
     int hp = 225
-    int wp = 28
+    int wp = 25
+    int block = 20 // -> onAttack
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} hit points|n+ {1} armor|n+ {2} willpower|nActive:|nTurns the hero invulnerable for {3} seconds.".format(
-                hp.toString(), ar.toString(), wp.toString(), dur.toString()
+            ..setDescription("+ {0} hit points|n+ {1} armor|n+ {2} willpower|nBlocks {3} damage of incoming attacks.|nActive:|nTurns the hero invulnerable for {4} seconds.".format(
+                hp.toString(), ar.toString(), wp.toString(), block.toString(), dur.toString()
             ))
             ..setGoldCost(3800)
             ..addRequirement(ITEM_ID_SHIELD)
@@ -340,14 +355,16 @@ function itemHolyShield(int itemId)
 
 
 function itemSacrificialDagger(int itemId)
-    int str = 30
+    int str = 25
     int as = 15
-    int lifesteal = 12
+    int lifesteal = 12 // onAttack
+    int mana = 8 // trigger
+    int hr = 30
     if compiletime
         itemId.getTypeDef()
-            ..setDescription(("+ {0} strength|n+ {1}% attack speed|n"+
-            "Attacks restore {2}% of the damage dealt.").format(
-                str.toString(), as.toString(), lifesteal.toString()
+            ..setDescription(("+ {0} strength|n+ {1}% attack speed|n+ {2} hit point regeneration per 10 seconds|nRestores {3} mana points per kill."+
+            "Attacks restore {4}% of the damage dealt.").format(
+                str.toString(), as.toString(), hr.toString(), mana.toString(), lifesteal.toString()
             ))
             ..setGoldCost(3450)
             ..addRequirement(ITEM_ID_DAGGER)
@@ -355,8 +372,18 @@ function itemSacrificialDagger(int itemId)
             ..addRequirement(ITEM_ID_RING_OF_HEALTH)
     else
         itemId.getItem()
+            ..addStatBonusAbsolute(Stat.HR, hr)
             ..addStatBonusAbsolute(Stat.STR, str)
             ..addStatBonusAbsolute(Stat.AS, as)
+
+        CreateTrigger()
+            ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
+            ..addAction(() -> (begin
+                let killer = GetKillingUnit()
+                if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and killer.hasItemById(convertItemId(ITEM_ID_SACRIFICIAL_DAGGER))
+                    killer.healMana(killer, 8. * killer.countItemsOfType(convertItemId(ITEM_ID_SACRIFICIAL_DAGGER)))
+                    killer.addEffect(Abilities.spiritTouchTarget, "origin").destr()
+            end))
 
 
 

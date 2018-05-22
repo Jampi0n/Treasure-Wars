@@ -123,7 +123,7 @@ function itemBow(int itemId)
 
 function itemShield(int itemId)
     int ar = 8
-    int block = 18 // -> onAttack
+    int block = 15 // -> onAttack
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} armor|nBlocks {1} damage of incoming attacks.".format(ar.toString(), block.toString()))

@@ -32,14 +32,14 @@ function ancientKnowledge()
         ..setLearnString("Increases his maximum hit points for a portion of his maximum mana ponits and increases his maximum mana points by "+
         "a portion of his maximum hit points.", (int lvl) -> (begin
             return "1 hit point for every {0} mana points, 1 mana point for every {1} hit points".format(
-            ANCIENT_KNOWLEDGE_HP_BONUS[lvl-1].toString(), ANCIENT_KNOWLEDGE_MP_BONUS[lvl-1].toString())
+            ANCIENT_KNOWLEDGE_HP_BONUS[lvl-1].toExactString(), ANCIENT_KNOWLEDGE_MP_BONUS[lvl-1].toExactString())
         end) )
 
     for lvl = 1 to 5
         aDef
-            ..setTooltipNormalExtended(lvl, ("Increases maximum hit points by 1 for every {0} points of his maximum mana points and "+
+            ..setDescriptionString(false, lvl, ("Increases maximum hit points by 1 for every {0} points of his maximum mana points and "+
             "increases his maximum mana points by 1 for every {1} points of his maximum hit points.").format(
-                ANCIENT_KNOWLEDGE_HP_BONUS[lvl-1].toString(), ANCIENT_KNOWLEDGE_MP_BONUS[lvl-1].toString())
+                ANCIENT_KNOWLEDGE_HP_BONUS[lvl-1].toExactString(), ANCIENT_KNOWLEDGE_MP_BONUS[lvl-1].toExactString())
             )
 
 constant real array TIDAL_FURY_HIT_DMG = [75, 125, 175, 225, 275]
@@ -47,6 +47,8 @@ constant real TIDAL_FURY_HIT_DMG_BONUS = 120
 
 constant real array TIDAL_FURY_WAVE_DMG = [20, 35, 50, 65, 80]
 constant real TIDAL_FURY_WAVE_DMG_BONUS = 60
+
+constant real TIDAL_FURY_AOE = 300
 
 @compiletime
 function tidalFury()
@@ -58,20 +60,20 @@ function tidalFury()
         ..setupIcon(Icons.bTNCrushingWave)
         ..setupWithHotKey("Tidal Fury", "Q")
         ..setArtCaster("")
-        ..setLearnString("Knocks nearby enemy units back, dealing damage and releasing a crushing wave for every enemy unit hit. The wave deals damage to every enemy it passes through.", (int lvl) -> (begin
+        /*..setLearnString("Knocks nearby enemy units back, dealing damage and releasing a crushing wave for every enemy unit hit. The wave deals damage to every enemy it passes through.", (int lvl) -> (begin
             return "{0} knockback damage, {1} wave damage.".format(
             TIDAL_FURY_HIT_DMG[lvl-1].str()+TIDAL_FURY_HIT_DMG_BONUS.getBonusString(C_STR),
             TIDAL_FURY_WAVE_DMG[lvl-1].str()+TIDAL_FURY_WAVE_DMG_BONUS.getBonusString(C_INT))
-        end) )
+        end) )*/
 
     for lvl = 1 to 5
         aDef
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setTargetsAllowed(lvl, "none")
-            ..setTooltipNormalExtended(lvl, "Knocks nearby enemy units back, dealing {0} damage and releasing a crushing wave for every enemy unit hit. The wave deals {1} damage to every enemy it passes through.".format(
+            /*..setDescriptionString(true, lvl, "Knocks nearby enemy units back, dealing {0} damage and releasing a crushing wave for every enemy unit hit. The wave deals {1} damage to every enemy it passes through.".format(
             TIDAL_FURY_HIT_DMG[lvl-1].str()+TIDAL_FURY_HIT_DMG_BONUS.getBonusString(C_STR),
-            TIDAL_FURY_WAVE_DMG[lvl-1].str()+TIDAL_FURY_WAVE_DMG_BONUS.getBonusString(C_INT)))
+            TIDAL_FURY_WAVE_DMG[lvl-1].str()+TIDAL_FURY_WAVE_DMG_BONUS.getBonusString(C_INT)))*/
 
 
 constant real array FISH_DAMAGE = [100, 150, 200, 250, 300]
@@ -110,14 +112,14 @@ function giantFish()
         ..setArtTarget("")
         ..setAnimationNames("spell")
         ..setupChannel(TargetType.AREA, "shockwave")
-        ..setLearnString("Throws a giant fish at the target location, damaging and slowing enemies in the area.", (int lvl) -> (begin
+        /*..setLearnString("Throws a giant fish at the target location, damaging and slowing enemies in the area.", (int lvl) -> (begin
             return "{0} damage, {1}% attack speed. {2}% movement speed, {3} seconds.".format(
                 FISH_DAMAGE[lvl-1].str()+FISH_DAMAGE_BONUS.getBonusString(C_INT),
                 FISH_ATTACK_SPEED[lvl-1].str(),
                 FISH_MOVE_SPEED[lvl-1].str(),
                 FISH_SLOW_DURATION[lvl-1].str()
             )
-        end) )
+        end) )*/
 
     for lvl = 1 to 5
         aDef
@@ -125,12 +127,12 @@ function giantFish()
             ..setManaCost(lvl, MANA[lvl-1])
             ..setCastRange(lvl, RANGE[lvl-1])
             ..setAreaofEffect(lvl, FISH_AOE[lvl-1])
-            ..setTooltipNormalExtended(lvl, "Throws a giant fish at the target location, dealing {0} magic damage and slowing attack speed by {1}% and movement speed by {2}% for {3} seconds.".format(
+            /*..setDescriptionString(true, lvl, "Throws a giant fish at the target location, dealing {0} magic damage and slowing attack speed by {1}% and movement speed by {2}% for {3} seconds.".format(
                 FISH_DAMAGE[lvl-1].str()+FISH_DAMAGE_BONUS.getBonusString(C_INT),
                 FISH_ATTACK_SPEED[lvl-1].str(),
                 FISH_MOVE_SPEED[lvl-1].str(),
                 FISH_SLOW_DURATION[lvl-1].str()
-            ))
+            ))*/
 
 
 constant int MANA_SHIELD_BUFF_ID = compiletime(createBasicBuff("Mana Shield", "Uses mana to reduce incoming damage.", Icons.bTNNeutralManaShield, Abilities.manaShieldCaster, "origin"))
@@ -154,7 +156,7 @@ function manaShield()
         ..setupWithHotKey("Mana Shield", "E")
         ..setLearnString("Reduces incoming damage at the cost of mana. Also drains mana while activated.", (int lvl) -> (begin
             return "{0}% reduction, {1} mana points per blocked damage point.".format(
-                (MANA_SHIELD_REDUCTION[lvl-1]*100).str(), MANA_PER_DAMAGE[lvl-1].toString()
+                (MANA_SHIELD_REDUCTION[lvl-1]*100).str(), MANA_PER_DAMAGE[lvl-1].toExactString()
             )
         end) )
 
@@ -165,13 +167,13 @@ function manaShield()
             ..setDurationHero(lvl, 1)
             ..setDurationNormal(lvl, 1)
             ..setDamageperInterval(lvl, 0)
-            ..setBuffs(lvl, int2fourchar(MANA_SHIELD_BUFF_ID)+",BEia")
+            ..setBuffs(lvl, MANA_SHIELD_BUFF_ID.toRawCode()+",BEia")
             ..setManaDrainedperSecond(lvl, MANA_PER_SECOND[lvl-1])
             ..setTooltipTurnOff(lvl, "(E) Deactivate Mana Shield - [|cffffcc00Level "+lvl.toString()+"|r]")
             ..setTooltipTurnOffExtended(lvl, "Deactivate Mana Shield to stop draining mana.")
             ..setTargetsAllowed(lvl, "none")
-            ..setTooltipNormalExtended(lvl, "Reduces incoming damage by {0}%, by spending {1} mana points for every blocked point of damage. Also drains mana while activated.".format(
-                (MANA_SHIELD_REDUCTION[lvl-1]*100).str(), MANA_PER_DAMAGE[lvl-1].toString()
+            ..setDescriptionString(true, lvl, "Reduces incoming damage by {0}%, by spending {1} mana points for every blocked point of damage. Also drains mana while activated.".format(
+                (MANA_SHIELD_REDUCTION[lvl-1]*100).str(), MANA_PER_DAMAGE[lvl-1].toExactString()
             ))
 
 
@@ -199,7 +201,7 @@ function ritualOfTheSeas()
         ..setAnimationNames("spell,channel")
         ..setupIcon("BTNGuardianofTheSea")
         ..setupWithHotKey("Ritual of the Seas", "R")
-        ..setLearnString(CHANNELING_SPELL + "Sends out magical energy, that drains hit points and mana from nearby enemies.|nThe Sea Druid gets {0}% of the hit points and {1}% of the mana drained from enemy heroes.".format(
+        /*..setLearnString(CHANNELING_SPELL + "Sends out magical energy, that drains hit points and mana from nearby enemies.|nThe Sea Druid gets {0}% of the hit points and {1}% of the mana drained from enemy heroes.".format(
             RITUAL_HP_RATIO.str(),
             RITUAL_MANA_RATIO.str()
         )    
@@ -209,7 +211,7 @@ function ritualOfTheSeas()
                 RITUAL_MANA_DRAIN[lvl-1].str()+RITUAL_MANA_DRAIN_BONUS.getBonusString(C_INT),
                 RITUAL_WAVE_COUNT[lvl-1].str()
             )
-        end) )
+        end) )*/
 
     for lvl = 1 to 5
         aDef
@@ -220,13 +222,13 @@ function ritualOfTheSeas()
             ..setEffects(lvl, "X000")
 
             ..setTargetsAllowed(lvl, "none")
-            ..setTooltipNormalExtended(lvl, CHANNELING_SPELL + "Sends out magical energy, that drain {0} hit points and {1} mana from nearby enemies.|nLasts for {2} waves.|nThe Sea Druid gets {3}% of the hit points and {4}% of the mana drained from enemy heroes.".format(
+            /*..setDescriptionString(true, lvl, CHANNELING_SPELL + "Sends out magical energy, that drain {0} hit points and {1} mana from nearby enemies.|nLasts for {2} waves.|nThe Sea Druid gets {3}% of the hit points and {4}% of the mana drained from enemy heroes.".format(
                 RITUAL_HP_DRAIN[lvl-1].str()+RITUAL_HP_DRAIN_BONUS.getBonusString(C_INT),
                 RITUAL_MANA_DRAIN[lvl-1].str()+RITUAL_MANA_DRAIN_BONUS.getBonusString(C_INT),
                 RITUAL_WAVE_COUNT[lvl-1].str(),
                 RITUAL_HP_RATIO.str(),
                 RITUAL_MANA_RATIO.str()
-            ))
+            ))*/
 
 function setupStats()
     heroType
@@ -250,7 +252,7 @@ function onSpellCast()
     if(spellId == ABILITY_TIDAL_FURY)
         let casterPos = caster.getPos()
         group nearby = CreateGroup()
-        nearby.enumUnitsInRange(casterPos, 300)
+        nearby.enumUnitsInRange(casterPos, TIDAL_FURY_AOE)
 
         let hitDmg = TIDAL_FURY_HIT_DMG[level-1].bonus(caster.getStr(), TIDAL_FURY_HIT_DMG_BONUS)
 
@@ -351,8 +353,138 @@ class RitualOfTheSeas
 
         this.checkTimer.release()
 
+
+
+    
+function retreatAI(HeroAI ai)
+    ai.issue("immolation")
+
+
+function attackAI(HeroAI ai)
+    let hero = ai.getHeroUnit()
+
+    ai.issue("unimmolation")
+
+    if hero.getMana()/hero.getMaxMana() > 0.5
+
+        let targetPos = hero.findAreaTarget(800, FISH_AOE[hero.getAbilityLevel(ABILITY_GIANT_FISH)-1], 3)
+        if targetPos.getValue() >= 6
+            ai.issue("shockwave", targetPos.getPos())
+
+        let g = CreateGroup()
+        unit u
+        int count = 0
+        g.enumUnitsInRange(hero.getPos(), TIDAL_FURY_AOE)
+        while(true)
+            u = FirstOfGroup(g)
+            if u == null
+                break
+            g.removeUnit(u)
+            if u.isTargetable(hero.getOwner(), false, true) and not u.isType(UNIT_TYPE_STRUCTURE)
+                if u.isType(UNIT_TYPE_HERO)
+                    count += 3
+                else
+                    count ++
+
+        if count >= 4
+            if ai.issue("howlofterror")
+                return
+
+    unit target = hero.findTarget(500, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_DISTANCE, null)
+    if target.isTargetable(hero.getOwner(), false, true)
+        ai.attack(target)
+
+function teamFightAI(HeroAI ai)
+
+    let hero = ai.getHeroUnit()
+
+    ai.issue("immolation")
+
+
+    
+    let g = CreateGroup()
+    unit u
+    int count = 0
+    g.enumUnitsInRange(hero.getPos(), TIDAL_FURY_AOE)
+    while(true)
+        u = FirstOfGroup(g)
+        if u == null
+            break
+        g.removeUnit(u)
+        if u.isTargetable(hero.getOwner(), false, true)
+            if u.isType(UNIT_TYPE_HERO)
+                count++
+
+    if count != 0
+        if ai.issue("howlofterror")
+            return
+
+
+    count = 0
+    g.enumUnitsInRange(hero.getPos(), RITUAL_AOE[hero.getAbilityLevel(ABILITY_RITUAL_OF_THE_SEAS)-1])
+    while(true)
+        u = FirstOfGroup(g)
+        if u == null
+            break
+        g.removeUnit(u)
+        if u.isTargetable(hero.getOwner(), false, true)
+            if u.isType(UNIT_TYPE_HERO)
+                count++
+
+    g.destr()
+    if count > 1
+        if ai.issue("tranquility")
+            return
+
+        
+    unit target = ai.getTeamFightTarget()
+    if target.isTargetable(hero.getOwner(), false, true)
+        ai.issue("shockwave", target.getPos())
+        if not ai.getAttacking()
+            ai.attack(target)
+
+function setupTooltips()
+    DynamicTooltip tooltip = new DynamicTooltip(ABILITY_TIDAL_FURY)
+    tooltip.setLearnString("Knocks nearby enemy units back, dealing damage and releasing a crushing wave for every enemy unit hit. The wave deals damage to every enemy it passes through.", (int lvl) -> (begin
+        return "{0}{S0} knockback damage, {1}{I0} wave damage.".format(
+        TIDAL_FURY_HIT_DMG[lvl-1].str(), TIDAL_FURY_WAVE_DMG[lvl-1].str())
+    end))
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, "Knocks nearby enemy units back, dealing {0}{S0} damage and releasing a crushing wave for every enemy unit hit. The wave deals {1}{I0} damage to every enemy it passes through.".format(
+            TIDAL_FURY_HIT_DMG[lvl-1].str(), TIDAL_FURY_WAVE_DMG[lvl-1].str()))
+    tooltip
+        ..setReplaceStrength(TIDAL_FURY_HIT_DMG_BONUS)
+        ..setReplaceIntelligence(TIDAL_FURY_WAVE_DMG_BONUS)
+    heroType.addDynamicTooltipIntelligence(tooltip)
+
+    tooltip = new DynamicTooltip(ABILITY_GIANT_FISH)
+    tooltip.setLearnString("Throws a giant fish at the target location, damaging and slowing enemies in the area.", (int lvl) -> (begin
+        return "{0}{I0} damage, {1}% attack speed. {2}% movement speed, {3} seconds.".format(
+            FISH_DAMAGE[lvl-1].str(), FISH_ATTACK_SPEED[lvl-1].str(), FISH_MOVE_SPEED[lvl-1].str(), FISH_SLOW_DURATION[lvl-1].str())
+    end) )
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, "Throws a giant fish at the target location, dealing {0}{I0} magic damage and slowing attack speed by {1}% and movement speed by {2}% for {3} seconds.".format(
+            FISH_DAMAGE[lvl-1].str(), FISH_ATTACK_SPEED[lvl-1].str(), FISH_MOVE_SPEED[lvl-1].str(), FISH_SLOW_DURATION[lvl-1].str()))
+    tooltip.setReplaceIntelligence(FISH_DAMAGE_BONUS)
+    heroType.addDynamicTooltipIntelligence(tooltip)
+
+    tooltip = new DynamicTooltip(ABILITY_RITUAL_OF_THE_SEAS)
+    tooltip.setLearnString(CHANNELING_SPELL + "Sends out magical energy, that drains hit points and mana from nearby enemies.|nThe Sea Druid gets {0}% of the hit points and {1}% of the mana drained from enemy heroes.".format(
+        RITUAL_HP_RATIO.str(), RITUAL_MANA_RATIO.str()), (int lvl) -> (begin
+        return "{0}{I0} damage, {1}{I1} mana, lasts for {2} waves.".format(
+            RITUAL_HP_DRAIN[lvl-1].str(), RITUAL_MANA_DRAIN[lvl-1].str(), RITUAL_WAVE_COUNT[lvl-1].str())
+    end) )
+    
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, CHANNELING_SPELL + "Sends out magical energy, that drain {0}{I0} hit points and {1}{I1} mana from nearby enemies.|nLasts for {2} waves.|nThe Sea Druid gets {3}% of the hit points and {4}% of the mana drained from enemy heroes.".format(
+            RITUAL_HP_DRAIN[lvl-1].str(), RITUAL_MANA_DRAIN[lvl-1].str(), RITUAL_WAVE_COUNT[lvl-1].str(), RITUAL_HP_RATIO.str(), RITUAL_MANA_RATIO.str()))
+    tooltip.setReplaceIntelligence(RITUAL_HP_DRAIN_BONUS, RITUAL_MANA_DRAIN_BONUS)
+    heroType.addDynamicTooltipIntelligence(tooltip)
+
 function initHeroType()
     setupStats()
+    setupTooltips()
+
     heroType
         ..setBonusCalculation((UnitWrapper whichWrapper, Stat whichStat) -> (begin
             let lvl = whichWrapper.toUnit().getAbilityLevel(ABILITY_ANCIENT_KNOWLEDGE)
@@ -376,6 +508,16 @@ function initHeroType()
                     UnitWrapper.defaultCalcualtion.calculate(whichWrapper, whichStat)
         end))
         ..addOnSpellCastFunc(function onSpellCast)
+        ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
+        ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
+        ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+        ..setSkillBuild("QWEQQWEQWQEWEWE")
+        ..addItem(ITEM_ID_HEAVY_BOOTS)
+        ..addItem(ITEM_ID_BLESSED_GOBLET)
+        ..addItem(ITEM_ID_BRACER_OF_POWER)
+        ..addItem(ITEM_ID_SPIKED_ARMOR)
+        ..addItem(ITEM_ID_ARCANE_BLADE)
+        ..addItem(ITEM_ID_ARCANE_SHIELD)
 
     buffFish = new BuffType(false, true)
 
@@ -432,7 +574,7 @@ function initHeroType()
     end))
 
 init
-    heroType = new HeroType(HERO_SEA_DRUID, "BTNSeaDruid")
+    heroType = new HeroType(HERO_SEA_DRUID, "BTNSeaDruid", 3)
         ..setOnInitFunction(() -> initHeroType())
       
 

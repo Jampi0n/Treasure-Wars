@@ -2,7 +2,7 @@ package Constants
 
 public constant MAGIC_REDUCTION = 0.02
 public constant ARMOR_REDUCTION = 0.02
-public constant DEBUG_MODE = false
+public constant DEBUG_MODE = true
 
 public constant STAT_COUNT = 11
 
@@ -24,6 +24,11 @@ public constant TEAM_NAME_TEAM_2 = "Brown"
 public constant MAX_HIT_BOX = 200.
 
 public int objectCount = 0
+
+public enum Lane
+    TOP
+    MID
+    BOT
 
 
 

@@ -1,10 +1,11 @@
 package PlayerControl
 
+import UtilityFunctions
 import LinkedList
 import ErrorHandling
 import ClosureTimers
-import Constants
 import Assets
+import Constants
 import initlater HeroControl
 /*
 * This package handles players
@@ -31,50 +32,6 @@ public function player.getCPlayer() returns CPlayer
 
 public function getCPlayer(int id) returns CPlayer
     return CPlayer.idToPlayer[id]
-
-
-public function int.toStatString() returns string
-    if this < 1000
-        return this.toString()
-    return this.toReal().toStatString()
-
-
-function real.getPrecision() returns int
-    if this >= 99.95
-        return 0
-    if this >= 9.995
-        return 1
-    return 2
-
-public function real.toStatString() returns string
-    real amount = this
-    int prec
-    if amount >= 1000000000
-        amount /= 1000000000
-        prec = amount.getPrecision()
-        if prec > 0
-            return amount.toString(amount.getPrecision())+"G"
-        return amount.round().toString()+"G"
-    if amount >= 1000000
-        amount /= 1000000
-        prec = amount.getPrecision()
-        if prec > 0
-            return amount.toString(prec)+"M"
-        return amount.round().toString()+"M"
-        
-    if amount >= 1000
-        amount /= 1000
-        prec = amount.getPrecision()
-        if prec > 0
-            return amount.toString(amount.getPrecision())+"k"
-        return amount.round().toString()+"k"
-
-    prec = amount.getPrecision()
-    if prec > 0
-        return amount.toString(prec)
-    return amount.round().toString()
-
-
 
 
 
@@ -156,23 +113,23 @@ public class StatTable
             ..setRowCount(13)
             ..setItemsStyle(true, false)
             ..setTitle("Stats: "+
-                playercolors[TEAM_PLAYER_TEAM_1].toColorString()+ScoreTable.team1Kills.toString()+"|r / "+
-                playercolors[TEAM_PLAYER_TEAM_2].toColorString()+ScoreTable.team2Kills.toString()+"|r"  )
+                players[TEAM_PLAYER_TEAM_1].getColor().toColor().toColorString()+ScoreTable.team1Kills.toString()+"|r / "+
+                players[TEAM_PLAYER_TEAM_2].getColor().toColor().toColorString()+ScoreTable.team2Kills.toString()+"|r"  )
             ..display(true)
             ..minimalize(true)
 
         for j = 0 to mBoard.getRowCount() - 1
             for i = 1 to mBoard.getColumnCount() - 1 
                 mBoard.getItem(j, i)
-                    ..setWidth(0.07)
+                    ..setWidth(0.05)
                     ..release()
             mBoard.getItem(j, 0)
-                ..setWidth(0.16)
+                ..setWidth(0.14)
                 ..release()
 
         for i = 1 to mBoard.getColumnCount() - 1 
             let cPlayer = columnToPlayer[i]
-            let color = fromPlayer(cPlayer.getPlayer())
+            let color = cPlayer.getPlayer().getColor().toColor()
             string icon
 
             let hero = Hero.getHero(cPlayer)
@@ -181,7 +138,7 @@ public class StatTable
             else
                 icon = Icons.bTNCastle
 
-            string name = cPlayer.getPlayer().getName().substring(0, 7)
+            string name = cPlayer.getPlayer().getName().substring(0, 5)
 
             mBoard.getItem(0, i)
                 ..setValueColor(color.red, color.green, color.blue, 255)
@@ -192,7 +149,7 @@ public class StatTable
 
             mBoard.getItem(1, i)
                 ..setValueColor(color.red, color.green, color.blue, 255)
-                ..setValue("xxxxxxxx")
+                ..setValue("xxxxxx")
                 ..release()
 
             setRowStats(i)
@@ -216,8 +173,8 @@ public class ScoreTable
     static function updateHeader(boolean firstTeam)
         let row = (firstTeam ? 0 : CPlayer.team1HeroCount + 1)
         string teamName = firstTeam ?
-        playercolors[TEAM_PLAYER_TEAM_1].toColorString() + TEAM_NAME_TEAM_1 + "|r" :
-        playercolors[TEAM_PLAYER_TEAM_2].toColorString() + TEAM_NAME_TEAM_2 + "|r"
+        players[TEAM_PLAYER_TEAM_1].getColor().toColor().toColorString() + TEAM_NAME_TEAM_1 + "|r" :
+        players[TEAM_PLAYER_TEAM_2].getColor().toColor().toColorString() + TEAM_NAME_TEAM_2 + "|r"
         
         mBoard.getItem(row, 0)
             ..setStyle(true, false)
@@ -309,8 +266,8 @@ public class ScoreTable
             ..release() 
 
         mBoard.setTitle("Score: "+
-        playercolors[TEAM_PLAYER_TEAM_1].toColorString()+team1Kills.toString()+"|r / "+
-        playercolors[TEAM_PLAYER_TEAM_2].toColorString()+team2Kills.toString()+"|r"  )
+        players[TEAM_PLAYER_TEAM_1].getColor().toColor().toColorString()+team1Kills.toString()+"|r / "+
+        players[TEAM_PLAYER_TEAM_2].getColor().toColor().toColorString()+team2Kills.toString()+"|r"  )
 
     static function updatePlayerDeaths(CPlayer p)
         let row = playerToRow[p.getId()]
@@ -353,7 +310,7 @@ public class ScoreTable
             ..setColumnCount(5)
             ..setRowCount(2)
             ..setItemsStyle(true, false)
-            ..setTitle("Score: "+playercolors[MAX_HERO_COUNT].toColorString()+"0|r / "+playercolors[MAX_HERO_COUNT+1].toColorString()+"0|r"  )
+            ..setTitle("Score: "+players[TEAM_PLAYER_TEAM_1].getColor().toColor().toColorString()+"0|r / "+players[TEAM_PLAYER_TEAM_2].getColor().toColor().toColorString()+"0|r"  )
             ..display(true)
             ..minimalize(true)
         doAfter(0.02, () -> mBoard.minimalize(false))
@@ -365,6 +322,13 @@ public class ScoreTable
             playerList.sortWith( (CPlayer p1, CPlayer p2) -> (p1.getId() - p2.getId()) )
             mBoard.setRowCount(mBoard.getRowCount()+1)
             update()
+            /*for cp in playerList
+                if cp.getTeam() == Team.TEAM1
+                    cp.getPlayer().setState(PLAYER_STATE_RESOURCE_FOOD_USED, CPlayer.team1HeroCount)
+                    cp.getPlayer().setState(PLAYER_STATE_RESOURCE_FOOD_CAP, CPlayer.team2HeroCount)
+                else
+                    cp.getPlayer().setState(PLAYER_STATE_RESOURCE_FOOD_USED, CPlayer.team2HeroCount)
+                    cp.getPlayer().setState(PLAYER_STATE_RESOURCE_FOOD_CAP, CPlayer.team1HeroCount)*/
         end))
 
         
@@ -395,6 +359,7 @@ public class CPlayer
     real statHealingDone = 0
     real statManaHealed = 0
     int statHydrasKilled = 0
+    int statDragonTurtlesKilled = 0
     int statBuildingsRazed = 0
 
     protected static CPlayer array idToPlayer
@@ -470,55 +435,69 @@ public class CPlayer
         return this.playertype
 
     static function getAllyHeroPlayers(Team t) returns LinkedList<CPlayer>
+        LinkedList<CPlayer> ret
         if t == Team.TEAM1
-            return team1HeroPlayers
+            ret = team1HeroPlayers
         else if t == Team.TEAM2
-            return team2HeroPlayers
+            ret =  team2HeroPlayers
         else
             error("Must be used on TEAM1 or TEAM2")
-            return null
+            ret =  null
+
+        return ret
 
     static function getAllyHeroPlayers(player p) returns LinkedList<CPlayer>
         return getAllyHeroPlayers(p.getCPlayer().getTeam())
 
     static function getEnemyHeroPlayers(Team t) returns LinkedList<CPlayer>
+        LinkedList<CPlayer> ret
         if t == Team.TEAM1
-            return team2HeroPlayers
+            ret = team2HeroPlayers
         else if t == Team.TEAM2
-            return team1HeroPlayers
+            ret = team1HeroPlayers
         else
             error("Must be used on TEAM1 or TEAM2")
-            return null
+            ret = null
+
+        return ret
 
     static function getEnemyHeroPlayers(player p) returns LinkedList<CPlayer>
         return getEnemyHeroPlayers(p.getCPlayer().getTeam())
 
     static function getTeamHeroCount(Team t) returns int
+        int ret
         if t == Team.TEAM1
-            return team1HeroCount
+            ret = team1HeroCount
         else if t == Team.TEAM2
-            return team2HeroCount
+            ret = team2HeroCount
         else
             error("Must be used on TEAM1 or TEAM2")
-            return -1
+            ret = -1
+
+        return ret
 
     static function invertTeam(Team t) returns Team
+        Team ret
         if t == Team.TEAM1
-            return Team.TEAM2
+            ret = Team.TEAM2
         else if t == Team.TEAM2
-            return Team.TEAM1
+            ret = Team.TEAM1
         else
             error("Must be used on TEAM1 or TEAM2")
-            return t
+            ret = t
+
+        return ret
 
     protected static function initPlayers()
         var admin = false
         for i = 0 to MAX_HERO_COUNT-1
             player p = players[i]
             Team t = i <= HERO_PLAYER_TEAM_1_LAST ?Team.TEAM1:Team.TEAM2
-            if( p.getSlotState()==PLAYER_SLOT_STATE_PLAYING )
+            if p.getSlotState()==PLAYER_SLOT_STATE_PLAYING
                 new CPlayer(p, t, PlayerType.HERO)
-                if(not admin)
+                if p.getController() == MAP_CONTROL_COMPUTER
+                    PauseCompAI(players[i], true)
+                if not admin and p.getController() == MAP_CONTROL_USER
                     admin = true
                     adminPlayer = i
             else

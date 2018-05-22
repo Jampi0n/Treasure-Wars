@@ -49,7 +49,7 @@ function passive()
 
     for lvl = 1 to 5
         aDef
-            ..setTooltipNormalExtended(lvl, "Increases the Warlock's intelligence by {0}%.".format(
+            ..setDescriptionString(false, lvl, "Increases the Warlock's intelligence by {0}%.".format(
                 FEL_MAGIC_INTEL[lvl-1].str())
             )
 
@@ -71,19 +71,19 @@ function firebolt()
         ..setArtTarget("")
         ..setAnimationNames("spell,throw")
         ..setupChannel(TargetType.POINT, "shockwave")
-        ..setLearnString("Summons a ball to fly to the target direction, dealing magic damage to the first unit it hits.", (int lvl) -> (begin
+        /*..setLearnString("Summons a ball to fly to the target direction, dealing magic damage to the first unit it hits.", (int lvl) -> (begin
             return "{0} damage.".format(
             FIREBOLT_DAMAGE[lvl-1].str()+FIREBOLT_DAMAGE_BONUS.getBonusString(C_INT))
-        end) )
+        end) )*/
 
     for lvl = 1 to 5
         aDef
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setCastRange(lvl, RANGE[lvl-1])
-            ..setTooltipNormalExtended(lvl, "Summons a ball to fly to the target direction, dealing {0} magic damage to the first unit it hits.".format(
+            /*..setDescriptionString(true, lvl, "Summons a ball to fly to the target direction, dealing {0} magic damage to the first unit it hits.".format(
                 FIREBOLT_DAMAGE[lvl-1].str()+FIREBOLT_DAMAGE_BONUS.getBonusString(C_INT))
-            )
+            )*/
 
 constant real array METEOR_DAMAGE = [70, 110, 150, 190, 230]
 constant real METEOR_DAMAGE_BONUS = 100
@@ -107,11 +107,11 @@ function infernalMeteor()
         ..setArtTarget("")
         ..setAnimationNames("spell,slam")
         ..setupChannel(TargetType.AREA, "inferno")
-        ..setLearnString("Calls down a burning meteor from the sky dealing magic damage and stunning enemies in the target area.", (int lvl) -> (begin
+        /*..setLearnString("Calls down a burning meteor from the sky dealing magic damage and stunning enemies in the target area.", (int lvl) -> (begin
             return "{0} damage, {1} seconds stun.".format(
                 METEOR_DAMAGE[lvl-1].str()+METEOR_DAMAGE_BONUS.getBonusString(C_INT), METEOR_STUN_DURATION[lvl-1].toString()
             )
-        end) )
+        end) )*/
 
     for lvl = 1 to 5
         aDef
@@ -119,9 +119,9 @@ function infernalMeteor()
             ..setManaCost(lvl, MANA[lvl-1])
             ..setCastRange(lvl, RANGE[lvl-1])
             ..setAreaofEffect(lvl, METEOR_AOE[lvl-1])
-            ..setTooltipNormalExtended(lvl, "Calls down a burning meteor from the sky dealing {0} magic damage and stunning enemies in the target area for {1} seconds.".format(
+            /*..setDescriptionString(true, lvl, "Calls down a burning meteor from the sky dealing {0} magic damage and stunning enemies in the target area for {1} seconds.".format(
                 METEOR_DAMAGE[lvl-1].str()+METEOR_DAMAGE_BONUS.getBonusString(C_INT), METEOR_STUN_DURATION[lvl-1].toString()
-            ))
+            ))*/
 
 
 
@@ -154,11 +154,11 @@ function soulburn()
         ..setArtTarget("")
         ..setAnimationNames("spell,one")
         ..setupChannel(TargetType.UNIT, "soulburn")
-        ..setLearnString("Deals damage over time to the target enemy unit. If the unit dies, while under the effect of Soul Burn, nearby enemy units will be affected by Soul Burn. The initial target is silenced for a short time.", (int lvl) -> (begin
+        /*..setLearnString("Deals damage over time to the target enemy unit. If the unit dies, while under the effect of Soul Burn, nearby enemy units will be affected by Soul Burn. The initial target is silenced for a short time.", (int lvl) -> (begin
             return "{0} damage per second, {1} seconds.".format(
                 SOUL_BURN_DAMAGE[lvl-1].str()+SOUL_BURN_DAMAGE_BONUS.getBonusString(C_INT), SOUL_BURN_DURATION[lvl-1].toString(), SOUL_BURN_SILENCE[lvl-1].toString()
             )
-        end) )
+        end) )*/
 
     for lvl = 1 to 5
         aDef
@@ -166,9 +166,9 @@ function soulburn()
             ..setManaCost(lvl, MANA[lvl-1])
             ..setCastRange(lvl, RANGE[lvl-1])
             ..setTargetsAllowed(lvl, "enemies,nonancient,ground,organic,air")
-            ..setTooltipNormalExtended(lvl, "Deals {0} damage per second to the target enemy unit for {1} seconds. If the unit dies, while under the effect of Soul Burn, nearby enemy units will be affected by Soul Burn. The initial target is silenced for {2} seconds.".format(
+            /*..setDescriptionString(true, lvl, "Deals {0} damage per second to the target enemy unit for {1} seconds. If the unit dies, while under the effect of Soul Burn, nearby enemy units will be affected by Soul Burn. The initial target is silenced for {2} seconds.".format(
                 SOUL_BURN_DAMAGE[lvl-1].str()+SOUL_BURN_DAMAGE_BONUS.getBonusString(C_INT), SOUL_BURN_DURATION[lvl-1].toString(), SOUL_BURN_SILENCE[lvl-1].toString()
-            ))
+            ))*/
 
 constant BUFF_ID_RAY_OF_DEATH = compiletime(createBasicBuff("Ray of Death", "This unit is under the effect of Ray of Death; it is disabled and takes damage over time.", "BTNNetherBolt", "", ""))
 
@@ -196,11 +196,11 @@ function rayOfDeath()
         ..setArtTarget("")
         ..setLightningEffects("MBUR")
         ..setAnimationNames("spell,channel")
-        ..setLearnString(CHANNELING_SPELL + "Channels a powerful ray at the target enemy hero, disabling the target and dealing damage over time. If he channels for the full duration, he summons an explosion at the target's location dealing additional damage.", (int lvl) -> (begin
+        /*..setLearnString(CHANNELING_SPELL + "Channels a powerful ray at the target enemy hero, disabling the target and dealing damage over time. If he channels for the full duration, he summons an explosion at the target's location dealing additional damage.", (int lvl) -> (begin
             return "{0} damage per second, {1} explosion damage, {2} seconds".format(
             RAY_OF_DEATH_DAMAGE[lvl-1].str()+RAY_OF_DEATH_DAMAGE_BONUS.getBonusString(C_INT), RAY_OF_DEATH_AFTER_DAMAGE[lvl-1].str()+RAY_OF_DEATH_AFTER_DAMAGE_BONUS.getBonusString(C_INT), RAY_OF_DEATH_DURATION[lvl-1].toString()
             )
-        end) )
+        end) )*/
 
     for lvl = 1 to 5
         aDef
@@ -210,11 +210,11 @@ function rayOfDeath()
             ..setCastRange(lvl, RANGE[lvl-1])
             ..setDurationHero(lvl, 60)
             ..setDurationNormal(lvl, 60)
-            ..setBuffs(lvl, "Bmlc,"+int2fourchar(BUFF_ID_RAY_OF_DEATH))
+            ..setBuffs(lvl, "Bmlc,"+BUFF_ID_RAY_OF_DEATH.toRawCode())
             ..setTargetsAllowed(lvl, "enemies,nonancient,ground,organic,hero")
-            ..setTooltipNormalExtended(lvl, CHANNELING_SPELL + "Channels a powerful ray at the target enemy hero, disabling the target and dealing {0} damage per second. If he channels for the full duration, he summons an explosion at the target's location dealing {1} additional damage.|nLasts {2} seconds.".format(
+            /*..setDescriptionString(true, lvl, CHANNELING_SPELL + "Channels a powerful ray at the target enemy hero, disabling the target and dealing {0} damage per second. If he channels for the full duration, he summons an explosion at the target's location dealing {1} additional damage.|nLasts {2} seconds.".format(
                 RAY_OF_DEATH_DAMAGE[lvl-1].str()+RAY_OF_DEATH_DAMAGE_BONUS.getBonusString(C_INT), RAY_OF_DEATH_AFTER_DAMAGE[lvl-1].str()+RAY_OF_DEATH_AFTER_DAMAGE_BONUS.getBonusString(C_INT), RAY_OF_DEATH_DURATION[lvl-1].toString()
-            ))
+            ))*/
 
 
 function onSpellCast()
@@ -265,10 +265,107 @@ function onSpellCast()
         target.addBuffReduced(caster, RAY_OF_DEATH_DURATION[level-1], buffRayOfDeath, level)
 
 
+
+
+function retreatAI(HeroAI _ai)
+
+function attackAI(HeroAI ai)
+    let hero = ai.getHeroUnit()
+
+    unit target
+    if hero.getMana()/hero.getMaxMana() > 0.5
+        let targetPos = hero.findAreaTarget(800, METEOR_AOE[hero.getAbilityLevel(ABILITY_INFERNAL_METEOR)-1], 3)
+        if targetPos.getValue() >= 6
+            ai.issue("inferno", targetPos.getPos())
+
+        target = hero.findTarget(800, AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
+        if target.isTargetable(hero.getOwner(), false, true)
+            ai.issue("soulburn", target)
+
+        target = hero.findTarget(800, AbilityTargetFocus.ENEMY_UNIT, AbilityTargetPriority.LOW_HEALTH, null)
+        if target.isTargetable(hero.getOwner(), false, true)
+            ai.issue("soulburn", target)
+
+    target = hero.findTarget(600, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_HEALTH, null)
+    if target.isTargetable(hero.getOwner(), false, true)
+        ai.attack(target)
+
+function teamFightAI(HeroAI ai)
+    let hero = ai.getHeroUnit()
+
+    unit target = ai.getTeamFightTarget()
+
+    if target.isTargetable(hero.getOwner(), false, true)
+
+        ai.issue("soulburn", target)
+        ai.issue("magicleash", target)
+        ai.issue("inferno", target.getPos())
+        if target.getPos().distanceTo(hero.getPos()) < 500
+            ai.issue("shockwave", target)
+
+        if not ai.getAttacking()
+            ai.attack(target)
+
+function setupTooltips()
+    DynamicTooltip tooltip = new DynamicTooltip(ABILITY_FIREBOLT)
+    tooltip.setLearnString("Summons a ball of fire to fly to the target direction, dealing magic damage to the first unit it hits.", (int lvl) -> (begin
+        return "{0}{I0} damage.".format(FIREBOLT_DAMAGE[lvl-1].str())
+    end) )
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, "Summons a ball of fire to fly to the target direction, dealing {0}{I0} magic damage to the first unit it hits.".format(
+            FIREBOLT_DAMAGE[lvl-1].str()))
+    tooltip.setReplaceIntelligence(FIREBOLT_DAMAGE_BONUS)            
+    heroType.addDynamicTooltipIntelligence(tooltip)
+
+    tooltip = new DynamicTooltip(ABILITY_INFERNAL_METEOR)
+    tooltip.setLearnString("Calls down a burning meteor from the sky dealing magic damage and stunning enemies in the target area.", (int lvl) -> (begin
+        return "{0}{I0} damage, {1} seconds stun.".format(METEOR_DAMAGE[lvl-1].str(), METEOR_STUN_DURATION[lvl-1].toExactString())
+    end))
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, "Calls down a burning meteor from the sky dealing {0}{I0} magic damage and stunning enemies in the target area for {1} seconds.".format(
+            METEOR_DAMAGE[lvl-1].str(), METEOR_STUN_DURATION[lvl-1].toExactString()))
+    tooltip.setReplaceIntelligence(METEOR_DAMAGE_BONUS)
+    heroType.addDynamicTooltipIntelligence(tooltip)
+
+    tooltip = new DynamicTooltip(ABILITY_SOUL_BURN)
+    tooltip.setLearnString("Deals damage over time to the target enemy unit. If the unit dies, while under the effect of Soul Burn, nearby enemy units will be affected by Soul Burn. The initial target is silenced for a short time.", (int lvl) -> (begin
+        return "{0}{I0} damage per second, {1} seconds.".format(
+            SOUL_BURN_DAMAGE[lvl-1].str(), SOUL_BURN_DURATION[lvl-1].toExactString(), SOUL_BURN_SILENCE[lvl-1].toExactString())
+    end))
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, "Deals {0}{I0} damage per second to the target enemy unit for {1} seconds. If the unit dies, while under the effect of Soul Burn, nearby enemy units will be affected by Soul Burn. The initial target is silenced for {2} seconds.".format(
+            SOUL_BURN_DAMAGE[lvl-1].str(), SOUL_BURN_DURATION[lvl-1].toExactString(), SOUL_BURN_SILENCE[lvl-1].toExactString()))
+    tooltip.setReplaceIntelligence(SOUL_BURN_DAMAGE_BONUS)
+    heroType.addDynamicTooltipIntelligence(tooltip)
+
+    tooltip = new DynamicTooltip(ABILITY_RAY_OF_DEATH)
+    tooltip.setLearnString(CHANNELING_SPELL + "Channels a powerful ray at the target enemy hero, disabling the target and dealing damage over time. If he channels for the full duration, he summons an explosion at the target's location dealing additional damage.", (int lvl) -> (begin
+        return "{0}{I0} damage per second, {1}{I1} explosion damage, {2} seconds".format(
+        RAY_OF_DEATH_DAMAGE[lvl-1].str(), RAY_OF_DEATH_AFTER_DAMAGE[lvl-1].str(), RAY_OF_DEATH_DURATION[lvl-1].toExactString())
+    end))
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, CHANNELING_SPELL + "Channels a powerful ray at the target enemy hero, disabling the target and dealing {0}{I0} damage per second. If he channels for the full duration, he summons an explosion at the target's location dealing {1}{I1} additional damage.|nLasts {2} seconds.".format(
+            RAY_OF_DEATH_DAMAGE[lvl-1].str(), RAY_OF_DEATH_AFTER_DAMAGE[lvl-1].str(), RAY_OF_DEATH_DURATION[lvl-1].toExactString()
+        ))
+    tooltip.setReplaceIntelligence(RAY_OF_DEATH_DAMAGE_BONUS, RAY_OF_DEATH_AFTER_DAMAGE_BONUS)
+    heroType.addDynamicTooltipIntelligence(tooltip)
+
 function initHeroType()
     setupStats()
+    setupTooltips()
+
     heroType
         ..addOnSpellCastFunc(function onSpellCast)
+        ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
+        ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
+        ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+        ..setSkillBuild("WEQEWEWEWEWQQQQ")
+        ..addItem(ITEM_ID_BOOTS_OF_DARKNESS)
+        ..addItem(ITEM_ID_ENCHANTED_ARMOR)
+        ..addItem(ITEM_ID_BLESSED_GOBLET)
+        ..addItem(ITEM_ID_SCROLL_OF_CONJURATION)
+        ..addItem(ITEM_ID_WAND_OF_DEATH)
+        ..addItem(ITEM_ID_RUNIC_ARMOR)
 
     buffRayOfDeath = new BuffType(false, true)
         ..addEndFunction((Buff whichBuff) ->(begin
@@ -357,5 +454,5 @@ function initHeroType()
     
         
 init
-    heroType = new HeroType(HERO_WARLOCK, Icons.bTNGuldan)
+    heroType = new HeroType(HERO_WARLOCK, Icons.bTNGuldan, 5)
         ..setOnInitFunction(() -> initHeroType())

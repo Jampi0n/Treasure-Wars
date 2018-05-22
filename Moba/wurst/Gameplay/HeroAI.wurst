@@ -1,0 +1,1015 @@
+package HeroAI
+
+import PlayerControl
+import HeroControl
+import HeroType
+import TimerUtils
+import ClosureTimers
+import ItemShopSystem
+import UnitType
+import BuildingTypes
+import OnAttack
+
+constant team1AIs = new LinkedList<HeroAI>
+constant team2AIs = new LinkedList<HeroAI>
+
+public constant real TEAM_FIGHT_RANGE = 1200
+constant real HALF_DISTANCE = 9800
+
+public enum AbilityTargetType
+    INSTANT
+    UNIT
+    AREA
+    LINE
+
+public enum AbilityTargetFocus
+    SELF
+    ALLY_HERO
+    ALLY_UNIT
+    ALLY
+    FRIEND_HERO
+    FRIEND_UNIT
+    FRIEND
+    ENEMY_HERO
+    ENEMY_UNIT
+    ENEMY
+
+public enum AbilityTargetPriority
+    LOW_HEALTH
+    LOW_DISTANCE
+    HIGH_VALUE
+    HIGH_HEALTH
+    
+enum AIState
+    ATTACK //attack moves towards the enemy base, focus is on pushing/killing minions
+    RETREAT //retreats fully to heal up
+    RETREAT_TEMP //retreats to the next tower, should be initiated, if a bad fight is assumed
+    RETREAT_TEMP_AI //retreats to the next tower, should be initiated, if a bad fight is assumed
+    HEAL //waits at the altar to be fully healed
+    TEAM_FIGHT //engages against nearby enemies, should be initiated, if a favoured fight is assumed
+
+
+public enum AbilitySlot
+    Q
+    W
+    E
+    R
+    PASSIVE
+
+public interface Filter
+    function filter(unit u) returns boolean
+
+
+public tuple targetPoint(vec2 pos, int value)
+
+public function targetPoint.getValue() returns int
+    return this.value
+
+public function targetPoint.getPos() returns vec2
+    return this.pos
+    
+/**
+**/
+public function unit.findAreaTarget(real range, real aoe, int heroValue) returns targetPoint
+    int currentValue = 0
+
+    let g = CreateGroup()
+    let nearby = CreateGroup()
+    let pos = this.getPos()
+
+    let owner = this.getOwner()
+    unit u
+    g.enumUnitsInRange(pos, range)
+    let targetUnit = g.getRandomUnit()
+    let unitPos = targetUnit.getPos()
+    if targetUnit != null
+        if not targetUnit.isType(UNIT_TYPE_STRUCTURE) and targetUnit.isAlive() and targetUnit.isVisible(owner) and IsUnitEnemy(targetUnit, owner)
+            nearby.enumUnitsInRange(unitPos, aoe)
+            while(true)
+                
+                u = FirstOfGroup(g)
+                if u == null
+                    break
+                g.removeUnit(u)
+            
+                if not u.isType(UNIT_TYPE_STRUCTURE) and u.isAlive() and u.isVisible(owner) and IsUnitEnemy(u, owner)
+                    if u.isType(UNIT_TYPE_HERO)
+                        currentValue += heroValue
+                    else
+                        currentValue++
+
+                        nearby.destr()
+
+    return targetPoint(unitPos, currentValue)
+
+
+
+public function unit.findTarget(real range, AbilityTargetFocus focus, AbilityTargetPriority priority, Filter filter) returns unit
+    let g = CreateGroup()
+    let pos = this.getPos()
+
+    real currentPrio = 0
+    unit currentTarget = null
+    real newPrio
+    boolean valid
+
+    unit u
+    g.enumUnitsInRange(pos, range)
+    while(true)
+        u = FirstOfGroup(g)
+        if u == null
+            break
+        g.removeUnit(u)
+        newPrio = 0
+        valid = false
+        if not u.isType(UNIT_TYPE_STRUCTURE) and u.isAlive() and u.isVisible(this.getOwner())
+            if focus == AbilityTargetFocus.ALLY_HERO and u.isType(UNIT_TYPE_HERO) and u.getOwner().isAllyOf(this.getOwner()) and u!=this
+                valid = true
+            else if focus == AbilityTargetFocus.ALLY_UNIT and not u.isType(UNIT_TYPE_HERO) and u.getOwner().isAllyOf(this.getOwner()) and u.getOwner() != this.getOwner()
+                valid = true
+            else if focus == AbilityTargetFocus.ALLY and u.getOwner().isAllyOf(this.getOwner()) and u.getOwner() != this.getOwner()
+                valid = true
+            else if focus == AbilityTargetFocus.FRIEND_HERO and u.isType(UNIT_TYPE_HERO) and (u.getOwner().isAllyOf(this.getOwner()) or u.getOwner() == this.getOwner())
+                valid = true
+            else if focus == AbilityTargetFocus.FRIEND_UNIT and not u.isType(UNIT_TYPE_HERO) and (u.getOwner().isAllyOf(this.getOwner()) or u.getOwner() == this.getOwner())
+                valid = true
+            else if focus == AbilityTargetFocus.FRIEND and (u.getOwner().isAllyOf(this.getOwner()) or u.getOwner() == this.getOwner())
+                valid = true
+            else if focus == AbilityTargetFocus.ENEMY_HERO and u.isType(UNIT_TYPE_HERO) and u.getOwner().isEnemyOf(this.getOwner()) and not u.isType(UNIT_TYPE_ANCIENT)
+                valid = true            
+            else if focus == AbilityTargetFocus.ENEMY_UNIT and not u.isType(UNIT_TYPE_HERO) and u.getOwner().isEnemyOf(this.getOwner()) and not u.isType(UNIT_TYPE_ANCIENT)
+                valid = true
+            else if focus == AbilityTargetFocus.ENEMY and u.getOwner().isEnemyOf(this.getOwner()) and not u.isType(UNIT_TYPE_ANCIENT)
+                valid = true
+
+        if filter != null
+            valid = valid and filter.filter(u)
+
+        if valid
+            if priority == AbilityTargetPriority.LOW_HEALTH
+                newPrio = 1/u.getHP()
+            else if priority == AbilityTargetPriority.LOW_DISTANCE
+                newPrio = 1/u.getPos().distanceTo(pos)
+            else if priority == AbilityTargetPriority.HIGH_VALUE
+                let uType = UnitType.getUnitType(u.getTypeId())
+                if uType != null
+                    newPrio = uType.getBounty().toReal()
+                else
+                    newPrio = 0
+            else if priority == AbilityTargetPriority.HIGH_HEALTH
+                newPrio = u.getHP()
+
+
+        if newPrio > currentPrio
+            currentTarget = u
+            currentPrio = newPrio
+
+
+
+        
+    if filter != null
+        destroy filter
+
+
+    g.destr()
+    return currentTarget
+
+
+public class TeamFight
+
+    private LinkedList<HeroAI> heroAIs
+    private vec2 teamFightLoc
+    private unit target
+    private boolean firstTeam
+
+    private static constant updateTimer = getTimer()
+    private static constant  activeTeamFights = new LinkedList<TeamFight>
+
+    //private Fx center
+
+    construct(vec2 pos, boolean firstTeam)
+        this.teamFightLoc = pos
+        this.firstTeam = firstTeam
+        this.target = null
+
+        this.heroAIs = new LinkedList<HeroAI>
+        activeTeamFights.add(this)
+        //print("teamfights: "+activeTeamFights.size().toString())
+
+        //this.center = new Fx(this.teamFightLoc, Units.monsterLure)
+
+
+    static function classInit()
+        updateTimer.startPeriodic(0.1, function updateStatic)
+
+    function addAI(HeroAI ai)
+        this.heroAIs.add(ai)
+
+    function removeAI(HeroAI ai)
+        this.heroAIs.remove(ai)
+
+    ondestroy
+        activeTeamFights.remove(this)
+        //destroy this.center
+        destroy this.heroAIs
+        //print("teamfights: "+activeTeamFights.size().toString())
+
+    static function updateStatic()
+        for TeamFight tf in activeTeamFights
+            tf.update()
+            
+
+    function update()
+
+        real x = 0
+        real y = 0
+        int count = 0
+        if heroAIs.isEmpty()
+            destroy this
+        else
+            for HeroAI ai in heroAIs
+                count++
+                x+=ai.getHeroUnit().getPos().x
+                y+=ai.getHeroUnit().getPos().y
+
+            this.teamFightLoc = vec2(x/count, y/count)
+            //this.center.setXY(this.teamFightLoc)
+
+            determineTarget()
+
+            let chance = determineWinChance(firstTeam, this.teamFightLoc)
+
+
+            if chance < 0.4
+                let allAIs = heroAIs.copy()
+
+                for HeroAI ai in allAIs
+                    ai.retreatTemporarily(25, true)
+                    ai.endTeamFight()
+            
+                destroy allAIs
+            else if this.target == null
+                let allAIs = heroAIs.copy()
+
+                for HeroAI ai in allAIs
+                    if chance > 0.6
+                        ai.changeState(AIState.ATTACK)
+                    else
+                        ai.retreatTemporarily(25, true)
+                    ai.endTeamFight()
+            
+                destroy allAIs
+
+
+
+    function determineTarget()
+        real currentValue = -1
+        unit currentTarget = null
+
+        for i = firstTeam ? HERO_PLAYER_TEAM_2_FIRST : HERO_PLAYER_TEAM_1_FIRST to firstTeam ? HERO_PLAYER_TEAM_2_LAST : HERO_PLAYER_TEAM_1_LAST
+            let hero = Hero.getHero(i)
+            if hero!=null
+                let heroUnit = hero.toUnit()
+                if hero.toUnit().getPos().distanceTo(this.teamFightLoc) < TEAM_FIGHT_RANGE and hero.toUnit().isAlive() and hero.toUnit().isTargetable(firstTeam ? players[TEAM_PLAYER_TEAM_1] : players[TEAM_PLAYER_TEAM_2], false, true)
+                    if hero.toUnit().isVisible(firstTeam ? players[TEAM_PLAYER_TEAM_1] : players[TEAM_PLAYER_TEAM_2])
+                        let nextValue = determineHeroOffensiveStrength(heroUnit)/determineHeroDefensiveStrength(heroUnit)
+                        if nextValue > currentValue
+                            currentTarget = heroUnit
+                            currentValue = nextValue
+
+        this.target = currentTarget
+
+
+
+
+    function getTeamFightLoc() returns vec2
+        return this.teamFightLoc
+
+    function getTarget() returns unit
+        return this.target
+
+public function getAI(int index) returns HeroAI
+    return HeroAI.heroAIs[index]
+
+public function HeroAI.addTeam(boolean firstTeam)
+    if firstTeam
+        team1AIs.add(this)
+    else
+        team2AIs.add(this)
+
+
+public class HeroAI
+    
+    private CPlayer owner
+    private Hero hero
+    private HeroType heroType
+    private unit heroUnit
+    protected AIState state
+    private vec2 homeLoc
+    private vec2 targetLoc
+    private boolean firstTeam
+    private boolean casting = false
+    private string castOrder = ""
+    protected boolean attacking = false
+    private vec2 currentTargetLoc
+    private vec2 currentRetreatLoc
+    
+    private Lane lane
+
+    private TeamFight teamFight
+
+
+    //keeps track of the damage against the hero over the last 4 seconds
+    //if a lot of damage is take outside of a team fight, the hero should retreat
+    private int damageIndex = 0
+    private static constant damageMax = 20
+    private real array[damageMax] damageCount
+    private real damageSum = 0
+    private real damageCurrent = 0
+
+
+    private static int team1TargetUpdate = 0
+    private static int team2TargetUpdate = 0
+
+    private int retreatCounter = 0
+
+    private static trigger attackedByTower
+    private static constant updateTimer = getTimer()
+    
+
+    private LinkedList<int> itemBuild
+    private string skillBuild
+
+    protected static HeroAI array heroAIs
+
+    private boolean paused = false
+
+    function aiMessage(string _msg)
+        
+        //print(fromPlayer(this.heroUnit.getOwner()).toColorString()+"["+this.heroUnit.getName()+"]|r "+msg)
+
+
+    function getHomeLoc() returns vec2
+        return this.homeLoc
+
+    function getTargetLoc() returns vec2
+        return this.targetLoc
+
+    function getOwner() returns CPlayer
+        return this.owner
+    
+    function getHero() returns Hero
+        return this.hero
+
+    function getHeroUnit() returns unit
+        return this.heroUnit
+
+    function getCasting() returns boolean
+        return this.casting
+
+    function getAttacking() returns boolean
+        return this.attacking
+
+    function getTeamFightLoc() returns vec2
+        return this.teamFight.getTeamFightLoc()
+
+    function getTeamFightTarget() returns unit
+        return this.teamFight.getTarget()
+
+    function updateTargetLoc()
+        if lane == Lane.TOP
+            print(this.heroUnit.getPos().distanceTo(this.targetLoc))
+            currentTargetLoc = gg_rct_CornerTop.getCenter()
+            if this.heroUnit.getPos().distanceTo(this.targetLoc) < HALF_DISTANCE
+                this.currentTargetLoc = this.targetLoc  
+        else if lane == Lane.BOT
+            print(this.heroUnit.getPos().distanceTo(this.targetLoc))
+            currentTargetLoc = gg_rct_CornerBot.getCenter()
+            if this.heroUnit.getPos().distanceTo(this.targetLoc) < HALF_DISTANCE
+                this.currentTargetLoc = this.targetLoc  
+        else
+            currentTargetLoc = targetLoc
+
+    function updateRetreatLoc()
+        if lane == Lane.TOP
+            currentRetreatLoc = gg_rct_CornerTop.getCenter()
+            if this.heroUnit.getPos().distanceTo(this.homeLoc) < HALF_DISTANCE
+                this.currentRetreatLoc = this.homeLoc  
+        else if lane == Lane.BOT
+            currentRetreatLoc = gg_rct_CornerBot.getCenter()
+            if this.heroUnit.getPos().distanceTo(this.homeLoc) < HALF_DISTANCE
+                this.currentRetreatLoc = this.homeLoc  
+        else
+            currentRetreatLoc = this.homeLoc
+
+    function attackedByTower()
+        if (this.state == AIState.ATTACK or this.state == AIState.RETREAT_TEMP)
+            let g = CreateGroup()
+            unit u
+            int count = 0
+            let owner = this.heroUnit.getOwner()
+            g.enumUnitsInRange(this.heroUnit.getPos(), 1000)
+            while(true)
+                u = FirstOfGroup(g)
+                if u == null
+                    break
+                g.removeUnit(u)
+                if IsUnitAlly(u, owner)
+                    if not u.isType(UNIT_TYPE_HERO)
+                        count++
+
+            g.destr()
+            if count < 5
+                this.retreatTemporarily(50, false)
+            else
+                this.retreatTemporarily(15, false)
+
+    static function classInit()
+
+        updateTimer.startPeriodic(0.1, function updateStatic)
+        CreateTrigger()
+            ..registerAnyUnitEvent(EVENT_PLAYER_HERO_LEVEL)
+            ..addAction(() ->(begin
+
+            let ai = heroAIs[GetTriggerUnit().getOwner().getId()]
+            if ai != null
+                ai.levelUp()
+        end))
+
+        //moved to tower
+        /*attackedByTower = CreateTrigger()
+            ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_ATTACKED)
+            ..addAction(() ->(begin
+            let ai = heroAIs[GetTriggerUnit().getOwner().getId()]
+            if ai != null
+                let attacker = GetAttacker()
+                if (ai.state == AIState.ATTACK or ai.state == AIState.RETREAT_TEMP)  and attacker.isType(UNIT_TYPE_STRUCTURE)
+                    let g = CreateGroup()
+                    unit u
+                    int count = 0
+                    let owner = ai.heroUnit.getOwner()
+                    g.enumUnitsInRange(ai.heroUnit.getPos(), 1000)
+                    while(true)
+                        u = FirstOfGroup(g)
+                        if u == null
+                            break
+                        g.removeUnit(u)
+                        if IsUnitAlly(u, owner)
+                            if not u.isType(UNIT_TYPE_HERO)
+                                count++
+
+                    g.destr()
+                    if count < 5
+                        ai.retreatTemporarily(50, false)
+                    else
+                        ai.retreatTemporarily(15, false)
+        end))*/
+    
+
+    construct(CPlayer owner)
+        this.owner = owner
+        this.hero = Hero.getHero(owner)
+        this.heroType = hero.getHeroType()
+        this.heroUnit = this.hero.toUnit()
+        this.firstTeam = owner.getId() <= HERO_PLAYER_TEAM_1_LAST
+        this.addTeam(firstTeam)
+
+        this.state = ATTACK
+
+        heroAIs[owner.getId()] = this
+
+        //test:
+        itemBuild = this.heroType.getItemBuild()
+        skillBuild = this.heroType.getSkillBuild()
+
+        if firstTeam
+            this.homeLoc = gg_rct_GreenCastle.getCenter()
+            this.targetLoc = gg_rct_BrownCastle.getCenter()
+        else
+            this.homeLoc = gg_rct_BrownCastle.getCenter()
+            this.targetLoc = gg_rct_GreenCastle.getCenter()
+
+
+
+        
+        
+
+        let rand = GetRandomInt(1, 3)
+        if rand == 1
+            this.lane = Lane.TOP
+        else if rand == 2
+            this.lane = Lane.BOT
+        else
+            this.lane = Lane.MID
+
+        updateTargetLoc()
+        //should not happen for everyone at the same time (lag)
+        doAfter(GetRandomReal(0.1, 0.3), () -> (begin
+            if not this.paused
+                this.buyItems()
+                this.selectSkills()
+        end))
+
+    static function getAbilityId(int heroId, AbilitySlot slot) returns int
+        int id = 256 * 256 * 256 * 65 //A
+        let second = (heroId/10).toInt()
+        id += 256 * 256 * (90-second) //Z,Y
+
+        id += 256 * (48 + heroId - 10*second)
+        if slot == AbilitySlot.Q
+            id += 81
+        else if slot == AbilitySlot.W
+            id += 87
+        else if slot == AbilitySlot.E
+            id += 69
+        else if slot == AbilitySlot.R
+            id += 82
+        else if slot == AbilitySlot.PASSIVE
+            id += 80
+
+        //print(id.toRawCode())
+        return id
+        
+    function changeState(AIState newState)
+        if this.state != newState
+            this.state = newState
+            //this.casting = false
+            //this.attacking = false
+
+
+    function buySpecificItem(Item whichItem)
+        //print("---buy specific item "+GetObjectName(whichItem.getTypeId()))
+        let recipe = whichItem.getRecipe()
+        let owningPlayer = this.owner.getPlayer()
+
+        if owningPlayer.getGold() >= 400
+
+            var missingGold = 0
+            var hasOne = false
+            if recipe != null
+                let requiredRequirements = new LinkedList<Item>
+                for int req in recipe.getRequiredItems()
+                    let required = Item.getItem(req)
+                    if not this.heroUnit.hasItemById(required.getTypeId())
+                        missingGold += required.getGoldCost()
+                        //if the required item is an recipe itself, there could already be items from its requirements
+                        let requiredRecipe = required.getRecipe()
+                        if requiredRecipe != null
+                            for int req2 in requiredRecipe.getRequiredItems()
+                                let required2 = Item.getItem(req2)
+
+                                //some items require one item several times
+                                if this.heroUnit.hasItemById(required2.getTypeId())
+
+                                    if requiredRequirements.contains(required2) or recipe.getRequiredItems().contains(required2.getId()) //already in list
+                                        if this.heroUnit.countItemsOfType(required2.getTypeId()) > 1
+                                            missingGold -= required2.getGoldCost()
+                                            requiredRequirements.add(required2)
+                                            hasOne = true
+                                    else
+                                        missingGold -= required2.getGoldCost()
+                                        requiredRequirements.add(required2)
+                                        hasOne = true
+
+                    else
+                        hasOne = true
+                    
+
+                //buy directly
+                //print("missing: "+missingGold.toString())
+                if owningPlayer.getGold() >= recipe.getGoldCost() + missingGold
+                    //print("try buying recipe directly")
+                    if hasOne or not this.heroUnit.isInventoryFull()
+                        for int req in recipe.getRequiredItems()
+                            let required = Item.getItem(req)
+                            GetItemOfTypeFromUnitBJ(this.heroUnit, required.getTypeId()).remove()
+
+                        for itm in requiredRequirements
+                            GetItemOfTypeFromUnitBJ(this.heroUnit, itm.getTypeId()).remove()
+
+
+                        owningPlayer.addGold(- recipe.getGoldCost() - missingGold)
+                        this.heroUnit.addItemById(recipe.getResultItem().getTypeId())
+                else
+                    //print("try buying requirements")
+                    for int req in recipe.getRequiredItems()
+                        let required = Item.getItem(req)
+                        if not this.heroUnit.hasItemById(required.getTypeId())
+                            this.buySpecificItem(required)
+
+                destroy requiredRequirements
+            else
+                //buy directly
+                if owningPlayer.getGold() >= whichItem.getGoldCost()
+                    //print("try buying basic item directly")
+                    if not this.heroUnit.isInventoryFull()
+                        owningPlayer.addGold(- whichItem.getGoldCost())
+                        this.heroUnit.addItemById(whichItem.getTypeId())
+
+    function buyItems()
+
+
+        for i = 0 to 5
+            Item itm = itemBuild.get(i).getItem()
+            if not this.heroUnit.hasItemById(itm.getTypeId())
+                if this.owner.getPlayer().getGold() < 400
+                    break
+                else
+                    buySpecificItem(itm)
+
+
+    function selectSingleSkill(string char)
+        int abilcode = -1
+        if char == "Q"
+            abilcode = getAbilityId(this.heroType.getHeroId(), AbilitySlot.Q)
+        else if char == "W"
+            abilcode = getAbilityId(this.heroType.getHeroId(), AbilitySlot.W)
+        else if char == "E"
+            abilcode = getAbilityId(this.heroType.getHeroId(), AbilitySlot.E)
+        else if char == "R"
+            abilcode = getAbilityId(this.heroType.getHeroId(), AbilitySlot.R)
+        else if char == "P"
+            abilcode = getAbilityId(this.heroType.getHeroId(), AbilitySlot.PASSIVE)
+
+        SelectHeroSkill(this.heroUnit, abilcode)
+
+
+    function selectSkills()
+        while GetHeroSkillPoints(this.heroUnit) != 0
+            selectSingleSkill(this.skillBuild.charAt(0))
+            this.skillBuild = this.skillBuild.substring(1)
+
+    function levelUp()
+        this.selectSkills()
+
+
+
+    static function updateStatic()
+        int i = 0
+        for HeroAI ai in team1AIs
+            doAfter(i * 0.05, -> ai.update())
+            i++
+        i = 0
+        for HeroAI ai in team2AIs
+            doAfter(i * 0.05, -> ai.update())
+            i++
+
+    function startTeamFight(TeamFight teamFight)
+
+        this.endTeamFight()
+
+        this.changeState(AIState.TEAM_FIGHT)
+        this.teamFight = teamFight
+        this.teamFight.addAI(this)
+        aiMessage("teamfight")
+
+    function endTeamFight()
+        if this.teamFight != null
+            this.teamFight.removeAI(this)
+            this.teamFight = null
+
+    function onDamage(real damage)
+        this.damageCurrent += damage
+
+    function retreatTemporarily(int counter, boolean useAI)
+        if useAI
+            this.changeState(AIState.RETREAT_TEMP_AI)
+        else
+            this.changeState(AIState.RETREAT_TEMP)
+        this.retreatCounter = counter
+
+
+    function update()
+
+        damageIndex++
+        if damageIndex >= damageMax
+            damageIndex = 0
+        damageSum += damageCurrent - damageCount[damageIndex]
+        if damageSum.abs() < 0.01
+            damageSum = 0
+        damageCount[damageIndex] = damageCurrent
+        damageCurrent = 0
+
+        if not paused
+
+            if casting
+                if this.heroUnit.getCurrentOrder() != OrderId(castOrder)
+                    castOrder = ""
+                    casting = false
+
+            if this.state == AIState.RETREAT
+
+                let dist = this.heroUnit.getPos().distanceTo(this.homeLoc)
+                if dist<300
+                    this.changeState(AIState.HEAL)
+                    this.buyItems()
+                else
+                    if not casting
+                        this.heroType.retreatAI(this)
+                    if this.heroUnit.getCurrentOrder() != OrderId("move") and not casting
+                        updateRetreatLoc()
+                        this.heroUnit.issuePointOrder("move", this.currentRetreatLoc)
+
+            else if this.state == AIState.HEAL
+                if this.heroUnit.getHP() >= this.heroUnit.getMaxHP()*0.9 and this.heroUnit.getMana() >= this.heroUnit.getMaxMana()*0.9
+                    this.changeState(AIState.ATTACK)
+                    let rand = GetRandomInt(1, 3)
+                    if rand == 1
+                        this.lane = Lane.TOP
+                    else if rand == 2
+                        this.lane = Lane.BOT
+                    else
+                        this.lane = Lane.MID
+
+                    updateTargetLoc()
+
+            else if this.state == AIState.ATTACK
+                if this.heroUnit.getHP() <= this.heroUnit.getMaxHP()*0.4
+                    this.changeState(AIState.RETREAT)
+
+                if this.damageSum > this.heroUnit.getMaxHP()*0.15
+                    aiMessage("taking too much damage, retreat: "+damageSum.toString())
+                    this.retreatTemporarily(10, false)
+                else
+                    updateTargetLoc()  
+
+
+                    let g = CreateGroup()
+                    unit u
+                    boolean heroNearby = false
+                    g.enumUnitsInRange(this.heroUnit.getPos(), TEAM_FIGHT_RANGE)
+                    while(true)
+                        u = FirstOfGroup(g)
+                        if u == null
+                            break
+                        g.removeUnit(u)
+                        if u.isTargetable(this.heroUnit.getOwner(), false, true)
+                            if u.isType(UNIT_TYPE_HERO)
+                                heroNearby = true
+                                break
+
+                    g.destr()
+
+                    if heroNearby
+                        let chance = determineWinChance(this.owner.getId()<=HERO_PLAYER_TEAM_1_LAST, this.heroUnit.getPos())
+                        //start team fight for all narby AIs
+                        aiMessage("attack chance = "+chance.toString())
+                        if chance > 0.6
+
+
+                            let newTeamFight = new TeamFight(this.heroUnit.getPos(), this.owner.getId()<=HERO_PLAYER_TEAM_1_LAST)
+
+                            for i = 0 to MAX_HERO_COUNT-1
+                                let ai = heroAIs[i]
+                                if ai != null
+                                    if ai.firstTeam == firstTeam and ai.heroUnit.getPos().distanceTo(this.heroUnit.getPos()) < TEAM_FIGHT_RANGE
+                                        if ai.state == AIState.ATTACK or ai.state == AIState.TEAM_FIGHT
+                                            if ai.state == AIState.ATTACK
+                                                ai.startTeamFight(newTeamFight)
+                                            else
+                                                if ai.getTeamFightLoc().distanceTo(ai.heroUnit.getPos()) > newTeamFight.getTeamFightLoc().distanceTo(ai.heroUnit.getPos())
+                                                    ai.startTeamFight(newTeamFight)
+                            return
+                        if chance < 0.4
+                            this.retreatTemporarily(20, true)
+                            return
+
+                    if not casting
+                        this.heroType.attackAI(this)
+                    if this.heroUnit.getCurrentOrder() != OrderId("attack") and not casting
+                        this.heroUnit.issuePointOrder("attack", this.currentTargetLoc)
+
+            else if this.state == AIState.TEAM_FIGHT
+                if this.heroUnit.getHP() <= this.heroUnit.getMaxHP()*0.4
+                    this.changeState(AIState.RETREAT)
+                    this.endTeamFight()
+                    aiMessage("solo retreat")
+                else
+                    if not casting
+                        this.heroType.teamFightAI(this)
+                    if this.heroUnit.getCurrentOrder() != OrderId("attack") and not casting
+                        this.heroUnit.issueTargetOrder("attack", this.getTeamFightTarget())
+
+
+            else if this.state == AIState.RETREAT_TEMP or this.state == AIState.RETREAT_TEMP_AI
+                let dist = this.heroUnit.getPos().distanceTo(this.homeLoc)
+                if dist<300
+                    this.changeState(AIState.HEAL)
+                    this.buyItems()
+                else if this.heroUnit.getHP() <= this.heroUnit.getMaxHP()*0.4
+                    this.changeState(AIState.RETREAT)
+                else
+                    
+
+                    if retreatCounter <= 0
+                        this.changeState(AIState.ATTACK)
+                    else
+                        retreatCounter--
+                        if this.state == AIState.RETREAT_TEMP_AI
+                            if not casting
+                                //this.heroType.retreatAI(this)
+                        if this.heroUnit.getCurrentOrder() != OrderId("move") and not casting
+                            updateRetreatLoc()
+                            this.heroUnit.issuePointOrder("move", this.currentRetreatLoc)
+
+
+
+    function issue(string order) returns boolean
+        boolean ret = false
+        if not casting
+            casting = this.heroUnit.issueImmediateOrder(order)
+            castOrder = order
+            ret = casting
+        return ret
+
+    function issue(string order, vec2 target) returns boolean
+        boolean ret = false
+        if not casting
+            casting = this.heroUnit.issuePointOrder(order, target)
+            castOrder = order
+            ret = casting
+        return ret
+
+    function issue(string order, widget targetWidget) returns boolean
+        boolean ret = false
+        if not casting
+            casting = this.heroUnit.issueTargetOrder(order, targetWidget)
+            castOrder = order
+            ret = casting
+        return ret
+
+    function attack(widget targetWidget) returns boolean
+        boolean ret = false
+        if not casting and not attacking
+            attacking = this.heroUnit.issueTargetOrder("attack", targetWidget)
+            ret = attacking
+        return ret
+
+
+                
+
+
+    function togglePause()
+        this.paused = not this.paused
+
+/**
+    Determines the win chance of a team, if a fight is initiated at a certain position.
+    I have no idea how this works. :/
+    Factors to take into consideration:
+    - Hero; hp, mana, lvl, item value, controlled by AI?
+    - Towers nearby
+    - Units nearby
+
+**/
+function determineWinChance(boolean firstTeam, vec2 pos) returns real
+
+    real strengthTeam1
+    real strengthTeam2
+
+    real unitStrength1 = 0
+    real unitStrength2 = 0
+
+    real towerStrength1 = 0
+    real towerStrength2 = 0
+
+    real heroStrength1 = 0
+    real heroStrength2 = 0
+
+    let g = CreateGroup()
+    g.enumUnitsInRange(pos, TEAM_FIGHT_RANGE)
+    unit u
+    while true
+        u = FirstOfGroup(g)
+        if u == null
+            break
+        g.removeUnit(u)
+
+        let uTeam1 = u.getOwner().isAllyOf(players[TEAM_PLAYER_TEAM_1])
+        let uTeam2 = u.getOwner().isAllyOf(players[TEAM_PLAYER_TEAM_2])
+
+        if u.isAlive()
+            if u.isType(UNIT_TYPE_STRUCTURE)
+                if u.getTypeId() == HERO_TOWER
+                    if uTeam1
+                        towerStrength1 += 100000
+                    else
+                        towerStrength2 += 100000
+                else
+                    if u.isType(UNIT_TYPE_ATTACKS_GROUND) and u.getPos().distanceTo(pos) < 1000 // tower
+                        if u.getTypeId() == OUTER_TOWER
+                            if uTeam1
+                                if firstTeam
+                                    towerStrength1 += 100
+                                else
+                                    towerStrength1 += 400
+                            else if uTeam2
+                                if firstTeam
+                                    towerStrength2 += 400
+                                else
+                                    towerStrength2 += 100
+                        else if u.getTypeId() == GATE_TOWER or u.getTypeId() == BASE_TOWER
+                            if uTeam1
+                                if firstTeam
+                                    towerStrength1 += 150
+                                else
+                                    towerStrength1 += 600
+                            else if uTeam2
+                                if firstTeam
+                                    towerStrength2 += 600
+                                else
+                                    towerStrength2 += 150
+
+            else if u.isType(UNIT_TYPE_HERO)
+                if uTeam1
+                    heroStrength1 += determineHeroStrength(u)
+                else if uTeam2
+                    heroStrength2 += determineHeroStrength(u)
+            else
+                if uTeam1
+                    if firstTeam
+                        unitStrength1 += 15
+                    else
+                        unitStrength1 += 25
+                else if uTeam2
+                    if firstTeam
+                        unitStrength2 += 25
+                    else
+                        unitStrength2 += 15
+
+    g.destr()
+
+    strengthTeam1 = unitStrength1 + towerStrength1 + heroStrength1
+    strengthTeam2 = unitStrength2 + towerStrength2 + heroStrength2
+    
+    //print(unitStrength1.toString()+"|"+towerStrength1.toString()+"|"+heroStrength1.toString()+" vs "+unitStrength2.toString()+"|"+towerStrength2.toString()+"|"+heroStrength2.toString())
+
+    let chance1 = strengthTeam1/(strengthTeam1 + strengthTeam2)
+
+    real ret
+    if firstTeam
+        ret = chance1
+    else
+        ret = 1-chance1
+
+    return ret
+
+
+
+function determineHeroOffensiveStrength(unit hero) returns real
+    let mana = hero.getMana()/hero.getMaxMana()
+    let str = hero.getStr()
+    let intel = hero.getInt()
+    let lvl = hero.getLevel() + 5
+
+    return (str + str * mana * (lvl/30) + 2 * intel * mana * (lvl/30)) / 4 //0-100 (standard values, can be higher)
+
+function determineHeroDefensiveStrength(unit hero) returns real
+    let hp = hero.getHP()
+    let armor = hero.getArmor()
+    let wp = hero.getWp()
+
+    return (hp * (1 + ARMOR_REDUCTION * armor) + hp * (1 + MAGIC_REDUCTION * wp)) / 120 //0-100 (standard values, can be higher)
+
+
+
+function determineHeroStrength(unit hero) returns real
+    let lvl = hero.getLevel()
+    let hp = hero.getHP()/hero.getMaxHP()
+    let mana = hero.getMana()/hero.getMaxMana()
+    int itemValue = 0
+
+    for i = 0 to 5
+        let itm = hero.itemInSlot(i)
+        if itm != null
+            itemValue += itm.getTypeId().getItemFromObject().getGoldCost()
+
+    let result = (0.25 + 0.25 * mana + 0.25 + 1.25 * hp)/2 * (5 + lvl)/30 * (0.2 + 0.8 * hp)
+
+    let ai = HeroAI.heroAIs[hero.getOwner().getId()]
+    real ret = (result * ( 20000 + itemValue) )/16
+    if ai != null
+        if ai.state == AIState.RETREAT or ai.state == AIState.RETREAT_TEMP or ai.state == AIState.RETREAT_TEMP_AI
+            ret = 0
+
+
+    return ret
+
+
+init
+    HeroAI.classInit()
+    TeamFight.classInit()
+
+    CreateTrigger()
+        ..registerPlayerChatEvent(players[0], "buy", false)
+        ..addAction(() -> (begin
+        let ai = HeroAI.heroAIs[0]
+        if ai != null
+            ai.buyItems()
+    end))
+
+    OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+        if attacker.isType(UNIT_TYPE_HERO)
+            let ai = HeroAI.heroAIs[attacker.getOwner().getId()]
+            if ai != null
+                ai.attacking = false
+    end))

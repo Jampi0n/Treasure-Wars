@@ -154,7 +154,7 @@ public function newItem(string name, int whichShop, boolean hasRecipe, string ic
 
         if(shop.itemsMade!="")
             shop.itemsMade += ","
-        shop.itemsMade += int2fourchar(compItemIdArray[compCurrentItemId])
+        shop.itemsMade += compItemIdArray[compCurrentItemId].toRawCode()
         shop.bDef.setItemsMade(shop.itemsMade)
 
         shop.soldItems.add(new ItemInShop(compCurrentItemId))
@@ -163,7 +163,7 @@ public function newItem(string name, int whichShop, boolean hasRecipe, string ic
     else
         if(shop.itemsMade!="")
             shop.itemsMade += ","
-        shop.itemsMade += int2fourchar(compItemIdArray[compCurrentItemId])
+        shop.itemsMade += compItemIdArray[compCurrentItemId].toRawCode()
         shop.bDef.setItemsMade(shop.itemsMade)
 
         shop.soldItems.add(new ItemInShop(compCurrentItemId))
@@ -228,8 +228,8 @@ public class ItemTypeDef
 
     function setAbility(int abilityTypeId)
         compItemDefinition[this.itemId]
-            ..setAbilities(int2fourchar(abilityTypeId))
-            ..setCooldownGroup(int2fourchar(abilityTypeId))
+            ..setAbilities(abilityTypeId.toRawCode())
+            ..setCooldownGroup(abilityTypeId.toRawCode())
             ..setActivelyUsed(true)
 
     function addRequirement(int id)

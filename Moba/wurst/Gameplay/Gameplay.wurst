@@ -7,8 +7,8 @@ import Constants
 public function allHeroesPicked()
     startSpawning()
 
-    for i=0 to 5
-        udg_Gate[i]..kill().setAnimation("death alternate")
+    //for i=0 to 5
+        //udg_Gate[i]..kill().setAnimation("death alternate")
 
 
     for i = 0 to MAX_HERO_COUNT - 1

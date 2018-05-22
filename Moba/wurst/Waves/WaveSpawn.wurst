@@ -22,12 +22,6 @@ int topUnitsSize
 int midUnitsSize
 int botUnitsSize
 
-public enum Lane
-    TOP
-    MID
-    BOT
-
-
 public int array laneUnitCountTeam1
 public int array laneUnitCountTeam2
 
@@ -150,6 +144,7 @@ function spawnWave()
 
     //print(greenCountTop.toString()+","+greenCountMid.toString()+","+greenCountBot.toString()+" vs "+brownCountTop.toString()+","+brownCountMid.toString()+","+brownCountBot.toString())
 
+    income()
 
     counter = 0
     for int unitId in topUnits

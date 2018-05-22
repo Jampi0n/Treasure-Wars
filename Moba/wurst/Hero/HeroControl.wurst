@@ -7,8 +7,10 @@ import HeroType
 import Upgrades
 import TimerUtils
 import ClosureTimers
+import Execute
 
 constant HP_PER_LEVEL = 15
+constant STRENGTH_BONUS = 45
 
 public class Hero
 
@@ -51,9 +53,9 @@ public class Hero
     function setup()
         this.heroType = HeroType.getHeroType(this.hero.getTypeId())
 
-        
-        this.heroType.initialize()
 
+        execute( -> this.heroType.initialize())
+        
         unitToHero.put(this.hero, this)
         heroes[this.owner.getId()] = this
         onDamageTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DAMAGED)
@@ -131,7 +133,7 @@ public class Hero
 
         //this.hero.wrapper().addStatAbsoluteBonus(Stat.MS, this.heroType.calculateStat(Stat.MS, lvl) - this.heroType.calculateStat(Stat.MS, lvl-1))
 
-        SetHeroStr(this.hero, this.heroType.calculateStat(Stat.STR, newLvl), true)
+        SetHeroStr(this.hero, this.heroType.calculateStat(Stat.STR, newLvl) + STRENGTH_BONUS , true)
         SetHeroAgi(this.hero, this.heroType.calculateStat(Stat.AGI, newLvl), true)
         SetHeroInt(this.hero, this.heroType.calculateStat(Stat.INT, newLvl), true)
 
@@ -165,11 +167,12 @@ public class Hero
         TimerDialogDisplay(this.reviveWindow, false)
         vec2 pos
         if this.owner.getTeam() == Team.TEAM1
-            pos = gg_rct_GreenCastle.getCenter()
+            pos = gg_rct_GreenAltar.getCenter()+vec2(128,128)
         else
-            pos = gg_rct_BrownCastle.getCenter()
+            pos = gg_rct_BrownAltar.getCenter()-vec2(128,128)
             
         this.hero.revive(pos, true)
+        this.hero.setMana(this.hero.getMaxMana())
         this.upgrade()
         if this.heroGlow != null
             this.heroGlow
@@ -226,7 +229,7 @@ public class Hero
         
 
         if killer.getId() < PLAYER_NEUTRAL_AGGRESSIVE
-            let bounty = 200
+            let bounty = 240
             int assistBounty = (bounty/(2*(size+1))).toInt()
 
             int killBounty = (bounty/2 + bounty/(2*(size+1))).toInt()
@@ -264,7 +267,7 @@ public class Hero
             //+" |cffffcc00( +"+(bounty/(2*size)).toInt().toString()+")|r"
 
             //xp
-            let xp = 50.
+            let xp = (this.level + 5) * 10.
 
             for CPlayer cPLayer in CPlayer.getEnemyHeroPlayers(this.owner.getTeam())
                 let hero = Hero.getHero(cPLayer)
