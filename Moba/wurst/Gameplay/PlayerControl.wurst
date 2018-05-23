@@ -492,6 +492,8 @@ public class CPlayer
         var admin = false
         for i = 0 to MAX_HERO_COUNT-1
             player p = players[i]
+            SetPlayerState(p, PLAYER_STATE_RESOURCE_FOOD_USED, 1)
+            SetPlayerState(p, PLAYER_STATE_RESOURCE_FOOD_USED, 0)
             Team t = i <= HERO_PLAYER_TEAM_1_LAST ?Team.TEAM1:Team.TEAM2
             if p.getSlotState()==PLAYER_SLOT_STATE_PLAYING
                 new CPlayer(p, t, PlayerType.HERO)
