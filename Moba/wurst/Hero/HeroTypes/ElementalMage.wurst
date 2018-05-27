@@ -17,7 +17,7 @@ HeroType heroType
 constant ABILITY_FRENZY = 'AY1P'
 constant ABILITY_FROST_BOLT = 'AY1Q'
 constant ABILITY_FIRE_BLINK = 'AY1W'
-constant ABILITY_SWITCH_ELEMENT = 'AY1E'
+constant ABILITY_ELEMENTAL_MARK = 'AY1E'
 constant ABILITY_FROST_AND_FLAME = 'AY1R'
 
 
@@ -109,11 +109,34 @@ function abiltiyW()
             ..setMinimumRange(lvl, 250)
             ..setMaximumRange(lvl, FIRE_BLINK_MAX_RANGE[lvl-1])
 
+constant real MARK_DURATION = 8
+constant real array MARK_DMG = [15, 25, 35, 45, 55]
+constant real MARK_DMG_BONUS = 70
 
+constant int array MARK_WP_REDUCTION = [10, 15, 20, 25, 30]
+constant real MARK_STUN = 1.5
+
+BuffType buffElementalMark
+constant MARK_BUFF_ID = compiletime(createAuraBuff("Elemental Mark", "This unit is under the effect of Elemental Mark; it has reduced willpower and it will take additional magic damage when attacked by the Elemental Mage. The unit will be stunned after 5 attacks.", "BTNElementalMark"))
+constant MARK_ABILITY_ID = compiletime(createNegativeBuffAbility(5, MARK_BUFF_ID, "ElementalMark2.mdx", "overhead"))
 
 @compiletime
 function abilityE()
+    int array MANA = [135, 140, 145, 150, 155]
+    real array COOLDOWN = [10, 10, 10, 10, 10]
 
+    let aDef = new AbilityDefinitionIllidanChannel(ABILITY_ELEMENTAL_MARK)
+        ..setupIcon("BTNElementalMark")
+        ..setupChannel(TargetType.UNIT, "soulburn", 1.1)
+        ..setAnimationNames("spell")
+        ..setupWithHotKey("Elemental Mark", "E")
+
+    for lvl = 1 to 5
+        aDef
+            ..setCooldown(lvl, COOLDOWN[lvl-1])
+            ..setManaCost(lvl, MANA[lvl-1])
+            ..setCastRange(lvl, 600)
+            ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
 
 
 constant int FF_FROST_IMPACT = compiletime(ArtilleryDetection.createDetectionDummy())
@@ -140,13 +163,13 @@ constant FF_ABILITY_ID = compiletime(ABIL_ID_GEN.next())
 
 @compiletime
 function abilityR()
-    int array MANA = [175, 175, 175, 175, 175]
-    real array COOLDOWN = [0, 100, 100, 100, 100]
+    int array MANA = [225, 250, 275, 300, 325]
+    real array COOLDOWN = [60, 60, 60, 60, 60]
 
     let buffADef = new AbilityDefinitionAuraSlow(FF_ABILITY_ID)
         ..setArtTarget(Abilities.frostDamage+","+Abilities.breathOfFireDamage)
         ..setTargetAttachmentPoint("chest")
-        ..setTargetAttachmentPoint2("origin")
+        ..setTargetAttachmentPoint1("origin")
         ..setTargetAttachments(2)
         ..hideIcon()
     for i = 1 to 5
@@ -170,14 +193,24 @@ function abilityR()
             ..setManaCost(lvl, MANA[lvl-1])
             ..setDurationHero(lvl, 0.01)
             ..setTargetsAllowed(lvl, "none")
-            ..setCastRange(lvl, 2000)
+            ..setCastRange(lvl, 3000)
             ..setAreaofEffect(lvl, FF_AOE)
 
 
-function onAttack(unit attacker, unit _target, boolean _advanced)
+function onAttack(unit attacker, unit target, boolean _advanced)
     let level = attacker.getAbilityLevel(ABILITY_FRENZY)
     if level > 0
         attacker.addBuff(attacker, FRENZY_DURATION, buffFrenzy, level)
+
+    if BuffList.hasBuffType(target, buffElementalMark)
+        let mark = BuffList.getBuffOfType(target, buffElementalMark)
+        let markLevel = mark.getLevel()
+        int stacks = mark.getData() + 1
+        if stacks == 5
+            stacks = 0
+            target.addBuffReduced(attacker, MARK_STUN, STUNNED, 1)
+        mark.setData(stacks)
+        attacker.dealDamage(target, MARK_DMG[markLevel-1].bonus(attacker.getInt(), MARK_DMG_BONUS), ReductionType.MAGIC)
 
 
 function onSpellCast()
@@ -220,9 +253,9 @@ function onSpellCast()
 
         nearby.destr()
 
-    else if spellId == ABILITY_SWITCH_ELEMENT
-        //useFrost(caster)
-
+    else if spellId == ABILITY_ELEMENTAL_MARK
+        let target = GetSpellTargetUnit()
+        target.addBuffReduced(caster, MARK_DURATION, buffElementalMark, level)
 
     else if spellId == ABILITY_FROST_AND_FLAME
         let casterPos = caster.getPos()
@@ -238,15 +271,15 @@ function setupStats()
     heroType
         //..setStat(Stat.AD, 5, 40)
         ..setStat(Stat.AR, 7, 14)
-        ..setStat(Stat.AS, 14, 56)
+        ..setStat(Stat.AS, 31, 86)
         ..setStat(Stat.HP, 8, 39)
         ..setStat(Stat.HR, 7, 21)
-        ..setStat(Stat.MP, 15, 41)
-        ..setStat(Stat.MR, 16, 46)
-        ..setStat(Stat.MS, 21, 72)
-        ..setStat(Stat.STR, 19, 54)
+        ..setStat(Stat.MP, 21, 51)
+        ..setStat(Stat.MR, 23, 56)
+        ..setStat(Stat.MS, 11, 42)
+        ..setStat(Stat.STR, 22, 74)
         ..setStat(Stat.AGI, 9, 17)
-        ..setStat(Stat.INT, 16, 57)
+        ..setStat(Stat.INT, 18, 57)
 
 function retreatAI(HeroAI _ai)
 
@@ -264,7 +297,7 @@ function setupTooltips()
     end) )
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, "Summons an orb of frost that deals {0}{I0} magic damage to all enemies close to it and slows them by {1}% for {2} seconds.".format(
-            FIRE_BLINK_DAMAGE[lvl-1].str(), FROST_BOLT_SLOW[lvl-1].str(), FROST_BOLT_DURATION[lvl-1].toExactString()
+            FROST_BOLT_DAMAGE[lvl-1].str(), FROST_BOLT_SLOW[lvl-1].str(), FROST_BOLT_DURATION[lvl-1].toExactString()
         ))
     tooltip.setReplaceIntelligence(FROST_BOLT_DAMAGE_BONUS)
     heroType.addDynamicTooltipIntelligence(tooltip)
@@ -281,7 +314,20 @@ function setupTooltips()
     tooltip.setReplaceIntelligence(FIRE_BLINK_DAMAGE_BONUS)
     heroType.addDynamicTooltipIntelligence(tooltip)
 
-
+    tooltip = new DynamicTooltip(ABILITY_ELEMENTAL_MARK)
+    tooltip.setLearnString("Reduces the target unit's willpower and makes it take additional magic damage, when the Elemental Mage attacks. After 5 attacks the target is stunned for {0} seconds. Lasts {1} seconds.".format(
+        MARK_STUN.toExactString(), MARK_DURATION.toExactString()
+    ), (int lvl) -> (begin
+        return "-{0} willpower, {1}{I0} magic damage.".format(
+            MARK_WP_REDUCTION[lvl-1].toString(), MARK_DMG[lvl-1].str()
+        )
+    end) )
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, "Reduces the target unit's willpower by {2} and makes it take {3}{I0} additional magic damage, when the Elemental Mage attacks. After 5 attacks the target is stunned for {0} seconds. Lasts {1} seconds.".format(
+            MARK_STUN.toExactString(), MARK_DURATION.toExactString(), MARK_WP_REDUCTION[lvl-1].toString(), MARK_DMG[lvl-1].str()
+        ))
+    tooltip.setReplaceIntelligence(MARK_DMG_BONUS)
+    heroType.addDynamicTooltipIntelligence(tooltip)
 
 
     tooltip = new DynamicTooltip(ABILITY_FROST_AND_FLAME)
@@ -291,7 +337,7 @@ function setupTooltips()
         )
     end) )
     for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, "Calls the power of Frost and Flame to fall from the sky at the target location to slow down and ignite nearby enemies."+
+        tooltip.setNormalString(true, lvl, "Calls the power of Frost and Flame to fall from the sky at the target location to slow down and ignite nearby enemies. "+
         "Deals {0}{I0} impact damage, {1}{I1} damage per second and slows movement speed by {2}%. Lasts {3}{I2} seconds.".format(
             FF_IMPACT_DAMAGE[lvl-1].str(), FF_DOT[lvl-1].str(), FF_SLOW[lvl-1].str(), FF_BUFF_DURATION[lvl-1].toExactString()
         ))
@@ -400,6 +446,24 @@ function initHeroType()
             ..addStatAbsoluteBonus(Stat.AS, -(stacks div 10))
     end))
 
+    buffElementalMark = new BuffType(false, true)
+
+    abilityList = new LinkedList<int>
+    ..add(MARK_ABILITY_ID)
+    buffElementalMark.setup(abilityList, MARK_BUFF_ID)
+
+    buffElementalMark.addFirstFunction( (Buff whichBuff) -> (begin
+        let level = whichBuff.getLevel()
+        whichBuff.getTarget().wrapper()
+            ..addStatAbsoluteBonus(Stat.AS, -MARK_WP_REDUCTION[level - 1])
+    end))
+
+    buffElementalMark.addEndFunction( (Buff whichBuff) -> (begin
+        let level = whichBuff.getLevel()
+        whichBuff.getTarget().wrapper()
+            ..addStatAbsoluteBonus(Stat.AS, MARK_WP_REDUCTION[level - 1])
+    end))
+
     ArtilleryDetection.registerArtilleryHit(FF_FLAME_IMPACT, (unit impact) ->(begin
         group nearby = CreateGroup()
         let caster = Hero.getHero(impact.getOwner()).toUnit()
@@ -432,17 +496,9 @@ function initHeroType()
         nearby.destr()
     end))
 
-function onCreate(Hero h)
-    doPeriodically(1.5, (c) -> (begin
-        h.toUnit().addAbility(FRENZY_ABILITY_ID)
-        doAfter(0.1) ->
-            print("remove?")
-            h.toUnit().removeAbility(FRENZY_ABILITY_ID)
-    end))
 init
-    heroType = new HeroType(HERO_ELEMENTAL_MAGE, Icons.bTNHeroAvatarOfFlame, 11)
+    heroType = new HeroType(HERO_ELEMENTAL_MAGE, "BTNCloakOfResistance", 11)
         ..setOnInitFunction(() -> initHeroType())
-        ..setOnCreateFunction((Hero h) -> onCreate(h))
 
    
 
