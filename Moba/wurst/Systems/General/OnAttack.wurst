@@ -310,6 +310,19 @@ public class OnAttack
                 ..removeAbility(ADVANCED_ONHIT)
                 ..addAbility(DEFAULT_ONHIT)
 
+    /**
+    Uses a custom onhit function to be able to change the missile art for it.
+    **/
+    static function useAdvanced(unit whichUnit, boolean advanced, int abilityId)
+        if advanced
+            whichUnit
+                ..removeAbility(DEFAULT_ONHIT)
+                ..addAbility(abilityId)
+        else
+            whichUnit
+                ..removeAbility(ADVANCED_ONHIT)
+                ..addAbility(abilityId)
+
 
 init
     addOnDamageFunc(Condition(function OnAttack.onDamage))

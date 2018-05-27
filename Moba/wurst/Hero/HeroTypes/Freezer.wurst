@@ -85,7 +85,7 @@ function frostNova()
         ..setArtSpecial("")
         ..setArtEffect("")
         ..setupIcon(Icons.bTNGlacier)
-        ..setupChannel(TargetType.UNIT, "frostnova")
+        ..setupChannel(TargetType.UNIT, "frostnova", 1.1)
         ..setupWithHotKey("Frost Nova", "Q")
         /*..setLearnString("Blasts enemy units around a target enemy unit with a wave of damaging frost that slows movement and attack rate.", (int lvl) -> (begin
             return "{0} target damage, {1} nova damage, {2} seconds.".format(
@@ -135,7 +135,7 @@ function frostArmor()
         ..setArtCaster("")
         ..setArtTarget("")
         ..setArtEffect("")
-        ..setupChannel(TargetType.UNIT, "frostarmor")
+        ..setupChannel(TargetType.UNIT, "frostarmor", 1.1)
         ..setupIcon("BTNSpell_Frost_ChillingArmor")
         ..setupWithHotKey("Frost Armor", "W")
         /*..setLearnString("Creates a shield of frost around a target friendly unit. The shield adds armor and slows units that attack it. Lasts {0} seconds.".format(ARMOR_DURATION.str()), (int lvl) -> (begin

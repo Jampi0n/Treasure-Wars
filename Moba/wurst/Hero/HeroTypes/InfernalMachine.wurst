@@ -187,7 +187,7 @@ function flameThrower()
         ..setMissileArt("")
         ..setArtTarget("")
         ..setAnimationNames("spell,throw")
-        ..setupChannel(TargetType.AREA, "shockwave")
+        ..setupChannel(TargetType.AREA, "shockwave", 0.5)
         ..setLearnString("Launches a fiery missile at the target location that deals large initial damage and ignites the targets, dealing additional damage over time.", (int lvl) -> (begin
             return "{0} initial damage, {1} damage per second for {2} seconds.".format(
                 FLAME_THROWER_DAMAGE[lvl-1].str()+FLAME_THROWER_DAMAGE_BONUS.getBonusString(C_INT),
