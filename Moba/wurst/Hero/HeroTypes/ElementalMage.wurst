@@ -145,10 +145,10 @@ constant int FF_FLAME_IMPACT = compiletime(ArtilleryDetection.createDetectionDum
 constant int FF_FLAME_ARTILLERY = compiletime(ArtilleryDetection.createArtilleryDummy(0, 0, 600, 2.5, Abilities.redDragonMissile, 1600, 0.1, FF_FLAME_IMPACT))
 
 constant real array FF_IMPACT_DAMAGE = [200, 250, 300, 350, 400]
-constant real FF_IMPACT_DAMAGE_BONUS = 160
+constant real FF_IMPACT_DAMAGE_BONUS = 150
 
-constant real array FF_DOT = [30, 45, 60, 75, 90]
-constant real FF_DOT_BONUS = 60
+constant real array FF_DOT = [30, 40, 50, 60, 70]
+constant real FF_DOT_BONUS = 40
 
 constant int array FF_SLOW = [30, 40, 50, 60, 70]
 constant real array FF_BUFF_DURATION = [3, 3.5, 4, 4.5, 5]
@@ -436,7 +436,6 @@ function initHeroType()
         whichBuff.setData(newStacks)
         whichBuff.getTarget().wrapper()
             ..addStatAbsoluteBonus(Stat.AS, (newStacks div 10) - (oldStacks div 10))
-        print("stacks: "+ newStacks.toString())
     end))
 
 
@@ -455,13 +454,13 @@ function initHeroType()
     buffElementalMark.addFirstFunction( (Buff whichBuff) -> (begin
         let level = whichBuff.getLevel()
         whichBuff.getTarget().wrapper()
-            ..addStatAbsoluteBonus(Stat.AS, -MARK_WP_REDUCTION[level - 1])
+            ..addStatAbsoluteBonus(Stat.AGI, -MARK_WP_REDUCTION[level - 1])
     end))
 
     buffElementalMark.addEndFunction( (Buff whichBuff) -> (begin
         let level = whichBuff.getLevel()
         whichBuff.getTarget().wrapper()
-            ..addStatAbsoluteBonus(Stat.AS, MARK_WP_REDUCTION[level - 1])
+            ..addStatAbsoluteBonus(Stat.AGI, MARK_WP_REDUCTION[level - 1])
     end))
 
     ArtilleryDetection.registerArtilleryHit(FF_FLAME_IMPACT, (unit impact) ->(begin
