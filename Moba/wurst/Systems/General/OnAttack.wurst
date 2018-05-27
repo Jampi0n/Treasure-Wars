@@ -128,7 +128,7 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
                 let wrapper = target.wrapper()
                 wrapper.addStatAbsoluteBonusReal(Stat.AGI, (-wp*1000).toInt())
                 doAfter(10, () -> (begin
-                    if target.isAlive()
+                    if target.isAlive() or target.isType(UNIT_TYPE_HERO)
                         wrapper.addStatAbsoluteBonusReal(Stat.AGI, (wp*1000).toInt() )
                 end))
 

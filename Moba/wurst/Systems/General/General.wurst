@@ -102,7 +102,7 @@ public function real.reduceArmor(int stat) returns real
     return this.reduce(stat, ARMOR_REDUCTION)
 
 public function real.reduce(int stat, real reduction) returns real
-    return this / ( 1 + stat * reduction )
+    return this / ( 1 + max(stat, -20) * reduction )
 
 public function unit.addBuff(unit caster, real duration, BuffType buffType, int level) returns Buff
     Buff ret = null
