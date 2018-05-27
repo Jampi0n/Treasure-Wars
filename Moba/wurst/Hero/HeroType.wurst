@@ -29,8 +29,8 @@ public constant HERO_MAX_LEVEL = 25
 
 public class HeroType
 
-    private int array[STAT_COUNT] statsBase
-    private int array[STAT_COUNT] statsMax
+    int array[STAT_COUNT] statsBase
+    int array[STAT_COUNT] statsMax
 
     private static constant unitIdToHeroType = new HashMap<integer, HeroType>
     private int unitId

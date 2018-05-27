@@ -3,12 +3,10 @@ package ElementalMage
 //11
 
 import HeroType
-import TimerUtils
-import HashMap
 import Missile
 import ClosureTimers
 import HeroControl
-import OnAttack
+import Fx
 
 
 public constant HERO_ELEMENTAL_MAGE = 'H00P'
@@ -24,9 +22,9 @@ constant ABILITY_FROST_AND_FLAME = 'AY1R'
 
 
 BuffType buffFrenzy
-constant FRENZY_BUFF_ID = compiletime(createAuraBuff("Frenzy", "This unit is under the effect of Frenzy; it attacks faster.", Icons.bTNOrbOfFrost))
+constant FRENZY_BUFF_ID = compiletime(createAuraBuff("Frenzy", "This unit is under the effect of Frenzy; it attacks faster.", "PASFrostFireFrenzy"))
 constant FRENZY_ABILITY_ID = compiletime(createPositiveBuffAbility(5, FRENZY_BUFF_ID, "", ""))
-        
+
 constant real FRENZY_DURATION = 3.
 constant real array FRENZY_BONUS = [2, 2.5, 3, 3.5, 4]
 
@@ -34,7 +32,7 @@ constant real array FRENZY_BONUS = [2, 2.5, 3, 3.5, 4]
 function passive()
     let aDef =createNoEffectAbiltiy(ABILITY_FRENZY)
         ..setupWithHotKey("Frenzy", "D")
-        ..setupIcon(Icons.bTNBloodLust)
+        ..setupIcon("PASFrostFireFrenzy")
         ..setLearnString("Increases the Elemental Mage's attack speed everytime he attacks. If he does not attack for {0} seconds, the bonus is gone.".format(FRENZY_DURATION.toExactString()), (int lvl) -> (begin
             return "{0}% attack speed bonus".format(
                 FRENZY_BONUS[lvl-1].toExactString())
@@ -42,7 +40,7 @@ function passive()
 
     for lvl = 1 to 5
         aDef
-            ..setDescriptionString(true, lvl, "Increases the Elemental Mage's attack speed by {1}% everytime he attacks. If he does not attack for {0} seconds, the bonus is gone.".format(
+            ..setDescriptionString(false, lvl, "Increases the Elemental Mage's attack speed by {1}% everytime he attacks. If he does not attack for {0} seconds, the bonus is gone.".format(
                 FRENZY_DURATION.toExactString(), FRENZY_BONUS[lvl-1].toExactString())
             )
 
@@ -64,7 +62,7 @@ function abilityQ()
     real array COOLDOWN = [8, 8, 8, 8, 8]
 
     let aDef = new AbilityDefinitionIllidanChannel(ABILITY_FROST_BOLT)
-        ..setupIcon(Icons.bTNFrostBolt)
+        ..setupIcon("BTNOrbOfFrost2")
         ..setupChannel(TargetType.POINT, "channel", 1.1)
         ..setAnimationNames("spell")
         ..setupWithHotKey("Frost Bolt", "Q")
@@ -95,7 +93,7 @@ function abiltiyW()
 
     let aDef = new AbilityDefinitionWardenBlink(ABILITY_FIRE_BLINK)
         ..setAnimationNames("")
-        ..setupIcon(Icons.bTNFire)
+        ..setupIcon("BTNSupernova")
         ..setupWithHotKey("Aspect of Fire", "W")
         ..setLightningEffects("")
         ..setArtTarget("")
@@ -113,35 +111,9 @@ function abiltiyW()
 
 
 
-
-BuffType buffFrostAttack
-constant FROST_ATTACK_BUFF_ID = compiletime(createAuraBuff("Frost Attack", "This unit was hit by a Frost Attack; it is slowed.", Icons.bTNOrbOfFrost))
-constant FROST_ATTACK_ABILITY_ID = compiletime(createNegativeBuffAbility(5, FROST_ATTACK_BUFF_ID, Abilities.frostDamage, "chest"))
-
-constant int FROST_BUFF_ID = compiletime(createBasicBuff("Frost", "This unit is using Frost attacks.", Icons.bTNOrbOfFrost, "", ""))
-
-constant int array FROST_ATTACK_SLOW = [14, 18, 22, 26, 30]
-constant int array FIRE_ATTACK_DMG = [20, 35, 50, 65, 80]
-
-constant int FIRE_ATTACK_DMG_BONUS = 80
-constant real FROST_ATTACK_DURATION = 2.
-
 @compiletime
 function abilityE()
-    let aDef = new AbilityDefinitionDemonHunterImmolation(ABILITY_SWITCH_ELEMENT)
-        ..setupIcon(Icons.bTNOrbOfFire)
-        ..setupWithHotKey("Fire", "E")
-        ..setTurnOff("Frost", "E")
-        ..setIconTurnOff(Icons.bTNOrbOfFrost)
 
-    for lvl = 1 to 5
-        aDef
-            ..setCooldown(lvl, 0)
-            ..setManaCost(lvl, 25)
-            ..setBuffs(lvl, asList(FROST_BUFF_ID, 'BEia'))
-            ..setTargetsAllowed(lvl, "none")
-            ..setManaDrainedperSecond(lvl, 0)
-            ..setDamageperInterval(lvl, 0)
 
 
 constant int FF_FROST_IMPACT = compiletime(ArtilleryDetection.createDetectionDummy())
@@ -149,17 +121,45 @@ constant int FF_FROST_ARTILLERY = compiletime(ArtilleryDetection.createArtillery
 constant int FF_FLAME_IMPACT = compiletime(ArtilleryDetection.createDetectionDummy())
 constant int FF_FLAME_ARTILLERY = compiletime(ArtilleryDetection.createArtilleryDummy(0, 0, 600, 2.5, Abilities.redDragonMissile, 1600, 0.1, FF_FLAME_IMPACT))
 
+constant real array FF_IMPACT_DAMAGE = [200, 250, 300, 350, 400]
+constant real FF_IMPACT_DAMAGE_BONUS = 160
+
+constant real array FF_DOT = [30, 45, 60, 75, 90]
+constant real FF_DOT_BONUS = 60
+
+constant int array FF_SLOW = [30, 40, 50, 60, 70]
+constant real array FF_BUFF_DURATION = [3, 3.5, 4, 4.5, 5]
+constant real FF_BUFF_DURATION_BONUS = 1
+
+constant real FF_AOE = 400
+
+BuffType buffFFBuff
+constant FF_BUFF_ID = compiletime(createAuraBuff("Frost and Flame", "This unit was hit by Frost and Flame; it is slowed and takes damage over time.", "BTNMageOrb"))
+constant FF_ABILITY_ID = compiletime(ABIL_ID_GEN.next())
+
 
 @compiletime
 function abilityR()
     int array MANA = [175, 175, 175, 175, 175]
-    real array COOLDOWN = [100, 100, 100, 100, 100]
+    real array COOLDOWN = [0, 100, 100, 100, 100]
 
-
+    let buffADef = new AbilityDefinitionAuraSlow(FF_ABILITY_ID)
+        ..setArtTarget(Abilities.frostDamage+","+Abilities.breathOfFireDamage)
+        ..setTargetAttachmentPoint("chest")
+        ..setTargetAttachmentPoint2("origin")
+        ..setTargetAttachments(2)
+        ..hideIcon()
+    for i = 1 to 5
+        buffADef
+            ..setTargetsAllowed(i, "invulnerable,self,vulnerable")
+            ..setAreaofEffect(i, 1)
+            ..setMovementSpeedFactor(i, 0)
+            ..setAttackSpeedFactor(i, 0)
+            ..setBuffs(i, FF_BUFF_ID.toRawCode())
 
     let aDef = new AbilityDefinitionIllidanChannel(ABILITY_FROST_AND_FLAME)
         ..setupIcon("BTNMageOrb")
-        ..setupWithHotKey("Unbreakable", "R")
+        ..setupWithHotKey("Frost and Flame", "R")
         ..setupChannel(TargetType.AREA, "silence", 1.1)
         ..setLightningEffects("")
 
@@ -171,7 +171,7 @@ function abilityR()
             ..setDurationHero(lvl, 0.01)
             ..setTargetsAllowed(lvl, "none")
             ..setCastRange(lvl, 2000)
-            ..setAreaofEffect(lvl, 400)
+            ..setAreaofEffect(lvl, FF_AOE)
 
 
 function onAttack(unit attacker, unit _target, boolean _advanced)
@@ -257,7 +257,19 @@ function teamFightAI(HeroAI _ai)
 
 
 function setupTooltips()
-    DynamicTooltip tooltip = new DynamicTooltip(ABILITY_FIRE_BLINK)
+    DynamicTooltip tooltip = new DynamicTooltip(ABILITY_FROST_BOLT)
+    tooltip.setLearnString("Summons an orb of frost that damages and slows all enemies close to it.", (int lvl) -> (begin
+        return "{0}{I0} damage, {1}% slow for {2} seconds.".format(
+            FROST_BOLT_DAMAGE[lvl-1].str(), FROST_BOLT_SLOW[lvl-1].str(), FROST_BOLT_DURATION[lvl-1].toExactString())
+    end) )
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, "Summons an orb of frost that deals {0}{I0} magic damage to all enemies close to it and slows them by {1}% for {2} seconds.".format(
+            FIRE_BLINK_DAMAGE[lvl-1].str(), FROST_BOLT_SLOW[lvl-1].str(), FROST_BOLT_DURATION[lvl-1].toExactString()
+        ))
+    tooltip.setReplaceIntelligence(FROST_BOLT_DAMAGE_BONUS)
+    heroType.addDynamicTooltipIntelligence(tooltip)
+
+    tooltip = new DynamicTooltip(ABILITY_FIRE_BLINK)
     tooltip.setLearnString("Teleports the Elemental Mage to the target location, dealing fire damage to nearby enemy units.", (int lvl) -> (begin
         return "{0}{I0} damage.".format(
             FIRE_BLINK_DAMAGE[lvl-1].str())
@@ -269,48 +281,54 @@ function setupTooltips()
     tooltip.setReplaceIntelligence(FIRE_BLINK_DAMAGE_BONUS)
     heroType.addDynamicTooltipIntelligence(tooltip)
 
-    tooltip = new DynamicTooltip(ABILITY_SWITCH_ELEMENT)
-    tooltip.setLearnString("Enhances the Elemental Mage's attacks with elemental Power.|n"+
-    "Fire:|nAttacks deal additional magic damage."+
-    "Frost:Attacks slow the attacked unit for {0} seconds.|n".format(FROST_ATTACK_DURATION.toExactString())
-    , (int lvl) -> (begin
-        return "{0}{I0} damage, {1}% slow.".format( FIRE_ATTACK_DMG[lvl-1].str(), FROST_ATTACK_SLOW[lvl-1].toString() )
+
+
+
+    tooltip = new DynamicTooltip(ABILITY_FROST_AND_FLAME)
+    tooltip.setLearnString("Calls the power of Frost and Flame to fall from the sky at the target location to slow down and ignite nearby enemies.", (int lvl) -> (begin
+        return "{0}{I0} impact damage, {1}{I1} damage per second, {2}% slow, lasts {3}{I2} seconds.".format(
+            FF_IMPACT_DAMAGE[lvl-1].str(), FF_DOT[lvl-1].str(), FF_SLOW[lvl-1].str(), FF_BUFF_DURATION[lvl-1].toExactString()
+        )
     end) )
-
     for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, "Attacks deal {0}{I0} additional magic damage.|nActivate to switch to Frost.".format(
-            FIRE_ATTACK_DMG[lvl-1].str()
+        tooltip.setNormalString(true, lvl, "Calls the power of Frost and Flame to fall from the sky at the target location to slow down and ignite nearby enemies."+
+        "Deals {0}{I0} impact damage, {1}{I1} damage per second and slows movement speed by {2}%. Lasts {3}{I2} seconds.".format(
+            FF_IMPACT_DAMAGE[lvl-1].str(), FF_DOT[lvl-1].str(), FF_SLOW[lvl-1].str(), FF_BUFF_DURATION[lvl-1].toExactString()
         ))
-        tooltip.setTurnOffString(true, lvl, "Attacks slow the attacked unit by {1}{I1}% for {0} seconds.|nActivate to switch to Fire.".format(
-            FROST_ATTACK_DURATION.toExactString(), FROST_ATTACK_SLOW[lvl-1].toString()
-        ))
-
-    tooltip.setReplaceIntelligence(FIRE_ATTACK_DMG_BONUS.toReal())
+    tooltip.setReplaceIntelligence(FF_IMPACT_DAMAGE_BONUS, FF_DOT_BONUS, FF_BUFF_DURATION_BONUS)
     heroType.addDynamicTooltipIntelligence(tooltip)
 
 
 function initHeroType()
     setupStats()
     setupTooltips()
-
-    buffFrostAttack = new BuffType(false, true)
+    
+    buffFFBuff = new BuffType(false, true)
 
     LinkedList<int> abilityList = new LinkedList<int>
-    ..add(FROST_ATTACK_ABILITY_ID)
-    buffFrostAttack.setup(abilityList, FROST_ATTACK_BUFF_ID)
+    ..add(FF_ABILITY_ID)
+    buffFFBuff.setup(abilityList, FF_BUFF_ID)
 
-    buffFrostAttack.addFirstFunction( (Buff whichBuff) -> (begin
+    buffFFBuff.addFirstFunction( (Buff whichBuff) -> (begin
         let level = whichBuff.getLevel()
         whichBuff.getTarget().wrapper()
-            ..addStatRelativeBonus(Stat.MS, -FROST_ATTACK_SLOW[level - 1]*10)
+            ..addStatRelativeBonus(Stat.MS, -FF_SLOW[level - 1]*10)
             ..incBlue()
     end))
 
-    buffFrostAttack.addEndFunction( (Buff whichBuff) -> (begin
+    buffFFBuff.addEndFunction( (Buff whichBuff) -> (begin
         let level = whichBuff.getLevel()
         whichBuff.getTarget().wrapper()
-            ..addStatRelativeBonus(Stat.MS, FROST_ATTACK_SLOW[level - 1]*10)
+            ..addStatRelativeBonus(Stat.MS, FF_SLOW[level - 1]*10)
             ..decBlue()
+    end))
+
+    buffFFBuff.setPeriodicTime(0.25)
+    buffFFBuff.addPeriodicFunction((Buff whichBuff) -> (begin
+        let caster = whichBuff.getCaster()
+        let target = whichBuff.getTarget()
+        if target.isTargetable(caster.getOwner(), false, true)
+            caster.dealDamage(target, 0.25 * FF_DOT[whichBuff.getLevel()-1].bonus(caster.getInt(), FF_DOT_BONUS), ReductionType.MAGIC)
     end))
 
     buffFrostBolt = new BuffType(false, true)
@@ -338,7 +356,6 @@ function initHeroType()
     heroType
         ..addOnSpellCastFunc(function onSpellCast)
         ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, advanced))
-        ..useHeroGlow()
         ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
         ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
         ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
@@ -354,9 +371,9 @@ function initHeroType()
     buffFrenzy = new BuffType(true, true)
 
     abilityList = new LinkedList<int>
-    ..add(FRENZY_ABILITY_ID)
+        ..add(FRENZY_ABILITY_ID)
     buffFrenzy.setup(abilityList, FRENZY_BUFF_ID)
-
+    
     buffFrenzy.addFirstFunction( (Buff whichBuff) -> (begin
         let level = whichBuff.getLevel() - 1
         let stacks = (FRENZY_BONUS[level]*10).toInt()
@@ -384,16 +401,48 @@ function initHeroType()
     end))
 
     ArtilleryDetection.registerArtilleryHit(FF_FLAME_IMPACT, (unit impact) ->(begin
-        print("ff flame")
+        group nearby = CreateGroup()
+        let caster = Hero.getHero(impact.getOwner()).toUnit()
+        let level = caster.getAbilityLevel(ABILITY_FROST_AND_FLAME)
+        nearby.enumUnitsInRange(impact.getPos(), FF_AOE)
+
+        
+        Fx fx
+
+        for i = 0 to 10
+            fx = new Fx(impact.getPos().polarOffset(GetRandomDirectionDeg().fromDeg(), GetRandomReal(0, 300)), Abilities.flameStrikeEmbers)
+            fx.setScale(2)
+            doAfter(0.5, () -> destroy fx)
+
+        for i = 0 to 10
+            fx = new Fx(impact.getPos().polarOffset(GetRandomDirectionDeg().fromDeg(), GetRandomReal(0, 300)), Abilities.breathOfFrostTarget)
+            fx.setScale(2)
+            destroy fx
+            
+
+        let dmg = (FF_IMPACT_DAMAGE[level-1]).bonus(caster.getInt(), FF_IMPACT_DAMAGE_BONUS)
+        let dur = FF_BUFF_DURATION[level-1].bonus(caster.getInt(), FF_BUFF_DURATION_BONUS)
+        while(not nearby.isEmpty())
+            unit target = FirstOfGroup(nearby)
+            nearby.removeUnit(target)
+            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(impact.getOwner(), false, true)
+                caster.dealDamage(target, dmg, ReductionType.MAGIC)
+                target.addBuffReduced(caster, dur, buffFFBuff, level)
+
+        nearby.destr()
     end))
 
-    ArtilleryDetection.registerArtilleryHit(FF_FROST_IMPACT, (unit impact) ->(begin
-        print("ff frost")
+function onCreate(Hero h)
+    doPeriodically(1.5, (c) -> (begin
+        h.toUnit().addAbility(FRENZY_ABILITY_ID)
+        doAfter(0.1) ->
+            print("remove?")
+            h.toUnit().removeAbility(FRENZY_ABILITY_ID)
     end))
-
 init
     heroType = new HeroType(HERO_ELEMENTAL_MAGE, Icons.bTNHeroAvatarOfFlame, 11)
         ..setOnInitFunction(() -> initHeroType())
+        ..setOnCreateFunction((Hero h) -> onCreate(h))
 
    
 
