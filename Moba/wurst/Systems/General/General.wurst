@@ -105,15 +105,20 @@ public function real.reduce(int stat, real reduction) returns real
     return this / ( 1 + stat * reduction )
 
 public function unit.addBuff(unit caster, real duration, BuffType buffType, int level) returns Buff
-    return new Buff(this, caster, duration, buffType, level)
+    Buff ret = null
+    if this.isAlive()
+        ret = new Buff(this, caster, duration, buffType, level)
+    return ret
 
 public function unit.addBuffReduced(unit caster, real duration, BuffType buffType, int level) returns Buff
     //buff reduction only uses 1/4 of the wp, so it reduces duration not as much as it reduces damage
     real realDuration =  duration.reduce( (this.getWp()/4).toInt() , 0.01 )
     if this.hasItemById(convertItemId(ITEM_ID_ARCANE_SHIELD))
         realDuration = realDuration * 0.85
-
-    return new Buff(this, caster, realDuration, buffType, level)
+    Buff ret = null
+    if this.isAlive()
+        ret = new Buff(this, caster, realDuration, buffType, level)
+    return ret
 
 
 public function unit.dealDamageAlways(unit target, real amount, ReductionType reductionType)

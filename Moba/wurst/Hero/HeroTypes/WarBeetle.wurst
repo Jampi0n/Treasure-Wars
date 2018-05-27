@@ -113,7 +113,7 @@ constant int array JUMP_MANA = [120, 110, 100, 90, 80]
 function root()
     let aDef = new AbilityDefinitionIllidanChannel(ABILITY_JUMP)
         ..setupIcon(Icons.bTNReplenishMana)
-        ..setupChannel(TargetType.POINT, "channel")
+        ..setupChannel(TargetType.POINT, "channel", 0.51)
         ..setupWithHotKey("Dash", "E")
         ..setArtCaster("")
         ..setArtEffect("")

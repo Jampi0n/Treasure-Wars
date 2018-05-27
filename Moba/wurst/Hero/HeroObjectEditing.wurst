@@ -86,11 +86,16 @@ public enum TargetType
     UNIT_OR_POINT
     AREA
 
-public function AbilityDefinitionIllidanChannel.setupChannel(TargetType targetType, string orderId)
+public function AbilityDefinitionIllidanChannel.setupChannel(TargetType targetType, string orderId, real castBackSwing)
+    this
+        ..setArtCaster("")
+        ..setArtEffect("")
+        ..setArtTarget("")
+        ..setArtSpecial("")
     for lvl = 1 to 5
         this
             ..setOptions(lvl, 1)
-            ..setFollowThroughTime(lvl, 0)
+            ..setFollowThroughTime(lvl, castBackSwing)
             ..setDisableOtherAbilities(lvl, false)
             ..setBaseOrderID(lvl, orderId)
             ..setArtDuration(lvl, 0)
@@ -128,6 +133,11 @@ public function AbilityDefinition.setupIcon(string name)
         this.setIconResearch(sLearn)
         this.setIconNormal(sNormal)
 
+public function AbilityDefinition.setTurnOff(string name, string hotkey)
+    for i = 1 to 5
+        this.setTooltipTurnOff(i, "("+hotkey+") "+name+" - [|cffffcc00Level "+i.toString()+"|r]")
+        this.setTooltipTurnOffExtended(i, "<description missing>")
+
 public function AbilityDefinition.setupWithHotKey(string name, string hotkey)
     this.presetHotkey(hotkey)
     this.setButtonPositionNormalY(2)
@@ -143,7 +153,9 @@ public function AbilityDefinition.setupWithHotKey(string name, string hotkey)
     this.setTooltipLearnExtended("<description missing>")
     for i = 1 to 5
         this.setTooltipNormalExtended(i, "<description missing>")
+        this.setTooltipTurnOffExtended(i, "<description missing>")
         this.setTooltipNormal(i, "("+hotkey+") "+name+" - [|cffffcc00Level "+i.toString()+"|r]")
+        this.setTooltipTurnOff(i, "("+hotkey+") "+name+" - [|cffffcc00Level "+i.toString()+"|r]")
         
     if(hotkey=="Q")
         this..presetHotkey("Q")
@@ -211,7 +223,9 @@ public class DynamicTooltip
     
     private int abilityTypeId
     private string array[5] normalString
+    private string array[5] turnOffString
     private string learnString
+    private boolean useTurnOff
 
     private constant replaceIntelligence = new LinkedList<real>
     private constant replaceStrength = new LinkedList<real>
@@ -221,6 +235,10 @@ public class DynamicTooltip
 
     construct(int abilityTypeId)
         this.abilityTypeId = abilityTypeId
+        this.useTurnOff = false
+
+    function getUseTurnOff() returns boolean
+        return this.useTurnOff
 
     function setReplaceIntelligence(vararg real replacements)
         for replacement in replacements
@@ -268,9 +286,25 @@ public class DynamicTooltip
         else
             this.normalString[level - 1] += "|n "
 
+    function setTurnOffString(boolean showCooldown, int level, string turnOffString)
+        this.useTurnOff = true
+        this.turnOffString[level-1] = turnOffString
+
+        if showCooldown
+            this.turnOffString[level - 1] += "|n" + "Cooldown: " + "<" + this.getAbilityTypeId().toRawCode() + ",Cool"+level.toString()+">" + "|n "
+        else
+            this.turnOffString[level - 1] += "|n "
+
     function evaluateNormalString(unit whichUnit) returns string
         let lvl = whichUnit.getAbilityLevel(this.abilityTypeId)
         string ret = ""
         if lvl != 0
             ret = this.normalString[lvl-1].evaluateBonus(replaceStrength, whichUnit.getStr(), replaceIntelligence, whichUnit.getInt())
+        return ret
+
+    function evaluateTurnOffString(unit whichUnit) returns string
+        let lvl = whichUnit.getAbilityLevel(this.abilityTypeId)
+        string ret = ""
+        if lvl != 0
+            ret = this.turnOffString[lvl-1].evaluateBonus(replaceStrength, whichUnit.getStr(), replaceIntelligence, whichUnit.getInt())
         return ret

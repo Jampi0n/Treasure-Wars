@@ -111,7 +111,7 @@ function giantFish()
         ..setMissileArt("")
         ..setArtTarget("")
         ..setAnimationNames("spell")
-        ..setupChannel(TargetType.AREA, "shockwave")
+        ..setupChannel(TargetType.AREA, "shockwave", 0.75)
         /*..setLearnString("Throws a giant fish at the target location, damaging and slowing enemies in the area.", (int lvl) -> (begin
             return "{0} damage, {1}% attack speed. {2}% movement speed, {3} seconds.".format(
                 FISH_DAMAGE[lvl-1].str()+FISH_DAMAGE_BONUS.getBonusString(C_INT),
