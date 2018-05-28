@@ -116,8 +116,10 @@ constant real MARK_DMG_BONUS = 70
 constant int array MARK_WP_REDUCTION = [10, 15, 20, 25, 30]
 constant real MARK_STUN = 1.5
 
+constant int MARK_REQUIRED_STACKS = 4
+
 BuffType buffElementalMark
-constant MARK_BUFF_ID = compiletime(createAuraBuff("Elemental Mark", "This unit is under the effect of Elemental Mark; it has reduced willpower and it will take additional magic damage when attacked by the Elemental Mage. The unit will be stunned after 5 attacks.", "BTNElementalMark"))
+constant MARK_BUFF_ID = compiletime(createAuraBuff("Elemental Mark", "This unit is under the effect of Elemental Mark; it has reduced willpower and it will take additional magic damage when attacked by the Elemental Mage. The unit will be stunned after "+MARK_REQUIRED_STACKS.str()+" attacks.", "BTNElementalMark"))
 constant MARK_ABILITY_ID = compiletime(createNegativeBuffAbility(5, MARK_BUFF_ID, "ElementalMark2.mdx", "overhead"))
 
 @compiletime
@@ -144,11 +146,11 @@ constant int FF_FROST_ARTILLERY = compiletime(ArtilleryDetection.createArtillery
 constant int FF_FLAME_IMPACT = compiletime(ArtilleryDetection.createDetectionDummy())
 constant int FF_FLAME_ARTILLERY = compiletime(ArtilleryDetection.createArtilleryDummy(0, 0, 600, 2.5, Abilities.redDragonMissile, 1600, 0.1, FF_FLAME_IMPACT))
 
-constant real array FF_IMPACT_DAMAGE = [200, 250, 300, 350, 400]
+constant real array FF_IMPACT_DAMAGE = [140, 170, 200, 230, 260]
 constant real FF_IMPACT_DAMAGE_BONUS = 150
 
 constant real array FF_DOT = [30, 40, 50, 60, 70]
-constant real FF_DOT_BONUS = 40
+constant real FF_DOT_BONUS = 45
 
 constant int array FF_SLOW = [30, 40, 50, 60, 70]
 constant real array FF_BUFF_DURATION = [3, 3.5, 4, 4.5, 5]
@@ -206,7 +208,7 @@ function onAttack(unit attacker, unit target, boolean _advanced)
         let mark = BuffList.getBuffOfType(target, buffElementalMark)
         let markLevel = mark.getLevel()
         int stacks = mark.getData() + 1
-        if stacks == 5
+        if stacks >= MARK_REQUIRED_STACKS
             stacks = 0
             target.addBuffReduced(attacker, MARK_STUN, STUNNED, 1)
         mark.setData(stacks)
@@ -315,16 +317,16 @@ function setupTooltips()
     heroType.addDynamicTooltipIntelligence(tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_ELEMENTAL_MARK)
-    tooltip.setLearnString("Reduces the target unit's willpower and makes it take additional magic damage, when the Elemental Mage attacks. After 5 attacks the target is stunned for {0} seconds. Lasts {1} seconds.".format(
-        MARK_STUN.toExactString(), MARK_DURATION.toExactString()
+    tooltip.setLearnString("Reduces the target unit's willpower and makes it take additional magic damage, when the Elemental Mage attacks. After {2} attacks the target is stunned for {0} seconds. Lasts {1} seconds.".format(
+        MARK_STUN.toExactString(), MARK_DURATION.toExactString(), MARK_REQUIRED_STACKS.str()
     ), (int lvl) -> (begin
         return "-{0} willpower, {1}{I0} magic damage.".format(
             MARK_WP_REDUCTION[lvl-1].toString(), MARK_DMG[lvl-1].str()
         )
     end) )
     for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, "Reduces the target unit's willpower by {2} and makes it take {3}{I0} additional magic damage, when the Elemental Mage attacks. After 5 attacks the target is stunned for {0} seconds. Lasts {1} seconds.".format(
-            MARK_STUN.toExactString(), MARK_DURATION.toExactString(), MARK_WP_REDUCTION[lvl-1].toString(), MARK_DMG[lvl-1].str()
+        tooltip.setNormalString(true, lvl, "Reduces the target unit's willpower by {2} and makes it take {3}{I0} additional magic damage, when the Elemental Mage attacks. After {4} attacks the target is stunned for {0} seconds. Lasts {1} seconds.".format(
+            MARK_STUN.toExactString(), MARK_DURATION.toExactString(), MARK_WP_REDUCTION[lvl-1].toString(), MARK_DMG[lvl-1].str(), MARK_REQUIRED_STACKS.str()
         ))
     tooltip.setReplaceIntelligence(MARK_DMG_BONUS)
     heroType.addDynamicTooltipIntelligence(tooltip)
