@@ -456,7 +456,7 @@ function initHeroType()
         end))
 
 init
-    heroType = new HeroType(HERO_TROLL_BERSERKER, Icons.bTNForestTroll, 7)
+    heroType = new HeroType(HERO_TROLL_BERSERKER, Icons.bTNForestTroll, 7, true)
         ..setOnInitFunction(() -> initHeroType())
 
    

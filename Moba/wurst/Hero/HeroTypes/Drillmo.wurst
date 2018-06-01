@@ -512,5 +512,5 @@ function initHeroType()
     
     
 init
-    heroType = new HeroType(HERO_DRILLMO, Icons.bTNFlyingMachine, 6)
+    heroType = new HeroType(HERO_DRILLMO, Icons.bTNFlyingMachine, 6, true)
         ..setOnInitFunction(() -> initHeroType())

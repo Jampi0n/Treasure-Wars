@@ -454,5 +454,5 @@ function initHeroType()
     
         
 init
-    heroType = new HeroType(HERO_WARLOCK, Icons.bTNGuldan, 5)
+    heroType = new HeroType(HERO_WARLOCK, Icons.bTNGuldan, 5, true)
         ..setOnInitFunction(() -> initHeroType())

@@ -491,6 +491,6 @@ function initHeroType()
 
 
 init
-    heroType = new HeroType(HERO_PALADIN, Icons.bTNHeroPaladin, 2)
+    heroType = new HeroType(HERO_PALADIN, Icons.bTNHeroPaladin, 2, true)
         ..setOnInitFunction(() -> initHeroType())
   

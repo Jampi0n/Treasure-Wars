@@ -607,7 +607,7 @@ function createHeroType(Hero hero)
     end))
 
 init
-    heroType = new HeroType(HERO_TREE, Icons.bTNTreant, 4)
+    heroType = new HeroType(HERO_TREE, Icons.bTNTreant, 4, true)
         ..setOnInitFunction(() -> initHeroType())
         ..setOnCreateFunction((Hero hero) -> createHeroType(hero))
 
