@@ -574,7 +574,7 @@ function initHeroType()
     end))
 
 init
-    heroType = new HeroType(HERO_SEA_DRUID, "BTNSeaDruid", 3)
+    heroType = new HeroType(HERO_SEA_DRUID, "BTNSeaDruid", 3, true)
         ..setOnInitFunction(() -> initHeroType())
       
 

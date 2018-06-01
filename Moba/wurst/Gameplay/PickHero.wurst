@@ -64,15 +64,15 @@ function setupCreatedHero(Hero hero)
     if GetLocalPlayer() == hero.toUnit().getOwner()
         PanCameraTo(pos.x, pos.y)
 
-//creates a random hero for a player
-function createRandomHero(CPlayer cPlayer, boolean removeFromTavern)
-    var random = GetRandomInt(0, remainingHeroTypesCount-1)
 
-    /*print("remaining:")
-    for i = 0 to remainingHeroTypesCount-1
-        print(remainingHeroTypes[i].getUnitId().toRawCode())
+function createRandomHeroForAI(CPlayer cPlayer, boolean removeFromTavern)
+    int random
 
-    print("pick: "+remainingHeroTypes[random].getUnitId().toRawCode())*/
+
+    while(true)
+        random = GetRandomInt(0, remainingHeroTypesCount-1)
+        if remainingHeroTypes[random].hasAI()
+            break
 
     Hero hero = new Hero(cPlayer, remainingHeroTypes[random].getUnitId() , gg_rct_CenterMid.getCenter(), angle(0))
     setupCreatedHero(hero)
@@ -85,18 +85,21 @@ function createRandomHero(CPlayer cPlayer, boolean removeFromTavern)
 
     removeHeroType(remainingHeroTypes[random], removeFromTavern)
 
-    /*if removeFromTavern
-        for i = 0 to MAX_HERO_COUNT-1
-            if(getCPlayer(i).getPlayerType()==PlayerType.HERO)
-                SetPlayerTechMaxAllowed(players[i],  remainingHeroTypes[random].getUnitId(), 0)
 
-    heroTypeIndex.put(remainingHeroTypes[random], heroTypeIndex.get(remainingHeroTypes[remainingHeroTypesCount-1]))
-    heroTypeIndex.remove(remainingHeroTypes[remainingHeroTypesCount-1])
+//creates a random hero for a player
+function createRandomHero(CPlayer cPlayer, boolean removeFromTavern)
+    var random = GetRandomInt(0, remainingHeroTypesCount-1)
 
-    remainingHeroTypes[random] = remainingHeroTypes[remainingHeroTypesCount-1]
-    remainingHeroTypes[remainingHeroTypesCount-1]=null
-    remainingHeroTypesCount--*/
+    Hero hero = new Hero(cPlayer, remainingHeroTypes[random].getUnitId() , gg_rct_CenterMid.getCenter(), angle(0))
+    setupCreatedHero(hero)
 
+
+
+
+
+
+
+    removeHeroType(remainingHeroTypes[random], removeFromTavern)
 
 
 function removeHeroType(HeroType herotype, boolean removeFromTavern)
@@ -121,7 +124,10 @@ function removeHeroType(HeroType herotype, boolean removeFromTavern)
 function allRandom()
     for i = 0 to MAX_HERO_COUNT-1
         if(getCPlayer(i).getPlayerType()==PlayerType.HERO)
-            createRandomHero(getCPlayer(i), false)
+            if players[i].getController() == MAP_CONTROL_COMPUTER
+                createRandomHeroForAI(getCPlayer(i), false)
+            else
+                createRandomHero(getCPlayer(i), false)
 
     allHeroesPicked()
     
@@ -188,7 +194,10 @@ function allPickEnd()
             if(Hero.getHero(getCPlayer(i))==null)
                 if(GetLocalPlayer()==players[i])
                     print("|cffffcc00You have not picked a hero in time. You will get a random one.")
-                createRandomHero(getCPlayer(i), false)
+                if players[i].getController() == MAP_CONTROL_COMPUTER
+                    createRandomHeroForAI(getCPlayer(i), false)
+                else
+                    createRandomHero(getCPlayer(i), false)
 
             FogModifierStop(tavernVision[i])
             DestroyFogModifier(tavernVision[i])
@@ -313,7 +322,7 @@ init
                     new CPlayer(players[i], i<=4?Team.TEAM1:Team.TEAM2, PlayerType.HERO)
 
                 //Hero hero = new Hero(createUnit(players[i], 'H00H', gg_rct_CenterMid.getCenter(), angle(0)))
-                createRandomHero(getCPlayer(i), false)
+                createRandomHeroForAI(getCPlayer(i), false)
                 //setupCreatedHero(hero)
 
                 //removeHeroType(hero.getHeroType())

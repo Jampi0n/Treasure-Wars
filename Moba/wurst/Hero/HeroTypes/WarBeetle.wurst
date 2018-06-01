@@ -468,7 +468,7 @@ function initHeroType()
 
 
 init
-    heroType = new HeroType(HERO_WAR_BEETLE, "BTNWarBeetle.blp", 10)
+    heroType = new HeroType(HERO_WAR_BEETLE, "BTNWarBeetle.blp", 10, true)
         ..setOnInitFunction(() -> initHeroType())
 
    

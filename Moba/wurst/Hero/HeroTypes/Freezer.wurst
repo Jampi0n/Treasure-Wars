@@ -695,6 +695,6 @@ function createHeroType(Hero hero)
     
         
 init
-    heroType = new HeroType(HERO_FREEZER, Icons.bTNFrostArmor, 9)
+    heroType = new HeroType(HERO_FREEZER, Icons.bTNFrostArmor, 9, true)
         ..setOnInitFunction(() -> initHeroType())
         ..setOnCreateFunction((Hero hero) -> createHeroType(hero))

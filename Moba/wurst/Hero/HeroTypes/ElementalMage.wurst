@@ -498,7 +498,7 @@ function initHeroType()
     end))
 
 init
-    heroType = new HeroType(HERO_ELEMENTAL_MAGE, "BTNCloakOfResistance", 11)
+    heroType = new HeroType(HERO_ELEMENTAL_MAGE, "BTNCloakOfResistance", 11, false)
         ..setOnInitFunction(() -> initHeroType())
 
    
