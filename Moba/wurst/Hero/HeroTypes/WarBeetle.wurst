@@ -79,8 +79,8 @@ function venomousBeetle()
             ..setDurationNormal(lvl, 0.1)
             ..setTargetsAllowed(lvl, "enemies,ground,neutral,nonancient,organic")
 
-constant real array WAR_STOMP_DURATION = [1.5, 1.75, 2, 2.25, 2.5]
-constant real WAR_STOMP_DURATION_BONUS = 1
+constant real array WAR_STOMP_DURATION = [1.4, 1.6, 1.8, 2, 2.2]
+constant real WAR_STOMP_DURATION_BONUS = 0.7
 constant real array WAR_STOMP_DAMAGE = [60, 100, 140, 180, 220]
 constant real WAR_STOMP_DAMAGE_BONUS = 120
 constant real WAR_STOMP_AOE = 350

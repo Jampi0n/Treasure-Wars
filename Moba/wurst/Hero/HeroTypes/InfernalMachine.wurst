@@ -153,11 +153,11 @@ function innerFire()
                 INNER_FIRE_DURATION.str()
             ))
 
-constant real array FLAME_THROWER_DAMAGE = [40, 70, 100, 130, 160]
-constant real FLAME_THROWER_DAMAGE_BONUS = 120
+constant real array FLAME_THROWER_DAMAGE = [60, 90, 120, 150, 180]
+constant real FLAME_THROWER_DAMAGE_BONUS = 100
 
-constant real array FLAME_THROWER_DOT = [15, 25, 35, 45, 55]
-constant real FLAME_THROWER_DOT_BONUS = 40
+constant real array FLAME_THROWER_DOT = [16, 24, 32, 40, 48]
+constant real FLAME_THROWER_DOT_BONUS = 30
 
 constant real array FLAME_THROWER_DURATION = [3, 3.5, 4, 4.5, 5]
 
