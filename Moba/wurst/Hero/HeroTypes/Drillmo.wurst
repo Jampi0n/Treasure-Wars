@@ -276,7 +276,6 @@ class Pull
                         this.caster.dealDamage(this.pulledUnit, PULL_DAMAGE[this.level-1].bonus(this.caster.getStr(), PULL_DAMAGE_BONUS), ReductionType.PHYSICAL)
                         this.pulledUnit.addBuff(caster, 0.15, STUNNED, 1)
                         this.pulledUnit.addBuff(caster, 0.15, UNTARGETABLE, 1)
-                        this.pulledUnit.setPropWindow(0)
 
                 else
                     if count < 65 -25
@@ -291,7 +290,6 @@ class Pull
         this.checkTimer.release()
         //destroy this.fx
         if this.pulledUnit != null
-            this.pulledUnit.setPropWindow(GetUnitDefaultPropWindow(this.pulledUnit))
             this.pulledUnit.setPos(this.pulledUnit.getPos())
 
 function onSpellCast()
