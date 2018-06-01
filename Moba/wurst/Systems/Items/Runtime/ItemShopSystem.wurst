@@ -209,6 +209,19 @@ public class Recipe extends Item
         this.resultItem = resultItem
         this.resultItem.recipe = this
 
+    //this event happens before the gold is added
+    //it is needed, because there is upkeep
+    static function onItemSell()
+        let owner = GetTriggerPlayer()
+        let itemTypeId = GetSoldItem().getTypeId()
+        let itm = itemMap.get(itemTypeId)
+        let currentGold = owner.getGold()
+        if itm != null
+            let newGold = currentGold + (itm.getGoldCost() div 2)
+            doAfter(0) ->
+                owner.setGold(newGold)
+
+
     static function onItemGet(unit hero, item whichItem)
         let itemTypeId = whichItem.getTypeId()
         let itm = itemMap.get(itemTypeId)
@@ -279,7 +292,7 @@ public class Recipe extends Item
             else
                 //remove
                 owner.addGold(recipe.gold)
-                printTimedToPlayer("You are missing: "+missingItems, 5, owner)
+                printTimedToPlayer("Missing items: "+missingItems +" Missing gold: "+missingGold.toString(), 5, owner)
                 printTimedToPlayer("Item price refunded.", 5, owner)
 
     
@@ -299,6 +312,9 @@ init
     CreateTrigger()
         ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_PICKUP_ITEM)
         ..addAction(function Recipe.onItemGetTrigger)
+    CreateTrigger()
+        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_PAWN_ITEM)
+        ..addAction(function Recipe.onItemSell)
 
     /*doAfter(1, () -> print("gold cost = "+itemGoldCost[ITEM_ID_HELMET].toString()))
     doAfter(1, () -> print("id = "+itemId[ITEM_ID_HELMET].toString()))

@@ -5,7 +5,6 @@ import StandardTextTags
 import initlater HeroControl
 import PlayerControl
 import Constants
-import UtilityFunctions
 
 public function createUnitType(int unitId, int bounty, int baseAttack, int upgradeAttack, int attackUpgradeId, int baseArmor, int upgradeArmor, int armorUpgradeId, int hitBox, string modelPath) returns int
     new UnitType(unitId, bounty, baseAttack, upgradeAttack, attackUpgradeId, baseArmor, upgradeArmor, armorUpgradeId, hitBox, modelPath)
