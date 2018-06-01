@@ -14,11 +14,132 @@ import UnitWrapper
 import PlayerControl
 import UnitType
 import StandardTextTags
+import Buff
 
 constant int DUMMY_CASTER = compiletime(UNIT_ID_GEN.next())
 constant int HEAL_BUFF_ID = compiletime(createDummyBuff())
 
 constant int MAX_CAMP_LEVEL = 20
+
+constant BUFF_MAP = new HashMap<int, BuffConfiguration>
+
+constant BuffType TURTLE_BUFF = new BuffType(true, false) //return dmg
+constant BuffType JUNGLE_STALKER_BUFF = new BuffType(true, false) //hp reg bonus
+constant BuffType MURGUL_BUFF = new BuffType(true, false) //attack speed bonus
+constant BuffType SEA_GIANT_BUFF = new BuffType(true, false) //str bonus
+constant BuffType MAKRURA_BUFF = new BuffType(true, false) //armor bonus
+constant BuffType SEA_ELEMENTAL_BUFF = new BuffType(true, false) //mana reg bonus
+constant BuffType REVENANT_BUFF = new BuffType(true, true) //dealing damage slows
+public constant BuffType REVENANT_SLOW_BUFF = new BuffType(false, true) //dealing damage slows
+
+constant TURTLE_RETURN_RATIO = 10
+public constant TURTLE_BUFF_ID = compiletime(createAuraBuff("Turtle Shell", "Returns "+TURTLE_RETURN_RATIO.toString()+"% of the damage the unit takes from attacks to the attacker.", Icons.bTNSeaTurtleGreen))
+constant TURTLE_ABILITY_ID = compiletime(createPositiveBuffAbility(1, TURTLE_BUFF_ID, "", ""))
+
+constant JUNGLE_STALKER_HP_REG = 8
+constant JUNGLE_STALKER_BUFF_ID = compiletime(createAuraBuff("Jungle Blood", "Heals "+JUNGLE_STALKER_HP_REG.toString()+" hit points per second.", Icons.bTNJungleBeast))
+constant JUNGLE_STALKER_ABILITY_ID = compiletime(createPositiveBuffAbility(1, JUNGLE_STALKER_BUFF_ID, "", ""))
+
+constant MURGUL_AS = 8
+constant MURGUL_BUFF_ID = compiletime(createAuraBuff("Mur'gul Frenzy", "Increases attack speed by "+MURGUL_AS.toString()+"%.", Icons.bTNMurgulShadowCaster))
+constant MURGUL_ABILITY_ID = compiletime(createPositiveBuffAbility(1, MURGUL_BUFF_ID, "", ""))
+
+constant SEA_GIANT_STR = 10
+constant SEA_GIANT_BUFF_ID = compiletime(createAuraBuff("Giant Strength", "Increases strength by "+SEA_GIANT_STR.toString()+"%.", Icons.bTNSeaGiantGreen))
+constant SEA_GIANT_ABILITY_ID = compiletime(createPositiveBuffAbility(1, SEA_GIANT_BUFF_ID, "", ""))
+
+constant MAKRURA_AR = 20
+constant MAKRURA_BUFF_ID = compiletime(createAuraBuff("Makrura Carapace", "Increases armor by "+MAKRURA_AR.toString()+"%.", Icons.bTNLobstrokkGreen))
+constant MAKRURA_ABILITY_ID = compiletime(createPositiveBuffAbility(1, MAKRURA_BUFF_ID, "", ""))
+
+constant SEA_ELEMENTAL_MP_REG = 2
+constant SEA_ELEMENTAL_BUFF_ID = compiletime(createAuraBuff("Liquid Energy", "Restores "+SEA_ELEMENTAL_MP_REG.toString()+" mana points per second.", Icons.bTNSeaElemental))
+constant SEA_ELEMENTAL_ABILITY_ID = compiletime(createPositiveBuffAbility(1, SEA_ELEMENTAL_BUFF_ID, "", ""))
+
+constant REVENANT_SLOW = 25
+public constant REVENANT_BUFF_ID = compiletime(createAuraBuff("Death Curse", "Slows movement speed of all targets damaged by this unit by "+REVENANT_SLOW.toString()+"%.", Icons.bTNDeepLordRevenant))
+constant REVENANT_ABILITY_ID = compiletime(createPositiveBuffAbility(1, REVENANT_BUFF_ID, Abilities.unholyAura, "origin"))
+
+public constant REVENANT_SLOW_BUFF_ID = compiletime(createAuraBuff("Death Curse", "This unit is slowed by "+REVENANT_SLOW.toString()+"%.", Icons.bTNCripple))
+constant REVENANT_SLOW_ABILITY_ID = compiletime(createPositiveBuffAbility(1, REVENANT_SLOW_BUFF_ID, Abilities.crippleTarget, ""))
+
+
+function initCreepBuffs()
+    var abilityList = new LinkedList<int>
+    abilityList.add(TURTLE_ABILITY_ID)
+    TURTLE_BUFF.setup(abilityList, TURTLE_BUFF_ID)
+
+    abilityList = new LinkedList<int>
+    abilityList.add(JUNGLE_STALKER_ABILITY_ID)
+    JUNGLE_STALKER_BUFF.setup(abilityList, JUNGLE_STALKER_BUFF_ID)
+
+    abilityList = new LinkedList<int>
+    abilityList.add(MURGUL_ABILITY_ID)
+    MURGUL_BUFF.setup(abilityList, MURGUL_BUFF_ID)
+
+    abilityList = new LinkedList<int>
+    abilityList.add(SEA_GIANT_ABILITY_ID)
+    SEA_GIANT_BUFF.setup(abilityList, SEA_GIANT_BUFF_ID)
+
+    abilityList = new LinkedList<int>
+    abilityList.add(MAKRURA_ABILITY_ID)
+    MAKRURA_BUFF.setup(abilityList, MAKRURA_BUFF_ID)
+
+    abilityList = new LinkedList<int>
+    abilityList.add(SEA_ELEMENTAL_ABILITY_ID)
+    SEA_ELEMENTAL_BUFF.setup(abilityList, SEA_ELEMENTAL_BUFF_ID)
+
+    abilityList = new LinkedList<int>
+    abilityList.add(REVENANT_ABILITY_ID)
+    REVENANT_BUFF.setup(abilityList, REVENANT_BUFF_ID)
+
+    abilityList = new LinkedList<int>
+    abilityList.add(REVENANT_SLOW_ABILITY_ID)
+    REVENANT_SLOW_BUFF.setup(abilityList, REVENANT_SLOW_BUFF_ID)
+
+    JUNGLE_STALKER_BUFF.setPeriodicTime(0.25)
+    JUNGLE_STALKER_BUFF.addPeriodicFunction((Buff whichBuff) -> begin
+        let target = whichBuff.getTarget()
+        target.healHP(target, 0.25 * JUNGLE_STALKER_HP_REG)
+    end)
+
+    SEA_ELEMENTAL_BUFF.setPeriodicTime(0.25)
+    SEA_ELEMENTAL_BUFF.addPeriodicFunction((Buff whichBuff) -> begin
+        let target = whichBuff.getTarget()
+        target.healMana(target, 0.25 * SEA_ELEMENTAL_MP_REG)
+    end)
+
+    MURGUL_BUFF.addFirstFunction((Buff whichBuff) -> begin
+        whichBuff.getTarget().wrapper().addStatAbsoluteBonus(Stat.AS, MURGUL_AS)
+    end)
+    MURGUL_BUFF.addEndFunction((Buff whichBuff) -> begin
+        whichBuff.getTarget().wrapper().addStatAbsoluteBonus(Stat.AS, -MURGUL_AS)
+    end)
+
+    SEA_GIANT_BUFF.addFirstFunction((Buff whichBuff) -> begin
+        whichBuff.getTarget().wrapper().addStatRelativeBonus(Stat.STR, SEA_GIANT_STR * 10)
+    end)
+    SEA_GIANT_BUFF.addEndFunction((Buff whichBuff) -> begin
+        whichBuff.getTarget().wrapper().addStatRelativeBonus(Stat.STR, -SEA_GIANT_STR * 10)
+    end)
+
+    MAKRURA_BUFF.addFirstFunction((Buff whichBuff) -> begin
+        whichBuff.getTarget().wrapper().addStatAbsoluteBonus(Stat.AR, MAKRURA_AR)
+    end)
+    MAKRURA_BUFF.addEndFunction((Buff whichBuff) -> begin
+        whichBuff.getTarget().wrapper().addStatAbsoluteBonus(Stat.AR, -MAKRURA_AR)
+    end)
+
+class BuffConfiguration
+    BuffType customBuff
+    BuffType bountyBuff
+    real bountyDuration
+    static constant unitTypeToBuffConfig = new HashMap<int, BuffConfiguration>
+
+    construct(BuffType customBuff,  BuffType bountyBuff, real bountyDuration)
+        this.customBuff = customBuff
+        this.bountyBuff = bountyBuff
+        this.bountyDuration = bountyDuration
 
 unit DUMMY_HEALER
 
@@ -36,6 +157,7 @@ class Creep
         this.unitTypeId = unitTypeId
         this.spawnPos = spawnPos
         this.facing = facing
+
 
 
 
@@ -67,6 +189,10 @@ public class CreepCamp
         unitToCamp.put(creepUnit, this)
         creepTypes.add(new Creep(creepUnit))
         totalLevel += creepUnit.getLevel()
+
+        let customBuff = BuffConfiguration.unitTypeToBuffConfig.get(creepUnit.getTypeId()).customBuff
+        if customBuff != null
+            creepUnit.addBuff(creepUnit, -1, customBuff, 1)
     
     private function addUnitRespawn(unit creepUnit)
         SetUnitAcquireRange(creepUnit, 200)
@@ -83,6 +209,10 @@ public class CreepCamp
             let creepUnit = createUnit(players[PLAYER_NEUTRAL_AGGRESSIVE], c.unitTypeId, c.spawnPos, c.facing)
             addUnitRespawn(creepUnit)
 
+            let customBuff = BuffConfiguration.unitTypeToBuffConfig.get(c.unitTypeId).customBuff
+            if customBuff != null
+                creepUnit.addBuff(creepUnit, -1, customBuff, 1)
+
 
     private static function onKill(unit u, unit killer)
         DUMMY_HEALER
@@ -95,6 +225,9 @@ public class CreepCamp
         killer.getOwner().getCPlayer()
             ..addUnitKill()
             ..addGoldEx(bounty)
+
+        killer.healHP(killer, killer.getMaxHP()*0.05)
+        killer.healMana(killer, killer.getMaxMana()*0.05)
 
         Hero.getHero(killer).addXp(u.getLevel()*4.)
     
@@ -121,8 +254,6 @@ public class CreepCamp
         let target = GetTriggerUnit()
         if(target.hasAbility(HEAL_BUFF_ID))
             target.removeAbility(HEAL_BUFF_ID)
-            target.healHP(target, target.getMaxHP()*0.05)
-            target.healMana(target, target.getMaxMana()*0.05)
 
     private static function initCreep(unit creepUnit, CreepCamp camp)
         if not allCreeps.contains(creepUnit)
@@ -169,6 +300,7 @@ public class CreepCamp
 
 init
     CreepCamp.initialize()
+    initCreepBuffs()
 
 
 @compiletime
