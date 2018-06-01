@@ -12,6 +12,7 @@ import initlater Paladin
 import StandardTextTags
 import HashMap
 import GameTimer
+import initlater Creeps
 
 import initlater ItemShopSystem
 
@@ -82,6 +83,15 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
                 currentDamage = currentDamage * (100 + CRITICAL_DAMAGE_MULT[critical.getLevel()-1])/100
                 createCriticalStrikeTextTag(target, currentDamage.toInt())
                 critical.dispel()
+
+            // turtle buff
+            if isAttack and target.hasAbility(TURTLE_BUFF_ID)
+                doAfter(0) ->
+                    target.dealDamage(source, currentDamage * 0.1, ReductionType.PHYSICAL)
+
+            // revenant buff
+            if source.hasAbility(REVENANT_BUFF_ID)
+                target.addBuffReduced(source, 2, REVENANT_SLOW_BUFF, 1)
 
             //heavy armored
             if isAttack and target.getAbilityLevel(ABILITY_HEAVY_ARMORED) > 0
