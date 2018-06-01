@@ -130,16 +130,53 @@ function initCreepBuffs()
         whichBuff.getTarget().wrapper().addStatAbsoluteBonus(Stat.AR, -MAKRURA_AR)
     end)
 
+    new BuffConfiguration(MURGUL_BUFF, 25)
+    ..addToUnitType(MURGUL_MAGE)
+    new BuffConfiguration(MURGUL_BUFF, -1)
+    ..addToUnitType(MURGUL_MELEE)
+
+    new BuffConfiguration(MAKRURA_BUFF, 25)
+    ..addToUnitType(MAKRURA_LORD)
+    new BuffConfiguration(MAKRURA_BUFF, -1)
+    ..addToUnitType(MAKRURA_SNAPPER)
+
+    new BuffConfiguration(SEA_GIANT_BUFF, 25)
+    ..addToUnitType(SEA_GIANT)
+
+    new BuffConfiguration(SEA_ELEMENTAL_BUFF, 25)
+    ..addToUnitType(SEA_ELEMENTAL)
+
+    new BuffConfiguration(JUNGLE_STALKER_BUFF, 25)
+    ..addToUnitType(JUNGLE_BEAST)
+    new BuffConfiguration(JUNGLE_STALKER_BUFF, -1)
+    ..addToUnitType(JUNGLE_BEAST_ELDER)
+
+    new BuffConfiguration(REVENANT_BUFF, 50)
+    ..addToUnitType(REVENANT_BOSS)
+    new BuffConfiguration(REVENANT_BUFF, -1)
+    ..addToUnitType(REVENANT)
+
+    new BuffConfiguration(TURTLE_BUFF, 25)
+    ..addToUnitType(TURTLE_GARGANTUAN)
+    new BuffConfiguration(TURTLE_BUFF, -1)
+    ..addToUnitType(TURTLE_GIANT)
+
+
+
 class BuffConfiguration
     BuffType customBuff
     BuffType bountyBuff
     real bountyDuration
     static constant unitTypeToBuffConfig = new HashMap<int, BuffConfiguration>
 
-    construct(BuffType customBuff,  BuffType bountyBuff, real bountyDuration)
-        this.customBuff = customBuff
-        this.bountyBuff = bountyBuff
+    construct(BuffType whichBuff, real bountyDuration)
+        this.customBuff = whichBuff
+        this.bountyBuff = bountyDuration > 0 ? whichBuff : null
         this.bountyDuration = bountyDuration
+
+    function addToUnitType(int unitTypeId)
+        unitTypeToBuffConfig.put(unitTypeId, this)
+        
 
 unit DUMMY_HEALER
 
@@ -209,9 +246,9 @@ public class CreepCamp
             let creepUnit = createUnit(players[PLAYER_NEUTRAL_AGGRESSIVE], c.unitTypeId, c.spawnPos, c.facing)
             addUnitRespawn(creepUnit)
 
-            let customBuff = BuffConfiguration.unitTypeToBuffConfig.get(c.unitTypeId).customBuff
-            if customBuff != null
-                creepUnit.addBuff(creepUnit, -1, customBuff, 1)
+            let buffConfig = BuffConfiguration.unitTypeToBuffConfig.get(c.unitTypeId)
+            if buffConfig != null and buffConfig.customBuff != null
+                    creepUnit.addBuff(creepUnit, -1, buffConfig.customBuff, 1)
 
 
     private static function onKill(unit u, unit killer)
@@ -219,6 +256,10 @@ public class CreepCamp
             ..setPos(u.getPos())
         //for i = 1 to count
         DUMMY_HEALER.issueTargetOrder("acidbomb", killer)
+
+        let buffConfig = BuffConfiguration.unitTypeToBuffConfig.get(u.getTypeId())
+        if buffConfig != null and buffConfig.bountyBuff != null
+            killer.addBuff(killer, buffConfig.bountyDuration, buffConfig.bountyBuff, 1)
 
         let bounty = UnitType.getUnitType(u.getTypeId()).getBounty()
         createGoldBountyTextTag(u, bounty, killer.getOwner())
