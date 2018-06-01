@@ -130,6 +130,14 @@ function initCreepBuffs()
         whichBuff.getTarget().wrapper().addStatAbsoluteBonus(Stat.AR, -MAKRURA_AR)
     end)
 
+    REVENANT_SLOW_BUFF.addFirstFunction((Buff whichBuff) -> begin
+        whichBuff.getTarget().wrapper().addStatRelativeBonus(Stat.MS, -REVENANT_SLOW * 10)
+    end)
+    REVENANT_SLOW_BUFF.addEndFunction((Buff whichBuff) -> begin
+        whichBuff.getTarget().wrapper().addStatRelativeBonus(Stat.MS, REVENANT_SLOW * 10)
+    end)
+
+
     new BuffConfiguration(MURGUL_BUFF, 25)
     ..addToUnitType(MURGUL_MAGE)
     new BuffConfiguration(MURGUL_BUFF, -1)
@@ -147,9 +155,9 @@ function initCreepBuffs()
     ..addToUnitType(SEA_ELEMENTAL)
 
     new BuffConfiguration(JUNGLE_STALKER_BUFF, 25)
-    ..addToUnitType(JUNGLE_BEAST)
-    new BuffConfiguration(JUNGLE_STALKER_BUFF, -1)
     ..addToUnitType(JUNGLE_BEAST_ELDER)
+    new BuffConfiguration(JUNGLE_STALKER_BUFF, -1)
+    ..addToUnitType(JUNGLE_BEAST)
 
     new BuffConfiguration(REVENANT_BUFF, 50)
     ..addToUnitType(REVENANT_BOSS)
@@ -229,7 +237,8 @@ public class CreepCamp
 
         let customBuff = BuffConfiguration.unitTypeToBuffConfig.get(creepUnit.getTypeId()).customBuff
         if customBuff != null
-            creepUnit.addBuff(creepUnit, -1, customBuff, 1)
+            doAfter(0.01) ->
+                creepUnit.addBuff(creepUnit, -1, customBuff, 1)
     
     private function addUnitRespawn(unit creepUnit)
         SetUnitAcquireRange(creepUnit, 200)
@@ -340,8 +349,8 @@ public class CreepCamp
             c.respawnDuration = c.totalLevel * 4.
 
 init
-    CreepCamp.initialize()
     initCreepBuffs()
+    CreepCamp.initialize()
 
 
 @compiletime
