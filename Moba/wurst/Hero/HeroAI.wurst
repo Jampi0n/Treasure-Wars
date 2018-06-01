@@ -48,14 +48,6 @@ enum AIState
     HEAL //waits at the altar to be fully healed
     TEAM_FIGHT //engages against nearby enemies, should be initiated, if a favoured fight is assumed
 
-
-public enum AbilitySlot
-    Q
-    W
-    E
-    R
-    PASSIVE
-
 public interface Filter
     function filter(unit u) returns boolean
 
@@ -509,26 +501,6 @@ public class HeroAI
                 this.buyItems()
                 this.selectSkills()
         end))
-
-    static function getAbilityId(int heroId, AbilitySlot slot) returns int
-        int id = 256 * 256 * 256 * 65 //A
-        let second = (heroId/10).toInt()
-        id += 256 * 256 * (90-second) //Z,Y
-
-        id += 256 * (48 + heroId - 10*second)
-        if slot == AbilitySlot.Q
-            id += 81
-        else if slot == AbilitySlot.W
-            id += 87
-        else if slot == AbilitySlot.E
-            id += 69
-        else if slot == AbilitySlot.R
-            id += 82
-        else if slot == AbilitySlot.PASSIVE
-            id += 80
-
-        //print(id.toRawCode())
-        return id
         
     function changeState(AIState newState)
         if this.state != newState
@@ -627,15 +599,15 @@ public class HeroAI
     function selectSingleSkill(string char)
         int abilcode = -1
         if char == "Q"
-            abilcode = getAbilityId(this.heroType.getHeroId(), AbilitySlot.Q)
+            abilcode = this.heroType.getAbilityId(AbilitySlot.Q)
         else if char == "W"
-            abilcode = getAbilityId(this.heroType.getHeroId(), AbilitySlot.W)
+            abilcode = this.heroType.getAbilityId(AbilitySlot.W)
         else if char == "E"
-            abilcode = getAbilityId(this.heroType.getHeroId(), AbilitySlot.E)
+            abilcode = this.heroType.getAbilityId(AbilitySlot.E)
         else if char == "R"
-            abilcode = getAbilityId(this.heroType.getHeroId(), AbilitySlot.R)
+            abilcode = this.heroType.getAbilityId(AbilitySlot.R)
         else if char == "P"
-            abilcode = getAbilityId(this.heroType.getHeroId(), AbilitySlot.PASSIVE)
+            abilcode = this.heroType.getAbilityId(AbilitySlot.PASSIVE)
 
         SelectHeroSkill(this.heroUnit, abilcode)
 

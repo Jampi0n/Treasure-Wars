@@ -320,7 +320,7 @@ function attackAI(HeroAI ai)
             ai.attack(target)
 
 function teamFightAI(HeroAI ai)
-    let ulti = HeroAI.getAbilityId(ai.getHero().getHeroType().getHeroId(), AbilitySlot.R)
+    let ulti = heroType.getAbilityId(AbilitySlot.R)
     let hero = ai.getHeroUnit()
     if hero.getAbilityLevel(ulti) > 0 and hero.getAbilityCooldownRemaining(ulti) <= 0
         let g = CreateGroup()

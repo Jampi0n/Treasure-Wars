@@ -461,7 +461,7 @@ function teamFightAI(HeroAI ai)
     if ai.getTeamFightTarget().getPos().distanceTo(hero.getPos()) < 500
         ai.issue("carrionswarm", ai.getTeamFightTarget().getPos())
 
-    let ulti = HeroAI.getAbilityId(ai.getHero().getHeroType().getHeroId(), AbilitySlot.R)
+    let ulti = ai.getHero().getHeroType().getAbilityId(AbilitySlot.R)
     
     if hero.getAbilityLevel(ulti) > 0 and hero.getAbilityCooldownRemaining(ulti) <= 0
         let g = CreateGroup()

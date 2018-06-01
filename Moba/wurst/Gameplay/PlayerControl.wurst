@@ -495,7 +495,7 @@ public class CPlayer
             SetPlayerState(p, PLAYER_STATE_RESOURCE_FOOD_USED, 1)
             SetPlayerState(p, PLAYER_STATE_RESOURCE_FOOD_USED, 0)
             Team t = i <= HERO_PLAYER_TEAM_1_LAST ?Team.TEAM1:Team.TEAM2
-            if p.getSlotState()==PLAYER_SLOT_STATE_PLAYING
+            if p.getSlotState()==PLAYER_SLOT_STATE_PLAYING or true
                 new CPlayer(p, t, PlayerType.HERO)
                 if p.getController() == MAP_CONTROL_COMPUTER
                     PauseCompAI(players[i], true)
