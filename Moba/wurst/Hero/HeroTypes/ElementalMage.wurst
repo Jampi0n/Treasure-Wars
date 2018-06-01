@@ -50,11 +50,11 @@ constant FROST_BOLT_BUFF_ID = compiletime(createAuraBuff("Frost Attack", "This u
 constant FROST_BOLT_ABILITY_ID = compiletime(createNegativeBuffAbility(5, FROST_BOLT_BUFF_ID, Abilities.frostDamage, "chest"))
 
 constant int array FROST_BOLT_SLOW = [40, 45, 50, 55, 60]
-constant real array FROST_BOLT_DURATION = [2, 2.5, 3, 3.5, 4]
+constant real array FROST_BOLT_DURATION = [2.5, 3, 3.5, 4, 4.5]
 
 
-constant real array FROST_BOLT_DAMAGE = [60, 100, 140, 180, 220]
-constant real FROST_BOLT_DAMAGE_BONUS = 100
+constant real array FROST_BOLT_DAMAGE = [75, 120, 165, 210, 255]
+constant real FROST_BOLT_DAMAGE_BONUS = 140
 
 @compiletime
 function abilityQ()
@@ -147,10 +147,10 @@ constant int FF_FLAME_IMPACT = compiletime(ArtilleryDetection.createDetectionDum
 constant int FF_FLAME_ARTILLERY = compiletime(ArtilleryDetection.createArtilleryDummy(0, 0, 600, 2.5, Abilities.redDragonMissile, 1600, 0.1, FF_FLAME_IMPACT))
 
 constant real array FF_IMPACT_DAMAGE = [140, 170, 200, 230, 260]
-constant real FF_IMPACT_DAMAGE_BONUS = 150
+constant real FF_IMPACT_DAMAGE_BONUS = 125
 
-constant real array FF_DOT = [30, 40, 50, 60, 70]
-constant real FF_DOT_BONUS = 45
+constant real array FF_DOT = [24, 32, 40, 48, 56]
+constant real FF_DOT_BONUS = 40
 
 constant int array FF_SLOW = [30, 40, 50, 60, 70]
 constant real array FF_BUFF_DURATION = [3, 3.5, 4, 4.5, 5]
