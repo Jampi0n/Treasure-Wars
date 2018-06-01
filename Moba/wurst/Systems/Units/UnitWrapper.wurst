@@ -190,7 +190,7 @@ public class UnitWrapper
         
 
     function applyTotalStatBonus(Stat whichStat)
-        if whichStat != Stat.MS and whichStat != Stat.HR and whichStat!= Stat.MR
+        if whichStat != Stat.MS and whichStat != Stat.HR and whichStat!= Stat.MR and whichStat!= Stat.HP and whichStat!= Stat.MP
             this.toUnit().setBonus(whichStat, this.statsTotalBonus[whichStat.toInt()])
             //update ability tooltips
             if this.toUnit().isType(UNIT_TYPE_HERO) and (whichStat == Stat.STR or whichStat == Stat.INT)
@@ -205,6 +205,10 @@ public class UnitWrapper
         else
             if whichStat == Stat.MS
                 this.toUnit().setMovementSpeed( this.getStatBaseValue(whichStat) + this.statsTotalBonus[whichStat.toInt()].toReal() )
+            else if whichStat == Stat.HP
+                this.toUnit().setMaxHP(this.getStatTotalValue(Stat.HP))
+            else if whichStat == Stat.MP
+                this.toUnit().setMaxMana(this.getStatTotalValue(Stat.MP))
 
     /**
     Sets the absolute stat bonus and updates the total bonus.

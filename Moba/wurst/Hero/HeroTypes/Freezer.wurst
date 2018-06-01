@@ -395,7 +395,7 @@ function attackAI(HeroAI ai)
         frostWyrm[hero.getOwner().getId()].issueTargetOrder("patrol", hero)
  
 function teamFightAI(HeroAI ai)
-    let ulti = HeroAI.getAbilityId(ai.getHero().getHeroType().getHeroId(), AbilitySlot.R)
+    let ulti = heroType.getAbilityId( AbilitySlot.R)
     let hero = ai.getHeroUnit()
 
 
