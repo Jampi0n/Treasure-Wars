@@ -9,10 +9,12 @@ import Assets
 import SoundUtils
 import LinkedList
 import General
+import StandardTextTags
 
 constant REVIVE_TIME = 150.
 constant MAX_LEVEL = 5
 constant DEATH_SOUND = new SoundDefinition(Sounds.giantSeaTurtleDeath1, false)
+constant TEAM_REWARD = 300
 
 vec2 spawnPos
 angle facing
@@ -52,14 +54,17 @@ function onDragonTurtleDeath()
             killedByTeam = false
 
         if killedByTeam
-            printTimed("Team "+teamName+" has killed a Dragon Turtle. All heroes get 300 gold. The Dragon Turtle will respawn in "+REVIVE_TIME.toInt().toString()+" seconds.", 10)
+            printTimed("Team "+teamName+" has killed a Dragon Turtle. All heroes get "+TEAM_REWARD.toString()+" gold. The Dragon Turtle will respawn in "+REVIVE_TIME.toInt().toString()+" seconds.", 10)
             PingMinimap(target.getX(), target.getY(), 3)
+
+            
 
             for CPlayer killerHero in killingTeam
                 let hero = Hero.getHero(killerHero)
                 if hero != null
                     killerHero.dragonTurtleBonus()
                     hero.addXp(150)
+                    createGoldBountyTextTag(target, TEAM_REWARD, killerHero.getPlayer())
 
             killer.getOwner().getCPlayer().statDragonTurtlesKilled++
 
@@ -81,8 +86,7 @@ function onDragonTurtleDeath()
         end))
 
 function CPlayer.dragonTurtleBonus()
-    int gold = 300
-    this.addGoldEx( gold )
+    this.addGoldEx( TEAM_REWARD )
 
 
 
