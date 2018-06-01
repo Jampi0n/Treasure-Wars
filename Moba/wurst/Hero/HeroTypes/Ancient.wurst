@@ -304,7 +304,7 @@ function onUprootStats(unit caster, int level) // remove bonus
     
 
 function onUproot(unit caster, int level) // remove bonus
-    caster.setPropWindow(GetUnitDefaultPropWindow(caster))
+    caster.setPropWindow(caster.getDefaultPropWindow())
     onUprootStats(caster, level)
     caster.setTimeScale(1)
     let pId = caster.getOwner().getId()
