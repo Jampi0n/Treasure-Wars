@@ -12,6 +12,9 @@ import Execute
 constant HP_PER_LEVEL = 15
 constant STRENGTH_BONUS = 45
 
+constant int array ASSIST_BOUNTY = [0, 60, 40, 30, 24]
+constant int array KILL_BOUNTY = [240, 180, 160, 150, 144]
+
 public function delayInit(real maxDelay, CallbackSingle cb)
     doAfter(GetRandomReal(1, maxDelay), cb)
 
@@ -260,9 +263,9 @@ public class Hero
 
         if killer.getId() < PLAYER_NEUTRAL_AGGRESSIVE
             let bounty = 240
-            int assistBounty = (bounty/(2*(size+1))).toInt()
+            int assistBounty = ASSIST_BOUNTY[size]
 
-            int killBounty = (bounty/2 + bounty/(2*(size+1))).toInt()
+            int killBounty = KILL_BOUNTY[size]
 
             if size == 0
                 printTimed("{0} was killed by {1} for {2} gold.".format(
