@@ -454,39 +454,39 @@ function setupTooltips()
     heroType.addDynamicTooltipIntelligence(tooltip)
 
 function initHeroType()
-    heroType
-        ..addOnSpellCastFunc(function onSpellCast)
-        ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
-        ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
-        ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
-        ..setSkillBuild("QWEQQWEQQWEWEWE")
-        ..addItem(ITEM_ID_HEAVY_BOOTS)
-        ..addItem(ITEM_ID_RUNIC_ARMOR)
-        ..addItem(ITEM_ID_WAR_HORN)
-        ..addItem(ITEM_ID_ARMOR_OF_COURAGE)
-        ..addItem(ITEM_ID_ARCANE_SHIELD)
-        ..addItem(ITEM_ID_WAR_DRUM)
-
-    var abilityList = new LinkedList<int>
-        ..add(ABILITY_HOLY_SHIELD_BUFF)
-    BUFF_HOLY_SHIELD.setup(abilityList, BUFF_ID_HOLY_SHIELD)
-    
-    abilityList = new LinkedList<int>
-        ..add(ABILITY_BATTLE_ROAR_BUFF)
-    BATTLE_ROAR.setup(abilityList, BUFF_ID_BATTLE_ROAR)
-    BATTLE_ROAR.addFirstFunction( (Buff thisBuff) -> (begin
-        thisBuff.getTarget().wrapper()
-            ..addStatRelativeBonus( Stat.MS, BATTLE_ROAR_MS[thisBuff.getLevel()-1]*10 )
-            ..addStatAbsoluteBonus( Stat.AS, BATTLE_ROAR_AS[thisBuff.getLevel()-1] )
-    end) )
-    BATTLE_ROAR.addEndFunction( (Buff thisBuff) -> (begin
-        thisBuff.getTarget().wrapper()
-            ..addStatRelativeBonus( Stat.MS, -BATTLE_ROAR_MS[thisBuff.getLevel()-1]*10 )
-            ..addStatAbsoluteBonus( Stat.AS, -BATTLE_ROAR_AS[thisBuff.getLevel()-1] )
-    end) )
-
     setupStats()
-    setupTooltips()
+    delayInit(5) ->
+        setupTooltips()
+        heroType
+            ..addOnSpellCastFunc(function onSpellCast)
+            ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
+            ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
+            ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+            ..setSkillBuild("QWEQQWEQQWEWEWE")
+            ..addItem(ITEM_ID_HEAVY_BOOTS)
+            ..addItem(ITEM_ID_RUNIC_ARMOR)
+            ..addItem(ITEM_ID_WAR_HORN)
+            ..addItem(ITEM_ID_ARMOR_OF_COURAGE)
+            ..addItem(ITEM_ID_ARCANE_SHIELD)
+            ..addItem(ITEM_ID_WAR_DRUM)
+
+        var abilityList = new LinkedList<int>
+            ..add(ABILITY_HOLY_SHIELD_BUFF)
+        BUFF_HOLY_SHIELD.setup(abilityList, BUFF_ID_HOLY_SHIELD)
+        
+        abilityList = new LinkedList<int>
+            ..add(ABILITY_BATTLE_ROAR_BUFF)
+        BATTLE_ROAR.setup(abilityList, BUFF_ID_BATTLE_ROAR)
+        BATTLE_ROAR.addFirstFunction( (Buff thisBuff) -> (begin
+            thisBuff.getTarget().wrapper()
+                ..addStatRelativeBonus( Stat.MS, BATTLE_ROAR_MS[thisBuff.getLevel()-1]*10 )
+                ..addStatAbsoluteBonus( Stat.AS, BATTLE_ROAR_AS[thisBuff.getLevel()-1] )
+        end) )
+        BATTLE_ROAR.addEndFunction( (Buff thisBuff) -> (begin
+            thisBuff.getTarget().wrapper()
+                ..addStatRelativeBonus( Stat.MS, -BATTLE_ROAR_MS[thisBuff.getLevel()-1]*10 )
+                ..addStatAbsoluteBonus( Stat.AS, -BATTLE_ROAR_AS[thisBuff.getLevel()-1] )
+        end) )
 
 
 

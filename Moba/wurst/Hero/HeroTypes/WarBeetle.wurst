@@ -391,70 +391,73 @@ function setupTooltips()
 
 function initHeroType()
     setupStats()
-    setupTooltips()
+    delayInit(5) ->
+        setupTooltips()
 
-    buffBite = new BuffType(false, true)
+        heroType
+            ..addOnSpellCastFunc(function onSpellCast)
+            ..useHeroGlow()
+            ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
+            ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
+            ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+            ..setSkillBuild("QWEQWQWQWQWEEEE")
+            ..addItem(ITEM_ID_HEAVY_BOOTS)
+            ..addItem(ITEM_ID_RUNIC_ARMOR)
+            ..addItem(ITEM_ID_AXE_OF_DECAY)
+            ..addItem(ITEM_ID_BLESSED_GOBLET)
+            ..addItem(ITEM_ID_ARCANE_SHIELD)
+            ..addItem(ITEM_ID_WAR_DRUM)
 
-    var abilityList = new LinkedList<int>
-    ..add(BITE_ABILITY_ID)
-    buffBite.setup(abilityList, BITE_BUFF_ID)
+        buffBite = new BuffType(false, true)
 
-    buffBite.addFirstFunction( (Buff whichBuff) -> (begin
-        whichBuff.getTarget().wrapper()
-            ..addStatRelativeBonus(Stat.MS, -BITE_SLOW * 10)
+        var abilityList = new LinkedList<int>
+        ..add(BITE_ABILITY_ID)
+        buffBite.setup(abilityList, BITE_BUFF_ID)
 
-    end))
+        buffBite.addFirstFunction( (Buff whichBuff) -> (begin
+            whichBuff.getTarget().wrapper()
+                ..addStatRelativeBonus(Stat.MS, -BITE_SLOW * 10)
 
-    buffBite.addEndFunction( (Buff whichBuff) -> (begin
-        whichBuff.getTarget().wrapper()
-            ..addStatRelativeBonus(Stat.MS, BITE_SLOW * 10)
-    end))
+        end))
 
-    buffUnbreakable = new BuffType(true, true)
+        buffBite.addEndFunction( (Buff whichBuff) -> (begin
+            whichBuff.getTarget().wrapper()
+                ..addStatRelativeBonus(Stat.MS, BITE_SLOW * 10)
+        end))
 
-    abilityList = new LinkedList<int>
-        ..add(UNBREAKABLE_ABILITY_ID)
-    buffUnbreakable.setup(abilityList, UNBREAKABLE_BUFF_ID)
-    buffUnbreakable.addFirstFunction((Buff whichBuff) -> (begin
-        let level = whichBuff.getLevel()
-        let target = whichBuff.getTarget()
-        target.wrapper()
-            ..addStatAbsoluteBonus(Stat.HP, UNBREAKABLE_HP[level-1])
-            ..addStatAbsoluteBonus(Stat.STR, UNBREAKABLE_STR[level-1])
-            ..addStatAbsoluteBonus(Stat.AR, UNBREAKABLE_DEF[level-1])
-            ..addStatAbsoluteBonus(Stat.AGI, UNBREAKABLE_DEF[level-1])
+        buffUnbreakable = new BuffType(true, true)
 
-        target.setScale(UNBREAKABLE_SCALE)
-    end))
+        abilityList = new LinkedList<int>
+            ..add(UNBREAKABLE_ABILITY_ID)
+        buffUnbreakable.setup(abilityList, UNBREAKABLE_BUFF_ID)
+        buffUnbreakable.addFirstFunction((Buff whichBuff) -> (begin
+            let level = whichBuff.getLevel()
+            let target = whichBuff.getTarget()
+            target.wrapper()
+                ..addStatAbsoluteBonus(Stat.HP, UNBREAKABLE_HP[level-1])
+                ..addStatAbsoluteBonus(Stat.STR, UNBREAKABLE_STR[level-1])
+                ..addStatAbsoluteBonus(Stat.AR, UNBREAKABLE_DEF[level-1])
+                ..addStatAbsoluteBonus(Stat.AGI, UNBREAKABLE_DEF[level-1])
 
-    buffUnbreakable.addEndFunction((Buff whichBuff) -> (begin
-        let level = whichBuff.getLevel()
-        let target = whichBuff.getTarget()
-        target.wrapper()
-            ..addStatAbsoluteBonus(Stat.HP, -UNBREAKABLE_HP[level-1])
-            ..addStatAbsoluteBonus(Stat.STR, -UNBREAKABLE_STR[level-1])
-            ..addStatAbsoluteBonus(Stat.AR, -UNBREAKABLE_DEF[level-1])
-            ..addStatAbsoluteBonus(Stat.AGI, -UNBREAKABLE_DEF[level-1])
+            target.setScale(UNBREAKABLE_SCALE)
+        end))
 
-        target.setScale(0.9)
-    end))
+        buffUnbreakable.addEndFunction((Buff whichBuff) -> (begin
+            let level = whichBuff.getLevel()
+            let target = whichBuff.getTarget()
+            target.wrapper()
+                ..addStatAbsoluteBonus(Stat.HP, -UNBREAKABLE_HP[level-1])
+                ..addStatAbsoluteBonus(Stat.STR, -UNBREAKABLE_STR[level-1])
+                ..addStatAbsoluteBonus(Stat.AR, -UNBREAKABLE_DEF[level-1])
+                ..addStatAbsoluteBonus(Stat.AGI, -UNBREAKABLE_DEF[level-1])
 
-    heroType
-        ..addOnSpellCastFunc(function onSpellCast)
-        ..useHeroGlow()
-        ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
-        ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
-        ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
-        ..setSkillBuild("QWEQWQWQWQWEEEE")
-        ..addItem(ITEM_ID_HEAVY_BOOTS)
-        ..addItem(ITEM_ID_RUNIC_ARMOR)
-        ..addItem(ITEM_ID_AXE_OF_DECAY)
-        ..addItem(ITEM_ID_BLESSED_GOBLET)
-        ..addItem(ITEM_ID_ARCANE_SHIELD)
-        ..addItem(ITEM_ID_WAR_DRUM)
+            target.setScale(0.9)
+        end))
 
+function createHeroType(Hero hero)
+    let heroUnit = hero.toUnit()
     CreateTrigger()
-        ..registerAnyUnitEvent(EVENT_PLAYER_HERO_SKILL)
+        ..registerUnitEvent(heroUnit, EVENT_UNIT_HERO_SKILL)
         ..addAction(() -> (begin
             let u = GetTriggerUnit()
             if GetLearnedSkill() == ABILITY_HARD_SHELL
@@ -470,6 +473,7 @@ function initHeroType()
 init
     heroType = new HeroType(HERO_WAR_BEETLE, "BTNWarBeetle.blp", 10, true)
         ..setOnInitFunction(() -> initHeroType())
+        ..setOnCreateFunction((Hero hero) -> createHeroType(hero))
 
    
 

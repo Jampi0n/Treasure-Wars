@@ -367,73 +367,75 @@ function setupTooltips()
 
 function initHeroType()
     setupStats()
-    setupTooltips()
+    delayInit(5) ->
+        setupTooltips()
 
-    heroType
-        ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
-        ..addOnSpellCastFunc(function onSpellCast)
-        ..addMorph(HERO_TROLL_BERSERKER_MELEE)
-        ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
-        ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
-        ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
-        ..setSkillBuild("QWQWQWQWQWEEEEE")
-        ..addItem(ITEM_ID_HEAVY_BOOTS)
-        ..addItem(ITEM_ID_BLOOD_SWORD)
-        ..addItem(ITEM_ID_INFERNAL_BOW)
-        ..addItem(ITEM_ID_RUNIC_ARMOR)
-        ..addItem(ITEM_ID_SACRIFICIAL_DAGGER)
-        ..addItem(ITEM_ID_CURSED_SWORD)
+        heroType
+            ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
+            ..addOnSpellCastFunc(function onSpellCast)
+            ..addMorph(HERO_TROLL_BERSERKER_MELEE)
+            ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
+            ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
+            ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+            ..setSkillBuild("QWQWQWQWQWEEEEE")
+            ..addItem(ITEM_ID_HEAVY_BOOTS)
+            ..addItem(ITEM_ID_BLOOD_SWORD)
+            ..addItem(ITEM_ID_INFERNAL_BOW)
+            ..addItem(ITEM_ID_RUNIC_ARMOR)
+            ..addItem(ITEM_ID_SACRIFICIAL_DAGGER)
+            ..addItem(ITEM_ID_CURSED_SWORD)
 
-    buffCriticalStrike = new BuffType(true, false)
+        buffCriticalStrike = new BuffType(true, false)
 
-    var abilityList = new LinkedList<int>
-        ..add(CRITICAL_ABILITY_ID)
-    buffCriticalStrike.setup(abilityList, CRITICAL_BUFF_ID)
-    buffCriticalStrike.addFirstFunction((Buff whichBuff) -> (begin
-        OnAttack.useAdvanced( whichBuff.getTarget(), true)
-    end))
+        var abilityList = new LinkedList<int>
+            ..add(CRITICAL_ABILITY_ID)
+        buffCriticalStrike.setup(abilityList, CRITICAL_BUFF_ID)
+        buffCriticalStrike.addFirstFunction((Buff whichBuff) -> (begin
+            OnAttack.useAdvanced( whichBuff.getTarget(), true)
+        end))
 
-    buffCriticalStrike.addEndFunction((Buff whichBuff) -> (begin
-        OnAttack.useAdvanced( whichBuff.getTarget(), false)
-    end))
+        buffCriticalStrike.addEndFunction((Buff whichBuff) -> (begin
+            OnAttack.useAdvanced( whichBuff.getTarget(), false)
+        end))
 
-    buffGrowth = new BuffType(true, true)
+        buffGrowth = new BuffType(true, true)
 
-    abilityList = new LinkedList<int>
-        ..add(GROWTH_ABILITY_ID)
-    buffGrowth.setup(abilityList, GROWTH_BUFF_ID)
-    buffGrowth.addFirstFunction((Buff whichBuff) -> (begin
-        let level = whichBuff.getLevel()
-        let caster = whichBuff.getCaster()
-        let target = whichBuff.getTarget()
-        let hpBonus = GROWTH_HP[level-1].bonus(caster.getInt(), GROWTH_HP_BONUS).toInt()
-        whichBuff.setData(hpBonus)
-        target.wrapper()
-            ..addStatAbsoluteBonus(Stat.HP, hpBonus)
-            ..addStatAbsoluteBonus(Stat.HR, GROWTH_HP_REGEN[level-1]*10)
+        abilityList = new LinkedList<int>
+            ..add(GROWTH_ABILITY_ID)
+        buffGrowth.setup(abilityList, GROWTH_BUFF_ID)
+        buffGrowth.addFirstFunction((Buff whichBuff) -> (begin
+            let level = whichBuff.getLevel()
+            let caster = whichBuff.getCaster()
+            let target = whichBuff.getTarget()
+            let hpBonus = GROWTH_HP[level-1].bonus(caster.getInt(), GROWTH_HP_BONUS).toInt()
+            whichBuff.setData(hpBonus)
+            target.wrapper()
+                ..addStatAbsoluteBonus(Stat.HP, hpBonus)
+                ..addStatAbsoluteBonus(Stat.HR, GROWTH_HP_REGEN[level-1]*10)
 
-        target.setScale(GROWTH_SCALE)
-    end))
+            target.setScale(GROWTH_SCALE)
+        end))
 
-    buffGrowth.addEndFunction((Buff whichBuff) -> (begin
-        let level = whichBuff.getLevel()
-        let target = whichBuff.getTarget()
-        let hpBonus = whichBuff.getData()
-        target.wrapper()
-            ..addStatAbsoluteBonus(Stat.HP, -hpBonus)
-            ..addStatAbsoluteBonus(Stat.HR, -GROWTH_HP_REGEN[level-1]*10)
+        buffGrowth.addEndFunction((Buff whichBuff) -> (begin
+            let level = whichBuff.getLevel()
+            let target = whichBuff.getTarget()
+            let hpBonus = whichBuff.getData()
+            target.wrapper()
+                ..addStatAbsoluteBonus(Stat.HP, -hpBonus)
+                ..addStatAbsoluteBonus(Stat.HR, -GROWTH_HP_REGEN[level-1]*10)
 
-        target.setScale(1.3)
-    end))
+            target.setScale(1.3)
+        end))
 
-    buffGrowthFear = new BuffType(false, true)
-    abilityList = new LinkedList<int>
-        ..add(GROWTH_FEAR_ABILTIY_ID)
-    buffGrowthFear.setup(abilityList, GROWTH_FEAR_BUFF_ID)
+        buffGrowthFear = new BuffType(false, true)
+        abilityList = new LinkedList<int>
+            ..add(GROWTH_FEAR_ABILTIY_ID)
+        buffGrowthFear.setup(abilityList, GROWTH_FEAR_BUFF_ID)
 
-
+function createHeroType(Hero hero)
+    let heroUnit = hero.toUnit()
     CreateTrigger()
-        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
+        ..registerUnitEvent(heroUnit, EVENT_UNIT_DEATH)
         ..addAction(() -> (begin
             if GetTriggerUnit().getTypeId() == HERO_TROLL_BERSERKER_MELEE
                 let u = GetTriggerUnit()
@@ -442,12 +444,9 @@ function initHeroType()
     end))
 
     CreateTrigger()
-        ..registerAnyUnitEvent(EVENT_PLAYER_HERO_SKILL)
+        ..registerUnitEvent(heroUnit, EVENT_UNIT_HERO_SKILL)
         ..addAction(() -> (begin
             let u = GetTriggerUnit()
-
-
-                
 
             if GetLearnedSkill() == ABILITY_SWITCH_WEAPONS and u.getTypeId() == HERO_TROLL_BERSERKER_MELEE
                 let newLevel = u.getAbilityLevel(ABILITY_SWITCH_WEAPONS)
@@ -458,6 +457,7 @@ function initHeroType()
 init
     heroType = new HeroType(HERO_TROLL_BERSERKER, Icons.bTNForestTroll, 7, true)
         ..setOnInitFunction(() -> initHeroType())
+        ..setOnCreateFunction((Hero hero) -> createHeroType(hero))
 
    
 

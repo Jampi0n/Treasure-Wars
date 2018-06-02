@@ -452,65 +452,69 @@ function setupTooltips()
     heroType.addDynamicTooltipStrength(tooltip)
 
 function initHeroType()
-    heroType
-        ..addOnSpellCastFunc(function onSpellCast)
-        ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
-        ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
-        ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
-        ..setSkillBuild("WQEWQWWQWQQEEEE")
-        ..addItem(ITEM_ID_HEAVY_BOOTS)
-        ..addItem(ITEM_ID_RUNIC_ARMOR)
-        ..addItem(ITEM_ID_FIREHAND_GAUNTLETS)
-        ..addItem(ITEM_ID_BLOOD_SWORD)
-        ..addItem(ITEM_ID_SPIKED_ARMOR)
-        ..addItem(ITEM_ID_CURSED_SWORD)
     setupStats()
-    setupTooltips()
+    delayInit(5) ->
+        setupTooltips()
+        heroType
+            ..addOnSpellCastFunc(function onSpellCast)
+            ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
+            ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
+            ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+            ..setSkillBuild("WQEWQWWQWQQEEEE")
+            ..addItem(ITEM_ID_HEAVY_BOOTS)
+            ..addItem(ITEM_ID_RUNIC_ARMOR)
+            ..addItem(ITEM_ID_FIREHAND_GAUNTLETS)
+            ..addItem(ITEM_ID_BLOOD_SWORD)
+            ..addItem(ITEM_ID_SPIKED_ARMOR)
+            ..addItem(ITEM_ID_CURSED_SWORD)
+    
+    
 
-    buffSpikeBall = new BuffType(false, false)
-    var abilityList = new LinkedList<int>
-    abilityList.add(SPIKE_BALL_ABILTIY_ID)
-    buffSpikeBall.setup(abilityList, SPIKE_BALL_BUFF_ID)
+        buffSpikeBall = new BuffType(false, false)
+        var abilityList = new LinkedList<int>
+        abilityList.add(SPIKE_BALL_ABILTIY_ID)
+        buffSpikeBall.setup(abilityList, SPIKE_BALL_BUFF_ID)
 
-    buffSpikeBall.setPeriodicTime(0.25)
-    buffSpikeBall.addPeriodicFunction((Buff whichBuff) -> (begin
-        let caster = whichBuff.getCaster()
-        let level = whichBuff.getLevel()
-        caster.dealDamage(whichBuff.getTarget(), 0.25 * SPIKE_BALL_DOT_DMG[level-1].bonus(caster.getStr(), SPIKE_BALL_DOT_DMG_BONUS) / SPIKE_BALL_DOT_DURATION[level-1] , ReductionType.PHYSICAL)
-    end))
-
-    buffSpeedBoost = new BuffType(true, true)
-    abilityList = new LinkedList<int>
-    abilityList.add(SPEED_BOOST_ABILITY_ID)
-    buffSpeedBoost.setup(abilityList, SPEED_BOOST_BUFF_ID)
-    buffSpeedBoost.addFirstFunction((Buff whichBuff) -> (begin
-        let target = whichBuff.getTarget()
-        target.wrapper().addStatRelativeBonus(Stat.MS, ((SPEED_BOOST[whichBuff.getLevel()-1].bonus(target.getInt(), SPEED_BOOST_BONUS)) * 10).toInt() )
-        AddUnitAnimationProperties(target, "fast", true)
-    end))
-
-    buffSpeedBoost.addEndFunction((Buff whichBuff) -> (begin
-        let target = whichBuff.getTarget()
-        target.wrapper().addStatRelativeBonus(Stat.MS, -((SPEED_BOOST[whichBuff.getLevel()-1].bonus(target.getInt(), SPEED_BOOST_BONUS)) * 10).toInt() )
-        AddUnitAnimationProperties(target, "fast", false)
-    end))
-
-
-    addOnDamageFunc( Condition( function onDamage ) )
-
-    CreateTrigger()
-        ..registerAnyUnitEvent(EVENT_PLAYER_HERO_SKILL)
-        ..addAction(() -> (begin
-            let u = GetTriggerUnit()
-            if GetLearnedSkill() == ABILITY_OVERCHARGE
-                let newLevel = u.getAbilityLevel(ABILITY_OVERCHARGE)
-                if newLevel!= 1
-                    u.wrapper().addStatAbsoluteBonus(Stat.AS, -OVERCHARGE_ATTACK_SPEED[newLevel-2])
-
-                u.wrapper().addStatAbsoluteBonus(Stat.AS, OVERCHARGE_ATTACK_SPEED[newLevel-1])
+        buffSpikeBall.setPeriodicTime(0.25)
+        buffSpikeBall.addPeriodicFunction((Buff whichBuff) -> (begin
+            let caster = whichBuff.getCaster()
+            let level = whichBuff.getLevel()
+            caster.dealDamage(whichBuff.getTarget(), 0.25 * SPIKE_BALL_DOT_DMG[level-1].bonus(caster.getStr(), SPIKE_BALL_DOT_DMG_BONUS) / SPIKE_BALL_DOT_DURATION[level-1] , ReductionType.PHYSICAL)
         end))
-    
-    
+
+        buffSpeedBoost = new BuffType(true, true)
+        abilityList = new LinkedList<int>
+        abilityList.add(SPEED_BOOST_ABILITY_ID)
+        buffSpeedBoost.setup(abilityList, SPEED_BOOST_BUFF_ID)
+        buffSpeedBoost.addFirstFunction((Buff whichBuff) -> (begin
+            let target = whichBuff.getTarget()
+            target.wrapper().addStatRelativeBonus(Stat.MS, ((SPEED_BOOST[whichBuff.getLevel()-1].bonus(target.getInt(), SPEED_BOOST_BONUS)) * 10).toInt() )
+            AddUnitAnimationProperties(target, "fast", true)
+        end))
+
+        buffSpeedBoost.addEndFunction((Buff whichBuff) -> (begin
+            let target = whichBuff.getTarget()
+            target.wrapper().addStatRelativeBonus(Stat.MS, -((SPEED_BOOST[whichBuff.getLevel()-1].bonus(target.getInt(), SPEED_BOOST_BONUS)) * 10).toInt() )
+            AddUnitAnimationProperties(target, "fast", false)
+        end))
+
+
+        addOnDamageFunc( Condition( function onDamage ) )
+
+function createHeroType(Hero hero)
+    CreateTrigger()
+    ..registerUnitEvent(hero.toUnit(), EVENT_UNIT_HERO_SKILL)
+    ..addAction(() -> (begin
+        let u = GetTriggerUnit()
+        if GetLearnedSkill() == ABILITY_OVERCHARGE
+            let newLevel = u.getAbilityLevel(ABILITY_OVERCHARGE)
+            if newLevel!= 1
+                u.wrapper().addStatAbsoluteBonus(Stat.AS, -OVERCHARGE_ATTACK_SPEED[newLevel-2])
+
+            u.wrapper().addStatAbsoluteBonus(Stat.AS, OVERCHARGE_ATTACK_SPEED[newLevel-1])
+    end))
+
 init
     heroType = new HeroType(HERO_DRILLMO, Icons.bTNFlyingMachine, 6, true)
         ..setOnInitFunction(() -> initHeroType())
+        ..setOnCreateFunction((Hero hero) -> createHeroType(hero))
