@@ -3,7 +3,6 @@ package Freezer
 
 import HeroType
 import UnitTypeConfig
-import HeroControl
 import TimerUtils
 import MapBounds
 import HashMap
@@ -513,176 +512,177 @@ function setupTooltips()
 
 function initHeroType()
     setupStats()
-    setupTooltips()
-    heroType
-        ..addOnSpellCastFunc(function onSpellCast)
-        ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target))
-        ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
-        ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
-        ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
-        ..setSkillBuild("EQWQQQQEWEWEWEW")
-        ..addItem(ITEM_ID_BOOTS_OF_DARKNESS)
-        ..addItem(ITEM_ID_ENCHANTED_ARMOR)
-        ..addItem(ITEM_ID_BLESSED_GOBLET)
-        ..addItem(ITEM_ID_SCROLL_OF_CONJURATION)
-        ..addItem(ITEM_ID_VAMPIRIC_GOBLET)
-        ..addItem(ITEM_ID_RUNIC_ARMOR)
+    delayInit(5) ->
+        setupTooltips()
+        heroType
+            ..addOnSpellCastFunc(function onSpellCast)
+            ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target))
+            ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
+            ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
+            ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+            ..setSkillBuild("EQWQQQQEWEWEWEW")
+            ..addItem(ITEM_ID_BOOTS_OF_DARKNESS)
+            ..addItem(ITEM_ID_ENCHANTED_ARMOR)
+            ..addItem(ITEM_ID_BLESSED_GOBLET)
+            ..addItem(ITEM_ID_SCROLL_OF_CONJURATION)
+            ..addItem(ITEM_ID_VAMPIRIC_GOBLET)
+            ..addItem(ITEM_ID_RUNIC_ARMOR)
 
-    buffFrostNova = new BuffType(false, true)
+        buffFrostNova = new BuffType(false, true)
 
-    var abilityList = new LinkedList<int>
-    ..add(NOVA_ABILTIY_ID)
-    buffFrostNova.setup(abilityList, NOVA_BUFF_ID)
+        var abilityList = new LinkedList<int>
+        ..add(NOVA_ABILTIY_ID)
+        buffFrostNova.setup(abilityList, NOVA_BUFF_ID)
 
-    buffFrostNova.addFirstFunction( (Buff whichBuff) -> (begin
-        let level = whichBuff.getLevel()
-        whichBuff.getTarget().wrapper()
-            ..addStatAbsoluteBonus(Stat.AS, -NOVA_AS[level - 1])
-            ..addStatRelativeBonus(Stat.MS, -NOVA_MS[level - 1]*10)
-            ..incBlue()
-    end))
+        buffFrostNova.addFirstFunction( (Buff whichBuff) -> (begin
+            let level = whichBuff.getLevel()
+            whichBuff.getTarget().wrapper()
+                ..addStatAbsoluteBonus(Stat.AS, -NOVA_AS[level - 1])
+                ..addStatRelativeBonus(Stat.MS, -NOVA_MS[level - 1]*10)
+                ..incBlue()
+        end))
 
-    buffFrostNova.addEndFunction( (Buff whichBuff) -> (begin
-        let level = whichBuff.getLevel()
-        whichBuff.getTarget().wrapper()
-            ..addStatAbsoluteBonus(Stat.AS, NOVA_AS[level - 1])
-            ..addStatRelativeBonus(Stat.MS, NOVA_MS[level - 1]*10)
-            ..decBlue()
-    end))
-
-
-    buffFrostArmor = new BuffType(true, true)
-
-    abilityList = new LinkedList<int>
-    ..add(ARMOR_ABILTIY_ID)
-    buffFrostArmor.setup(abilityList, ARMOR_BUFF_ID)
-
-    buffFrostArmor.addFirstFunction( (Buff whichBuff) -> (begin
-        let level = whichBuff.getLevel()
-        let intel = whichBuff.getCaster().getInt()
-        whichBuff.setData(intel)
-        whichBuff.getTarget().wrapper()
-            ..addStatAbsoluteBonus(Stat.AR, ARMOR_AR[level - 1].bonus(intel, ARMOR_AR_BONUS).round())
-    end))
-
-    buffFrostArmor.addEndFunction( (Buff whichBuff) -> (begin
-        let intel = whichBuff.getData()
-        let level = whichBuff.getLevel()
-        whichBuff.getTarget().wrapper()
-            ..addStatAbsoluteBonus(Stat.AR, -ARMOR_AR[level - 1].bonus(intel, ARMOR_AR_BONUS).round())
-    end))
+        buffFrostNova.addEndFunction( (Buff whichBuff) -> (begin
+            let level = whichBuff.getLevel()
+            whichBuff.getTarget().wrapper()
+                ..addStatAbsoluteBonus(Stat.AS, NOVA_AS[level - 1])
+                ..addStatRelativeBonus(Stat.MS, NOVA_MS[level - 1]*10)
+                ..decBlue()
+        end))
 
 
-    buffFrostArmorSlow = new BuffType(false, true)
+        buffFrostArmor = new BuffType(true, true)
 
-    abilityList = new LinkedList<int>
-    ..add(ARMOR_SLOW_ABILTIY_ID)
-    buffFrostArmorSlow.setup(abilityList, ARMOR_SLOW_BUFF_ID)
+        abilityList = new LinkedList<int>
+        ..add(ARMOR_ABILTIY_ID)
+        buffFrostArmor.setup(abilityList, ARMOR_BUFF_ID)
 
-    buffFrostArmorSlow.addFirstFunction( (Buff whichBuff) -> (begin
-        let level = whichBuff.getLevel()
-        whichBuff.getTarget().wrapper()
-            ..addStatAbsoluteBonus(Stat.AS, -ARMOR_SLOW[level - 1])
-            ..addStatRelativeBonus(Stat.MS, -ARMOR_SLOW[level - 1]*10)
-            ..incBlue()
-    end))
+        buffFrostArmor.addFirstFunction( (Buff whichBuff) -> (begin
+            let level = whichBuff.getLevel()
+            let intel = whichBuff.getCaster().getInt()
+            whichBuff.setData(intel)
+            whichBuff.getTarget().wrapper()
+                ..addStatAbsoluteBonus(Stat.AR, ARMOR_AR[level - 1].bonus(intel, ARMOR_AR_BONUS).round())
+        end))
 
-    buffFrostArmorSlow.addEndFunction( (Buff whichBuff) -> (begin
-        let level = whichBuff.getLevel()
-        whichBuff.getTarget().wrapper()
-            ..addStatAbsoluteBonus(Stat.AS, ARMOR_SLOW[level - 1])
-            ..addStatRelativeBonus(Stat.MS, ARMOR_SLOW[level - 1]*10)
-            ..decBlue()
-    end))
-
-
-    buffFrostBreath = new BuffType(false, true)
-
-    abilityList = new LinkedList<int>
-    ..add(FROST_BREATH_ABILTIY_ID)
-    buffFrostBreath.setup(abilityList, FROST_BREATH_BUFF_ID)
-
-    buffFrostBreath.addFirstFunction( (Buff whichBuff) -> (begin
-        let level = whichBuff.getLevel()
-        whichBuff.getTarget().wrapper()
-            ..addStatRelativeBonus(Stat.MS, -FROST_BREATH_SLOW[level - 1]*10)
-            ..incBlue()
-    end))
-
-    buffFrostBreath.addEndFunction( (Buff whichBuff) -> (begin
-        let level = whichBuff.getLevel()
-        whichBuff.getTarget().wrapper()
-            ..addStatRelativeBonus(Stat.MS, FROST_BREATH_SLOW[level - 1]*10)
-            ..decBlue()
-    end))
+        buffFrostArmor.addEndFunction( (Buff whichBuff) -> (begin
+            let intel = whichBuff.getData()
+            let level = whichBuff.getLevel()
+            whichBuff.getTarget().wrapper()
+                ..addStatAbsoluteBonus(Stat.AR, -ARMOR_AR[level - 1].bonus(intel, ARMOR_AR_BONUS).round())
+        end))
 
 
+        buffFrostArmorSlow = new BuffType(false, true)
 
-    buffFreeze= new BuffType(false, true)
+        abilityList = new LinkedList<int>
+        ..add(ARMOR_SLOW_ABILTIY_ID)
+        buffFrostArmorSlow.setup(abilityList, ARMOR_SLOW_BUFF_ID)
 
-    abilityList = new LinkedList<int>
-    ..add(FREEZE_ABILTIY_ID)
-    buffFreeze.setup(abilityList, FREEZE_BUFF_ID)
+        buffFrostArmorSlow.addFirstFunction( (Buff whichBuff) -> (begin
+            let level = whichBuff.getLevel()
+            whichBuff.getTarget().wrapper()
+                ..addStatAbsoluteBonus(Stat.AS, -ARMOR_SLOW[level - 1])
+                ..addStatRelativeBonus(Stat.MS, -ARMOR_SLOW[level - 1]*10)
+                ..incBlue()
+        end))
 
-    buffFreeze.addFirstFunction( (Buff whichBuff) -> (begin
-        whichBuff.getTarget().addBuff(whichBuff.getCaster(), 0.1, STUNNED, 1)
-        let fx = createUnit(Player(PLAYER_NEUTRAL_PASSIVE), FREEZE_EFFECT, whichBuff.getTarget().getPos(), angle(GetRandomReal(0, 2 * bj_PI)))
-        whichBuff.setData(fx.getHandleId())
-        Freeze.effectMap.put(fx.getHandleId(), fx)
-        let wrapper = whichBuff.getTarget().wrapper()
-        wrapper.addStatAbsoluteBonus(Stat.AR, FREEZE_DEF)
-        wrapper.addStatAbsoluteBonus(Stat.AGI, FREEZE_DEF)
-    end))
-    buffFreeze.setPeriodicTime(0.05)
-    buffFreeze.addPeriodicFunction( (Buff whichBuff) -> (begin
-        let target = whichBuff.getTarget()
-        let caster = whichBuff.getCaster()
-        let level = whichBuff.getLevel()
-        let fx = Freeze.effectMap.get(whichBuff.getData())
-        if target.isTargetable(caster.getOwner(), false, true)
-            fx.setXY(target.getPos())
-            target.addBuff(whichBuff.getCaster(), 0.1, STUNNED, 1)
-            caster.dealDamage(target, 0.05 * FREEZE_DMG[level-1].bonus(caster.getInt(), FREEZE_DMG_BONUS), ReductionType.MAGIC)
-        else
-            whichBuff.dispel()
-    end))
+        buffFrostArmorSlow.addEndFunction( (Buff whichBuff) -> (begin
+            let level = whichBuff.getLevel()
+            whichBuff.getTarget().wrapper()
+                ..addStatAbsoluteBonus(Stat.AS, ARMOR_SLOW[level - 1])
+                ..addStatRelativeBonus(Stat.MS, ARMOR_SLOW[level - 1]*10)
+                ..decBlue()
+        end))
 
-    buffFreeze.addEndFunction( (Buff whichBuff) -> (begin
-        let fx = Freeze.effectMap.get(whichBuff.getData())
-        fx.remove()
-        whichBuff.setData(0)
-        let wrapper = whichBuff.getTarget().wrapper()
-        wrapper.addStatAbsoluteBonus(Stat.AR, -FREEZE_DEF)
-        wrapper.addStatAbsoluteBonus(Stat.AGI, -FREEZE_DEF)
-    end))
 
-    OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-        if attacker.getTypeId() == FROST_WYRM
-            group nearby = CreateGroup()
-            nearby.enumUnitsInRange(target.getPos(), FROST_WYRM_AOE)
+        buffFrostBreath = new BuffType(false, true)
 
-            let dmg = attacker.wrapper().getStatTotalValue(Stat.AD) * 0.5
-            let level = Hero.getHero(attacker.getOwner()).toUnit().getAbilityLevel(ABILITY_FROST_WYRM)
+        abilityList = new LinkedList<int>
+        ..add(FROST_BREATH_ABILTIY_ID)
+        buffFrostBreath.setup(abilityList, FROST_BREATH_BUFF_ID)
 
-            if not target.isType(UNIT_TYPE_STRUCTURE)
-                target.addBuffReduced(attacker, FROST_BREATH_DUR[level-1], buffFrostBreath, level)
+        buffFrostBreath.addFirstFunction( (Buff whichBuff) -> (begin
+            let level = whichBuff.getLevel()
+            whichBuff.getTarget().wrapper()
+                ..addStatRelativeBonus(Stat.MS, -FROST_BREATH_SLOW[level - 1]*10)
+                ..incBlue()
+        end))
 
-            while(not nearby.isEmpty())
-                unit u = FirstOfGroup(nearby)
-                nearby.removeUnit(u)
-                if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(attacker.getOwner(), false, true) and u != target
-                    u.addBuffReduced(attacker, FROST_BREATH_DUR[level-1], buffFrostBreath, level)
-                    attacker.dealDamage(u, dmg, ReductionType.PHYSICAL)
+        buffFrostBreath.addEndFunction( (Buff whichBuff) -> (begin
+            let level = whichBuff.getLevel()
+            whichBuff.getTarget().wrapper()
+                ..addStatRelativeBonus(Stat.MS, FROST_BREATH_SLOW[level - 1]*10)
+                ..decBlue()
+        end))
 
-            nearby.destr()
-    end))
 
-    OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-        if BuffList.hasBuffType(target, buffFrostArmor) and not attacker.isType(UNIT_TYPE_STRUCTURE) and attacker.isTargetable(target.getOwner(), false, true)
-            let armorBuff = BuffList.getBuffOfType(target, buffFrostArmor)
-            let level = armorBuff.getLevel()
-            attacker.addBuffReduced(armorBuff.getCaster(), ARMOR_SLOW_DURATION[level-1].bonus(armorBuff.getData(), ARMOR_SLOW_DURATION_BONUS), buffFrostArmorSlow, level)
-    end))
+
+        buffFreeze= new BuffType(false, true)
+
+        abilityList = new LinkedList<int>
+        ..add(FREEZE_ABILTIY_ID)
+        buffFreeze.setup(abilityList, FREEZE_BUFF_ID)
+
+        buffFreeze.addFirstFunction( (Buff whichBuff) -> (begin
+            whichBuff.getTarget().addBuff(whichBuff.getCaster(), 0.1, STUNNED, 1)
+            let fx = createUnit(Player(PLAYER_NEUTRAL_PASSIVE), FREEZE_EFFECT, whichBuff.getTarget().getPos(), angle(GetRandomReal(0, 2 * bj_PI)))
+            whichBuff.setData(fx.getHandleId())
+            Freeze.effectMap.put(fx.getHandleId(), fx)
+            let wrapper = whichBuff.getTarget().wrapper()
+            wrapper.addStatAbsoluteBonus(Stat.AR, FREEZE_DEF)
+            wrapper.addStatAbsoluteBonus(Stat.AGI, FREEZE_DEF)
+        end))
+        buffFreeze.setPeriodicTime(0.05)
+        buffFreeze.addPeriodicFunction( (Buff whichBuff) -> (begin
+            let target = whichBuff.getTarget()
+            let caster = whichBuff.getCaster()
+            let level = whichBuff.getLevel()
+            let fx = Freeze.effectMap.get(whichBuff.getData())
+            if target.isTargetable(caster.getOwner(), false, true)
+                fx.setXY(target.getPos())
+                target.addBuff(whichBuff.getCaster(), 0.1, STUNNED, 1)
+                caster.dealDamage(target, 0.05 * FREEZE_DMG[level-1].bonus(caster.getInt(), FREEZE_DMG_BONUS), ReductionType.MAGIC)
+            else
+                whichBuff.dispel()
+        end))
+
+        buffFreeze.addEndFunction( (Buff whichBuff) -> (begin
+            let fx = Freeze.effectMap.get(whichBuff.getData())
+            fx.remove()
+            whichBuff.setData(0)
+            let wrapper = whichBuff.getTarget().wrapper()
+            wrapper.addStatAbsoluteBonus(Stat.AR, -FREEZE_DEF)
+            wrapper.addStatAbsoluteBonus(Stat.AGI, -FREEZE_DEF)
+        end))
+
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if attacker.getTypeId() == FROST_WYRM
+                group nearby = CreateGroup()
+                nearby.enumUnitsInRange(target.getPos(), FROST_WYRM_AOE)
+
+                let dmg = attacker.wrapper().getStatTotalValue(Stat.AD) * 0.5
+                let level = Hero.getHero(attacker.getOwner()).toUnit().getAbilityLevel(ABILITY_FROST_WYRM)
+
+                if not target.isType(UNIT_TYPE_STRUCTURE)
+                    target.addBuffReduced(attacker, FROST_BREATH_DUR[level-1], buffFrostBreath, level)
+
+                while(not nearby.isEmpty())
+                    unit u = FirstOfGroup(nearby)
+                    nearby.removeUnit(u)
+                    if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(attacker.getOwner(), false, true) and u != target
+                        u.addBuffReduced(attacker, FROST_BREATH_DUR[level-1], buffFrostBreath, level)
+                        attacker.dealDamage(u, dmg, ReductionType.PHYSICAL)
+
+                nearby.destr()
+        end))
+
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if BuffList.hasBuffType(target, buffFrostArmor) and not attacker.isType(UNIT_TYPE_STRUCTURE) and attacker.isTargetable(target.getOwner(), false, true)
+                let armorBuff = BuffList.getBuffOfType(target, buffFrostArmor)
+                let level = armorBuff.getLevel()
+                attacker.addBuffReduced(armorBuff.getCaster(), ARMOR_SLOW_DURATION[level-1].bonus(armorBuff.getData(), ARMOR_SLOW_DURATION_BONUS), buffFrostArmorSlow, level)
+        end))
 
    
 function createHeroType(Hero hero)

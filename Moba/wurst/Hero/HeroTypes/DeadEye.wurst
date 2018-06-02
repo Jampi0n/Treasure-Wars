@@ -440,32 +440,32 @@ function setupTooltips()
     heroType.addDynamicTooltipIntelligence(tooltip)
 
 function initHeroType()
-    setupTooltips()
-    heroType
-        ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
-        ..addOnSpellCastFunc(function onSpellCast)
-        ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
-        ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
-        ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
-        ..setSkillBuild("QWQWQWQWQWEEEEE")
-        ..addItem(ITEM_ID_HEAVY_BOOTS)
-        ..addItem(ITEM_ID_BLOOD_SWORD)
-        ..addItem(ITEM_ID_INFERNAL_BOW)
-        ..addItem(ITEM_ID_RUNIC_ARMOR)
-        ..addItem(ITEM_ID_SACRIFICIAL_DAGGER)
-        ..addItem(ITEM_ID_CURSED_SWORD)
-
-    onLeave(() -> (begin
-        skeletons.removeUnit(getEnterLeaveUnit())
-    end))
-
-    var abilityList = new LinkedList<int>
-    ..add('A00A')
-    BUFF_TERROR.setup(abilityList, 'B00E')
-
     setupStats()
+    delayInit(5) ->
+        setupTooltips()
+        heroType
+            ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
+            ..addOnSpellCastFunc(function onSpellCast)
+            ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
+            ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
+            ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+            ..setSkillBuild("QWQWQWQWQWEEEEE")
+            ..addItem(ITEM_ID_HEAVY_BOOTS)
+            ..addItem(ITEM_ID_BLOOD_SWORD)
+            ..addItem(ITEM_ID_INFERNAL_BOW)
+            ..addItem(ITEM_ID_RUNIC_ARMOR)
+            ..addItem(ITEM_ID_SACRIFICIAL_DAGGER)
+            ..addItem(ITEM_ID_CURSED_SWORD)
 
-    addOnDamageFunc( Condition (function onDamage))
+        onLeave(() -> (begin
+            skeletons.removeUnit(getEnterLeaveUnit())
+        end))
+
+        var abilityList = new LinkedList<int>
+        ..add('A00A')
+        BUFF_TERROR.setup(abilityList, 'B00E')
+
+        addOnDamageFunc( Condition (function onDamage))
     
 init
     

@@ -352,68 +352,69 @@ function setupTooltips()
 
 function initHeroType()
     setupStats()
-    setupTooltips()
+    delayInit(5) ->
+        setupTooltips()
 
-    heroType
-        ..addOnSpellCastFunc(function onSpellCast)
-        ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
-        ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
-        ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
-        ..setSkillBuild("WEQEWEWEWEWQQQQ")
-        ..addItem(ITEM_ID_BOOTS_OF_DARKNESS)
-        ..addItem(ITEM_ID_ENCHANTED_ARMOR)
-        ..addItem(ITEM_ID_BLESSED_GOBLET)
-        ..addItem(ITEM_ID_SCROLL_OF_CONJURATION)
-        ..addItem(ITEM_ID_WAND_OF_DEATH)
-        ..addItem(ITEM_ID_RUNIC_ARMOR)
+        heroType
+            ..addOnSpellCastFunc(function onSpellCast)
+            ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
+            ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
+            ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+            ..setSkillBuild("WEQEWEWEWEWQQQQ")
+            ..addItem(ITEM_ID_BOOTS_OF_DARKNESS)
+            ..addItem(ITEM_ID_ENCHANTED_ARMOR)
+            ..addItem(ITEM_ID_BLESSED_GOBLET)
+            ..addItem(ITEM_ID_SCROLL_OF_CONJURATION)
+            ..addItem(ITEM_ID_WAND_OF_DEATH)
+            ..addItem(ITEM_ID_RUNIC_ARMOR)
 
-    buffRayOfDeath = new BuffType(false, true)
-        ..addEndFunction((Buff whichBuff) ->(begin
-            whichBuff.getTarget().removeAbility(BUFF_ID_RAY_OF_DEATH)
-        end))
-        ..addExpireFunction((Buff whichBuff) ->(begin
-            let caster = whichBuff.getCaster()
-            let pos = whichBuff.getTarget().getPos()
+        buffRayOfDeath = new BuffType(false, true)
+            ..addEndFunction((Buff whichBuff) ->(begin
+                whichBuff.getTarget().removeAbility(BUFF_ID_RAY_OF_DEATH)
+            end))
+            ..addExpireFunction((Buff whichBuff) ->(begin
+                let caster = whichBuff.getCaster()
+                let pos = whichBuff.getTarget().getPos()
 
-            addEffect("NoxCloudExplosion.mdx", pos).destr()
+                addEffect("NoxCloudExplosion.mdx", pos).destr()
 
-            group nearby = CreateGroup()
-            nearby.enumUnitsInRange(pos, RAY_OF_DEATH_AFTER_AOE)
+                group nearby = CreateGroup()
+                nearby.enumUnitsInRange(pos, RAY_OF_DEATH_AFTER_AOE)
 
-            let dmg = RAY_OF_DEATH_AFTER_DAMAGE[caster.getAbilityLevel(ABILITY_RAY_OF_DEATH)-1].bonus(caster.getInt(), RAY_OF_DEATH_AFTER_DAMAGE_BONUS)
+                let dmg = RAY_OF_DEATH_AFTER_DAMAGE[caster.getAbilityLevel(ABILITY_RAY_OF_DEATH)-1].bonus(caster.getInt(), RAY_OF_DEATH_AFTER_DAMAGE_BONUS)
 
-            while(not nearby.isEmpty())
-                unit target = FirstOfGroup(nearby)
-                nearby.removeUnit(target)
-                if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
-                    caster.dealDamage(target, dmg, ReductionType.MAGIC)
-        
-            nearby.destr()
+                while(not nearby.isEmpty())
+                    unit target = FirstOfGroup(nearby)
+                    nearby.removeUnit(target)
+                    if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
+                        caster.dealDamage(target, dmg, ReductionType.MAGIC)
+            
+                nearby.destr()
 
-        end))
-        ..setPeriodicTime(0.1)
-        ..addPeriodicFunction((Buff whichBuff) ->(begin
-            let target = whichBuff.getTarget()
-            let caster = whichBuff.getCaster()
-            if not caster.getCurrentOrder() == OrderId("magicleash") or not target.isTargetable(caster.getOwner(), false, true)
-                whichBuff.dispel()
-            else
-                caster.dealDamage(target, 0.1 * RAY_OF_DEATH_DAMAGE[caster.getAbilityLevel(ABILITY_RAY_OF_DEATH)-1].bonus(caster.getInt(), RAY_OF_DEATH_DAMAGE_BONUS), ReductionType.MAGIC)
-                target.addEffect(Abilities.illidanMissile, "chest").destr()
-        end))
+            end))
+            ..setPeriodicTime(0.1)
+            ..addPeriodicFunction((Buff whichBuff) ->(begin
+                let target = whichBuff.getTarget()
+                let caster = whichBuff.getCaster()
+                if not caster.getCurrentOrder() == OrderId("magicleash") or not target.isTargetable(caster.getOwner(), false, true)
+                    whichBuff.dispel()
+                else
+                    caster.dealDamage(target, 0.1 * RAY_OF_DEATH_DAMAGE[caster.getAbilityLevel(ABILITY_RAY_OF_DEATH)-1].bonus(caster.getInt(), RAY_OF_DEATH_DAMAGE_BONUS), ReductionType.MAGIC)
+                    target.addEffect(Abilities.illidanMissile, "chest").destr()
+            end))
 
-    buffSoulBurn = new BuffType(false, true)
-    var abilityList = new LinkedList<int>
-        ..add(ABILITY_ID_SOUL_BURN)
-    buffSoulBurn
-        ..setup(abilityList, BUFF_ID_SOUL_BURN)
-        ..setPeriodicTime(0.5)
-        ..addPeriodicFunction((Buff whichBuff) ->(begin
-            let target = whichBuff.getTarget()
-            let caster = whichBuff.getCaster()
-            if target.isTargetable(caster.getOwner(), false, true)
-                caster.dealDamage(target, 0.5 * SOUL_BURN_DAMAGE[caster.getAbilityLevel(ABILITY_SOUL_BURN)-1].bonus(caster.getInt(), SOUL_BURN_DAMAGE_BONUS), ReductionType.MAGIC)
-        end))
+        buffSoulBurn = new BuffType(false, true)
+        var abilityList = new LinkedList<int>
+            ..add(ABILITY_ID_SOUL_BURN)
+        buffSoulBurn
+            ..setup(abilityList, BUFF_ID_SOUL_BURN)
+            ..setPeriodicTime(0.5)
+            ..addPeriodicFunction((Buff whichBuff) ->(begin
+                let target = whichBuff.getTarget()
+                let caster = whichBuff.getCaster()
+                if target.isTargetable(caster.getOwner(), false, true)
+                    caster.dealDamage(target, 0.5 * SOUL_BURN_DAMAGE[caster.getAbilityLevel(ABILITY_SOUL_BURN)-1].bonus(caster.getInt(), SOUL_BURN_DAMAGE_BONUS), ReductionType.MAGIC)
+            end))
 
     CreateTrigger()
         ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
@@ -439,8 +440,10 @@ function initHeroType()
                 nearby.destr()
     end))
 
+function createHeroType(Hero hero)
+    let heroUnit = hero.toUnit()
     CreateTrigger()
-        ..registerAnyUnitEvent(EVENT_PLAYER_HERO_SKILL)
+        ..registerUnitEvent(heroUnit, EVENT_UNIT_HERO_SKILL)
         ..addAction(() -> (begin
             let u = GetTriggerUnit()
             if GetLearnedSkill() == ABILITY_FEL_MAGIC
@@ -456,3 +459,4 @@ function initHeroType()
 init
     heroType = new HeroType(HERO_WARLOCK, Icons.bTNGuldan, 5, true)
         ..setOnInitFunction(() -> initHeroType())
+        ..setOnCreateFunction((Hero hero) -> createHeroType(hero))

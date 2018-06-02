@@ -3,7 +3,6 @@ package SeaDruid
 //3
 
 import HeroType
-import HeroControl
 import Knockback3
 import Missile
 import TimerUtils
@@ -483,8 +482,7 @@ function setupTooltips()
 
 function initHeroType()
     setupStats()
-    setupTooltips()
-
+    
     heroType
         ..setBonusCalculation((UnitWrapper whichWrapper, Stat whichStat) -> (begin
             let lvl = whichWrapper.toUnit().getAbilityLevel(ABILITY_ANCIENT_KNOWLEDGE)
@@ -507,71 +505,74 @@ function initHeroType()
                 else //else calculate default values
                     UnitWrapper.defaultCalcualtion.calculate(whichWrapper, whichStat)
         end))
-        ..addOnSpellCastFunc(function onSpellCast)
-        ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
-        ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
-        ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
-        ..setSkillBuild("QWEQQWEQWQEWEWE")
-        ..addItem(ITEM_ID_HEAVY_BOOTS)
-        ..addItem(ITEM_ID_BLESSED_GOBLET)
-        ..addItem(ITEM_ID_BRACER_OF_POWER)
-        ..addItem(ITEM_ID_SPIKED_ARMOR)
-        ..addItem(ITEM_ID_ARCANE_BLADE)
-        ..addItem(ITEM_ID_ARCANE_SHIELD)
+    delayInit(5) ->
+        setupTooltips()
+        heroType
+            ..addOnSpellCastFunc(function onSpellCast)
+            ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
+            ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
+            ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+            ..setSkillBuild("QWEQQWEQWQEWEWE")
+            ..addItem(ITEM_ID_HEAVY_BOOTS)
+            ..addItem(ITEM_ID_BLESSED_GOBLET)
+            ..addItem(ITEM_ID_BRACER_OF_POWER)
+            ..addItem(ITEM_ID_SPIKED_ARMOR)
+            ..addItem(ITEM_ID_ARCANE_BLADE)
+            ..addItem(ITEM_ID_ARCANE_SHIELD)
 
-    buffFish = new BuffType(false, true)
+        buffFish = new BuffType(false, true)
 
-    var abilityList = new LinkedList<int>
-        ..add(FISH_ABILTIY_ID)
-    buffFish.setup(abilityList, FISH_BUFF_ID)
+        var abilityList = new LinkedList<int>
+            ..add(FISH_ABILTIY_ID)
+        buffFish.setup(abilityList, FISH_BUFF_ID)
 
-    buffFish.addFirstFunction( (Buff whichBuff) -> (begin
-        let level = whichBuff.getLevel()
-        whichBuff.getTarget().wrapper()
-            ..addStatAbsoluteBonus(Stat.AS, -FISH_ATTACK_SPEED[level - 1])
-            ..addStatRelativeBonus(Stat.MS, -FISH_MOVE_SPEED[level - 1]*10)
-    end))
+        buffFish.addFirstFunction( (Buff whichBuff) -> (begin
+            let level = whichBuff.getLevel()
+            whichBuff.getTarget().wrapper()
+                ..addStatAbsoluteBonus(Stat.AS, -FISH_ATTACK_SPEED[level - 1])
+                ..addStatRelativeBonus(Stat.MS, -FISH_MOVE_SPEED[level - 1]*10)
+        end))
 
-    buffFish.addEndFunction( (Buff whichBuff) -> (begin
-        let level = whichBuff.getLevel()
-        whichBuff.getTarget().wrapper()
-            ..addStatAbsoluteBonus(Stat.AS, FISH_ATTACK_SPEED[level - 1])
-            ..addStatRelativeBonus(Stat.MS, FISH_MOVE_SPEED[level - 1]*10)
-    end))
+        buffFish.addEndFunction( (Buff whichBuff) -> (begin
+            let level = whichBuff.getLevel()
+            whichBuff.getTarget().wrapper()
+                ..addStatAbsoluteBonus(Stat.AS, FISH_ATTACK_SPEED[level - 1])
+                ..addStatRelativeBonus(Stat.MS, FISH_MOVE_SPEED[level - 1]*10)
+        end))
 
-    ArtilleryDetection.registerArtilleryHit(FISH_IMPACT, (unit impact) ->(begin
-        group nearby = CreateGroup()
-        let caster = Hero.getHero(impact.getOwner()).toUnit()
-        let level = caster.getAbilityLevel(ABILITY_GIANT_FISH)
-        nearby.enumUnitsInRange(impact.getPos(), FISH_AOE[level-1])
+        ArtilleryDetection.registerArtilleryHit(FISH_IMPACT, (unit impact) ->(begin
+            group nearby = CreateGroup()
+            let caster = Hero.getHero(impact.getOwner()).toUnit()
+            let level = caster.getAbilityLevel(ABILITY_GIANT_FISH)
+            nearby.enumUnitsInRange(impact.getPos(), FISH_AOE[level-1])
 
-        let dmg = FISH_DAMAGE[level-1].bonus(caster.getInt(), FISH_DAMAGE_BONUS)
+            let dmg = FISH_DAMAGE[level-1].bonus(caster.getInt(), FISH_DAMAGE_BONUS)
 
-        while(not nearby.isEmpty())
-            unit target = FirstOfGroup(nearby)
-            nearby.removeUnit(target)
-            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(impact.getOwner(), false, true)
+            while(not nearby.isEmpty())
+                unit target = FirstOfGroup(nearby)
+                nearby.removeUnit(target)
+                if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(impact.getOwner(), false, true)
 
-                caster.dealDamage(target, dmg, ReductionType.MAGIC)
-                target.addBuffReduced(caster, FISH_SLOW_DURATION[level-1], buffFish, level)
+                    caster.dealDamage(target, dmg, ReductionType.MAGIC)
+                    target.addBuffReduced(caster, FISH_SLOW_DURATION[level-1], buffFish, level)
 
-        nearby.destr()
+            nearby.destr()
 
-        let fx = new Fx(impact.getPos(), Abilities.stampedeMissileDeath)
-        fx.setScale(3)
-        destroy fx
+            let fx = new Fx(impact.getPos(), Abilities.stampedeMissileDeath)
+            fx.setScale(3)
+            destroy fx
 
-        SOUND_FISH_IMPACT.playOnPoint(impact.getPos3Zero()).snd.setVolume(120)
+            SOUND_FISH_IMPACT.playOnPoint(impact.getPos3Zero()).snd.setVolume(120)
 
-    end))
+        end))
 
-    buffManaShield = new BuffType(true, true) // the actual effect is in OnAttack
-        ..setPeriodicTime(0.1)
-    buffManaShield.addPeriodicFunction( (Buff whichBuff) -> (begin
-        let caster = whichBuff.getCaster()
-        if not caster.hasAbility(MANA_SHIELD_BUFF_ID)
-            whichBuff.dispel()
-    end))
+        buffManaShield = new BuffType(true, true) // the actual effect is in OnAttack
+            ..setPeriodicTime(0.1)
+        buffManaShield.addPeriodicFunction( (Buff whichBuff) -> (begin
+            let caster = whichBuff.getCaster()
+            if not caster.hasAbility(MANA_SHIELD_BUFF_ID)
+                whichBuff.dispel()
+        end))
 
 init
     heroType = new HeroType(HERO_SEA_DRUID, "BTNSeaDruid", 3, true)

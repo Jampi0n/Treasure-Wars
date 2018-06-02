@@ -3,7 +3,6 @@ package PythonWarriores
 //0
 
 import HeroType
-import HeroControl
 import ClosureTimers
 import OnUnitEnterLeave
 import SoundUtils
@@ -388,100 +387,101 @@ function setupTooltips()
 
 function initHeroType()
     setupStats()
-    setupTooltips()
+    delayInit(5) ->
+        setupTooltips()
+        heroType
+            ..addOnSpellCastFunc(function onSpellCast)
+            ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
+            ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
+            ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
+            ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+            ..setSkillBuild("WEQEEWEWEWWQQQQ")
+            ..addItem(ITEM_ID_BOOTS_OF_DARKNESS)
+            ..addItem(ITEM_ID_ENCHANTED_ARMOR)
+            ..addItem(ITEM_ID_WAND_OF_DEATH)
+            ..addItem(ITEM_ID_RUNIC_ARMOR)
+            ..addItem(ITEM_ID_SCROLL_OF_CONJURATION)
+            ..addItem(ITEM_ID_BLESSED_GOBLET)
 
-    heroType
-        ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
-        ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
-        ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
-        ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
-        ..setSkillBuild("WEQEEWEWEWWQQQQ")
-        ..addItem(ITEM_ID_BOOTS_OF_DARKNESS)
-        ..addItem(ITEM_ID_ENCHANTED_ARMOR)
-        ..addItem(ITEM_ID_WAND_OF_DEATH)
-        ..addItem(ITEM_ID_RUNIC_ARMOR)
-        ..addItem(ITEM_ID_SCROLL_OF_CONJURATION)
-        ..addItem(ITEM_ID_BLESSED_GOBLET)
+        var abilityList = new LinkedList<int>
+            ..add(ENVENOMED_BLADES_ABILITY_ID)
+        BUFF_ENVENOMED_BLADES.setup(abilityList, ENVENOMED_BLADES_BUFF_ID)
+        BUFF_ENVENOMED_BLADES.setPeriodicTime(1)
+        BUFF_ENVENOMED_BLADES.addPeriodicFunction((Buff thisBuff)-> (begin
+            let target = thisBuff.getTarget()
+            let caster = thisBuff.getCaster()
+            if target.isTargetable(caster.getOwner(), false, true)
+                caster.dealDamage(target, 
+                (ENVENOMED_BLADES_DAMAGE[thisBuff.getLevel()-1]).bonus(caster.getInt(), ENVENOMED_BLADES_DAMAGE_BONUS)
+                , ReductionType.MAGIC)
+        end) )
+        
 
-    var abilityList = new LinkedList<int>
-        ..add(ENVENOMED_BLADES_ABILITY_ID)
-    BUFF_ENVENOMED_BLADES.setup(abilityList, ENVENOMED_BLADES_BUFF_ID)
-    BUFF_ENVENOMED_BLADES.setPeriodicTime(1)
-    BUFF_ENVENOMED_BLADES.addPeriodicFunction((Buff thisBuff)-> (begin
-        let target = thisBuff.getTarget()
-        let caster = thisBuff.getCaster()
-        if target.isTargetable(caster.getOwner(), false, true)
-            caster.dealDamage(target, 
-            (ENVENOMED_BLADES_DAMAGE[thisBuff.getLevel()-1]).bonus(caster.getInt(), ENVENOMED_BLADES_DAMAGE_BONUS)
+        //Poison Spit
+        abilityList = new LinkedList<int>
+            ..add(ABILITY_POISON_SPIT_ARMOR_REDUCED)
+            ..add(ABILITY_POISON_SPIT_SLOWED)
+        BUFF_POISON_SPIT.setup(abilityList, BUFF_ID_POISON_SPIT)
+        BUFF_POISON_SPIT.addApplyFunction( (Buff thisBuff) -> (begin
+            thisBuff.getCaster().dealDamage(thisBuff.getTarget(), 
+            (POISON_SPIT_DOT[thisBuff.getLevel()-1]).bonus(thisBuff.getCaster().getInt(), POISON_SPIT_DOT_BONUS)/4
             , ReductionType.MAGIC)
-    end) )
+        end) )
+        BUFF_POISON_SPIT.addFirstFunction( (Buff thisBuff) -> (begin
+            let wrapper = thisBuff.getTarget().wrapper()
+            wrapper.addStatRelativeBonus( Stat.MS, POISON_SPIT_SLOW_MS[thisBuff.getLevel()-1]*10 )
+            wrapper.addStatAbsoluteBonus( Stat.AR, POISON_SPIT_ARMOR_REDUCTION[thisBuff.getLevel()-1] )
+        end) )
+
+        BUFF_POISON_SPIT.addEndFunction( (Buff thisBuff) -> (begin
+            let wrapper = thisBuff.getTarget().wrapper()
+            wrapper.addStatRelativeBonus( Stat.MS, -POISON_SPIT_SLOW_MS[thisBuff.getLevel()-1]*10 )
+            wrapper.addStatAbsoluteBonus( Stat.AR, -POISON_SPIT_ARMOR_REDUCTION[thisBuff.getLevel()-1] )
+        end) )
+
+        onEnter(() -> (begin
+            let spitDummy = getEnterLeaveUnit()
+            int level = spitDummy.getTypeId()+1-'n007'
+            if(level>3)
+                level = spitDummy.getTypeId()+4-'n00A'
+
+            if level >= 1 and level <= 5
+                spitDummy.setTimedLife(POISON_SPIT_DURATION[level-1])
+                spitDummies.addUnit(spitDummy)
+                SOUND_POISON_SPIT.playOnPoint(spitDummy.getPos3Zero())
+
+
+                real x
+                real y
+                real angle
+                for i = 0 to 9 + level*3
+                    angle = i/(10 + level*3)*2*bj_PI
+                    x = spitDummy.getX() + (POISON_SPIT_AOE[level-1]-50) * angle.cos()
+                    y = spitDummy.getY() + (POISON_SPIT_AOE[level-1]-50) * angle.sin()
+                    var e = AddSpecialEffect("Units\\Undead\\PlagueCloud\\PlagueCloudtarget.mdl", x, y)
+                    doAfter(5.+level, () -> DestroyEffect(e))
+
+        end) )
+
+        onLeave(() -> (begin
+            let spitDummy = getEnterLeaveUnit()
+            int level = spitDummy.getTypeId()+1-'n007'
+            if(level>3)
+                level = spitDummy.getTypeId()+4-'n00A'
+
+            if level >= 1 and level <= 5
+                
+                spitDummies.removeUnit(spitDummy)
+        end) )
+
+        let spitPeriodicTrigger = CreateTrigger()
+        spitPeriodicTrigger.registerTimerEvent(0.25, true)
+        spitPeriodicTrigger.addAction(() -> (begin
+            ForGroup(spitDummies, function poisonSpitPeriodic)
+        end) )
+
+
     
-
-    //Poison Spit
-    abilityList = new LinkedList<int>
-        ..add(ABILITY_POISON_SPIT_ARMOR_REDUCED)
-        ..add(ABILITY_POISON_SPIT_SLOWED)
-    BUFF_POISON_SPIT.setup(abilityList, BUFF_ID_POISON_SPIT)
-    BUFF_POISON_SPIT.addApplyFunction( (Buff thisBuff) -> (begin
-        thisBuff.getCaster().dealDamage(thisBuff.getTarget(), 
-        (POISON_SPIT_DOT[thisBuff.getLevel()-1]).bonus(thisBuff.getCaster().getInt(), POISON_SPIT_DOT_BONUS)/4
-        , ReductionType.MAGIC)
-    end) )
-    BUFF_POISON_SPIT.addFirstFunction( (Buff thisBuff) -> (begin
-        let wrapper = thisBuff.getTarget().wrapper()
-        wrapper.addStatRelativeBonus( Stat.MS, POISON_SPIT_SLOW_MS[thisBuff.getLevel()-1]*10 )
-        wrapper.addStatAbsoluteBonus( Stat.AR, POISON_SPIT_ARMOR_REDUCTION[thisBuff.getLevel()-1] )
-    end) )
-
-    BUFF_POISON_SPIT.addEndFunction( (Buff thisBuff) -> (begin
-        let wrapper = thisBuff.getTarget().wrapper()
-        wrapper.addStatRelativeBonus( Stat.MS, -POISON_SPIT_SLOW_MS[thisBuff.getLevel()-1]*10 )
-        wrapper.addStatAbsoluteBonus( Stat.AR, -POISON_SPIT_ARMOR_REDUCTION[thisBuff.getLevel()-1] )
-    end) )
-
-    onEnter(() -> (begin
-        let spitDummy = getEnterLeaveUnit()
-        int level = spitDummy.getTypeId()+1-'n007'
-        if(level>3)
-            level = spitDummy.getTypeId()+4-'n00A'
-
-        if level >= 1 and level <= 5
-            spitDummy.setTimedLife(POISON_SPIT_DURATION[level-1])
-            spitDummies.addUnit(spitDummy)
-            SOUND_POISON_SPIT.playOnPoint(spitDummy.getPos3Zero())
-
-
-            real x
-            real y
-            real angle
-            for i = 0 to 9 + level*3
-                angle = i/(10 + level*3)*2*bj_PI
-                x = spitDummy.getX() + (POISON_SPIT_AOE[level-1]-50) * angle.cos()
-                y = spitDummy.getY() + (POISON_SPIT_AOE[level-1]-50) * angle.sin()
-                var e = AddSpecialEffect("Units\\Undead\\PlagueCloud\\PlagueCloudtarget.mdl", x, y)
-                doAfter(5.+level, () -> DestroyEffect(e))
-
-    end) )
-
-    onLeave(() -> (begin
-        let spitDummy = getEnterLeaveUnit()
-        int level = spitDummy.getTypeId()+1-'n007'
-        if(level>3)
-            level = spitDummy.getTypeId()+4-'n00A'
-
-        if level >= 1 and level <= 5
-            
-            spitDummies.removeUnit(spitDummy)
-    end) )
-
-    let spitPeriodicTrigger = CreateTrigger()
-    spitPeriodicTrigger.registerTimerEvent(0.25, true)
-    spitPeriodicTrigger.addAction(() -> (begin
-        ForGroup(spitDummies, function poisonSpitPeriodic)
-    end) )
-
-
-    heroType.addOnSpellCastFunc(function onSpellCast)
 
 
 init

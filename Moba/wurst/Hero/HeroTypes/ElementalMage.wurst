@@ -5,7 +5,6 @@ package ElementalMage
 import HeroType
 import Missile
 import ClosureTimers
-import HeroControl
 import Fx
 
 
@@ -349,153 +348,152 @@ function setupTooltips()
 
 function initHeroType()
     setupStats()
-    setupTooltips()
-    
-    buffFFBuff = new BuffType(false, true)
+    delayInit(5) ->
+        setupTooltips()
+        heroType
+            ..addOnSpellCastFunc(function onSpellCast)
+            ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, advanced))
+            ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
+            ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
+            ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+            ..setSkillBuild("QWEQWQWQWQWEEEE")
+            ..addItem(ITEM_ID_HEAVY_BOOTS)
+            ..addItem(ITEM_ID_RUNIC_ARMOR)
+            ..addItem(ITEM_ID_AXE_OF_DECAY)
+            ..addItem(ITEM_ID_BLESSED_GOBLET)
+            ..addItem(ITEM_ID_ARCANE_SHIELD)
+            ..addItem(ITEM_ID_WAR_DRUM)
 
-    LinkedList<int> abilityList = new LinkedList<int>
-    ..add(FF_ABILITY_ID)
-    buffFFBuff.setup(abilityList, FF_BUFF_ID)
+        buffFFBuff = new BuffType(false, true)
 
-    buffFFBuff.addFirstFunction( (Buff whichBuff) -> (begin
-        let level = whichBuff.getLevel()
-        whichBuff.getTarget().wrapper()
-            ..addStatRelativeBonus(Stat.MS, -FF_SLOW[level - 1]*10)
-            ..incBlue()
-    end))
+        LinkedList<int> abilityList = new LinkedList<int>
+        ..add(FF_ABILITY_ID)
+        buffFFBuff.setup(abilityList, FF_BUFF_ID)
 
-    buffFFBuff.addEndFunction( (Buff whichBuff) -> (begin
-        let level = whichBuff.getLevel()
-        whichBuff.getTarget().wrapper()
-            ..addStatRelativeBonus(Stat.MS, FF_SLOW[level - 1]*10)
-            ..decBlue()
-    end))
+        buffFFBuff.addFirstFunction( (Buff whichBuff) -> (begin
+            let level = whichBuff.getLevel()
+            whichBuff.getTarget().wrapper()
+                ..addStatRelativeBonus(Stat.MS, -FF_SLOW[level - 1]*10)
+                ..incBlue()
+        end))
 
-    buffFFBuff.setPeriodicTime(0.25)
-    buffFFBuff.addPeriodicFunction((Buff whichBuff) -> (begin
-        let caster = whichBuff.getCaster()
-        let target = whichBuff.getTarget()
-        if target.isTargetable(caster.getOwner(), false, true)
-            caster.dealDamage(target, 0.25 * FF_DOT[whichBuff.getLevel()-1].bonus(caster.getInt(), FF_DOT_BONUS), ReductionType.MAGIC)
-    end))
+        buffFFBuff.addEndFunction( (Buff whichBuff) -> (begin
+            let level = whichBuff.getLevel()
+            whichBuff.getTarget().wrapper()
+                ..addStatRelativeBonus(Stat.MS, FF_SLOW[level - 1]*10)
+                ..decBlue()
+        end))
 
-    buffFrostBolt = new BuffType(false, true)
+        buffFFBuff.setPeriodicTime(0.25)
+        buffFFBuff.addPeriodicFunction((Buff whichBuff) -> (begin
+            let caster = whichBuff.getCaster()
+            let target = whichBuff.getTarget()
+            if target.isTargetable(caster.getOwner(), false, true)
+                caster.dealDamage(target, 0.25 * FF_DOT[whichBuff.getLevel()-1].bonus(caster.getInt(), FF_DOT_BONUS), ReductionType.MAGIC)
+        end))
 
-    abilityList = new LinkedList<int>
-    ..add(FROST_BOLT_ABILITY_ID)
-    buffFrostBolt.setup(abilityList, FROST_BOLT_BUFF_ID)
+        buffFrostBolt = new BuffType(false, true)
 
-    buffFrostBolt.addFirstFunction( (Buff whichBuff) -> (begin
-        let level = whichBuff.getLevel()
-        whichBuff.getTarget().wrapper()
-            ..addStatRelativeBonus(Stat.MS, -FROST_BOLT_SLOW[level - 1]*10)
-            ..addStatAbsoluteBonus(Stat.AS, -FROST_BOLT_SLOW[level - 1])
-            ..incBlue()
-    end))
+        abilityList = new LinkedList<int>
+        ..add(FROST_BOLT_ABILITY_ID)
+        buffFrostBolt.setup(abilityList, FROST_BOLT_BUFF_ID)
 
-    buffFrostBolt.addEndFunction( (Buff whichBuff) -> (begin
-        let level = whichBuff.getLevel()
-        whichBuff.getTarget().wrapper()
-            ..addStatRelativeBonus(Stat.MS, FROST_BOLT_SLOW[level - 1]*10)
-            ..addStatAbsoluteBonus(Stat.AS, FROST_BOLT_SLOW[level - 1])
-            ..decBlue()
-    end))
+        buffFrostBolt.addFirstFunction( (Buff whichBuff) -> (begin
+            let level = whichBuff.getLevel()
+            whichBuff.getTarget().wrapper()
+                ..addStatRelativeBonus(Stat.MS, -FROST_BOLT_SLOW[level - 1]*10)
+                ..addStatAbsoluteBonus(Stat.AS, -FROST_BOLT_SLOW[level - 1])
+                ..incBlue()
+        end))
 
-    heroType
-        ..addOnSpellCastFunc(function onSpellCast)
-        ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, advanced))
-        ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
-        ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
-        ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
-        ..setSkillBuild("QWEQWQWQWQWEEEE")
-        ..addItem(ITEM_ID_HEAVY_BOOTS)
-        ..addItem(ITEM_ID_RUNIC_ARMOR)
-        ..addItem(ITEM_ID_AXE_OF_DECAY)
-        ..addItem(ITEM_ID_BLESSED_GOBLET)
-        ..addItem(ITEM_ID_ARCANE_SHIELD)
-        ..addItem(ITEM_ID_WAR_DRUM)
+        buffFrostBolt.addEndFunction( (Buff whichBuff) -> (begin
+            let level = whichBuff.getLevel()
+            whichBuff.getTarget().wrapper()
+                ..addStatRelativeBonus(Stat.MS, FROST_BOLT_SLOW[level - 1]*10)
+                ..addStatAbsoluteBonus(Stat.AS, FROST_BOLT_SLOW[level - 1])
+                ..decBlue()
+        end))
 
+        buffFrenzy = new BuffType(true, true)
 
-    buffFrenzy = new BuffType(true, true)
-
-    abilityList = new LinkedList<int>
-        ..add(FRENZY_ABILITY_ID)
-    buffFrenzy.setup(abilityList, FRENZY_BUFF_ID)
-    
-    buffFrenzy.addFirstFunction( (Buff whichBuff) -> (begin
-        let level = whichBuff.getLevel() - 1
-        let stacks = (FRENZY_BONUS[level]*10).toInt()
-        whichBuff.getTarget().wrapper()
-            ..addStatAbsoluteBonus(Stat.AS, stacks div 10 )
-        whichBuff.setData(stacks)
-    end))
-
-    buffFrenzy.addStackFunction( (Buff whichBuff) -> (begin
-        let level = whichBuff.getLevel() - 1
-        let oldStacks = whichBuff.getData()
-        let newStacks = min(oldStacks + (FRENZY_BONUS[level]*10).toInt(), 1000)
-
-        whichBuff.setData(newStacks)
-        whichBuff.getTarget().wrapper()
-            ..addStatAbsoluteBonus(Stat.AS, (newStacks div 10) - (oldStacks div 10))
-    end))
-
-
-    buffFrenzy.addEndFunction( (Buff whichBuff) -> (begin
-        let stacks = whichBuff.getData()
-        whichBuff.getTarget().wrapper()
-            ..addStatAbsoluteBonus(Stat.AS, -(stacks div 10))
-    end))
-
-    buffElementalMark = new BuffType(false, true)
-
-    abilityList = new LinkedList<int>
-    ..add(MARK_ABILITY_ID)
-    buffElementalMark.setup(abilityList, MARK_BUFF_ID)
-
-    buffElementalMark.addFirstFunction( (Buff whichBuff) -> (begin
-        let level = whichBuff.getLevel()
-        whichBuff.getTarget().wrapper()
-            ..addStatAbsoluteBonus(Stat.AGI, -MARK_WP_REDUCTION[level - 1])
-    end))
-
-    buffElementalMark.addEndFunction( (Buff whichBuff) -> (begin
-        let level = whichBuff.getLevel()
-        whichBuff.getTarget().wrapper()
-            ..addStatAbsoluteBonus(Stat.AGI, MARK_WP_REDUCTION[level - 1])
-    end))
-
-    ArtilleryDetection.registerArtilleryHit(FF_FLAME_IMPACT, (unit impact) ->(begin
-        group nearby = CreateGroup()
-        let caster = Hero.getHero(impact.getOwner()).toUnit()
-        let level = caster.getAbilityLevel(ABILITY_FROST_AND_FLAME)
-        nearby.enumUnitsInRange(impact.getPos(), FF_AOE)
-
+        abilityList = new LinkedList<int>
+            ..add(FRENZY_ABILITY_ID)
+        buffFrenzy.setup(abilityList, FRENZY_BUFF_ID)
         
-        Fx fx
+        buffFrenzy.addFirstFunction( (Buff whichBuff) -> (begin
+            let level = whichBuff.getLevel() - 1
+            let stacks = (FRENZY_BONUS[level]*10).toInt()
+            whichBuff.getTarget().wrapper()
+                ..addStatAbsoluteBonus(Stat.AS, stacks div 10 )
+            whichBuff.setData(stacks)
+        end))
 
-        for i = 0 to 10
-            fx = new Fx(impact.getPos().polarOffset(GetRandomDirectionDeg().fromDeg(), GetRandomReal(0, 300)), Abilities.flameStrikeEmbers)
-            fx.setScale(2)
-            doAfter(0.5, () -> destroy fx)
+        buffFrenzy.addStackFunction( (Buff whichBuff) -> (begin
+            let level = whichBuff.getLevel() - 1
+            let oldStacks = whichBuff.getData()
+            let newStacks = min(oldStacks + (FRENZY_BONUS[level]*10).toInt(), 1000)
 
-        for i = 0 to 10
-            fx = new Fx(impact.getPos().polarOffset(GetRandomDirectionDeg().fromDeg(), GetRandomReal(0, 300)), Abilities.breathOfFrostTarget)
-            fx.setScale(2)
-            destroy fx
+            whichBuff.setData(newStacks)
+            whichBuff.getTarget().wrapper()
+                ..addStatAbsoluteBonus(Stat.AS, (newStacks div 10) - (oldStacks div 10))
+        end))
+
+
+        buffFrenzy.addEndFunction( (Buff whichBuff) -> (begin
+            let stacks = whichBuff.getData()
+            whichBuff.getTarget().wrapper()
+                ..addStatAbsoluteBonus(Stat.AS, -(stacks div 10))
+        end))
+
+        buffElementalMark = new BuffType(false, true)
+
+        abilityList = new LinkedList<int>
+        ..add(MARK_ABILITY_ID)
+        buffElementalMark.setup(abilityList, MARK_BUFF_ID)
+
+        buffElementalMark.addFirstFunction( (Buff whichBuff) -> (begin
+            let level = whichBuff.getLevel()
+            whichBuff.getTarget().wrapper()
+                ..addStatAbsoluteBonus(Stat.AGI, -MARK_WP_REDUCTION[level - 1])
+        end))
+
+        buffElementalMark.addEndFunction( (Buff whichBuff) -> (begin
+            let level = whichBuff.getLevel()
+            whichBuff.getTarget().wrapper()
+                ..addStatAbsoluteBonus(Stat.AGI, MARK_WP_REDUCTION[level - 1])
+        end))
+
+        ArtilleryDetection.registerArtilleryHit(FF_FLAME_IMPACT, (unit impact) ->(begin
+            group nearby = CreateGroup()
+            let caster = Hero.getHero(impact.getOwner()).toUnit()
+            let level = caster.getAbilityLevel(ABILITY_FROST_AND_FLAME)
+            nearby.enumUnitsInRange(impact.getPos(), FF_AOE)
+
             
+            Fx fx
 
-        let dmg = (FF_IMPACT_DAMAGE[level-1]).bonus(caster.getInt(), FF_IMPACT_DAMAGE_BONUS)
-        let dur = FF_BUFF_DURATION[level-1].bonus(caster.getInt(), FF_BUFF_DURATION_BONUS)
-        while(not nearby.isEmpty())
-            unit target = FirstOfGroup(nearby)
-            nearby.removeUnit(target)
-            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(impact.getOwner(), false, true)
-                caster.dealDamage(target, dmg, ReductionType.MAGIC)
-                target.addBuffReduced(caster, dur, buffFFBuff, level)
+            for i = 0 to 10
+                fx = new Fx(impact.getPos().polarOffset(GetRandomDirectionDeg().fromDeg(), GetRandomReal(0, 300)), Abilities.flameStrikeEmbers)
+                fx.setScale(2)
+                doAfter(0.5, () -> destroy fx)
 
-        nearby.destr()
-    end))
+            for i = 0 to 10
+                fx = new Fx(impact.getPos().polarOffset(GetRandomDirectionDeg().fromDeg(), GetRandomReal(0, 300)), Abilities.breathOfFrostTarget)
+                fx.setScale(2)
+                destroy fx
+                
+
+            let dmg = (FF_IMPACT_DAMAGE[level-1]).bonus(caster.getInt(), FF_IMPACT_DAMAGE_BONUS)
+            let dur = FF_BUFF_DURATION[level-1].bonus(caster.getInt(), FF_BUFF_DURATION_BONUS)
+            while(not nearby.isEmpty())
+                unit target = FirstOfGroup(nearby)
+                nearby.removeUnit(target)
+                if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(impact.getOwner(), false, true)
+                    caster.dealDamage(target, dmg, ReductionType.MAGIC)
+                    target.addBuffReduced(caster, dur, buffFFBuff, level)
+
+            nearby.destr()
+        end))
 
 init
     heroType = new HeroType(HERO_ELEMENTAL_MAGE, "BTNCloakOfResistance", 11, false)

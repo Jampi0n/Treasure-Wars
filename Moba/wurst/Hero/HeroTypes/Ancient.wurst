@@ -6,7 +6,6 @@ import HeroType
 import TimerUtils
 import UnitType
 import ClosureTimers
-import HeroControl
 import Fx
 
 
@@ -541,33 +540,52 @@ function setupTooltips()
 
 function initHeroType()
     setupStats()
-    setupTooltips()
+    delayInit(5) ->
+        setupTooltips()
+        heroType
+            ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
+            ..addOnSpellCastFunc(function onSpellCast)
+            ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
+            ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
+            ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+            ..setSkillBuild("QWQWQWQWQWEEEEE")
+            ..addItem(ITEM_ID_HEAVY_BOOTS)
+            ..addItem(ITEM_ID_RUNIC_ARMOR)
+            ..addItem(ITEM_ID_FIREHAND_GAUNTLETS)
+            ..addItem(ITEM_ID_BLESSED_GOBLET)
+            ..addItem(ITEM_ID_ARCANE_SHIELD)
+            ..addItem(ITEM_ID_WAR_DRUM)
+        var abilityList = new LinkedList<int>
+            ..add(ENTAGLING_ROOTS_ABILITY_ID)
+        BUFF_ENTAGLING_ROOTS.setup(abilityList, ENTAGLING_ROOTS_BUFF_ID)
 
     heroType
-        ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
-        ..addOnSpellCastFunc(function onSpellCast)
         ..useHeroGlow()
         ..addMorph(HERO_TREE_ROOTED)
-        ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
-        ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
-        ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
-        ..setSkillBuild("QWQWQWQWQWEEEEE")
-        ..addItem(ITEM_ID_HEAVY_BOOTS)
-        ..addItem(ITEM_ID_RUNIC_ARMOR)
-        ..addItem(ITEM_ID_FIREHAND_GAUNTLETS)
-        ..addItem(ITEM_ID_BLESSED_GOBLET)
-        ..addItem(ITEM_ID_ARCANE_SHIELD)
-        ..addItem(ITEM_ID_WAR_DRUM)
 
-    var abilityList = new LinkedList<int>
-        ..add(ENTAGLING_ROOTS_ABILITY_ID)
-    BUFF_ENTAGLING_ROOTS.setup(abilityList, ENTAGLING_ROOTS_BUFF_ID)
+
+
+
 
     for i = 0 to bj_MAX_PLAYERS-1
         uprooted_dummy[i] = null 
 
+
+
+function createHeroType(Hero hero)
+    let heroUnit = hero.toUnit()
+    uprooted_dummy[hero.toUnit().getOwner().getId()] = createUnit(hero.toUnit().getOwner(), UPROOTED, hero.toUnit().getPos(), angle(0))
     CreateTrigger()
-        ..registerAnyUnitEvent(EVENT_PLAYER_HERO_SKILL)
+        ..registerUnitEvent(hero.toUnit(), EVENT_UNIT_ISSUED_POINT_ORDER)
+        ..addAction(() ->(begin
+            let u = GetTriggerUnit()
+            if GetIssuedOrderId() == OrderId("smart") and u.getTypeId() == HERO_TREE_ROOTED
+                let pos = vec2( GetOrderPointX(), GetOrderPointY() )
+                doAfter(0, () -> u.issuePointOrder("attack", pos))
+    end))
+
+    CreateTrigger()
+        ..registerUnitEvent(heroUnit, EVENT_UNIT_HERO_SKILL)
         ..addAction(() -> (begin
             let u = GetTriggerUnit()
             if GetLearnedSkill() == ABILITY_REGENERATION
@@ -586,24 +604,12 @@ function initHeroType()
         end))
 
     CreateTrigger()
-        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
+        ..registerUnitEvent(heroUnit, EVENT_UNIT_DEATH)
         ..addAction(() -> (begin
             if GetTriggerUnit().getTypeId() == HERO_TREE_ROOTED
                 let u = GetTriggerUnit()
                 onUproot(u, u.getAbilityLevel(ABILITY_ROOT))
 
-    end))
-
-
-function createHeroType(Hero hero)
-    uprooted_dummy[hero.toUnit().getOwner().getId()] = createUnit(hero.toUnit().getOwner(), UPROOTED, hero.toUnit().getPos(), angle(0))
-    CreateTrigger()
-        ..registerUnitEvent(hero.toUnit(), EVENT_UNIT_ISSUED_POINT_ORDER)
-        ..addAction(() ->(begin
-            let u = GetTriggerUnit()
-            if GetIssuedOrderId() == OrderId("smart") and u.getTypeId() == HERO_TREE_ROOTED
-                let pos = vec2( GetOrderPointX(), GetOrderPointY() )
-                doAfter(0, () -> u.issuePointOrder("attack", pos))
     end))
 
 init
