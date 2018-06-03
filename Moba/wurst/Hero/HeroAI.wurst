@@ -8,6 +8,7 @@ import ItemShopSystem
 import UnitType
 import BuildingTypes
 import OnAttack
+import ErrorHandling
 
 constant team1AIs = new LinkedList<HeroAI>
 constant team2AIs = new LinkedList<HeroAI>
@@ -514,8 +515,9 @@ public class HeroAI
             //this.attacking = false
 
 
-    function buySpecificItem(Item whichItem)
+    function buySpecificItem(Item whichItem) returns boolean
         //print("---buy specific item "+GetObjectName(whichItem.getTypeId()))
+        boolean ret = false
         let recipe = whichItem.getRecipe()
         let owningPlayer = this.owner.getPlayer()
 
@@ -567,12 +569,17 @@ public class HeroAI
 
                         owningPlayer.addGold(- recipe.getGoldCost() - missingGold)
                         this.heroUnit.addItemById(recipe.getResultItem().getTypeId())
+                        ret = true
                 else
                     //print("try buying requirements")
+                    int i = 0
                     for int req in recipe.getRequiredItems()
                         let required = Item.getItem(req)
                         if not this.heroUnit.hasItemById(required.getTypeId())
-                            this.buySpecificItem(required)
+                            doAfter(i * 0.05) ->
+                                this.buySpecificItem(required)
+                            
+                            i++
 
                 destroy requiredRequirements
             else
@@ -582,17 +589,20 @@ public class HeroAI
                     if not this.heroUnit.isInventoryFull()
                         owningPlayer.addGold(- whichItem.getGoldCost())
                         this.heroUnit.addItemById(whichItem.getTypeId())
+                         ret = true
+
+        return ret
 
     function buyItems()
-
 
         for i = 0 to 5
             Item itm = itemBuild.get(i).getItem()
             if not this.heroUnit.hasItemById(itm.getTypeId())
-                if this.owner.getPlayer().getGold() < 400
-                    break
-                else
-                    buySpecificItem(itm)
+                if this.owner.getPlayer().getGold() >= 400
+                    if not buySpecificItem(itm)
+                        break
+
+
 
 
     function selectSingleSkill(string char)
@@ -612,9 +622,24 @@ public class HeroAI
 
 
     function selectSkills()
-        while GetHeroSkillPoints(this.heroUnit) != 0
+        int skillPoints
+        while true
+            skillPoints = GetHeroSkillPoints(this.heroUnit)
+            if skillPoints <= 0
+                return
+
             selectSingleSkill(this.skillBuild.charAt(0))
-            this.skillBuild = this.skillBuild.substring(1)
+
+            //now the hero should have spent one skill point
+            if GetHeroSkillPoints(this.heroUnit) == skillPoints-1
+                this.skillBuild = this.skillBuild.substring(1)
+            else
+                //hero could not learn skill
+                error("Unable to learn skill "+this.skillBuild.charAt(0)+" for hero "+this.heroUnit.getName())
+                return
+            
+
+            
 
     function levelUp()
         this.selectSkills()

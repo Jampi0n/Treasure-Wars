@@ -453,6 +453,7 @@ function setupTooltips()
 
 function initHeroType()
     setupStats()
+    heroType.setSkillBuild("WQEWQWWQWQQEEEE")
     delayInit(5) ->
         setupTooltips()
         heroType
@@ -460,7 +461,6 @@ function initHeroType()
             ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
             ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
             ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
-            ..setSkillBuild("WQEWQWWQWQQEEEE")
             ..addItem(ITEM_ID_HEAVY_BOOTS)
             ..addItem(ITEM_ID_RUNIC_ARMOR)
             ..addItem(ITEM_ID_FIREHAND_GAUNTLETS)

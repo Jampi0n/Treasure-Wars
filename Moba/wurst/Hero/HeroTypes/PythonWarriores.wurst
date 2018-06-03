@@ -387,6 +387,7 @@ function setupTooltips()
 
 function initHeroType()
     setupStats()
+    heroType.setSkillBuild("WEQEEWEWEWWQQQQ")
     delayInit(5) ->
         setupTooltips()
         heroType
@@ -395,7 +396,6 @@ function initHeroType()
             ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
             ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
             ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
-            ..setSkillBuild("WEQEEWEWEWWQQQQ")
             ..addItem(ITEM_ID_BOOTS_OF_DARKNESS)
             ..addItem(ITEM_ID_ENCHANTED_ARMOR)
             ..addItem(ITEM_ID_WAND_OF_DEATH)

@@ -441,6 +441,7 @@ function setupTooltips()
 
 function initHeroType()
     setupStats()
+    heroType.setSkillBuild("QWQWQWQWQWEEEEE")
     delayInit(5) ->
         setupTooltips()
         heroType
@@ -449,7 +450,6 @@ function initHeroType()
             ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
             ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
             ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
-            ..setSkillBuild("QWQWQWQWQWEEEEE")
             ..addItem(ITEM_ID_HEAVY_BOOTS)
             ..addItem(ITEM_ID_BLOOD_SWORD)
             ..addItem(ITEM_ID_INFERNAL_BOW)
