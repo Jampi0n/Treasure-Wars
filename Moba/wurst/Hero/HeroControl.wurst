@@ -274,9 +274,9 @@ public class Hero
         //creating the assist string with correct use of <,> and <and>
         if assistants > 2
             if assistants == 3
-                assistString = assistName[0]+","+assistName[1]+" and "+assistName[2]
+                assistString = assistName[0]+", "+assistName[1]+" and "+assistName[2]
             else // 4
-                assistString = assistName[0]+","+assistName[1]+","+assistName[2]+" and "+assistName[3]
+                assistString = assistName[0]+", "+assistName[1]+", "+assistName[2]+" and "+assistName[3]
         else
             if assistants == 1
                 assistString = assistName[0]
