@@ -482,8 +482,8 @@ function setupTooltips()
 
 function initHeroType()
     setupStats()
-    
     heroType
+        ..setSkillBuild("QWEQQWEQWQEWEWE")
         ..setBonusCalculation((UnitWrapper whichWrapper, Stat whichStat) -> (begin
             let lvl = whichWrapper.toUnit().getAbilityLevel(ABILITY_ANCIENT_KNOWLEDGE)
             if lvl == 0
@@ -512,7 +512,6 @@ function initHeroType()
             ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
             ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
             ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
-            ..setSkillBuild("QWEQQWEQWQEWEWE")
             ..addItem(ITEM_ID_HEAVY_BOOTS)
             ..addItem(ITEM_ID_BLESSED_GOBLET)
             ..addItem(ITEM_ID_BRACER_OF_POWER)

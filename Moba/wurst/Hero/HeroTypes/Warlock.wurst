@@ -352,6 +352,7 @@ function setupTooltips()
 
 function initHeroType()
     setupStats()
+    heroType.setSkillBuild("WEQEWEWEWEWQQQQ")
     delayInit(5) ->
         setupTooltips()
 
@@ -360,7 +361,6 @@ function initHeroType()
             ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
             ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
             ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
-            ..setSkillBuild("WEQEWEWEWEWQQQQ")
             ..addItem(ITEM_ID_BOOTS_OF_DARKNESS)
             ..addItem(ITEM_ID_ENCHANTED_ARMOR)
             ..addItem(ITEM_ID_BLESSED_GOBLET)
