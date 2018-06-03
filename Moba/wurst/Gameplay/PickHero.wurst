@@ -48,7 +48,7 @@ function setupCreatedHero(Hero hero)
     else
         pos = gg_rct_BrownAltar.getCenter()-vec2(128,128)
 
-    if heroUnit.getOwner().getId() != 0 //heroUnit.getOwner().getController() == MAP_CONTROL_COMPUTER and heroUnit.getOwner().getSlotState() == PLAYER_SLOT_STATE_PLAYING
+    if heroUnit.getOwner().getController() == MAP_CONTROL_COMPUTER and heroUnit.getOwner().getSlotState() == PLAYER_SLOT_STATE_PLAYING
         doAfter(GetRandomReal(1, 3), () -> ( begin
             let ai = new HeroAI(cPlayer)
             ai.togglePause()
@@ -330,7 +330,11 @@ init
 
                 //removeHeroType(hero.getHeroType())
 
-                new HeroAI(getCPlayer(i))
+                let ai = new HeroAI(getCPlayer(i))
+
+                doAfter(6) ->
+                    ai.buyItems()
+                    ai.selectSkills()
 
                 SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_VISION, true)
                 SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_CONTROL, true)
