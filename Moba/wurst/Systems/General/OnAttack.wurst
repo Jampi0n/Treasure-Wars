@@ -90,7 +90,7 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
                     target.dealDamage(source, currentDamage * 0.1, ReductionType.PHYSICAL)
 
             // revenant buff
-            if source.hasAbility(REVENANT_BUFF_ID)
+            if source.hasAbility(REVENANT_BUFF_ID) and not target.isType(UNIT_TYPE_STRUCTURE)
                 target.addBuffReduced(source, 2, REVENANT_SLOW_BUFF, 1)
 
             //heavy armored
