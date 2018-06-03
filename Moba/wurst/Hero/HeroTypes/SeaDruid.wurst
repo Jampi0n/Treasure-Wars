@@ -573,6 +573,15 @@ function initHeroType()
                 whichBuff.dispel()
         end))
 
+function createHeroType(Hero hero)
+    CreateTrigger()
+        ..addAction(() -> (begin
+            GetTriggerUnit().wrapper()
+                ..updateTotalStatBonus(Stat.HP)
+                ..updateTotalStatBonus(Stat.MP)
+        end))
+        ..registerUnitEvent(hero.toUnit(), EVENT_UNIT_HERO_SKILL)
+
 init
     heroType = new HeroType(HERO_SEA_DRUID, "BTNSeaDruid", 3, true)
         ..setOnInitFunction(() -> initHeroType())

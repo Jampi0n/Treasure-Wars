@@ -50,13 +50,13 @@ public class Hero
         onDeathTrigger.addAction(function onDeathStatic)
         onLevelUpTrigger.addAction(function onLevelUpStatic)
 
-        CreateTrigger()
+        /*CreateTrigger()
             ..addAction(() -> (begin
                 let hero = unitToHero.get(GetTriggerUnit())
                 if hero != null
                     hero.upgrade()
             end))
-            ..registerAnyUnitEvent(EVENT_PLAYER_HERO_SKILL)
+            ..registerAnyUnitEvent(EVENT_PLAYER_HERO_SKILL)*/
 
 
     function setup()
