@@ -29,12 +29,15 @@ public class Hero
     private static constant onDamageTrigger = CreateTrigger()
     private static constant onDeathTrigger = CreateTrigger()
     private static constant onLevelUpTrigger = CreateTrigger()
+    private static string array assistName
     protected static Hero array heroes
     private static constant unitToHero = new HashMap<unit,Hero>
-    private constant assistMap = new HashMap<CPlayer,real>
+    private constant assistMap = new HashMap<player,real>
+    private player lastAssistant = null
     private trigger onSpellCastTrigger
     private timer reviveTimer
     private timerdialog reviveWindow
+    private boolean firstTeam
 
     //when gold or xp is shared, their values are mostly non integer. To avoid rounding errors, the remainder will be stored here.
     private real sharedGold = 0
@@ -57,6 +60,8 @@ public class Hero
 
 
     function setup()
+        firstTeam = this.owner.getId() <= HERO_PLAYER_TEAM_1_LAST
+
         this.heroType = HeroType.getHeroType(this.hero.getTypeId())
         let upgradePlayer = owner.getPlayer()
 
@@ -184,14 +189,20 @@ public class Hero
         unitToHero.get( GetTriggerUnit()).onLevelUp()
     
     //handles assists
-    function addAssistDuration(CPlayer p)
+    function addAssistDuration(player p)
         this.assistMap.put(p,getElapsedGameTime() + assistDuration)
+        this.lastAssistant = p
 
     function onDamage()
-        CPlayer damageSource
-        damageSource = GetEventDamageSource().getOwner().getCPlayer()
-        if damageSource != null and damageSource.getTeam()!=this.owner.getTeam()
-            this.addAssistDuration(damageSource)
+        let damageSource = GetEventDamageSource().getOwner()
+        let damageSourceId = damageSource.getId()
+        if damageSource != null
+            if firstTeam
+                if damageSourceId >= HERO_PLAYER_TEAM_2_FIRST and damageSourceId <= HERO_PLAYER_TEAM_2_LAST
+                    this.addAssistDuration(damageSource)
+            else
+                if damageSourceId >= HERO_PLAYER_TEAM_1_FIRST and damageSourceId <= HERO_PLAYER_TEAM_1_LAST
+                    this.addAssistDuration(damageSource)
 
     static function onDamageStatic()
         unitToHero.get( GetTriggerUnit()).onDamage()
@@ -221,107 +232,123 @@ public class Hero
 
     //handles death
     function onDeath()
+        //indetify true killer
+        let owningPlayer = this.owner.getPlayer()
 
-        this.owner.addDeath()
-
-        if this.heroGlow != null
-            this.heroGlow.setVertexColor(colorA(255, 255, 255, 0))
-
-        real maxValue = -1
-        CPlayer lastAssistant = null //find last assistant, to replace killer, if killer is not a player
-        player killer = GetKillingUnit().getOwner()
-        let assistList = new LinkedList<CPlayer>
-
-        let enemyList = CPlayer.getEnemyHeroPlayers(this.owner.getTeam())
-
-        for CPlayer assistant in enemyList
-            let time = this.assistMap.get(assistant)
-            if(time > getElapsedGameTime() and assistant.getPlayer()!=killer)
-                assistList.add(assistant)
-                if(time > maxValue)
-                    maxValue = time
-                    lastAssistant = assistant
+        player killingPlayer = GetKillingUnit().getOwner()
+        int killingId = killingPlayer.getId()
 
         //replace killer with last assistant, if killer is not an enemy hero
-        if not enemyList.contains(killer.getCPlayer()) and not assistList.isEmpty()
-            killer = lastAssistant.getPlayer()
-            assistList.remove(killer.getCPlayer())
+        boolean replaceKiller = false
 
-        string assistString = ""
+        //team 1 hero dies
+        if firstTeam
+            //killer not in team 2
+            if killingId < HERO_PLAYER_TEAM_2_FIRST or killingId > HERO_PLAYER_TEAM_2_LAST
+                replaceKiller = true
+        //team 2 hero dies
+        else
+            //killer not in team 1
+            if killingId < HERO_PLAYER_TEAM_1_FIRST or killingId > HERO_PLAYER_TEAM_1_LAST
+                replaceKiller = true
 
-        int size = assistList.size()
-        int c = 0
-        for CPlayer p in assistList
-            c++
-            assistString += p.getPlayer().getFullColoredName()+" "
-            if c == size-1
-                assistString += "and "
-            else if c < size
-                assistString += ", "
+        let gameTime = getElapsedGameTime()
+        let assistList = new LinkedList<player>
 
-        
+        string assistString
 
-        if killer.getId() < PLAYER_NEUTRAL_AGGRESSIVE
-            let bounty = 240
-            int assistBounty = ASSIST_BOUNTY[size]
+        let enemyList = CPlayer.getEnemyHeroPlayers(this.owner.getTeam())
+        int i = 0
+        for assistantC in enemyList
+            let assistant = assistantC.getPlayer()
+            let time = this.assistMap.get(assistant)
+            if(time > gameTime and assistant!=killingPlayer)
+                if not replaceKiller or lastAssistant != assistant
+                    assistList.add(assistant)
+                    assistName[i] = assistant.getFullColoredName()
+                    i++
 
-            int killBounty = KILL_BOUNTY[size]
 
-            if size == 0
+        let assistants = assistList.size()
+
+        //creating the assist string with correct use of <,> and <and>
+        if assistants > 2
+            if assistants == 3
+                assistString = assistName[0]+","+assistName[1]+" and "+assistName[2]
+            else // 4
+                assistString = assistName[0]+","+assistName[1]+","+assistName[2]+" and "+assistName[3]
+        else
+            if assistants == 1
+                assistString = assistName[0]
+            else //2
+                assistString = assistName[0]+" and "+assistName[1]
+
+
+        if replaceKiller
+            if assistMap.get(lastAssistant) > gameTime
+                killingPlayer = lastAssistant
+                killingId = killingPlayer.getId()
+
+
+        if killingId <= HERO_PLAYER_TEAM_2_LAST
+            int assistBounty = ASSIST_BOUNTY[assistants]
+
+            int killBounty = KILL_BOUNTY[assistants]
+
+            if assistants == 0
                 printTimed("{0} was killed by {1} for {2} gold.".format(
-                    this.owner.getPlayer().getFullColoredName(), 
-                    killer.getFullColoredName(),
-                    "|cffffcc00"+bounty.toString()+"|r"
+                    owningPlayer.getFullColoredName(), 
+                    killingPlayer.getFullColoredName(),
+                    "|cffffcc00"+killBounty.toString()+"|r"
                 ), 10)
-
-                killer.getCPlayer()
-                    ..addGoldEx(bounty)
-                    ..addHeroKill(killer.getId() < MAX_HERO_COUNT)
-
 
             else
                 printTimed("{0} was killed by {1} for {3} gold. {2} get{5} {4} gold for helping.".format(
-                    this.owner.getPlayer().getFullColoredName(), 
-                    killer.getFullColoredName(),
+                    owningPlayer.getFullColoredName(), 
+                    killingPlayer.getFullColoredName(),
                     assistString,
                     "|cffffcc00"+killBounty.toString()+"|r",
                     "|cffffcc00"+assistBounty.toString()+"|r",
-                    size==1?"s":""
+                    assistants==1?"s":""
                 ), 10)
 
-                killer.getCPlayer()
-                    ..addGoldEx(bounty)
-                    ..addHeroKill(killer.getId() < MAX_HERO_COUNT)
                     
-                for CPlayer p in assistList
-                    p.addGoldEx(assistBounty)
-                    p.addAssist()
+
+
+            doAfter(0.1) ->
+                for p in assistList
+                    p.getCPlayer()
+                        ..addGoldEx(assistBounty)
+                        ..addAssist()
+                killingPlayer.getCPlayer()
+                    ..addGoldEx(killBounty)
+                    ..addHeroKill(killingId <= HERO_PLAYER_TEAM_2_LAST)
             
-            //+" |cffffcc00( +"+(bounty/(2*size)).toInt().toString()+")|r"
+                let xp = (this.level + 5) * 10.
+                for cPLayer in CPlayer.getEnemyHeroPlayers(this.owner.getTeam())
+                    let hero = Hero.getHero(cPLayer)
+                    if hero != null
+                        hero.addXp(xp)
 
-            //xp
-            let xp = (this.level + 5) * 10.
-
-            for CPlayer cPLayer in CPlayer.getEnemyHeroPlayers(this.owner.getTeam())
-                let hero = Hero.getHero(cPLayer)
-                if hero != null
-                    hero.addXp(xp)
+                destroy assistList
         else
             printTimed("{0} was killed by {1}.".format(
-                this.owner.getPlayer().getFullColoredName(), 
-                killer.getName()
+                owningPlayer.getFullColoredName(), 
+                killingPlayer.getName()
             ), 10)
 
-        destroy assistList
+            destroy assistList
+
+        
 
         
         this.reviveTimer
             ..start(10.+level*2, function reviveStatic)
-        if GetLocalPlayer() == this.owner.getPlayer()
+        if GetLocalPlayer() == owningPlayer
             TimerDialogDisplay(this.reviveWindow, true)
-            
-            
 
+        doAfter(0.1) ->
+            this.owner.addDeath()
 
     static function onDeathStatic()
         unitToHero.get( GetTriggerUnit()).onDeath()
