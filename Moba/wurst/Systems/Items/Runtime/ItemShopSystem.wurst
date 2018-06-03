@@ -292,7 +292,7 @@ public class Recipe extends Item
             else
                 //remove
                 owner.addGold(recipe.gold)
-                printTimedToPlayer("Missing items: "+missingItems +" Missing gold: "+missingGold.toString(), 5, owner)
+                printTimedToPlayer("Missing items: "+missingItems +" Missing gold: "+(recipe.gold + missingGold - owner.getGold()).toString(), 5, owner)
                 printTimedToPlayer("Item price refunded.", 5, owner)
 
     
