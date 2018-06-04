@@ -290,7 +290,7 @@ function onRootStats(unit caster, int level) // add bonus
     doAfter(0, () -> caster.wrapper().addStatAbsoluteBonus(Stat.MS, 0) )
 
 function onRoot(unit caster, int level) // add bonus
-    doAfter(0, () -> caster.setPropWindow(0))
+    doAfter(0, () -> caster.setPropWindow(angle(0)))
     onRootStats(caster, level)
     caster.setTimeScale(1)
     uprooted_dummy[caster.getOwner().getId()].setOwner(Player(PLAYER_NEUTRAL_PASSIVE), false)
@@ -303,7 +303,7 @@ function onUprootStats(unit caster, int level) // remove bonus
     
 
 function onUproot(unit caster, int level) // remove bonus
-    caster.setPropWindow(caster.getDefaultPropWindowAngle())
+    caster.setPropWindow(caster.getDefaultPropWindow())
     onUprootStats(caster, level)
     caster.setTimeScale(1)
     let pId = caster.getOwner().getId()
