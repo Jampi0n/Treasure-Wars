@@ -206,9 +206,9 @@ public class UnitWrapper
             if whichStat == Stat.MS
                 this.toUnit().setMovementSpeed( this.getStatBaseValue(whichStat) + this.statsTotalBonus[whichStat.toInt()].toReal() )
             else if whichStat == Stat.HP
-                this.toUnit().setMaxHPKeepRatio(this.getStatTotalValue(Stat.HP))
+                this.toUnit().setMaxHP(this.getStatTotalValue(Stat.HP), true)
             else if whichStat == Stat.MP
-                this.toUnit().setMaxManaKeepRatio(this.getStatTotalValue(Stat.MP))
+                this.toUnit().setMaxMana(this.getStatTotalValue(Stat.MP), true)
 
     /**
     Sets the absolute stat bonus and updates the total bonus.
