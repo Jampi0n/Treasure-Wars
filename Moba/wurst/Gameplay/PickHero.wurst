@@ -61,8 +61,10 @@ function setupCreatedHero(Hero hero)
 
     
     heroUnit.setPos(pos)
-    heroUnit.pause()
-    doAfter(5, -> heroUnit.unpause())
+    //prevent using skills for first 5 seconds, as skills will be initialized
+    UnitModifySkillPoints(heroUnit, -1)
+    
+    doAfter(5, -> UnitModifySkillPoints(heroUnit, 1))
 
     if GetLocalPlayer() == heroUnit.getOwner()
         PanCameraTo(pos.x, pos.y)
