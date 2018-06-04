@@ -585,6 +585,7 @@ function createHeroType(Hero hero)
 init
     heroType = new HeroType(HERO_SEA_DRUID, "BTNSeaDruid", 3, true)
         ..setOnInitFunction(() -> initHeroType())
+        ..setOnCreateFunction((Hero hero) -> createHeroType(hero))
       
 
    
