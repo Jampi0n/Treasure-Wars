@@ -60,8 +60,8 @@ function abilityQ()
             ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
 
 
-constant real array MIND_CURSE_MANA_DRAIN = [12, 20, 28, 36, 44]
-constant real MIND_CURSE_MANA_DRAIN_BONUS = 20
+constant real array MIND_CURSE_MANA_DRAIN = [20, 25, 30, 35, 40]
+constant real MIND_CURSE_MANA_DRAIN_BONUS = 30
 
 constant real array MIND_CURSE_DURATION = [3, 3.5, 4, 4.5, 5]
 constant real MIND_CURSE_DURATION_BONUS = 4
@@ -73,8 +73,8 @@ constant MIND_CURSE_ABILITY_ID = compiletime(createNegativeBuffAbility(5, MIND_C
 
 @compiletime
 function abilityW()
-    int array MANA = [90, 100, 110, 120, 130]
-    real array COOLDOWN = [16, 16, 16, 16, 16]
+    int array MANA = [90, 90, 90, 90, 90]
+    real array COOLDOWN = [10, 10, 10, 10, 10]
     real array RANGE = [800, 800, 800, 800, 800]
     
     let aDef = new AbilityDefinitionIllidanChannel(ABILITY_MIND_CURSE)
@@ -91,7 +91,7 @@ function abilityW()
             ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
 
 
-constant int array SERPEND_WARD_HP = [0, 250, 500, 750, 1000]
+constant int array SERPEND_WARD_HP = [0, 150, 300, 450, 600]
 constant real SERPENT_WARD_DURATION = 30
 constant real array SERPENT_POISON_DURATION = [2, 2.25, 2.5, 2.75, 3]
 
@@ -101,12 +101,14 @@ constant int SERPENT_POISON_SLOW = 2
 constant int array SERPENT_STACKS = [3, 4, 5, 6, 7]
 
 BuffType buffSerpentPoison
+constant SERPENT_POISON_BUFF_ID = compiletime(createAuraBuff("Serpent Poison", "This unit was hit by Serpent Ward; it is slowed and has reduced armor.", Icons.bTNSerpentWard))
+constant SERPENT_POISON_ABILITY_ID = compiletime(createNegativeBuffAbility(5, SERPENT_POISON_BUFF_ID, Abilities.poisonStingTarget, "chest"))
 
 @compiletime
 function abilityE()
     int array MANA = [60, 60, 60, 60, 60]
     real array COOLDOWN = [6, 6, 6, 6, 6]
-    real array RANGE = [600, 700, 800, 900, 1000]
+    real array RANGE = [500, 500, 500, 500, 500]
 
 
     let aDef = new AbilityDefinitionIllidanChannel(ABILITY_SERPENT_WARD)
@@ -156,16 +158,16 @@ function abilityR()
 function setupStats()
     heroType
         //..setStat(Stat.AD, 5, 40)
-        ..setStat(Stat.AR, 4, 16)
-        ..setStat(Stat.AS, 34, 88)
-        ..setStat(Stat.HP, 7, 32)
-        ..setStat(Stat.HR, 4, 19)
-        ..setStat(Stat.MP, 12, 29)
-        ..setStat(Stat.MR, 7, 22)
-        ..setStat(Stat.MS, 6, 21)
-        ..setStat(Stat.STR, 16, 91)
-        ..setStat(Stat.AGI, 4, 11)
-        ..setStat(Stat.INT, 6, 23)
+        ..setStat(Stat.AR, 11, 27)
+        ..setStat(Stat.AS, 14, 48)
+        ..setStat(Stat.HP, 11, 39)
+        ..setStat(Stat.HR, 11, 29)
+        ..setStat(Stat.MP, 17, 33)
+        ..setStat(Stat.MR, 15, 29)
+        ..setStat(Stat.MS, 31, 51)
+        ..setStat(Stat.STR, 14, 71)
+        ..setStat(Stat.AGI, 8, 23)
+        ..setStat(Stat.INT, 9, 33)
 
 function onDamage()
 
@@ -209,8 +211,9 @@ function onSpellCast()
         target.addBuffReduced(caster, MIND_CURSE_DURATION[level-1].bonus(caster.getInt(), MIND_CURSE_DURATION_BONUS), buffMindCurseTarget, level)
 
     if(spellId==ABILITY_SERPENT_WARD)
-        let ward = createUnit(caster.getOwner(), SERPENT_WARD, caster.getPos(), angle(0))
+        let ward = createUnit(caster.getOwner(), SERPENT_WARD, vec2(GetSpellTargetX(), GetSpellTargetY()), angle(0))
         let wrapper = ward.wrapper()
+        ward.setTimedLife(SERPENT_WARD_DURATION)
 
         wrapper.addStatAbsoluteBonus(Stat.HP, SERPEND_WARD_HP[level-1] )
     
@@ -282,9 +285,9 @@ function setupTooltips()
 
 function initHeroType()
     setupStats()
+    setupTooltips()
     heroType.setSkillBuild("QWQWQWQWQWEEEEE")
     delayInit(5) ->
-        setupTooltips()
         heroType
             ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
             ..addOnSpellCastFunc(function onSpellCast)
@@ -312,9 +315,9 @@ function initHeroType()
         end)
 
         abilityList = new LinkedList<int>
-        ..add(MIND_CURSE_ABILITY_ID)
+        ..add(SERPENT_POISON_ABILITY_ID)
         buffSerpentPoison = new BuffType(false, true)
-        buffSerpentPoison.setup(abilityList, MIND_CURSE_BUFF_ID)
+        buffSerpentPoison.setup(abilityList, SERPENT_POISON_BUFF_ID)
 
         buffSerpentPoison.addFirstFunction( (Buff whichBuff) -> (begin
             let level = whichBuff.getLevel()
@@ -342,9 +345,10 @@ function initHeroType()
         end))
 
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            let hero = Hero.getHero(attacker.getOwner()).toUnit()
-            let level = hero.getAbilityLevel(ABILITY_SERPENT_WARD)
-            target.addBuffReduced(hero, SERPENT_POISON_DURATION[level-1], buffSerpentPoison, level)
+            if attacker.getTypeId() == SERPENT_WARD
+                let hero = Hero.getHero(attacker.getOwner()).toUnit()
+                let level = hero.getAbilityLevel(ABILITY_SERPENT_WARD)
+                target.addBuffReduced(hero, SERPENT_POISON_DURATION[level-1], buffSerpentPoison, level)
         end))
     
 init
