@@ -1,0 +1,354 @@
+package VoodooArcher
+
+//12
+
+import HeroType
+import ClosureTimers
+import UnitTypeConfig
+import OnAttack
+import Fx
+
+public constant HERO_VOODOO_ARCHER = 'H012'
+HeroType heroType
+
+constant ABILITY_VOODOO_ARROWS = 'AY2P'
+constant ABILITY_GHOST_ARROWS = 'AY2Q'
+constant ABILITY_MIND_CURSE = 'AY2W'
+constant ABILITY_SERPENT_WARD = 'AY2E'
+constant ABILITY_BIG_BAD_VOODOO = 'AY2R'
+
+
+constant real array VOODOO_ARROW_DAMAGE = [6, 12, 18, 24, 30]
+
+@compiletime
+function passive()
+    let aDef = createNoEffectAbiltiy(ABILITY_VOODOO_ARROWS)
+        ..setupIcon("PASDemonArrow")
+        ..setupWithHotKey("Voodoo Arrows", "D")
+        ..setLearnString("Each attack deals additional void damage.", (int lvl) -> (begin
+            return "{0} damage.".format(
+                VOODOO_ARROW_DAMAGE[lvl-1].str())
+        end) )
+
+    for lvl = 1 to 5
+        aDef
+            ..setDescriptionString(false, lvl, "Each attack deals {0} additional void damage.".format( 
+                VOODOO_ARROW_DAMAGE[lvl-1].str())
+            )
+
+
+constant real array GHOST_ARROWS_DAMAGE = [100, 160, 220, 280, 340]
+constant real GHOST_ARROWS_DAMAGE_BONUS = 220
+
+@compiletime
+function abilityQ()
+    int array MANA = [70, 75, 80, 85, 90]
+    real array COOLDOWN = [9, 9, 9, 9, 9]
+    real array RANGE = [700, 700, 700, 700, 700]
+
+    let aDef = new AbilityDefinitionIllidanChannel(ABILITY_GHOST_ARROWS)
+        ..setupIcon("BTNThunderArrow")
+        ..setupWithHotKey("Ghost Arrows", "Q")
+        ..setAnimationNames("spell")
+        ..setupChannel(TargetType.UNIT, "channel", 0.5)
+
+    for lvl = 1 to 5
+        aDef
+            ..setCooldown(lvl, COOLDOWN[lvl-1])
+            ..setManaCost(lvl, MANA[lvl-1])
+            ..setCastRange(lvl, RANGE[lvl-1])
+            ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
+
+
+constant real array MIND_CURSE_MANA_DRAIN = [12, 20, 28, 36, 44]
+constant real MIND_CURSE_MANA_DRAIN_BONUS = 20
+
+constant real array MIND_CURSE_DURATION = [3, 3.5, 4, 4.5, 5]
+constant real MIND_CURSE_DURATION_BONUS = 4
+
+BuffType buffMindCurseTarget
+
+constant MIND_CURSE_BUFF_ID = compiletime(createAuraBuff("Mind Curse", "This unit is under the effect of Mind Curse; it loses mana over time.", "BTNWitchDoctorRitual"))
+constant MIND_CURSE_ABILITY_ID = compiletime(createNegativeBuffAbility(5, MIND_CURSE_BUFF_ID, Abilities.manaDrainTarget, "origin"))
+
+@compiletime
+function abilityW()
+    int array MANA = [90, 100, 110, 120, 130]
+    real array COOLDOWN = [16, 16, 16, 16, 16]
+    real array RANGE = [800, 800, 800, 800, 800]
+    
+    let aDef = new AbilityDefinitionIllidanChannel(ABILITY_MIND_CURSE)
+        ..setupIcon("BTNWitchDoctorRitual")
+        ..setupWithHotKey("Terror", "W")
+        ..setAnimationNames("spell")
+        ..setupChannel(TargetType.UNIT, "manaburn", 0.5)
+
+    for lvl = 1 to 5
+        aDef
+            ..setCooldown(lvl, COOLDOWN[lvl-1])
+            ..setManaCost(lvl, MANA[lvl-1])
+            ..setCastRange(lvl, RANGE[lvl-1])
+            ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
+
+
+constant int array SERPEND_WARD_HP = [0, 250, 500, 750, 1000]
+constant real SERPENT_WARD_DURATION = 30
+constant real array SERPENT_POISON_DURATION = [2, 2.25, 2.5, 2.75, 3]
+
+constant int SERPENT_POISON_ARMOR = 1
+constant int SERPENT_POISON_SLOW = 2
+
+constant int array SERPENT_STACKS = [3, 4, 5, 6, 7]
+
+BuffType buffSerpentPoison
+
+@compiletime
+function abilityE()
+    int array MANA = [60, 60, 60, 60, 60]
+    real array COOLDOWN = [6, 6, 6, 6, 6]
+    real array RANGE = [600, 700, 800, 900, 1000]
+
+
+    let aDef = new AbilityDefinitionIllidanChannel(ABILITY_SERPENT_WARD)
+        ..setAnimationNames("spell")
+        ..setupIcon(Icons.bTNSerpentWard)
+        ..setupWithHotKey("Serpent Ward", "E")
+        ..setupChannel(TargetType.POINT, "ward", 0.5)
+
+    for lvl = 1 to 5
+        aDef
+            ..setCastRange(lvl, RANGE[lvl-1])
+            ..setCooldown(lvl, COOLDOWN[lvl-1])
+            ..setManaCost(lvl, MANA[lvl-1])
+
+
+        
+constant real array DEATH_COIL_DMG_BASE = [200, 275, 350, 425, 500]
+constant real array DEATH_COIL_DMG_FACTOR = [20, 35, 50, 65, 80]
+constant real DEATH_COIL_DMG_BASE_BONUS = 250
+constant real DEATH_COIL_DMG_FACTOR_BONUS = 60
+constant real DEATH_COIL_DURATION = 10
+
+constant integer BUFF_ID_ON_DEATH_COIL = compiletime(createDummyBuff())
+
+@compiletime
+function abilityR()
+    int array MANA = [150, 160, 170, 180, 190]
+    real array COOLDOWN = [90, 90, 90, 90, 90]
+    real array RANGE = [800, 900, 1000, 1100, 1200]
+
+    let aDef = new AbilityDefinitionRoar(ABILITY_BIG_BAD_VOODOO)
+        ..setLevels(5)
+        ..setAnimationNames("spell")
+        ..setupIcon(Icons.bTNBigBadVoodooSpell)
+        ..setupWithHotKey("Death Pact", "R")
+        ..setArtCaster("Abilities\\Spells\\Undead\\DeathPact\\DeathPactCaster.mdl")
+
+
+    for lvl = 1 to 5
+        aDef
+            ..setCooldown(lvl, COOLDOWN[lvl-1])
+            ..setManaCost(lvl, MANA[lvl-1])
+            ..setTargetsAllowed(lvl, "none")
+
+
+
+function setupStats()
+    heroType
+        //..setStat(Stat.AD, 5, 40)
+        ..setStat(Stat.AR, 4, 16)
+        ..setStat(Stat.AS, 34, 88)
+        ..setStat(Stat.HP, 7, 32)
+        ..setStat(Stat.HR, 4, 19)
+        ..setStat(Stat.MP, 12, 29)
+        ..setStat(Stat.MR, 7, 22)
+        ..setStat(Stat.MS, 6, 21)
+        ..setStat(Stat.STR, 16, 91)
+        ..setStat(Stat.AGI, 4, 11)
+        ..setStat(Stat.INT, 6, 23)
+
+function onDamage()
+
+
+function onAttack(unit attacker, unit target, boolean _isActive)
+    let level = attacker.getAbilityLevel(ABILITY_VOODOO_ARROWS)
+    attacker.dealDamage(target, VOODOO_ARROW_DAMAGE[level-1], ReductionType.NONE)
+
+
+function onSpellCast()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+
+    if(spellId==ABILITY_GHOST_ARROWS)
+        let target = GetSpellTargetUnit()
+        let angles = 12
+        let angleStep = bj_PI*2/angles
+
+        for i = 0 to angles - 1
+            let mOffset = vec2(0,0).polarOffset(angle(angleStep*i), 250)
+            let facing = angle(angleStep*i+bj_PI)
+            let fx = new Fx((target.getPos()+mOffset).withZ(110), facing, "Models\\LujkaArrow.mdl")
+            doPeriodicallyTimed(0.03, 0.99, (CallbackCounted cb)-> begin
+                fx.setXY(target.getPos()+mOffset)
+                fx.setXYAngle(facing)
+            end)
+            doAfter(1, -> begin
+                doPeriodicallyTimed(0.03, 0.3, (CallbackCounted cb)-> begin
+                    fx.setXY(target.getPos()+mOffset*(cb.getCount()/10))
+                    if cb.isLast()
+                        destroy fx
+                end)
+            end)
+        doAfter(1.25) ->
+            caster.dealDamage(target, GHOST_ARROWS_DAMAGE[level-1].bonus(caster.getStr(), GHOST_ARROWS_DAMAGE_BONUS), ReductionType.PHYSICAL)
+            
+
+    if(spellId==ABILITY_MIND_CURSE)
+        let target = GetSpellTargetUnit()
+        target.addBuffReduced(caster, MIND_CURSE_DURATION[level-1].bonus(caster.getInt(), MIND_CURSE_DURATION_BONUS), buffMindCurseTarget, level)
+
+    if(spellId==ABILITY_SERPENT_WARD)
+        let ward = createUnit(caster.getOwner(), SERPENT_WARD, caster.getPos(), angle(0))
+        let wrapper = ward.wrapper()
+
+        wrapper.addStatAbsoluteBonus(Stat.HP, SERPEND_WARD_HP[level-1] )
+    
+
+    if(spellId==ABILITY_BIG_BAD_VOODOO)
+        
+
+
+function retreatAI(HeroAI _ai)
+
+function attackAI(HeroAI _ai)
+
+function teamFightAI(HeroAI _ai)
+            
+
+function setupTooltips()
+    DynamicTooltip tooltip = new DynamicTooltip(ABILITY_GHOST_ARROWS)
+    tooltip.setLearnString("Summons Ghost Arrows to pierce the target enemy unit dealing damage.", (int lvl) -> (begin
+        return "{0}{S0} damage.".format(
+            GHOST_ARROWS_DAMAGE[lvl-1].str())
+    end) )
+    
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, "Summons Ghost Arrows to pierce the target enemy unit dealing {0}{S0} damage.".format(
+            GHOST_ARROWS_DAMAGE[lvl-1].str())
+        )
+    tooltip.setReplaceStrength(GHOST_ARROWS_DAMAGE_BONUS)
+    heroType.addDynamicTooltipStrength(tooltip)
+
+    tooltip = new DynamicTooltip(ABILITY_MIND_CURSE)
+    tooltip.setLearnString("Burns mana of the target enemy unit over time.", (int lvl) -> (begin
+        return "{0}{I0} mana per second, {1}{I1} seconds.".format(
+        MIND_CURSE_MANA_DRAIN[lvl-1].str(),
+        MIND_CURSE_DURATION[lvl-1].toExactString())
+    end) )
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, "Burns {0}{I0} mana per second of the target enemy unit for {1}{I1} seconds.".format(
+            MIND_CURSE_MANA_DRAIN[lvl-1].str(),
+        MIND_CURSE_DURATION[lvl-1].toExactString()))
+    tooltip.setReplaceIntelligence(MIND_CURSE_MANA_DRAIN_BONUS, MIND_CURSE_DURATION_BONUS)
+    heroType.addDynamicTooltipIntelligence(tooltip)
+
+    tooltip = new DynamicTooltip(ABILITY_SERPENT_WARD)
+    tooltip.setLearnString("Summons an immobile serpentine ward to attack nearby enemies for {0} seconds. Attacked targets have their armor and movement speed reduced.".format(SERPENT_WARD_DURATION.toExactString()), (int lvl) -> (begin
+        return "{0} armor, {1}% movement speed per attack, {2} seconds.".format(
+        (SERPENT_POISON_ARMOR*SERPENT_STACKS[lvl-1]).str(),
+        (SERPENT_POISON_SLOW*SERPENT_STACKS[lvl-1]).str(),
+        SERPENT_POISON_DURATION[lvl-1].toExactString())
+    end) )
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, "Summons an immobile serpentine ward to attack nearby enemies for {3} seconds. Attacked targets have their armor reduced by {0} and movement speed by {1}% for {2} seconds per attack.".format(
+            (SERPENT_POISON_ARMOR*SERPENT_STACKS[lvl-1]).str(),
+            (SERPENT_POISON_SLOW*SERPENT_STACKS[lvl-1]).str(),
+            SERPENT_POISON_DURATION[lvl-1].toExactString(),
+            SERPENT_WARD_DURATION.toExactString()))
+
+    tooltip.setReplaceIntelligence(DEATH_COIL_DMG_BASE_BONUS, DEATH_COIL_DMG_FACTOR_BONUS)
+    heroType.addDynamicTooltipIntelligence(tooltip)
+
+    tooltip = new DynamicTooltip(ABILITY_BIG_BAD_VOODOO)
+    tooltip.setLearnString("", (lvl) -> "" )
+    
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, "Deals {0}{I0} magic damage and additional {1}{I1} magic damage for every sacrificed skeleton to the target enemy hero.".format(
+            DEATH_COIL_DMG_BASE[lvl-1].str()+DEATH_COIL_DMG_BASE_BONUS.getBonusString(C_INT),
+            DEATH_COIL_DMG_FACTOR[lvl-1].str()+DEATH_COIL_DMG_FACTOR_BONUS.getBonusString(C_INT)))
+    tooltip.setReplaceIntelligence(DEATH_COIL_DMG_BASE_BONUS, DEATH_COIL_DMG_FACTOR_BONUS)
+    heroType.addDynamicTooltipIntelligence(tooltip)
+
+function initHeroType()
+    setupStats()
+    heroType.setSkillBuild("QWQWQWQWQWEEEEE")
+    delayInit(5) ->
+        setupTooltips()
+        heroType
+            ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
+            ..addOnSpellCastFunc(function onSpellCast)
+            ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
+            ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
+            ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+            ..addItem(ITEM_ID_HEAVY_BOOTS)
+            ..addItem(ITEM_ID_BLOOD_SWORD)
+            ..addItem(ITEM_ID_INFERNAL_BOW)
+            ..addItem(ITEM_ID_RUNIC_ARMOR)
+            ..addItem(ITEM_ID_SACRIFICIAL_DAGGER)
+            ..addItem(ITEM_ID_CURSED_SWORD)
+
+        var abilityList = new LinkedList<int>
+        ..add(MIND_CURSE_ABILITY_ID)
+        buffMindCurseTarget = new BuffType(false, true)
+        buffMindCurseTarget.setup(abilityList, MIND_CURSE_BUFF_ID)
+
+        buffMindCurseTarget.setPeriodicTime(0.25)
+        buffMindCurseTarget.addPeriodicFunction((whichBuff) -> begin
+            let target = whichBuff.getTarget()
+            let caster = whichBuff.getCaster()
+            let level = whichBuff.getLevel()
+            caster.damageMana(target, 0.25 * MIND_CURSE_MANA_DRAIN[level-1].bonus(caster.getInt(), MIND_CURSE_MANA_DRAIN_BONUS), ReductionType.MAGIC)
+        end)
+
+        abilityList = new LinkedList<int>
+        ..add(MIND_CURSE_ABILITY_ID)
+        buffSerpentPoison = new BuffType(false, true)
+        buffSerpentPoison.setup(abilityList, MIND_CURSE_BUFF_ID)
+
+        buffSerpentPoison.addFirstFunction( (Buff whichBuff) -> (begin
+            let level = whichBuff.getLevel()
+            whichBuff.getTarget().wrapper()
+                ..addStatRelativeBonus(Stat.MS, -10 * SERPENT_POISON_SLOW * SERPENT_STACKS[level-1])
+                ..addStatAbsoluteBonus(Stat.AR, -SERPENT_POISON_ARMOR * SERPENT_STACKS[level-1])
+            whichBuff.setData(SERPENT_STACKS[level-1])
+        end))
+
+        buffSerpentPoison.addStackFunction( (Buff whichBuff) -> (begin
+            let level = whichBuff.getLevel()
+            let stacks = whichBuff.getData() + SERPENT_STACKS[level-1]
+            whichBuff.setData(stacks)
+            whichBuff.getTarget().wrapper()
+                ..addStatRelativeBonus(Stat.MS, -10 * SERPENT_POISON_SLOW * (SERPENT_STACKS[level-1]))
+                ..addStatAbsoluteBonus(Stat.AR, -SERPENT_POISON_ARMOR * (SERPENT_STACKS[level-1]))
+        end))
+
+
+        buffSerpentPoison.addEndFunction( (Buff whichBuff) -> (begin
+            let stacks = whichBuff.getData()
+            whichBuff.getTarget().wrapper()
+                ..addStatRelativeBonus(Stat.MS, 10 * SERPENT_POISON_SLOW * (stacks))
+                ..addStatAbsoluteBonus(Stat.AR, SERPENT_POISON_ARMOR * (stacks))
+        end))
+
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            let hero = Hero.getHero(attacker.getOwner()).toUnit()
+            let level = hero.getAbilityLevel(ABILITY_SERPENT_WARD)
+            target.addBuffReduced(hero, SERPENT_POISON_DURATION[level-1], buffSerpentPoison, level)
+        end))
+    
+init
+    
+    heroType = new HeroType(HERO_VOODOO_ARCHER, Icons.bTNShadowHunter, 12, true)
+        ..setOnInitFunction(() -> initHeroType())
+        
