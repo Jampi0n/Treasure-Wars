@@ -51,7 +51,7 @@ constant real array BITE_SLOW_DURATION = [0.6, 0.9, 1.2, 1.5, 1.8]
 constant real BITE_SLOW_DURATION_BONUS = 0.6
 
 BuffType buffBite
-constant BITE_BUFF_ID = compiletime(createAuraBuff("Venomous Beetle", "This unit was hit by Envenomed Blades; it is slowed and takes damage over time.", "BTNPoisonBlades"))
+constant BITE_BUFF_ID = compiletime(createAuraBuff("Venomous Beetle", "This unit was bitten by a Venomous Beetle; it is slowed.", Icons.bTNCarrionScarabs))
 constant BITE_ABILITY_ID = compiletime(createNegativeBuffAbility(5, BITE_BUFF_ID, Abilities.poisonStingTarget, "chest"))
 
 @compiletime

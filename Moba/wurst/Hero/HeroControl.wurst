@@ -50,19 +50,24 @@ public class Hero
         onDeathTrigger.addAction(function onDeathStatic)
         onLevelUpTrigger.addAction(function onLevelUpStatic)
 
-        /*CreateTrigger()
+        CreateTrigger()
             ..addAction(() -> (begin
-                let hero = unitToHero.get(GetTriggerUnit())
+                let heroUnit = GetTriggerUnit()
+                let hero = unitToHero.get(heroUnit)
                 if hero != null
-                    hero.upgrade()
+                    hero.getHeroType()
+                        ..updateTooltipsStr(heroUnit)
+                        ..updateTooltipsInt(heroUnit)
             end))
-            ..registerAnyUnitEvent(EVENT_PLAYER_HERO_SKILL)*/
+            ..registerAnyUnitEvent(EVENT_PLAYER_HERO_SKILL)
 
 
     function setup()
         firstTeam = this.owner.getId() <= HERO_PLAYER_TEAM_1_LAST
 
         this.heroType = HeroType.getHeroType(this.hero.getTypeId())
+            ..updateTooltipsStr(this.hero)
+            ..updateTooltipsInt(this.hero)
         let upgradePlayer = owner.getPlayer()
 
         execute( -> this.heroType.initialize())
@@ -233,6 +238,10 @@ public class Hero
     //handles death
     function onDeath()
         //indetify true killer
+
+        if this.heroGlow != null
+            this.heroGlow.setVertexColor(colorA(255, 255, 255, 0))
+
         let owningPlayer = this.owner.getPlayer()
 
         player killingPlayer = GetKillingUnit().getOwner()
