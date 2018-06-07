@@ -42,7 +42,7 @@ constant real GHOST_ARROWS_DAMAGE_BONUS = 220
 
 @compiletime
 function abilityQ()
-    int array MANA = [70, 75, 80, 85, 90]
+    int array MANA = [90, 95, 100, 105, 110]
     real array COOLDOWN = [9, 9, 9, 9, 9]
     real array RANGE = [700, 700, 700, 700, 700]
 
@@ -60,20 +60,20 @@ function abilityQ()
             ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
 
 
-constant real array MIND_CURSE_MANA_DRAIN = [20, 25, 30, 35, 40]
+constant real array MIND_CURSE_MANA_DRAIN = [30, 40, 50, 60, 70]
 constant real MIND_CURSE_MANA_DRAIN_BONUS = 30
 
-constant real array MIND_CURSE_DURATION = [3, 3.5, 4, 4.5, 5]
+constant real array MIND_CURSE_DURATION = [2, 2.25, 2.5, 2.75, 3]
 constant real MIND_CURSE_DURATION_BONUS = 4
 
 BuffType buffMindCurseTarget
 
-constant MIND_CURSE_BUFF_ID = compiletime(createAuraBuff("Mind Curse", "This unit is under the effect of Mind Curse; it loses mana over time.", "BTNWitchDoctorRitual"))
+constant MIND_CURSE_BUFF_ID = compiletime(createAuraBuff("Mind Curse", "This unit is under the effect of Mind Curse; it loses mana over time and cannot cast spells.", "BTNWitchDoctorRitual"))
 constant MIND_CURSE_ABILITY_ID = compiletime(createNegativeBuffAbility(5, MIND_CURSE_BUFF_ID, Abilities.manaDrainTarget, "origin"))
 
 @compiletime
 function abilityW()
-    int array MANA = [90, 90, 90, 90, 90]
+    int array MANA = [75, 75, 75, 75, 75]
     real array COOLDOWN = [10, 10, 10, 10, 10]
     real array RANGE = [800, 800, 800, 800, 800]
     
@@ -125,26 +125,22 @@ function abilityE()
 
 
         
-constant real array DEATH_COIL_DMG_BASE = [200, 275, 350, 425, 500]
-constant real array DEATH_COIL_DMG_FACTOR = [20, 35, 50, 65, 80]
-constant real DEATH_COIL_DMG_BASE_BONUS = 250
-constant real DEATH_COIL_DMG_FACTOR_BONUS = 60
-constant real DEATH_COIL_DURATION = 10
+constant real array BBV_DAMAGE = [50, 65, 80, 95, 110]
+constant real BBV_DAMAGE_BONUS = 80
+constant real BBV_DURATION = 5
 
 constant integer BUFF_ID_ON_DEATH_COIL = compiletime(createDummyBuff())
 
 @compiletime
 function abilityR()
-    int array MANA = [150, 160, 170, 180, 190]
-    real array COOLDOWN = [90, 90, 90, 90, 90]
-    real array RANGE = [800, 900, 1000, 1100, 1200]
+    int array MANA = [160, 170, 180, 190, 200]
+    real array COOLDOWN = [110, 110, 110, 110, 110]
 
-    let aDef = new AbilityDefinitionRoar(ABILITY_BIG_BAD_VOODOO)
+    let aDef = new AbilityDefinitionKeeperoftheGroveTranquility(ABILITY_BIG_BAD_VOODOO)
         ..setLevels(5)
-        ..setAnimationNames("spell")
         ..setupIcon(Icons.bTNBigBadVoodooSpell)
         ..setupWithHotKey("Death Pact", "R")
-        ..setArtCaster("Abilities\\Spells\\Undead\\DeathPact\\DeathPactCaster.mdl")
+        ..setAnimationNames("spell,channel")
 
 
     for lvl = 1 to 5
@@ -152,7 +148,9 @@ function abilityR()
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setTargetsAllowed(lvl, "none")
-
+            ..setDurationHero(lvl, BBV_DURATION)
+            ..setDurationNormal(lvl, BBV_DURATION)
+            ..setEffects(lvl, "X000")
 
 
 function setupStats()
@@ -208,7 +206,9 @@ function onSpellCast()
 
     if(spellId==ABILITY_MIND_CURSE)
         let target = GetSpellTargetUnit()
-        target.addBuffReduced(caster, MIND_CURSE_DURATION[level-1].bonus(caster.getInt(), MIND_CURSE_DURATION_BONUS), buffMindCurseTarget, level)
+        let dur = MIND_CURSE_DURATION[level-1].bonus(caster.getInt(), MIND_CURSE_DURATION_BONUS)
+        target.addBuffReduced(caster, dur, buffMindCurseTarget, level)
+        target.addBuffReduced(caster, dur, SILENCED, 1)
 
     if(spellId==ABILITY_SERPENT_WARD)
         let ward = createUnit(caster.getOwner(), SERPENT_WARD, vec2(GetSpellTargetX(), GetSpellTargetY()), angle(0))
@@ -219,6 +219,24 @@ function onSpellCast()
     
 
     if(spellId==ABILITY_BIG_BAD_VOODOO)
+        let firstTeam = caster.getOwner().getId() <= HERO_PLAYER_TEAM_1_LAST
+        let iFrom = firstTeam ? HERO_PLAYER_TEAM_2_FIRST : HERO_PLAYER_TEAM_1_FIRST
+        let iTo = firstTeam ? HERO_PLAYER_TEAM_2_LAST : HERO_PLAYER_TEAM_1_LAST
+        let fx = caster.addEffect(Abilities.voodooAura, "origin")
+        doPeriodically(0.1, (cb) -> begin
+            if not caster.isAlive() or caster.getCurrentOrder() != OrderId("tranquility")
+                destroy cb
+                fx.destr()
+            else
+                for i = iFrom to iTo
+                    let hero = Hero.getHero(i)
+                    if hero != null
+                        let target = hero.toUnit()
+                        if target.isTargetable(caster.getOwner(), false, true)
+                            caster.dealDamage(target, 0.1 * BBV_DAMAGE[level-1].bonus(caster.getInt(), BBV_DAMAGE_BONUS), ReductionType.NONE)
+                            target.addEffect(Abilities.vengeanceMissile, "overhead").destr()
+                        
+        end)
         
 
 
@@ -270,17 +288,19 @@ function setupTooltips()
             SERPENT_POISON_DURATION[lvl-1].toExactString(),
             SERPENT_WARD_DURATION.toExactString()))
 
-    tooltip.setReplaceIntelligence(DEATH_COIL_DMG_BASE_BONUS, DEATH_COIL_DMG_FACTOR_BONUS)
+    tooltip.setReplaceIntelligence(0)
     heroType.addDynamicTooltipIntelligence(tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_BIG_BAD_VOODOO)
-    tooltip.setLearnString("", (lvl) -> "" )
+    tooltip.setLearnString("Deals void damage to all enemy heroes while channeling.".format(BBV_DURATION.toExactString()), (int lvl) -> (begin
+        return "{0}{I0} damage per second.".format(
+        BBV_DAMAGE[lvl-1].str())
+    end) )
     
     for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, "Deals {0}{I0} magic damage and additional {1}{I1} magic damage for every sacrificed skeleton to the target enemy hero.".format(
-            DEATH_COIL_DMG_BASE[lvl-1].str()+DEATH_COIL_DMG_BASE_BONUS.getBonusString(C_INT),
-            DEATH_COIL_DMG_FACTOR[lvl-1].str()+DEATH_COIL_DMG_FACTOR_BONUS.getBonusString(C_INT)))
-    tooltip.setReplaceIntelligence(DEATH_COIL_DMG_BASE_BONUS, DEATH_COIL_DMG_FACTOR_BONUS)
+        tooltip.setNormalString(true, lvl, "Deals {0}{I0} void damage per second to all enemy heroes while channeling.".format(
+            BBV_DAMAGE[lvl-1].str()))
+    tooltip.setReplaceIntelligence(BBV_DAMAGE_BONUS)
     heroType.addDynamicTooltipIntelligence(tooltip)
 
 function initHeroType()
