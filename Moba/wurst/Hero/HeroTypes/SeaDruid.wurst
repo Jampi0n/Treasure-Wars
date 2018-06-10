@@ -275,6 +275,8 @@ function onSpellCast()
         
                 end) )
                     ..setMaxRange(500)
+        nearby.destr()
+
     else if(spellId==ABILITY_GIANT_FISH)
         ArtilleryDetection.fireArtillery(caster.getOwner(), FISH_ARTILLERY, caster.getPos(), vec2(GetSpellTargetX(), GetSpellTargetY()))
 
@@ -384,6 +386,7 @@ function attackAI(HeroAI ai)
                     count += 3
                 else
                     count ++
+        g.destr()
 
         if count >= 4
             if ai.issue("howlofterror")

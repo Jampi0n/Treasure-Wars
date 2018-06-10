@@ -74,21 +74,19 @@ public class Hero
         
         unitToHero.put(this.hero, this)
         heroes[this.owner.getId()] = this
-        delayInit(5) ->
-            onDamageTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DAMAGED)
-            onDeathTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DEATH)
-            onLevelUpTrigger.registerUnitEvent(this.hero, EVENT_UNIT_HERO_LEVEL)
+        onDamageTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DAMAGED)
+        onDeathTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DEATH)
+        onLevelUpTrigger.registerUnitEvent(this.hero, EVENT_UNIT_HERO_LEVEL)
         onSpellCastTrigger = this.heroType.getOnSpellCastTrigger()
         onSpellCastTrigger.registerUnitEvent(this.hero, EVENT_UNIT_SPELL_EFFECT)
 
         let wrapper = this.hero.wrapper()
 
-        delayInit(10) ->
-            this.reviveTimer = getTimer()
-            ..setData(this castTo int)
-            this.reviveWindow = CreateTimerDialog(this.reviveTimer)
-            TimerDialogDisplay(this.reviveWindow, false)
-            TimerDialogSetTitle(this.reviveWindow, this.owner.getPlayer().getFullColoredName())
+        this.reviveTimer = getTimer()
+        ..setData(this castTo int)
+        this.reviveWindow = CreateTimerDialog(this.reviveTimer)
+        TimerDialogDisplay(this.reviveWindow, false)
+        TimerDialogSetTitle(this.reviveWindow, this.owner.getPlayer().getFullColoredName())
 
         if this.heroType.getBonusCalculation() != null
             wrapper.setBonusCalculation(this.heroType.getBonusCalculation())

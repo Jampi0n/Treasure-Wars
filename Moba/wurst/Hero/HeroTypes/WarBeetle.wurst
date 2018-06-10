@@ -317,6 +317,7 @@ function attackAI(HeroAI ai)
                     count += 3
                 else
                     count ++
+        g.destr()
 
         if count >= 4
             if ai.issue("howlofterror")
@@ -346,6 +347,7 @@ function teamFightAI(HeroAI ai)
         if u.isTargetable(hero.getOwner(), false, true)
             if u.isType(UNIT_TYPE_HERO)
                 count++
+    g.destr()
 
     if count != 0
         if ai.issue("howlofterror")
