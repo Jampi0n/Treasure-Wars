@@ -79,10 +79,10 @@ public function unit.findAreaTarget(real range, real aoe, int heroValue) returns
             nearby.enumUnitsInRange(unitPos, aoe)
             while(true)
                 
-                u = FirstOfGroup(g)
+                u = FirstOfGroup(nearby)
                 if u == null
                     break
-                g.removeUnit(u)
+                nearby.removeUnit(u)
             
                 if not u.isType(UNIT_TYPE_STRUCTURE) and u.isAlive() and u.isVisible(owner) and IsUnitEnemy(u, owner)
                     if u.isType(UNIT_TYPE_HERO)
@@ -90,7 +90,8 @@ public function unit.findAreaTarget(real range, real aoe, int heroValue) returns
                     else
                         currentValue++
 
-                        nearby.destr()
+    nearby.destr()
+    g.destr()
 
     return targetPoint(unitPos, currentValue)
 
@@ -418,7 +419,7 @@ public class HeroAI
 
     static function classInit()
 
-        updateTimer.startPeriodic(0.1, function updateStatic)
+        updateTimer.startPeriodic(0.15, function updateStatic)
         CreateTrigger()
             ..registerAnyUnitEvent(EVENT_PLAYER_HERO_LEVEL)
             ..addAction(() ->(begin
@@ -649,11 +650,11 @@ public class HeroAI
     static function updateStatic()
         int i = 0
         for HeroAI ai in team1AIs
-            doAfter(i * 0.05, -> ai.update())
+            doAfter(i * 0.03, -> ai.update())
             i++
         i = 0
         for HeroAI ai in team2AIs
-            doAfter(i * 0.05, -> ai.update())
+            doAfter(i * 0.03, -> ai.update())
             i++
 
     function startTeamFight(TeamFight teamFight)

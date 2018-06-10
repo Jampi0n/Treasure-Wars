@@ -105,24 +105,24 @@ function onUnitDeath()
                 The killing team gets bountyAllyFactor/xpAllyFactor of the full gold / xp evenly shared amongst all players except the killer.
             */
 
-            boolean killerIsEnemy = killingPlayer.getCPlayer().getTeam() == CPlayer.invertTeam(dyingCPlayer.getTeam())
+
+            boolean killerIsEnemy = killingUnit != null and killingPlayer.getCPlayer().getTeam() == CPlayer.invertTeam(dyingCPlayer.getTeam()) 
             int killerIsHero = 0
             //the killing player belongs to the enemy team
-            if killerIsEnemy and killingPlayer.getId() < MAX_HERO_COUNT and killingUnit != null
+            if killerIsEnemy and killingPlayer.getId() < MAX_HERO_COUNT 
                 killerIsHero = 1
 
             // killer reward
-            if killerIsEnemy
+            if killerIsEnemy and killerIsHero == 1
                 killingPlayer.getCPlayer()
                     ..addGoldEx(bounty)
                     ..addUnitKill()
-                if killerIsHero == 1
-                    createGoldBountyTextTag(dyingUnit, bounty, killingPlayer)
-                    //xp
+                createGoldBountyTextTag(dyingUnit, bounty, killingPlayer)
+                //xp
 
-                    let killingHero = Hero.getHero(killingPlayer)
-                    if killingHero != null
-                        killingHero.toUnit().addXp(xp, true)
+                let killingHero = Hero.getHero(killingPlayer)
+                if killingHero != null
+                    killingHero.toUnit().addXp(xp, true)
 
             // killer team reward
 

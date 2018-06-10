@@ -143,16 +143,22 @@ public class PathUnit
     ondestroy
         if this.currentPath == GREEN_TOP
             addLaneUnitCount(Team.TEAM1, Lane.TOP, -1)
+            team1Units.remove(this.assocUnit)
         else if this.currentPath == GREEN_MID
             addLaneUnitCount(Team.TEAM1, Lane.MID, -1)
+            team1Units.remove(this.assocUnit)
         else if this.currentPath == GREEN_BOT
             addLaneUnitCount(Team.TEAM1, Lane.BOT, -1)
+            team1Units.remove(this.assocUnit)
         else if this.currentPath == BROWN_TOP
             addLaneUnitCount(Team.TEAM2, Lane.TOP, -1)
+            team2Units.remove(this.assocUnit)
         else if this.currentPath == BROWN_MID
             addLaneUnitCount(Team.TEAM2, Lane.MID, -1)
+            team2Units.remove(this.assocUnit)
         else if this.currentPath == BROWN_BOT
             addLaneUnitCount(Team.TEAM2, Lane.BOT, -1)
+            team2Units.remove(this.assocUnit)
 
         objectCount--
         unitToPathUnit.remove(this.assocUnit)

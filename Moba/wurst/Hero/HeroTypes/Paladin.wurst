@@ -232,6 +232,7 @@ class DivinePunishment
                         this.caster.dealDamage(target, dmg, ReductionType.MAGIC)
                     end) )
 
+            nearby.destr()
             return
 
         if this.count>=45
@@ -341,6 +342,8 @@ function attackAI(HeroAI ai)
         if count >= 5
             if ai.issue("howlofterror")
                 return
+        
+        g.destr()
 
     unit target = hero.findTarget(500, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_DISTANCE, null)
     if target.isTargetable(hero.getOwner(), false, true)
