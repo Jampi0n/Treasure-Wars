@@ -7,6 +7,7 @@ import initlater General
 import UnitType
 import Upgrades
 import initlater HeroControl
+import PlayerControl
 import ErrorHandling
 import LinkedList
 
@@ -57,6 +58,9 @@ public class UnitWrapper
     protected BuffList buffList
 
     private int blueCount = 0
+    private int revealCount = 0
+
+    private Team team
 
     static function create(unit assocUnit)
         if not unitMap.has(assocUnit)
@@ -66,6 +70,7 @@ public class UnitWrapper
         objectCount++
 
         this.assocUnit = assocUnit
+        this.team = assocUnit.getOwner().getCPlayer().getTeam()
 
         allUnits[unitWrapperCount] = this.assocUnit
         this.index = unitWrapperCount
@@ -280,6 +285,22 @@ public class UnitWrapper
         blueCount--
         if blueCount == 0
             this.assocUnit.setVertexColor(255, 255, 255, 255)
+
+    function incReveal()
+        revealCount++
+        if revealCount == 1
+            if this.team == Team.TEAM1
+                UnitShareVision(this.toUnit(), players[TEAM_PLAYER_TEAM_2], true)
+            else if this.team == Team.TEAM2
+                UnitShareVision(this.toUnit(), players[TEAM_PLAYER_TEAM_1], true)
+
+    function decReveal()
+        revealCount--
+        if revealCount == 0
+            if this.team == Team.TEAM1
+                UnitShareVision(this.toUnit(), players[TEAM_PLAYER_TEAM_2], false)
+            else if this.team == Team.TEAM2
+                UnitShareVision(this.toUnit(), players[TEAM_PLAYER_TEAM_1], false)
 
 public function unit.wrapper() returns UnitWrapper
     return UnitWrapper.getWrapper(this)
