@@ -38,7 +38,7 @@ function passive()
 
 
 constant real array GHOST_ARROWS_DAMAGE = [100, 160, 220, 280, 340]
-constant real GHOST_ARROWS_DAMAGE_BONUS = 220
+constant real GHOST_ARROWS_DAMAGE_BONUS = 160
 
 @compiletime
 function abilityQ()
@@ -79,7 +79,7 @@ function abilityW()
     
     let aDef = new AbilityDefinitionIllidanChannel(ABILITY_MIND_CURSE)
         ..setupIcon("BTNWitchDoctorRitual")
-        ..setupWithHotKey("Terror", "W")
+        ..setupWithHotKey("Mind Curse", "W")
         ..setAnimationNames("spell")
         ..setupChannel(TargetType.UNIT, "manaburn", 0.5)
 
@@ -96,9 +96,11 @@ constant real SERPENT_WARD_DURATION = 30
 constant real array SERPENT_POISON_DURATION = [2, 2.25, 2.5, 2.75, 3]
 
 constant int SERPENT_POISON_ARMOR = 1
-constant int SERPENT_POISON_SLOW = 2
+constant int SERPENT_POISON_SLOW = 1
 
-constant int array SERPENT_STACKS = [3, 4, 5, 6, 7]
+constant int array SERPENT_STACKS = [20, 25, 30, 35, 40]
+
+constant int SERPENT_POSION_MAX_STACKS = 15
 
 BuffType buffSerpentPoison
 constant SERPENT_POISON_BUFF_ID = compiletime(createAuraBuff("Serpent Poison", "This unit was hit by Serpent Ward; it is slowed and has reduced armor.", Icons.bTNSerpentWard))
@@ -139,7 +141,7 @@ function abilityR()
     let aDef = new AbilityDefinitionKeeperoftheGroveTranquility(ABILITY_BIG_BAD_VOODOO)
         ..setLevels(5)
         ..setupIcon(Icons.bTNBigBadVoodooSpell)
-        ..setupWithHotKey("Death Pact", "R")
+        ..setupWithHotKey("Big Bad Voodoo", "R")
         ..setAnimationNames("spell,channel")
 
 
@@ -275,18 +277,19 @@ function setupTooltips()
     heroType.addDynamicTooltipIntelligence(tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_SERPENT_WARD)
-    tooltip.setLearnString("Summons an immobile serpentine ward to attack nearby enemies for {0} seconds. Attacked targets have their armor and movement speed reduced.".format(SERPENT_WARD_DURATION.toExactString()), (int lvl) -> (begin
+    tooltip.setLearnString("Summons an immobile serpentine ward to attack nearby enemies for {0} seconds. Attacked targets have their armor and movement speed reduced. Stacks up to {1} times.".format(SERPENT_WARD_DURATION.toExactString(), SERPENT_POSION_MAX_STACKS.toString()), (int lvl) -> (begin
         return "{0} armor, {1}% movement speed per attack, {2} seconds.".format(
-        (SERPENT_POISON_ARMOR*SERPENT_STACKS[lvl-1]).str(),
-        (SERPENT_POISON_SLOW*SERPENT_STACKS[lvl-1]).str(),
+        (SERPENT_POISON_ARMOR*SERPENT_STACKS[lvl-1]/10).toExactString(),
+        (SERPENT_POISON_SLOW*SERPENT_STACKS[lvl-1]/10).toExactString(),
         SERPENT_POISON_DURATION[lvl-1].toExactString())
     end) )
     for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, "Summons an immobile serpentine ward to attack nearby enemies for {3} seconds. Attacked targets have their armor reduced by {0} and movement speed by {1}% for {2} seconds per attack.".format(
+        tooltip.setNormalString(true, lvl, "Summons an immobile serpentine ward to attack nearby enemies for {3} seconds. Attacked targets have their armor reduced by {0} and movement speed by {1}% for {2} seconds per attack. Stacks up to {4} times.".format(
             (SERPENT_POISON_ARMOR*SERPENT_STACKS[lvl-1]).str(),
             (SERPENT_POISON_SLOW*SERPENT_STACKS[lvl-1]).str(),
             SERPENT_POISON_DURATION[lvl-1].toExactString(),
-            SERPENT_WARD_DURATION.toExactString()))
+            SERPENT_WARD_DURATION.toExactString(),
+            SERPENT_POSION_MAX_STACKS.toString()))
 
     tooltip.setReplaceIntelligence(0)
     heroType.addDynamicTooltipIntelligence(tooltip)
@@ -339,26 +342,44 @@ function initHeroType()
         buffSerpentPoison = new BuffType(false, true)
         buffSerpentPoison.setup(abilityList, SERPENT_POISON_BUFF_ID)
 
+        /*
+            About stacks:
+            Stacks are used, so the buff is level independent.
+            Instead more stacks are gained on higher levels.
+            Stacks are divided by 10 to allow smaller numbers: 25 -> 2.5 stacks
+            To use non-integer values for stacks, the total stack amount is rounded down.
+            So if you have 3 times 2.5 stacks, you have 7 in total.
+            The stack number times 10 is stored in data to have the accuracy of one decimal.
+            To ensure no rounding errors, the new bonus is calculated by (stacks div 10) - (prevStacks div 10)
+            So the new total bonus is calculated and the old total bonus is subtracted.
+            This makes sure rounding only occures in the total bonus.
+
+            Stacks SERPENT_POSION_MAX_STACKS times. In reality the total stack count is capped at
+            SERPENT_POSION_MAX_STACKS * SERPENT_STACKS[level-1]
+        */
+
         buffSerpentPoison.addFirstFunction( (Buff whichBuff) -> (begin
             let level = whichBuff.getLevel()
             whichBuff.getTarget().wrapper()
-                ..addStatRelativeBonus(Stat.MS, -10 * SERPENT_POISON_SLOW * SERPENT_STACKS[level-1])
-                ..addStatAbsoluteBonus(Stat.AR, -SERPENT_POISON_ARMOR * SERPENT_STACKS[level-1])
+                ..addStatRelativeBonus(Stat.MS, -10 * SERPENT_POISON_SLOW * (SERPENT_STACKS[level-1] div 10)  )
+                ..addStatAbsoluteBonus(Stat.AR, -SERPENT_POISON_ARMOR * (SERPENT_STACKS[level-1] div 10)  )
             whichBuff.setData(SERPENT_STACKS[level-1])
         end))
 
         buffSerpentPoison.addStackFunction( (Buff whichBuff) -> (begin
             let level = whichBuff.getLevel()
-            let stacks = whichBuff.getData() + SERPENT_STACKS[level-1]
-            whichBuff.setData(stacks)
+            let prevStacks = whichBuff.getData()
+            let newStacks = min(prevStacks + SERPENT_STACKS[level-1], SERPENT_STACKS[level-1]*SERPENT_POSION_MAX_STACKS)
+            let stackDiff = (newStacks div 10) - (prevStacks div 10)
+            whichBuff.setData(newStacks)
             whichBuff.getTarget().wrapper()
-                ..addStatRelativeBonus(Stat.MS, -10 * SERPENT_POISON_SLOW * (SERPENT_STACKS[level-1]))
-                ..addStatAbsoluteBonus(Stat.AR, -SERPENT_POISON_ARMOR * (SERPENT_STACKS[level-1]))
+                ..addStatRelativeBonus(Stat.MS, -10 * SERPENT_POISON_SLOW * stackDiff) 
+                ..addStatAbsoluteBonus(Stat.AR, -SERPENT_POISON_ARMOR * stackDiff)
         end))
 
 
         buffSerpentPoison.addEndFunction( (Buff whichBuff) -> (begin
-            let stacks = whichBuff.getData()
+            let stacks = whichBuff.getData() div 10
             whichBuff.getTarget().wrapper()
                 ..addStatRelativeBonus(Stat.MS, 10 * SERPENT_POISON_SLOW * (stacks))
                 ..addStatAbsoluteBonus(Stat.AR, SERPENT_POISON_ARMOR * (stacks))
@@ -373,6 +394,6 @@ function initHeroType()
     
 init
     
-    heroType = new HeroType(HERO_VOODOO_ARCHER, Icons.bTNShadowHunter, 12, true)
+    heroType = new HeroType(HERO_VOODOO_ARCHER, Icons.bTNShadowHunter, 12, false)
         ..setOnInitFunction(() -> initHeroType())
         

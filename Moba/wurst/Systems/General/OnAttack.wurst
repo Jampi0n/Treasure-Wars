@@ -9,6 +9,7 @@ import UnitTypeConfig
 import initlater SeaDruid
 import initlater TrollBerserker
 import initlater Paladin
+import initlater Destroyer
 import StandardTextTags
 import HashMap
 import GameTimer
@@ -84,10 +85,10 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
                 createCriticalStrikeTextTag(target, currentDamage.toInt())
                 critical.dispel()
 
-            // turtle buff
-            if isAttack and target.hasAbility(TURTLE_BUFF_ID)
-                doAfter(0) ->
-                    target.dealDamage(source, currentDamage * 0.1, ReductionType.PHYSICAL)
+            // death frenzy - DESTROYER
+            let deathFrenzyLevel = source.getAbilityLevel(ABILITY_DEATH_FRENZY)
+            if deathFrenzyLevel != 0
+                currentDamage *= 1 + DEATH_FRENZY_BONUS[deathFrenzyLevel-1]/100
 
             // revenant buff
             if source.hasAbility(REVENANT_BUFF_ID) and not target.isType(UNIT_TYPE_STRUCTURE)
@@ -103,6 +104,11 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
 
             if isAttack and target.isType(UNIT_TYPE_HERO)
                 currentDamage = currentDamage - 20 * target.countItemsOfType(convertItemId(ITEM_ID_HOLY_SHIELD))
+
+            // turtle buff
+            if isAttack and target.hasAbility(TURTLE_BUFF_ID)
+                doAfter(0) ->
+                    target.dealDamage(source, currentDamage * 0.1, ReductionType.PHYSICAL)
 
             // mana shield - SEA DRUID
             if target.isType(UNIT_TYPE_HERO) and BuffList.hasBuffType(target, buffManaShield)
