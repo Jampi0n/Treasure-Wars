@@ -291,59 +291,69 @@ public class Hero
                 assistString = assistName[0]+" and "+assistName[1]
 
 
+        boolean unknownKiller = false
+
         if replaceKiller
             if assistMap.get(lastAssistant) > gameTime
                 killingPlayer = lastAssistant
                 killingId = killingPlayer.getId()
-
-
-        if killingId <= HERO_PLAYER_TEAM_2_LAST
-            int assistBounty = ASSIST_BOUNTY[assistants]
-
-            int killBounty = KILL_BOUNTY[assistants]
-
-            if assistants == 0
-                printTimed("{0} was killed by {1} for {2} gold.".format(
-                    owningPlayer.getFullColoredName(), 
-                    killingPlayer.getFullColoredName(),
-                    "|cffffcc00"+killBounty.toString()+"|r"
-                ), 10)
-
             else
-                printTimed("{0} was killed by {1} for {3} gold. {2} get{5} {4} gold for helping.".format(
+                if killingId != TEAM_PLAYER_TEAM_1 and killingId != TEAM_PLAYER_TEAM_2 and killingId != PLAYER_NEUTRAL_AGGRESSIVE
+                    unknownKiller = true
+
+        if  not unknownKiller
+            if killingId <= HERO_PLAYER_TEAM_2_LAST
+                int assistBounty = ASSIST_BOUNTY[assistants]
+
+                int killBounty = KILL_BOUNTY[assistants]
+
+                if assistants == 0
+                    printTimed("{0} was killed by {1} for {2} gold.".format(
+                        owningPlayer.getFullColoredName(), 
+                        killingPlayer.getFullColoredName(),
+                        "|cffffcc00"+killBounty.toString()+"|r"
+                    ), 10)
+
+                else
+                    printTimed("{0} was killed by {1} for {3} gold. {2} get{5} {4} gold for helping.".format(
+                        owningPlayer.getFullColoredName(), 
+                        killingPlayer.getFullColoredName(),
+                        assistString,
+                        "|cffffcc00"+killBounty.toString()+"|r",
+                        "|cffffcc00"+assistBounty.toString()+"|r",
+                        assistants==1?"s":""
+                    ), 10)
+
+                        
+
+
+                doAfter(0.1) ->
+                    for p in assistList
+                        p.getCPlayer()
+                            ..addGoldEx(assistBounty)
+                            ..addAssist()
+                    killingPlayer.getCPlayer()
+                        ..addGoldEx(killBounty)
+                        ..addHeroKill(killingId <= HERO_PLAYER_TEAM_2_LAST)
+                
+                    let xp = (this.level + 5) * 10.
+                    for cPLayer in CPlayer.getEnemyHeroPlayers(this.owner.getTeam())
+                        let hero = Hero.getHero(cPLayer)
+                        if hero != null
+                            hero.addXp(xp)
+
+                    destroy assistList
+            else
+                printTimed("{0} was killed by {1}.".format(
                     owningPlayer.getFullColoredName(), 
-                    killingPlayer.getFullColoredName(),
-                    assistString,
-                    "|cffffcc00"+killBounty.toString()+"|r",
-                    "|cffffcc00"+assistBounty.toString()+"|r",
-                    assistants==1?"s":""
+                    killingPlayer.getName()
                 ), 10)
-
-                    
-
-
-            doAfter(0.1) ->
-                for p in assistList
-                    p.getCPlayer()
-                        ..addGoldEx(assistBounty)
-                        ..addAssist()
-                killingPlayer.getCPlayer()
-                    ..addGoldEx(killBounty)
-                    ..addHeroKill(killingId <= HERO_PLAYER_TEAM_2_LAST)
-            
-                let xp = (this.level + 5) * 10.
-                for cPLayer in CPlayer.getEnemyHeroPlayers(this.owner.getTeam())
-                    let hero = Hero.getHero(cPLayer)
-                    if hero != null
-                        hero.addXp(xp)
 
                 destroy assistList
         else
-            printTimed("{0} was killed by {1}.".format(
-                owningPlayer.getFullColoredName(), 
-                killingPlayer.getName()
+            printTimed("{0} died.".format(
+                owningPlayer.getFullColoredName()
             ), 10)
-
             destroy assistList
 
         
