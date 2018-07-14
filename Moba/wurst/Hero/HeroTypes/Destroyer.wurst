@@ -398,7 +398,6 @@ function initHeroType()
                     g.removeUnit(u)
                     if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(owner, false, true)
                         heroDestroyer.dealDamage(u, dmg, ReductionType.MAGIC)
-                        u.addEffect(Abilities.immolationRedDamage, "overhead").destr()
             else
                 whichBuff.dispel()
         end))
