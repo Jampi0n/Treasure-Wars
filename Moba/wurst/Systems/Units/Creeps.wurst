@@ -362,7 +362,7 @@ function objectData()
     let healMissile = createTargetMissile(missileId, HEAL_BUFF_ID)
 
     dummy
-        ..setNormalAbilities(asList('Aloc', rootId, missileId))
+        ..setNormalAbilities(commaList('Aloc', rootId, missileId))
         ..setAnimationCastBackswing(0)
         ..setAnimationCastPoint(0)
         ..setAttacksEnabled(0)

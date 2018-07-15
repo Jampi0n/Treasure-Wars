@@ -453,9 +453,9 @@ function setupTooltips()
 
 function initHeroType()
     setupStats()
+    setupTooltips()
     heroType.setSkillBuild("WQEWQWWQWQQEEEE")
     delayInit(5) ->
-        setupTooltips()
         heroType
             ..addOnSpellCastFunc(function onSpellCast)
             ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
