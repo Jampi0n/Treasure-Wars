@@ -485,6 +485,7 @@ function setupTooltips()
 
 function initHeroType()
     setupStats()
+    setupTooltips()
     heroType
         ..setSkillBuild("QWEQQWEQWQEWEWE")
         ..setBonusCalculation((UnitWrapper whichWrapper, Stat whichStat) -> (begin
@@ -509,7 +510,6 @@ function initHeroType()
                     UnitWrapper.defaultCalcualtion.calculate(whichWrapper, whichStat)
         end))
     delayInit(5) ->
-        setupTooltips()
         heroType
             ..addOnSpellCastFunc(function onSpellCast)
             ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))

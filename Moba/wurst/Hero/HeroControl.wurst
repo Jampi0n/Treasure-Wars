@@ -128,6 +128,10 @@ public class Hero
         if this.heroType.getOnCreateFunction() != null
             this.heroType.getOnCreateFunction().onCreate(this)
 
+
+        this.heroType.updateTooltipsStr(this.hero)
+        this.heroType.updateTooltipsInt(this.hero)
+
     construct(CPlayer p, int unitId, vec2 pos, angle facing )
         objectCount++
         this.hero = createUnit(p.getPlayer(), unitId, pos, facing)

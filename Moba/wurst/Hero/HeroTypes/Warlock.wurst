@@ -352,9 +352,9 @@ function setupTooltips()
 
 function initHeroType()
     setupStats()
+    setupTooltips()
     heroType.setSkillBuild("WEQEWEWEWEWQQQQ")
     delayInit(5) ->
-        setupTooltips()
 
         heroType
             ..addOnSpellCastFunc(function onSpellCast)

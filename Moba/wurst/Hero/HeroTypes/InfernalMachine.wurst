@@ -472,9 +472,9 @@ function setupTooltips()
 
 function initHeroType()
     setupStats()
+    setupTooltips()
     heroType.setSkillBuild("QEWQQWQEQWEWEWE")
     delayInit(5) ->
-        setupTooltips()
 
         heroType
             ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive, advanced))

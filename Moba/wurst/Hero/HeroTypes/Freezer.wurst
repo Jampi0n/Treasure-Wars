@@ -513,8 +513,8 @@ function setupTooltips()
 function initHeroType()
     setupStats()
     heroType.setSkillBuild("EQWQQQQEWEWEWEW")
+    setupTooltips()
     delayInit(5) ->
-        setupTooltips()
         heroType
             ..addOnSpellCastFunc(function onSpellCast)
             ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target))
