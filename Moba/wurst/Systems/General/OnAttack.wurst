@@ -88,7 +88,7 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
             // death frenzy - DESTROYER
             let deathFrenzyLevel = source.getAbilityLevel(ABILITY_DEATH_FRENZY)
             if deathFrenzyLevel != 0
-                currentDamage *= 1 + DEATH_FRENZY_BONUS[deathFrenzyLevel-1]/100
+                currentDamage *= 1 + DEATH_FRENZY_BONUS[deathFrenzyLevel-1]/100 * (1-source.getLife()/GetUnitState(source, UNIT_STATE_MAX_LIFE))
 
             // revenant buff
             if source.hasAbility(REVENANT_BUFF_ID) and not target.isType(UNIT_TYPE_STRUCTURE)
@@ -129,6 +129,11 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
             if source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_WAND_OF_BLOOD)) and not target.isType(UNIT_TYPE_STRUCTURE)
                 source.healHP(source, currentDamage * 0.08)
 
+            // Wild Rage - DESTROYER
+            if source.hasAbility(RAGE_BUFF_ID)
+                print(currentDamage * RAGE_LIFE_STEAL)
+                source.healHP(source, currentDamage * RAGE_LIFE_STEAL)
+        
             // sacrifical dagger - ITEM
             if isAttack and source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_SACRIFICIAL_DAGGER)) and not target.isType(UNIT_TYPE_STRUCTURE)
                 source.healHP(source, currentDamage * 0.12)

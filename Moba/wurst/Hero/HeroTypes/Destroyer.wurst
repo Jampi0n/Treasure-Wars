@@ -4,6 +4,8 @@ package Destroyer
 
 import HeroType
 import BuffObjEditing
+import UnitTypeConfig
+import ClosureTimers
 
 public constant HERO_DESTROYER = 'H00R'
 HeroType heroType
@@ -11,8 +13,8 @@ HeroType heroType
 public constant ABILITY_DEATH_FRENZY = 'AY3P'
 constant ABILITY_PREY = 'AY3Q'
 constant ABILITY_IMMOLATION = 'AY3W'
-constant ABILITY_SERPENT_WARD = 'AY3E'
-constant ABILITY_BIG_BAD_VOODOO = 'AY3R'
+constant ABILITY_BONE_WALL = 'AY3E'
+constant ABILITY_WILD_RAGE = 'AY3R'
 
 unit heroDestroyer = null
 
@@ -36,9 +38,8 @@ function passive()
 
 
 constant real array PREY_BONUS_DAMAGE = [25, 40, 55, 70, 85]
-constant real PREY_DURATION = 8
-constant real PREY_DURATION_BONUS = 2.5
-constant int array PREY_MOVE_SPEED = [100, 150, 200, 250, 300]
+constant real PREY_DURATION = 12
+constant int array PREY_MOVE_SPEED = [40, 50, 60, 70, 80]
 
 BuffType buffPreyTarget
 BuffType buffPreyCaster
@@ -89,6 +90,7 @@ function abilityW()
         ..setTooltipNormalExtended(1, "This unit has Immolation; it attacks faster and nearby enemy units will take damage over time.")
         ..setArtSpecial(1, Abilities.immolationRedDamage)
         ..setArtTarget(1, Abilities.immolationREDTarget)
+        ..setTargetAttachmentPoint0(1, "chest")
 
     let aDef = new AbilityDefinitionDemonHunterImmolation(ABILITY_IMMOLATION)
         ..setupIcon(Icons.bTNImmolationOn)
@@ -107,81 +109,88 @@ function abilityW()
             ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
 
 
-constant int array SERPEND_WARD_HP = [0, 150, 300, 450, 600]
-constant real SERPENT_WARD_DURATION = 30
-constant real array SERPENT_POISON_DURATION = [2, 2.25, 2.5, 2.75, 3]
-
-constant int SERPENT_POISON_ARMOR = 1
-constant int SERPENT_POISON_SLOW = 2
-
-constant int array SERPENT_STACKS = [3, 4, 5, 6, 7]
-
-BuffType buffSerpentPoison
-constant SERPENT_POISON_BUFF_ID = compiletime(createAuraBuff("Serpent Poison", "This unit was hit by Serpent Ward; it is slowed and has reduced armor.", Icons.bTNSerpentWard))
-constant SERPENT_POISON_ABILITY_ID = compiletime(createNegativeBuffAbility(5, SERPENT_POISON_BUFF_ID, Abilities.poisonStingTarget, "chest"))
+constant int array WALL_NUMBER = [6, 7, 8, 9, 10]
+constant real array WALL_DURATION = [4, 4.5, 5, 5.5, 6]
 
 @compiletime
 function abilityE()
-    int array MANA = [60, 60, 60, 60, 60]
-    real array COOLDOWN = [6, 6, 6, 6, 6]
-    real array RANGE = [500, 500, 500, 500, 500]
+    int array MANA = [90, 90, 90, 90, 90]
+    real array COOLDOWN = [17, 16, 15, 14, 13]
+    real array RANGE = [1000, 1000, 1000, 1000, 1000]
 
 
-    let aDef = new AbilityDefinitionIllidanChannel(ABILITY_SERPENT_WARD)
+    let aDef = new AbilityDefinitionIllidanChannel(ABILITY_BONE_WALL)
         ..setAnimationNames("spell")
-        ..setupIcon(Icons.bTNSerpentWard)
-        ..setupWithHotKey("Serpent Ward", "E")
+        ..setupIcon(Icons.bTNRaiseDead)
+        ..setupWithHotKey("Bone Wall", "E")
         ..setupChannel(TargetType.POINT, "ward", 0.5)
+        ..setLearnString("Summons a wall of bones at the target location, blocking the way for the Destroyer's victims to flee. The wall gets bigger on higher levels.", (int lvl) -> (begin
+            return "Lasts {0} seconds.".format(
+                WALL_DURATION[lvl-1].toExactString())
+        end) )
 
     for lvl = 1 to 5
         aDef
             ..setCastRange(lvl, RANGE[lvl-1])
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
+            ..setDescriptionString(false, lvl, "Summons a wall of bones at the target location, blocking the way for the Destroyer's victims to flee. Lasts {0} seconds.".format(
+                WALL_DURATION[lvl-1].toExactString()
+            ))
 
 
         
-constant real array BBV_DAMAGE = [50, 65, 80, 95, 110]
-constant real BBV_DAMAGE_BONUS = 80
-constant real BBV_DURATION = 5
+constant real array RAGE_SELF_DAMAGE = [30, 40, 50, 60, 70]
 
-constant integer BUFF_ID_ON_DEATH_COIL = compiletime(createDummyBuff())
+constant real RAGE_DURATION = 15
+constant real RAGE_DURATION_BONUS = 4
+
+constant int array RAGE_DAMAGE_BONUS = [25, 30, 35, 40, 45]
+
+public constant real RAGE_LIFE_STEAL = 0.25
+
+public constant int RAGE_BUFF_ID = compiletime(createAuraBuff("Wild Rage", "This unit has increased damage and is healed for dealing damage. It takes damage over time.", Icons.bTNUnholyFrenzy))
+constant int RAGE_ABILITY_ID = compiletime(createPositiveBuffAbility(5, RAGE_BUFF_ID, Abilities.unholyFrenzyTarget, "overhead"))
+
+BuffType buffRage
 
 @compiletime
 function abilityR()
-    int array MANA = [160, 170, 180, 190, 200]
-    real array COOLDOWN = [110, 110, 110, 110, 110]
+    int array MANA = [140, 150, 160, 170, 180]
+    real array COOLDOWN = [75, 75, 75, 75, 75]
 
-    let aDef = new AbilityDefinitionKeeperoftheGroveTranquility(ABILITY_BIG_BAD_VOODOO)
-        ..setLevels(5)
-        ..setupIcon(Icons.bTNBigBadVoodooSpell)
-        ..setupWithHotKey("Death Pact", "R")
-        ..setAnimationNames("spell,channel")
-
+    let aDef = new AbilityDefinitionRoar(ABILITY_WILD_RAGE)
+        ..setupIcon(Icons.bTNUnholyFrenzy)
+        ..setAnimationNames("")
+        ..setupWithHotKey("Wild Rage", "R")
+        ..setLightningEffects("")
+        ..setArtTarget("")
+        ..setMissileArt("")
+        ..setArtSpecial("")
+        ..setLightningEffects("")
+        ..setCheckDependencies(true)
 
     for lvl = 1 to 5
         aDef
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setTargetsAllowed(lvl, "none")
-            ..setDurationHero(lvl, BBV_DURATION)
-            ..setDurationNormal(lvl, BBV_DURATION)
-            ..setEffects(lvl, "X000")
+
 
 
 function setupStats()
     heroType
         //..setStat(Stat.AD, 5, 40)
-        ..setStat(Stat.AR, 11, 27)
-        ..setStat(Stat.AS, 14, 48)
-        ..setStat(Stat.HP, 11, 39)
-        ..setStat(Stat.HR, 11, 29)
-        ..setStat(Stat.MP, 17, 33)
-        ..setStat(Stat.MR, 15, 29)
-        ..setStat(Stat.MS, 0, 0)
-        ..setStat(Stat.STR, 14, 71)
-        ..setStat(Stat.AGI, 8, 23)
-        ..setStat(Stat.INT, 9, 33)
+        ..setStat(Stat.AR, 12, 31)
+        ..setStat(Stat.AS, 29, 73)
+        ..setStat(Stat.HP, 14, 43)
+        ..setStat(Stat.HR, 32, 69)
+        ..setStat(Stat.MP, 19, 41)
+        ..setStat(Stat.MR, 17, 38)
+        ..setStat(Stat.MS, 31, 77)
+        ..setStat(Stat.STR, 17, 64)
+        ..setStat(Stat.AGI, 13, 43)
+        ..setStat(Stat.INT, 11, 33)
 
 function onDamage()
 
@@ -201,18 +210,52 @@ function onSpellCast()
 
     if(spellId==ABILITY_PREY)
         let target = GetSpellTargetUnit()
-        target.addBuffReduced(caster, PREY_DURATION.bonus(caster.getInt(), PREY_DURATION_BONUS), buffPreyTarget, level)
+        target.addBuffReduced(caster, PREY_DURATION, buffPreyTarget, level)
         caster.addBuff(caster, -1, buffPreyCaster, level)
 
     if(spellId==ABILITY_IMMOLATION)
         caster.addBuff(caster, -1, buffImmolation, 1)
 
-    if(spellId==ABILITY_SERPENT_WARD)
+    if(spellId==ABILITY_BONE_WALL)
+        let pos = vec2(GetSpellTargetX(), GetSpellTargetY())
+        let angle1 = caster.getPos().angleTo(pos)
+        let angle2 = angle1.op_minus(angle(bj_PI/2))
+        let facing = angle1
+        let modelPath = "Doodads\\LordaeronSummer\\Props\\SkullPile\\SkullPile0.mdl"
 
+        var wall = createUnit(caster.getOwner(), WALL, pos, angle(0))
+        wall.setXY(pos)
+        var model = addEffect(modelPath, pos)
+        model.setRoll(facing)
+        doAfter(WALL_DURATION[level-1]) ->
+            model.setAlpha(0)
+            model.destr()
+            wall.kill()
+
+        for i = 1 to WALL_NUMBER[level-1]
+            var newPos = pos.polarOffset(angle2, 64. * i)
+            wall = createUnit(caster.getOwner(), WALL, newPos, angle(0))
+            wall.setXY(newPos)
+            model = addEffect(modelPath, newPos)
+            model.setRoll(facing)
+            doAfter(WALL_DURATION[level-1]) ->
+                model.setAlpha(0)
+                model.destr()
+                wall.kill()
+
+            newPos = pos.polarOffset(angle2, -64. * i)
+            wall = createUnit(caster.getOwner(), WALL, newPos, angle(0))
+            wall.setXY(newPos)
+            model = addEffect(modelPath, newPos)
+            model.setRoll(facing)
+            doAfter(WALL_DURATION[level-1]) ->
+                model.setAlpha(0)
+                model.destr()
+                wall.kill()
     
 
-    if(spellId==ABILITY_BIG_BAD_VOODOO)
-
+    if(spellId==ABILITY_WILD_RAGE)
+        caster.addBuff(caster, RAGE_DURATION.bonus(caster.getInt(), RAGE_DURATION_BONUS), buffRage, level)
         
 
 
@@ -232,12 +275,12 @@ function setupTooltips()
     end) )
     
     for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, "Marks the target enemy unit as his prey. The target will be revealed, the Destroyer will deal {1} bonus damage against the target and have move {2}% faster when moving towards the target. Lasts {0}{I0} seconds.".format(
+        tooltip.setNormalString(true, lvl, "Marks the target enemy unit as his prey. The target will be revealed, the Destroyer will deal {1} bonus damage against the target and have move {2}% faster when moving towards the target. Lasts {0} seconds.".format(
             PREY_DURATION.str(),
             PREY_BONUS_DAMAGE[lvl-1].str(),
             PREY_MOVE_SPEED[lvl-1].str())
         )
-    tooltip.setReplaceIntelligence(PREY_DURATION_BONUS)
+    tooltip.setReplaceIntelligence(0)
     heroType.addDynamicTooltipIntelligence(tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_IMMOLATION)
@@ -253,33 +296,17 @@ function setupTooltips()
     tooltip.setReplaceIntelligence(IMMOLATION_DAMAGE_BONUS)
     heroType.addDynamicTooltipIntelligence(tooltip)
 
-    tooltip = new DynamicTooltip(ABILITY_SERPENT_WARD)
-    tooltip.setLearnString("Summons an immobile serpentine ward to attack nearby enemies for {0} seconds. Attacked targets have their armor and movement speed reduced.".format(SERPENT_WARD_DURATION.toExactString()), (int lvl) -> (begin
-        return "{0} armor, {1}% movement speed per attack, {2} seconds.".format(
-        (SERPENT_POISON_ARMOR*SERPENT_STACKS[lvl-1]).str(),
-        (SERPENT_POISON_SLOW*SERPENT_STACKS[lvl-1]).str(),
-        SERPENT_POISON_DURATION[lvl-1].toExactString())
-    end) )
-    for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, "Summons an immobile serpentine ward to attack nearby enemies for {3} seconds. Attacked targets have their armor reduced by {0} and movement speed by {1}% for {2} seconds per attack.".format(
-            (SERPENT_POISON_ARMOR*SERPENT_STACKS[lvl-1]).str(),
-            (SERPENT_POISON_SLOW*SERPENT_STACKS[lvl-1]).str(),
-            SERPENT_POISON_DURATION[lvl-1].toExactString(),
-            SERPENT_WARD_DURATION.toExactString()))
-
-    tooltip.setReplaceIntelligence(0)
-    heroType.addDynamicTooltipIntelligence(tooltip)
-
-    tooltip = new DynamicTooltip(ABILITY_BIG_BAD_VOODOO)
-    tooltip.setLearnString("Deals void damage to all enemy heroes while channeling.".format(BBV_DURATION.toExactString()), (int lvl) -> (begin
-        return "{0}{I0} damage per second.".format(
-        BBV_DAMAGE[lvl-1].str())
+    tooltip = new DynamicTooltip(ABILITY_WILD_RAGE)
+    tooltip.setLearnString("Increases the Destroyer's attack damage and heals the Destroyer for {0}% of the damage he deals, but deals damage to the Destroyer over time. Lasts {1}{I0} seconds.".format((RAGE_LIFE_STEAL*100).str(), RAGE_DURATION.toExactString()), (int lvl) -> (begin
+        return "{0} bonus attack damage, {1} damage per second.".format(
+        RAGE_DAMAGE_BONUS[lvl-1].toString(), RAGE_SELF_DAMAGE[lvl-1].toExactString())
     end) )
     
     for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, "Deals {0}{I0} void damage per second to all enemy heroes while channeling.".format(
-            BBV_DAMAGE[lvl-1].str()))
-    tooltip.setReplaceIntelligence(BBV_DAMAGE_BONUS)
+        tooltip.setNormalString(true, lvl, "Increases the Destroyer's attack damage by {0} and heals the Destroyer for {2}% of the damage he deals, but deals {1} damage per second to the Destroyer. Lasts {3}{I0} seconds.".format(
+            RAGE_DAMAGE_BONUS[lvl-1].toString(), RAGE_SELF_DAMAGE[lvl-1].toExactString(), (RAGE_LIFE_STEAL*100).str(), RAGE_DURATION.toExactString()
+            ))
+    tooltip.setReplaceIntelligence(RAGE_DURATION_BONUS)
     heroType.addDynamicTooltipIntelligence(tooltip)
 
 function initHeroType()
@@ -400,6 +427,26 @@ function initHeroType()
                         heroDestroyer.dealDamage(u, dmg, ReductionType.MAGIC)
             else
                 whichBuff.dispel()
+        end))
+
+
+        abilityList = new LinkedList<int>
+        ..add(RAGE_ABILITY_ID)
+        buffRage = new BuffType(true, true)
+        buffRage.setup(abilityList, RAGE_BUFF_ID)
+
+        buffRage.setPeriodicTime(0.2)
+        buffRage.addPeriodicFunction((Buff whichBuff) -> (begin
+            //use hp to not trigger damage event
+            heroDestroyer.addHP(-0.2 * (RAGE_SELF_DAMAGE[whichBuff.getLevel()-1].reduceMagic(heroDestroyer.getInt())))
+        end))
+
+        buffRage.addFirstFunction( (Buff whichBuff) -> (begin
+            heroDestroyer.wrapper().addStatAbsoluteBonus(Stat.AD, RAGE_DAMAGE_BONUS[whichBuff.getLevel()-1])
+        end))
+
+        buffRage.addEndFunction( (Buff whichBuff) -> (begin
+            heroDestroyer.wrapper().addStatAbsoluteBonus(Stat.AD, -RAGE_DAMAGE_BONUS[whichBuff.getLevel()-1])
         end))
 
     
