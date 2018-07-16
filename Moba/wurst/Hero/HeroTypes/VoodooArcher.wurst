@@ -73,7 +73,7 @@ constant MIND_CURSE_ABILITY_ID = compiletime(createNegativeBuffAbility(5, MIND_C
 
 @compiletime
 function abilityW()
-    int array MANA = [75, 75, 75, 75, 75]
+    int array MANA = [65, 65, 65, 65, 65]
     real array COOLDOWN = [10, 10, 10, 10, 10]
     real array RANGE = [800, 800, 800, 800, 800]
     
@@ -264,13 +264,13 @@ function setupTooltips()
     heroType.addDynamicTooltipStrength(tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_MIND_CURSE)
-    tooltip.setLearnString("Burns mana of the target enemy unit over time.", (int lvl) -> (begin
+    tooltip.setLearnString("Burns mana of the target enemy unit over time and silences it.", (int lvl) -> (begin
         return "{0}{I0} mana per second, {1}{I1} seconds.".format(
         MIND_CURSE_MANA_DRAIN[lvl-1].str(),
         MIND_CURSE_DURATION[lvl-1].toExactString())
     end) )
     for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, "Burns {0}{I0} mana per second of the target enemy unit for {1}{I1} seconds.".format(
+        tooltip.setNormalString(true, lvl, "Burns {0}{I0} mana per second of the target enemy unit over time and silences it for {1}{I1} seconds.".format(
             MIND_CURSE_MANA_DRAIN[lvl-1].str(),
         MIND_CURSE_DURATION[lvl-1].toExactString()))
     tooltip.setReplaceIntelligence(MIND_CURSE_MANA_DRAIN_BONUS, MIND_CURSE_DURATION_BONUS)
