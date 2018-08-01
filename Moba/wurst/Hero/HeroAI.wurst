@@ -429,34 +429,15 @@ public class HeroAI
                 ai.levelUp()
         end))
 
-        //moved to tower
-        /*attackedByTower = CreateTrigger()
+        attackedByTower = CreateTrigger()
             ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_ATTACKED)
             ..addAction(() ->(begin
             let ai = heroAIs[GetTriggerUnit().getOwner().getId()]
             if ai != null
                 let attacker = GetAttacker()
-                if (ai.state == AIState.ATTACK or ai.state == AIState.RETREAT_TEMP)  and attacker.isType(UNIT_TYPE_STRUCTURE)
-                    let g = CreateGroup()
-                    unit u
-                    int count = 0
-                    let owner = ai.heroUnit.getOwner()
-                    g.enumUnitsInRange(ai.heroUnit.getPos(), 1000)
-                    while(true)
-                        u = FirstOfGroup(g)
-                        if u == null
-                            break
-                        g.removeUnit(u)
-                        if IsUnitAlly(u, owner)
-                            if not u.isType(UNIT_TYPE_HERO)
-                                count++
-
-                    g.destr()
-                    if count < 5
-                        ai.retreatTemporarily(50, false)
-                    else
-                        ai.retreatTemporarily(15, false)
-        end))*/
+                if (ai.state == AIState.ATTACK or ai.state == AIState.RETREAT_TEMP or ai.state == AIState.RETREAT_TEMP_AI or ai.state == AIState.TEAM_FIGHT)  and attacker.getTypeId() == HERO_TOWER
+                    ai.retreatTemporarily(50, false)
+        end))
     
 
     construct(CPlayer owner)
@@ -881,6 +862,11 @@ function determineWinChance(boolean firstTeam, vec2 pos) returns real
 
     real heroStrength1 = 0
     real heroStrength2 = 0
+
+    if gg_rct_GreenHeroTower.contains(pos)
+        towerStrength1 += 100000
+    else if gg_rct_BrownHeroTower.contains(pos)
+        towerStrength2 += 100000
 
     let g = CreateGroup()
     g.enumUnitsInRange(pos, TEAM_FIGHT_RANGE)
