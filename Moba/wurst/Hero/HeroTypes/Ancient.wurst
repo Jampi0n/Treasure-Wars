@@ -449,6 +449,10 @@ function attackAI(HeroAI ai)
         if target.isTargetable(hero.getOwner(), false, true)
             ai.issue("chainlightning", target)
 
+    target = hero.findTarget(250, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_HEALTH, null)
+    if target.isTargetable(hero.getOwner(), false, true)
+        ai.attack(target)
+
     target = hero.findTarget(500, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_DISTANCE, null)
     if target.isTargetable(hero.getOwner(), false, true)
         ai.attack(target)
