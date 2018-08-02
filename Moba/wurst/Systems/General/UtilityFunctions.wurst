@@ -4,11 +4,14 @@ package UtilityFunctions
 
 function string.cutOffZeroes() returns string
     string str = this
-    while true
-        let strEnd = str.charAt(str.length()-1)
-        if strEnd != "0" and strEnd != "."
-            break
-        str = str.substring(0, str.length()-1)
+    if str.contains(".")
+        while true
+            let strEnd = str.charAt(str.length()-1)
+            if strEnd != "0"
+                if strEnd == "."
+                    str = str.substring(0, str.length()-1)
+                break
+            str = str.substring(0, str.length()-1)
     return str
 
 /**
