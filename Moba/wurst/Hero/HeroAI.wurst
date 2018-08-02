@@ -865,14 +865,10 @@ function determineWinChance(boolean firstTeam, vec2 pos) returns real
     real heroStrength1 = 0
     real heroStrength2 = 0
 
-    boolean p = false
-
     if gg_rct_GreenHeroTower.contains(pos)
         towerStrength1 += 10000
-        p = true
     else if gg_rct_BrownHeroTower.contains(pos)
         towerStrength2 += 10000
-        p = true
 
     let g = CreateGroup()
     g.enumUnitsInRange(pos, TEAM_FIGHT_RANGE)
