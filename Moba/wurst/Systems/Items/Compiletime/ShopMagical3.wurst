@@ -185,13 +185,14 @@ function itemWandOfDeath(int itemId)
             
 
 function itemWandOfBlood(int itemId)
-    int intel = 35
-    int hr = 40
+    int intel = 30
+    int hr = 35
+    int hp = 200
     int lifesteal = 8 // -> onAttack
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} intelligence|n+ {1} hit point regeneration per 10 seconds|nDealing damage restores hit points equal to {2}% of the damage dealt.|nThis effect does not stack.".format(
-                intel.toString(), hr.toString(), lifesteal.toString()
+            ..setDescription("+ {0} intelligence|n+ {1} hit points|n+ {2} hit point regeneration per 10 seconds|nDealing damage restores hit points equal to {3}% of the damage dealt.|nThis effect does not stack.".format(
+                intel.toString(), hp.toString(), hr.toString(), lifesteal.toString()
             ))
             ..setGoldCost(3650)
             ..addRequirement(ITEM_ID_MAGIC_STAFF)
@@ -201,6 +202,7 @@ function itemWandOfBlood(int itemId)
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.INT, intel)
             ..addStatBonusAbsolute(Stat.HR, hr)
+            ..addStatBonusAbsolute(Stat.HP, hp)
 
             
 function itemArcaneBlade(int itemId)
