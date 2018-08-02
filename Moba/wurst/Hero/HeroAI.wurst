@@ -576,6 +576,8 @@ public class HeroAI
         return ret
 
     function buyItems()
+        if itemBuild.size() == 0
+            return
 
         for i = 0 to 5
             Item itm = itemBuild.get(i).getItem()
@@ -863,10 +865,14 @@ function determineWinChance(boolean firstTeam, vec2 pos) returns real
     real heroStrength1 = 0
     real heroStrength2 = 0
 
+    boolean p = false
+
     if gg_rct_GreenHeroTower.contains(pos)
-        towerStrength1 += 100000
+        towerStrength1 += 10000
+        p = true
     else if gg_rct_BrownHeroTower.contains(pos)
-        towerStrength2 += 100000
+        towerStrength2 += 10000
+        p = true
 
     let g = CreateGroup()
     g.enumUnitsInRange(pos, TEAM_FIGHT_RANGE)
@@ -934,6 +940,7 @@ function determineWinChance(boolean firstTeam, vec2 pos) returns real
     strengthTeam1 = unitStrength1 + towerStrength1 + heroStrength1
     strengthTeam2 = unitStrength2 + towerStrength2 + heroStrength2
     
+
     //print(unitStrength1.toString()+"|"+towerStrength1.toString()+"|"+heroStrength1.toString()+" vs "+unitStrength2.toString()+"|"+towerStrength2.toString()+"|"+heroStrength2.toString())
 
     let chance1 = strengthTeam1/(strengthTeam1 + strengthTeam2)
@@ -944,9 +951,8 @@ function determineWinChance(boolean firstTeam, vec2 pos) returns real
     else
         ret = 1-chance1
 
+
     return ret
-
-
 
 function determineHeroOffensiveStrength(unit hero) returns real
     let mana = hero.getMana()/hero.getMaxMana()
@@ -960,8 +966,13 @@ function determineHeroDefensiveStrength(unit hero) returns real
     let hp = hero.getHP()
     let armor = hero.getArmor()
     let wp = hero.getWp()
+    bool inBase
+    if hero.getOwner().getId() <= HERO_PLAYER_TEAM_1_LAST
+        inBase = gg_rct_GreenHeroTower.contains(hero.getPos())
+    else
+        inBase = gg_rct_BrownHeroTower.contains(hero.getPos())
 
-    return (hp * (1 + ARMOR_REDUCTION * armor) + hp * (1 + MAGIC_REDUCTION * wp)) / 120 //0-100 (standard values, can be higher)
+    return (inBase ? 3 : 1) * (hp * (1 + ARMOR_REDUCTION * armor) + hp * (1 + MAGIC_REDUCTION * wp)) / 120 //0-100 (standard values, can be higher)
 
 
 
@@ -970,6 +981,12 @@ function determineHeroStrength(unit hero) returns real
     let hp = hero.getHP()/hero.getMaxHP()
     let mana = hero.getMana()/hero.getMaxMana()
     int itemValue = 0
+
+    bool inBase
+    if hero.getOwner().getId() <= HERO_PLAYER_TEAM_1_LAST
+        inBase = gg_rct_GreenHeroTower.contains(hero.getPos())
+    else
+        inBase = gg_rct_BrownHeroTower.contains(hero.getPos())
 
     for i = 0 to 5
         let itm = hero.itemInSlot(i)
@@ -980,6 +997,8 @@ function determineHeroStrength(unit hero) returns real
 
     let ai = HeroAI.heroAIs[hero.getOwner().getId()]
     real ret = (result * ( 20000 + itemValue) )/16
+    if inBase
+        ret += 2500
     if ai != null
         if ai.state == AIState.RETREAT or ai.state == AIState.RETREAT_TEMP or ai.state == AIState.RETREAT_TEMP_AI
             ret = 0
