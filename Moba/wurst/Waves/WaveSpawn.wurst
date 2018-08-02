@@ -87,14 +87,14 @@ public function spawnUnit( boolean firstTeam, int unitId, vec2 startPos) returns
 
 
 function setupSpawnUnits()
-    topUnitIds.add(FOOTMAN)
+    //topUnitIds.add(FOOTMAN)
     topUnitIds.add(FOOTMAN)
     topUnitIds.add(FOOTMAN)
     topUnitIds.add(FOOTMAN)
     topUnitIds.add(RIFLEMAN)
     topUnitIds.add(RIFLEMAN)
 
-    topUnitIds2.add(FOOTMAN_2)
+    //topUnitIds2.add(FOOTMAN_2)
     topUnitIds2.add(FOOTMAN_2)
     topUnitIds2.add(FOOTMAN_2)
     topUnitIds2.add(FOOTMAN_2)
@@ -107,30 +107,30 @@ function setupSpawnUnits()
     midUnitsIds.add(FOOTMAN)
     midUnitsIds.add(FOOTMAN)
     midUnitsIds.add(KNIGHT)
-    midUnitsIds.add(KNIGHT)
+    //midUnitsIds.add(KNIGHT)
     midUnitsIds.add(RIFLEMAN)
     midUnitsIds.add(RIFLEMAN)
-    midUnitsIds.add(RIFLEMAN)
+    //midUnitsIds.add(RIFLEMAN)
 
     midUnitsIds2.add(FOOTMAN_2)
     midUnitsIds2.add(FOOTMAN_2)
     midUnitsIds2.add(FOOTMAN_2)
     midUnitsIds2.add(KNIGHT_2)
-    midUnitsIds2.add(KNIGHT_2)
+    //midUnitsIds2.add(KNIGHT_2)
     midUnitsIds2.add(RIFLEMAN_2)
     midUnitsIds2.add(RIFLEMAN_2)
-    midUnitsIds2.add(RIFLEMAN_2)
+    //midUnitsIds2.add(RIFLEMAN_2)
 
     midUnitsIdsSize = midUnitsIds.size()
 
-    botUnitsIds.add(FOOTMAN)
+    //botUnitsIds.add(FOOTMAN)
     botUnitsIds.add(FOOTMAN)
     botUnitsIds.add(FOOTMAN)
     botUnitsIds.add(FOOTMAN)
     botUnitsIds.add(RIFLEMAN)
     botUnitsIds.add(RIFLEMAN)
 
-    botUnitsIds2.add(FOOTMAN_2)
+    //botUnitsIds2.add(FOOTMAN_2)
     botUnitsIds2.add(FOOTMAN_2)
     botUnitsIds2.add(FOOTMAN_2)
     botUnitsIds2.add(FOOTMAN_2)
@@ -209,7 +209,7 @@ function spawnWave()
 
 
     i = 1
-    while greenCountTop < brownCountTop - i
+    while greenCountTop < brownCountTop - 2*i and i <= 3
         doAfter(counter*0.25, () -> (begin
             if not spawnStopped
                 if barracksAliveTeam1[0]
@@ -222,11 +222,11 @@ function spawnWave()
                     team1Units.add(spawnedUnit)
         end))
         counter++
-        i += 2
+        i ++
 
     
     i = 1
-    while brownCountTop < greenCountTop - i
+    while brownCountTop < greenCountTop - 2*i and i <= 3
         doAfter(counter*0.25, () -> (begin
             if not spawnStopped
                 if barracksAliveTeam2[0]
@@ -239,7 +239,7 @@ function spawnWave()
                     team2Units.add(spawnedUnit)
         end))
         counter++
-        i += 2
+        i ++
 
 
 
@@ -277,7 +277,7 @@ function spawnWave()
 
 
     i = 1
-    while greenCountMid < brownCountMid - i
+    while greenCountMid < brownCountMid - 2*i and i <= 3
         doAfter(counter*0.25, () -> (begin
             if not spawnStopped
                 if barracksAliveTeam1[1]
@@ -290,10 +290,10 @@ function spawnWave()
                     team1Units.add(spawnedUnit)
         end))
         counter++
-        i += 2
+        i ++
 
     i = 1        
-    while brownCountMid < greenCountMid - i
+    while brownCountMid < greenCountMid - 2*i and i <= 3
         doAfter(counter*0.25, () -> (begin
             if not spawnStopped
                 if barracksAliveTeam2[1]
@@ -306,7 +306,7 @@ function spawnWave()
                     team2Units.add(spawnedUnit)
         end))
         counter++
-        i += 2
+        i ++
 
 
     counter = 0
@@ -341,7 +341,7 @@ function spawnWave()
 
     
     i = 1
-    while greenCountBot < brownCountBot - i
+    while greenCountBot < brownCountBot - 2*i and i <= 3
         doAfter(counter*0.25, () -> (begin
             if not spawnStopped
                 if barracksAliveTeam1[2]
@@ -354,10 +354,10 @@ function spawnWave()
                     team1Units.add(spawnedUnit)
         end))
         counter++
-        i += 2
+        i ++
 
     i = 1
-    while brownCountBot < greenCountBot - i
+    while brownCountBot < greenCountBot - 2*i and i <= 3
         doAfter(counter*0.25, () -> (begin
             if not spawnStopped
                 if barracksAliveTeam2[2]
@@ -370,7 +370,7 @@ function spawnWave()
                     team2Units.add(spawnedUnit)
         end))
         counter++
-        i += 2
+        i ++
 
 
     doAfter(6, () -> (begin
