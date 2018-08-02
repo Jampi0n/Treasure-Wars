@@ -45,7 +45,7 @@ BuffType buffPreyTarget
 BuffType buffPreyCaster
 
 constant int PREY_TARGET_BUFF_ID = compiletime(createAuraBuff("Prey", "This unit is under the effect of Prey; it is revealed and takes increased damage from the caster.", "BTNBlood_eye"))
-constant int PREY_TARGET_ABILITY_ID = compiletime(createNegativeBuffAbility(5, PREY_TARGET_BUFF_ID, Abilities.curseTarget, "overhead"))
+constant int PREY_TARGET_ABILITY_ID = compiletime(createNegativeBuffAbility(5, PREY_TARGET_BUFF_ID, Abilities.possessionTarget, "overhead"))
 
 
 constant int PREY_CASTER_BUFF_ID = compiletime(createAuraBuff("Prey", "This unit has casted Prey; it's movement speed is increased while moving towards the target.", "BTNBlood_eye"))
@@ -202,6 +202,7 @@ function onAttack(unit attacker, unit target, boolean _isActive)
     if prey != null
         let level = prey.getLevel()
         attacker.dealDamage(target, PREY_BONUS_DAMAGE[level-1], ReductionType.PHYSICAL)
+        target.addEffect(Abilities.stampedeMissileDeath, "origin")
 
 
 function onSpellCast()
@@ -232,6 +233,7 @@ function onSpellCast()
             doPeriodicallyCounted(0.05, 20, (CallbackCounted cb) -> begin
                 model.setAlpha((12.75 * cb.getCount()).round() )
             end)
+            addEffect(Abilities.mirrorImageDeathCaster, pos).destr()
             model.destr()
             wall.kill()
 
@@ -245,7 +247,7 @@ function onSpellCast()
                 doPeriodicallyCounted(0.05, 20, (CallbackCounted cb) -> begin
                     model.setAlpha((12.75 * cb.getCount()).round() )
                 end)
-
+                addEffect(Abilities.mirrorImageDeathCaster, newPos).destr()
                 model.destr()
                 wall.kill()
 
@@ -258,7 +260,7 @@ function onSpellCast()
                 doPeriodicallyCounted(0.05, 20, (CallbackCounted cb) -> begin
                     model.setAlpha((12.75 * cb.getCount()).round() )
                 end)
-
+                addEffect(Abilities.mirrorImageDeathCaster, newPos).destr()
                 model.destr()
                 wall.kill()
     
