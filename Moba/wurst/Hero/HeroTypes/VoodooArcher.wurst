@@ -127,9 +127,9 @@ function abilityE()
 
 
         
-constant real array BBV_DAMAGE = [50, 65, 80, 95, 110]
-constant real BBV_DAMAGE_BONUS = 80
-constant real BBV_DURATION = 5
+constant real array BBV_DAMAGE = [40, 55, 70, 85, 90]
+constant real BBV_DAMAGE_BONUS = 60
+constant real BBV_DURATION = 4
 
 constant integer BUFF_ID_ON_DEATH_COIL = compiletime(createDummyBuff())
 
