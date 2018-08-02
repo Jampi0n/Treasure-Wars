@@ -257,7 +257,8 @@ class EatTreeAnimation
     function update()
         this.count++
 
-    
+        this.model.setColorByPlayer(target.getOwner())
+
         if count >= 75
             kill = true
 

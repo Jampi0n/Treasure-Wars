@@ -39,7 +39,7 @@ public enum Team
 init
     SetCreepCampFilterState( false )
     SetAllyColorFilterState( 0 )
-    EnableMinimapFilterButtons( false, false )
+    EnableMinimapFilterButtons( true, false )
     /*CreateTrigger()
         ..registerTimerEvent(5, true)
         ..addAction(() -> (begin
