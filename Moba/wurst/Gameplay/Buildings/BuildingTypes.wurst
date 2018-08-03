@@ -517,14 +517,14 @@ function onBuildingAbility()
 
 
 function onMilitiaDespawn()
-    let u = GetTriggerUnit()
+    let u = GetEnumUnit()
     if u.getTypeId() == MILITIA_DEFEND
         if removeMilitaTeam1
-            if u.getOwner().getCPlayer().getTeam() == Team.TEAM1
+            if u.getOwner().getCPlayer().getTeam() == Team.TEAM1 and gg_rct_GreenMilitiaDespawn.contains(u.getPos())
                 militiaTeam1.removeUnit(u)
                 u.remove()
         if removeMilitaTeam2
-            if u.getOwner().getCPlayer().getTeam() == Team.TEAM2
+            if u.getOwner().getCPlayer().getTeam() == Team.TEAM2 and gg_rct_BrownMilitiaDespawn.contains(u.getPos())
                 militiaTeam2.removeUnit(u)
                 u.remove()
 
@@ -559,13 +559,19 @@ init
         ..addAction(function onBuildingAbility)
         ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_SELL_ITEM)
 
-    region reg = CreateRegion()
-    reg.addRect(gg_rct_GreenMilitiaDespawn)
-    reg.addRect(gg_rct_BrownMilitiaDespawn)
+    //region reg = CreateRegion()
+    //reg.addRect(gg_rct_GreenMilitiaDespawn)
+    //reg.addRect(gg_rct_BrownMilitiaDespawn)
 
     CreateTrigger()
-        ..addAction(function onMilitiaDespawn)
-        ..registerEnterRegion(reg, null)
+        //..addAction(function onMilitiaDespawn)
+        //..registerEnterRegion(reg, null)
+        ..registerTimerEvent(0.1, true)
+        ..addAction()->
+            ForGroup(militiaTeam1, function onMilitiaDespawn)
+            ForGroup(militiaTeam2, function onMilitiaDespawn)
+
+
 
     /*group buildings = CreateGroup()
     GroupEnumUnitsOfPlayer(buildings, players[10], null)
