@@ -131,7 +131,6 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
 
             // Wild Rage - DESTROYER
             if source.hasAbility(RAGE_BUFF_ID)
-                print(currentDamage * RAGE_LIFE_STEAL)
                 source.healHP(source, currentDamage * RAGE_LIFE_STEAL)
         
             // sacrifical dagger - ITEM

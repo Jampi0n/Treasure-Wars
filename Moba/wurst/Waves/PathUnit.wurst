@@ -39,6 +39,12 @@ public class PathUnit
     private rect returnRect = null
 
     boolean checkEnter = false
+    boolean firstTeam
+    rect homeRect
+    rect targetRect
+
+    boolean atHome = true
+    boolean atEnemy = false
 
     function setPathState(PathState newState)
         this.pathState = newState
@@ -63,7 +69,8 @@ public class PathUnit
         onAttackTrigger.registerAnyUnitEvent(EVENT_PLAYER_UNIT_ATTACKED)
         onAttackTrigger.addAction(function onAttackStatic)
 
-        region brownBase = CreateRegion()
+
+        /*region brownBase = CreateRegion()
             ..addRect(gg_rct_BrownBase)
         region greenBase = CreateRegion()
             ..addRect(gg_rct_GreenBase) 
@@ -76,9 +83,9 @@ public class PathUnit
         region greenHome = CreateRegion()
             ..addRect(gg_rct_GreenTopHome)
             ..addRect(gg_rct_GreenMidHome)
-            ..addRect(gg_rct_GreenBotHome)
+            ..addRect(gg_rct_GreenBotHome)*/
 
-        CreateTrigger()
+        /*CreateTrigger()
             ..registerEnterRegion(brownBase, null)
             ..addAction(function onBaseEnterBrown)
         CreateTrigger()
@@ -90,14 +97,14 @@ public class PathUnit
             ..addAction(function onBaseEnterGreen)
         CreateTrigger()
             ..registerLeaveRegion(greenBase, null)
-            ..addAction(function onBaseLeaveGreen)
+            ..addAction(function onBaseLeaveGreen)*/
 
-        CreateTrigger()
+        /*CreateTrigger()
             ..registerEnterRegion(brownHome, null)
             ..addAction(function onReturnBrown)
         CreateTrigger()
             ..registerEnterRegion(greenHome, null)
-            ..addAction(function onReturnGreen)
+            ..addAction(function onReturnGreen)*/
 
         CreateTrigger()
             ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
@@ -111,6 +118,9 @@ public class PathUnit
             print("Warning! - "+u.getName()+" is already a PathUnit.")
             destroy(this)
         else
+            this.firstTeam = u.getOwner() == players[TEAM_PLAYER_TEAM_1]
+            this.homeRect = firstTeam ? gg_rct_GreenBase : gg_rct_BrownBase
+            this.targetRect = firstTeam ? gg_rct_BrownBase : gg_rct_GreenBase
             this.assocUnit = u
             this.currentPath = null
             this.currentSubPath = 0
@@ -318,6 +328,37 @@ public class PathUnit
                                 
     static function updateMovementGroup()
         var pU = PathUnit.unitToPathUnit.get(GetEnumUnit())
+
+        if pU.checkEnter
+            if (pU.pathState == PathState.RETURNING or pU.pathState == PathState.HOME_TOWN)
+                if pU.returnRect.contains(pU.assocUnit.getPos(), 64)
+                    pU.setPathState(PathState.PATH)
+                    pU.nextUpdate = 0
+
+        
+            if not pU.atEnemy and pU.targetRect.contains(pU.assocUnit.getPos())
+                pU.atEnemy = true
+                if pU.pathState == PathState.PATH
+                    pU.setPathState(PathState.ENEMY_TOWN)
+                    pU.nextUpdate = gameTime + 1000
+                    //print(pU.assocUnit.getName()+" enter enemy base")
+                    if pU.firstTeam
+                        pU.assocUnit.issuePointOrder("attack", gg_rct_BrownCastle.getRightTop())
+                    else
+                        pU.assocUnit.issuePointOrder("attack", gg_rct_GreenCastle.getLeftBot())     
+                
+            if pU.atHome and not pU.homeRect.contains(pU.assocUnit.getPos())
+                pU.atHome = false
+                if pU.pathState == PathState.HOME_TOWN
+                    pU.nextUpdate = gameTime + 0.5
+                    pU.setPathState(PathState.RETURNING)
+                    //print(pU.assocUnit.getName()+" leave home base")
+                    if pU.returnRect != null
+                        if pU.returnRect.contains(pU.assocUnit.getPos())
+                            pU.setPathState(PathState.PATH)
+                        else
+                            pU.assocUnit.issuePointOrder("move", pU.returnRect.getCenter())
+
         if(pU.nextUpdate<gameTime)
             operations++
             pU.updateMovement()
@@ -383,7 +424,7 @@ public class PathUnit
                 pathUnit.onBaseLeave()
                 //print("onBaseLeaveBrown")
 
-    static function onReturnGreen()
+    /*static function onReturnGreen()
         let u = GetTriggerUnit()
         if u.getOwner() == players[TEAM_PLAYER_TEAM_1]
             let pathUnit = unitToPathUnit.get(u)
@@ -407,7 +448,7 @@ public class PathUnit
                     pathUnit.nextUpdate = 0
                     //print("brown -> true")
                 else
-                    //print("brown -> wrong")
+                    //print("brown -> wrong")*/
 
 
 
