@@ -326,15 +326,16 @@ class RitualOfTheSeas
                 if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(this.caster.getOwner(), false, true) and target.isVisible(this.caster.getOwner())
                     doAfter(target.getPos().distanceTo(caster.getPos())/1000 , () -> (begin
 
-                        let manaDrained = min( target.getMana(), manaDrain.reduceMagic(target.getWp()))
-                        let hpDrained = min( target.getHP(), hpDrain.reduceMagic(target.getWp()))
+                        if target.isAlive() and target.wrapper() != null
+                            let manaDrained = min( target.getMana(), manaDrain.reduceMagic(target.getWp()))
+                            let hpDrained = min( target.getHP(), hpDrain.reduceMagic(target.getWp()))
 
-                        if target.isType(UNIT_TYPE_HERO)
-                            caster.healMana(caster, manaDrained * RITUAL_MANA_RATIO/100 )
-                            caster.healHP(caster, hpDrained * RITUAL_HP_RATIO/100 )
+                            if target.isType(UNIT_TYPE_HERO)
+                                caster.healMana(caster, manaDrained * RITUAL_MANA_RATIO/100 )
+                                caster.healHP(caster, hpDrained * RITUAL_HP_RATIO/100 )
 
-                        caster.damageMana(target, manaDrain.reduceMagic(target.getWp()), ReductionType.NONE)
-                        caster.dealDamage(target, hpDrain, ReductionType.MAGIC)
+                            caster.damageMana(target, manaDrain.reduceMagic(target.getWp()), ReductionType.NONE)
+                            caster.dealDamage(target, hpDrain, ReductionType.MAGIC)
 
 
                     end))
