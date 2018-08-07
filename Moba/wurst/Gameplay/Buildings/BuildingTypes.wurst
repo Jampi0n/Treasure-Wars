@@ -12,6 +12,10 @@ import BuffTypeConfig
 import UnitWrapper
 import ErrorHandling
 import HeroControl
+import Buff
+import ObjectEditingPreset
+import Assets
+import LinkedList
 
 public constant int ALTAR = 'h002'
 public constant int ARCANE_SANCTUM = 'h008'
@@ -528,6 +532,34 @@ function onMilitiaDespawn()
                 militiaTeam2.removeUnit(u)
                 u.remove()
 
+constant HOME_BUFF_ID = compiletime(createAuraBuff("Protected", "This unit is protected; it is invulnerable and is being healed.", Icons.bTNInvulnerable))
+constant HOME_ABILTIY_ID = compiletime(createPositiveBuffAbility(1, HOME_BUFF_ID, "Abilities\\Spells\\Human\\DivineShield\\DivineShieldTarget.mdl", ""))
+constant BUFF_HOME = new BuffType(true, true)
+
+function homeInvulnerability()
+    group nearby = CreateGroup()
+    nearby.enumUnitsInRange(gg_rct_GreenAltar.getCenter(), 800)
+
+    while(not nearby.isEmpty())
+        unit target = FirstOfGroup(nearby)
+        nearby.removeUnit(target)
+        if not target.isType(UNIT_TYPE_STRUCTURE) and IsUnitAlly(target, players[TEAM_PLAYER_TEAM_1]) 
+            target.addBuff( target, 0.5, UNTARGETABLE, 1)
+            target.addBuff( target, 0.5, BUFF_HOME, 1)
+
+    nearby.destr()
+
+    nearby = CreateGroup()
+    nearby.enumUnitsInRange(gg_rct_BrownAltar.getCenter(), 800)
+
+    while(not nearby.isEmpty())
+        unit target = FirstOfGroup(nearby)
+        nearby.removeUnit(target)
+        if not target.isType(UNIT_TYPE_STRUCTURE) and IsUnitAlly(target, players[TEAM_PLAYER_TEAM_2]) 
+            target.addBuff( target, 0.5, UNTARGETABLE, 1)
+            target.addBuff( target, 0.5, BUFF_HOME, 1)
+
+    nearby.destr()
 
 public function income()
     int factorTeam1 = 5
@@ -571,7 +603,14 @@ init
             ForGroup(militiaTeam1, function onMilitiaDespawn)
             ForGroup(militiaTeam2, function onMilitiaDespawn)
 
+    var abilityList = new LinkedList<int>
+    ..add(HOME_ABILTIY_ID)
+    BUFF_HOME.setup(abilityList, HOME_BUFF_ID)
 
+    CreateTrigger()
+        ..registerTimerEvent(0.2, true)
+        ..addAction(function homeInvulnerability)
+        
 
     /*group buildings = CreateGroup()
     GroupEnumUnitsOfPlayer(buildings, players[10], null)
