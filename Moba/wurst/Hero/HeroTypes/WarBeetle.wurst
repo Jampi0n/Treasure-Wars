@@ -36,7 +36,7 @@ function passive()
 
     for lvl = 1 to 5
         aDef
-            ..setDescriptionString(true, lvl, "Increases the War Beetles's armor by {0}.".format(
+            ..setDescriptionString(false, lvl, "Increases the War Beetles's armor by {0}.".format(
                 HARD_SHELL_ARMOR[lvl-1].str())
             )
 
