@@ -48,9 +48,9 @@ function setupCreatedHero(Hero hero)
     else
         pos = gg_rct_BrownAltar.getCenter()-vec2(128,128)
 
-    if heroUnit.getOwner().getController() == MAP_CONTROL_COMPUTER and heroUnit.getOwner().getSlotState() == PLAYER_SLOT_STATE_PLAYING
+    if owner.getController() == MAP_CONTROL_COMPUTER and owner.getSlotState() == PLAYER_SLOT_STATE_PLAYING
         doAfter(GetRandomReal(1, 3), () -> ( begin
-            let ai = new HeroAI(cPlayer)
+            let ai = new HeroAI(cPlayer, GetAIDifficulty(owner))
             ai.togglePause()
             doAfter(GetRandomReal(48, 52), () -> (begin
                 ai.togglePause()
@@ -234,8 +234,8 @@ function endPickMode()
         ..destr()
 
 function onModePick()
-    string s = GetEventPlayerChatString()
-    if(s=="-ap")
+    string s = GetEventPlayerChatString().toLowerCase()
+    if s == "-ap"
         pickMode = PickMode.ALLPICK
     else
         pickMode = PickMode.ALLRANDOM
@@ -333,7 +333,7 @@ init
 
                 //removeHeroType(hero.getHeroType())
 
-                let ai = new HeroAI(getCPlayer(i))
+                let ai = new HeroAI(getCPlayer(i), AI_DIFFICULTY_NEWBIE)
 
                 doAfter(6) ->
                     ai.buyItems()
@@ -365,7 +365,7 @@ init
 
                     //removeHeroType(hero.getHeroType())
 
-                    let ai = new HeroAI(getCPlayer(i))
+                    let ai = new HeroAI(getCPlayer(i), AI_DIFFICULTY_INSANE)
 
                     Hero.getHero(i).toUnit().setLevel(25, false)
 

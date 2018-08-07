@@ -440,7 +440,7 @@ public class HeroAI
         end))
     
 
-    construct(CPlayer owner)
+    construct(CPlayer owner, aidifficulty diff)
         this.owner = owner
         this.hero = Hero.getHero(owner)
         this.heroType = hero.getHeroType()
@@ -477,6 +477,40 @@ public class HeroAI
             this.lane = Lane.MID
 
         updateTargetLoc()
+
+        let wrapper = this.heroUnit.wrapper()
+
+        if diff == AI_DIFFICULTY_NORMAL
+            this.owner.addGoldEx((500).round())
+            wrapper.addStatRelativeBonus(Stat.AGI, 100)
+            wrapper.addStatRelativeBonus(Stat.AR, 100)
+            wrapper.addStatAbsoluteBonus(Stat.AS, 10)
+            wrapper.addStatRelativeBonus(Stat.HP, 100)
+            wrapper.addStatRelativeBonus(Stat.HR, 100)
+            wrapper.addStatRelativeBonus(Stat.INT, 100)
+            wrapper.addStatRelativeBonus(Stat.MP, 100)
+            wrapper.addStatRelativeBonus(Stat.MR, 100)
+            wrapper.addStatRelativeBonus(Stat.STR, 100)
+
+            wrapper.addStatAbsoluteBonus(Stat.HR, 30)
+            wrapper.addStatAbsoluteBonus(Stat.MR, 20)
+            
+        else if diff == AI_DIFFICULTY_INSANE
+            this.owner.addGoldEx((1500).round())
+            wrapper.addStatRelativeBonus(Stat.AGI, 200)
+            wrapper.addStatRelativeBonus(Stat.AR, 20)
+            wrapper.addStatAbsoluteBonus(Stat.AS, 20)
+            wrapper.addStatRelativeBonus(Stat.HP, 200)
+            wrapper.addStatRelativeBonus(Stat.HR, 200)
+            wrapper.addStatRelativeBonus(Stat.INT, 200)
+            wrapper.addStatRelativeBonus(Stat.MP, 200)
+            wrapper.addStatRelativeBonus(Stat.MR, 200)
+            wrapper.addStatRelativeBonus(Stat.STR, 200)
+
+            wrapper.addStatAbsoluteBonus(Stat.HR, 60)
+            wrapper.addStatAbsoluteBonus(Stat.MR, 40)
+
+
         //should not happen for everyone at the same time (lag)
         doAfter(GetRandomReal(0.1, 0.3), () -> (begin
             if not this.paused
@@ -842,7 +876,7 @@ public class HeroAI
     function togglePause()
         this.paused = not this.paused
 
-/**
+/*
     Determines the win chance of a team, if a fight is initiated at a certain position.
     I have no idea how this works. :/
     Factors to take into consideration:
@@ -850,7 +884,9 @@ public class HeroAI
     - Towers nearby
     - Units nearby
 
-**/
+    Towers and units are more relevant for the defending team, as the offensive team usually won't benefit from tower support.
+
+*/
 function determineWinChance(boolean firstTeam, vec2 pos) returns real
 
     real strengthTeam1
@@ -865,10 +901,11 @@ function determineWinChance(boolean firstTeam, vec2 pos) returns real
     real heroStrength1 = 0
     real heroStrength2 = 0
 
+    //don't fight inside the hero tower
     if gg_rct_GreenHeroTower.contains(pos)
-        towerStrength1 += 10000
+        return firstTeam ? 1 : 0
     else if gg_rct_BrownHeroTower.contains(pos)
-        towerStrength2 += 10000
+        return firstTeam ? 0 : 1
 
     let g = CreateGroup()
     g.enumUnitsInRange(pos, TEAM_FIGHT_RANGE)
@@ -879,10 +916,11 @@ function determineWinChance(boolean firstTeam, vec2 pos) returns real
             break
         g.removeUnit(u)
 
-        let uTeam1 = u.getOwner().isAllyOf(players[TEAM_PLAYER_TEAM_1])
-        let uTeam2 = u.getOwner().isAllyOf(players[TEAM_PLAYER_TEAM_2])
-
         if u.isAlive()
+
+            let uTeam1 = u.getOwner().isAllyOf(players[TEAM_PLAYER_TEAM_1])
+            let uTeam2 = u.getOwner().isAllyOf(players[TEAM_PLAYER_TEAM_2])
+
             if u.isType(UNIT_TYPE_STRUCTURE)
                 if u.getTypeId() == HERO_TOWER
                     if uTeam1
@@ -890,16 +928,16 @@ function determineWinChance(boolean firstTeam, vec2 pos) returns real
                     else
                         towerStrength2 += 100000
                 else
-                    if u.isType(UNIT_TYPE_ATTACKS_GROUND) and u.getPos().distanceTo(pos) < 1000 // tower
+                    if u.isType(UNIT_TYPE_ATTACKS_GROUND) // tower
                         if u.getTypeId() == OUTER_TOWER
                             if uTeam1
                                 if firstTeam
                                     towerStrength1 += 100
                                 else
-                                    towerStrength1 += 400
+                                    towerStrength1 += 600
                             else if uTeam2
                                 if firstTeam
-                                    towerStrength2 += 400
+                                    towerStrength2 += 600
                                 else
                                     towerStrength2 += 100
                         else if u.getTypeId() == GATE_TOWER or u.getTypeId() == BASE_TOWER
@@ -907,10 +945,10 @@ function determineWinChance(boolean firstTeam, vec2 pos) returns real
                                 if firstTeam
                                     towerStrength1 += 150
                                 else
-                                    towerStrength1 += 600
+                                    towerStrength1 += 900
                             else if uTeam2
                                 if firstTeam
-                                    towerStrength2 += 600
+                                    towerStrength2 += 900
                                 else
                                     towerStrength2 += 150
 
@@ -950,6 +988,11 @@ function determineWinChance(boolean firstTeam, vec2 pos) returns real
 
     return ret
 
+
+/*
+    A hero with a lot of strength or intelligence is considered to have a lot of offensive power.
+    This hero will be focused with a higher priority.
+*/
 function determineHeroOffensiveStrength(unit hero) returns real
     let mana = hero.getMana()/hero.getMaxMana()
     let str = hero.getStr()
@@ -958,6 +1001,10 @@ function determineHeroOffensiveStrength(unit hero) returns real
 
     return (str + str * mana * (lvl/30) + 2 * intel * mana * (lvl/30)) / 4 //0-100 (standard values, can be higher)
 
+/*
+    A hero with more ehp is considered to have a lot of defensive power.
+    This hero will be focused with a lower priority.
+*/
 function determineHeroDefensiveStrength(unit hero) returns real
     let hp = hero.getHP()
     let armor = hero.getArmor()
@@ -971,7 +1018,10 @@ function determineHeroDefensiveStrength(unit hero) returns real
     return (inBase ? 3 : 1) * (hp * (1 + ARMOR_REDUCTION * armor) + hp * (1 + MAGIC_REDUCTION * wp)) / 120 //0-100 (standard values, can be higher)
 
 
-
+/*
+    Relevant information:
+        level, hp factor, mana factor, total item value
+*/
 function determineHeroStrength(unit hero) returns real
     let lvl = hero.getLevel()
     let hp = hero.getHP()/hero.getMaxHP()
