@@ -137,7 +137,7 @@ public function unit.dealDamageAlways(unit target, real amount, ReductionType re
     UnitDamageTarget(this, target, newAmount, false, true, ATTACK_TYPE_NORMAL, damageType, WEAPON_TYPE_WHOKNOWS)
 
 public function unit.dealDamage(unit target, real amount, ReductionType reductionType)
-    if not this.isType(UNIT_TYPE_ANCIENT)
+    if not target.isType(UNIT_TYPE_ANCIENT)
         this.dealDamageAlways(target, amount, reductionType)
         if not IsUnitEnemy(target, this.getOwner()) and this != target
             print(this.getName()+" damages ally: "+target.getName())
