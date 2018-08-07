@@ -47,8 +47,8 @@ constant real array BITE_DAMAGE = [100, 160, 220, 280, 340]
 constant real BITE_DAMAGEL_BONUS = 180
 
 constant int BITE_SLOW = 200
-constant real array BITE_SLOW_DURATION = [0.6, 0.9, 1.2, 1.5, 1.8]
-constant real BITE_SLOW_DURATION_BONUS = 0.6
+constant real array BITE_SLOW_DURATION = [0.8, 1.2, 1.6, 2, 2.4]
+constant real BITE_SLOW_DURATION_BONUS = 0.7
 
 BuffType buffBite
 constant BITE_BUFF_ID = compiletime(createAuraBuff("Venomous Beetle", "This unit was bitten by a Venomous Beetle; it is slowed.", Icons.bTNCarrionScarabs))
@@ -236,7 +236,7 @@ class VenoumosBeetle
         this.ownerIntelligence = owner.getInt()
         this.target = target
         this.level = caster.getAbilityLevel(ABILITY_VENOMOUS_BEETLE)
-        this.dummy = createUnit(owner.getOwner(), VENOMOUS_BEETLE, owner.getPos(), owner.getPos().angleTo(target.getPos()))
+        this.dummy = createUnit(DUMMY_PLAYER, VENOMOUS_BEETLE, owner.getPos(), owner.getPos().angleTo(target.getPos()))
         this.dummy.setXY(owner.getPos())
         this.dummy.setPathing(false)
         this.dummy.issueTargetOrder("chainlightning", target)
@@ -398,6 +398,7 @@ function initHeroType()
     setupStats()
     setupTooltips()
     heroType.setSkillBuild("QWEQWQWQWQWEEEE")
+    heroType.useHeroGlow()
     delayInit(5) ->
 
         heroType
