@@ -507,7 +507,7 @@ public class HeroAI
         else if diff == AI_DIFFICULTY_INSANE
             this.owner.addGoldEx((1500).round())
             wrapper.addStatRelativeBonus(Stat.AGI, 200)
-            wrapper.addStatRelativeBonus(Stat.AR, 20)
+            wrapper.addStatRelativeBonus(Stat.AR, 200)
             wrapper.addStatAbsoluteBonus(Stat.AS, 20)
             wrapper.addStatRelativeBonus(Stat.HP, 200)
             wrapper.addStatRelativeBonus(Stat.HR, 200)
