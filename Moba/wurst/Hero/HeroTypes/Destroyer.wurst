@@ -167,7 +167,7 @@ constant real PREY_DURATION = 15
 constant int array PREY_MOVE_SPEED = [20, 25, 30, 35, 40]
 
 constant int PREY_SLOW = 50
-constant real PREY_SLOW_DURATION = 1.5
+constant real PREY_SLOW_DURATION = 1
 
 BuffType buffPreyTarget
 BuffType buffPreyCaster
@@ -214,15 +214,15 @@ function abilityR()
 function setupStats()
     heroType
         //..setStat(Stat.AD, 5, 40)
-        ..setStat(Stat.AR, 12, 31)
-        ..setStat(Stat.AS, 29, 73)
+        ..setStat(Stat.AR, 12, 28)
+        ..setStat(Stat.AS, 19, 53)
         ..setStat(Stat.HP, 14, 43)
         ..setStat(Stat.HR, 32, 69)
-        ..setStat(Stat.MP, 19, 41)
+        ..setStat(Stat.MP, 19, 34)
         ..setStat(Stat.MR, 17, 38)
         ..setStat(Stat.MS, 14, 37)
-        ..setStat(Stat.STR, 17, 63)
-        ..setStat(Stat.AGI, 13, 43)
+        ..setStat(Stat.STR, 17, 55)
+        ..setStat(Stat.AGI, 13, 34)
         ..setStat(Stat.INT, 11, 33)
 
 function onDamage()
