@@ -507,12 +507,12 @@ function setupTooltips()
 
     tooltip = new DynamicTooltip(ABILITY_IMPALE)
     tooltip.setLearnString("Releases thorns in a line, damaging and entangling every enemy unit they pass through.", (int lvl) -> (begin
-        return "{0}{I0} damage, {1}{I1} second.".format( ENTANGLE_HIT_DAMAGE[lvl-1].str(), ENTANGLE_DURATION[lvl-1].toString() )
+        return "{0}{I0} damage, {1}{I1} second.".format( ENTANGLE_HIT_DAMAGE[lvl-1].str(), ENTANGLE_DURATION[lvl-1].toExactString() )
     end) )
 
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, "Releases thorns in a line, dealing {0}{I0} damage and entangling every enemy unit they pass through for {1}{I1} seconds.".format(
-            ENTANGLE_HIT_DAMAGE[lvl-1].str(), ENTANGLE_DURATION[lvl-1].toString()
+            ENTANGLE_HIT_DAMAGE[lvl-1].str(), ENTANGLE_DURATION[lvl-1].toExactString()
         ))
     tooltip.setReplaceIntelligence(ENTANGLE_HIT_DAMAGE_BONUS, ENTANGLE_DURATION_BONUS)
     heroType.addDynamicTooltipIntelligence(tooltip)
