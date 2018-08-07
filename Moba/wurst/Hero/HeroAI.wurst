@@ -7,7 +7,7 @@ import ClosureTimers
 import ItemShopSystem
 import UnitType
 import BuildingTypes
-import OnAttack
+//import OnAttack
 import ErrorHandling
 
 constant team1AIs = new LinkedList<HeroAI>
@@ -304,6 +304,7 @@ public class HeroAI
     private boolean casting = false
     private string castOrder = ""
     protected boolean attacking = false
+    private timer attackTimer = getTimer()
     private vec2 currentTargetLoc
     private vec2 currentRetreatLoc
     
@@ -368,6 +369,13 @@ public class HeroAI
 
     function getTeamFightTarget() returns unit
         return this.teamFight.getTarget()
+
+    static function onAttackTimer()
+        (GetExpiredTimer().getData() castTo HeroAI).attacking = false
+
+    function attackFor(real time)
+        attacking = true
+        attackTimer.start(time, function onAttackTimer)
 
     function updateTargetLoc()
         if lane == Lane.TOP
@@ -451,6 +459,7 @@ public class HeroAI
         this.state = ATTACK
 
         heroAIs[owner.getId()] = this
+        this.attackTimer.setData(this castTo int)
 
         //test:
         itemBuild = this.heroType.getItemBuild()
@@ -865,8 +874,7 @@ public class HeroAI
     function attack(widget targetWidget) returns boolean
         boolean ret = false
         if not casting and not attacking
-            attacking = this.heroUnit.issueTargetOrder("attack", targetWidget)
-            ret = attacking
+            ret = this.heroUnit.issueTargetOrder("attack", targetWidget)
         return ret
 
 
@@ -1065,9 +1073,17 @@ init
             ai.buyItems()
     end))
 
-    OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+    /*OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
         if attacker.isType(UNIT_TYPE_HERO)
             let ai = HeroAI.heroAIs[attacker.getOwner().getId()]
             if ai != null
                 ai.attacking = false
+    end))*/
+
+    CreateTrigger()
+        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_ATTACKED)
+        ..addAction(() -> (begin
+        let ai = HeroAI.heroAIs[GetAttacker().getOwner().getId()]
+        if ai != null
+            ai.attackFor(2)
     end))
