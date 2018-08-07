@@ -6,17 +6,19 @@ import HeroType
 import BuffObjEditing
 import UnitTypeConfig
 import ClosureTimers
+import DamageDetection
 
 public constant HERO_DESTROYER = 'H00R'
 HeroType heroType
 
 public constant ABILITY_DEATH_FRENZY = 'AY3P'
-constant ABILITY_PREY = 'AY3Q'
+constant ABILITY_BREATH = 'AY3Q'
 constant ABILITY_IMMOLATION = 'AY3W'
 constant ABILITY_BONE_WALL = 'AY3E'
 constant ABILITY_WILD_RAGE = 'AY3R'
 
 unit heroDestroyer = null
+group hitByBreath = CreateGroup()
 
 public constant real array DEATH_FRENZY_BONUS = [25, 35, 45, 55, 65]
 
@@ -37,31 +39,31 @@ function passive()
             )
 
 
-constant real array PREY_BONUS_DAMAGE = [25, 40, 55, 70, 85]
-constant real PREY_DURATION = 12
-constant int array PREY_MOVE_SPEED = [40, 50, 60, 70, 80]
+constant integer BUFF_ID_ON_BREATH = compiletime(createDummyBuff())
 
-BuffType buffPreyTarget
-BuffType buffPreyCaster
+constant real array BREATH_DAMAGE = [75, 125, 175, 225, 275]
+constant real BREATH_DAMAGE_BONUS = 80
 
-constant int PREY_TARGET_BUFF_ID = compiletime(createAuraBuff("Prey", "This unit is under the effect of Prey; it is revealed and takes increased damage from the caster.", "BTNBlood_eye"))
-constant int PREY_TARGET_ABILITY_ID = compiletime(createNegativeBuffAbility(5, PREY_TARGET_BUFF_ID, Abilities.possessionTarget, "overhead"))
+constant int array BREATH_ARMOR_REDUCTION = [30, 35, 40, 45, 50]
+constant real BREATH_DURATION = 3
 
+BuffType buffMeltingBreath
 
-constant int PREY_CASTER_BUFF_ID = compiletime(createAuraBuff("Prey", "This unit has casted Prey; it's movement speed is increased while moving towards the target.", "BTNBlood_eye"))
-constant int PREY_CASTER_ABILITY_ID = compiletime(createNegativeBuffAbility(5, PREY_CASTER_BUFF_ID, "", ""))
+constant int BREATH_BUFF_ID = compiletime(createAuraBuff("Melting Breath", "This unit was hit by Melting Breath; it has reduced armor.", "BTNFlameBurst"))
+constant int BREATH_ABILITY_ID = compiletime(createNegativeBuffAbility(5, BREATH_BUFF_ID, Abilities.lordofFlameMissile, "chest"))
+
 
 @compiletime
 function abilityQ()
     int array MANA = [90, 95, 100, 105, 110]
-    real array COOLDOWN = [16, 16, 16, 16, 16]
-    real array RANGE = [2000, 2000, 2000, 2000, 2000]
+    real array COOLDOWN = [8, 8, 8, 8, 8]
+    real array RANGE = [450, 450, 450, 450, 450]
 
-    let aDef = new AbilityDefinitionIllidanChannel(ABILITY_PREY)
-        ..setupIcon("BTNBlood_eye")
-        ..setupWithHotKey("Prey", "Q")
-        ..setAnimationNames("spell")
-        ..setupChannel(TargetType.UNIT, "channel", 0.5)
+    let aDef = new AbilityDefinitionBreathofFrostCreep(ABILITY_BREATH)
+        ..setupIcon("BTNFlameBurst")
+        ..setupWithHotKey("Melting Breath", "Q")
+        ..setAnimationNames("spell,channel")
+        ..setMissileArt(Abilities.breathOfFireMissile)
 
     for lvl = 1 to 5
         aDef
@@ -69,13 +71,20 @@ function abilityQ()
             ..setManaCost(lvl, MANA[lvl-1])
             ..setCastRange(lvl, RANGE[lvl-1])
             ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
+            ..setDamage(lvl, 0.01)
+            ..setDamagePerSecond(lvl, 0.01)
+            ..setBuffs(lvl, BUFF_ID_ON_BREATH.toRawCode())
+            ..setDistance(lvl, 375)
+            ..setFinalArea(lvl, 300)
+            ..setMaxDamage(lvl, 99999)
+            ..setAreaofEffect(lvl, 125)
 
 
-constant real array IMMOLATION_DAMAGE = [24, 36, 48, 60, 72]
+constant real array IMMOLATION_DAMAGE = [32, 44, 56, 68, 80]
 constant real IMMOLATION_DAMAGE_BONUS = 30
 
 constant int array IMMOLATION_ATTACK_SPEED = [18, 26, 34, 42, 50]
-constant real array IMMOLATION_MANA_DRAIN = [5, 6, 7, 8, 9]
+constant real array IMMOLATION_MANA_DRAIN = [6, 7.2, 8.4, 9.6, 10.8]
 
 BuffType buffImmolation
 constant IMMOLATION_BUFF_ID = compiletime(BUFF_ID_GEN.next())
@@ -153,17 +162,39 @@ public constant real RAGE_LIFE_STEAL = 0.35
 public constant int RAGE_BUFF_ID = compiletime(createAuraBuff("Wild Rage", "This unit has increased damage and is healed for dealing damage. It takes damage over time.", Icons.bTNUnholyFrenzy))
 constant int RAGE_ABILITY_ID = compiletime(createPositiveBuffAbility(5, RAGE_BUFF_ID, Abilities.unholyFrenzyTarget, "overhead"))
 
+constant real array PREY_BONUS_DAMAGE = [40, 55, 70, 85, 100]
+constant real PREY_DURATION = 15
+constant int array PREY_MOVE_SPEED = [20, 25, 30, 35, 40]
+
+constant int PREY_SLOW = 50
+constant real PREY_SLOW_DURATION = 1.5
+
+BuffType buffPreyTarget
+BuffType buffPreyCaster
+BuffType buffPreySlow
+
+constant int PREY_TARGET_BUFF_ID = compiletime(createAuraBuff("Prey", "This unit is the Prey; it is revealed and takes increased damage from the Hunter.", Icons.bTNUnholyFrenzy))
+constant int PREY_TARGET_ABILITY_ID = compiletime(createNegativeBuffAbility(5, PREY_TARGET_BUFF_ID, Abilities.possessionTarget, "overhead"))
+
+constant int PREY_SLOW_BUFF_ID = compiletime(createAuraBuff("Prey - Slowed", "The Prey was hit by the Hunter; it has reduced movement speed.", Icons.bTNUnholyFrenzy))
+constant int PREY_SLOW_ABILITY_ID = compiletime(createNegativeBuffAbility(5, PREY_SLOW_BUFF_ID, "", ""))
+
+constant int PREY_CASTER_BUFF_ID = compiletime(createAuraBuff("Hunter", "This unit is the Hunter; it's movement speed is increased while moving towards the target.", Icons.bTNUnholyFrenzy))
+constant int PREY_CASTER_ABILITY_ID = compiletime(createPositiveBuffAbility(5, PREY_CASTER_BUFF_ID, Abilities.unholyFrenzyTarget, "overhead"))
+
 BuffType buffRage
 
 @compiletime
 function abilityR()
     int array MANA = [140, 150, 160, 170, 180]
     real array COOLDOWN = [75, 75, 75, 75, 75]
+    real RANGE = 900
 
-    let aDef = new AbilityDefinitionRoar(ABILITY_WILD_RAGE)
+    let aDef = new AbilityDefinitionIllidanChannel(ABILITY_WILD_RAGE)
+        ..setAnimationNames("spell")
+        ..setupChannel(TargetType.UNIT, "channel", 0.5)
         ..setupIcon(Icons.bTNUnholyFrenzy)
-        ..setAnimationNames("")
-        ..setupWithHotKey("Wild Rage", "R")
+        ..setupWithHotKey("Hunter and Prey", "R")
         ..setLightningEffects("")
         ..setArtTarget("")
         ..setMissileArt("")
@@ -175,7 +206,8 @@ function abilityR()
         aDef
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
-            ..setTargetsAllowed(lvl, "none")
+            ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
+            ..setCastRange(lvl, RANGE)
 
 
 
@@ -188,12 +220,23 @@ function setupStats()
         ..setStat(Stat.HR, 32, 69)
         ..setStat(Stat.MP, 19, 41)
         ..setStat(Stat.MR, 17, 38)
-        ..setStat(Stat.MS, 31, 77)
-        ..setStat(Stat.STR, 17, 64)
+        ..setStat(Stat.MS, 14, 37)
+        ..setStat(Stat.STR, 17, 63)
         ..setStat(Stat.AGI, 13, 43)
         ..setStat(Stat.INT, 11, 33)
 
 function onDamage()
+    let target = GetTriggerUnit()
+    if target.hasAbility(BUFF_ID_ON_BREATH)
+        target.removeAbility(BUFF_ID_ON_BREATH)
+
+        let caster = GetEventDamageSource()
+        if target.isTargetable(caster.getOwner(), false, true) and not hitByBreath.contains(target)
+            let level = caster.getAbilityLevel(ABILITY_BREATH)
+            hitByBreath.addUnit(target)
+            caster.dealDamage(target, BREATH_DAMAGE[level-1].bonus(caster.getInt(), BREATH_DAMAGE_BONUS), ReductionType.MAGIC)
+            target.addBuffReduced(caster, BREATH_DURATION, buffMeltingBreath, level)
+
 
 
 function onAttack(unit attacker, unit target, boolean _isActive)
@@ -202,6 +245,7 @@ function onAttack(unit attacker, unit target, boolean _isActive)
     if prey != null
         let level = prey.getLevel()
         attacker.dealDamage(target, PREY_BONUS_DAMAGE[level-1], ReductionType.PHYSICAL)
+        target.addBuffReduced(attacker, PREY_SLOW_DURATION, buffPreySlow, 1)
         target.addEffect(Abilities.stampedeMissileDeath, "origin")
 
 
@@ -210,10 +254,11 @@ function onSpellCast()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
 
-    if(spellId==ABILITY_PREY)
-        let target = GetSpellTargetUnit()
+    if(spellId==ABILITY_BREATH)
+        /*let target = GetSpellTargetUnit()
         target.addBuffReduced(caster, PREY_DURATION, buffPreyTarget, level)
-        caster.addBuff(caster, -1, buffPreyCaster, level)
+        caster.addBuff(caster, -1, buffPreyCaster, level)*/
+        hitByBreath.clear()
 
     if(spellId==ABILITY_IMMOLATION)
         caster.addBuff(caster, -1, buffImmolation, 1)
@@ -266,7 +311,9 @@ function onSpellCast()
     
 
     if(spellId==ABILITY_WILD_RAGE)
-        caster.addBuff(caster, RAGE_DURATION.bonus(caster.getInt(), RAGE_DURATION_BONUS), buffRage, level)
+        let target = GetSpellTargetUnit()
+        target.addBuffReduced(caster, PREY_DURATION, buffPreyTarget, level)
+        caster.addBuff(caster, -1, buffPreyCaster, level)
         
 
 
@@ -278,46 +325,49 @@ function teamFightAI(HeroAI _ai)
             
 
 function setupTooltips()
-    DynamicTooltip tooltip = new DynamicTooltip(ABILITY_PREY)
-    tooltip.setLearnString("Marks the target enemy unit as his prey. The target will be revealed, the Destroyer will deal bonus damage against the target and have increased movmement speed when moving towards the target. Lasts {0} seconds.".format(PREY_DURATION.toExactString()), (int lvl) -> (begin
+
+    tooltip = new DynamicTooltip(ABILITY_BREATH)
+    tooltip.setLearnString("Breathes a cone of fire at enemy units, dealing magic damage. The heat melts the target's armor, reducing it for {1} seconds.".format(
+        BREATH_DURATION.str()
+    ), (int lvl) -> (begin
+        return "{0}{I0} damage, {1}% armor reduction.".format(
+        BREATH_DAMAGE[lvl-1].str(), BREATH_ARMOR_REDUCTION[lvl-1].str())
+    end) )
+    
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, "Breathes a cone of fire at enemy units, dealing {0}{I0} magic damage. The heat melts the target's armor, reducing it by {1}% for {2} seconds.".format(
+            BREATH_DAMAGE[lvl-1].str(), BREATH_ARMOR_REDUCTION[lvl-1].str(), BREATH_DURATION.str()
+            ))
+    tooltip.setReplaceIntelligence(BREATH_DAMAGE_BONUS)
+    heroType.addDynamicTooltipIntelligence(tooltip)
+
+    tooltip = new DynamicTooltip(ABILITY_IMMOLATION)
+    tooltip.setLearnString("Engulfs the Destroyer in flames, damaging nearby enemies and the Destroyer himself. Heroes take double damage. Also increases the Destroyer's attack speed.|nDrains mana until deactivated.", (int lvl) -> (begin
+        return "{0}{I0} damage per second, {1}% attack speed.".format(
+        IMMOLATION_DAMAGE[lvl-1].str(),
+        IMMOLATION_ATTACK_SPEED[lvl-1].str())
+    end) )
+    for lvl = 1 to 5
+        tooltip.setNormalString(false, lvl, "Engulfs the Destroyer in flames, dealing {0}{I0} damage per second to nearby enemies and the Destroyer himself. Heroes take double damage. Also increases the Destroyer's attack speed by {1}%.|nDrains mana until deactivated.".format(
+            IMMOLATION_DAMAGE[lvl-1].str(),
+            IMMOLATION_ATTACK_SPEED[lvl-1].str()))
+    tooltip.setReplaceIntelligence(IMMOLATION_DAMAGE_BONUS)
+    heroType.addDynamicTooltipIntelligence(tooltip)
+
+    DynamicTooltip tooltip = new DynamicTooltip(ABILITY_WILD_RAGE)
+    tooltip.setLearnString("Marks the target enemy unit as his prey. The Destroyer will have increased movmement speed when moving towards the prey. Every attack against the prey deals bonus damage and slows the prey. Lasts {0} seconds.".format(PREY_DURATION.toExactString()), (int lvl) -> (begin
         return "{0} damage, {1}% movement speed".format(
             PREY_BONUS_DAMAGE[lvl-1].str(),
             PREY_MOVE_SPEED[lvl-1].str())
     end) )
     
     for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, "Marks the target enemy unit as his prey. The target will be revealed, the Destroyer will deal {1} bonus damage against the target and have move {2}% faster when moving towards the target. Lasts {0} seconds.".format(
+        tooltip.setNormalString(true, lvl, "Marks the target enemy unit as his prey. The Destroyer will have move {2}% faster when moving towards the prey. Every attack against the prey deals {0} bonus damage and slows the prey. Lasts {0} seconds.".format(
             PREY_DURATION.str(),
             PREY_BONUS_DAMAGE[lvl-1].str(),
             PREY_MOVE_SPEED[lvl-1].str())
         )
     tooltip.setReplaceIntelligence(0)
-    heroType.addDynamicTooltipIntelligence(tooltip)
-
-    tooltip = new DynamicTooltip(ABILITY_IMMOLATION)
-    tooltip.setLearnString("Engulfs the Destroyer in flames, damaging nearby enemies and the Destroyer himself. Also increases the Destroyer's attack speed.|nDrains mana until deactivated.", (int lvl) -> (begin
-        return "{0}{I0} damage per second, {1}% attack speed.".format(
-        IMMOLATION_DAMAGE[lvl-1].str(),
-        IMMOLATION_ATTACK_SPEED[lvl-1].str())
-    end) )
-    for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, "Engulfs the Destroyer in flames, dealing {0}{I0} damage per second to nearby enemies and the Destroyer himself. Also increases the Destroyer's attack speed by {1}%.|nDrains mana until deactivated.".format(
-            IMMOLATION_DAMAGE[lvl-1].str(),
-            IMMOLATION_ATTACK_SPEED[lvl-1].str()))
-    tooltip.setReplaceIntelligence(IMMOLATION_DAMAGE_BONUS)
-    heroType.addDynamicTooltipIntelligence(tooltip)
-
-    tooltip = new DynamicTooltip(ABILITY_WILD_RAGE)
-    tooltip.setLearnString("Increases the Destroyer's attack damage and heals the Destroyer for {0}% of the damage he deals, but deals damage to the Destroyer over time. Lasts {1}{I0} seconds.".format((RAGE_LIFE_STEAL*100).str(), RAGE_DURATION.toExactString()), (int lvl) -> (begin
-        return "{0} bonus attack damage, {1} damage per second.".format(
-        RAGE_DAMAGE_BONUS[lvl-1].toString(), RAGE_SELF_DAMAGE[lvl-1].toExactString())
-    end) )
-    
-    for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, "Increases the Destroyer's attack damage by {0} and heals the Destroyer for {2}% of the damage he deals, but deals {1} damage per second to the Destroyer. Lasts {3}{I0} seconds.".format(
-            RAGE_DAMAGE_BONUS[lvl-1].toString(), RAGE_SELF_DAMAGE[lvl-1].toExactString(), (RAGE_LIFE_STEAL*100).str(), RAGE_DURATION.toExactString()
-            ))
-    tooltip.setReplaceIntelligence(RAGE_DURATION_BONUS)
     heroType.addDynamicTooltipIntelligence(tooltip)
 
 function initHeroType()
@@ -339,6 +389,19 @@ function initHeroType()
             ..addItem(ITEM_ID_CURSED_SWORD)
 
         var abilityList = new LinkedList<int>
+        ..add(BREATH_ABILITY_ID)
+        buffMeltingBreath = new BuffType(false, true)
+        buffMeltingBreath.setup(abilityList, BREATH_BUFF_ID)
+
+        buffMeltingBreath.addFirstFunction( (Buff whichBuff) -> (begin
+            whichBuff.getTarget().wrapper().addStatRelativeBonus(Stat.AR, -BREATH_ARMOR_REDUCTION[whichBuff.getLevel()-1] * 10)
+        end))
+
+        buffMeltingBreath.addEndFunction( (Buff whichBuff) -> (begin
+            whichBuff.getTarget().wrapper().addStatRelativeBonus(Stat.AR, BREATH_ARMOR_REDUCTION[whichBuff.getLevel()-1] * 10)
+        end))
+
+        abilityList = new LinkedList<int>
         ..add(PREY_TARGET_ABILITY_ID)
         buffPreyTarget = new BuffType(false, true)
         buffPreyTarget.setup(abilityList, PREY_TARGET_BUFF_ID)
@@ -385,17 +448,14 @@ function initHeroType()
                 whichBuff.setData(1)
                 caster.wrapper().addStatRelativeBonus(Stat.MS, PREY_MOVE_SPEED[level-1]*10)
 
-            target.wrapper().incReveal()
         end))
 
         buffPreyTarget.addEndFunction( (Buff whichBuff) -> (begin
             let caster = whichBuff.getCaster()
-            let target = whichBuff.getTarget()
             let level = whichBuff.getLevel()
             if whichBuff.getData()==1
                 caster.wrapper().addStatRelativeBonus(Stat.MS, -PREY_MOVE_SPEED[level-1]*10)
 
-            target.wrapper().decReveal()
             let casterBuff = BuffList.getBuffOfType(caster, buffPreyCaster)
             if casterBuff!= null
                 casterBuff.dispel()
@@ -405,6 +465,19 @@ function initHeroType()
         ..add(PREY_CASTER_ABILITY_ID)
         buffPreyCaster = new BuffType(true, true)
         buffPreyCaster.setup(abilityList, PREY_CASTER_BUFF_ID)
+
+        abilityList = new LinkedList<int>
+        ..add(PREY_SLOW_ABILITY_ID)
+        buffPreySlow = new BuffType(true, true)
+        buffPreySlow.setup(abilityList, PREY_SLOW_BUFF_ID)
+
+        buffPreySlow.addFirstFunction( (Buff whichBuff) -> (begin
+            whichBuff.getTarget().wrapper().addStatRelativeBonus(Stat.MS, -PREY_SLOW * 10)
+        end))
+
+        buffPreySlow.addEndFunction( (Buff whichBuff) -> (begin
+            whichBuff.getTarget().wrapper().addStatRelativeBonus(Stat.MS, PREY_SLOW * 10)
+        end))
 
         buffImmolation = new BuffType(true, true)
         buffImmolation.setPeriodicTime(0.2)
@@ -426,7 +499,7 @@ function initHeroType()
             if heroDestroyer.hasAbility(IMMOLATION_BUFF_ID)
                 let dmg = IMMOLATION_DAMAGE[level-1].bonus(heroDestroyer.getInt(), IMMOLATION_DAMAGE_BONUS) * 0.2
                 //use hp to not trigger damage event
-                heroDestroyer.addHP(-(dmg.reduceMagic(heroDestroyer.getInt())))
+                heroDestroyer.addHP(-(2 * dmg.reduceMagic(heroDestroyer.getWp())))
                 group g = CreateGroup()
                 g.enumUnitsInRange(heroDestroyer.getPos(), 250)
                 while true
@@ -435,7 +508,10 @@ function initHeroType()
                         break
                     g.removeUnit(u)
                     if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(owner, false, true)
-                        heroDestroyer.dealDamage(u, dmg, ReductionType.MAGIC)
+                        if u.isType(UNIT_TYPE_HERO)
+                            heroDestroyer.dealDamage(u, 2 * dmg, ReductionType.MAGIC)
+                        else
+                            heroDestroyer.dealDamage(u, dmg, ReductionType.MAGIC)
             else
                 whichBuff.dispel()
         end))
@@ -460,6 +536,8 @@ function initHeroType()
             heroDestroyer.wrapper().addStatAbsoluteBonus(Stat.AD, -RAGE_DAMAGE_BONUS[whichBuff.getLevel()-1])
         end))
 
+
+        addOnDamageFunc( Condition (function onDamage))
     
 init
     
