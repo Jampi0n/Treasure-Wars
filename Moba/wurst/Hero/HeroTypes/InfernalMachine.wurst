@@ -461,14 +461,14 @@ function setupTooltips()
         return "{0}{I0} initial damage, {1}{I1} damage per second for {2} seconds.".format(
             FLAME_THROWER_DAMAGE[lvl-1].str(),
             FLAME_THROWER_DOT[lvl-1].str(),
-            FLAME_THROWER_DURATION[lvl-1].str()
+            FLAME_THROWER_DURATION[lvl-1].toExactString()
         )
     end) )
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, "Launches a fiery missile at the target location that deals {0}{I0} initial damage and ignites the targets, dealing {1}{I1} damage per second for {2} seconds.".format(
             FLAME_THROWER_DAMAGE[lvl-1].str(),
             FLAME_THROWER_DOT[lvl-1].str(),
-            FLAME_THROWER_DURATION[lvl-1].str()
+            FLAME_THROWER_DURATION[lvl-1].toExactString()
         ))
     tooltip.setReplaceIntelligence(FLAME_THROWER_DAMAGE_BONUS, FLAME_THROWER_DOT_BONUS)
     heroType.addDynamicTooltipIntelligence(tooltip)
