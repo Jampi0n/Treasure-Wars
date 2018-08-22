@@ -133,6 +133,7 @@ public class UnitWrapper
         if uType != null
             statBaseValue[Stat.AD.toInt()] = uType.getBaseAttack() + uType.getUpgradeAttack(this.assocUnit.getOwner())
             statBaseValue[Stat.AR.toInt()] = uType.getBaseArmor() + uType.getUpgradeArmor(this.assocUnit.getOwner())
+            statBaseValue[Stat.HP.toInt()] = (uType.getBaseHp() * ( 1 + 0.2 * uType.getUpgradeArmorCount(this.assocUnit.getOwner()))).round()
             //willpower is same as armor
             statBaseValue[Stat.AGI.toInt()] = uType.getBaseArmor() + uType.getUpgradeArmor(this.assocUnit.getOwner())
 
