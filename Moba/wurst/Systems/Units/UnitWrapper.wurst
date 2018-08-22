@@ -98,6 +98,8 @@ public class UnitWrapper
 
         let uType = UnitType.getUnitType(this.assocUnit.getTypeId())
 
+        statBaseValue[Stat.HP.toInt()] = this.assocUnit.getMaxHP().toInt()
+
         if uType != null
             updateBaseStatsUnits()
         else if this.assocUnit.isType(UNIT_TYPE_HERO)
@@ -114,7 +116,6 @@ public class UnitWrapper
 
         statBaseValue[Stat.AS.toInt()] = 0 //not needed as this is always a relative bonus
         
-        statBaseValue[Stat.HP.toInt()] = this.assocUnit.getMaxHP().toInt()
         statBaseValue[Stat.HR.toInt()] = 0
         
         statBaseValue[Stat.MP.toInt()] = this.assocUnit.getMaxMana().toInt()
@@ -133,9 +134,10 @@ public class UnitWrapper
         if uType != null
             statBaseValue[Stat.AD.toInt()] = uType.getBaseAttack() + uType.getUpgradeAttack(this.assocUnit.getOwner())
             statBaseValue[Stat.AR.toInt()] = uType.getBaseArmor() + uType.getUpgradeArmor(this.assocUnit.getOwner())
-            statBaseValue[Stat.HP.toInt()] = (uType.getBaseHp() * ( 1 + 0.2 * uType.getUpgradeArmorCount(this.assocUnit.getOwner()))).round()
+            statBaseValue[Stat.HP.toInt()] = uType.getBaseHp() //(uType.getBaseHp() * ( 1 + 0.1 * uType.getUpgradeArmorCount(this.assocUnit.getOwner()))).round()
             //willpower is same as armor
             statBaseValue[Stat.AGI.toInt()] = uType.getBaseArmor() + uType.getUpgradeArmor(this.assocUnit.getOwner())
+            this.addStatAbsoluteBonus(Stat.HP, 0)
 
     function updateBaseStatsHero()
         if not this.assocUnit.isType(UNIT_TYPE_HERO)
