@@ -16,7 +16,7 @@ function itemEnchantedArmor(int itemId)
     int intel = 20
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} mana points|n+ {1} intelligence|n+ {2} hit points|n+ {3} armor".format(
+            ..setDescription("+ {0} mana points\n+ {1} intelligence\n+ {2} hit points\n+ {3} armor".format(
                 mp.toString(), intel.toString(), hp.toString(), ar.toString()
             ))
             ..setGoldCost(3950)
@@ -36,7 +36,7 @@ function itemEmeraldPendant(int itemId)
     int killMana = 25 //trigger
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} mana points|n +{1} hit points|nRestores {2} mana points per kill.".format(
+            ..setDescription("+ {0} mana points\n +{1} hit points|nRestores {2} mana points per kill.".format(
                 mp.toString(), hp.toString(), killMana.toString()
             ))
             ..setGoldCost(3500)
@@ -69,7 +69,7 @@ function itemRingOfDarkness(int itemId)
     int voidExplosion = 30 //trigger
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} intelligence|n+ {1} mana point regeneration per 10 seconds|nAttacks deal {2} additional void damage.|nRestores {3} mana points everytime you are attacked.|nKilling a unit creates a void explosion, dealing {4} damage to neaby enemies.".format(
+            ..setDescription("+ {0} intelligence\n+ {1} mana point regeneration per 10 seconds|nAttacks deal {2} additional void damage.|nRestores {3} mana points everytime you are attacked.|nKilling a unit creates a void explosion, dealing {4} damage to neaby enemies.".format(
                 intel.toString(), mr.toString(), voidDmg.toString(), mp.toString(), voidExplosion.toString()
             ))
             ..setGoldCost(3700)
@@ -120,7 +120,7 @@ function itemBlessedGoblet(int itemId)
     int mr = 1 //trigger ^
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} hit points|n+ {1} mana points|nRegenerates {2}% of your missing mana per second.".format(
+            ..setDescription("+ {0} hit points\n+ {1} mana points|nRegenerates {2}% of your missing mana per second.".format(
                 hp.toString(), mp.toString(), mr.toString()
             ))
             ..setGoldCost(4000)
@@ -191,7 +191,7 @@ function itemWandOfBlood(int itemId)
     int lifesteal = 8 // -> onAttack
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} intelligence|n+ {1} hit points|n+ {2} hit point regeneration per 10 seconds|nDealing damage restores hit points equal to {3}% of the damage dealt.|nThis effect does not stack.".format(
+            ..setDescription("+ {0} intelligence\n+ {1} hit points\n+ {2} hit point regeneration per 10 seconds|nDealing damage restores hit points equal to {3}% of the damage dealt.|nThis effect does not stack.".format(
                 intel.toString(), hp.toString(), hr.toString(), lifesteal.toString()
             ))
             ..setGoldCost(3650)
@@ -212,7 +212,7 @@ function itemArcaneBlade(int itemId)
     int manaFactor = 5
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} mana points|n+ {1}% attack speed|nDeals {2} + {3}% of your current mana as magic damage.|nThis effect does not stack.".format(
+            ..setDescription("+ {0} mana points\n+ {1}% attack speed|nDeals {2} + {3}% of your current mana as magic damage.|nThis effect does not stack.".format(
                 mp.toString(), as.toString(), dmg.toString(), manaFactor.toString()
             ))
             ..setGoldCost(3800)
@@ -239,7 +239,7 @@ function itemVampiricGoblet(int itemId)
     int killMana = 30 //trigger
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} mana points|n +{1} hit point|n+ {2} intelligence|nRestores {3} mana points per kill.|nDealing damage against heroes restores {4}% of the damage dealt as hitpoints and {5}% as mana points.|nThis effect does not stack.".format(
+            ..setDescription("+ {0} mana points\n +{1} hit point\n+ {2} intelligence|nRestores {3} mana points per kill.|nDealing damage against heroes restores {4}% of the damage dealt as hitpoints and {5}% as mana points.|nThis effect does not stack.".format(
                 mp.toString(), hp.toString(), intel.toString(), killMana.toString(), hpFactor.toString(), manaFactor.toString()
             ))
             ..setGoldCost(4750)
@@ -271,7 +271,7 @@ function itemVoidArmor(int itemId)
     int dmgReduction = 10 // -> onAttack
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} mana points|n+ {1} hit points|n+ {2} armor|n+ {3} willpower|nReduces incoming damage by {4}% and converts it into mana for the hero.|nThis effect does not stack.".format(
+            ..setDescription("+ {0} mana points\n+ {1} hit points\n+ {2} armor\n+ {3} willpower|nReduces incoming damage by {4}% and converts it into mana for the hero.|nThis effect does not stack.".format(
                 mp.toString(), hp.toString(), ar.toString(), wp.toString(), dmgReduction.toString()
             ))
             ..setGoldCost(4250)
@@ -290,7 +290,7 @@ function itemArcaneShield(int itemId)
     int deBuffReduction = 15 // -> General
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} hit points|n+ {1} willpower|nMost negative buffs last {2}% shorter.".format(
+            ..setDescription("+ {0} hit points\n+ {1} willpower|nMost negative buffs last {2}% shorter.".format(
                 hp.toString(), wp.toString(), deBuffReduction.toString()
             ))
             ..setGoldCost(3800)
@@ -342,7 +342,7 @@ function itemBracerOfPower(int itemId)
     int bonus = 15 //trigger -> General
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} hit points|n+ {1} mana points|n+ {2} hit point regeneration per 10 seconds|n+ {3} mana point regeneration per 10 seconds|nIncreases all incoming effects that restore hit points or mana points by {4}%.".format(
+            ..setDescription("+ {0} hit points\n+ {1} mana points\n+ {2} hit point regeneration per 10 seconds\n+ {3} mana point regeneration per 10 seconds|nIncreases all incoming effects that restore hit points or mana points by {4}%.".format(
                 hp.toString(), mp.toString(), hr.toString(), mr.toString(), bonus.toString()
             ))
             ..setGoldCost(3700)

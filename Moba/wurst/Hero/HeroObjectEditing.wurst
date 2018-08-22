@@ -26,7 +26,7 @@ PQWER
 
 */
 
-public constant CHANNELING_SPELL = "|cffffcc00Channeling Spell:|r|n"
+public constant CHANNELING_SPELL = "|cffffcc00Channeling Spell:|r\n"
 
 public constant C_STR = color(255, 187, 102)
 public constant C_INT = color(102, 187, 255)
@@ -42,23 +42,23 @@ public function int.str() returns string
         return this.toString()
 
 public function AbilityDefinition.setLearnString(string intro, LevelString levelString)
-    string learnString = intro+"|n"
+    string learnString = intro+"\n"
     for i = 1 to 5
         learnString += getLevelString(i) + levelString.getString(i)
 
-    this.setTooltipLearnExtended(learnString +"|n ")
+    this.setTooltipLearnExtended(learnString +"\n ")
 
     destroy levelString
 
 
 public function AbilityDefinition.setDescriptionString(boolean showCooldown, int lvl, string description)
     if showCooldown
-        this.setTooltipNormalExtended(lvl, description+ "|n" + "Cooldown: " + "<" + this.getNewId().toRawCode() + ",Cool"+lvl.toString()+">" + "|n ")
+        this.setTooltipNormalExtended(lvl, description+ "\n" + "Cooldown: " + "<" + this.getNewId().toRawCode() + ",Cool"+lvl.toString()+">" + "\n ")
     else
-        this.setTooltipNormalExtended(lvl, description+ "|n ")
+        this.setTooltipNormalExtended(lvl, description+ "\n ")
 
 public function getLevelString(int level) returns string
-    return " |n|cffffcc00Level "+level.toString()+"|r - "
+    return " \n|cffffcc00Level "+level.toString()+"|r - "
 
 public function int.getBonusString() returns string
     if(this==0)
@@ -274,13 +274,13 @@ public class DynamicTooltip
 
 
     function setLearnString(string intro, LevelString levelString)
-        this.learnString = intro + "|n"
+        this.learnString = intro + "\n"
 
         for i = 1 to 5
             this.learnString += getLevelString(i) + levelString.getString(i)
 
         destroy levelString
-        this.learnString += "|n "
+        this.learnString += "\n "
 
     function evaluateLearnString(unit whichUnit) returns string
         return this.learnString.evaluateBonus(replaceStrength, whichUnit.getStr(), replaceIntelligence, whichUnit.getInt())
@@ -289,18 +289,18 @@ public class DynamicTooltip
         this.normalString[level-1] = normalString
 
         if showCooldown
-            this.normalString[level - 1] += "|n" + "Cooldown: " + "<" + this.getAbilityTypeId().toRawCode() + ",Cool"+level.toString()+">" + "|n "
+            this.normalString[level - 1] += "\n" + "Cooldown: " + "<" + this.getAbilityTypeId().toRawCode() + ",Cool"+level.toString()+">" + "\n "
         else
-            this.normalString[level - 1] += "|n "
+            this.normalString[level - 1] += "\n "
 
     function setTurnOffString(boolean showCooldown, int level, string turnOffString)
         this.useTurnOff = true
         this.turnOffString[level-1] = turnOffString
 
         if showCooldown
-            this.turnOffString[level - 1] += "|n" + "Cooldown: " + "<" + this.getAbilityTypeId().toRawCode() + ",Cool"+level.toString()+">" + "|n "
+            this.turnOffString[level - 1] += "\n" + "Cooldown: " + "<" + this.getAbilityTypeId().toRawCode() + ",Cool"+level.toString()+">" + "\n "
         else
-            this.turnOffString[level - 1] += "|n "
+            this.turnOffString[level - 1] += "\n "
 
     function evaluateNormalString(unit whichUnit) returns string
         let lvl = whichUnit.getAbilityLevel(this.abilityTypeId)

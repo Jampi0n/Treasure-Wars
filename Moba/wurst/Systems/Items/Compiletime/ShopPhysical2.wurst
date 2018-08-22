@@ -58,7 +58,7 @@ function itemHeavyBoots(int itemId)
     int hp = 225
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+{1} armor|n+ {2} hit points|n+ {0} movement speed|nMovement speed bonus from boots does not stack.".format(
+            ..setDescription("+{1} armor\n+ {2} hit points\n+ {0} movement speed|nMovement speed bonus from boots does not stack.".format(
                 ms.toString(), ar.toString(), hp.toString()
             ))
             ..setGoldCost(2400)
@@ -84,7 +84,7 @@ function itemSpikedMail(int itemId)
     int spikeDmg = 20
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} armor|n+ {1} hit points|nEnemies attacking the hero will take {2} damage.".format(
+            ..setDescription("+ {0} armor\n+ {1} hit points|nEnemies attacking the hero will take {2} damage.".format(
                 ar.toString(), hp.toString(), spikeDmg.toString()
             ))
             ..setGoldCost(1800)
@@ -105,7 +105,7 @@ function itemHeavyArmor(int itemId)
     int hp = 260
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} armor|n+ {1} hit points".format(
+            ..setDescription("+ {0} armor\n+ {1} hit points".format(
                 ar.toString(), hp.toString()
             ))
             ..setGoldCost(1850)
@@ -159,7 +159,7 @@ function itemSteelArmor(int itemId)
     int hp = 115
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} armor|n+ {1} willpower|n+ {2} hit points".format(
+            ..setDescription("+ {0} armor\n+ {1} willpower\n+ {2} hit points".format(
                 ar.toString(), wp.toString(), hp.toString()
             ))
             ..setGoldCost(1700)
@@ -335,7 +335,7 @@ function itemHeavyHelmet(int itemId)
     int hr = 50
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} armor|n+ {1} hit point regeneration per 10 seconds".format(
+            ..setDescription("+ {0} armor\n+ {1} hit point regeneration per 10 seconds".format(
                 ar.toString(), hr.toString()
             ))
             ..setGoldCost(1600)
@@ -351,7 +351,7 @@ function itemRavenSword(int itemId)
     int str = 15
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} strength|n+ {1}% attack speed|nDeals {2} additional void damage.".format(
+            ..setDescription("+ {0} strength\n+ {1}% attack speed|nDeals {2} additional void damage.".format(
                 str.toString(), as.toString(), voidDmg.toString()
             ))
             ..setGoldCost(1900)

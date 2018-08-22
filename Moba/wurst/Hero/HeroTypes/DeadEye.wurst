@@ -120,7 +120,7 @@ function boneBrothers()
     real array COOLDOWN = [18, 15, 12, 9, 6]
     real array RANGE = [600, 700, 800, 900, 1000]
 
-    string learnString = "Switches position with one of his skeletons.|n"
+    string learnString = "Switches position with one of his skeletons.\n"
     for lvl = 1 to 5
         learnString+=getLevelString(lvl)+
         "{0} range, {1} seconds cooldown.".format( RANGE[lvl-1].str(), COOLDOWN[lvl-1].str() )

@@ -66,7 +66,7 @@ function itemFirehandGauntlets(int itemId)
     int as = 18
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} armor|n+ {1}% attack speed|n+ {2} hit points|n+ {3} mana points|nAttacks deal {4} additional magic damage.".format(
+            ..setDescription("+ {0} armor\n+ {1}% attack speed\n+ {2} hit points\n+ {3} mana points|nAttacks deal {4} additional magic damage.".format(
                 ar.toString(), as.toString(), hp.toString(), mp.toString(), magicDmg.toString()
             ))
             ..setGoldCost(4150)
@@ -92,7 +92,7 @@ function itemSpikedArmor(int itemId)
     int spikeDmg = 32
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} armor|n+ {1} hit points|nEnemies attacking the hero will take {2} damage.".format(
+            ..setDescription("+ {0} armor\n+ {1} hit points|nEnemies attacking the hero will take {2} damage.".format(
                 ar.toString(), hp.toString(), spikeDmg.toString()
             ))
             ..setGoldCost(4100)
@@ -117,7 +117,7 @@ function itemCursedSword(int itemId)
     int as = 20
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} strength|n+ {1}% attack speed|nDeals {2}% of the target's maximum health as void damage.|nThis effect does not stack.|nRestores {3} hit points and {4} mana points per kill.".format(
+            ..setDescription("+ {0} strength\n+ {1}% attack speed|nDeals {2}% of the target's maximum health as void damage.|nThis effect does not stack.|nRestores {3} hit points and {4} mana points per kill.".format(
                 str.toString(), as.toString(), voidDmg.toString(), hp.toString(), mana.toString()
             ))
             ..setGoldCost(4300)
@@ -153,7 +153,7 @@ function itemArmorOfCourage(int itemId)
     int hp = 375
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} armor|n+ {1} willpower|n+ {2} hit points".format(
+            ..setDescription("+ {0} armor\n+ {1} willpower\n+ {2} hit points".format(
                 ar.toString(), wp.toString(), hp.toString()
             ))
             ..setGoldCost(3950)
@@ -172,7 +172,7 @@ function itemHelmetOfJustice(int itemId)
     int hr = 60
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} intelligence|n+ {1} armor|n+ {2} hit point regeneration per 10 seconds|nRestores {3} mana points per kill.".format(
+            ..setDescription("+ {0} intelligence\n+ {1} armor\n+ {2} hit point regeneration per 10 seconds|nRestores {3} mana points per kill.".format(
                 intel.toString(), ar.toString(), hr.toString(), killMana.toString()
             ))
             ..setGoldCost(4050)
@@ -200,7 +200,7 @@ function itemInfernalBow(int itemId)
     int hp = 200
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} strength|n+ {1} hit points|n+ {2} mana points|nDeals {3} additional magic damage.".format(
+            ..setDescription("+ {0} strength\n+ {1} hit points\n+ {2} mana points|nDeals {3} additional magic damage.".format(
                 str.toString(), hp.toString(), mp.toString(), magicDmg.toString()
             ))
             ..setGoldCost(3800)
@@ -224,7 +224,7 @@ function itemRunicArmor(int itemId)
     int hp = 350
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} armor|n+ {1} willpower|n+ {2} hit points".format(
+            ..setDescription("+ {0} armor\n+ {1} willpower\n+ {2} hit points".format(
                 ar.toString(), wp.toString(), hp.toString()
             ))
             ..setGoldCost(4150)
@@ -243,7 +243,7 @@ function itemEnchantedBlade(int itemId)
     int mBurn = 10
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} strength|n+ {1}% attack speed|n+ {2} willpower|nAttacks burn {3} mana, dealing damage equal to the mana burned.|nThis effect does not stack.".format(
+            ..setDescription("+ {0} strength\n+ {1}% attack speed\n+ {2} willpower|nAttacks burn {3} mana, dealing damage equal to the mana burned.|nThis effect does not stack.".format(
                 str.toString(), as.toString(), wp.toString(), mBurn.toString()
             ))
             ..setGoldCost(3600)
@@ -327,7 +327,7 @@ function itemHolyShield(int itemId)
     int block = 20 // -> onAttack
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} hit points|n+ {1} armor|n+ {2} willpower|nBlocks {3} damage of incoming attacks.|nActive:|nTurns the hero invulnerable for {4} seconds.".format(
+            ..setDescription("+ {0} hit points\n+ {1} armor\n+ {2} willpower|nBlocks {3} damage of incoming attacks.|nActive:|nTurns the hero invulnerable for {4} seconds.".format(
                 hp.toString(), ar.toString(), wp.toString(), block.toString(), dur.toString()
             ))
             ..setGoldCost(3800)
@@ -362,7 +362,7 @@ function itemSacrificialDagger(int itemId)
     int hr = 30
     if compiletime
         itemId.getTypeDef()
-            ..setDescription(("+ {0} strength|n+ {1}% attack speed|n+ {2} hit point regeneration per 10 seconds|nRestores {3} mana points per kill."+
+            ..setDescription(("+ {0} strength\n+ {1}% attack speed\n+ {2} hit point regeneration per 10 seconds|nRestores {3} mana points per kill."+
             "Attacks restore {4}% of the damage dealt.").format(
                 str.toString(), as.toString(), hr.toString(), mana.toString(), lifesteal.toString()
             ))

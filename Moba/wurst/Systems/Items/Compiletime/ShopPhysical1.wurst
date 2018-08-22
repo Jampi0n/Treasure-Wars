@@ -73,7 +73,7 @@ function itemLeatherArmor(int itemId)
     int hp = 100
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} armor|n+ {1} hit points".format(ar.toString(), hp.toString()))
+            ..setDescription("+ {0} armor\n+ {1} hit points".format(ar.toString(), hp.toString()))
             ..setGoldCost(825)
     else
         itemId.getItem()
@@ -97,7 +97,7 @@ function itemDagger(int itemId)
     int as = 8
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} strength|n+ {1}% attack speed".format(str.toString(), as.toString()))
+            ..setDescription("+ {0} strength\n+ {1}% attack speed".format(str.toString(), as.toString()))
             ..setGoldCost(800)
     else
         itemId.getItem()
