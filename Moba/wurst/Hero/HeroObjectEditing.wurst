@@ -7,6 +7,7 @@ import AbilityObjEditing
 import public ObjectEditingPreset
 import public ObjectIds
 import public ObjectIdGenerator
+import HashMap
 
 /*
 You cannot add learnable abilities to hero with code, it must be done with object data.
@@ -227,15 +228,21 @@ public class DynamicTooltip
     private string learnString
     private boolean useTurnOff
 
+    private static constant idToTooltip = new HashMap<int,DynamicTooltip>
+
     private constant replaceIntelligence = new LinkedList<real>
     private constant replaceStrength = new LinkedList<real>
 
     function getAbilityTypeId() returns int
         return this.abilityTypeId
 
+    static function getDynamicTooltip(int abilityTypeId) returns DynamicTooltip
+        return idToTooltip.get(abilityTypeId)
+
     construct(int abilityTypeId)
         this.abilityTypeId = abilityTypeId
         this.useTurnOff = false
+        idToTooltip.put(abilityTypeId, this)
 
     function getUseTurnOff() returns boolean
         return this.useTurnOff

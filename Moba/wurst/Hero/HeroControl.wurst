@@ -430,5 +430,37 @@ public class Hero
         this.reviveTimer.release()
 
         
+function displayTooltip(int pId, AbilitySlot slot)
+    let hero = Hero.getHero(pId)
+    if hero != null
+        let abilityTypeId = hero.getHeroType().getAbilityId(slot)
+        let tooltip = DynamicTooltip.getDynamicTooltip(abilityTypeId)
+        if tooltip != null
+            printTimedToPlayer("\n\n"+ GetObjectName(abilityTypeId) + "\n" + tooltip.evaluateLearnString(hero.toUnit())+"\n", 20, players[pId])
+        else
+            printTimedToPlayer("this skill does not have a dynamic tooltip; read the skill description instead", 5, players[pId])
 init
     Hero.classInit()
+
+    for i = HERO_PLAYER_TEAM_1_FIRST to HERO_PLAYER_TEAM_2_LAST
+        CreateTrigger()
+            ..registerPlayerChatEvent(players[i], "-q", true)
+            ..addAction() ->
+                displayTooltip(GetTriggerPlayer().getId(), AbilitySlot.Q)
+        CreateTrigger()
+            ..registerPlayerChatEvent(players[i], "-w", true)
+            ..addAction() ->
+                displayTooltip(GetTriggerPlayer().getId(), AbilitySlot.W)
+        CreateTrigger()
+            ..registerPlayerChatEvent(players[i], "-e", true)
+            ..addAction() ->
+                displayTooltip(GetTriggerPlayer().getId(), AbilitySlot.E)
+        CreateTrigger()
+            ..registerPlayerChatEvent(players[i], "-r", true)
+            ..addAction() ->
+                displayTooltip(GetTriggerPlayer().getId(), AbilitySlot.R)
+        CreateTrigger()
+            ..registerPlayerChatEvent(players[i], "-p", true)
+            ..addAction() ->
+                displayTooltip(GetTriggerPlayer().getId(), AbilitySlot.PASSIVE)
+                
