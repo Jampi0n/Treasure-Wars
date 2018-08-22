@@ -14,7 +14,7 @@ function itemSkullPendant(int itemId)
     int killMana = 15 //trigger
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} mana points|n +{1} hit points|nRestores {2} mana points per kill.".format(
+            ..setDescription("+ {0} mana points\n +{1} hit points|nRestores {2} mana points per kill.".format(
                 mp.toString(), hp.toString(), killMana.toString()
             ))
             ..setGoldCost(2100)
@@ -43,7 +43,7 @@ function itemVisionWard(int itemId)
     if compiletime
 
         itemId.getTypeDef()
-            ..setDescription("+ {0} mana points|n+ {1} hit points|n+ {2} intelligence|nAttacks drain {3} mana from the target.|nActive:|nSummons an invulnerable and immovable ward that provides vision in an area.".format(
+            ..setDescription("+ {0} mana points\n+ {1} hit points\n+ {2} intelligence|nAttacks drain {3} mana from the target.|nActive:|nSummons an invulnerable and immovable ward that provides vision in an area.".format(
                 mp.toString(), hp.toString(), intel.toString(), mana.toString()
             ))
             ..setGoldCost(3450)
@@ -98,7 +98,7 @@ function itemGhostHood(int itemId)
     int wp = 16
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} mana points|n+ {1} hit points|n+ {2} armor|n+ {3} willpower".format(
+            ..setDescription("+ {0} mana points\n+ {1} hit points\n+ {2} armor\n+ {3} willpower".format(
                 mp.toString(), hp.toString(), ar.toString(), wp.toString()
             ))
             ..setGoldCost(1825)
@@ -140,7 +140,7 @@ function itemFrostRing(int itemId)
     int mr = 20
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} mana points|n+ {1} mana point regeneration per 10 seconds".format(
+            ..setDescription("+ {0} mana points\n+ {1} mana point regeneration per 10 seconds".format(
                 mp.toString(), mr.toString()
             ))
             ..setGoldCost(1900)
@@ -185,7 +185,7 @@ function itemBootsOfDarkness(int itemId)
     int intelFactor = 12
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} movement speed|n+ {1}% intelligence|nAttacks deal {2} additional void damage.|nMovement speed bonus from boots does not stack.".format(
+            ..setDescription("+ {0} movement speed\n+ {1}% intelligence|nAttacks deal {2} additional void damage.|nMovement speed bonus from boots does not stack.".format(
                 ms.toString(), intelFactor.toString(), voidDmg.toString()
             ))
             ..setGoldCost(2400)
@@ -216,7 +216,7 @@ function itemMagmaCrystal(int itemId)
     int magicDmg = 20
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} hit points|n+ {1} mana points|nAttacks deal {2} additional magic damage.".format(
+            ..setDescription("+ {0} hit points\n+ {1} mana points|nAttacks deal {2} additional magic damage.".format(
                 hp.toString(), mp.toString(), magicDmg.toString()
             ))
             ..setGoldCost(1750)
@@ -264,7 +264,7 @@ function itemAncientStoneTablet(int itemId)
     int wp = 25
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} hit points|n+ {1} willpower".format(
+            ..setDescription("+ {0} hit points\n+ {1} willpower".format(
                 hp.toString(), wp.toString()
             ))
             ..setGoldCost(1800)
@@ -281,7 +281,7 @@ function itemBattlemageArmor(int itemId)
     int ar = 15
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} mana points|n+ {1} hit points|n+ {2} armor".format(
+            ..setDescription("+ {0} mana points\n+ {1} hit points\n+ {2} armor".format(
                 mp.toString(), hp.toString(), ar.toString()
             ))
             ..setGoldCost(1700)

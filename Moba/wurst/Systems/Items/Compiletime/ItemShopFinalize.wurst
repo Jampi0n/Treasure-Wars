@@ -132,7 +132,7 @@ function sortShops()
 function createItemDescritptions()
     for i = 0 to compCurrentItemId
         if compItemIsRecipe[i]
-            string recipeDesc = "|n|n|cffffcc00Requires:|r"
+            string recipeDesc = "\n\n|cffffcc00Requires:|r"
             string requiredItems = compItemRequiredItems[i]
             let requiredItemList = stringToList(requiredItems, ",")
 
@@ -140,17 +140,17 @@ function createItemDescritptions()
 
                 let buttonPos = " ["+(compItemPosX[j]+1).toString()+","+(compItemPosY[j]+1).toString()+"]"
 
-                recipeDesc += "|n - "+compItemName[j]+" ( "+compItemShopDescription[j] + buttonPos+" )"
+                recipeDesc += "\n - "+compItemName[j]+" ( "+compItemShopDescription[j] + buttonPos+" )"
 
             destroy requiredItemList
 
 
 
             compItemDefinition[i].setDescription(compItemDesc[i-1] + recipeDesc)
-            compItemDefinition[i].setTooltipExtended("Total price: " + compItemGoldCost[i-1].toString() +"|n"+ compItemDesc[i-1] + recipeDesc +"|n ")
+            compItemDefinition[i].setTooltipExtended("Total price: " + compItemGoldCost[i-1].toString() +"\n"+ compItemDesc[i-1] + recipeDesc +"\n ")
         else
             compItemDefinition[i].setDescription(compItemDesc[i])
-            compItemDefinition[i].setTooltipExtended("Price: " + compItemGoldCost[i].toString() +"|n"+ compItemDesc[i] +"|n ")
+            compItemDefinition[i].setTooltipExtended("Price: " + compItemGoldCost[i].toString() +"\n"+ compItemDesc[i] +"\n ")
 
 @compiletime
 public function itemShopFinalize()

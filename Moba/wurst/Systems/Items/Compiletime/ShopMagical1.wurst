@@ -17,7 +17,7 @@ function itemMageAmulet(int itemId)
     int hp = 100
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} mana points|n +{1} hit points".format(mp.toString(), hp.toString()))
+            ..setDescription("+ {0} mana points\n +{1} hit points".format(mp.toString(), hp.toString()))
             ..setGoldCost(825)
     else
         itemId.getItem()
@@ -53,7 +53,7 @@ function itemMageArmor(int itemId)
     int ar = 8
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} mana points|n +{1} hit points|n +{2} armor".format(mp.toString(), hp.toString(), ar.toString()))
+            ..setDescription("+ {0} mana points\n +{1} hit points\n +{2} armor".format(mp.toString(), hp.toString(), ar.toString()))
             ..setGoldCost(800)
     else
         itemId.getItem()
