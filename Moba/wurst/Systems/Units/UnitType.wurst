@@ -15,7 +15,7 @@ public function createUnitType(int baseHp, int unitId, int bounty, int baseAttac
     return unitId
 
 public function createUnitType(int unitId) returns int
-    new UnitType(0, unitId, 0, 0, 0, 0, 0, 0, 0, 32, "")
+    new UnitType(100, unitId, 0, 0, 0, 0, 0, 0, 0, 32, "")
     return unitId
 
 public class UnitType
