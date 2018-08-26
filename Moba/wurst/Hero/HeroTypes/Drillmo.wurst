@@ -170,7 +170,7 @@ function speedBoost()
             ..setAttackSpeedIncrease(lvl, 0)
             ..setDamageTakenIncrease(lvl, 0)
             ..setMovementSpeedIncrease(lvl, 0)
-            ..setBuffs(lvl, SPEED_BOOST_BUFF_ID.toRawCode())
+            //..setBuffs(lvl, SPEED_BOOST_BUFF_ID.toRawCode())
             ..setDurationHero(lvl, 0.01)
             /*..setDescriptionString(true, lvl, "Increases the hero's movement speed by {0}% for {1} seconds.".format(
                 SPEED_BOOST[lvl-1].toString() + SPEED_BOOST_BONUS.getBonusString(C_INT),
@@ -321,6 +321,7 @@ function onSpellCast()
 
     else if spellId == ABILITY_SPEED_BOOST
         caster.addBuff(caster, SPEED_BOOST_DURATION[level-1], buffSpeedBoost, level)
+        caster.removeAbility('Bbsk')
 
 function onDamage()
     let u = GetTriggerUnit()
