@@ -225,6 +225,7 @@ public class DynamicTooltip
     private int abilityTypeId
     private string array[5] normalString
     private string array[5] turnOffString
+    private string array[5] learnLevelString
     private string learnString
     private boolean useTurnOff
 
@@ -278,9 +279,13 @@ public class DynamicTooltip
 
         for i = 1 to 5
             this.learnString += getLevelString(i) + levelString.getString(i)
+            this.learnLevelString[i-1] = levelString.getString(i)
 
         destroy levelString
         this.learnString += "\n "
+
+    function evaluateLearnStringLevel(unit whichUnit, int level) returns string
+        return this.learnLevelString[level-1].evaluateBonus(replaceStrength, whichUnit.getStr(), replaceIntelligence, whichUnit.getInt())
 
     function evaluateLearnString(unit whichUnit) returns string
         return this.learnString.evaluateBonus(replaceStrength, whichUnit.getStr(), replaceIntelligence, whichUnit.getInt())
