@@ -13,16 +13,28 @@ function gameModes()
             )
         ..setIcon(Icons.bTNScroll)
         ..discovered(true)
-    
+
+function commands()
+    CreateQuest()
+        ..setTitle("Commands")
+        ..setDescription(
+            "The characters q,w,e,r and p are used as arguments for skills. Replace [skill] with one of those characters to get information about a skill.\n" +
+            "-[skill] : Shows the tooltip of that skill on the current level\n" +
+            "-[skill]L : Shows the learn tooltip of that skill\n" +
+            "-[skill]x : Shows the tooltip of that skill on level x\n"
+            )
+        ..setIcon(Icons.bTNScroll)
+        ..discovered(true)
+
 function gameMechanics()
     CreateQuest()
         ..setTitle("Game Mechanics")
         ..setDescription(
             "Heroes improve stats by leveling up. Items can also increase stats.\n" +
             "Special Stats:\n\n"+
-            "Strength increases attack damage and improves the power of some abilities. This is indicated by an "+C_STR.toColorString()+"orange|r number telling how much a value is increased per 100 strength.\n\n"+
+            "Strength increases attack damage and improves the power of some abilities. This is indicated by an "+C_STR.toColorString()+"orange|r number telling how much the value is increased with your current strength.\n\n"+
             "Willpower increases your resistance against spell damage and reduces the duration of most negative buffs. Willpower works as armor against spell damage.\n\n"+
-            "Intelligence increases improves the power of some abilities. This is indicated by a "+C_INT.toColorString()+"blue|r number telling how much a value is increased per 100 intelligence.\n\n"
+            "Intelligence increases improves the power of some abilities. This is indicated by a "+C_INT.toColorString()+"blue|r number telling how much the value is increased with your current intelligence.\n\n"
             )
         ..setIcon(Icons.bTNEngineeringUpgrade)
         ..discovered(true)
@@ -48,3 +60,4 @@ init
     gameModes()
     gameMechanics()
     gamePlay()
+    commands()
