@@ -254,7 +254,6 @@ public interface OnAttackFunctionAdvanced
 
 public class OnAttack
 
-    private static trigger onAttackTrigger = CreateTrigger()
     private static constant onAttackFunctionList = new LinkedList<OnAttackFunction>()
     private static constant onAttackFunctionListAdvanced = new LinkedList<OnAttackFunctionAdvanced>()
 
