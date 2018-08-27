@@ -236,7 +236,7 @@ public class HeroType
             this.skillBuild = skillBuild
             
 
-    function updateTooltipsStr(unit whichUnit)
+    function updateTooltipsStr(unit _whichUnit)
         /*for dynamicTooltip in dynamicStrength
             let abilityTypeId = dynamicTooltip.getAbilityTypeId()
             BlzSetAbilityExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateNormalString(whichUnit), whichUnit.getAbilityLevel(abilityTypeId))
@@ -245,7 +245,7 @@ public class HeroType
                 BlzSetAbilityActivatedExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateTurnOffString(whichUnit), whichUnit.getAbilityLevel(abilityTypeId))
         */
 
-    function updateTooltipsInt(unit whichUnit)
+    function updateTooltipsInt(unit _whichUnit)
         /*
         for dynamicTooltip in dynamicIntelligence
             let abilityTypeId = dynamicTooltip.getAbilityTypeId()
