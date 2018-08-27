@@ -308,10 +308,16 @@ public class DynamicTooltip
             this.turnOffString[level - 1] += "\n "
 
     function evaluateNormalString(unit whichUnit) returns string
-        let lvl = whichUnit.getAbilityLevel(this.abilityTypeId)
+        let level = whichUnit.getAbilityLevel(this.abilityTypeId)
         string ret = ""
-        if lvl != 0
-            ret = this.normalString[lvl-1].evaluateBonus(replaceStrength, whichUnit.getStr(), replaceIntelligence, whichUnit.getInt())
+        if level != 0
+            ret = this.normalString[level-1].evaluateBonus(replaceStrength, whichUnit.getStr(), replaceIntelligence, whichUnit.getInt())
+        return ret
+
+    function evaluateNormalStringLevel(unit whichUnit, int level) returns string
+        string ret = ""
+        if level != 0
+            ret = this.normalString[level-1].evaluateBonus(replaceStrength, whichUnit.getStr(), replaceIntelligence, whichUnit.getInt())
         return ret
 
     function evaluateTurnOffString(unit whichUnit) returns string
