@@ -487,14 +487,14 @@ init
     Hero.classInit()
 
     for i = HERO_PLAYER_TEAM_1_FIRST to HERO_PLAYER_TEAM_2_LAST
-        CreateTrigger()
+        /*CreateTrigger()
             ..registerPlayerChatEvent(players[i], "-ql", true)
             ..registerPlayerChatEvent(players[i], "-wl", true)
             ..registerPlayerChatEvent(players[i], "-el", true)
             ..registerPlayerChatEvent(players[i], "-rl", true)
             ..registerPlayerChatEvent(players[i], "-pl", true)
             ..addAction() ->
-                displayTooltip(GetTriggerPlayer().getId(), charToAbilitySlot(GetEventPlayerChatString().substring(1, 2)))
+                displayTooltip(GetTriggerPlayer().getId(), charToAbilitySlot(GetEventPlayerChatString().substring(1, 2)))*/
 
         CreateTrigger()
             ..registerPlayerChatEvent(players[i], "-q", true)
@@ -503,19 +503,22 @@ init
             ..registerPlayerChatEvent(players[i], "-r", true)
             ..registerPlayerChatEvent(players[i], "-p", true)
             ..addAction() ->
+                displayTooltip(GetTriggerPlayer().getId(), charToAbilitySlot(GetEventPlayerChatString().substring(1, 2)))
+            /*
+            ..addAction() ->
                 let slot = charToAbilitySlot(GetEventPlayerChatString().substring(1, 2))
                 let hero = Hero.getHero(GetTriggerPlayer())
                 let abilityTypeId = hero.getHeroType().getAbilityId(slot)
-                displayTooltipLevelFull(GetTriggerPlayer().getId(), slot, hero.toUnit().getAbilityLevel(abilityTypeId))
+                displayTooltipLevelFull(GetTriggerPlayer().getId(), slot, hero.toUnit().getAbilityLevel(abilityTypeId))*/
 
-        CreateTrigger()
+        /*CreateTrigger()
             ..registerPlayerChatEvent(players[i], "-q", false)
             ..registerPlayerChatEvent(players[i], "-w", false)
             ..registerPlayerChatEvent(players[i], "-e", false)
             ..registerPlayerChatEvent(players[i], "-r", false)
             ..registerPlayerChatEvent(players[i], "-p", false)
             ..addAction() ->
-                displayTooltipLevelFull(GetTriggerPlayer().getId(), charToAbilitySlot(GetEventPlayerChatString().substring(1, 2)), S2I(GetEventPlayerChatString().substring(2,3)))
+                displayTooltipLevelFull(GetTriggerPlayer().getId(), charToAbilitySlot(GetEventPlayerChatString().substring(1, 2)), S2I(GetEventPlayerChatString().substring(2,3)))*/
                 
 
                 

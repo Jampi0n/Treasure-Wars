@@ -47,20 +47,20 @@ constant real FIERY_HANDS_DMG_BONUS = 30
 
 @compiletime
 function passive()
-    let aDef = createNoEffectAbiltiy(ABILITY_FIERY_HANDS)
+    createNoEffectAbiltiy(ABILITY_FIERY_HANDS)
         ..setupWithHotKey("Fiery Hands", "D")
         ..setupIcon("PASFierySoul")
-        ..setLearnString("Killing a unit creates a fire explosion, dealing magic damage to nearby targets.", (int lvl) -> (begin
+        /*..setLearnString("Killing a unit creates a fire explosion, dealing magic damage to nearby targets.", (int lvl) -> (begin
             return "{0} damage".format(
                 FIERY_HANDS_DMG[lvl-1].str() + FIERY_HANDS_DMG_BONUS.getBonusString(C_INT)
             )
-        end) )
+        end) )*/
 
-    for lvl = 1 to 5
+    /*for lvl = 1 to 5
         aDef
             ..setDescriptionString(false, lvl, "Killing a unit creates a fire explosion, dealing {0} magic damage to nearby targets.".format(
                 FIERY_HANDS_DMG[lvl-1].str() + FIERY_HANDS_DMG_BONUS.getBonusString(C_INT)
-            ))
+            ))*/
 
 public constant int array BASH_DAMAGE_BONUS = [60, 100, 140, 180, 220]
 constant real array BASH_STUN_DURATION = [1.2, 1.4, 1.6, 1.8, 2]
@@ -133,24 +133,24 @@ function innerFire()
         ..setAnimationNames("spell")
         ..setupIcon(Icons.bTNInnerFire)
         ..setupWithHotKey("Inner Fire", "W")
-        ..setLearnString("Increases nearby units strength, armor and willpower.", (int lvl) -> (begin
+        /*..setLearnString("Increases nearby units strength, armor and willpower.", (int lvl) -> (begin
             return "+{0}% strength, +{1} armor and willpower, {2} seconds".format(
             INNER_FIRE_DMG[lvl-1].str()+INNER_FIRE_DMG_BONUS.getBonusString(C_INT),
             INNER_FIRE_DEF[lvl-1].str()+INNER_FIRE_DEF_BONUS.getBonusString(C_INT),
             INNER_FIRE_DURATION.str()
             )
-        end) )
+        end) )*/
 
     for lvl = 1 to 5
         aDef
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setTargetsAllowed(lvl, "none")
-            ..setDescriptionString(true, lvl, "Increases nearby units' strength by {0}% and armor and willpower by {1} for {2} seconds.".format(
+            /*..setDescriptionString(true, lvl, "Increases nearby units' strength by {0}% and armor and willpower by {1} for {2} seconds.".format(
                 INNER_FIRE_DMG[lvl-1].str()+INNER_FIRE_DMG_BONUS.getBonusString(C_INT),
                 INNER_FIRE_DEF[lvl-1].str()+INNER_FIRE_DEF_BONUS.getBonusString(C_INT),
                 INNER_FIRE_DURATION.str()
-            ))
+            ))*/
 
 constant real array FLAME_THROWER_DAMAGE = [60, 90, 120, 150, 180]
 constant real FLAME_THROWER_DAMAGE_BONUS = 100
@@ -187,13 +187,13 @@ function flameThrower()
         ..setArtTarget("")
         ..setAnimationNames("spell,throw")
         ..setupChannel(TargetType.AREA, "shockwave", 0.5)
-        ..setLearnString("Launches a fiery missile at the target location that deals large initial damage and ignites the targets, dealing additional damage over time.", (int lvl) -> (begin
+        /*..setLearnString("Launches a fiery missile at the target location that deals large initial damage and ignites the targets, dealing additional damage over time.", (int lvl) -> (begin
             return "{0} initial damage, {1} damage per second for {2} seconds.".format(
                 FLAME_THROWER_DAMAGE[lvl-1].str()+FLAME_THROWER_DAMAGE_BONUS.getBonusString(C_INT),
                 FLAME_THROWER_DOT[lvl-1].str()+FLAME_THROWER_DOT_BONUS.getBonusString(C_INT),
                 FLAME_THROWER_DURATION[lvl-1].str()
             )
-        end) )
+        end) )*/
 
     for lvl = 1 to 5
         aDef
@@ -201,11 +201,11 @@ function flameThrower()
             ..setManaCost(lvl, MANA[lvl-1])
             ..setCastRange(lvl, RANGE[lvl-1])
             ..setAreaofEffect(lvl, FLAME_THROWER_AOE[lvl-1])
-            ..setDescriptionString(true, lvl, "Launches a fiery missile at the target location that deals {0} initial damage and ignites the targets, dealing {1} damage per second for {2} seconds.".format(
+            /*..setDescriptionString(true, lvl, "Launches a fiery missile at the target location that deals {0} initial damage and ignites the targets, dealing {1} damage per second for {2} seconds.".format(
                 FLAME_THROWER_DAMAGE[lvl-1].str()+FLAME_THROWER_DAMAGE_BONUS.getBonusString(C_INT),
                 FLAME_THROWER_DOT[lvl-1].str()+FLAME_THROWER_DOT_BONUS.getBonusString(C_INT),
                 FLAME_THROWER_DURATION[lvl-1].str()
-            ))
+            ))*/
 
 constant int array RAPID_FIRE_ATTACK_SPEED = [80, 120, 160, 200, 240]
 constant real RAPID_FIRE_DURATION = 3

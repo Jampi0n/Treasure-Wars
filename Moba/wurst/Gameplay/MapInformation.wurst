@@ -18,10 +18,7 @@ function commands()
     CreateQuest()
         ..setTitle("Commands")
         ..setDescription(
-            "The characters q,w,e,r and p are used as arguments for skills. Replace [skill] with one of those characters to get information about a skill.\n" +
-            "-[skill] : Shows the tooltip of that skill on the current level\n" +
-            "-[skill]L : Shows the learn tooltip of that skill\n" +
-            "-[skill]x : Shows the tooltip of that skill on level x\n"
+            "As of 1.30 the dynamic tooltip feature was partially broken. Please use \"-skill\" where skill is q,w,e,r or p if the skill description is missing the skill learn menu.\n"
             )
         ..setIcon(Icons.bTNScroll)
         ..discovered(true)

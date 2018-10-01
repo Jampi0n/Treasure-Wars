@@ -33,21 +33,21 @@ constant ENVENOMED_BLADES_ABILITY_ID = compiletime(createNegativeBuffAbility(5, 
 
 @compiletime
 function envenomedBlades()
-    let aDef = createNoEffectAbiltiy(ABILITY_ENVENOMED_BLADES)
+    createNoEffectAbiltiy(ABILITY_ENVENOMED_BLADES)
         ..setupIcon("PASPoisonBlades")
         ..setupWithHotKey("Envenomed Blades", "D")
-        ..setLearnString("Attacks deal poison damage every second.", (int lvl) -> (begin
+        /*..setLearnString("Attacks deal poison damage every second.", (int lvl) -> (begin
             return "{0} damage, {1} seconds.".format(
             ENVENOMED_BLADES_DAMAGE[lvl-1].str()+ENVENOMED_BLADES_DAMAGE_BONUS.getBonusString(C_INT), 
             ENVENOMED_BLADES_DURATION[lvl-1].str())
-        end) )
+        end) )*/
 
-    for lvl = 1 to 5
+    /*for lvl = 1 to 5
         aDef
             ..setDescriptionString(false, lvl, "Attacks deal {0} poison damage every second for {1} seconds.".format(
             ENVENOMED_BLADES_DAMAGE[lvl-1].str()+ENVENOMED_BLADES_DAMAGE_BONUS.getBonusString(C_INT), 
             ENVENOMED_BLADES_DURATION[lvl-1].str())
-            )
+            )*/
     
 constant real array MISTWALK_DURATION = [5, 5.5, 6, 6.5, 7]
 constant real MISTWALK_DURATION_BONUS = 4
@@ -179,10 +179,10 @@ function paralyzingStrike()
         ..setLightningEffects("")
         ..setMissileArt("")
         ..setArtTarget("")
-        ..setLearnString("Deals massive magical damage to the target, stunning it and teleports the Python Warriores behind the target.", (int lvl) -> (begin
+        /*..setLearnString("Deals massive magical damage to the target, stunning it and teleports the Python Warriores behind the target.", (int lvl) -> (begin
             return "{0} damage, {1} seconds stun.".format( PARALYZING_STRIKE_DAMAGE[lvl-1].str()+PARALYZING_STRIKE_DAMAGE_BONUS.getBonusString(C_INT),
             PARALYZING_STRIKE_DURATION[lvl-1].toSmartString()+PARALYZING_STRIKE_DURATION_BONUS.getBonusString(C_INT))
-        end) )
+        end) )*/
 
     for lvl = 1 to 5
         aDef
@@ -193,9 +193,9 @@ function paralyzingStrike()
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setTargetsAllowed(lvl, "enemies,ground,neutral,nonancient,organic,hero")
-            ..setDescriptionString(true, lvl, "Deals {0} magical damage to the target, stunning it for {1} seconds and teleports the Python Warriores behind the target.".format(
+            /*..setDescriptionString(true, lvl, "Deals {0} magical damage to the target, stunning it for {1} seconds and teleports the Python Warriores behind the target.".format(
             PARALYZING_STRIKE_DAMAGE[lvl-1].str()+PARALYZING_STRIKE_DAMAGE_BONUS.getBonusString(C_INT),
-            PARALYZING_STRIKE_DURATION[lvl-1].toSmartString()+PARALYZING_STRIKE_DURATION_BONUS.getBonusString(C_INT)))
+            PARALYZING_STRIKE_DURATION[lvl-1].toSmartString()+PARALYZING_STRIKE_DURATION_BONUS.getBonusString(C_INT)))*/
 
 
 
