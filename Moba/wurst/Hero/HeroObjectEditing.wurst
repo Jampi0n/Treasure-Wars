@@ -137,7 +137,7 @@ public function AbilityDefinition.setupIcon(string name)
 public function AbilityDefinition.setTurnOff(string name, string hotkey)
     for i = 1 to 5
         this.setTooltipTurnOff(i, "("+hotkey+") "+name+" - [|cffffcc00Level "+i.toString()+"|r]")
-        this.setTooltipTurnOffExtended(i, "description missing")
+        this.setTooltipTurnOffExtended(i, "Description missing.")
 
 public function AbilityDefinition.setupWithHotKey(string name, string hotkey)
     this.presetHotkey(hotkey)
@@ -151,7 +151,7 @@ public function AbilityDefinition.setupWithHotKey(string name, string hotkey)
     this.setRequirements("")
     this.setCheckDependencies(false)
     this.setTooltipLearn("("+hotkey+")"+" Learn "+name+" - [|cffffcc00Level %d|r]")
-    this.setTooltipLearnExtended("description missing")
+    this.setTooltipLearnExtended("Description missing. Use \"-"+ hotkey +"\" to get the tooltip.")
     for i = 1 to 5
         this.setTooltipNormalExtended(i, "description missing")
         this.setTooltipTurnOffExtended(i, "description missing")
