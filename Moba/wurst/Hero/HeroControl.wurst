@@ -501,7 +501,7 @@ init
             ..registerPlayerChatEvent(players[i], "-w", true)
             ..registerPlayerChatEvent(players[i], "-e", true)
             ..registerPlayerChatEvent(players[i], "-r", true)
-            ..registerPlayerChatEvent(players[i], "-p", true)
+            ..registerPlayerChatEvent(players[i], "-d", true)
             ..addAction() ->
                 displayTooltip(GetTriggerPlayer().getId(), charToAbilitySlot(GetEventPlayerChatString().substring(1, 2)))
             /*

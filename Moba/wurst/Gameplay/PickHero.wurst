@@ -62,7 +62,7 @@ function setupCreatedHero(Hero hero)
     
     heroUnit.setPos(pos)
     //prevent using skills for first 5 seconds, as skills will be initialized
-    printTimedToPlayer("|cffffcc00As of 1.30 the dynamic tooltip feature was partially broken. Please use \"-skill\" where skill is q,w,e,r or p if the skill description is missing the skill learn menu.|r\n", 5, owner)
+    printTimedToPlayer("|cffffcc00As of 1.30 the dynamic tooltip feature was partially broken. Please use \"-skill\" where skill is q,w,e,r or d if the skill description is missing the skill learn menu.|r\n", 5, owner)
     UnitModifySkillPoints(heroUnit, -1)
     
     doAfter(5, -> UnitModifySkillPoints(heroUnit, 1))
