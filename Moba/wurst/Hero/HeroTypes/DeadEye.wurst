@@ -23,7 +23,7 @@ constant SOUND_BLACK_ARROW = new SoundDefinition(Sounds.raiseSkeleton1, false, t
 
 //Balancing and Object Editing
 
-constant real array BLACK_ARROW_THRESHOLD = [40, 55, 70, 85, 90]
+constant real array BLACK_ARROW_THRESHOLD = [20, 25, 30, 35, 40]
 constant real array BLACK_ARROW_DURATION = [30, 35, 40, 45, 50]
 
 @compiletime
@@ -120,7 +120,7 @@ function boneBrothers()
     real array COOLDOWN = [18, 15, 12, 9, 6]
     real array RANGE = [600, 700, 800, 900, 1000]
 
-    string learnString = "Switches position with one of his skeletons.\n"
+    string learnString = "Swaps position with one of his skeletons.\n"
     for lvl = 1 to 5
         learnString+=getLevelString(lvl)+
         "{0} range, {1} seconds cooldown.".format( RANGE[lvl-1].str(), COOLDOWN[lvl-1].str() )
@@ -143,7 +143,7 @@ function boneBrothers()
             ..setCooldown(lvl, COOLDOWN[lvl-1])
             ..setManaCost(lvl, MANA[lvl-1])
             ..setTargetsAllowed(lvl, "nonancient,player")
-            ..setDescriptionString(true, lvl, "Switches position with one of his skeletons." )
+            ..setDescriptionString(true, lvl, "Swaps position with one of his skeletons." )
 
 
         
