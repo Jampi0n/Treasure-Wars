@@ -18,7 +18,7 @@ function commands()
     CreateQuest()
         ..setTitle("Commands")
         ..setDescription(
-            "As of 1.30 the dynamic tooltip feature was partially broken. Please use \"-skill\" where skill is q,w,e,r or d if the skill description is missing the skill learn menu.\n"
+            "As of 1.30 the dynamic tooltip feature was partially broken. Please use \"-skill\" where skill is q,w,e,r or d if the skill description is missing in the skill learn menu.\n"
             )
         ..setIcon(Icons.bTNScroll)
         ..discovered(true)
