@@ -138,7 +138,7 @@ function createItemDescritptions()
 
             for int j in requiredItemList
 
-                let buttonPos = " ["+(compItemPosX[j]+1).toString()+","+(compItemPosY[j]+1).toString()+"]"
+                let buttonPos = " ["+(compItemPosX[j+(compItemIsRecipe[j+1]?1:0)]+1).toString()+","+(compItemPosY[j+(compItemIsRecipe[j+1]?1:0)]+1).toString()+"]"
 
                 recipeDesc += "\n - "+compItemName[j]+" ( "+compItemShopDescription[j] + buttonPos+" )"
 
