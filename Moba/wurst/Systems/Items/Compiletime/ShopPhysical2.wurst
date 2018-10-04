@@ -15,7 +15,7 @@ import Assets
 function itemSkullAxe(int itemId)
     int mana = 10 // trigger
     int hp = 16 // trigger
-    int str = 15
+    int str = 18
     if compiletime
         itemId.getTypeDef()
             ..setDescription("+ {0} strength|nRestores {1} hit points and {2} mana points per kill.".format(
