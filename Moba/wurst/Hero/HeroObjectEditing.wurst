@@ -27,7 +27,6 @@ PQWER
 */
 
 public constant COMPILETIME_TOOLTIPS = true
-public constant ABIL_DEF_MAP = new HashMap<int,AbilityDefinition>
 
 public constant CHANNELING_SPELL = "|cffffcc00Channeling Spell:|r\n"
 
@@ -143,7 +142,6 @@ public function AbilityDefinition.setTurnOff(string name, string hotkey)
         this.setTooltipTurnOffExtended(i, "Description missing.")
 
 public function AbilityDefinition.setupWithHotKey(string name, string hotkey)
-    ABIL_DEF_MAP.put(this.getNewId(), this)
     this.presetHotkey(hotkey)
     this.setButtonPositionNormalY(2)
     this.setButtonPositionTurnOffY(2)
@@ -279,6 +277,7 @@ public class DynamicTooltip
 
     private constant replaceIntelligence = new LinkedList<real>
     private constant replaceStrength = new LinkedList<real>
+    private AbilityDefinition aDef = null
 
     function getAbilityTypeId() returns int
         return this.abilityTypeId
@@ -290,6 +289,12 @@ public class DynamicTooltip
         this.abilityTypeId = abilityTypeId
         this.useTurnOff = false
         idToTooltip.put(abilityTypeId, this)
+
+    construct(AbilityDefinition aDef)
+        this.abilityTypeId = aDef.getNewId()
+        this.useTurnOff = false
+        idToTooltip.put(abilityTypeId, this)
+        this.aDef = aDef
 
     function getUseTurnOff() returns boolean
         return this.useTurnOff
@@ -319,13 +324,14 @@ public class DynamicTooltip
             this.normalString[j] = result
 
     function writeData()
-        let aDef = ABIL_DEF_MAP.get(this.abilityTypeId)
-        aDef.setTooltipLearnExtended("asd asd die\n"+this.evaluateLearnString())
+        if aDef == null
+            return
+        aDef.setTooltipLearnExtended(this.evaluateLearnString())
         for i = 1 to 5
-            aDef.setTooltipNormalExtended(i, "asd asd die\n"+this.evaluateNormalString(i))
+            aDef.setTooltipNormalExtended(i, this.evaluateNormalString(i))
         if this.getUseTurnOff()
             for i = 1 to 5
-                aDef.setTooltipTurnOffExtended(i, "asd asd die\n"+this.evaluateTurnOffString(i))
+                aDef.setTooltipTurnOffExtended(i, this.evaluateTurnOffString(i))
 
     function setLearnString(string intro, LevelString levelString)
         this.learnString = intro + "\n"
