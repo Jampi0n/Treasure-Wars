@@ -24,28 +24,29 @@ constant ABILITY_NATURES_WRATH = 'AZ4R'
 
 constant int array REGENERATION_HIT_POINT_REGEN = [30, 45, 60, 75, 90]
 
-@compiletime
-function passive()
-    let aDef =createNoEffectAbiltiy(ABILITY_REGENERATION)
-        ..setupWithHotKey("Recovery", "D")
-        ..setupIcon("PASSpell_Nature_ResistNature")
-        ..setLearnString("Increases the Ancient's hit point regeneration.", (int lvl) -> (begin
-            return "{0}% increased regeneration".format(
-                REGENERATION_HIT_POINT_REGEN[lvl-1].str())
-        end) )
+function passive(int abilityId)
+    if compiletime
+        createNoEffectAbiltiy(abilityId)
+            ..setupWithHotKey("Recovery", "D")
+            ..setupIcon("PASSpell_Nature_ResistNature")
 
+    DynamicTooltip tooltip = new DynamicTooltip(abilityId)
+    tooltip.setLearnString("Increases the Ancient's hit point regeneration.", (int lvl) -> (begin
+        return "{0}% increased regeneration".format(
+            REGENERATION_HIT_POINT_REGEN[lvl-1].str())
+    end) )
     for lvl = 1 to 5
-        aDef
-            ..setDescriptionString(true, lvl, "Increases the Ancient's hit point regeneration by {0}%.".format(
-                REGENERATION_HIT_POINT_REGEN[lvl-1].str())
-            )
+        tooltip.setNormalString(false, lvl, "Increases the Ancient's hit point regeneration by {0}%.".format(
+            REGENERATION_HIT_POINT_REGEN[lvl-1].str())
+        )
+    tooltip.setReplaceIntelligence(0)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 constant real array DEVOUR_HEAL = [150, 225, 300, 375, 400]
 constant real DEVOUR_HEAL_BONUS = 200
 
 constant real array DEVOUR_COOLDOWN = [20, 17, 14, 11, 8]
 
-@compiletime
 function rootDummy()
     new UnitDefinition(UPROOTED, 'hfoo')
         ..setNormalAbilities("Aloc")
@@ -61,37 +62,46 @@ function rootDummy()
         ..setUnitSoundSet("")
         ..setName("Uprooted")
 
-@compiletime
-function devourUnit()
+function devourUnit(int abilityId)
     int array MANA = [120, 110, 100, 90, 80]
 
-    let aDef = new AbilityDefinitionFarseerChainLightning(ABILITY_EAT_UNIT)
-        ..setupIcon("BTNStrengthofNature")
-        ..setAnimationNames("spell")
-        ..setupWithHotKey("Eat Unit", "Q")
-        ..setLightningEffects("")
-        ..setArtTarget("")
-        ..setMissileArt("")
-        ..setArtSpecial("")
-        ..setLightningEffects("")
-        ..setRequirements(UPROOTED.toRawCode())
-        ..setCheckDependencies(true)
-        /*..setLearnString(CHANNELING_SPELL + "Grabs the target enemy unit to devour it and heals the hero.", (int lvl) -> (begin
-            return "{0} hit points healed, {1} seconds cooldown.".format( DEVOUR_HEAL[lvl-1].str()+DEVOUR_HEAL_BONUS.getBonusString(C_INT), DEVOUR_COOLDOWN[lvl-1].str())
-        end) )*/
+    if compiletime
+        rootDummy()
+        let aDef = new AbilityDefinitionFarseerChainLightning(abilityId)
+            ..setupIcon("BTNStrengthofNature")
+            ..setAnimationNames("spell")
+            ..setupWithHotKey("Eat Unit", "Q")
+            ..setLightningEffects("")
+            ..setArtTarget("")
+            ..setMissileArt("")
+            ..setArtSpecial("")
+            ..setLightningEffects("")
+            ..setRequirements(UPROOTED.toRawCode())
+            ..setCheckDependencies(true)
 
+
+        for lvl = 1 to 5
+            aDef
+                ..setCooldown(lvl, DEVOUR_COOLDOWN[lvl-1])
+                ..setManaCost(lvl, MANA[lvl-1])
+                ..setNumberofTargetsHit(lvl, 1)
+                ..setDamageperTarget(lvl, 0)
+                ..setCastRange(lvl, 150)
+                ..setDurationNormal(lvl, 0.1)
+                ..setTargetsAllowed(lvl, "air,enemies,ground,neutral,nonancient,organic,nonhero")
+
+
+    DynamicTooltip tooltip = new DynamicTooltip(abilityId)
+    tooltip.setLearnString(CHANNELING_SPELL + "Grabs the target enemy unit to devour it, healing the hero.", (int lvl) -> (begin
+        return "{0}{I0} hit points healed, {1} seconds cooldown.".format( DEVOUR_HEAL[lvl-1].str(), DEVOUR_COOLDOWN[lvl-1].str())
+    end) )
     for lvl = 1 to 5
-        aDef
-            ..setCooldown(lvl, DEVOUR_COOLDOWN[lvl-1])
-            ..setManaCost(lvl, MANA[lvl-1])
-            ..setNumberofTargetsHit(lvl, 1)
-            ..setDamageperTarget(lvl, 0)
-            ..setCastRange(lvl, 150)
-            ..setDurationNormal(lvl, 0.1)
-            ..setTargetsAllowed(lvl, "air,enemies,ground,neutral,nonancient,organic,nonhero")
-            /*..setDescriptionString(true, lvl, CHANNELING_SPELL + "Grabs the target enemy unit to devour it and heals the hero for {0} hit points.".format(
-                DEVOUR_HEAL[lvl-1].str()+DEVOUR_HEAL_BONUS.getBonusString(C_INT)
-            ))*/
+        tooltip.setNormalString(true, lvl, CHANNELING_SPELL + "Grabs the target enemy unit to devour it, healing the hero for {0}{I0} hit points.".format(
+            DEVOUR_HEAL[lvl-1].str()
+        ))
+    tooltip.setReplaceIntelligence(DEVOUR_HEAL_BONUS)
+    addDynamicTooltipIntelligence(heroType, tooltip)
+
 
 constant real array ENTANGLE_DURATION = [2, 2.4, 2.8, 3.2, 3.6]
 constant real ENTANGLE_DURATION_BONUS = 1
@@ -102,34 +112,36 @@ constant BuffType BUFF_ENTAGLING_ROOTS = new BuffType(false, true)
 constant int ENTAGLING_ROOTS_BUFF_ID = compiletime(createAuraBuff("Entangling Roots", "This unit was hit by Entangling Roots; it cannot move or attack.", "BTNEntnagle"))
 constant int ENTAGLING_ROOTS_ABILITY_ID = compiletime(createNegativeBuffAbility(5, ENTAGLING_ROOTS_BUFF_ID, Abilities.entanglingRootsTarget, "origin"))
 
-
-@compiletime
-function entanglingRoots()
+function entanglingRoots(int abilityId)
     int array MANA = [120, 130, 140, 150, 160]
     real array COOLDOWN = [14, 13, 12, 11, 10]
 
+    if compiletime
+        let aDef = new AbilityDefinitionDreadlordCarrionSwarm(abilityId)
+            ..setupIcon("BTNEntnagle")
+            ..setAnimationNames("attack,2")
+            ..setupWithHotKey("Entangling Roots", "W")
+            ..setMissileArt("")
 
-    let aDef = new AbilityDefinitionDreadlordCarrionSwarm(ABILITY_IMPALE)
-        ..setupIcon("BTNEntnagle")
-        ..setAnimationNames("attack,2")
-        ..setupWithHotKey("Entangling Roots", "W")
-        ..setMissileArt("")
-        //..setRequirements(UPROOTED.toRawCode())
-        //..setCheckDependencies(true)
-        /*..setLearnString("Releases thorns in a line, damaging and entangling every enemy unit they pass through.", (int lvl) -> (begin
-            return "{0} damage, {1} second.".format( ENTANGLE_HIT_DAMAGE[lvl-1].str()+ENTANGLE_HIT_DAMAGE_BONUS.getBonusString(C_INT), ENTANGLE_DURATION[lvl-1].toString()+ENTANGLE_DURATION_BONUS.getBonusString(C_INT) )
-        end) )*/
+        for lvl = 1 to 5
+            aDef
+                ..setCooldown(lvl, COOLDOWN[lvl-1])
+                ..setManaCost(lvl, MANA[lvl-1])
+                ..setCastRange(lvl, 800)
+                ..setTargetsAllowed(lvl, "none")
+
+
+    DynamicTooltip tooltip = new DynamicTooltip(abilityId)
+    tooltip.setLearnString("Releases thorns in a line, damaging and entangling every enemy unit they pass through.", (int lvl) -> (begin
+        return "{0}{I0} damage, {1}{I1} second.".format( ENTANGLE_HIT_DAMAGE[lvl-1].str(), ENTANGLE_DURATION[lvl-1].toExactString() )
+    end) )
 
     for lvl = 1 to 5
-        aDef
-            ..setCooldown(lvl, COOLDOWN[lvl-1])
-            ..setManaCost(lvl, MANA[lvl-1])
-            ..setCastRange(lvl, 800)
-            ..setTargetsAllowed(lvl, "none")
-            /*..setDescriptionString(true, lvl, "Releases thorns in a line, dealing {0} damage and entangling every enemy unit they pass through for {1} seconds.".format(
-                ENTANGLE_HIT_DAMAGE[lvl-1].str()+ENTANGLE_HIT_DAMAGE_BONUS.getBonusString(C_INT), ENTANGLE_DURATION[lvl-1].toString()+ENTANGLE_DURATION_BONUS.getBonusString(C_INT)
-            ))*/
-
+        tooltip.setNormalString(true, lvl, "Releases thorns in a line, dealing {0}{I0} damage and entangling every enemy unit they pass through for {1}{I1} seconds.".format(
+            ENTANGLE_HIT_DAMAGE[lvl-1].str(), ENTANGLE_DURATION[lvl-1].toExactString()
+        ))
+    tooltip.setReplaceIntelligence(ENTANGLE_HIT_DAMAGE_BONUS, ENTANGLE_DURATION_BONUS)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 
 
@@ -140,31 +152,37 @@ constant real array ROOT_AOE_RANGE = [150, 175, 200, 225, 250]
 
 constant real ROOT_DURATION = 1.75//2.57
 
-@compiletime
-function root()
+function root(int abilityId)
     int array MANA = [25, 25, 25, 25, 25]
     real array COOLDOWN = [3, 3, 3, 3, 3]
 
-    let aDef = new AbilityDefinitionBearform(ABILITY_ROOT)
-        ..setupIcon(Icons.bTNRoot)
-        ..setIconTurnOff(Icons.bTNUproot)
-        ..setupWithHotKey("Root", "E")
-        /*..setLearnString("Burrows the Ancient's roots into the ground, rendering it immobile, but allowing to hurl enormous rocks dealing area of effect damage. The Ancient's armor and willpower are increased while rooted.", (int lvl) -> (begin
-            return "{0} area of effect damage, {1} bonus armor and willpower.".format( ROOT_AOE_DAMAGE[lvl-1].str()+ROOT_AOE_DAMAGE_BONUS.getBonusString(C_STR), ROOT_RESISTANCE[lvl-1].str())
-        end) )*/
+    if compiletime
+        let aDef = new AbilityDefinitionBearform(abilityId)
+            ..setupIcon(Icons.bTNRoot)
+            ..setIconTurnOff(Icons.bTNUproot)
+            ..setupWithHotKey("Root", "E")
 
+        for lvl = 1 to 5
+            aDef
+                ..setCooldown(lvl, COOLDOWN[lvl-1])
+                ..setManaCost(lvl, MANA[lvl-1])
+                ..setNormalFormUnit(lvl, HERO_TREE.toRawCode())
+                ..setAlternateFormUnit(lvl, HERO_TREE_ROOTED.toRawCode())
+                ..setDurationNormal(lvl, ROOT_DURATION)
+                ..setTooltipTurnOff(lvl, "(E) Uproot - [|cffffcc00Level "+lvl.toString()+"|r]")
+
+    DynamicTooltip tooltip = new DynamicTooltip(abilityId)
+    tooltip.setLearnString("Burrows the Ancient's roots into the ground, rendering it immobile, but allowing to hurl enormous rocks dealing area of effect damage. The Ancient's armor and willpower are increased while rooted.", (int lvl) -> (begin
+        return "{0}{S0} area of effect damage, {1} bonus armor and willpower.".format( ROOT_AOE_DAMAGE[lvl-1].str(), ROOT_RESISTANCE[lvl-1].str())
+    end) )
+    
     for lvl = 1 to 5
-        aDef
-            ..setCooldown(lvl, COOLDOWN[lvl-1])
-            ..setManaCost(lvl, MANA[lvl-1])
-            ..setNormalFormUnit(lvl, HERO_TREE.toRawCode())
-            ..setAlternateFormUnit(lvl, HERO_TREE_ROOTED.toRawCode())
-            ..setDurationNormal(lvl, ROOT_DURATION)
-            ..setTooltipTurnOff(lvl, "(E) Uproot - [|cffffcc00Level "+lvl.toString()+"|r]")
-            /*..setDescriptionString(false, lvl, "Burrows the Ancient's roots into the ground, rendering it immobile, but allowing to hurl enormous rocks dealing {0} area of effect damage. The Ancient's armor and willpower are increased by {1} while rooted.".format(
-                ROOT_AOE_DAMAGE[lvl-1].str()+ROOT_AOE_DAMAGE_BONUS.getBonusString(C_STR), ROOT_RESISTANCE[lvl-1].str()
-            ))*/
-            ..setTooltipTurnOffExtended(lvl, "Allows the Ancient to pull itself up out of the ground so that it can move and engage units in melee combat.")
+        tooltip.setNormalString(true, lvl, "Burrows the Ancient's roots into the ground, rendering it immobile, but allowing to hurl enormous rocks dealing {0}{S0} area of effect damage. The Ancient's armor and willpower are increased by {1} while rooted.".format(
+            ROOT_AOE_DAMAGE[lvl-1].str(), ROOT_RESISTANCE[lvl-1].str()
+        ))
+        tooltip.setTurnOffString(false, lvl, "Allows the Ancient to pull itself up out of the ground so that it can move and engage units in melee combat.")
+    tooltip.setReplaceStrength(ROOT_AOE_DAMAGE_BONUS)        
+    addDynamicTooltipStrength(heroType, tooltip)
 
 constant int NATURES_WRATH_DUMMY_BUFF = compiletime(createDummyBuff())
 
@@ -175,31 +193,37 @@ constant real array NATURES_WRATH_DURATION = [5, 5, 5, 5, 5]
 
 constant real NATURES_WRATH_AOE = 300
 
-@compiletime
-function naturesWrath()
+function naturesWrath(int abilityId)
     int array MANA = [160, 170, 180, 190, 200]
 
-    let aDef = new AbilityDefinitionBeserk(ABILITY_NATURES_WRATH)
-        ..setupIcon("BTNNaturesWrath")
-        ..setupWithHotKey("Nature's Wrath", "R")
-        /*..setLearnString("Covers the ancient in a storm of sharp leaves, that deal damage to nearby enemies.", (int lvl) -> (begin
-            return "{0} damage per second, lasts {1} seconds, {2} seconds cooldown.".format( 
-                NATURES_WRATH_TOTAL_DAMAGE[lvl-1].str()+NATURES_WRATH_TOTAL_DAMAGE_BONUS.getBonusString(C_INT), NATURES_WRATH_DURATION[lvl-1].str(), NATURES_WRATH_COOLDOWN[lvl-1].str()
-            )
-        end) )*/
+    if compiletime
+        let aDef = new AbilityDefinitionBeserk(abilityId)
+            ..setupIcon("BTNNaturesWrath")
+            ..setupWithHotKey("Nature's Wrath", "R")
 
+
+        for lvl = 1 to 5
+            aDef
+                ..setCooldown(lvl, NATURES_WRATH_COOLDOWN[lvl-1])
+                ..setManaCost(lvl, MANA[lvl-1])
+                ..setBuffs(lvl, NATURES_WRATH_DUMMY_BUFF.toRawCode())
+                ..setDamageTakenIncrease(lvl, 0)
+                ..setAttackSpeedIncrease(lvl, 0)
+                ..setMovementSpeedIncrease(lvl, 0)
+
+    DynamicTooltip tooltip = new DynamicTooltip(abilityId)
+    tooltip.setLearnString("Covers the ancient in a storm of sharp leaves, that deal damage to nearby enemies.", (int lvl) -> (begin
+        return "{0}{I0} damage over {1} seconds, {2} seconds cooldown.".format( 
+            NATURES_WRATH_TOTAL_DAMAGE[lvl-1].str(), NATURES_WRATH_DURATION[lvl-1].str(), NATURES_WRATH_COOLDOWN[lvl-1].str()
+        )
+    end) )
+    
     for lvl = 1 to 5
-        aDef
-            ..setCooldown(lvl, NATURES_WRATH_COOLDOWN[lvl-1])
-            ..setManaCost(lvl, MANA[lvl-1])
-            ..setBuffs(lvl, NATURES_WRATH_DUMMY_BUFF.toRawCode())
-            ..setDamageTakenIncrease(lvl, 0)
-            ..setAttackSpeedIncrease(lvl, 0)
-            ..setMovementSpeedIncrease(lvl, 0)
-            /*..setDescriptionString(true, lvl, "Covers the ancient in a storm of sharp leaves, that deal {0} damage to nearby enemies over {1} seconds.".format(
-                NATURES_WRATH_TOTAL_DAMAGE[lvl-1].str()+NATURES_WRATH_TOTAL_DAMAGE_BONUS.getBonusString(C_INT), NATURES_WRATH_DURATION[lvl-1].str()
-            ))*/
-
+        tooltip.setNormalString(true, lvl, "Covers the ancient in a storm of sharp leaves, that deal {0}{I0} damage to nearby enemies over {1} seconds.".format(
+            NATURES_WRATH_TOTAL_DAMAGE[lvl-1].str(), NATURES_WRATH_DURATION[lvl-1].str()
+        ))
+    tooltip.setReplaceIntelligence(NATURES_WRATH_TOTAL_DAMAGE_BONUS)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 
 unit array uprooted_dummy
@@ -495,56 +519,11 @@ function teamFightAI(HeroAI ai)
 
 @compiletime
 function setupTooltips()
-    if compiletime and not COMPILETIME_TOOLTIPS
-        return
-    DynamicTooltip tooltip = new DynamicTooltip(ABILITY_EAT_UNIT)
-    tooltip.setLearnString(CHANNELING_SPELL + "Grabs the target enemy unit to devour it, healing the hero.", (int lvl) -> (begin
-        return "{0}{I0} hit points healed, {1} seconds cooldown.".format( DEVOUR_HEAL[lvl-1].str(), DEVOUR_COOLDOWN[lvl-1].str())
-    end) )
-    for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, CHANNELING_SPELL + "Grabs the target enemy unit to devour it, healing the hero for {0}{I0} hit points.".format(
-            DEVOUR_HEAL[lvl-1].str()
-        ))
-    tooltip.setReplaceIntelligence(DEVOUR_HEAL_BONUS)
-    addDynamicTooltipIntelligence(heroType, tooltip)
-
-    tooltip = new DynamicTooltip(ABILITY_IMPALE)
-    tooltip.setLearnString("Releases thorns in a line, damaging and entangling every enemy unit they pass through.", (int lvl) -> (begin
-        return "{0}{I0} damage, {1}{I1} second.".format( ENTANGLE_HIT_DAMAGE[lvl-1].str(), ENTANGLE_DURATION[lvl-1].toExactString() )
-    end) )
-
-    for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, "Releases thorns in a line, dealing {0}{I0} damage and entangling every enemy unit they pass through for {1}{I1} seconds.".format(
-            ENTANGLE_HIT_DAMAGE[lvl-1].str(), ENTANGLE_DURATION[lvl-1].toExactString()
-        ))
-    tooltip.setReplaceIntelligence(ENTANGLE_HIT_DAMAGE_BONUS, ENTANGLE_DURATION_BONUS)
-    addDynamicTooltipIntelligence(heroType, tooltip)
-
-    tooltip = new DynamicTooltip(ABILITY_ROOT)
-    tooltip.setLearnString("Burrows the Ancient's roots into the ground, rendering it immobile, but allowing to hurl enormous rocks dealing area of effect damage. The Ancient's armor and willpower are increased while rooted.", (int lvl) -> (begin
-        return "{0}{S0} area of effect damage, {1} bonus armor and willpower.".format( ROOT_AOE_DAMAGE[lvl-1].str(), ROOT_RESISTANCE[lvl-1].str())
-    end) )
-    
-    for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, "Burrows the Ancient's roots into the ground, rendering it immobile, but allowing to hurl enormous rocks dealing {0}{S0} area of effect damage. The Ancient's armor and willpower are increased by {1} while rooted.".format(
-            ROOT_AOE_DAMAGE[lvl-1].str(), ROOT_RESISTANCE[lvl-1].str()
-        ))
-    tooltip.setReplaceStrength(ROOT_AOE_DAMAGE_BONUS)        
-    addDynamicTooltipStrength(heroType, tooltip)
-
-    tooltip = new DynamicTooltip(ABILITY_NATURES_WRATH)
-    tooltip.setLearnString("Covers the ancient in a storm of sharp leaves, that deal damage to nearby enemies.", (int lvl) -> (begin
-        return "{0}{I0} damage over {1} seconds, {2} seconds cooldown.".format( 
-            NATURES_WRATH_TOTAL_DAMAGE[lvl-1].str(), NATURES_WRATH_DURATION[lvl-1].str(), NATURES_WRATH_COOLDOWN[lvl-1].str()
-        )
-    end) )
-    
-    for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, "Covers the ancient in a storm of sharp leaves, that deal {0}{I0} damage to nearby enemies over {1} seconds.".format(
-            NATURES_WRATH_TOTAL_DAMAGE[lvl-1].str(), NATURES_WRATH_DURATION[lvl-1].str()
-        ))
-    tooltip.setReplaceIntelligence(NATURES_WRATH_TOTAL_DAMAGE_BONUS)
-    addDynamicTooltipIntelligence(heroType, tooltip)
+    passive(ABILITY_REGENERATION)
+    devourUnit(ABILITY_EAT_UNIT)
+    entanglingRoots(ABILITY_IMPALE)
+    root(ABILITY_ROOT)
+    naturesWrath(ABILITY_NATURES_WRATH)
 
 function initHeroType()
     setupStats()

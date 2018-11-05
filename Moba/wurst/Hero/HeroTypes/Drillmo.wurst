@@ -9,7 +9,7 @@ import DamageDetection
 //import Fx
 
 public constant HERO_DRILLMO = 'H00L'
-HeroType heroType
+HeroType heroType = null
 
 constant ABILITY_OVERCHARGE = 'AZ6P'
 constant ABILITY_PULL = 'AZ6Q'
@@ -404,7 +404,7 @@ function setupTooltips()
             PULL_DAMAGE[lvl-1].str()
         ))
     tooltip.setReplaceStrength(PULL_DAMAGE_BONUS)
-    heroType.addDynamicTooltipStrength(tooltip)
+    addDynamicTooltipStrength(heroType, tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_SPIKE_BALL)
     tooltip.setLearnString(CHANNELING_SPELL + "Slams the ground with a massive spike ball, dealing damage stunning targets in an area in front of the hero. After that targets will be bleeding and take additional damage.", (int lvl) -> (begin
@@ -423,7 +423,7 @@ function setupTooltips()
             SPIKE_BALL_DOT_DURATION[lvl-1].toString()
         ))
     tooltip.setReplaceStrength(SPIKE_BALL_DMG_BONUS, SPIKE_BALL_DOT_DMG_BONUS)
-    heroType.addDynamicTooltipStrength(tooltip)
+    addDynamicTooltipStrength(heroType, tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_SPEED_BOOST)
     tooltip.setLearnString("Temporarily increases the hero's movement speed.", (int lvl) -> (begin
@@ -438,7 +438,7 @@ function setupTooltips()
             SPEED_BOOST_DURATION[lvl-1].str()
         ))
     tooltip.setReplaceIntelligence(SPEED_BOOST_BONUS.toReal())
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_ROCKET)
     tooltip.setLearnString("Fires a rocket at the target enemy unit, dealing damage in an area around the target.", (int lvl) -> (begin
@@ -454,7 +454,7 @@ function setupTooltips()
             ROCKET_DMG[lvl-1].str()
         ))
     tooltip.setReplaceStrength(ROCKET_DMG_BONUS)
-    heroType.addDynamicTooltipStrength(tooltip)
+    addDynamicTooltipStrength(heroType, tooltip)
 
 function initHeroType()
     setupStats()

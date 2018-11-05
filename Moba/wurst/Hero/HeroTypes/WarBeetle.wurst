@@ -12,7 +12,7 @@ import Knockback3
 
 public constant HERO_WAR_BEETLE = 'H00S'
 
-HeroType heroType
+HeroType heroType = null
 
 constant UPROOTED = compiletime(UNIT_ID_GEN.next())
 
@@ -380,7 +380,7 @@ function setupTooltips()
             BITE_SLOW_DURATION[lvl-1].toExactString()
         ))
     tooltip.setReplaceIntelligence(BITE_DAMAGEL_BONUS, BITE_SLOW_DURATION_BONUS)
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_WAR_STOMP)
     tooltip.setLearnString("Slams the ground, stunning and damaging nearby enemy land units.", (int lvl) -> (begin
@@ -392,7 +392,7 @@ function setupTooltips()
             WAR_STOMP_DAMAGE[lvl-1].str(), WAR_STOMP_DURATION[lvl-1].toExactString()
         ))
     tooltip.setReplaceStrength(WAR_STOMP_DAMAGE_BONUS, WAR_STOMP_DURATION_BONUS)
-    heroType.addDynamicTooltipStrength(tooltip)
+    addDynamicTooltipStrength(heroType, tooltip)
 
 function initHeroType()
     setupStats()

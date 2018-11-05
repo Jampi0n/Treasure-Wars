@@ -256,10 +256,12 @@ public class HeroType
                 BlzSetAbilityActivatedExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateTurnOffString(whichUnit), whichUnit.getAbilityLevel(abilityTypeId))
         
 
+    @deprecated("use global function instead")
     function addDynamicTooltipStrength(DynamicTooltip tooltip)
         if(this!=null)
             this.dynamicStrength.add(tooltip)
 
+    @deprecated("use global function instead")
     function addDynamicTooltipIntelligence(DynamicTooltip tooltip)
         if(this!=null)
             this.dynamicIntelligence.add(tooltip)

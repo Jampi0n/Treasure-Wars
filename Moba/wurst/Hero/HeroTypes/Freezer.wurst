@@ -9,7 +9,7 @@ import HashMap
 import OnAttack
 
 public constant HERO_FREEZER = 'H00V'
-HeroType heroType
+HeroType heroType = null
 
 constant ABILITY_COLD_HAND = 'AZ9P'
 constant ABILITY_FROST_NOVA = 'AZ9Q'
@@ -454,7 +454,7 @@ function setupTooltips()
             NOVA_AOE_DMG[lvl-1].str(),
             NOVA_DURATION[lvl-1].toExactString()))
     tooltip.setReplaceIntelligence(NOVA_TARGET_DMG_BONUS, NOVA_AOE_DMG_BONUS, NOVA_DURATION_BONUS)
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_FROST_ARMOR)
     tooltip.setLearnString("Creates a shield of frost around a target friendly unit. The shield adds armor and slows units that attack it. Lasts {0} seconds.".format(ARMOR_DURATION.str()), (int lvl) -> (begin
@@ -471,7 +471,7 @@ function setupTooltips()
             ARMOR_SLOW_DURATION[lvl-1].toExactString(),
             ARMOR_DURATION.str()))
     tooltip.setReplaceIntelligence(ARMOR_AR_BONUS.toReal(), ARMOR_SLOW_DURATION_BONUS)
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_FROST_WYRM)
     tooltip.setLearnString("Summons a powerful Frost Wyrm. The Frost Wyrm's attack speed and hit points scale with the respective stats of the Hero. The Frost Wyrm's attacks slow the targets.", (int lvl) -> (begin
@@ -491,7 +491,7 @@ function setupTooltips()
             FROST_BREATH_DUR[lvl-1].toExactString()
         ))
     tooltip.setReplaceIntelligence(FROST_WYRM_INT_FACTOR.toReal())        
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_FREEZE)
     tooltip.setLearnString(CHANNELING_SPELL + "Freezes nearby enemies, disabling them and dealing damage over time. However, targets covered with ice have their armor and willpower increased by {0}.".format(FREEZE_DEF.str()), (int lvl) -> (begin
@@ -508,7 +508,7 @@ function setupTooltips()
             FREEZE_DEF.str()
         ))
     tooltip.setReplaceIntelligence(FREEZE_DMG_BONUS)
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 function initHeroType()
     setupStats()

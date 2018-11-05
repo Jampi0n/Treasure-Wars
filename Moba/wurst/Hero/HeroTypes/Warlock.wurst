@@ -7,7 +7,7 @@ import ClosureTimers
 import HeroType
 
 public constant HERO_WARLOCK = 'H00H'
-HeroType heroType
+HeroType heroType = null
 
 constant ABILITY_FEL_MAGIC = 'AZ5P'
 constant ABILITY_FIREBOLT = 'AZ5Q'
@@ -315,7 +315,7 @@ function setupTooltips()
         tooltip.setNormalString(true, lvl, "Summons a ball of fire to fly to the target direction, dealing {0}{I0} magic damage to the first unit it hits.".format(
             FIREBOLT_DAMAGE[lvl-1].str()))
     tooltip.setReplaceIntelligence(FIREBOLT_DAMAGE_BONUS)            
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_INFERNAL_METEOR)
     tooltip.setLearnString("Calls down a burning meteor from the sky dealing magic damage and stunning enemies in the target area.", (int lvl) -> (begin
@@ -325,7 +325,7 @@ function setupTooltips()
         tooltip.setNormalString(true, lvl, "Calls down a burning meteor from the sky dealing {0}{I0} magic damage and stunning enemies in the target area for {1} seconds.".format(
             METEOR_DAMAGE[lvl-1].str(), METEOR_STUN_DURATION[lvl-1].toExactString()))
     tooltip.setReplaceIntelligence(METEOR_DAMAGE_BONUS)
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_SOUL_BURN)
     tooltip.setLearnString("Deals damage over time to the target enemy unit. If the unit dies, while under the effect of Soul Burn, nearby enemy units will be affected by Soul Burn. The initial target is silenced for a short time.", (int lvl) -> (begin
@@ -336,7 +336,7 @@ function setupTooltips()
         tooltip.setNormalString(true, lvl, "Deals {0}{I0} damage per second to the target enemy unit for {1} seconds. If the unit dies, while under the effect of Soul Burn, nearby enemy units will be affected by Soul Burn. The initial target is silenced for {2} seconds.".format(
             SOUL_BURN_DAMAGE[lvl-1].str(), SOUL_BURN_DURATION[lvl-1].toExactString(), SOUL_BURN_SILENCE[lvl-1].toExactString()))
     tooltip.setReplaceIntelligence(SOUL_BURN_DAMAGE_BONUS)
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_RAY_OF_DEATH)
     tooltip.setLearnString(CHANNELING_SPELL + "Channels a powerful ray at the target enemy hero, disabling the target and dealing damage over time. If he channels for the full duration, he summons an explosion at the target's location dealing additional damage.", (int lvl) -> (begin
@@ -348,7 +348,7 @@ function setupTooltips()
             RAY_OF_DEATH_DAMAGE[lvl-1].str(), RAY_OF_DEATH_AFTER_DAMAGE[lvl-1].str(), RAY_OF_DEATH_DURATION[lvl-1].toExactString()
         ))
     tooltip.setReplaceIntelligence(RAY_OF_DEATH_DAMAGE_BONUS, RAY_OF_DEATH_AFTER_DAMAGE_BONUS)
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 function initHeroType()
     setupStats()
