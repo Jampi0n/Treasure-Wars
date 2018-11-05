@@ -459,7 +459,7 @@ function displayTooltipLevelFull(int pId, AbilitySlot slot, int level)
             let abilityTypeId = hero.getHeroType().getAbilityId(slot)
             let tooltip = DynamicTooltip.getDynamicTooltip(abilityTypeId)
             if tooltip != null
-                printTimedToPlayer("\n\n"+ GetObjectName(abilityTypeId) + " (" +level.toString()+ ") - " + tooltip.evaluateNormalStringLevel(hero.toUnit(), level)+"\n", 20, players[pId])
+                printTimedToPlayer("\n\n"+ GetObjectName(abilityTypeId) + " (" +level.toString()+ ") - " + tooltip.evaluateNormalString(hero.toUnit(), level)+"\n", 20, players[pId])
             else
                 printTimedToPlayer("this skill does not have a dynamic tooltip; read the skill description instead", 5, players[pId])
 
@@ -475,7 +475,7 @@ function charToAbilitySlot(string char) returns AbilitySlot
         ret = AbilitySlot.E
     else if s == "R"
         ret = AbilitySlot.R
-    else if s == "P"
+    else if s == "D"
         ret = AbilitySlot.PASSIVE
     else
         error("unknown skill slot: "+char)

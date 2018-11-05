@@ -68,8 +68,8 @@ public class HeroType
 
     private string icon = "ReplaceableTextures\\CommandButtons\\BTNSelectHeroOn.blp"
 
-    private constant dynamicIntelligence = new LinkedList<DynamicTooltip>
-    private constant dynamicStrength = new LinkedList<DynamicTooltip>
+    protected constant dynamicIntelligence = new LinkedList<DynamicTooltip>
+    protected constant dynamicStrength = new LinkedList<DynamicTooltip>
 
     construct(int unitId, string icon, int heroId, boolean hasAI)
         objectCount++
@@ -256,10 +256,12 @@ public class HeroType
         
 
     function addDynamicTooltipStrength(DynamicTooltip tooltip)
-        this.dynamicStrength.add(tooltip)
+        if(this!=null)
+            this.dynamicStrength.add(tooltip)
 
     function addDynamicTooltipIntelligence(DynamicTooltip tooltip)
-        this.dynamicIntelligence.add(tooltip)
+        if(this!=null)
+            this.dynamicIntelligence.add(tooltip)
 
 
     function getAbilityId(AbilitySlot slot) returns int
@@ -275,6 +277,19 @@ public class HeroType
         //print(id.toRawCode())
         return id
     
+
+public function addDynamicTooltipStrength(HeroType herotype, DynamicTooltip tooltip)
+    if(herotype!=null)
+        herotype.dynamicStrength.add(tooltip)
+    if compiletime
+        tooltip.writeData()
+            
+public function addDynamicTooltipIntelligence(HeroType herotype, DynamicTooltip tooltip)
+    if(herotype!=null)
+        herotype.dynamicIntelligence.add(tooltip)
+    if compiletime
+        tooltip.writeData()
+
 init
     SLOT_ID[AbilitySlot.Q castTo int] = 81
     SLOT_ID[AbilitySlot.W castTo int] = 87

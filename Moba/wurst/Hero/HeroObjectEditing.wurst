@@ -26,6 +26,9 @@ PQWER
 
 */
 
+public constant COMPILETIME_TOOLTIPS = true
+public constant ABIL_DEF_MAP = new HashMap<int,AbilityDefinition>
+
 public constant CHANNELING_SPELL = "|cffffcc00Channeling Spell:|r\n"
 
 public constant C_STR = color(255, 187, 102)
@@ -140,6 +143,7 @@ public function AbilityDefinition.setTurnOff(string name, string hotkey)
         this.setTooltipTurnOffExtended(i, "Description missing.")
 
 public function AbilityDefinition.setupWithHotKey(string name, string hotkey)
+    ABIL_DEF_MAP.put(this.getNewId(), this)
     this.presetHotkey(hotkey)
     this.setButtonPositionNormalY(2)
     this.setButtonPositionTurnOffY(2)
@@ -201,24 +205,66 @@ public function AbilityDefinition.setupWithHotKey(string name, string hotkey)
 public function bonus(int statValue, real atHundred) returns string
     return (atHundred*statValue/100).toString()
 
-public function string.evaluateIntelligence(LinkedList<real> replacers, int intelligence) returns string
+public function string.removeDynamics() returns string
+    int i = 0
+    string preString = this
+    while true
+        string newString = preString.replace("{I" + i.toString() + "}","")
+        if(preString == newString)
+            break
+        preString = newString
+        i++
+    i = 0
+    while true
+        string newString = preString.replace("{S" + i.toString() + "}","")
+        if(preString == newString)
+            break
+        preString = newString
+        i++
+    return preString
+
+public function string.replaceDynamics() returns string
+    int i = 0
+    string preString = this
+    while true
+        string newString = preString.replace("{I" + i.toString() + "}", C_INT.toColorString()+" (int)" )
+        if(preString == newString)
+            break
+        preString = newString
+        i++
+    i = 0
+    while true
+        string newString = preString.replace("{S" + i.toString() + "}", C_STR.toColorString()+" (str)")
+        if(preString == newString)
+            break
+        preString = newString
+        i++
+    return preString
+
+public function string.evaluateIntelligence(LinkedList<real> replacers, int intelligence, bool const) returns string
     var result = this
     var i = 0
     for dynamicInteger in replacers
-        result = result.replace("{I" + i.toString() + "}", C_INT.toColorString()+" (+"+(intelligence * dynamicInteger/100).toSmartString()+")|r " )
+        if const
+            result = result.replace("{I" + i.toString() + "}", C_INT.toColorString()+" (+"+(intelligence * dynamicInteger/100).toSmartString()+"% int)|r " )
+        else
+            result = result.replace("{I" + i.toString() + "}", C_INT.toColorString()+" (+"+(intelligence * dynamicInteger/100).toSmartString()+")|r " )
         i++
     return result
 
-public function string.evaluateStrength(LinkedList<real> replacers, int strength) returns string
+public function string.evaluateStrength(LinkedList<real> replacers, int strength, bool const) returns string
     var result = this
     var i = 0
     for dynamicInteger in replacers
-        result = result.replace("{S" + i.toString() + "}", C_STR.toColorString()+" (+"+(strength * dynamicInteger/100).toSmartString()+")|r ")
+        if const
+            result = result.replace("{S" + i.toString() + "}", C_STR.toColorString()+" (+"+(strength * dynamicInteger/100).toSmartString()+"% str)|r " )
+        else
+            result = result.replace("{S" + i.toString() + "}", C_STR.toColorString()+" (+"+(strength * dynamicInteger/100).toSmartString()+")|r ")
         i++
     return result
 
-public function string.evaluateBonus(LinkedList<real> replaceStrength, int strength, LinkedList<real> replaceIntelligence, int intelligence) returns string
-    return this.evaluateStrength(replaceStrength, strength).evaluateIntelligence(replaceIntelligence, intelligence)
+public function string.evaluateBonus(LinkedList<real> replaceStrength, int strength, LinkedList<real> replaceIntelligence, int intelligence, bool const) returns string
+    return this.evaluateStrength(replaceStrength, strength, const).evaluateIntelligence(replaceIntelligence, intelligence, const)
     
 public class DynamicTooltip
     
@@ -272,7 +318,14 @@ public class DynamicTooltip
                 i++
             this.normalString[j] = result
 
-
+    function writeData()
+        let aDef = ABIL_DEF_MAP.get(this.abilityTypeId)
+        aDef.setTooltipLearnExtended("asd asd die\n"+this.evaluateLearnString())
+        for i = 1 to 5
+            aDef.setTooltipNormalExtended(i, "asd asd die\n"+this.evaluateNormalString(i))
+        if this.getUseTurnOff()
+            for i = 1 to 5
+                aDef.setTooltipTurnOffExtended(i, "asd asd die\n"+this.evaluateTurnOffString(i))
 
     function setLearnString(string intro, LevelString levelString)
         this.learnString = intro + "\n"
@@ -284,11 +337,6 @@ public class DynamicTooltip
         destroy levelString
         this.learnString += "\n "
 
-    function evaluateLearnStringLevel(unit whichUnit, int level) returns string
-        return this.learnLevelString[level-1].evaluateBonus(replaceStrength, whichUnit.getStr(), replaceIntelligence, whichUnit.getInt())
-
-    function evaluateLearnString(unit whichUnit) returns string
-        return this.learnString.evaluateBonus(replaceStrength, whichUnit.getStr(), replaceIntelligence, whichUnit.getInt())
 
     function setNormalString(boolean showCooldown, int level, string normalString)
         this.normalString[level-1] = normalString
@@ -307,22 +355,64 @@ public class DynamicTooltip
         else
             this.turnOffString[level - 1] += "\n "
 
-    function evaluateNormalString(unit whichUnit) returns string
-        let level = whichUnit.getAbilityLevel(this.abilityTypeId)
+
+    
+    function evaluateLearnStringLevel(int level, int strength, int intelligence, bool const) returns string
+        return this.learnLevelString[level-1].evaluateBonus(replaceStrength, strength, replaceIntelligence, intelligence, const)
+
+    function evaluateLearnString(int strength, int intelligence, bool const) returns string
+        return this.learnString.evaluateBonus(replaceStrength, strength, replaceIntelligence, intelligence, const)
+
+    function evaluateNormalString(int level, int strength, int intelligence, bool const) returns string
         string ret = ""
         if level != 0
-            ret = this.normalString[level-1].evaluateBonus(replaceStrength, whichUnit.getStr(), replaceIntelligence, whichUnit.getInt())
+            ret = this.normalString[level-1].evaluateBonus(replaceStrength, strength, replaceIntelligence, intelligence, const)
         return ret
 
-    function evaluateNormalStringLevel(unit whichUnit, int level) returns string
+    function evaluateTurnOffString(int level, int strength, int intelligence, bool const) returns string
         string ret = ""
         if level != 0
-            ret = this.normalString[level-1].evaluateBonus(replaceStrength, whichUnit.getStr(), replaceIntelligence, whichUnit.getInt())
+            ret = this.turnOffString[level-1].evaluateBonus(replaceStrength, strength, replaceIntelligence, intelligence, const)
         return ret
+
+    // Overloaded functions:
+
+    function evaluateLearnStringLevel(int level) returns string
+        return evaluateLearnStringLevel(level, 100, 100, true)
+
+    function evaluateLearnStringLevel(unit whichUnit) returns string
+        return evaluateLearnStringLevel(whichUnit.getAbilityLevel(this.abilityTypeId), whichUnit.getStr(), whichUnit.getInt(), false)
+
+    function evaluateLearnStringLevel(unit whichUnit, int level) returns string
+        return evaluateLearnStringLevel(level, whichUnit.getStr(), whichUnit.getInt(), false)
+
+
+    function evaluateLearnString() returns string
+        return evaluateLearnString(100, 100, true)
+
+    function evaluateLearnString(unit whichUnit) returns string
+        return evaluateLearnString(whichUnit.getStr(), whichUnit.getInt(), false)
+
+
+    function evaluateNormalString(int level) returns string
+        return evaluateNormalString(level, 100, 100, true)
+
+    function evaluateNormalString(unit whichUnit) returns string
+        return evaluateNormalString(whichUnit.getAbilityLevel(this.abilityTypeId), whichUnit.getStr(), whichUnit.getInt(), false)
+
+    function evaluateNormalString(unit whichUnit, int level) returns string
+        return evaluateNormalString(level, whichUnit.getStr(), whichUnit.getInt(), false)
+
+
+    function evaluateTurnOffString(int level) returns string
+        return evaluateTurnOffString(level, 100, 100, true)
 
     function evaluateTurnOffString(unit whichUnit) returns string
-        let lvl = whichUnit.getAbilityLevel(this.abilityTypeId)
-        string ret = ""
-        if lvl != 0
-            ret = this.turnOffString[lvl-1].evaluateBonus(replaceStrength, whichUnit.getStr(), replaceIntelligence, whichUnit.getInt())
-        return ret
+        return evaluateTurnOffString(whichUnit.getAbilityLevel(this.abilityTypeId), whichUnit.getStr(), whichUnit.getInt(), false)
+
+    function evaluateTurnOffString(unit whichUnit, int level) returns string
+        return evaluateTurnOffString(level, whichUnit.getStr(), whichUnit.getInt(), false)
+
+
+
+
