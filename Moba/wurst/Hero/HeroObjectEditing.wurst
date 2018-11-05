@@ -26,6 +26,9 @@ PQWER
 
 */
 
+
+/*  This flag can be set to false to disable setting tooltips at compiletime
+**  Could speed up compiling the map. For the moment it is required due to a bug in 1.30 */
 public constant COMPILETIME_TOOLTIPS = true
 
 public constant CHANNELING_SPELL = "|cffffcc00Channeling Spell:|r\n"
@@ -324,7 +327,7 @@ public class DynamicTooltip
             this.normalString[j] = result
 
     function writeData()
-        if aDef == null
+        if aDef == null or not COMPILETIME_TOOLTIPS
             return
         aDef.setTooltipLearnExtended(this.evaluateLearnString())
         for i = 1 to 5
