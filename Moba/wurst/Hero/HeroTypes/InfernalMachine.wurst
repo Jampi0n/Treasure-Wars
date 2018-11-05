@@ -11,7 +11,7 @@ import ClosureTimers
 
 public constant HERO_INFERNAL_MACHINE = 'H017'
 public constant HERO_INFERNAL_MACHINE_MORPH = 'H01D'
-HeroType heroType
+HeroType heroType = null
 
 
 constant ABILITY_FIERY_HANDS = 'AZ8P'
@@ -437,7 +437,7 @@ function setupTooltips()
             FIERY_HANDS_DMG[lvl-1].str()
         ))
     tooltip.setReplaceIntelligence(FIERY_HANDS_DMG_BONUS)
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_INNER_FIRE)
     tooltip.setLearnString("Increases nearby units strength, armor and willpower.", (int lvl) -> (begin
@@ -454,7 +454,7 @@ function setupTooltips()
             INNER_FIRE_DURATION.str()
         ))
     tooltip.setReplaceIntelligence(INNER_FIRE_DMG_BONUS.toReal(), INNER_FIRE_DEF_BONUS.toReal())
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_FLAME_THROWER)
     tooltip.setLearnString("Launches a fiery missile at the target location that deals large initial damage and ignites the targets, dealing additional damage over time.", (int lvl) -> (begin
@@ -471,7 +471,7 @@ function setupTooltips()
             FLAME_THROWER_DURATION[lvl-1].toExactString()
         ))
     tooltip.setReplaceIntelligence(FLAME_THROWER_DAMAGE_BONUS, FLAME_THROWER_DOT_BONUS)
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 
 function initHeroType()

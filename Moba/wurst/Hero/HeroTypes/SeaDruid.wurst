@@ -11,7 +11,7 @@ import Fx
 import SoundUtils
 
 public constant HERO_SEA_DRUID = 'H00K'
-HeroType heroType
+HeroType heroType = null
 
 constant ABILITY_ANCIENT_KNOWLEDGE = 'AZ3P'
 constant ABILITY_TIDAL_FURY = 'AZ3Q'
@@ -460,7 +460,7 @@ function setupTooltips()
     tooltip
         ..setReplaceStrength(TIDAL_FURY_HIT_DMG_BONUS)
         ..setReplaceIntelligence(TIDAL_FURY_WAVE_DMG_BONUS)
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_GIANT_FISH)
     tooltip.setLearnString("Throws a giant fish at the target location, damaging and slowing enemies in the area.", (int lvl) -> (begin
@@ -471,7 +471,7 @@ function setupTooltips()
         tooltip.setNormalString(true, lvl, "Throws a giant fish at the target location, dealing {0}{I0} magic damage and slowing attack speed by {1}% and movement speed by {2}% for {3} seconds.".format(
             FISH_DAMAGE[lvl-1].str(), FISH_ATTACK_SPEED[lvl-1].str(), FISH_MOVE_SPEED[lvl-1].str(), FISH_SLOW_DURATION[lvl-1].str()))
     tooltip.setReplaceIntelligence(FISH_DAMAGE_BONUS)
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_RITUAL_OF_THE_SEAS)
     tooltip.setLearnString(CHANNELING_SPELL + "Sends out magical energy, that drains hit points and mana from nearby enemies.|nThe Sea Druid gets {0}% of the hit points and {1}% of the mana drained from enemy heroes.".format(
@@ -484,7 +484,7 @@ function setupTooltips()
         tooltip.setNormalString(true, lvl, CHANNELING_SPELL + "Sends out magical energy, that drain {0}{I0} hit points and {1}{I1} mana from nearby enemies.|nLasts for {2} waves.|nThe Sea Druid gets {3}% of the hit points and {4}% of the mana drained from enemy heroes.".format(
             RITUAL_HP_DRAIN[lvl-1].str(), RITUAL_MANA_DRAIN[lvl-1].str(), RITUAL_WAVE_COUNT[lvl-1].str(), RITUAL_HP_RATIO.str(), RITUAL_MANA_RATIO.str()))
     tooltip.setReplaceIntelligence(RITUAL_HP_DRAIN_BONUS, RITUAL_MANA_DRAIN_BONUS)
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 function initHeroType()
     setupStats()

@@ -9,7 +9,7 @@ import ClosureTimers
 import DamageDetection
 
 public constant HERO_DESTROYER = 'H00R'
-HeroType heroType
+HeroType heroType = null
 
 public constant ABILITY_DEATH_FRENZY = 'AY3P'
 constant ABILITY_BREATH = 'AY3Q'
@@ -22,21 +22,25 @@ group hitByBreath = CreateGroup()
 
 public constant real array DEATH_FRENZY_BONUS = [25, 35, 45, 55, 65]
 
-@compiletime
-function passive()
-    let aDef = createNoEffectAbiltiy(ABILITY_DEATH_FRENZY)
-        ..setupIcon("PASbloodpresence")
-        ..setupWithHotKey("Death Frenzy", "D")
-        ..setLearnString("The Destroyer deals increased damage from all sources, the more injured he becomes.", (int lvl) -> (begin
-            return "up to {0}% increased damage.".format(
-                DEATH_FRENZY_BONUS[lvl-1].str())
-        end) )
+function passive(int abilityId)
+    if compiletime
+        createNoEffectAbiltiy(abilityId)
+            ..setupIcon("PASbloodpresence")
+            ..setupWithHotKey("Death Frenzy", "D")
 
+
+    DynamicTooltip tooltip = new DynamicTooltip(abilityId)
+    tooltip.setLearnString("The Destroyer deals increased damage from all sources, the more injured he becomes.", (int lvl) -> (begin
+        return "up to {0}% increased damage.".format(
+            DEATH_FRENZY_BONUS[lvl-1].str())
+    end) )
+    
     for lvl = 1 to 5
-        aDef
-            ..setDescriptionString(false, lvl, "The Destroyer deals up to {0}% increased damage from all sources, the more injured he becomes".format( 
-                DEATH_FRENZY_BONUS[lvl-1].str())
-            )
+        tooltip.setNormalString(false, lvl, "The Destroyer deals up to {0}% increased damage from all sources, the more injured he becomes".format( 
+            DEATH_FRENZY_BONUS[lvl-1].str())
+        )
+    tooltip.setReplaceIntelligence(0)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 
 constant integer BUFF_ID_ON_BREATH = compiletime(createDummyBuff())
@@ -53,31 +57,46 @@ constant int BREATH_BUFF_ID = compiletime(createAuraBuff("Melting Breath", "This
 constant int BREATH_ABILITY_ID = compiletime(createNegativeBuffAbility(5, BREATH_BUFF_ID, Abilities.lordofFlameMissile, "chest"))
 
 
-@compiletime
-function abilityQ()
+function abilityQ(int abilityId)
     int array MANA = [90, 95, 100, 105, 110]
     real array COOLDOWN = [8, 8, 8, 8, 8]
     real array RANGE = [450, 450, 450, 450, 450]
 
-    let aDef = new AbilityDefinitionBreathofFrostCreep(ABILITY_BREATH)
-        ..setupIcon("BTNFlameBurst")
-        ..setupWithHotKey("Melting Breath", "Q")
-        ..setAnimationNames("spell,channel")
-        ..setMissileArt(Abilities.breathOfFireMissile)
+    if compiletime
+        let aDef = new AbilityDefinitionBreathofFrostCreep(abilityId)
+            ..setupIcon("BTNFlameBurst")
+            ..setupWithHotKey("Melting Breath", "Q")
+            ..setAnimationNames("spell,channel")
+            ..setMissileArt(Abilities.breathOfFireMissile)
 
+        for lvl = 1 to 5
+            aDef
+                ..setCooldown(lvl, COOLDOWN[lvl-1])
+                ..setManaCost(lvl, MANA[lvl-1])
+                ..setCastRange(lvl, RANGE[lvl-1])
+                ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
+                ..setDamage(lvl, 0.01)
+                ..setDamagePerSecond(lvl, 0.01)
+                ..setBuffs(lvl, BUFF_ID_ON_BREATH.toRawCode())
+                ..setDistance(lvl, 375)
+                ..setFinalArea(lvl, 300)
+                ..setMaxDamage(lvl, 99999)
+                ..setAreaofEffect(lvl, 125)
+
+    DynamicTooltip tooltip = new DynamicTooltip(abilityId)
+    tooltip.setLearnString("Breathes a cone of fire at enemy units, dealing magic damage. The heat melts the target's armor, reducing it for {0} seconds.".format(
+        BREATH_DURATION.str()
+    ), (int lvl) -> (begin
+        return "{0}{I0} damage, {1}% armor reduction.".format(
+        BREATH_DAMAGE[lvl-1].str(), BREATH_ARMOR_REDUCTION[lvl-1].str())
+    end) )
+    
     for lvl = 1 to 5
-        aDef
-            ..setCooldown(lvl, COOLDOWN[lvl-1])
-            ..setManaCost(lvl, MANA[lvl-1])
-            ..setCastRange(lvl, RANGE[lvl-1])
-            ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
-            ..setDamage(lvl, 0.01)
-            ..setDamagePerSecond(lvl, 0.01)
-            ..setBuffs(lvl, BUFF_ID_ON_BREATH.toRawCode())
-            ..setDistance(lvl, 375)
-            ..setFinalArea(lvl, 300)
-            ..setMaxDamage(lvl, 99999)
-            ..setAreaofEffect(lvl, 125)
+        tooltip.setNormalString(true, lvl, "Breathes a cone of fire at enemy units, dealing {0}{I0} magic damage. The heat melts the target's armor, reducing it by {1}% for {2} seconds.".format(
+            BREATH_DAMAGE[lvl-1].str(), BREATH_ARMOR_REDUCTION[lvl-1].str(), BREATH_DURATION.str()
+            ))
+    tooltip.setReplaceIntelligence(BREATH_DAMAGE_BONUS)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 
 constant real array IMMOLATION_DAMAGE = [32, 44, 56, 68, 80]
@@ -90,63 +109,80 @@ BuffType buffImmolation
 constant IMMOLATION_BUFF_ID = compiletime(BUFF_ID_GEN.next())
 
 
-@compiletime
-function abilityW()
+function abilityW(int abilityId)
     int array MANA = [25, 25, 25, 25, 25]
     real AOE = 250
-    
-    new BuffDefinition(IMMOLATION_BUFF_ID, 'BEim')
-        ..setTooltipNormalExtended(1, "This unit has Immolation; it attacks faster and nearby enemy units will take damage over time.")
-        ..setArtSpecial(1, Abilities.immolationRedDamage)
-        ..setArtTarget(1, Abilities.immolationREDTarget)
-        ..setTargetAttachmentPoint0(1, "chest")
+    if compiletime
+        new BuffDefinition(IMMOLATION_BUFF_ID, 'BEim')
+            ..setTooltipNormalExtended(1, "This unit has Immolation; it attacks faster and nearby enemy units will take damage over time.")
+            ..setArtSpecial(1, Abilities.immolationRedDamage)
+            ..setArtTarget(1, Abilities.immolationREDTarget)
+            ..setTargetAttachmentPoint0(1, "chest")
 
-    let aDef = new AbilityDefinitionDemonHunterImmolation(ABILITY_IMMOLATION)
-        ..setupIcon(Icons.bTNImmolationOn)
-        ..setIconTurnOff(Icons.bTNImmolationOff)
-        ..setupWithHotKey("Immolation", "W")
-        ..setTurnOff("Deactivate Immolation","W")
-        ..setAnimationNames("spell")
+        let aDef = new AbilityDefinitionDemonHunterImmolation(abilityId)
+            ..setupIcon(Icons.bTNImmolationOn)
+            ..setIconTurnOff(Icons.bTNImmolationOff)
+            ..setupWithHotKey("Immolation", "W")
+            ..setTurnOff("Deactivate Immolation","W")
+            ..setAnimationNames("spell")
 
+        for lvl = 1 to 5
+            aDef
+                ..setCooldown(lvl, 0)
+                ..setManaCost(lvl, MANA[lvl-1])
+                ..setAreaofEffect(lvl, AOE)
+                ..setManaDrainedperSecond(lvl, IMMOLATION_MANA_DRAIN[lvl-1])
+                ..setBuffs(lvl, IMMOLATION_BUFF_ID.toRawCode()+",BEia")
+                ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
+                ..setTooltipTurnOffExtended(lvl, "Deactivate to stop draining mana and life.")
+
+    DynamicTooltip tooltip = new DynamicTooltip(abilityId)
+    tooltip.setLearnString("Engulfs the Destroyer in flames, damaging nearby enemies and the Destroyer himself. Heroes take double damage. Also increases the Destroyer's attack speed.|nDrains mana until deactivated.", (int lvl) -> (begin
+        return "{0}{I0} damage per second, {1}% attack speed.".format(
+        IMMOLATION_DAMAGE[lvl-1].str(),
+        IMMOLATION_ATTACK_SPEED[lvl-1].str())
+    end) )
     for lvl = 1 to 5
-        aDef
-            ..setCooldown(lvl, 0)
-            ..setManaCost(lvl, MANA[lvl-1])
-            ..setAreaofEffect(lvl, AOE)
-            ..setManaDrainedperSecond(lvl, IMMOLATION_MANA_DRAIN[lvl-1])
-            ..setBuffs(lvl, IMMOLATION_BUFF_ID.toRawCode()+",BEia")
-            ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
-            ..setTooltipTurnOffExtended(lvl, "Deactivate to stop draining mana and life.")
+        tooltip.setNormalString(false, lvl, "Engulfs the Destroyer in flames, dealing {0}{I0} damage per second to nearby enemies and the Destroyer himself. Heroes take double damage. Also increases the Destroyer's attack speed by {1}%.|nDrains mana until deactivated.".format(
+            IMMOLATION_DAMAGE[lvl-1].str(),
+            IMMOLATION_ATTACK_SPEED[lvl-1].str()))
+    tooltip.setReplaceIntelligence(IMMOLATION_DAMAGE_BONUS)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 
 constant int array WALL_NUMBER = [6, 7, 8, 9, 10]
 constant real array WALL_DURATION = [4, 4.5, 5, 5.5, 6]
 
-@compiletime
-function abilityE()
+function abilityE(int abilityId)
     int array MANA = [90, 90, 90, 90, 90]
     real array COOLDOWN = [17, 16, 15, 14, 13]
     real array RANGE = [1000, 1000, 1000, 1000, 1000]
 
+    if compiletime
+        let aDef = new AbilityDefinitionIllidanChannel(abilityId)
+            ..setAnimationNames("spell")
+            ..setupIcon("BTNNecromancy")
+            ..setupWithHotKey("Bone Wall", "E")
+            ..setupChannel(TargetType.POINT, "ward", 0.5)
 
-    let aDef = new AbilityDefinitionIllidanChannel(ABILITY_BONE_WALL)
-        ..setAnimationNames("spell")
-        ..setupIcon("BTNNecromancy")
-        ..setupWithHotKey("Bone Wall", "E")
-        ..setupChannel(TargetType.POINT, "ward", 0.5)
-        ..setLearnString("Summons a wall of bones at the target location, blocking the way for the Destroyer's victims to flee. The wall gets bigger on higher levels.", (int lvl) -> (begin
-            return "Lasts {0} seconds.".format(
-                WALL_DURATION[lvl-1].toExactString())
-        end) )
+        for lvl = 1 to 5
+            aDef
+                ..setCastRange(lvl, RANGE[lvl-1])
+                ..setCooldown(lvl, COOLDOWN[lvl-1])
+                ..setManaCost(lvl, MANA[lvl-1])
 
+    DynamicTooltip tooltip = new DynamicTooltip(abilityId)
+    tooltip.setLearnString("Summons a wall of bones at the target location, blocking the way for the Destroyer's victims to flee. The wall gets bigger on higher levels.", (int lvl) -> (begin
+        return "Lasts {0} seconds.".format(
+            WALL_DURATION[lvl-1].toExactString())
+    end) )
+    
     for lvl = 1 to 5
-        aDef
-            ..setCastRange(lvl, RANGE[lvl-1])
-            ..setCooldown(lvl, COOLDOWN[lvl-1])
-            ..setManaCost(lvl, MANA[lvl-1])
-            ..setDescriptionString(false, lvl, "Summons a wall of bones at the target location, blocking the way for the Destroyer's victims to flee. Lasts {0} seconds.".format(
-                WALL_DURATION[lvl-1].toExactString()
-            ))
+        tooltip.setNormalString(true, lvl, "Summons a wall of bones at the target location, blocking the way for the Destroyer's victims to flee. Lasts {0} seconds.".format(
+            WALL_DURATION[lvl-1].toExactString()
+        ))
+    tooltip.setReplaceIntelligence(0)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 
         
@@ -184,30 +220,47 @@ constant int PREY_CASTER_ABILITY_ID = compiletime(createPositiveBuffAbility(5, P
 
 BuffType buffRage
 
-@compiletime
-function abilityR()
+function abilityR(int abilityId)
     int array MANA = [140, 150, 160, 170, 180]
     real array COOLDOWN = [75, 75, 75, 75, 75]
     real RANGE = 900
 
-    let aDef = new AbilityDefinitionIllidanChannel(ABILITY_WILD_RAGE)
-        ..setAnimationNames("spell")
-        ..setupChannel(TargetType.UNIT, "channel", 0.5)
-        ..setupIcon(Icons.bTNUnholyFrenzy)
-        ..setupWithHotKey("Hunter and Prey", "R")
-        ..setLightningEffects("")
-        ..setArtTarget("")
-        ..setMissileArt("")
-        ..setArtSpecial("")
-        ..setLightningEffects("")
-        ..setCheckDependencies(true)
+    if compiletime
+        let aDef = new AbilityDefinitionIllidanChannel(abilityId)
+            ..setAnimationNames("spell")
+            ..setupChannel(TargetType.UNIT, "channel", 0.5)
+            ..setupIcon(Icons.bTNUnholyFrenzy)
+            ..setupWithHotKey("Hunter and Prey", "R")
+            ..setLightningEffects("")
+            ..setArtTarget("")
+            ..setMissileArt("")
+            ..setArtSpecial("")
+            ..setLightningEffects("")
+            ..setCheckDependencies(true)
 
+        for lvl = 1 to 5
+            aDef
+                ..setCooldown(lvl, COOLDOWN[lvl-1])
+                ..setManaCost(lvl, MANA[lvl-1])
+                ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
+                ..setCastRange(lvl, RANGE)
+
+
+    DynamicTooltip tooltip = new DynamicTooltip(abilityId)
+    tooltip.setLearnString("Marks the target enemy unit as his prey. The Destroyer will have increased movmement speed when moving towards the prey. Every attack against the prey deals bonus damage and slows the prey. Lasts {0} seconds.".format(PREY_DURATION.toExactString()), (int lvl) -> (begin
+        return "{0} damage, {1}% movement speed".format(
+            PREY_BONUS_DAMAGE[lvl-1].str(),
+            PREY_MOVE_SPEED[lvl-1].str())
+    end) )
+    
     for lvl = 1 to 5
-        aDef
-            ..setCooldown(lvl, COOLDOWN[lvl-1])
-            ..setManaCost(lvl, MANA[lvl-1])
-            ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
-            ..setCastRange(lvl, RANGE)
+        tooltip.setNormalString(true, lvl, "Marks the target enemy unit as his prey. The Destroyer will have move {2}% faster when moving towards the prey. Every attack against the prey deals {0} bonus damage and slows the prey. Lasts {0} seconds.".format(
+            PREY_DURATION.str(),
+            PREY_BONUS_DAMAGE[lvl-1].str(),
+            PREY_MOVE_SPEED[lvl-1].str())
+        )
+    tooltip.setReplaceIntelligence(0)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 
 
@@ -323,52 +376,20 @@ function attackAI(HeroAI _ai)
 
 function teamFightAI(HeroAI _ai)
             
-
+@compiletime
 function setupTooltips()
 
-    tooltip = new DynamicTooltip(ABILITY_BREATH)
-    tooltip.setLearnString("Breathes a cone of fire at enemy units, dealing magic damage. The heat melts the target's armor, reducing it for {0} seconds.".format(
-        BREATH_DURATION.str()
-    ), (int lvl) -> (begin
-        return "{0}{I0} damage, {1}% armor reduction.".format(
-        BREATH_DAMAGE[lvl-1].str(), BREATH_ARMOR_REDUCTION[lvl-1].str())
-    end) )
-    
-    for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, "Breathes a cone of fire at enemy units, dealing {0}{I0} magic damage. The heat melts the target's armor, reducing it by {1}% for {2} seconds.".format(
-            BREATH_DAMAGE[lvl-1].str(), BREATH_ARMOR_REDUCTION[lvl-1].str(), BREATH_DURATION.str()
-            ))
-    tooltip.setReplaceIntelligence(BREATH_DAMAGE_BONUS)
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    passive(ABILITY_DEATH_FRENZY)
+    abilityQ(ABILITY_BREATH)
+    abilityW(ABILITY_IMMOLATION)
+    abilityE(ABILITY_BONE_WALL)
+    abilityR(ABILITY_WILD_RAGE)
 
-    tooltip = new DynamicTooltip(ABILITY_IMMOLATION)
-    tooltip.setLearnString("Engulfs the Destroyer in flames, damaging nearby enemies and the Destroyer himself. Heroes take double damage. Also increases the Destroyer's attack speed.|nDrains mana until deactivated.", (int lvl) -> (begin
-        return "{0}{I0} damage per second, {1}% attack speed.".format(
-        IMMOLATION_DAMAGE[lvl-1].str(),
-        IMMOLATION_ATTACK_SPEED[lvl-1].str())
-    end) )
-    for lvl = 1 to 5
-        tooltip.setNormalString(false, lvl, "Engulfs the Destroyer in flames, dealing {0}{I0} damage per second to nearby enemies and the Destroyer himself. Heroes take double damage. Also increases the Destroyer's attack speed by {1}%.|nDrains mana until deactivated.".format(
-            IMMOLATION_DAMAGE[lvl-1].str(),
-            IMMOLATION_ATTACK_SPEED[lvl-1].str()))
-    tooltip.setReplaceIntelligence(IMMOLATION_DAMAGE_BONUS)
-    heroType.addDynamicTooltipIntelligence(tooltip)
 
-    DynamicTooltip tooltip = new DynamicTooltip(ABILITY_WILD_RAGE)
-    tooltip.setLearnString("Marks the target enemy unit as his prey. The Destroyer will have increased movmement speed when moving towards the prey. Every attack against the prey deals bonus damage and slows the prey. Lasts {0} seconds.".format(PREY_DURATION.toExactString()), (int lvl) -> (begin
-        return "{0} damage, {1}% movement speed".format(
-            PREY_BONUS_DAMAGE[lvl-1].str(),
-            PREY_MOVE_SPEED[lvl-1].str())
-    end) )
+
+
+
     
-    for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, "Marks the target enemy unit as his prey. The Destroyer will have move {2}% faster when moving towards the prey. Every attack against the prey deals {0} bonus damage and slows the prey. Lasts {0} seconds.".format(
-            PREY_DURATION.str(),
-            PREY_BONUS_DAMAGE[lvl-1].str(),
-            PREY_MOVE_SPEED[lvl-1].str())
-        )
-    tooltip.setReplaceIntelligence(0)
-    heroType.addDynamicTooltipIntelligence(tooltip)
 
 function initHeroType()
     setupStats()

@@ -10,7 +10,7 @@ import Fx
 
 public constant HERO_ELEMENTAL_MAGE = 'H00P'
 
-HeroType heroType
+HeroType heroType = null
 
 
 constant ABILITY_FRENZY = 'AY1P'
@@ -301,7 +301,7 @@ function setupTooltips()
             FROST_BOLT_DAMAGE[lvl-1].str(), FROST_BOLT_SLOW[lvl-1].str(), FROST_BOLT_DURATION[lvl-1].toExactString()
         ))
     tooltip.setReplaceIntelligence(FROST_BOLT_DAMAGE_BONUS)
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_FIRE_BLINK)
     tooltip.setLearnString("Teleports the Elemental Mage to the target location, dealing fire damage to nearby enemy units.", (int lvl) -> (begin
@@ -313,7 +313,7 @@ function setupTooltips()
             FIRE_BLINK_DAMAGE[lvl-1].str()
         ))
     tooltip.setReplaceIntelligence(FIRE_BLINK_DAMAGE_BONUS)
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_ELEMENTAL_MARK)
     tooltip.setLearnString("Reduces the target unit's willpower and makes it take additional magic damage, when the Elemental Mage attacks. After {2} attacks the target is stunned for {0} seconds. Lasts {1} seconds.".format(
@@ -328,7 +328,7 @@ function setupTooltips()
             MARK_STUN.toExactString(), MARK_DURATION.toExactString(), MARK_WP_REDUCTION[lvl-1].toString(), MARK_DMG[lvl-1].str(), MARK_REQUIRED_STACKS.str()
         ))
     tooltip.setReplaceIntelligence(MARK_DMG_BONUS)
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 
     tooltip = new DynamicTooltip(ABILITY_FROST_AND_FLAME)
@@ -343,7 +343,7 @@ function setupTooltips()
             FF_IMPACT_DAMAGE[lvl-1].str(), FF_DOT[lvl-1].str(), FF_SLOW[lvl-1].str(), FF_BUFF_DURATION[lvl-1].toExactString()
         ))
     tooltip.setReplaceIntelligence(FF_IMPACT_DAMAGE_BONUS, FF_DOT_BONUS, FF_BUFF_DURATION_BONUS)
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 
 function initHeroType()

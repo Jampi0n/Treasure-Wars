@@ -9,7 +9,7 @@ import OnAttack
 import Fx
 
 public constant HERO_VOODOO_ARCHER = 'H012'
-HeroType heroType
+HeroType heroType = null
 
 constant ABILITY_VOODOO_ARROWS = 'AY2P'
 constant ABILITY_GHOST_ARROWS = 'AY2Q'
@@ -261,7 +261,7 @@ function setupTooltips()
             GHOST_ARROWS_DAMAGE[lvl-1].str())
         )
     tooltip.setReplaceStrength(GHOST_ARROWS_DAMAGE_BONUS)
-    heroType.addDynamicTooltipStrength(tooltip)
+    addDynamicTooltipStrength(heroType, tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_MIND_CURSE)
     tooltip.setLearnString("Burns mana of the target enemy unit over time and silences it.", (int lvl) -> (begin
@@ -274,7 +274,7 @@ function setupTooltips()
             MIND_CURSE_MANA_DRAIN[lvl-1].str(),
         MIND_CURSE_DURATION[lvl-1].toExactString()))
     tooltip.setReplaceIntelligence(MIND_CURSE_MANA_DRAIN_BONUS, MIND_CURSE_DURATION_BONUS)
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_SERPENT_WARD)
     tooltip.setLearnString("Summons an immobile serpentine ward to attack nearby enemies for {0} seconds. Attacked targets have their armor and movement speed reduced. Stacks up to {1} times.".format(SERPENT_WARD_DURATION.toExactString(), SERPENT_POSION_MAX_STACKS.toString()), (int lvl) -> (begin
@@ -292,7 +292,7 @@ function setupTooltips()
             SERPENT_POSION_MAX_STACKS.toString()))
 
     tooltip.setReplaceIntelligence(0)
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_BIG_BAD_VOODOO)
     tooltip.setLearnString("Deals void damage to all enemy heroes while channeling.".format(BBV_DURATION.toExactString()), (int lvl) -> (begin
@@ -304,7 +304,7 @@ function setupTooltips()
         tooltip.setNormalString(true, lvl, "Deals {0}{I0} void damage per second to all enemy heroes while channeling.".format(
             BBV_DAMAGE[lvl-1].str()))
     tooltip.setReplaceIntelligence(BBV_DAMAGE_BONUS)
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 function initHeroType()
     setupStats()

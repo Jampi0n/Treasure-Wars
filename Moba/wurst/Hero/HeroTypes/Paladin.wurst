@@ -10,7 +10,7 @@ import SoundUtils
 
 
 public constant HERO_PALADIN = 'H000'
-HeroType heroType
+HeroType heroType = null
 
 public constant ABILITY_HEAVY_ARMORED = 'AZ2P'
 constant ABILITY_SHIELD_BASH = 'AZ2Q'
@@ -419,7 +419,7 @@ function setupTooltips()
             SHIELD_BASH_DMG[lvl-1].str(),
             SHIELD_BASH_DURATION[lvl-1].toExactString()))
     tooltip.setReplaceStrength(SHIELD_BASH_DMG_BONUS)
-    heroType.addDynamicTooltipStrength(tooltip)
+    addDynamicTooltipStrength(heroType, tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_BATTLE_ROAR)
     tooltip.setLearnString("Increases nearby units' attack and movement speed.", (int lvl) -> (begin
@@ -434,7 +434,7 @@ function setupTooltips()
             BATTLE_ROAR_MS[lvl-1].str()+"%",
             BATTLE_ROAR_DURATION[lvl-1].toExactString()))
     tooltip.setReplaceIntelligence(BATTLE_ROAR_DURATION_BONUS)
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_HOLY_SHIELD)
     tooltip.setLearnString("Turns the target frendly hero untargetable.", (int lvl) -> (begin
@@ -446,7 +446,7 @@ function setupTooltips()
             HOLY_SHIELD_DURATION[lvl-1].toExactString()
             ))
     tooltip.setReplaceIntelligence(HOLY_SHIELD_DURATION_BONUS)
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_DIVINE_PUNISHMENT)
     tooltip.setLearnString(CHANNELING_SPELL + "Calls upon the power of the gods. After two seconds of channeling nearby enemies will be struck by divine magic.", (int lvl) -> (begin
@@ -458,7 +458,7 @@ function setupTooltips()
             DIVINE_PUNISHMENT_DMG[lvl-1].str()
         ))
     tooltip.setReplaceIntelligence(DIVINE_PUNISHMENT_DMG_BONUS)
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 function initHeroType()
     setupStats()

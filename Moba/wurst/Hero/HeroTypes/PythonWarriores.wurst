@@ -18,7 +18,7 @@ constant ABILITY_EMPOWERED_STRIKE = 'AZ0E'
 constant ABILITY_PARALYZING_STRIKE = 'AZ0R'
 
 public constant HERO_PYTHON_WARRIORES = 'H00J'
-HeroType heroType
+HeroType heroType = null
 
 //Balancing and Object Editing
 constant real array ENVENOMED_BLADES_DAMAGE = [5, 10, 15, 20, 25]
@@ -338,7 +338,7 @@ function setupTooltips()
             ENVENOMED_BLADES_DURATION[lvl-1].str())
             )
     tooltip.setReplaceIntelligence(ENVENOMED_BLADES_DAMAGE_BONUS)
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_MISTWALK)
     tooltip.setLearnString("Turns the Python Warriores invisibile.", (int lvl) -> (begin
@@ -349,7 +349,7 @@ function setupTooltips()
         tooltip.setNormalString(true, lvl, "Turns the Python Warriores invisibile for {0}{I0} seconds.".format(
             MISTWALK_DURATION[lvl-1].toExactString()))
     tooltip.setReplaceIntelligence(MISTWALK_DURATION_BONUS)
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_POISON_SPIT)
     tooltip.setLearnString("Spits poison at the target area. Enemies within the area of effect are slowed, have reduced armor and take damage over time.",
@@ -364,7 +364,7 @@ function setupTooltips()
         tooltip.setNormalString(true, lvl, "Spits poison at the target area. Enemies within the area of effect are slowed by {0}, have their armor reduced by {1} and take {2}{I0} damage per second.|nLasts {3} seconds.".format(
             (-POISON_SPIT_SLOW_MS[lvl-1]).str()+"%", (-POISON_SPIT_ARMOR_REDUCTION[lvl-1]).str(), POISON_SPIT_DOT[lvl-1].str(), POISON_SPIT_DURATION[lvl-1].str()))
     tooltip.setReplaceIntelligence(POISON_SPIT_DOT_BONUS)
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_EMPOWERED_STRIKE)
     tooltip.setLearnString("Strikes the target enemy unit with a powerful melee attack dealing physical damage.", (int lvl) -> (begin
@@ -374,7 +374,7 @@ function setupTooltips()
         tooltip.setNormalString(true, lvl, "Strikes the target enemy unit with a powerful melee attack dealing {0}{S0} physical damage.".format( 
             EMPOWERED_STRIKE_DAMAGE[lvl-1].str()))
     tooltip.setReplaceStrength(EMPOWERED_STRIKE_DAMAGE_BONUS)
-    heroType.addDynamicTooltipStrength(tooltip)
+    addDynamicTooltipStrength(heroType, tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_PARALYZING_STRIKE)
     tooltip.setLearnString("Deals massive magical damage to the target, stunning it and teleports the Python Warriores behind the target.", (int lvl) -> (begin
@@ -387,7 +387,7 @@ function setupTooltips()
             PARALYZING_STRIKE_DAMAGE[lvl-1].str(),
             PARALYZING_STRIKE_DURATION[lvl-1].toExactString()))
     tooltip.setReplaceIntelligence(PARALYZING_STRIKE_DAMAGE_BONUS, PARALYZING_STRIKE_DURATION_BONUS)
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 function initHeroType()
     setupStats()

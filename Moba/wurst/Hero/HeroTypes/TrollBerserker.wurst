@@ -10,7 +10,7 @@ import OnAttack
 public constant HERO_TROLL_BERSERKER = 'H00X'
 public constant HERO_TROLL_BERSERKER_MELEE = 'H018'
 
-HeroType heroType
+HeroType heroType = null
 
 
 constant ABILITY_FOCUS = 'AZ7P'
@@ -362,7 +362,7 @@ function setupTooltips()
         tooltip.setNormalString(true, lvl, "Increases the Troll Berserker's maximum hit points by {0}{I0} and hit point regeneration by {1} hit points per second for {2} seconds. When activated, the Troll Berserker petrifies nearby enemies making them unable to move for {3} seconds.".format(
             GROWTH_HP[lvl-1].str(), GROWTH_HP_REGEN[lvl-1].str(), GROWTH_DURATION[lvl-1].str(), GROWTH_FEAR_DURATION[lvl-1].toExactString()))
     tooltip.setReplaceIntelligence(GROWTH_HP_BONUS)
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 
 function initHeroType()
