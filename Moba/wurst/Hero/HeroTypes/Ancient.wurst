@@ -12,7 +12,7 @@ import Fx
 public constant HERO_TREE = 'H014'
 public constant HERO_TREE_ROOTED = 'H015'
 
-HeroType heroType
+HeroType heroType = null
 
 constant UPROOTED = compiletime(UNIT_ID_GEN.next())
 
@@ -493,7 +493,10 @@ function teamFightAI(HeroAI ai)
         if not ai.getAttacking()
             ai.attack(target)
 
+@compiletime
 function setupTooltips()
+    if compiletime and not COMPILETIME_TOOLTIPS
+        return
     DynamicTooltip tooltip = new DynamicTooltip(ABILITY_EAT_UNIT)
     tooltip.setLearnString(CHANNELING_SPELL + "Grabs the target enemy unit to devour it, healing the hero.", (int lvl) -> (begin
         return "{0}{I0} hit points healed, {1} seconds cooldown.".format( DEVOUR_HEAL[lvl-1].str(), DEVOUR_COOLDOWN[lvl-1].str())
@@ -503,7 +506,7 @@ function setupTooltips()
             DEVOUR_HEAL[lvl-1].str()
         ))
     tooltip.setReplaceIntelligence(DEVOUR_HEAL_BONUS)
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_IMPALE)
     tooltip.setLearnString("Releases thorns in a line, damaging and entangling every enemy unit they pass through.", (int lvl) -> (begin
@@ -515,7 +518,7 @@ function setupTooltips()
             ENTANGLE_HIT_DAMAGE[lvl-1].str(), ENTANGLE_DURATION[lvl-1].toExactString()
         ))
     tooltip.setReplaceIntelligence(ENTANGLE_HIT_DAMAGE_BONUS, ENTANGLE_DURATION_BONUS)
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_ROOT)
     tooltip.setLearnString("Burrows the Ancient's roots into the ground, rendering it immobile, but allowing to hurl enormous rocks dealing area of effect damage. The Ancient's armor and willpower are increased while rooted.", (int lvl) -> (begin
@@ -527,7 +530,7 @@ function setupTooltips()
             ROOT_AOE_DAMAGE[lvl-1].str(), ROOT_RESISTANCE[lvl-1].str()
         ))
     tooltip.setReplaceStrength(ROOT_AOE_DAMAGE_BONUS)        
-    heroType.addDynamicTooltipStrength(tooltip)
+    addDynamicTooltipStrength(heroType, tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_NATURES_WRATH)
     tooltip.setLearnString("Covers the ancient in a storm of sharp leaves, that deal damage to nearby enemies.", (int lvl) -> (begin
@@ -541,7 +544,7 @@ function setupTooltips()
             NATURES_WRATH_TOTAL_DAMAGE[lvl-1].str(), NATURES_WRATH_DURATION[lvl-1].str()
         ))
     tooltip.setReplaceIntelligence(NATURES_WRATH_TOTAL_DAMAGE_BONUS)
-    heroType.addDynamicTooltipIntelligence(tooltip)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 function initHeroType()
     setupStats()

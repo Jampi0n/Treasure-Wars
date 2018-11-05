@@ -16,6 +16,7 @@ import Buff
 import ObjectEditingPreset
 import Assets
 import LinkedList
+import OnAttack
 
 public constant int ALTAR = 'h002'
 public constant int ARCANE_SANCTUM = 'h008'
@@ -46,6 +47,16 @@ constant real WORKSHOP_REBUILD_TIME = 60
 
 constant int SHOP_SHARING = 'Aall'
 
+constant int TOWER_FOCUS_ARMOR = 25
+constant real TOWER_FOCUS_DUR = 4
+constant int TOWER_FOCUS_ABILITY_ID = 'A00O'
+
+BuffType buffTowerFocus
+
+constant int TOWER_FOCUS_BUFF_ID = compiletime(createAuraBuff("Tower Focus", "This unit was hit by a Tower; it has reduced armor.", Icons.bTNHumanWatchTower))
+constant int TOWER_FOCUS_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, TOWER_FOCUS_BUFF_ID, "", "chest"))
+    
+let a = "|cffffcc00gdg|r"
 
 enum VictoryState
     UNDECIDED
@@ -610,6 +621,39 @@ init
     CreateTrigger()
         ..registerTimerEvent(0.2, true)
         ..addAction(function homeInvulnerability)
+
+
+
+    buffTowerFocus = new BuffType(false, true)
+
+    abilityList = new LinkedList<int>
+    ..add(TOWER_FOCUS_ABILTIY_ID)
+    buffTowerFocus.setup(abilityList, TOWER_FOCUS_BUFF_ID)
+
+    buffTowerFocus.addFirstFunction( (Buff whichBuff) -> (begin
+        whichBuff.getTarget().wrapper()
+            ..addStatAbsoluteBonus(Stat.AR, -TOWER_FOCUS_ARMOR)
+        whichBuff.setData(1)
+    end))
+
+    buffTowerFocus.addStackFunction( (Buff whichBuff) -> (begin
+        let stacks = whichBuff.getData() + 1
+        whichBuff.setData(stacks)
+        whichBuff.getTarget().wrapper()
+            ..addStatAbsoluteBonus(Stat.AR, -TOWER_FOCUS_ARMOR)
+    end))
+
+
+    buffTowerFocus.addEndFunction( (Buff whichBuff) -> (begin
+        let stacks = whichBuff.getData()
+        whichBuff.getTarget().wrapper()
+            ..addStatAbsoluteBonus(Stat.AR, TOWER_FOCUS_ARMOR * stacks)
+    end))
+
+    OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+        if attacker.getAbilityLevel(TOWER_FOCUS_ABILITY_ID)>0 and target.isType(UNIT_TYPE_HERO)
+            target.addBuffReduced(attacker, TOWER_FOCUS_DUR, buffTowerFocus, 1)
+    end))
         
 
     /*group buildings = CreateGroup()
