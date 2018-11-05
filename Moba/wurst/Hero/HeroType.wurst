@@ -237,6 +237,7 @@ public class HeroType
             
 
     function updateTooltipsStr(unit whichUnit)
+        return
         for dynamicTooltip in dynamicStrength
             let abilityTypeId = dynamicTooltip.getAbilityTypeId()
             BlzSetAbilityExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateNormalString(whichUnit), whichUnit.getAbilityLevel(abilityTypeId))
@@ -246,7 +247,7 @@ public class HeroType
         
 
     function updateTooltipsInt(unit whichUnit)
-        
+        return
         for dynamicTooltip in dynamicIntelligence
             let abilityTypeId = dynamicTooltip.getAbilityTypeId()
             BlzSetAbilityExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateNormalString(whichUnit), whichUnit.getAbilityLevel(abilityTypeId))
