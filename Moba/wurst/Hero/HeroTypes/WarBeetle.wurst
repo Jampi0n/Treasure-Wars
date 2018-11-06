@@ -24,21 +24,26 @@ constant ABILITY_UNBREAKABLE = 'AY0R'
 
 constant int array HARD_SHELL_ARMOR = [12, 18, 24, 30, 36]
 
-@compiletime
-function passive()
-    let aDef =createNoEffectAbiltiy(ABILITY_HARD_SHELL)
-        ..setupWithHotKey("Hard Shell", "D")
-        ..setupIcon("PASNagaArmorUp1")
-        ..setLearnString("Increases the War Beetles's armor.", (int lvl) -> (begin
-            return "{0} extra armor".format(
-                HARD_SHELL_ARMOR[lvl-1].str())
-        end) )
 
+function passive(int abilityId)
+
+    if compiletime
+        createNoEffectAbiltiy(abilityId)
+            ..setupWithHotKey("Hard Shell", "D")
+            ..setupIcon("PASNagaArmorUp1")
+
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setLearnString("Increases the War Beetles's armor.", (int lvl) -> (begin
+        return "{0} extra armor".format(
+            HARD_SHELL_ARMOR[lvl-1].str())
+    end) )
     for lvl = 1 to 5
-        aDef
-            ..setDescriptionString(false, lvl, "Increases the War Beetles's armor by {0}.".format(
-                HARD_SHELL_ARMOR[lvl-1].str())
-            )
+        tooltip.setNormalString(false, lvl, "Increases the War Beetles's armor by {0}.".format(
+            HARD_SHELL_ARMOR[lvl-1].str())
+        )
+    tooltip.setReplaceIntelligence(0)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 constant int BEETLE_BITE = 'A00N'
 constant int VENOMOUS_BEETLE = 'u002'
@@ -54,30 +59,46 @@ BuffType buffBite
 constant BITE_BUFF_ID = compiletime(createAuraBuff("Venomous Beetle", "This unit was bitten by a Venomous Beetle; it is slowed.", Icons.bTNCarrionScarabs))
 constant BITE_ABILITY_ID = compiletime(createNegativeBuffAbility(5, BITE_BUFF_ID, Abilities.poisonStingTarget, "chest"))
 
-@compiletime
-function venomousBeetle()
-    int array MANA = [100, 105, 110, 115, 120]
-    real array COOLDOWN = [9, 9, 9, 9, 9]
 
-    let aDef = new AbilityDefinitionFarseerChainLightning(ABILITY_VENOMOUS_BEETLE)
-        ..setupIcon(Icons.bTNCarrionScarabs)
-        ..setAnimationNames("spell,slam")
-        ..setupWithHotKey("Venomous Beetle", "Q")
-        ..setLightningEffects("")
-        ..setArtTarget("")
-        ..setMissileArt("")
-        ..setArtSpecial("")
-        ..setLightningEffects("")
+function venomousBeetle(int abilityId)
 
+    if compiletime
+        int array MANA = [100, 105, 110, 115, 120]
+        real array COOLDOWN = [9, 9, 9, 9, 9]
+
+        let aDef = new AbilityDefinitionFarseerChainLightning(abilityId)
+            ..setupIcon(Icons.bTNCarrionScarabs)
+            ..setAnimationNames("spell,slam")
+            ..setupWithHotKey("Venomous Beetle", "Q")
+            ..setLightningEffects("")
+            ..setArtTarget("")
+            ..setMissileArt("")
+            ..setArtSpecial("")
+            ..setLightningEffects("")
+
+        for lvl = 1 to 5
+            aDef
+                ..setCooldown(lvl, COOLDOWN[lvl-1])
+                ..setManaCost(lvl, MANA[lvl-1])
+                ..setNumberofTargetsHit(lvl, 1)
+                ..setDamageperTarget(lvl, 0)
+                ..setCastRange(lvl, 600)
+                ..setDurationNormal(lvl, 0.1)
+                ..setTargetsAllowed(lvl, "enemies,ground,neutral,nonancient,organic")
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setLearnString("Sends out a venomous beetle to bite the target enemy unit, dealing damage and slowing it.", (int lvl) -> (begin
+        return "{0}{I0} damage, lasts {1}{I1} seconds.".format(
+            BITE_DAMAGE[lvl-1].str(),
+            BITE_SLOW_DURATION[lvl-1].toExactString())
+    end) )
     for lvl = 1 to 5
-        aDef
-            ..setCooldown(lvl, COOLDOWN[lvl-1])
-            ..setManaCost(lvl, MANA[lvl-1])
-            ..setNumberofTargetsHit(lvl, 1)
-            ..setDamageperTarget(lvl, 0)
-            ..setCastRange(lvl, 600)
-            ..setDurationNormal(lvl, 0.1)
-            ..setTargetsAllowed(lvl, "enemies,ground,neutral,nonancient,organic")
+        tooltip.setNormalString(true, lvl, "Sends out a venomous beetle to bite the target enemy unit, dealing {0}{I0} damage and slowing it for {1}{I1} seconds.".format(
+            BITE_DAMAGE[lvl-1].str(),
+            BITE_SLOW_DURATION[lvl-1].toExactString()
+        ))
+    tooltip.setReplaceIntelligence(BITE_DAMAGEL_BONUS, BITE_SLOW_DURATION_BONUS)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 constant real array WAR_STOMP_DURATION = [1.4, 1.6, 1.8, 2, 2.2]
 constant real WAR_STOMP_DURATION_BONUS = 0.7
@@ -85,52 +106,70 @@ constant real array WAR_STOMP_DAMAGE = [60, 100, 140, 180, 220]
 constant real WAR_STOMP_DAMAGE_BONUS = 120
 constant real WAR_STOMP_AOE = 350
 
-@compiletime
-function warstomp()
-    int array MANA = [120, 130, 140, 150, 160]
-    real array COOLDOWN = [8, 8, 8, 8, 8]
 
+function warstomp(int abilityId)
 
-    let aDef = new AbilityDefinitionPitLordHowlofTerror(ABILITY_WAR_STOMP)
-        ..setupIcon(Icons.bTNSeaGiantWarStomp)
-        ..setAnimationNames("spell,slam")
-        ..setupWithHotKey("War Stomp", "W")
-        ..setArtCaster(Abilities.warStompCaster)
+    if compiletime
+        int array MANA = [120, 130, 140, 150, 160]
+        real array COOLDOWN = [8, 8, 8, 8, 8]
+
+        let aDef = new AbilityDefinitionPitLordHowlofTerror(abilityId)
+            ..setupIcon(Icons.bTNSeaGiantWarStomp)
+            ..setAnimationNames("spell,slam")
+            ..setupWithHotKey("War Stomp", "W")
+            ..setArtCaster(Abilities.warStompCaster)
+        for lvl = 1 to 5
+            aDef
+                ..setCooldown(lvl, COOLDOWN[lvl-1])
+                ..setManaCost(lvl, MANA[lvl-1])
+                ..setTargetsAllowed(lvl, "none")
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setLearnString("Slams the ground, stunning and damaging nearby enemy land units.", (int lvl) -> (begin
+        return "{0}{S0} damage, {1}{S1} second.".format( WAR_STOMP_DAMAGE[lvl-1].str(), WAR_STOMP_DURATION[lvl-1].toExactString() )
+    end) )
+
     for lvl = 1 to 5
-        aDef
-            ..setCooldown(lvl, COOLDOWN[lvl-1])
-            ..setManaCost(lvl, MANA[lvl-1])
-            ..setTargetsAllowed(lvl, "none")
-
-
+        tooltip.setNormalString(true, lvl, "Slams the ground, dealing {0}{S0} damage to nearby enemy land units and stunning them for {1}{S1} seconds.".format(
+            WAR_STOMP_DAMAGE[lvl-1].str(), WAR_STOMP_DURATION[lvl-1].toExactString()
+        ))
+    tooltip.setReplaceStrength(WAR_STOMP_DAMAGE_BONUS, WAR_STOMP_DURATION_BONUS)
+    addDynamicTooltipStrength(heroType, tooltip)
 
 
 constant real array JUMP_RANGE = [800, 1000, 1200, 1400, 1600]
 constant real array JUMP_COOLDOWN = [17, 16, 15, 14, 13]
 constant int array JUMP_MANA = [120, 110, 100, 90, 80]
 
-@compiletime
-function root()
-    let aDef = new AbilityDefinitionIllidanChannel(ABILITY_JUMP)
-        ..setupIcon(Icons.bTNReplenishMana)
-        ..setupChannel(TargetType.POINT, "channel", 0.51)
-        ..setupWithHotKey("Dash", "E")
-        ..setArtCaster("")
-        ..setArtEffect("")
-        ..setArtSpecial("")
-        ..setArtTarget("")
-        ..setLearnString("Dashes towards the target point.", (int lvl) -> (begin
+
+function jump(int abilityId)
+
+    if compiletime
+        let aDef = new AbilityDefinitionIllidanChannel(abilityId)
+            ..setupIcon(Icons.bTNReplenishMana)
+            ..setupChannel(TargetType.POINT, "channel", 0.51)
+            ..setupWithHotKey("Dash", "E")
+            ..setArtCaster("")
+            ..setArtEffect("")
+            ..setArtSpecial("")
+            ..setArtTarget("")
+
+        for lvl = 1 to 5
+            aDef
+                ..setCooldown(lvl, JUMP_COOLDOWN[lvl-1])
+                ..setManaCost(lvl, JUMP_MANA[lvl-1])
+                ..setCastRange(lvl, JUMP_RANGE[lvl-1])
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setLearnString("Dashes towards the target point.", (int lvl) -> (begin
         return "{0} range, {1} mana, {2} seconds cooldown".format( 
             JUMP_RANGE[lvl-1].str(), JUMP_MANA[lvl-1].str(), JUMP_COOLDOWN[lvl-1].toExactString()
         )
     end) )
-
     for lvl = 1 to 5
-        aDef
-            ..setCooldown(lvl, JUMP_COOLDOWN[lvl-1])
-            ..setManaCost(lvl, JUMP_MANA[lvl-1])
-            ..setCastRange(lvl, JUMP_RANGE[lvl-1])
-            ..setDescriptionString(true, lvl, "Dashes towards the target point.")
+        tooltip.setNormalString(true, lvl, "Dashes towards the target point.")
+    tooltip.setReplaceIntelligence(0)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 constant int array UNBREAKABLE_HP =[400, 550, 700, 850, 1000]
 constant int array UNBREAKABLE_DEF =[15, 20, 25, 30, 35]
@@ -148,43 +187,48 @@ constant int UNBREAKABLE_DUMMY_BUFF = compiletime(createDummyBuff())
 
 BuffType buffUnbreakable
 
-@compiletime
-function unbreakable()
-    int array MANA = [175, 175, 175, 175, 175]
-    real array COOLDOWN = [100, 100, 100, 100, 100]
+
+function unbreakable(int abilityId)
+
+    if compiletime
+        int array MANA = [175, 175, 175, 175, 175]
+        real array COOLDOWN = [100, 100, 100, 100, 100]
+
+        let aDef = new AbilityDefinitionBeserk(abilityId)
+            ..setupIcon(Icons.bTNAdvancedCreatureCarapace)
+            ..setAnimationNames("")
+            ..setupWithHotKey("Unbreakable", "R")
+            ..setLightningEffects("")
+            ..setArtTarget("")
+            ..setMissileArt("")
+            ..setArtSpecial("")
+            ..setLightningEffects("")
+            ..setCheckDependencies(true)
 
 
+        for lvl = 1 to 5
+            aDef
+                ..setCooldown(lvl, COOLDOWN[lvl-1])
+                ..setManaCost(lvl, MANA[lvl-1])
+                ..setAttackSpeedIncrease(lvl, 0)
+                ..setDamageTakenIncrease(lvl, 0)
+                ..setMovementSpeedIncrease(lvl, 0)
+                ..setDurationHero(lvl, 0.01)
+                ..setTargetsAllowed(lvl, "none")
+                ..setBuffs(lvl, UNBREAKABLE_DUMMY_BUFF.toRawCode())
 
-    let aDef = new AbilityDefinitionBeserk(ABILITY_UNBREAKABLE)
-        ..setupIcon(Icons.bTNAdvancedCreatureCarapace)
-        ..setAnimationNames("")
-        ..setupWithHotKey("Unbreakable", "R")
-        ..setLightningEffects("")
-        ..setArtTarget("")
-        ..setMissileArt("")
-        ..setArtSpecial("")
-        ..setLightningEffects("")
-        ..setCheckDependencies(true)
-        ..setLearnString("Increases the War Beetle's strength, armor, willpower and hit points for {0} seconds.".format(UNBREAKABLE_DURATION.str()), (int lvl) -> (begin
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setLearnString("Increases the War Beetle's strength, armor, willpower and hit points for {0} seconds.".format(UNBREAKABLE_DURATION.str()), (int lvl) -> (begin
         return "{0} strength, {1} armor and willpower, {2} hit points".format( 
             UNBREAKABLE_STR[lvl-1].str(), UNBREAKABLE_DEF[lvl-1].str(), UNBREAKABLE_HP[lvl-1].str()
         )
     end) )
-
-
     for lvl = 1 to 5
-        aDef
-            ..setCooldown(lvl, COOLDOWN[lvl-1])
-            ..setManaCost(lvl, MANA[lvl-1])
-            ..setAttackSpeedIncrease(lvl, 0)
-            ..setDamageTakenIncrease(lvl, 0)
-            ..setMovementSpeedIncrease(lvl, 0)
-            ..setDurationHero(lvl, 0.01)
-            ..setTargetsAllowed(lvl, "none")
-            ..setBuffs(lvl, UNBREAKABLE_DUMMY_BUFF.toRawCode())
-            ..setDescriptionString(true, lvl, "Increases the War Beetle's strength by {0}, armor and willpower by {1} and hit points by {2} for {3} seconds.".format(
+        tooltip.setNormalString(true, lvl, "Increases the War Beetle's strength by {0}, armor and willpower by {1} and hit points by {2} for {3} seconds.".format(
             UNBREAKABLE_STR[lvl-1].str(), UNBREAKABLE_DEF[lvl-1].str(), UNBREAKABLE_HP[lvl-1].str(), UNBREAKABLE_DURATION.str()
         ))
+    tooltip.setReplaceIntelligence(0)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 
 function onSpellCast()
@@ -367,32 +411,13 @@ function teamFightAI(HeroAI ai)
 
 
 
+@compiletime
 function setupTooltips()
-    DynamicTooltip tooltip = new DynamicTooltip(ABILITY_VENOMOUS_BEETLE)
-    tooltip.setLearnString("Sends out a venomous beetle to bite the target enemy unit, dealing damage and slowing it.", (int lvl) -> (begin
-        return "{0}{I0} damage, lasts {1}{I1} seconds.".format(
-            BITE_DAMAGE[lvl-1].str(),
-            BITE_SLOW_DURATION[lvl-1].toExactString())
-    end) )
-    for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, "Sends out a venomous beetle to bite the target enemy unit, dealing {0}{I0} damage and slowing it for {1}{I1} seconds.".format(
-            BITE_DAMAGE[lvl-1].str(),
-            BITE_SLOW_DURATION[lvl-1].toExactString()
-        ))
-    tooltip.setReplaceIntelligence(BITE_DAMAGEL_BONUS, BITE_SLOW_DURATION_BONUS)
-    addDynamicTooltipIntelligence(heroType, tooltip)
-
-    tooltip = new DynamicTooltip(ABILITY_WAR_STOMP)
-    tooltip.setLearnString("Slams the ground, stunning and damaging nearby enemy land units.", (int lvl) -> (begin
-        return "{0}{S0} damage, {1}{S1} second.".format( WAR_STOMP_DAMAGE[lvl-1].str(), WAR_STOMP_DURATION[lvl-1].toExactString() )
-    end) )
-
-    for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, "Slams the ground, dealing {0}{S0} damage to nearby enemy land units and stunning them for {1}{S1} seconds.".format(
-            WAR_STOMP_DAMAGE[lvl-1].str(), WAR_STOMP_DURATION[lvl-1].toExactString()
-        ))
-    tooltip.setReplaceStrength(WAR_STOMP_DAMAGE_BONUS, WAR_STOMP_DURATION_BONUS)
-    addDynamicTooltipStrength(heroType, tooltip)
+    passive(ABILITY_HARD_SHELL)
+    venomousBeetle(ABILITY_VENOMOUS_BEETLE)
+    warstomp(ABILITY_WAR_STOMP)
+    jump(ABILITY_JUMP)
+    unbreakable(ABILITY_UNBREAKABLE)
 
 function initHeroType()
     setupStats()

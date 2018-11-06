@@ -20,44 +20,64 @@ constant ABILITY_BIG_BAD_VOODOO = 'AY2R'
 
 constant real array VOODOO_ARROW_DAMAGE = [6, 12, 18, 24, 30]
 
-@compiletime
-function passive()
-    let aDef = createNoEffectAbiltiy(ABILITY_VOODOO_ARROWS)
-        ..setupIcon("PASDemonArrow")
-        ..setupWithHotKey("Voodoo Arrows", "D")
-        ..setLearnString("Each attack deals additional void damage.", (int lvl) -> (begin
-            return "{0} damage.".format(
-                VOODOO_ARROW_DAMAGE[lvl-1].str())
-        end) )
 
+function passive(int abilityId)
+    if compiletime
+        createNoEffectAbiltiy(abilityId)
+            ..setupIcon("PASDemonArrow")
+            ..setupWithHotKey("Voodoo Arrows", "D")
+
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setLearnString("Each attack deals additional void damage.", (int lvl) -> (begin
+        return "{0} damage.".format(
+            VOODOO_ARROW_DAMAGE[lvl-1].str())
+    end) )
+    
     for lvl = 1 to 5
-        aDef
-            ..setDescriptionString(false, lvl, "Each attack deals {0} additional void damage.".format( 
-                VOODOO_ARROW_DAMAGE[lvl-1].str())
-            )
+        tooltip.setNormalString(false, lvl, "Each attack deals {0} additional void damage.".format( 
+            VOODOO_ARROW_DAMAGE[lvl-1].str())
+        )
+    tooltip.setReplaceStrength(0)
+    addDynamicTooltipStrength(heroType, tooltip)
 
 
 constant real array GHOST_ARROWS_DAMAGE = [100, 160, 220, 280, 340]
 constant real GHOST_ARROWS_DAMAGE_BONUS = 160
 
-@compiletime
-function abilityQ()
-    int array MANA = [90, 95, 100, 105, 110]
-    real array COOLDOWN = [9, 9, 9, 9, 9]
-    real array RANGE = [700, 700, 700, 700, 700]
 
-    let aDef = new AbilityDefinitionIllidanChannel(ABILITY_GHOST_ARROWS)
-        ..setupIcon("BTNThunderArrow")
-        ..setupWithHotKey("Ghost Arrows", "Q")
-        ..setAnimationNames("spell")
-        ..setupChannel(TargetType.UNIT, "channel", 0.5)
+function abilityQ(int abilityId)
 
+    if compiletime
+        int array MANA = [90, 95, 100, 105, 110]
+        real array COOLDOWN = [9, 9, 9, 9, 9]
+        real array RANGE = [700, 700, 700, 700, 700]
+
+        let aDef = new AbilityDefinitionIllidanChannel(abilityId)
+            ..setupIcon("BTNThunderArrow")
+            ..setupWithHotKey("Ghost Arrows", "Q")
+            ..setAnimationNames("spell")
+            ..setupChannel(TargetType.UNIT, "channel", 0.5)
+
+        for lvl = 1 to 5
+            aDef
+                ..setCooldown(lvl, COOLDOWN[lvl-1])
+                ..setManaCost(lvl, MANA[lvl-1])
+                ..setCastRange(lvl, RANGE[lvl-1])
+                ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setLearnString("Summons Ghost Arrows to pierce the target enemy unit dealing damage.", (int lvl) -> (begin
+        return "{0}{S0} damage.".format(
+            GHOST_ARROWS_DAMAGE[lvl-1].str())
+    end) )
+    
     for lvl = 1 to 5
-        aDef
-            ..setCooldown(lvl, COOLDOWN[lvl-1])
-            ..setManaCost(lvl, MANA[lvl-1])
-            ..setCastRange(lvl, RANGE[lvl-1])
-            ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
+        tooltip.setNormalString(true, lvl, "Summons Ghost Arrows to pierce the target enemy unit dealing {0}{S0} damage.".format(
+            GHOST_ARROWS_DAMAGE[lvl-1].str())
+        )
+    tooltip.setReplaceStrength(GHOST_ARROWS_DAMAGE_BONUS)
+    addDynamicTooltipStrength(heroType, tooltip)
 
 
 constant real array MIND_CURSE_MANA_DRAIN = [30, 40, 50, 60, 70]
@@ -71,24 +91,39 @@ BuffType buffMindCurseTarget
 constant MIND_CURSE_BUFF_ID = compiletime(createAuraBuff("Mind Curse", "This unit is under the effect of Mind Curse; it loses mana over time and cannot cast spells.", "BTNWitchDoctorRitual"))
 constant MIND_CURSE_ABILITY_ID = compiletime(createNegativeBuffAbility(5, MIND_CURSE_BUFF_ID, Abilities.manaDrainTarget, "origin"))
 
-@compiletime
-function abilityW()
-    int array MANA = [65, 65, 65, 65, 65]
-    real array COOLDOWN = [10, 10, 10, 10, 10]
-    real array RANGE = [800, 800, 800, 800, 800]
-    
-    let aDef = new AbilityDefinitionIllidanChannel(ABILITY_MIND_CURSE)
-        ..setupIcon("BTNWitchDoctorRitual")
-        ..setupWithHotKey("Mind Curse", "W")
-        ..setAnimationNames("spell")
-        ..setupChannel(TargetType.UNIT, "manaburn", 0.5)
 
+function abilityW(int abilityId)
+
+    if compiletime
+        int array MANA = [65, 65, 65, 65, 65]
+        real array COOLDOWN = [10, 10, 10, 10, 10]
+        real array RANGE = [800, 800, 800, 800, 800]
+        
+        let aDef = new AbilityDefinitionIllidanChannel(abilityId)
+            ..setupIcon("BTNWitchDoctorRitual")
+            ..setupWithHotKey("Mind Curse", "W")
+            ..setAnimationNames("spell")
+            ..setupChannel(TargetType.UNIT, "manaburn", 0.5)
+
+        for lvl = 1 to 5
+            aDef
+                ..setCooldown(lvl, COOLDOWN[lvl-1])
+                ..setManaCost(lvl, MANA[lvl-1])
+                ..setCastRange(lvl, RANGE[lvl-1])
+                ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setLearnString("Burns mana of the target enemy unit over time and silences it.", (int lvl) -> (begin
+        return "{0}{I0} mana per second, {1}{I1} seconds.".format(
+        MIND_CURSE_MANA_DRAIN[lvl-1].str(),
+        MIND_CURSE_DURATION[lvl-1].toExactString())
+    end) )
     for lvl = 1 to 5
-        aDef
-            ..setCooldown(lvl, COOLDOWN[lvl-1])
-            ..setManaCost(lvl, MANA[lvl-1])
-            ..setCastRange(lvl, RANGE[lvl-1])
-            ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
+        tooltip.setNormalString(true, lvl, "Burns {0}{I0} mana per second of the target enemy unit over time and silences it for {1}{I1} seconds.".format(
+            MIND_CURSE_MANA_DRAIN[lvl-1].str(),
+        MIND_CURSE_DURATION[lvl-1].toExactString()))
+    tooltip.setReplaceIntelligence(MIND_CURSE_MANA_DRAIN_BONUS, MIND_CURSE_DURATION_BONUS)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 
 constant int array SERPEND_WARD_HP = [0, 150, 300, 450, 600]
@@ -106,26 +141,43 @@ BuffType buffSerpentPoison
 constant SERPENT_POISON_BUFF_ID = compiletime(createAuraBuff("Serpent Poison", "This unit was hit by Serpent Ward; it is slowed and has reduced armor.", Icons.bTNSerpentWard))
 constant SERPENT_POISON_ABILITY_ID = compiletime(createNegativeBuffAbility(5, SERPENT_POISON_BUFF_ID, Abilities.poisonStingTarget, "chest"))
 
-@compiletime
-function abilityE()
-    int array MANA = [60, 60, 60, 60, 60]
-    real array COOLDOWN = [6, 6, 6, 6, 6]
-    real array RANGE = [500, 500, 500, 500, 500]
 
+function abilityE(int abilityId)
 
-    let aDef = new AbilityDefinitionIllidanChannel(ABILITY_SERPENT_WARD)
-        ..setAnimationNames("spell")
-        ..setupIcon(Icons.bTNSerpentWard)
-        ..setupWithHotKey("Serpent Ward", "E")
-        ..setupChannel(TargetType.POINT, "ward", 0.5)
+    if compiletime
+        int array MANA = [60, 60, 60, 60, 60]
+        real array COOLDOWN = [6, 6, 6, 6, 6]
+        real array RANGE = [500, 500, 500, 500, 500]
 
+        let aDef = new AbilityDefinitionIllidanChannel(abilityId)
+            ..setAnimationNames("spell")
+            ..setupIcon(Icons.bTNSerpentWard)
+            ..setupWithHotKey("Serpent Ward", "E")
+            ..setupChannel(TargetType.POINT, "ward", 0.5)
+
+        for lvl = 1 to 5
+            aDef
+                ..setCastRange(lvl, RANGE[lvl-1])
+                ..setCooldown(lvl, COOLDOWN[lvl-1])
+                ..setManaCost(lvl, MANA[lvl-1])
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setLearnString("Summons an immobile serpentine ward to attack nearby enemies for {0} seconds. Attacked targets have their armor and movement speed reduced. Stacks up to {1} times.".format(SERPENT_WARD_DURATION.toExactString(), SERPENT_POSION_MAX_STACKS.toString()), (int lvl) -> (begin
+        return "{0} armor, {1}% movement speed per attack, {2} seconds.".format(
+        (SERPENT_POISON_ARMOR*SERPENT_STACKS[lvl-1]/10).toExactString(),
+        (SERPENT_POISON_SLOW*SERPENT_STACKS[lvl-1]/10).toExactString(),
+        SERPENT_POISON_DURATION[lvl-1].toExactString())
+    end) )
     for lvl = 1 to 5
-        aDef
-            ..setCastRange(lvl, RANGE[lvl-1])
-            ..setCooldown(lvl, COOLDOWN[lvl-1])
-            ..setManaCost(lvl, MANA[lvl-1])
+        tooltip.setNormalString(true, lvl, "Summons an immobile serpentine ward to attack nearby enemies for {3} seconds. Attacked targets have their armor reduced by {0} and movement speed by {1}% for {2} seconds per attack. Stacks up to {4} times.".format(
+            (SERPENT_POISON_ARMOR*SERPENT_STACKS[lvl-1]).str(),
+            (SERPENT_POISON_SLOW*SERPENT_STACKS[lvl-1]).str(),
+            SERPENT_POISON_DURATION[lvl-1].toExactString(),
+            SERPENT_WARD_DURATION.toExactString(),
+            SERPENT_POSION_MAX_STACKS.toString()))
 
-
+    tooltip.setReplaceIntelligence(0)
+    addDynamicTooltipIntelligence(heroType, tooltip)
         
 constant real array BBV_DAMAGE = [40, 55, 70, 85, 90]
 constant real BBV_DAMAGE_BONUS = 60
@@ -133,26 +185,40 @@ constant real BBV_DURATION = 4
 
 constant integer BUFF_ID_ON_DEATH_COIL = compiletime(createDummyBuff())
 
-@compiletime
-function abilityR()
-    int array MANA = [160, 170, 180, 190, 200]
-    real array COOLDOWN = [110, 110, 110, 110, 110]
 
-    let aDef = new AbilityDefinitionKeeperoftheGroveTranquility(ABILITY_BIG_BAD_VOODOO)
-        ..setLevels(5)
-        ..setupIcon(Icons.bTNBigBadVoodooSpell)
-        ..setupWithHotKey("Big Bad Voodoo", "R")
-        ..setAnimationNames("spell,channel")
+function abilityR(int abilityId)
+
+    if compiletime
+        int array MANA = [160, 170, 180, 190, 200]
+        real array COOLDOWN = [110, 110, 110, 110, 110]
+
+        let aDef = new AbilityDefinitionKeeperoftheGroveTranquility(abilityId)
+            ..setLevels(5)
+            ..setupIcon(Icons.bTNBigBadVoodooSpell)
+            ..setupWithHotKey("Big Bad Voodoo", "R")
+            ..setAnimationNames("spell,channel")
 
 
+        for lvl = 1 to 5
+            aDef
+                ..setCooldown(lvl, COOLDOWN[lvl-1])
+                ..setManaCost(lvl, MANA[lvl-1])
+                ..setTargetsAllowed(lvl, "none")
+                ..setDurationHero(lvl, BBV_DURATION)
+                ..setDurationNormal(lvl, BBV_DURATION)
+                ..setEffects(lvl, "X000")
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setLearnString("Deals void damage to all enemy heroes while channeling.".format(BBV_DURATION.toExactString()), (int lvl) -> (begin
+        return "{0}{I0} damage per second.".format(
+        BBV_DAMAGE[lvl-1].str())
+    end) )
+    
     for lvl = 1 to 5
-        aDef
-            ..setCooldown(lvl, COOLDOWN[lvl-1])
-            ..setManaCost(lvl, MANA[lvl-1])
-            ..setTargetsAllowed(lvl, "none")
-            ..setDurationHero(lvl, BBV_DURATION)
-            ..setDurationNormal(lvl, BBV_DURATION)
-            ..setEffects(lvl, "X000")
+        tooltip.setNormalString(true, lvl, "Deals {0}{I0} void damage per second to all enemy heroes while channeling.".format(
+            BBV_DAMAGE[lvl-1].str()))
+    tooltip.setReplaceIntelligence(BBV_DAMAGE_BONUS)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 
 function setupStats()
@@ -249,62 +315,13 @@ function attackAI(HeroAI _ai)
 function teamFightAI(HeroAI _ai)
             
 
+@compiletime
 function setupTooltips()
-    DynamicTooltip tooltip = new DynamicTooltip(ABILITY_GHOST_ARROWS)
-    tooltip.setLearnString("Summons Ghost Arrows to pierce the target enemy unit dealing damage.", (int lvl) -> (begin
-        return "{0}{S0} damage.".format(
-            GHOST_ARROWS_DAMAGE[lvl-1].str())
-    end) )
-    
-    for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, "Summons Ghost Arrows to pierce the target enemy unit dealing {0}{S0} damage.".format(
-            GHOST_ARROWS_DAMAGE[lvl-1].str())
-        )
-    tooltip.setReplaceStrength(GHOST_ARROWS_DAMAGE_BONUS)
-    addDynamicTooltipStrength(heroType, tooltip)
-
-    tooltip = new DynamicTooltip(ABILITY_MIND_CURSE)
-    tooltip.setLearnString("Burns mana of the target enemy unit over time and silences it.", (int lvl) -> (begin
-        return "{0}{I0} mana per second, {1}{I1} seconds.".format(
-        MIND_CURSE_MANA_DRAIN[lvl-1].str(),
-        MIND_CURSE_DURATION[lvl-1].toExactString())
-    end) )
-    for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, "Burns {0}{I0} mana per second of the target enemy unit over time and silences it for {1}{I1} seconds.".format(
-            MIND_CURSE_MANA_DRAIN[lvl-1].str(),
-        MIND_CURSE_DURATION[lvl-1].toExactString()))
-    tooltip.setReplaceIntelligence(MIND_CURSE_MANA_DRAIN_BONUS, MIND_CURSE_DURATION_BONUS)
-    addDynamicTooltipIntelligence(heroType, tooltip)
-
-    tooltip = new DynamicTooltip(ABILITY_SERPENT_WARD)
-    tooltip.setLearnString("Summons an immobile serpentine ward to attack nearby enemies for {0} seconds. Attacked targets have their armor and movement speed reduced. Stacks up to {1} times.".format(SERPENT_WARD_DURATION.toExactString(), SERPENT_POSION_MAX_STACKS.toString()), (int lvl) -> (begin
-        return "{0} armor, {1}% movement speed per attack, {2} seconds.".format(
-        (SERPENT_POISON_ARMOR*SERPENT_STACKS[lvl-1]/10).toExactString(),
-        (SERPENT_POISON_SLOW*SERPENT_STACKS[lvl-1]/10).toExactString(),
-        SERPENT_POISON_DURATION[lvl-1].toExactString())
-    end) )
-    for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, "Summons an immobile serpentine ward to attack nearby enemies for {3} seconds. Attacked targets have their armor reduced by {0} and movement speed by {1}% for {2} seconds per attack. Stacks up to {4} times.".format(
-            (SERPENT_POISON_ARMOR*SERPENT_STACKS[lvl-1]).str(),
-            (SERPENT_POISON_SLOW*SERPENT_STACKS[lvl-1]).str(),
-            SERPENT_POISON_DURATION[lvl-1].toExactString(),
-            SERPENT_WARD_DURATION.toExactString(),
-            SERPENT_POSION_MAX_STACKS.toString()))
-
-    tooltip.setReplaceIntelligence(0)
-    addDynamicTooltipIntelligence(heroType, tooltip)
-
-    tooltip = new DynamicTooltip(ABILITY_BIG_BAD_VOODOO)
-    tooltip.setLearnString("Deals void damage to all enemy heroes while channeling.".format(BBV_DURATION.toExactString()), (int lvl) -> (begin
-        return "{0}{I0} damage per second.".format(
-        BBV_DAMAGE[lvl-1].str())
-    end) )
-    
-    for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, "Deals {0}{I0} void damage per second to all enemy heroes while channeling.".format(
-            BBV_DAMAGE[lvl-1].str()))
-    tooltip.setReplaceIntelligence(BBV_DAMAGE_BONUS)
-    addDynamicTooltipIntelligence(heroType, tooltip)
+    passive(ABILITY_VOODOO_ARROWS)
+    abilityQ(ABILITY_GHOST_ARROWS)
+    abilityW(ABILITY_MIND_CURSE)
+    abilityE(ABILITY_SERPENT_WARD)
+    abilityR(ABILITY_BIG_BAD_VOODOO)
 
 function initHeroType()
     setupStats()

@@ -30,7 +30,7 @@ function passive(int abilityId)
             ..setupWithHotKey("Recovery", "D")
             ..setupIcon("PASSpell_Nature_ResistNature")
 
-    DynamicTooltip tooltip = new DynamicTooltip(abilityId)
+    let tooltip = new DynamicTooltip(abilityId)
     tooltip.setLearnString("Increases the Ancient's hit point regeneration.", (int lvl) -> (begin
         return "{0}% increased regeneration".format(
             REGENERATION_HIT_POINT_REGEN[lvl-1].str())
@@ -63,9 +63,9 @@ function rootDummy()
         ..setName("Uprooted")
 
 function devourUnit(int abilityId)
-    int array MANA = [120, 110, 100, 90, 80]
-
+    
     if compiletime
+        int array MANA = [120, 110, 100, 90, 80]
         rootDummy()
         let aDef = new AbilityDefinitionFarseerChainLightning(abilityId)
             ..setupIcon("BTNStrengthofNature")
@@ -91,7 +91,7 @@ function devourUnit(int abilityId)
                 ..setTargetsAllowed(lvl, "air,enemies,ground,neutral,nonancient,organic,nonhero")
 
 
-    DynamicTooltip tooltip = new DynamicTooltip(abilityId)
+    let tooltip = new DynamicTooltip(abilityId)
     tooltip.setLearnString(CHANNELING_SPELL + "Grabs the target enemy unit to devour it, healing the hero.", (int lvl) -> (begin
         return "{0}{I0} hit points healed, {1} seconds cooldown.".format( DEVOUR_HEAL[lvl-1].str(), DEVOUR_COOLDOWN[lvl-1].str())
     end) )
@@ -113,10 +113,10 @@ constant int ENTAGLING_ROOTS_BUFF_ID = compiletime(createAuraBuff("Entangling Ro
 constant int ENTAGLING_ROOTS_ABILITY_ID = compiletime(createNegativeBuffAbility(5, ENTAGLING_ROOTS_BUFF_ID, Abilities.entanglingRootsTarget, "origin"))
 
 function entanglingRoots(int abilityId)
-    int array MANA = [120, 130, 140, 150, 160]
-    real array COOLDOWN = [14, 13, 12, 11, 10]
 
     if compiletime
+        int array MANA = [120, 130, 140, 150, 160]
+        real array COOLDOWN = [14, 13, 12, 11, 10]
         let aDef = new AbilityDefinitionDreadlordCarrionSwarm(abilityId)
             ..setupIcon("BTNEntnagle")
             ..setAnimationNames("attack,2")
@@ -131,7 +131,7 @@ function entanglingRoots(int abilityId)
                 ..setTargetsAllowed(lvl, "none")
 
 
-    DynamicTooltip tooltip = new DynamicTooltip(abilityId)
+    let tooltip = new DynamicTooltip(abilityId)
     tooltip.setLearnString("Releases thorns in a line, damaging and entangling every enemy unit they pass through.", (int lvl) -> (begin
         return "{0}{I0} damage, {1}{I1} second.".format( ENTANGLE_HIT_DAMAGE[lvl-1].str(), ENTANGLE_DURATION[lvl-1].toExactString() )
     end) )
@@ -153,10 +153,10 @@ constant real array ROOT_AOE_RANGE = [150, 175, 200, 225, 250]
 constant real ROOT_DURATION = 1.75//2.57
 
 function root(int abilityId)
-    int array MANA = [25, 25, 25, 25, 25]
-    real array COOLDOWN = [3, 3, 3, 3, 3]
 
     if compiletime
+        int array MANA = [25, 25, 25, 25, 25]
+        real array COOLDOWN = [3, 3, 3, 3, 3]
         let aDef = new AbilityDefinitionBearform(abilityId)
             ..setupIcon(Icons.bTNRoot)
             ..setIconTurnOff(Icons.bTNUproot)
@@ -171,7 +171,7 @@ function root(int abilityId)
                 ..setDurationNormal(lvl, ROOT_DURATION)
                 ..setTooltipTurnOff(lvl, "(E) Uproot - [|cffffcc00Level "+lvl.toString()+"|r]")
 
-    DynamicTooltip tooltip = new DynamicTooltip(abilityId)
+    let tooltip = new DynamicTooltip(abilityId)
     tooltip.setLearnString("Burrows the Ancient's roots into the ground, rendering it immobile, but allowing to hurl enormous rocks dealing area of effect damage. The Ancient's armor and willpower are increased while rooted.", (int lvl) -> (begin
         return "{0}{S0} area of effect damage, {1} bonus armor and willpower.".format( ROOT_AOE_DAMAGE[lvl-1].str(), ROOT_RESISTANCE[lvl-1].str())
     end) )
@@ -194,9 +194,9 @@ constant real array NATURES_WRATH_DURATION = [5, 5, 5, 5, 5]
 constant real NATURES_WRATH_AOE = 300
 
 function naturesWrath(int abilityId)
-    int array MANA = [160, 170, 180, 190, 200]
 
     if compiletime
+        int array MANA = [160, 170, 180, 190, 200]
         let aDef = new AbilityDefinitionBeserk(abilityId)
             ..setupIcon("BTNNaturesWrath")
             ..setupWithHotKey("Nature's Wrath", "R")
@@ -211,7 +211,7 @@ function naturesWrath(int abilityId)
                 ..setAttackSpeedIncrease(lvl, 0)
                 ..setMovementSpeedIncrease(lvl, 0)
 
-    DynamicTooltip tooltip = new DynamicTooltip(abilityId)
+    let tooltip = new DynamicTooltip(abilityId)
     tooltip.setLearnString("Covers the ancient in a storm of sharp leaves, that deal damage to nearby enemies.", (int lvl) -> (begin
         return "{0}{I0} damage over {1} seconds, {2} seconds cooldown.".format( 
             NATURES_WRATH_TOTAL_DAMAGE[lvl-1].str(), NATURES_WRATH_DURATION[lvl-1].str(), NATURES_WRATH_COOLDOWN[lvl-1].str()
