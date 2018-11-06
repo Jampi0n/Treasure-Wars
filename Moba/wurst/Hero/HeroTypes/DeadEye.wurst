@@ -201,6 +201,7 @@ function deathpact(int abilityId)
             ..setMissileArc(0)
             ..setMissileSpeed(1100)
             ..setArtSpecial("Abilities\\Spells\\Undead\\DeathCoil\\DeathCoilSpecialArt.mdl")
+        ABIL_DEF_MAP.put(aDefDeathCoil.getNewId(), aDefDeathCoil)
 
         for lvl = 1 to 5
             aDefDeathCoil
@@ -208,7 +209,7 @@ function deathpact(int abilityId)
                 ..setManaCost(lvl, 0)
                 ..setCooldown(lvl, COOLDOWN[lvl-1])
                 ..setTargetsAllowed(lvl, "air,enemies,ground,neutral,nonancient,organic,hero")
-                ..setTooltipNormal(lvl, "(R) Learn Death Coil - [|cffffcc00Level "+lvl.toString()+"|r]")
+                ..setTooltipNormal(lvl, "(R) Death Coil - [|cffffcc00Level "+lvl.toString()+"|r]")
 
 
     DynamicTooltip tooltip = new DynamicTooltip(abilityId)
@@ -226,7 +227,7 @@ function deathpact(int abilityId)
     tooltip.setReplaceIntelligence(DEATH_COIL_DMG_BASE_BONUS, DEATH_COIL_DMG_FACTOR_BONUS)
     addDynamicTooltipIntelligence(heroType, tooltip)
 
-    tooltip = new DynamicTooltip(abilityId)
+    tooltip = new DynamicTooltip(ABILITY_DEATH_COIL)
     tooltip.setLearnString("", (lvl) -> "" )
     
     for lvl = 1 to 5
