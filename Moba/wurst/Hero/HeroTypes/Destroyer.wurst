@@ -29,7 +29,7 @@ function passive(int abilityId)
             ..setupWithHotKey("Death Frenzy", "D")
 
 
-    DynamicTooltip tooltip = new DynamicTooltip(abilityId)
+    let tooltip = new DynamicTooltip(abilityId)
     tooltip.setLearnString("The Destroyer deals increased damage from all sources, the more injured he becomes.", (int lvl) -> (begin
         return "up to {0}% increased damage.".format(
             DEATH_FRENZY_BONUS[lvl-1].str())
@@ -58,11 +58,11 @@ constant int BREATH_ABILITY_ID = compiletime(createNegativeBuffAbility(5, BREATH
 
 
 function abilityQ(int abilityId)
-    int array MANA = [90, 95, 100, 105, 110]
-    real array COOLDOWN = [8, 8, 8, 8, 8]
-    real array RANGE = [450, 450, 450, 450, 450]
 
     if compiletime
+        int array MANA = [90, 95, 100, 105, 110]
+        real array COOLDOWN = [8, 8, 8, 8, 8]
+        real array RANGE = [450, 450, 450, 450, 450]
         let aDef = new AbilityDefinitionBreathofFrostCreep(abilityId)
             ..setupIcon("BTNFlameBurst")
             ..setupWithHotKey("Melting Breath", "Q")
@@ -83,7 +83,7 @@ function abilityQ(int abilityId)
                 ..setMaxDamage(lvl, 99999)
                 ..setAreaofEffect(lvl, 125)
 
-    DynamicTooltip tooltip = new DynamicTooltip(abilityId)
+    let tooltip = new DynamicTooltip(abilityId)
     tooltip.setLearnString("Breathes a cone of fire at enemy units, dealing magic damage. The heat melts the target's armor, reducing it for {0} seconds.".format(
         BREATH_DURATION.str()
     ), (int lvl) -> (begin
@@ -110,9 +110,10 @@ constant IMMOLATION_BUFF_ID = compiletime(BUFF_ID_GEN.next())
 
 
 function abilityW(int abilityId)
-    int array MANA = [25, 25, 25, 25, 25]
-    real AOE = 250
+
     if compiletime
+        int array MANA = [25, 25, 25, 25, 25]
+        real AOE = 250
         new BuffDefinition(IMMOLATION_BUFF_ID, 'BEim')
             ..setTooltipNormalExtended(1, "This unit has Immolation; it attacks faster and nearby enemy units will take damage over time.")
             ..setArtSpecial(1, Abilities.immolationRedDamage)
@@ -134,9 +135,8 @@ function abilityW(int abilityId)
                 ..setManaDrainedperSecond(lvl, IMMOLATION_MANA_DRAIN[lvl-1])
                 ..setBuffs(lvl, IMMOLATION_BUFF_ID.toRawCode()+",BEia")
                 ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
-                ..setTooltipTurnOffExtended(lvl, "Deactivate to stop draining mana and life.")
 
-    DynamicTooltip tooltip = new DynamicTooltip(abilityId)
+    let tooltip = new DynamicTooltip(abilityId)
     tooltip.setLearnString("Engulfs the Destroyer in flames, damaging nearby enemies and the Destroyer himself. Heroes take double damage. Also increases the Destroyer's attack speed.|nDrains mana until deactivated.", (int lvl) -> (begin
         return "{0}{I0} damage per second, {1}% attack speed.".format(
         IMMOLATION_DAMAGE[lvl-1].str(),
@@ -146,6 +146,7 @@ function abilityW(int abilityId)
         tooltip.setNormalString(false, lvl, "Engulfs the Destroyer in flames, dealing {0}{I0} damage per second to nearby enemies and the Destroyer himself. Heroes take double damage. Also increases the Destroyer's attack speed by {1}%.|nDrains mana until deactivated.".format(
             IMMOLATION_DAMAGE[lvl-1].str(),
             IMMOLATION_ATTACK_SPEED[lvl-1].str()))
+        tooltip.setTurnOffString(false, lvl, "Deactivate to stop draining mana and life.")
     tooltip.setReplaceIntelligence(IMMOLATION_DAMAGE_BONUS)
     addDynamicTooltipIntelligence(heroType, tooltip)
 
@@ -154,11 +155,11 @@ constant int array WALL_NUMBER = [6, 7, 8, 9, 10]
 constant real array WALL_DURATION = [4, 4.5, 5, 5.5, 6]
 
 function abilityE(int abilityId)
-    int array MANA = [90, 90, 90, 90, 90]
-    real array COOLDOWN = [17, 16, 15, 14, 13]
-    real array RANGE = [1000, 1000, 1000, 1000, 1000]
 
     if compiletime
+        int array MANA = [90, 90, 90, 90, 90]
+        real array COOLDOWN = [17, 16, 15, 14, 13]
+        real array RANGE = [1000, 1000, 1000, 1000, 1000]
         let aDef = new AbilityDefinitionIllidanChannel(abilityId)
             ..setAnimationNames("spell")
             ..setupIcon("BTNNecromancy")
@@ -171,7 +172,7 @@ function abilityE(int abilityId)
                 ..setCooldown(lvl, COOLDOWN[lvl-1])
                 ..setManaCost(lvl, MANA[lvl-1])
 
-    DynamicTooltip tooltip = new DynamicTooltip(abilityId)
+    let tooltip = new DynamicTooltip(abilityId)
     tooltip.setLearnString("Summons a wall of bones at the target location, blocking the way for the Destroyer's victims to flee. The wall gets bigger on higher levels.", (int lvl) -> (begin
         return "Lasts {0} seconds.".format(
             WALL_DURATION[lvl-1].toExactString())
@@ -221,11 +222,11 @@ constant int PREY_CASTER_ABILITY_ID = compiletime(createPositiveBuffAbility(5, P
 BuffType buffRage
 
 function abilityR(int abilityId)
-    int array MANA = [140, 150, 160, 170, 180]
-    real array COOLDOWN = [75, 75, 75, 75, 75]
-    real RANGE = 900
 
     if compiletime
+        int array MANA = [140, 150, 160, 170, 180]
+        real array COOLDOWN = [75, 75, 75, 75, 75]
+        real RANGE = 900
         let aDef = new AbilityDefinitionIllidanChannel(abilityId)
             ..setAnimationNames("spell")
             ..setupChannel(TargetType.UNIT, "channel", 0.5)
@@ -246,7 +247,7 @@ function abilityR(int abilityId)
                 ..setCastRange(lvl, RANGE)
 
 
-    DynamicTooltip tooltip = new DynamicTooltip(abilityId)
+    let tooltip = new DynamicTooltip(abilityId)
     tooltip.setLearnString("Marks the target enemy unit as his prey. The Destroyer will have increased movmement speed when moving towards the prey. Every attack against the prey deals bonus damage and slows the prey. Lasts {0} seconds.".format(PREY_DURATION.toExactString()), (int lvl) -> (begin
         return "{0} damage, {1}% movement speed".format(
             PREY_BONUS_DAMAGE[lvl-1].str(),
@@ -385,11 +386,6 @@ function setupTooltips()
     abilityE(ABILITY_BONE_WALL)
     abilityR(ABILITY_WILD_RAGE)
 
-
-
-
-
-    
 
 function initHeroType()
     setupStats()

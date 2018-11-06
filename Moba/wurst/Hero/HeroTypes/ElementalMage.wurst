@@ -27,21 +27,25 @@ constant FRENZY_ABILITY_ID = compiletime(createPositiveBuffAbility(5, FRENZY_BUF
 constant real FRENZY_DURATION = 3.
 constant real array FRENZY_BONUS = [2, 2.5, 3, 3.5, 4]
 
-@compiletime
-function passive()
-    let aDef =createNoEffectAbiltiy(ABILITY_FRENZY)
-        ..setupWithHotKey("Frenzy", "D")
-        ..setupIcon("PASFrostFireFrenzy")
-        ..setLearnString("Increases the Elemental Mage's attack speed everytime he attacks. If he does not attack for {0} seconds, the bonus is gone.".format(FRENZY_DURATION.toExactString()), (int lvl) -> (begin
-            return "{0}% attack speed bonus".format(
-                FRENZY_BONUS[lvl-1].toExactString())
-        end) )
 
+function passive(int abilityId)
+    if compiletime
+        createNoEffectAbiltiy(abilityId)
+            ..setupWithHotKey("Frenzy", "D")
+            ..setupIcon("PASFrostFireFrenzy")
+
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setLearnString("Increases the Elemental Mage's attack speed everytime he attacks. If he does not attack for {0} seconds, the bonus is gone.".format(FRENZY_DURATION.toExactString()), (int lvl) -> (begin
+        return "{0}% attack speed bonus".format(
+            FRENZY_BONUS[lvl-1].toExactString())
+    end) )
     for lvl = 1 to 5
-        aDef
-            ..setDescriptionString(false, lvl, "Increases the Elemental Mage's attack speed by {1}% everytime he attacks. If he does not attack for {0} seconds, the bonus is gone.".format(
-                FRENZY_DURATION.toExactString(), FRENZY_BONUS[lvl-1].toExactString())
-            )
+        tooltip.setNormalString(false, lvl, "Increases the Elemental Mage's attack speed by {1}% everytime he attacks. If he does not attack for {0} seconds, the bonus is gone.".format(
+            FRENZY_DURATION.toExactString(), FRENZY_BONUS[lvl-1].toExactString())
+        )
+    tooltip.setReplaceIntelligence(0)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 
 BuffType buffFrostBolt
@@ -55,27 +59,39 @@ constant real array FROST_BOLT_DURATION = [2.5, 3, 3.5, 4, 4.5]
 constant real array FROST_BOLT_DAMAGE = [75, 120, 165, 210, 255]
 constant real FROST_BOLT_DAMAGE_BONUS = 140
 
-@compiletime
-function abilityQ()
-    int array MANA = [120, 125, 130, 135, 140]
-    real array COOLDOWN = [8, 8, 8, 8, 8]
 
-    let aDef = new AbilityDefinitionIllidanChannel(ABILITY_FROST_BOLT)
-        ..setupIcon("BTNOrbOfFrost2")
-        ..setupChannel(TargetType.POINT, "channel", 1.1)
-        ..setAnimationNames("spell")
-        ..setupWithHotKey("Frost Bolt", "Q")
-        ..setLightningEffects("")
-        ..setArtTarget("")
-        ..setMissileArt("")
-        ..setArtSpecial("")
-        ..setLightningEffects("")
+function abilityQ(int abilityId)
+    if compiletime
+        int array MANA = [120, 125, 130, 135, 140]
+        real array COOLDOWN = [8, 8, 8, 8, 8]
+        let aDef = new AbilityDefinitionIllidanChannel(abilityId)
+            ..setupIcon("BTNOrbOfFrost2")
+            ..setupChannel(TargetType.POINT, "channel", 1.1)
+            ..setAnimationNames("spell")
+            ..setupWithHotKey("Frost Bolt", "Q")
+            ..setLightningEffects("")
+            ..setArtTarget("")
+            ..setMissileArt("")
+            ..setArtSpecial("")
+            ..setLightningEffects("")
 
+        for lvl = 1 to 5
+            aDef
+                ..setCooldown(lvl, COOLDOWN[lvl-1])
+                ..setManaCost(lvl, MANA[lvl-1])
+                ..setCastRange(lvl, 800)
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setLearnString("Summons an orb of frost that damages and slows all enemies close to it.", (int lvl) -> (begin
+        return "{0}{I0} damage, {1}% slow for {2} seconds.".format(
+            FROST_BOLT_DAMAGE[lvl-1].str(), FROST_BOLT_SLOW[lvl-1].str(), FROST_BOLT_DURATION[lvl-1].toExactString())
+    end) )
     for lvl = 1 to 5
-        aDef
-            ..setCooldown(lvl, COOLDOWN[lvl-1])
-            ..setManaCost(lvl, MANA[lvl-1])
-            ..setCastRange(lvl, 800)
+        tooltip.setNormalString(true, lvl, "Summons an orb of frost that deals {0}{I0} magic damage to all enemies close to it and slows them by {1}% for {2} seconds.".format(
+            FROST_BOLT_DAMAGE[lvl-1].str(), FROST_BOLT_SLOW[lvl-1].str(), FROST_BOLT_DURATION[lvl-1].toExactString()
+        ))
+    tooltip.setReplaceIntelligence(FROST_BOLT_DAMAGE_BONUS)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 
 constant real array FIRE_BLINK_MAX_RANGE =[700, 700, 700, 700, 700]
@@ -86,27 +102,39 @@ constant real FIRE_BLINK_DAMAGE_BONUS = 150
 
 constant real FIRE_BLINK_AOE = 300
 
-@compiletime
-function abiltiyW()
-    int array MANA = [140, 150, 160, 170, 180]
 
-    let aDef = new AbilityDefinitionWardenBlink(ABILITY_FIRE_BLINK)
-        ..setAnimationNames("")
-        ..setupIcon("BTNSupernova")
-        ..setupWithHotKey("Aspect of Fire", "W")
-        ..setLightningEffects("")
-        ..setArtTarget("")
-        ..setMissileArt("")
-        ..setArtSpecial("")
-        ..setLightningEffects("")
+function abilityW(int abilityId)
+    if compiletime
+        int array MANA = [140, 150, 160, 170, 180]
+        let aDef = new AbilityDefinitionWardenBlink(abilityId)
+            ..setAnimationNames("")
+            ..setupIcon("BTNSupernova")
+            ..setupWithHotKey("Aspect of Fire", "W")
+            ..setLightningEffects("")
+            ..setArtTarget("")
+            ..setMissileArt("")
+            ..setArtSpecial("")
+            ..setLightningEffects("")
 
+        for lvl = 1 to 5
+            aDef
+                ..setCastRange(lvl, FIRE_BLINK_MAX_RANGE[lvl-1])
+                ..setCooldown(lvl, FIRE_BLINK_COOLDOWN[lvl-1])
+                ..setManaCost(lvl, MANA[lvl-1])
+                ..setMinimumRange(lvl, 250)
+                ..setMaximumRange(lvl, FIRE_BLINK_MAX_RANGE[lvl-1])
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setLearnString("Teleports the Elemental Mage to the target location, dealing fire damage to nearby enemy units.", (int lvl) -> (begin
+        return "{0}{I0} damage.".format(
+            FIRE_BLINK_DAMAGE[lvl-1].str())
+    end) )
     for lvl = 1 to 5
-        aDef
-            ..setCastRange(lvl, FIRE_BLINK_MAX_RANGE[lvl-1])
-            ..setCooldown(lvl, FIRE_BLINK_COOLDOWN[lvl-1])
-            ..setManaCost(lvl, MANA[lvl-1])
-            ..setMinimumRange(lvl, 250)
-            ..setMaximumRange(lvl, FIRE_BLINK_MAX_RANGE[lvl-1])
+        tooltip.setNormalString(true, lvl, "Teleports the Elemental Mage to the target location, dealing {0}{I0} fire damage to nearby enemy units.".format(
+            FIRE_BLINK_DAMAGE[lvl-1].str()
+        ))
+    tooltip.setReplaceIntelligence(FIRE_BLINK_DAMAGE_BONUS)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 constant real MARK_DURATION = 8
 constant real array MARK_DMG = [15, 25, 35, 45, 55]
@@ -121,23 +149,38 @@ BuffType buffElementalMark
 constant MARK_BUFF_ID = compiletime(createAuraBuff("Elemental Mark", "This unit is under the effect of Elemental Mark; it has reduced willpower and it will take additional magic damage when attacked by the Elemental Mage. The unit will be stunned after "+MARK_REQUIRED_STACKS.str()+" attacks.", "BTNElementalMark"))
 constant MARK_ABILITY_ID = compiletime(createNegativeBuffAbility(5, MARK_BUFF_ID, "ElementalMark2.mdx", "overhead"))
 
-@compiletime
-function abilityE()
-    int array MANA = [135, 140, 145, 150, 155]
-    real array COOLDOWN = [10, 10, 10, 10, 10]
 
-    let aDef = new AbilityDefinitionIllidanChannel(ABILITY_ELEMENTAL_MARK)
-        ..setupIcon("BTNElementalMark")
-        ..setupChannel(TargetType.UNIT, "soulburn", 1.1)
-        ..setAnimationNames("spell")
-        ..setupWithHotKey("Elemental Mark", "E")
+function abilityE(int abilityId)
+    if compiletime
+        int array MANA = [135, 140, 145, 150, 155]
+        real array COOLDOWN = [10, 10, 10, 10, 10]
+        let aDef = new AbilityDefinitionIllidanChannel(abilityId)
+            ..setupIcon("BTNElementalMark")
+            ..setupChannel(TargetType.UNIT, "soulburn", 1.1)
+            ..setAnimationNames("spell")
+            ..setupWithHotKey("Elemental Mark", "E")
 
+        for lvl = 1 to 5
+            aDef
+                ..setCooldown(lvl, COOLDOWN[lvl-1])
+                ..setManaCost(lvl, MANA[lvl-1])
+                ..setCastRange(lvl, 600)
+                ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setLearnString("Reduces the target unit's willpower and makes it take additional magic damage, when the Elemental Mage attacks. After {2} attacks the target is stunned for {0} seconds. Lasts {1} seconds.".format(
+        MARK_STUN.toExactString(), MARK_DURATION.toExactString(), MARK_REQUIRED_STACKS.str()
+    ), (int lvl) -> (begin
+        return "-{0} willpower, {1}{I0} magic damage.".format(
+            MARK_WP_REDUCTION[lvl-1].toString(), MARK_DMG[lvl-1].str()
+        )
+    end) )
     for lvl = 1 to 5
-        aDef
-            ..setCooldown(lvl, COOLDOWN[lvl-1])
-            ..setManaCost(lvl, MANA[lvl-1])
-            ..setCastRange(lvl, 600)
-            ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
+        tooltip.setNormalString(true, lvl, "Reduces the target unit's willpower by {2} and makes it take {3}{I0} additional magic damage, when the Elemental Mage attacks. After {4} attacks the target is stunned for {0} seconds. Lasts {1} seconds.".format(
+            MARK_STUN.toExactString(), MARK_DURATION.toExactString(), MARK_WP_REDUCTION[lvl-1].toString(), MARK_DMG[lvl-1].str(), MARK_REQUIRED_STACKS.str()
+        ))
+    tooltip.setReplaceIntelligence(MARK_DMG_BONUS)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 
 constant int FF_FROST_IMPACT = compiletime(ArtilleryDetection.createDetectionDummy())
@@ -162,40 +205,54 @@ constant FF_BUFF_ID = compiletime(createAuraBuff("Frost and Flame", "This unit w
 constant FF_ABILITY_ID = compiletime(ABIL_ID_GEN.next())
 
 
-@compiletime
-function abilityR()
-    int array MANA = [225, 250, 275, 300, 325]
-    real array COOLDOWN = [60, 60, 60, 60, 60]
 
-    let buffADef = new AbilityDefinitionAuraSlow(FF_ABILITY_ID)
-        ..setArtTarget(Abilities.frostDamage+","+Abilities.breathOfFireDamage)
-        ..setTargetAttachmentPoint("chest")
-        ..setTargetAttachmentPoint1("origin")
-        ..setTargetAttachments(2)
-        ..hideIcon()
-    for i = 1 to 5
-        buffADef
-            ..setTargetsAllowed(i, "invulnerable,self,vulnerable")
-            ..setAreaofEffect(i, 1)
-            ..setMovementSpeedFactor(i, 0)
-            ..setAttackSpeedFactor(i, 0)
-            ..setBuffs(i, FF_BUFF_ID.toRawCode())
+function abilityR(int abilityId)
+    if compiletime
+        int array MANA = [225, 250, 275, 300, 325]
+        real array COOLDOWN = [60, 60, 60, 60, 60]
+        let buffADef = new AbilityDefinitionAuraSlow(FF_ABILITY_ID)
+            ..setArtTarget(Abilities.frostDamage+","+Abilities.breathOfFireDamage)
+            ..setTargetAttachmentPoint("chest")
+            ..setTargetAttachmentPoint1("origin")
+            ..setTargetAttachments(2)
+            ..hideIcon()
+        for i = 1 to 5
+            buffADef
+                ..setTargetsAllowed(i, "invulnerable,self,vulnerable")
+                ..setAreaofEffect(i, 1)
+                ..setMovementSpeedFactor(i, 0)
+                ..setAttackSpeedFactor(i, 0)
+                ..setBuffs(i, FF_BUFF_ID.toRawCode())
 
-    let aDef = new AbilityDefinitionIllidanChannel(ABILITY_FROST_AND_FLAME)
-        ..setupIcon("BTNMageOrb")
-        ..setupWithHotKey("Frost and Flame", "R")
-        ..setupChannel(TargetType.AREA, "silence", 1.1)
-        ..setLightningEffects("")
+        let aDef = new AbilityDefinitionIllidanChannel(abilityId)
+            ..setupIcon("BTNMageOrb")
+            ..setupWithHotKey("Frost and Flame", "R")
+            ..setupChannel(TargetType.AREA, "silence", 1.1)
+            ..setLightningEffects("")
 
 
+        for lvl = 1 to 5
+            aDef
+                ..setCooldown(lvl, COOLDOWN[lvl-1])
+                ..setManaCost(lvl, MANA[lvl-1])
+                ..setDurationHero(lvl, 0.01)
+                ..setTargetsAllowed(lvl, "none")
+                ..setCastRange(lvl, 3000)
+                ..setAreaofEffect(lvl, FF_AOE)
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setLearnString("Calls the power of Frost and Flame to fall from the sky at the target location to slow down and ignite nearby enemies.", (int lvl) -> (begin
+        return "{0}{I0} impact damage, {1}{I1} damage per second, {2}% slow, lasts {3}{I2} seconds.".format(
+            FF_IMPACT_DAMAGE[lvl-1].str(), FF_DOT[lvl-1].str(), FF_SLOW[lvl-1].str(), FF_BUFF_DURATION[lvl-1].toExactString()
+        )
+    end) )
     for lvl = 1 to 5
-        aDef
-            ..setCooldown(lvl, COOLDOWN[lvl-1])
-            ..setManaCost(lvl, MANA[lvl-1])
-            ..setDurationHero(lvl, 0.01)
-            ..setTargetsAllowed(lvl, "none")
-            ..setCastRange(lvl, 3000)
-            ..setAreaofEffect(lvl, FF_AOE)
+        tooltip.setNormalString(true, lvl, "Calls the power of Frost and Flame to fall from the sky at the target location to slow down and ignite nearby enemies. "+
+        "Deals {0}{I0} impact damage, {1}{I1} damage per second and slows movement speed by {2}%. Lasts {3}{I2} seconds.".format(
+            FF_IMPACT_DAMAGE[lvl-1].str(), FF_DOT[lvl-1].str(), FF_SLOW[lvl-1].str(), FF_BUFF_DURATION[lvl-1].toExactString()
+        ))
+    tooltip.setReplaceIntelligence(FF_IMPACT_DAMAGE_BONUS, FF_DOT_BONUS, FF_BUFF_DURATION_BONUS)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 
 function onAttack(unit attacker, unit target, boolean _advanced)
@@ -290,60 +347,14 @@ function teamFightAI(HeroAI _ai)
 
 
 
+@compiletime
 function setupTooltips()
-    DynamicTooltip tooltip = new DynamicTooltip(ABILITY_FROST_BOLT)
-    tooltip.setLearnString("Summons an orb of frost that damages and slows all enemies close to it.", (int lvl) -> (begin
-        return "{0}{I0} damage, {1}% slow for {2} seconds.".format(
-            FROST_BOLT_DAMAGE[lvl-1].str(), FROST_BOLT_SLOW[lvl-1].str(), FROST_BOLT_DURATION[lvl-1].toExactString())
-    end) )
-    for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, "Summons an orb of frost that deals {0}{I0} magic damage to all enemies close to it and slows them by {1}% for {2} seconds.".format(
-            FROST_BOLT_DAMAGE[lvl-1].str(), FROST_BOLT_SLOW[lvl-1].str(), FROST_BOLT_DURATION[lvl-1].toExactString()
-        ))
-    tooltip.setReplaceIntelligence(FROST_BOLT_DAMAGE_BONUS)
-    addDynamicTooltipIntelligence(heroType, tooltip)
 
-    tooltip = new DynamicTooltip(ABILITY_FIRE_BLINK)
-    tooltip.setLearnString("Teleports the Elemental Mage to the target location, dealing fire damage to nearby enemy units.", (int lvl) -> (begin
-        return "{0}{I0} damage.".format(
-            FIRE_BLINK_DAMAGE[lvl-1].str())
-    end) )
-    for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, "Teleports the Elemental Mage to the target location, dealing {0}{I0} fire damage to nearby enemy units.".format(
-            FIRE_BLINK_DAMAGE[lvl-1].str()
-        ))
-    tooltip.setReplaceIntelligence(FIRE_BLINK_DAMAGE_BONUS)
-    addDynamicTooltipIntelligence(heroType, tooltip)
-
-    tooltip = new DynamicTooltip(ABILITY_ELEMENTAL_MARK)
-    tooltip.setLearnString("Reduces the target unit's willpower and makes it take additional magic damage, when the Elemental Mage attacks. After {2} attacks the target is stunned for {0} seconds. Lasts {1} seconds.".format(
-        MARK_STUN.toExactString(), MARK_DURATION.toExactString(), MARK_REQUIRED_STACKS.str()
-    ), (int lvl) -> (begin
-        return "-{0} willpower, {1}{I0} magic damage.".format(
-            MARK_WP_REDUCTION[lvl-1].toString(), MARK_DMG[lvl-1].str()
-        )
-    end) )
-    for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, "Reduces the target unit's willpower by {2} and makes it take {3}{I0} additional magic damage, when the Elemental Mage attacks. After {4} attacks the target is stunned for {0} seconds. Lasts {1} seconds.".format(
-            MARK_STUN.toExactString(), MARK_DURATION.toExactString(), MARK_WP_REDUCTION[lvl-1].toString(), MARK_DMG[lvl-1].str(), MARK_REQUIRED_STACKS.str()
-        ))
-    tooltip.setReplaceIntelligence(MARK_DMG_BONUS)
-    addDynamicTooltipIntelligence(heroType, tooltip)
-
-
-    tooltip = new DynamicTooltip(ABILITY_FROST_AND_FLAME)
-    tooltip.setLearnString("Calls the power of Frost and Flame to fall from the sky at the target location to slow down and ignite nearby enemies.", (int lvl) -> (begin
-        return "{0}{I0} impact damage, {1}{I1} damage per second, {2}% slow, lasts {3}{I2} seconds.".format(
-            FF_IMPACT_DAMAGE[lvl-1].str(), FF_DOT[lvl-1].str(), FF_SLOW[lvl-1].str(), FF_BUFF_DURATION[lvl-1].toExactString()
-        )
-    end) )
-    for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, "Calls the power of Frost and Flame to fall from the sky at the target location to slow down and ignite nearby enemies. "+
-        "Deals {0}{I0} impact damage, {1}{I1} damage per second and slows movement speed by {2}%. Lasts {3}{I2} seconds.".format(
-            FF_IMPACT_DAMAGE[lvl-1].str(), FF_DOT[lvl-1].str(), FF_SLOW[lvl-1].str(), FF_BUFF_DURATION[lvl-1].toExactString()
-        ))
-    tooltip.setReplaceIntelligence(FF_IMPACT_DAMAGE_BONUS, FF_DOT_BONUS, FF_BUFF_DURATION_BONUS)
-    addDynamicTooltipIntelligence(heroType, tooltip)
+    passive(ABILITY_FRENZY)
+    abilityQ(ABILITY_FROST_BOLT)
+    abilityW(ABILITY_FIRE_BLINK)
+    abilityE(ABILITY_ELEMENTAL_MARK)
+    abilityR(ABILITY_FROST_AND_FLAME)
 
 
 function initHeroType()

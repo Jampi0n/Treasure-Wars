@@ -22,7 +22,6 @@ constant ABILITY_RAPID_FIRE = 'AZ8R'
 
 constant MELEE = compiletime(UNIT_ID_GEN.next())
 
-@compiletime
 function meleeDummy()
     new UnitDefinition(MELEE, 'hfoo')
         ..setNormalAbilities("Aloc")
@@ -45,22 +44,23 @@ constant real FIERY_HANDS_AOE = 250
 constant real array FIERY_HANDS_DMG = [15, 25, 35, 45, 55]
 constant real FIERY_HANDS_DMG_BONUS = 30
 
-@compiletime
-function passive()
-    createNoEffectAbiltiy(ABILITY_FIERY_HANDS)
-        ..setupWithHotKey("Fiery Hands", "D")
-        ..setupIcon("PASFierySoul")
-        /*..setLearnString("Killing a unit creates a fire explosion, dealing magic damage to nearby targets.", (int lvl) -> (begin
-            return "{0} damage".format(
-                FIERY_HANDS_DMG[lvl-1].str() + FIERY_HANDS_DMG_BONUS.getBonusString(C_INT)
-            )
-        end) )*/
 
-    /*for lvl = 1 to 5
-        aDef
-            ..setDescriptionString(false, lvl, "Killing a unit creates a fire explosion, dealing {0} magic damage to nearby targets.".format(
-                FIERY_HANDS_DMG[lvl-1].str() + FIERY_HANDS_DMG_BONUS.getBonusString(C_INT)
-            ))*/
+function passive(int abilityId)
+    if compiletime
+        createNoEffectAbiltiy(abilityId)
+            ..setupWithHotKey("Fiery Hands", "D")
+            ..setupIcon("PASFierySoul")
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setLearnString("Killing a unit creates a fire explosion, dealing magic damage to nearby targets.", (int lvl) -> (begin
+        return "{0}{I0} damage".format(FIERY_HANDS_DMG[lvl-1].str())
+    end))
+    for lvl = 1 to 5
+        tooltip.setNormalString(false, lvl, "Killing a unit creates a fire explosion, dealing {0}{I0} magic damage to nearby targets.".format(
+            FIERY_HANDS_DMG[lvl-1].str()
+        ))
+    tooltip.setReplaceIntelligence(FIERY_HANDS_DMG_BONUS)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 public constant int array BASH_DAMAGE_BONUS = [60, 100, 140, 180, 220]
 constant real array BASH_STUN_DURATION = [1.2, 1.4, 1.6, 1.8, 2]
@@ -72,41 +72,49 @@ constant int BASH_ABILITY_ID = compiletime(createPositiveBuffAbility(5, BASH_BUF
 
 public BuffType buffBash
 
-@compiletime
-function bash()
-    int array MANA = [60, 60, 60, 60, 60]
-    real array COOLDOWN = [9, 9, 9, 9, 9]
 
-    let aDef = new AbilityDefinitionBeserk(ABILITY_BASH)
-        ..setupIcon("BTNFistOfFire")
-        ..setAnimationNames("")
-        ..setupWithHotKey("Bash", "Q")
-        ..setLightningEffects("")
-        ..setArtTarget("")
-        ..setMissileArt("")
-        ..setArtSpecial("")
-        ..setLightningEffects("")
-        ..setCheckDependencies(true)
-        ..setRequirements(MELEE.toRawCode())
-        ..setLearnString("Increases the movement speed of the Infernal Machine and causes the next attack to stun the target and deal bonus damage. Lasts {0} seconds.".format(BASH_BUFF_DURATION.str()), (int lvl) -> (begin
-            return "{0} bonus damage, {1} seconds stun.".format(
-                BASH_DAMAGE_BONUS[lvl-1].str(), BASH_STUN_DURATION[lvl-1].toString()
-                )
-        end) )
+function bash(int abilityId)
 
+    if compiletime
+        int array MANA = [60, 60, 60, 60, 60]
+        real array COOLDOWN = [9, 9, 9, 9, 9]
+
+        meleeDummy()
+        let aDef = new AbilityDefinitionBeserk(abilityId)
+            ..setupIcon("BTNFistOfFire")
+            ..setAnimationNames("")
+            ..setupWithHotKey("Bash", "Q")
+            ..setLightningEffects("")
+            ..setArtTarget("")
+            ..setMissileArt("")
+            ..setArtSpecial("")
+            ..setLightningEffects("")
+            ..setCheckDependencies(true)
+            ..setRequirements(MELEE.toRawCode())
+
+        for lvl = 1 to 5
+            aDef
+                ..setCooldown(lvl, COOLDOWN[lvl-1])
+                ..setManaCost(lvl, MANA[lvl-1])
+                ..setAttackSpeedIncrease(lvl, 0)
+                ..setDamageTakenIncrease(lvl, 0)
+                ..setMovementSpeedIncrease(lvl, 0)
+                ..setBuffs(lvl, BASH_BUFF_ID.toRawCode())
+                ..setDurationHero(lvl, 0.01)
+                ..setTargetsAllowed(lvl, "air,enemies,ground,neutral,nonancient,organic,nonhero")
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setLearnString("Increases the movement speed of the Infernal Machine and causes the next attack to stun the target and deal bonus damage. Lasts {0} seconds.".format(BASH_BUFF_DURATION.str()), (int lvl) -> (begin
+        return "{0} bonus damage, {1} seconds stun.".format(
+            BASH_DAMAGE_BONUS[lvl-1].str(), BASH_STUN_DURATION[lvl-1].toString()
+            )
+    end) )
     for lvl = 1 to 5
-        aDef
-            ..setCooldown(lvl, COOLDOWN[lvl-1])
-            ..setManaCost(lvl, MANA[lvl-1])
-            ..setAttackSpeedIncrease(lvl, 0)
-            ..setDamageTakenIncrease(lvl, 0)
-            ..setMovementSpeedIncrease(lvl, 0)
-            ..setBuffs(lvl, BASH_BUFF_ID.toRawCode())
-            ..setDurationHero(lvl, 0.01)
-            ..setTargetsAllowed(lvl, "air,enemies,ground,neutral,nonancient,organic,nonhero")
-            ..setDescriptionString(true, lvl, "Increases the movement speed of the Infernal Machine and causes the next attack to stun the target for {0} seconds and deal {1} bonus bonus damage. Lasts {2} seconds.".format(
-                BASH_STUN_DURATION[lvl-1].toString(), BASH_DAMAGE_BONUS[lvl-1].str(), BASH_BUFF_DURATION.str()
-            ))
+        tooltip.setNormalString(true, lvl, "Increases the movement speed of the Infernal Machine and causes the next attack to stun the target for {0} seconds and deal {1} bonus bonus damage. Lasts {2} seconds.".format(
+            BASH_STUN_DURATION[lvl-1].toString(), BASH_DAMAGE_BONUS[lvl-1].str(), BASH_BUFF_DURATION.str()
+        ))
+    tooltip.setReplaceIntelligence(0)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 
 constant int array INNER_FIRE_DMG = [5, 10, 15, 20, 25]
@@ -124,33 +132,40 @@ constant real INNER_FIRE_AOE = 900
 
 public BuffType buffInnerFire
 
-@compiletime
-function innerFire()
-    int array MANA = [80, 85, 90, 95, 100]
-    real array COOLDOWN = [19, 19, 19, 19, 19]
 
-    let aDef = new AbilityDefinitionRoar(ABILITY_INNER_FIRE)
-        ..setAnimationNames("spell")
-        ..setupIcon(Icons.bTNInnerFire)
-        ..setupWithHotKey("Inner Fire", "W")
-        /*..setLearnString("Increases nearby units strength, armor and willpower.", (int lvl) -> (begin
-            return "+{0}% strength, +{1} armor and willpower, {2} seconds".format(
-            INNER_FIRE_DMG[lvl-1].str()+INNER_FIRE_DMG_BONUS.getBonusString(C_INT),
-            INNER_FIRE_DEF[lvl-1].str()+INNER_FIRE_DEF_BONUS.getBonusString(C_INT),
-            INNER_FIRE_DURATION.str()
-            )
-        end) )*/
+function innerFire(int abilityId)
 
+    if compiletime
+        int array MANA = [80, 85, 90, 95, 100]
+        real array COOLDOWN = [19, 19, 19, 19, 19]
+
+        let aDef = new AbilityDefinitionRoar(abilityId)
+            ..setAnimationNames("spell")
+            ..setupIcon(Icons.bTNInnerFire)
+            ..setupWithHotKey("Inner Fire", "W")
+
+        for lvl = 1 to 5
+            aDef
+                ..setCooldown(lvl, COOLDOWN[lvl-1])
+                ..setManaCost(lvl, MANA[lvl-1])
+                ..setTargetsAllowed(lvl, "none")
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setLearnString("Increases nearby units strength, armor and willpower.", (int lvl) -> (begin
+        return "+{0}{I0}% strength, +{1}{I1} armor and willpower, {2} seconds".format(
+        INNER_FIRE_DMG[lvl-1].str(),
+        INNER_FIRE_DEF[lvl-1].str(),
+        INNER_FIRE_DURATION.str()
+        )
+    end) )
     for lvl = 1 to 5
-        aDef
-            ..setCooldown(lvl, COOLDOWN[lvl-1])
-            ..setManaCost(lvl, MANA[lvl-1])
-            ..setTargetsAllowed(lvl, "none")
-            /*..setDescriptionString(true, lvl, "Increases nearby units' strength by {0}% and armor and willpower by {1} for {2} seconds.".format(
-                INNER_FIRE_DMG[lvl-1].str()+INNER_FIRE_DMG_BONUS.getBonusString(C_INT),
-                INNER_FIRE_DEF[lvl-1].str()+INNER_FIRE_DEF_BONUS.getBonusString(C_INT),
-                INNER_FIRE_DURATION.str()
-            ))*/
+        tooltip.setNormalString(true, lvl, "Increases nearby units' strength by {0}{I0}% and armor and willpower by {1}{I1} for {2} seconds.".format(
+            INNER_FIRE_DMG[lvl-1].str(),
+            INNER_FIRE_DEF[lvl-1].str(),
+            INNER_FIRE_DURATION.str()
+        ))
+    tooltip.setReplaceIntelligence(INNER_FIRE_DMG_BONUS.toReal(), INNER_FIRE_DEF_BONUS.toReal())
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 constant real array FLAME_THROWER_DAMAGE = [60, 90, 120, 150, 180]
 constant real FLAME_THROWER_DAMAGE_BONUS = 100
@@ -172,40 +187,47 @@ constant int FLAME_THROWER_ARTILLERY = compiletime(ArtilleryDetection.createArti
 BuffType buffFlameThrower
 
 
-@compiletime
-function flameThrower()
-    int array MANA = [90, 100, 110, 120, 130]
-    real array COOLDOWN = [11, 11, 11, 11, 11]
-    real array RANGE = [900, 900, 900, 900, 900]
 
-    let aDef = new AbilityDefinitionIllidanChannel(ABILITY_FLAME_THROWER)
-        ..setupIcon(Icons.bTNWallOfFire)
-        ..setupWithHotKey("Flame Thrower", "E")
-        ..setArtCaster("")
-        ..setArtEffect("")
-        ..setMissileArt("")
-        ..setArtTarget("")
-        ..setAnimationNames("spell,throw")
-        ..setupChannel(TargetType.AREA, "shockwave", 0.5)
-        /*..setLearnString("Launches a fiery missile at the target location that deals large initial damage and ignites the targets, dealing additional damage over time.", (int lvl) -> (begin
-            return "{0} initial damage, {1} damage per second for {2} seconds.".format(
-                FLAME_THROWER_DAMAGE[lvl-1].str()+FLAME_THROWER_DAMAGE_BONUS.getBonusString(C_INT),
-                FLAME_THROWER_DOT[lvl-1].str()+FLAME_THROWER_DOT_BONUS.getBonusString(C_INT),
-                FLAME_THROWER_DURATION[lvl-1].str()
-            )
-        end) )*/
+function flameThrower(int abilityId)
 
+    if compiletime
+        int array MANA = [90, 100, 110, 120, 130]
+        real array COOLDOWN = [11, 11, 11, 11, 11]
+        real array RANGE = [900, 900, 900, 900, 900]
+
+        let aDef = new AbilityDefinitionIllidanChannel(abilityId)
+            ..setupIcon(Icons.bTNWallOfFire)
+            ..setupWithHotKey("Flame Thrower", "E")
+            ..setArtCaster("")
+            ..setArtEffect("")
+            ..setMissileArt("")
+            ..setArtTarget("")
+            ..setAnimationNames("spell,throw")
+            ..setupChannel(TargetType.AREA, "shockwave", 0.5)
+
+        for lvl = 1 to 5
+            aDef
+                ..setCooldown(lvl, COOLDOWN[lvl-1])
+                ..setManaCost(lvl, MANA[lvl-1])
+                ..setCastRange(lvl, RANGE[lvl-1])
+                ..setAreaofEffect(lvl, FLAME_THROWER_AOE[lvl-1])
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setLearnString("Launches a fiery missile at the target location that deals large initial damage and ignites the targets, dealing additional damage over time.", (int lvl) -> (begin
+        return "{0}{I0} initial damage, {1}{I1} damage per second for {2} seconds.".format(
+            FLAME_THROWER_DAMAGE[lvl-1].str(),
+            FLAME_THROWER_DOT[lvl-1].str(),
+            FLAME_THROWER_DURATION[lvl-1].toExactString()
+        )
+    end) )
     for lvl = 1 to 5
-        aDef
-            ..setCooldown(lvl, COOLDOWN[lvl-1])
-            ..setManaCost(lvl, MANA[lvl-1])
-            ..setCastRange(lvl, RANGE[lvl-1])
-            ..setAreaofEffect(lvl, FLAME_THROWER_AOE[lvl-1])
-            /*..setDescriptionString(true, lvl, "Launches a fiery missile at the target location that deals {0} initial damage and ignites the targets, dealing {1} damage per second for {2} seconds.".format(
-                FLAME_THROWER_DAMAGE[lvl-1].str()+FLAME_THROWER_DAMAGE_BONUS.getBonusString(C_INT),
-                FLAME_THROWER_DOT[lvl-1].str()+FLAME_THROWER_DOT_BONUS.getBonusString(C_INT),
-                FLAME_THROWER_DURATION[lvl-1].str()
-            ))*/
+        tooltip.setNormalString(true, lvl, "Launches a fiery missile at the target location that deals {0}{I0} initial damage and ignites the targets, dealing {1}{I1} damage per second for {2} seconds.".format(
+            FLAME_THROWER_DAMAGE[lvl-1].str(),
+            FLAME_THROWER_DOT[lvl-1].str(),
+            FLAME_THROWER_DURATION[lvl-1].toExactString()
+        ))
+    tooltip.setReplaceIntelligence(FLAME_THROWER_DAMAGE_BONUS, FLAME_THROWER_DOT_BONUS)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
 constant int array RAPID_FIRE_ATTACK_SPEED = [80, 120, 160, 200, 240]
 constant real RAPID_FIRE_DURATION = 3
@@ -213,34 +235,41 @@ constant real array RAPID_FIRE_STUN_DURATION = [0.2, 0.2, 0.2, 0.2, 0.2]
 
 constant int RAPID_FIRE_BUFF_ID = compiletime(createDummyBuff("Rapid Fire"))
 
-@compiletime
-function switchWeapons()
-    int array MANA = [150, 165, 180, 195, 210]
-    real array COOLDOWN = [120, 120, 120, 120, 120]
 
-    let aDef = new AbilityDefinitionAlchemistChemicalRage(ABILITY_RAPID_FIRE)
-        ..setupIcon(Icons.bTNHumanMissileUpThree)
-        ..setupWithHotKey("Rapid Fire", "R")
-        ..setLearnString("Enables a rapid firing ranged attack for the Infernal Machine, that stuns enemies it hits for a short time. Bash is disabled while under the effect of Rapid Fire.|nLasts {0} seconds.".format(RAPID_FIRE_DURATION.str()), (int lvl) -> (begin
-            return "+{0}% attack speed, {1} stun duration.".format(
-                RAPID_FIRE_ATTACK_SPEED[lvl-1].str(), RAPID_FIRE_STUN_DURATION[lvl-1].toString()
-            )
-        end) )
+function rapidFire(int abilityId)
 
+    if compiletime
+        int array MANA = [150, 165, 180, 195, 210]
+        real array COOLDOWN = [120, 120, 120, 120, 120]
+
+        let aDef = new AbilityDefinitionAlchemistChemicalRage(abilityId)
+            ..setupIcon(Icons.bTNHumanMissileUpThree)
+            ..setupWithHotKey("Rapid Fire", "R")
+
+        for lvl = 1 to 5
+            aDef
+                ..setCooldown(lvl, COOLDOWN[lvl-1])
+                ..setManaCost(lvl, MANA[lvl-1])
+                ..setNormalFormUnit(lvl, HERO_INFERNAL_MACHINE.toRawCode())
+                ..setAlternateFormUnit(lvl, HERO_INFERNAL_MACHINE_MORPH.toRawCode())
+                ..setDurationNormal(lvl, 0)
+                ..setDurationHero(lvl, RAPID_FIRE_DURATION)
+                ..setAttackSpeedBonusInfoPanelOnly(lvl, 0.8)
+                ..setMoveSpeedBonusInfoPanelOnly(lvl, 0)
+                ..setBuffs(lvl, RAPID_FIRE_BUFF_ID.toRawCode())
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setLearnString("Enables a rapid firing ranged attack for the Infernal Machine, that stuns enemies it hits for a short time. Bash is disabled while under the effect of Rapid Fire.|nLasts {0} seconds.".format(RAPID_FIRE_DURATION.str()), (int lvl) -> (begin
+        return "+{0}% attack speed, {1} stun duration.".format(
+            RAPID_FIRE_ATTACK_SPEED[lvl-1].str(), RAPID_FIRE_STUN_DURATION[lvl-1].toString()
+        )
+    end) )
     for lvl = 1 to 5
-        aDef
-            ..setCooldown(lvl, COOLDOWN[lvl-1])
-            ..setManaCost(lvl, MANA[lvl-1])
-            ..setNormalFormUnit(lvl, HERO_INFERNAL_MACHINE.toRawCode())
-            ..setAlternateFormUnit(lvl, HERO_INFERNAL_MACHINE_MORPH.toRawCode())
-            ..setDurationNormal(lvl, 0)
-            ..setDurationHero(lvl, RAPID_FIRE_DURATION)
-            ..setAttackSpeedBonusInfoPanelOnly(lvl, 0.8)
-            ..setMoveSpeedBonusInfoPanelOnly(lvl, 0)
-            ..setBuffs(lvl, RAPID_FIRE_BUFF_ID.toRawCode())
-            ..setDescriptionString(true, lvl, "Enables a rapid firing ranged attack with {0}% faster attack speed for the Infernal Machine, that stuns enemies it hits for {1} seconds. Bash is disabled while under the effect of Rapid Fire.|nLasts {2} seconds.".format(
-                RAPID_FIRE_ATTACK_SPEED[lvl-1].str(), RAPID_FIRE_STUN_DURATION[lvl-1].toString(), RAPID_FIRE_DURATION.str()
-            ))
+        tooltip.setNormalString(true, lvl, "Enables a rapid firing ranged attack with {0}% faster attack speed for the Infernal Machine, that stuns enemies it hits for {1} seconds. Bash is disabled while under the effect of Rapid Fire.|nLasts {2} seconds.".format(
+            RAPID_FIRE_ATTACK_SPEED[lvl-1].str(), RAPID_FIRE_STUN_DURATION[lvl-1].toString(), RAPID_FIRE_DURATION.str()
+        ))
+    tooltip.setReplaceIntelligence(0)
+    addDynamicTooltipIntelligence(heroType, tooltip)
 
             
 unit array melee_dummy
@@ -427,51 +456,14 @@ function teamFightAI(HeroAI ai)
         if not ai.getAttacking()
             ai.attack(target)
 
+@compiletime
 function setupTooltips()
-    DynamicTooltip tooltip = new DynamicTooltip(ABILITY_FIERY_HANDS)
-    tooltip.setLearnString("Killing a unit creates a fire explosion, dealing magic damage to nearby targets.", (int lvl) -> (begin
-        return "{0}{I0} damage".format(FIERY_HANDS_DMG[lvl-1].str())
-    end))
-    for lvl = 1 to 5
-        tooltip.setNormalString(false, lvl, "Killing a unit creates a fire explosion, dealing {0}{I0} magic damage to nearby targets.".format(
-            FIERY_HANDS_DMG[lvl-1].str()
-        ))
-    tooltip.setReplaceIntelligence(FIERY_HANDS_DMG_BONUS)
-    addDynamicTooltipIntelligence(heroType, tooltip)
 
-    tooltip = new DynamicTooltip(ABILITY_INNER_FIRE)
-    tooltip.setLearnString("Increases nearby units strength, armor and willpower.", (int lvl) -> (begin
-        return "+{0}{I0}% strength, +{1}{I1} armor and willpower, {2} seconds".format(
-        INNER_FIRE_DMG[lvl-1].str(),
-        INNER_FIRE_DEF[lvl-1].str(),
-        INNER_FIRE_DURATION.str()
-        )
-    end) )
-    for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, "Increases nearby units' strength by {0}{I0}% and armor and willpower by {1}{I1} for {2} seconds.".format(
-            INNER_FIRE_DMG[lvl-1].str(),
-            INNER_FIRE_DEF[lvl-1].str(),
-            INNER_FIRE_DURATION.str()
-        ))
-    tooltip.setReplaceIntelligence(INNER_FIRE_DMG_BONUS.toReal(), INNER_FIRE_DEF_BONUS.toReal())
-    addDynamicTooltipIntelligence(heroType, tooltip)
-
-    tooltip = new DynamicTooltip(ABILITY_FLAME_THROWER)
-    tooltip.setLearnString("Launches a fiery missile at the target location that deals large initial damage and ignites the targets, dealing additional damage over time.", (int lvl) -> (begin
-        return "{0}{I0} initial damage, {1}{I1} damage per second for {2} seconds.".format(
-            FLAME_THROWER_DAMAGE[lvl-1].str(),
-            FLAME_THROWER_DOT[lvl-1].str(),
-            FLAME_THROWER_DURATION[lvl-1].toExactString()
-        )
-    end) )
-    for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, "Launches a fiery missile at the target location that deals {0}{I0} initial damage and ignites the targets, dealing {1}{I1} damage per second for {2} seconds.".format(
-            FLAME_THROWER_DAMAGE[lvl-1].str(),
-            FLAME_THROWER_DOT[lvl-1].str(),
-            FLAME_THROWER_DURATION[lvl-1].toExactString()
-        ))
-    tooltip.setReplaceIntelligence(FLAME_THROWER_DAMAGE_BONUS, FLAME_THROWER_DOT_BONUS)
-    addDynamicTooltipIntelligence(heroType, tooltip)
+    passive(ABILITY_FIERY_HANDS)
+    bash(ABILITY_BASH)
+    innerFire(ABILITY_INNER_FIRE)
+    flameThrower(ABILITY_FLAME_THROWER)
+    rapidFire(ABILITY_RAPID_FIRE)
 
 
 function initHeroType()
