@@ -362,7 +362,7 @@ function itemSacrificialDagger(int itemId)
     int hr = 30
     if compiletime
         itemId.getTypeDef()
-            ..setDescription(("+ {0} strength\n+ {1}% attack speed\n+ {2} hit point regeneration per 10 seconds|nRestores {3} mana points per kill."+
+            ..setDescription(("+ {0} strength\n+ {1}% attack speed\n+ {2} hit point regeneration per 10 seconds|nRestores {3} mana points per kill. "+
             "Attacks restore {4}% of the damage dealt.").format(
                 str.toString(), as.toString(), hr.toString(), mana.toString(), lifesteal.toString()
             ))
