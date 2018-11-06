@@ -232,8 +232,8 @@ function deathpact(int abilityId)
     
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, "Deals {0}{I0} magic damage and additional {1}{I1} magic damage for every sacrificed skeleton to the target enemy hero.".format(
-            DEATH_COIL_DMG_BASE[lvl-1].str()+DEATH_COIL_DMG_BASE_BONUS.getBonusString(C_INT),
-            DEATH_COIL_DMG_FACTOR[lvl-1].str()+DEATH_COIL_DMG_FACTOR_BONUS.getBonusString(C_INT)))
+            DEATH_COIL_DMG_BASE[lvl-1].str(),
+            DEATH_COIL_DMG_FACTOR[lvl-1].str()))
     tooltip.setReplaceIntelligence(DEATH_COIL_DMG_BASE_BONUS, DEATH_COIL_DMG_FACTOR_BONUS)
     addDynamicTooltipIntelligence(heroType, tooltip)
         
@@ -356,6 +356,7 @@ function onSpellCast()
             caster.getOwner().setAbilityAvailable(ABILITY_DEATH_PACT, false)
             caster.addAbility(ABILITY_DEATH_COIL)
             caster.setAbilityLevel(ABILITY_DEATH_COIL, level)
+            heroType.updateTooltipsInt(caster)
         end))
         doAfter(DEATH_COIL_DURATION+1, () -> (begin
             caster.removeAbility(ABILITY_DEATH_COIL)
