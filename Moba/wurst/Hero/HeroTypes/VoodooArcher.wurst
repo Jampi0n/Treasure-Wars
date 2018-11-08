@@ -403,7 +403,7 @@ function initHeroType()
         end))
 
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if attacker.getTypeId() == SERPENT_WARD
+            if attacker.getTypeId() == SERPENT_WARD and not target.isType(UNIT_TYPE_STRUCTURE)
                 let hero = Hero.getHero(attacker.getOwner()).toUnit()
                 let level = hero.getAbilityLevel(ABILITY_SERPENT_WARD)
                 target.addBuffReduced(hero, SERPENT_POISON_DURATION[level-1], buffSerpentPoison, level)
