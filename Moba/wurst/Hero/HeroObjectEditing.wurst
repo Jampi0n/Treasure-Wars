@@ -268,8 +268,14 @@ public function string.evaluateStrength(LinkedList<real> replacers, int strength
         i++
     return result
 
-public function string.evaluateBonus(LinkedList<real> replaceStrength, int strength, LinkedList<real> replaceIntelligence, int intelligence, bool const) returns string
-    return this.evaluateStrength(replaceStrength, strength, const).evaluateIntelligence(replaceIntelligence, intelligence, const)
+public function string.evaluateCooldown(real cooldown) returns string
+    if compiletime
+        return this
+    else
+        return this.replace("{CD}", cooldown.toSmartString())
+
+public function string.evaluateBonus(LinkedList<real> replaceStrength, int strength, LinkedList<real> replaceIntelligence, int intelligence, real cooldown, bool const) returns string
+    return this.evaluateStrength(replaceStrength, strength, const).evaluateIntelligence(replaceIntelligence, intelligence, const).evaluateCooldown(cooldown)
     
 public class DynamicTooltip
     
@@ -357,7 +363,11 @@ public class DynamicTooltip
         this.normalString[level-1] = normalString
 
         if showCooldown
-            this.normalString[level - 1] += "\n" + "Cooldown: " + "<" + this.getAbilityTypeId().toRawCode() + ",Cool"+level.toString()+">" + "\n "
+            //this.normalString[level - 1] += "\n" + "Cooldown: " + "<" + this.getAbilityTypeId().toRawCode() + ",Cool"+level.toString()+">" + "\n "
+            if compiletime
+                this.normalString[level - 1] += "\n" + "Cooldown: " + "<" + this.getAbilityTypeId().toRawCode() + ",Cool"+level.toString()+">" + "\n "
+            else
+                this.normalString[level - 1] += "\n" + "Cooldown: " + "{CD}" + "\n "
         else
             this.normalString[level - 1] += "\n "
 
@@ -366,28 +376,31 @@ public class DynamicTooltip
         this.turnOffString[level-1] = turnOffString
 
         if showCooldown
-            this.turnOffString[level - 1] += "\n" + "Cooldown: " + "<" + this.getAbilityTypeId().toRawCode() + ",Cool"+level.toString()+">" + "\n "
+            if compiletime
+                this.turnOffString[level - 1] += "\n" + "Cooldown: " + "<" + this.getAbilityTypeId().toRawCode() + ",Cool"+level.toString()+">" + "\n "
+            else
+                this.turnOffString[level - 1] += "\n" + "Cooldown: " + "{CD}" + "\n "
         else
             this.turnOffString[level - 1] += "\n "
 
 
     
     function evaluateLearnStringLevel(int level, int strength, int intelligence, bool const) returns string
-        return this.learnLevelString[level-1].evaluateBonus(replaceStrength, strength, replaceIntelligence, intelligence, const)
+        return this.learnLevelString[level-1].evaluateBonus(replaceStrength, strength, replaceIntelligence, intelligence, -1, const)
 
     function evaluateLearnString(int strength, int intelligence, bool const) returns string
-        return this.learnString.evaluateBonus(replaceStrength, strength, replaceIntelligence, intelligence, const)
+        return this.learnString.evaluateBonus(replaceStrength, strength, replaceIntelligence, intelligence, -1, const)
 
-    function evaluateNormalString(int level, int strength, int intelligence, bool const) returns string
+    function evaluateNormalString(int level, int strength, int intelligence, real cooldown, bool const) returns string
         string ret = ""
         if level != 0
-            ret = this.normalString[level-1].evaluateBonus(replaceStrength, strength, replaceIntelligence, intelligence, const)
+            ret = this.normalString[level-1].evaluateBonus(replaceStrength, strength, replaceIntelligence, intelligence, cooldown, const)
         return ret
 
-    function evaluateTurnOffString(int level, int strength, int intelligence, bool const) returns string
+    function evaluateTurnOffString(int level, int strength, int intelligence, real cooldown, bool const) returns string
         string ret = ""
         if level != 0
-            ret = this.turnOffString[level-1].evaluateBonus(replaceStrength, strength, replaceIntelligence, intelligence, const)
+            ret = this.turnOffString[level-1].evaluateBonus(replaceStrength, strength, replaceIntelligence, intelligence, cooldown, const)
         return ret
 
     // Overloaded functions:
@@ -410,23 +423,25 @@ public class DynamicTooltip
 
 
     function evaluateNormalString(int level) returns string
-        return evaluateNormalString(level, 100, 100, true)
+        return evaluateNormalString(level, 100, 100, -1 ,true)
 
     function evaluateNormalString(unit whichUnit) returns string
-        return evaluateNormalString(whichUnit.getAbilityLevel(this.abilityTypeId), whichUnit.getStr(), whichUnit.getInt(), false)
+        let level = whichUnit.getAbilityLevel(this.abilityTypeId)
+        return evaluateNormalString(level, whichUnit.getStr(), whichUnit.getInt(), BlzGetUnitAbilityCooldown(whichUnit, this.abilityTypeId, level), false)
 
     function evaluateNormalString(unit whichUnit, int level) returns string
-        return evaluateNormalString(level, whichUnit.getStr(), whichUnit.getInt(), false)
+        return evaluateNormalString(level, whichUnit.getStr(), whichUnit.getInt(), BlzGetUnitAbilityCooldown(whichUnit, this.abilityTypeId, level), false)
 
 
     function evaluateTurnOffString(int level) returns string
-        return evaluateTurnOffString(level, 100, 100, true)
+        return evaluateTurnOffString(level, 100, 100, -1, true)
 
     function evaluateTurnOffString(unit whichUnit) returns string
-        return evaluateTurnOffString(whichUnit.getAbilityLevel(this.abilityTypeId), whichUnit.getStr(), whichUnit.getInt(), false)
+        let level = whichUnit.getAbilityLevel(this.abilityTypeId)
+        return evaluateTurnOffString(level, whichUnit.getStr(), whichUnit.getInt(), BlzGetUnitAbilityCooldown(whichUnit, this.abilityTypeId, level), false)
 
     function evaluateTurnOffString(unit whichUnit, int level) returns string
-        return evaluateTurnOffString(level, whichUnit.getStr(), whichUnit.getInt(), false)
+        return evaluateTurnOffString(level, whichUnit.getStr(), whichUnit.getInt(), BlzGetUnitAbilityCooldown(whichUnit, this.abilityTypeId, level), false)
 
 
 

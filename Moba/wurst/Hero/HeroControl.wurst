@@ -40,6 +40,12 @@ public class Hero
     private timerdialog reviveWindow
     private boolean firstTeam
 
+    private int array [5] skillIds
+
+    private real array [4] defaultCooldown
+    //modifies each cooldown seperately
+    private real array [4] cooldownMod
+
     //when gold or xp is shared, their values are mostly non integer. To avoid rounding errors, the remainder will be stored here.
     private real sharedXp = 0
 
@@ -55,9 +61,10 @@ public class Hero
                 let heroUnit = GetTriggerUnit()
                 let hero = unitToHero.get(heroUnit)
                 if hero != null
-                    hero.getHeroType()
-                        ..updateTooltipsStr(heroUnit)
-                        ..updateTooltipsInt(heroUnit)
+                    for i = 0 to 3
+                        hero.defaultCooldown[i] = BlzGetAbilityCooldown(hero.skillIds[i], hero.toUnit().getAbilityLevel(hero.skillIds[i]))
+                    hero.updateCooldowns()
+
             end))
             ..registerAnyUnitEvent(EVENT_PLAYER_HERO_SKILL)
 
@@ -69,6 +76,16 @@ public class Hero
             ..updateTooltipsStr(this.hero)
             ..updateTooltipsInt(this.hero)
         let upgradePlayer = owner.getPlayer()
+
+        this.skillIds[0] = this.heroType.getAbilityId(AbilitySlot.Q)
+        this.skillIds[1] = this.heroType.getAbilityId(AbilitySlot.W)
+        this.skillIds[2] = this.heroType.getAbilityId(AbilitySlot.E)
+        this.skillIds[3] = this.heroType.getAbilityId(AbilitySlot.R)
+        this.skillIds[4] = this.heroType.getAbilityId(AbilitySlot.PASSIVE)
+
+        for i = 0 to 3
+            this.cooldownMod[i] = 0
+            this.defaultCooldown[i] = 0
 
         execute( -> this.heroType.initialize())
         
@@ -131,6 +148,7 @@ public class Hero
 
         this.heroType.updateTooltipsStr(this.hero)
         this.heroType.updateTooltipsInt(this.hero)
+
 
     construct(CPlayer p, int unitId, vec2 pos, angle facing )
         objectCount++
@@ -428,6 +446,18 @@ public class Hero
         TimerDialogDisplay(this.reviveWindow, false)
         DestroyTimerDialog(this.reviveWindow)
         this.reviveTimer.release()
+
+
+    function updateCooldowns()
+        let heroUnit = this.toUnit()
+        for i = 0 to 3
+            real newCd = (this.defaultCooldown[i]+this.cooldownMod[i]) / (1.0+0.01*heroUnit.wrapper().getStatTotalValue(Stat.CD))
+            print(heroUnit.getName() +" update cooldown["+i.toString()+"] = "+newCd.toSmartString() + ", default = " + this.defaultCooldown[i].toSmartString())
+            BlzSetUnitAbilityCooldown(heroUnit, skillIds[i], GetUnitAbilityLevel(heroUnit, skillIds[i]), newCd )  
+
+        this.getHeroType()
+            ..updateTooltipsStr(heroUnit)
+            ..updateTooltipsInt(heroUnit)
 
         
 function displayTooltip(int pId, AbilitySlot slot)
