@@ -34,7 +34,7 @@ function createShopBuilding(int unitId, boolean first, int position)
     if(not first)
         facing = 90
 
-    createUnit(players[10], unitId, posGreen, facing.asAngleDegrees())
+    createUnit(players[TEAM_PLAYER_TEAM_1], unitId, posGreen, facing.asAngleDegrees())
         ..addAbility('A00X')
 
         
@@ -44,10 +44,10 @@ function createShopBuilding(int unitId, boolean first, int position)
         facing = 180
 
     if DEBUG_MODE
-        createUnit(players[10], unitId, posBrown, facing.asAngleDegrees())
+        createUnit(players[TEAM_PLAYER_TEAM_1], unitId, posBrown, facing.asAngleDegrees())
             ..addAbility('A00X')
     else
-        createUnit(players[11], unitId, posBrown, facing.asAngleDegrees())
+        createUnit(players[TEAM_PLAYER_TEAM_2], unitId, posBrown, facing.asAngleDegrees())
             ..addAbility('A00X')
 
 /*  ==========================================================================================================================

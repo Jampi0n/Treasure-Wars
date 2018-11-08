@@ -95,6 +95,7 @@ public class UnitWrapper
         statBaseValue[Stat.STR.toInt()] = this.assocUnit.getStr(false)
         statBaseValue[Stat.AGI.toInt()] = this.assocUnit.getAgi(false)
         statBaseValue[Stat.INT.toInt()] = this.assocUnit.getInt(false)
+        statBaseValue[Stat.CD.toInt()] = 0
 
         let uType = UnitType.getUnitType(this.assocUnit.getTypeId())
 
@@ -156,6 +157,7 @@ public class UnitWrapper
         statBaseValue[Stat.MP.toInt()] = 100 + GetPlayerTechCount(this.assocUnit.getOwner(), UPG_MP, true) * 10
         statBaseValue[Stat.MR.toInt()] = 0
         statBaseValue[Stat.MS.toInt()] = this.defaultMovementSpeed.toInt()
+        statBaseValue[Stat.CD.toInt()] = 0
 
     protected static function getWrapper(unit whichUnit) returns UnitWrapper
         return unitMap.get(whichUnit)
@@ -198,7 +200,7 @@ public class UnitWrapper
         
 
     function applyTotalStatBonus(Stat whichStat)
-        if whichStat != Stat.MS and whichStat != Stat.HR and whichStat!= Stat.MR and whichStat!= Stat.HP and whichStat!= Stat.MP
+        if whichStat != Stat.MS and whichStat != Stat.HR and whichStat!= Stat.MR and whichStat!= Stat.HP and whichStat!= Stat.MP and whichStat != Stat.CD
             this.toUnit().setBonus(whichStat, this.statsTotalBonus[whichStat.toInt()])
             //update ability tooltips
             if this.toUnit().isType(UNIT_TYPE_HERO) and (whichStat == Stat.STR or whichStat == Stat.INT)
@@ -209,7 +211,7 @@ public class UnitWrapper
                         hType.updateTooltipsStr(this.toUnit())
                     else
                         hType.updateTooltipsInt(this.toUnit())
-                    
+                        
         else
             if whichStat == Stat.MS
                 this.toUnit().setMovementSpeed( this.getStatBaseValue(whichStat) + this.statsTotalBonus[whichStat.toInt()].toReal() )
@@ -217,7 +219,10 @@ public class UnitWrapper
                 this.toUnit().setMaxHP(this.getStatTotalValue(Stat.HP), true)
             else if whichStat == Stat.MP
                 this.toUnit().setMaxMana(this.getStatTotalValue(Stat.MP), true)
-
+            else if whichStat == Stat.CD
+                let hero = Hero.getHero(this.toUnit())
+                if hero != null
+                    hero.updateCooldowns()
     /**
     Sets the absolute stat bonus and updates the total bonus.
     **/
