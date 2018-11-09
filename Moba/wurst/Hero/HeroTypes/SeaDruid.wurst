@@ -82,8 +82,7 @@ function tidalFury(int abilityId)
     tooltip
         ..setReplaceStrength(TIDAL_FURY_HIT_DMG_BONUS)
         ..setReplaceIntelligence(TIDAL_FURY_WAVE_DMG_BONUS)
-    addDynamicTooltipIntelligence(heroType, tooltip)
-    addDynamicTooltipStrength(heroType, tooltip)
+    addDynamicTooltipBoth(heroType, tooltip)
 
 
 constant real array FISH_DAMAGE = [100, 150, 200, 250, 300]

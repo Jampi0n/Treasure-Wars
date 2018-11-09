@@ -277,13 +277,63 @@ public function string.evaluateCooldown(real cooldown) returns string
 public function string.evaluateBonus(LinkedList<real> replaceStrength, int strength, LinkedList<real> replaceIntelligence, int intelligence, real cooldown, bool const) returns string
     return this.evaluateStrength(replaceStrength, strength, const).evaluateIntelligence(replaceIntelligence, intelligence, const).evaluateCooldown(cooldown)
     
+
+abstract class DynamicElement
+    function evaluate(int _strength, int _intelligence, real _cooldown, bool _const) returns string
+        return ""
+
+class DynamicText extends DynamicElement
+    string message
+
+    construct(string message)
+        this.message = message
+
+    override function evaluate(int strength, int intelligence, real cooldown, bool const) returns string
+        return this.message
+
+class DynamicStrength extends DynamicElement
+    real factor
+    construct(real factor)
+        this.factor = factor
+
+    override function evaluate(int strength, int intelligence, real cooldown, bool const) returns string
+        if const
+            return C_STR.toColorString()+" (+"+(factor).toSmartString()+"% str)|r "
+        else
+            return C_STR.toColorString()+" (+"+(strength * factor/100).toSmartString()+")|r "
+
+class DynamicIntelligence extends DynamicElement
+    real factor
+    construct(real factor)
+        this.factor = factor
+
+    override function evaluate(int strength, int intelligence, real cooldown, bool const) returns string
+        if const
+            return C_INT.toColorString()+" (+"+(factor).toSmartString()+"% int)|r "
+        else
+            return C_INT.toColorString()+" (+"+(intelligence * factor/100).toSmartString()+")|r "
+
+class DynamicCooldown extends DynamicElement
+    construct()
+
+    override function evaluate(int strength, int intelligence, real cooldown, bool const) returns string
+        return cooldown.toSmartString()
+
 public class DynamicTooltip
     
     private int abilityTypeId
     private string array[5] normalString
     private string array[5] turnOffString
     private string array[5] learnLevelString
+
+    private LinkedList<DynamicElement> array[5] normalList
+    private LinkedList<DynamicElement> array[5] turnOffList
+    private LinkedList<DynamicElement> array[5] learnLevelList
+
     private string learnString
+
+    private LinkedList<DynamicElement> learnList
+
     private boolean useTurnOff
 
     private static constant idToTooltip = new HashMap<int,DynamicTooltip>
@@ -311,6 +361,54 @@ public class DynamicTooltip
         idToTooltip.put(abilityTypeId, this)
         this.aDef = aDef*/
 
+
+    private function min(int a, int b) returns int
+        if a == -1 and b == -1
+            return -1
+        else if a == -1
+            return 2
+        else if b == -1
+            return 1
+        else
+            return a <= b? 1:2
+
+    function evaluateList(LinkedList<DynamicElement> list, int strength, int intelligence, real cooldown, bool const) returns string
+        string s = ""
+        for elem in list
+            s+=elem.evaluate(strength, intelligence, cooldown, const)
+        return s
+
+    /*
+    **  Dynamic Tooltips are list based, because iterating through a list is a lot faster compared to replacing substrings.
+    */
+    function convertToList(string tooltip) returns LinkedList<DynamicElement>
+        LinkedList<DynamicElement> list = new LinkedList<DynamicElement>()
+        int current = 0
+        int i = 0
+        let l = tooltip.length()
+        while i<l
+            string substr = tooltip.charAt(i)
+            if(substr=="{")
+                list.add(new DynamicText(tooltip.substring(current, i)))
+                string referenceType = tooltip.charAt(i+1)
+                if(referenceType=="I")
+                    int id = S2I(tooltip.charAt(i+2))
+                    list.add(new DynamicIntelligence(replaceIntelligence.get(id)))
+                else if(referenceType=="S")
+                    int id = S2I(tooltip.charAt(i+2))
+                    list.add(new DynamicStrength(replaceStrength.get(id)))
+                else if(referenceType=="C")
+                    list.add(new DynamicCooldown())
+                i+=3
+                current = i+1
+            i++
+
+        list.add(new DynamicText(tooltip.substring(current)))
+        return list
+
+            
+
+
     function getUseTurnOff() returns boolean
         return this.useTurnOff
 
@@ -322,22 +420,18 @@ public class DynamicTooltip
         for replacement in replacements
             replaceStrength.add(replacement)
 
-    function format(vararg string replacements)
-        var result = this.learnString
-        var i = 0
-        for replacement in replacements
-            result = result.replace("{N" + i.toString() + "}", replacement)
-            i++
-        this.learnString = result
-
-        for j=1 to 5
-            result = this.normalString[j]
-            i = 0
-            for replacement in replacements
-                result = result.replace("{N" + i.toString() + "}", replacement)
-                i++
-            this.normalString[j] = result
-
+    function finalize()
+        for i = 0 to 4
+            this.normalList[i] = this.convertToList(this.normalString[i])
+            this.normalString[i] = ""
+            if this.getUseTurnOff()
+                this.turnOffList[i] = this.convertToList(this.turnOffString[i])
+                this.turnOffString[i] = ""
+            this.learnLevelList[i] = this.convertToList(this.learnLevelString[i])
+            this.learnLevelString[i] = ""
+        this.learnList = this.convertToList(this.learnString)
+        this.learnString = ""
+        
     function writeData()
         if aDef == null or not COMPILETIME_TOOLTIPS
             return
@@ -371,6 +465,7 @@ public class DynamicTooltip
         else
             this.normalString[level - 1] += "\n "
 
+
     function setTurnOffString(boolean showCooldown, int level, string turnOffString)
         this.useTurnOff = true
         this.turnOffString[level-1] = turnOffString
@@ -386,21 +481,21 @@ public class DynamicTooltip
 
     
     function evaluateLearnStringLevel(int level, int strength, int intelligence, bool const) returns string
-        return this.learnLevelString[level-1].evaluateBonus(replaceStrength, strength, replaceIntelligence, intelligence, -1, const)
+        return this.evaluateList(this.learnLevelList[level-1], strength, intelligence, -1, const)
 
     function evaluateLearnString(int strength, int intelligence, bool const) returns string
-        return this.learnString.evaluateBonus(replaceStrength, strength, replaceIntelligence, intelligence, -1, const)
+        return this.evaluateList(this.learnList, strength, intelligence, -1, const)
 
     function evaluateNormalString(int level, int strength, int intelligence, real cooldown, bool const) returns string
         string ret = ""
         if level != 0
-            ret = this.normalString[level-1].evaluateBonus(replaceStrength, strength, replaceIntelligence, intelligence, cooldown, const)
+            ret = this.evaluateList(this.normalList[level-1], strength, intelligence, cooldown, const)
         return ret
 
     function evaluateTurnOffString(int level, int strength, int intelligence, real cooldown, bool const) returns string
         string ret = ""
         if level != 0
-            ret = this.turnOffString[level-1].evaluateBonus(replaceStrength, strength, replaceIntelligence, intelligence, cooldown, const)
+            ret = this.evaluateList(this.turnOffList[level-1], strength, intelligence, cooldown, const)
         return ret
 
     // Overloaded functions:
