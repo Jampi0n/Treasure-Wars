@@ -452,7 +452,6 @@ public class Hero
         let heroUnit = this.toUnit()
         for i = 0 to 3
             real newCd = (this.defaultCooldown[i]+this.cooldownMod[i]) / (1.0+0.01*heroUnit.wrapper().getStatTotalValue(Stat.CD))
-            print(heroUnit.getName() +" update cooldown["+i.toString()+"] = "+newCd.toSmartString() + ", default = " + this.defaultCooldown[i].toSmartString())
             BlzSetUnitAbilityCooldown(heroUnit, skillIds[i], GetUnitAbilityLevel(heroUnit, skillIds[i]), newCd )  
 
         this.getHeroType()
