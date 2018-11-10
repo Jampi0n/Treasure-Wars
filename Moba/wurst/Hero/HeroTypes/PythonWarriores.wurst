@@ -39,6 +39,7 @@ function envenomedBlades(int abilityId)
             ..setupWithHotKey("Envenomed Blades", "D")
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceIntelligence(ENVENOMED_BLADES_DAMAGE_BONUS)
     tooltip.setLearnString("Attacks deal poison damage every second.", (int lvl) -> (begin
         return "{0}{I0} damage, {1} seconds.".format(
         ENVENOMED_BLADES_DAMAGE[lvl-1].str(), 
@@ -49,7 +50,6 @@ function envenomedBlades(int abilityId)
             ENVENOMED_BLADES_DAMAGE[lvl-1].str()+ENVENOMED_BLADES_DAMAGE_BONUS.getBonusString(C_INT), 
             ENVENOMED_BLADES_DURATION[lvl-1].str())
             )
-    tooltip.setReplaceIntelligence(ENVENOMED_BLADES_DAMAGE_BONUS)
     addDynamicTooltipIntelligence(heroType, tooltip)
     
 constant real array MISTWALK_DURATION = [5, 5.5, 6, 6.5, 7]
@@ -80,6 +80,7 @@ function mistwalk(int abilityId)
 
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceIntelligence(MISTWALK_DURATION_BONUS)
     tooltip.setLearnString("Turns the Python Warriores invisibile.", (int lvl) -> (begin
         return "{0}{I0} seconds.".format( MISTWALK_DURATION[lvl-1].toExactString())
     end) )
@@ -87,7 +88,6 @@ function mistwalk(int abilityId)
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, "Turns the Python Warriores invisibile for {0}{I0} seconds.".format(
             MISTWALK_DURATION[lvl-1].toExactString()))
-    tooltip.setReplaceIntelligence(MISTWALK_DURATION_BONUS)
     addDynamicTooltipIntelligence(heroType, tooltip)
 
 constant int array POISON_SPIT_SLOW_MS = [-30, -35, -40, -45, -50]
@@ -131,6 +131,7 @@ function poisonSpit(int abilityId)
                 ..setTargetsAllowed(lvl, "none")
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceIntelligence(POISON_SPIT_DOT_BONUS)
     tooltip.setLearnString("Spits poison at the target area. Enemies within the area of effect are slowed, have reduced armor and take damage over time.",
         (int lvl) -> (begin
             return "{0}{I0} damage per second, {1} slow, {2} armor, lasts {3} seconds.".format(
@@ -142,7 +143,6 @@ function poisonSpit(int abilityId)
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, "Spits poison at the target area. Enemies within the area of effect are slowed by {0}, have their armor reduced by {1} and take {2}{I0} damage per second.|nLasts {3} seconds.".format(
             (-POISON_SPIT_SLOW_MS[lvl-1]).str()+"%", (-POISON_SPIT_ARMOR_REDUCTION[lvl-1]).str(), POISON_SPIT_DOT[lvl-1].str(), POISON_SPIT_DURATION[lvl-1].str()))
-    tooltip.setReplaceIntelligence(POISON_SPIT_DOT_BONUS)
     addDynamicTooltipIntelligence(heroType, tooltip)
 
 constant real array EMPOWERED_STRIKE_DAMAGE = [80, 140, 200, 260, 320]
@@ -174,13 +174,13 @@ function empoweredStrike(int abilityId)
                 ..setTargetsAllowed(lvl, "air,enemies,ground,neutral,nonancient,organic")
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceStrength(EMPOWERED_STRIKE_DAMAGE_BONUS)
     tooltip.setLearnString("Strikes the target enemy unit with a powerful melee attack dealing physical damage.", (int lvl) -> (begin
         return "{0}{S0} damage.".format( EMPOWERED_STRIKE_DAMAGE[lvl-1].str())
     end) )
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, "Strikes the target enemy unit with a powerful melee attack dealing {0}{S0} physical damage.".format( 
             EMPOWERED_STRIKE_DAMAGE[lvl-1].str()))
-    tooltip.setReplaceStrength(EMPOWERED_STRIKE_DAMAGE_BONUS)
     addDynamicTooltipStrength(heroType, tooltip)
 
 
@@ -216,6 +216,7 @@ function paralyzingStrike(int abilityId)
                 ..setTargetsAllowed(lvl, "enemies,ground,neutral,nonancient,organic,hero")
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceIntelligence(PARALYZING_STRIKE_DAMAGE_BONUS, PARALYZING_STRIKE_DURATION_BONUS)
     tooltip.setLearnString("Deals massive magical damage to the target, stunning it and teleports the Python Warriores behind the target.", (int lvl) -> (begin
         return "{0}{I0} damage, {1}{I1} seconds stun.".format(
         PARALYZING_STRIKE_DAMAGE[lvl-1].str(),
@@ -225,7 +226,6 @@ function paralyzingStrike(int abilityId)
         tooltip.setNormalString(true, lvl, "Deals {0}{I0} magical damage to the target, stunning it for {1}{I1} seconds and teleports the Python Warriores behind the target.".format(
             PARALYZING_STRIKE_DAMAGE[lvl-1].str(),
             PARALYZING_STRIKE_DURATION[lvl-1].toExactString()))
-    tooltip.setReplaceIntelligence(PARALYZING_STRIKE_DAMAGE_BONUS, PARALYZING_STRIKE_DURATION_BONUS)
     addDynamicTooltipIntelligence(heroType, tooltip)
 
 

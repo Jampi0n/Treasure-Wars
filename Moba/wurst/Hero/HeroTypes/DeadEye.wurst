@@ -34,6 +34,7 @@ function blackArrow(int abilityId)
             ..setupWithHotKey("Black Arrow", "D")
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceStrength(0)
     tooltip.setLearnString("Increases the damage of killing attacks against enemies and spawns a skeleton.", (int lvl) -> (begin
         return "{0} damage, lasts {1} seconds.".format(
         BLACK_ARROW_THRESHOLD[lvl-1].str(), 
@@ -45,7 +46,6 @@ function blackArrow(int abilityId)
             BLACK_ARROW_THRESHOLD[lvl-1].str(), 
             BLACK_ARROW_DURATION[lvl-1].str())
             )
-    tooltip.setReplaceStrength(0)
     addDynamicTooltipStrength(heroType, tooltip)
 
 
@@ -80,6 +80,7 @@ function piercingShot(int abilityId)
                 ..setCastRange(lvl, RANGE[lvl-1])
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceStrength(PIERCING_SHOT_DAMAGE_BONUS)
     tooltip.setLearnString("Shoots an arrow towards the target direction, dealing damage to enemies it strikes through.", (int lvl) -> (begin
         return "{0}{S0} damage.".format(
         PIERCING_SHOT_DAMAGE[lvl-1].str())
@@ -89,7 +90,6 @@ function piercingShot(int abilityId)
         tooltip.setNormalString(true, lvl, "Shoots an arrow towards the target direction, dealing {0}{S0} damage to enemies it strikes through.".format(
             PIERCING_SHOT_DAMAGE[lvl-1].str())
         )
-    tooltip.setReplaceStrength(PIERCING_SHOT_DAMAGE_BONUS)
     addDynamicTooltipStrength(heroType, tooltip)
 
 constant real array TERROR_DURATION = [2, 2.6, 3.2, 3.8, 4.4]
@@ -116,6 +116,7 @@ function terror(int abilityId)
                 ..setTargetsAllowed(lvl, "none")
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceIntelligence(TERROR_DURATION_BONUS)
     tooltip.setLearnString("Terrifies nearby enemies, making them miss on their attacks.", (int lvl) -> (begin
         return "{0}{I0} seconds, {1} area of effect.".format(
         TERROR_DURATION[lvl-1].toExactString(),
@@ -124,7 +125,6 @@ function terror(int abilityId)
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, "Terrifies enemies within {0} range, making them miss on their attacks for {1}{I0} seconds.".format(
             TERROR_AOE[lvl-1].str(), TERROR_DURATION[lvl-1].toString()))
-    tooltip.setReplaceIntelligence(TERROR_DURATION_BONUS)
     addDynamicTooltipIntelligence(heroType, tooltip)
 
 real array BONE_BROTHERS_COOLDOWN = [18, 15, 12, 9, 6]
@@ -153,12 +153,12 @@ function boneBrothers(int abilityId)
                 ..setTargetsAllowed(lvl, "nonancient,player")
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceIntelligence(TERROR_DURATION_BONUS)
     tooltip.setLearnString("Swaps position with one of his skeletons.", (lvl) -> (begin
         return "{0} range, {1} seconds cooldown.".format( BONE_BROTHERS_RANGE[lvl-1].str(), BONE_BROTHERS_COOLDOWN[lvl-1].str())
     end))
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, "Swaps position with one of his skeletons.")
-    tooltip.setReplaceIntelligence(TERROR_DURATION_BONUS)
     addDynamicTooltipIntelligence(heroType, tooltip)
 
         
@@ -213,6 +213,7 @@ function deathpact(int abilityId)
 
 
     DynamicTooltip tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceIntelligence(DEATH_COIL_DMG_BASE_BONUS, DEATH_COIL_DMG_FACTOR_BONUS)
     tooltip.setLearnString("Sacrifices all his skeletons to unlock the power of Death Coil for "+DEATH_COIL_DURATION.str()+" seconds.|nDeath Coil deals massive magic damage at the target enemy hero. Sacrificing more skeletons increases the damage of Death Coil.", (int lvl) -> (begin
         return "{0}{I0} base damage, {1}{I1} damage per sacrificed skeleton.".format(
         DEATH_COIL_DMG_BASE[lvl-1].str(),
@@ -224,17 +225,15 @@ function deathpact(int abilityId)
             DEATH_COIL_DMG_BASE[lvl-1].str(),
             DEATH_COIL_DMG_FACTOR[lvl-1].str()))
 
-    tooltip.setReplaceIntelligence(DEATH_COIL_DMG_BASE_BONUS, DEATH_COIL_DMG_FACTOR_BONUS)
     addDynamicTooltipIntelligence(heroType, tooltip)
 
     tooltip = new DynamicTooltip(ABILITY_DEATH_COIL)
+    tooltip.setReplaceIntelligence(DEATH_COIL_DMG_BASE_BONUS, DEATH_COIL_DMG_FACTOR_BONUS)
     tooltip.setLearnString("", (lvl) -> "" )
-    
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, "Deals {0}{I0} magic damage and additional {1}{I1} magic damage for every sacrificed skeleton to the target enemy hero.".format(
             DEATH_COIL_DMG_BASE[lvl-1].str(),
             DEATH_COIL_DMG_FACTOR[lvl-1].str()))
-    tooltip.setReplaceIntelligence(DEATH_COIL_DMG_BASE_BONUS, DEATH_COIL_DMG_FACTOR_BONUS)
     addDynamicTooltipIntelligence(heroType, tooltip)
         
 
