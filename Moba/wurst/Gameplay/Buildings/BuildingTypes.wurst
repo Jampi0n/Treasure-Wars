@@ -443,7 +443,6 @@ function onBuildingAbility()
                     let u = GetEnumUnit()
                     militiaTeam1.removeUnit(u)
                     u.remove()
-                    print("remove after 60")
                 end))
             end))
 
