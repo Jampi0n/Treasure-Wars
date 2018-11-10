@@ -447,16 +447,18 @@ public class Hero
         DestroyTimerDialog(this.reviveWindow)
         this.reviveTimer.release()
 
-
+    /*
+    **  Changing cooldowns of morph abilities crashes the game, once they are used.
+    */
     function updateCooldowns()
-        let heroUnit = this.toUnit()
+        /*let heroUnit = this.toUnit()
         for i = 0 to 3
             real newCd = (this.defaultCooldown[i]+this.cooldownMod[i]) / (1.0+0.01*heroUnit.wrapper().getStatTotalValue(Stat.CD))
-            BlzSetUnitAbilityCooldown(heroUnit, skillIds[i], GetUnitAbilityLevel(heroUnit, skillIds[i]), newCd )  
-
+            BlzSetUnitAbilityCooldown(heroUnit, skillIds[i], GetUnitAbilityLevel(heroUnit, skillIds[i]), newCd )  */
+        /*
         this.getHeroType()
             ..updateTooltipsStr(heroUnit)
-            ..updateTooltipsInt(heroUnit)
+            ..updateTooltipsInt(heroUnit)*/
 
         
 function displayTooltip(int pId, AbilitySlot slot)
@@ -515,7 +517,7 @@ function charToAbilitySlot(string char) returns AbilitySlot
 init
     Hero.classInit()
 
-    for i = HERO_PLAYER_TEAM_1_FIRST to HERO_PLAYER_TEAM_2_LAST
+    //for i = HERO_PLAYER_TEAM_1_FIRST to HERO_PLAYER_TEAM_2_LAST
         /*CreateTrigger()
             ..registerPlayerChatEvent(players[i], "-ql", true)
             ..registerPlayerChatEvent(players[i], "-wl", true)
@@ -525,14 +527,14 @@ init
             ..addAction() ->
                 displayTooltip(GetTriggerPlayer().getId(), charToAbilitySlot(GetEventPlayerChatString().substring(1, 2)))*/
 
-        CreateTrigger()
+        /*CreateTrigger()
             ..registerPlayerChatEvent(players[i], "-q", true)
             ..registerPlayerChatEvent(players[i], "-w", true)
             ..registerPlayerChatEvent(players[i], "-e", true)
             ..registerPlayerChatEvent(players[i], "-r", true)
             ..registerPlayerChatEvent(players[i], "-d", true)
             ..addAction() ->
-                displayTooltip(GetTriggerPlayer().getId(), charToAbilitySlot(GetEventPlayerChatString().substring(1, 2)))
+                displayTooltip(GetTriggerPlayer().getId(), charToAbilitySlot(GetEventPlayerChatString().substring(1, 2)))*/
             /*
             ..addAction() ->
                 let slot = charToAbilitySlot(GetEventPlayerChatString().substring(1, 2))

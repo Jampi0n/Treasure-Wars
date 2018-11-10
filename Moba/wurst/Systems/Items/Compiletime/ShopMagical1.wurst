@@ -82,7 +82,6 @@ function itemGemOfMana(int itemId)
     else
         itemId.getItem()
             ..addStatBonusAbsolute(Stat.MP, mp)
-            ..addStatBonusAbsolute(Stat.CD, 20)
             
 function itemGemOfDarkness(int itemId)
     int voidDmg = 12

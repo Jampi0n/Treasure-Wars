@@ -207,77 +207,6 @@ public function AbilityDefinition.setupWithHotKey(string name, string hotkey)
             ..setLevelSkipRequirement(4)
         return
 
-/*
-public function bonus(int statValue, real atHundred) returns string
-    return (atHundred*statValue/100).toString()
-
-public function string.removeDynamics() returns string
-    int i = 0
-    string preString = this
-    while true
-        string newString = preString.replace("{I" + i.toString() + "}","")
-        if(preString == newString)
-            break
-        preString = newString
-        i++
-    i = 0
-    while true
-        string newString = preString.replace("{S" + i.toString() + "}","")
-        if(preString == newString)
-            break
-        preString = newString
-        i++
-    return preString
-
-public function string.replaceDynamics() returns string
-    int i = 0
-    string preString = this
-    while true
-        string newString = preString.replace("{I" + i.toString() + "}", C_INT.toColorString()+" (int)" )
-        if(preString == newString)
-            break
-        preString = newString
-        i++
-    i = 0
-    while true
-        string newString = preString.replace("{S" + i.toString() + "}", C_STR.toColorString()+" (str)")
-        if(preString == newString)
-            break
-        preString = newString
-        i++
-    return preString
-
-public function string.evaluateIntelligence(LinkedList<real> replacers, int intelligence, bool const) returns string
-    var result = this
-    var i = 0
-    for dynamicInteger in replacers
-        if const
-            result = result.replace("{I" + i.toString() + "}", C_INT.toColorString()+" (+"+(intelligence * dynamicInteger/100).toSmartString()+"% int)|r " )
-        else
-            result = result.replace("{I" + i.toString() + "}", C_INT.toColorString()+" (+"+(intelligence * dynamicInteger/100).toSmartString()+")|r " )
-        i++
-    return result
-
-public function string.evaluateStrength(LinkedList<real> replacers, int strength, bool const) returns string
-    var result = this
-    var i = 0
-    for dynamicInteger in replacers
-        if const
-            result = result.replace("{S" + i.toString() + "}", C_STR.toColorString()+" (+"+(strength * dynamicInteger/100).toSmartString()+"% str)|r " )
-        else
-            result = result.replace("{S" + i.toString() + "}", C_STR.toColorString()+" (+"+(strength * dynamicInteger/100).toSmartString()+")|r ")
-        i++
-    return result
-
-public function string.evaluateCooldown(real cooldown) returns string
-    if compiletime
-        return this
-    else
-        return this.replace("{CD}", cooldown.toSmartString())
-
-public function string.evaluateBonus(LinkedList<real> replaceStrength, int strength, LinkedList<real> replaceIntelligence, int intelligence, real cooldown, bool const) returns string
-    return this.evaluateStrength(replaceStrength, strength, const).evaluateIntelligence(replaceIntelligence, intelligence, const).evaluateCooldown(cooldown)
-*/    
 
 abstract class DynamicElement
     function evaluate(int _strength, int _intelligence, real _cooldown, bool _const) returns string
@@ -323,16 +252,10 @@ class DynamicCooldown extends DynamicElement
 public class DynamicTooltip
     
     private int abilityTypeId
-    /*private string array[5] normalString
-    private string array[5] turnOffString
-    private string array[5] learnLevelString*/
 
     private LinkedList<DynamicElement> array[5] normalList
     private LinkedList<DynamicElement> array[5] turnOffList
     private LinkedList<DynamicElement> array[5] learnLevelList
-
-    //private string learnString
-
     private LinkedList<DynamicElement> learnList
 
     private boolean useTurnOff
@@ -357,7 +280,7 @@ public class DynamicTooltip
             this.aDef = ABIL_DEF_MAP.get(this.abilityTypeId)
 
 
-    function evaluateList(LinkedList<DynamicElement> list, int strength, int intelligence, real cooldown, bool const) returns string
+    private function evaluateList(LinkedList<DynamicElement> list, int strength, int intelligence, real cooldown, bool const) returns string
         string s = ""
         for elem in list
             s+=elem.evaluate(strength, intelligence, cooldown, const)
@@ -366,7 +289,7 @@ public class DynamicTooltip
     /*
     **  Dynamic Tooltips are list based, because iterating through a list is a lot faster compared to replacing substrings.
     */
-    function convertToList(string tooltip) returns LinkedList<DynamicElement>
+    private function convertToList(string tooltip) returns LinkedList<DynamicElement>
         LinkedList<DynamicElement> list = new LinkedList<DynamicElement>()
         int current = 0
         int i = 0
@@ -397,32 +320,9 @@ public class DynamicTooltip
         list.add(new DynamicText(tooltip.substring(current)))
         return list
 
-            
-
-
     function getUseTurnOff() returns boolean
         return this.useTurnOff
 
-    function setReplaceIntelligence(vararg real replacements)
-        for replacement in replacements
-            replaceIntelligence.add(replacement)
-
-    function setReplaceStrength(vararg real replacements)
-        for replacement in replacements
-            replaceStrength.add(replacement)
-
-    /*function finalize()
-        for i = 0 to 4
-            this.normalList[i] = this.convertToList(this.normalString[i])
-            this.normalString[i] = ""
-            if this.getUseTurnOff()
-                this.turnOffList[i] = this.convertToList(this.turnOffString[i])
-                this.turnOffString[i] = ""
-            this.learnLevelList[i] = this.convertToList(this.learnLevelString[i])
-            this.learnLevelString[i] = ""
-        this.learnList = this.convertToList(this.learnString)
-        this.learnString = ""*/
-        
     function writeData()
         if aDef == null or not COMPILETIME_TOOLTIPS
             return
@@ -433,14 +333,21 @@ public class DynamicTooltip
             for i = 1 to 5
                 aDef.setTooltipTurnOffExtended(i, this.evaluateTurnOffString(i))
 
+    function setReplaceIntelligence(vararg real replacements)
+        for replacement in replacements
+            replaceIntelligence.add(replacement)
+
+    function setReplaceStrength(vararg real replacements)
+        for replacement in replacements
+            replaceStrength.add(replacement)
+        
+
     function setLearnString(string intro, LevelString levelString)
         string newString = intro + "\n"
-        //this.learnString = intro + "\n"
 
         for i = 1 to 5
             newString += getLevelString(i) + levelString.getString(i)
             this.learnLevelList[i-1] = this.convertToList(levelString.getString(i))
-            //this.learnLevelString[i-1] = levelString.getString(i)
 
         destroy levelString
         newString += "\n "
@@ -449,16 +356,14 @@ public class DynamicTooltip
 
     function setNormalString(boolean showCooldown, int level, string normalString)
         string newString = normalString
-        //this.normalString[level-1] = normalString
 
         if showCooldown
-            //this.normalString[level - 1] += "\n" + "Cooldown: " + "<" + this.getAbilityTypeId().toRawCode() + ",Cool"+level.toString()+">" + "\n "
             if compiletime
-                newString += "\n" + "Cooldown: " + "<" + this.getAbilityTypeId().toRawCode() + ",Cool"+level.toString()+">" + "\n "
+                newString += "\n" + "Cooldown: " + "<" + this.getAbilityTypeId().toRawCode() + ",Cool"+level.toString()+">" + " seconds\n "
             else
-            newString += "\n" + "Cooldown: " + "{CD}" + "\n "
+                newString += "\n" + "Cooldown: " + "{CD}" + " seconds\n "
         else
-        newString += "\n "
+            newString += "\n "
 
         this.normalList[level - 1] = this.convertToList(newString)
 
@@ -466,15 +371,15 @@ public class DynamicTooltip
     function setTurnOffString(boolean showCooldown, int level, string turnOffString)
         this.useTurnOff = true
         string newString = turnOffString
-        //this.turnOffString[level-1] = turnOffString
 
         if showCooldown
             if compiletime
-                newString += "\n" + "Cooldown: " + "<" + this.getAbilityTypeId().toRawCode() + ",Cool"+level.toString()+">" + "\n "
+                newString += "\n" + "Cooldown: " + "<" + this.getAbilityTypeId().toRawCode() + ",Cool"+level.toString()+">" + " seconds\n "
             else
-            newString += "\n" + "Cooldown: " + "{CD}" + "\n "
+                newString += "\n" + "Cooldown: " + "{CD}" + " seconds\n "
         else
             newString += "\n "
+            
         this.turnOffList[level - 1] = this.convertToList(newString)
 
 

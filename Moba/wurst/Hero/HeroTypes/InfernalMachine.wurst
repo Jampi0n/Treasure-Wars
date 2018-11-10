@@ -107,12 +107,12 @@ function bash(int abilityId)
     tooltip.setReplaceIntelligence(0)
     tooltip.setLearnString("Increases the movement speed of the Infernal Machine and causes the next attack to stun the target and deal bonus damage. Lasts {0} seconds.".format(BASH_BUFF_DURATION.str()), (int lvl) -> (begin
         return "{0} bonus damage, {1} seconds stun.".format(
-            BASH_DAMAGE_BONUS[lvl-1].str(), BASH_STUN_DURATION[lvl-1].toString()
+            BASH_DAMAGE_BONUS[lvl-1].str(), BASH_STUN_DURATION[lvl-1].toSmartString()
             )
     end) )
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, "Increases the movement speed of the Infernal Machine and causes the next attack to stun the target for {0} seconds and deal {1} bonus bonus damage. Lasts {2} seconds.".format(
-            BASH_STUN_DURATION[lvl-1].toString(), BASH_DAMAGE_BONUS[lvl-1].str(), BASH_BUFF_DURATION.str()
+            BASH_STUN_DURATION[lvl-1].toString(), BASH_DAMAGE_BONUS[lvl-1].str(), BASH_BUFF_DURATION.toSmartString()
         ))
     addDynamicTooltipIntelligence(heroType, tooltip)
 
@@ -156,14 +156,14 @@ function innerFire(int abilityId)
         return "+{0}{I0}% strength, +{1}{I1} armor and willpower, {2} seconds".format(
         INNER_FIRE_DMG[lvl-1].str(),
         INNER_FIRE_DEF[lvl-1].str(),
-        INNER_FIRE_DURATION.str()
+        INNER_FIRE_DURATION.toSmartString()
         )
     end) )
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, "Increases nearby units' strength by {0}{I0}% and armor and willpower by {1}{I1} for {2} seconds.".format(
             INNER_FIRE_DMG[lvl-1].str(),
             INNER_FIRE_DEF[lvl-1].str(),
-            INNER_FIRE_DURATION.str()
+            INNER_FIRE_DURATION.toSmartString()
         ))
     addDynamicTooltipIntelligence(heroType, tooltip)
 
@@ -218,14 +218,14 @@ function flameThrower(int abilityId)
         return "{0}{I0} initial damage, {1}{I1} damage per second for {2} seconds.".format(
             FLAME_THROWER_DAMAGE[lvl-1].str(),
             FLAME_THROWER_DOT[lvl-1].str(),
-            FLAME_THROWER_DURATION[lvl-1].toExactString()
+            FLAME_THROWER_DURATION[lvl-1].toSmartString()
         )
     end) )
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, "Launches a fiery missile at the target location that deals {0}{I0} initial damage and ignites the targets, dealing {1}{I1} damage per second for {2} seconds.".format(
             FLAME_THROWER_DAMAGE[lvl-1].str(),
             FLAME_THROWER_DOT[lvl-1].str(),
-            FLAME_THROWER_DURATION[lvl-1].toExactString()
+            FLAME_THROWER_DURATION[lvl-1].toSmartString()
         ))
     addDynamicTooltipIntelligence(heroType, tooltip)
 
@@ -290,9 +290,9 @@ function onRapid(unit caster, int level) // add bonus
                 doAfter(0, () -> caster.issueTargetOrder("attack", target))
     end))
     melee_dummy[caster.getOwner().getId()].setOwner(Player(PLAYER_NEUTRAL_PASSIVE), false)
-    
     if BuffList.hasBuffType(caster, buffBash)
         BuffList.getBuffOfType(caster, buffBash).dispel()
+
 function onRapidEndStats(unit caster, int level) // remove bonus
     caster.wrapper().addStatAbsoluteBonus(Stat.AS, -RAPID_FIRE_ATTACK_SPEED[level-1] + 80)
     caster.wrapper().addStatAbsoluteBonus(Stat.MS, 0)
@@ -345,10 +345,11 @@ function onSpellCast()
         ArtilleryDetection.fireArtillery(caster.getOwner(), FLAME_THROWER_ARTILLERY, caster.getPos(), vec2(GetSpellTargetX(), GetSpellTargetY()))
 
     else if spellId == ABILITY_RAPID_FIRE
+        /*
         if caster.getTypeId() == HERO_INFERNAL_MACHINE
             doAfter( 0, () -> onRapid(caster, level))
         else
-            doAfter( 0, () -> onRapidEnd(caster, level))
+            doAfter( 0, () -> onRapidEnd(caster, level))*/
 
 class AttackOrderTrack
 
