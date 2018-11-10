@@ -30,6 +30,7 @@ function focus(int abilityId)
             ..setupWithHotKey("Focus", "D")
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceStrength(0)
     tooltip.setLearnString("Every attack increases the Troll Berserker's strength by {0} for a short time.".format(FOCUS_BONUS.str()), (int lvl) -> (begin
         return "{0} seconds.".format(
             FOCUS_DURATION[lvl-1].str()
@@ -40,7 +41,6 @@ function focus(int abilityId)
         tooltip.setNormalString(false, lvl, "Every attack increases the Troll Berserker's strength by {0} for {1} seconds.".format(
             FOCUS_BONUS.str(), FOCUS_DURATION[lvl-1].str()
         ))
-    tooltip.setReplaceStrength(0)
     addDynamicTooltipStrength(heroType, tooltip)
 
 public constant real array CRITICAL_DAMAGE_MULT = [100, 130, 160, 190, 220]
@@ -80,6 +80,7 @@ function critical(int abilityId)
                 ..setDurationHero(lvl, 0.01)
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceStrength(0)
     tooltip.setLearnString("Increases the attack damage of the next attack.", (int lvl) -> (begin
         return "{0}% damage increase.".format(
             CRITICAL_DAMAGE_MULT[lvl-1].str()
@@ -90,7 +91,6 @@ function critical(int abilityId)
         tooltip.setNormalString(true, lvl, "Increases the attack damage of the next attack by {0}%.".format(
             CRITICAL_DAMAGE_MULT[lvl-1].str()
         ))
-    tooltip.setReplaceStrength(0)
     addDynamicTooltipStrength(heroType, tooltip)
 
 
@@ -121,6 +121,7 @@ function blink(int abilityId)
                 ..setMaximumRange(lvl, BLINK_MAX_RANGE[lvl-1])
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceStrength(0)
     tooltip.setLearnString("Teleports the Troll Berserker a short distance.", (int lvl) -> (begin
         return "{0} range, {1} seconds cooldown".format(
             BLINK_MAX_RANGE[lvl-1].str(),
@@ -130,7 +131,6 @@ function blink(int abilityId)
     
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, "Teleports the Troll Berserker a short distance.")
-    tooltip.setReplaceStrength(0)
     addDynamicTooltipStrength(heroType, tooltip)
 
 constant int array SWITCH_DMG = [5, 10, 15, 20, 25]
@@ -160,6 +160,7 @@ function switchWeapons(int abilityId)
                 ..setDurationNormal(lvl, SWITCH_DURATION)
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceStrength(0)
     tooltip.setLearnString("Turnes the Troll Berserker into a melee fighter, increasing attack damage and movement speed.", (int lvl) -> (begin
         return "+{0} attack damage, +{1} movement speed.".format(
             SWITCH_DMG[lvl-1].str(), SWITCH_MOVE_SPEED[lvl-1].str()
@@ -171,7 +172,6 @@ function switchWeapons(int abilityId)
             SWITCH_DMG[lvl-1].str(), SWITCH_MOVE_SPEED[lvl-1].str()
         ))
         tooltip.setTurnOffString(true, lvl, "Turnes the Troll Berserker back into a ranged fighter.")
-    tooltip.setReplaceStrength(0)
     addDynamicTooltipStrength(heroType, tooltip)
 
 
@@ -236,6 +236,7 @@ function growth(int abilityId)
                 ..setTargetsAllowed(lvl, "none")
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceIntelligence(GROWTH_HP_BONUS)
     tooltip.setLearnString("Increases the Troll Berserker's maximum hit points and hit point regeneration. When activated, the Troll Berserker petrifies nearby enemies making them unable to move for a short time.", (int lvl) -> (begin
         return "{0}{I0} hit points, {1} hit point regeneration per second, lasts {2} seconds, {3} seconds fear.".format(
             GROWTH_HP[lvl-1].str(), GROWTH_HP_REGEN[lvl-1].str(), GROWTH_DURATION[lvl-1].str(), GROWTH_FEAR_DURATION[lvl-1].toExactString())
@@ -243,7 +244,6 @@ function growth(int abilityId)
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, "Increases the Troll Berserker's maximum hit points by {0}{I0} and hit point regeneration by {1} hit points per second for {2} seconds. When activated, the Troll Berserker petrifies nearby enemies making them unable to move for {3} seconds.".format(
             GROWTH_HP[lvl-1].str(), GROWTH_HP_REGEN[lvl-1].str(), GROWTH_DURATION[lvl-1].str(), GROWTH_FEAR_DURATION[lvl-1].toExactString()))
-    tooltip.setReplaceIntelligence(GROWTH_HP_BONUS)
     addDynamicTooltipIntelligence(heroType, tooltip)
             
 

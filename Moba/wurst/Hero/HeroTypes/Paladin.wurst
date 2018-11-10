@@ -36,6 +36,7 @@ function heavyArmored(int abilityId)
             ..setupWithHotKey("Heavy Armored", "D")
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceStrength(0)
     tooltip.setLearnString("Reduces damage from incoming attacks.", (int lvl) -> (begin
         return "{0} damage reduction.".format(
         HEAVY_ARMOED_REDUCTION[lvl-1].str())
@@ -44,7 +45,6 @@ function heavyArmored(int abilityId)
         tooltip.setNormalString(false, lvl, "Reduces damage from incoming attacks by {0}.".format(
             HEAVY_ARMOED_REDUCTION[lvl-1].str())
             )
-    tooltip.setReplaceStrength(0)
     addDynamicTooltipStrength(heroType, tooltip)
 
 constant real array SHIELD_BASH_DMG = [60, 100, 140, 180, 220]
@@ -72,6 +72,7 @@ function shieldBash(int abilityId)
                 ..setTargetsAllowed(lvl, "none")
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceStrength(SHIELD_BASH_DMG_BONUS)
     tooltip.setLearnString("Bashes enemies in front of him with his shield, dealing physical damage and stunning them.", (int lvl) -> (begin
         return "{0}{S0} damage, {1} seconds stun.".format(
         SHIELD_BASH_DMG[lvl-1].str(),
@@ -82,7 +83,6 @@ function shieldBash(int abilityId)
         tooltip.setNormalString(true, lvl, "Bashes enemies in front of him with his shield, dealing {0}{S0} physical damage and stunning them for {1} seconds.".format(
             SHIELD_BASH_DMG[lvl-1].str(),
             SHIELD_BASH_DURATION[lvl-1].toExactString()))
-    tooltip.setReplaceStrength(SHIELD_BASH_DMG_BONUS)
     addDynamicTooltipStrength(heroType, tooltip)
 
 constant real array BATTLE_ROAR_AOE = [600, 700, 800, 900, 1000]
@@ -116,6 +116,7 @@ function battleRoar(int abilityId)
                 ..setTargetsAllowed(lvl, "none")
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceIntelligence(BATTLE_ROAR_DURATION_BONUS)
     tooltip.setLearnString("Increases nearby units' attack and movement speed.", (int lvl) -> (begin
         return "{0} attack speed, {1} movement speed, {2}{I0} seconds".format(
         BATTLE_ROAR_AS[lvl-1].str()+"%",
@@ -127,7 +128,6 @@ function battleRoar(int abilityId)
             BATTLE_ROAR_AS[lvl-1].str()+"%",
             BATTLE_ROAR_MS[lvl-1].str()+"%",
             BATTLE_ROAR_DURATION[lvl-1].toExactString()))
-    tooltip.setReplaceIntelligence(BATTLE_ROAR_DURATION_BONUS)
     addDynamicTooltipIntelligence(heroType, tooltip)
 
 constant real array HOLY_SHIELD_DURATION = [2, 2.5, 3, 3.5, 4]
@@ -166,6 +166,7 @@ function holyShield(int abilityId)
                 ..setTargetsAllowed(lvl, "friend,nonancient,hero")
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceIntelligence(HOLY_SHIELD_DURATION_BONUS)
     tooltip.setLearnString("Turns the target frendly hero untargetable.", (int lvl) -> (begin
         return "{0}{I0} seconds.".format(
         HOLY_SHIELD_DURATION[lvl-1].toExactString())
@@ -174,7 +175,6 @@ function holyShield(int abilityId)
         tooltip.setNormalString(true, lvl, "Turns the target frendly hero untargetable for {0}{I0} seconds.".format(
             HOLY_SHIELD_DURATION[lvl-1].toExactString()
             ))
-    tooltip.setReplaceIntelligence(HOLY_SHIELD_DURATION_BONUS)
     addDynamicTooltipIntelligence(heroType, tooltip)
 
 
@@ -204,6 +204,7 @@ function divinePunishment(int abilityId)
                 ..setTargetsAllowed(lvl, "none")
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceIntelligence(DIVINE_PUNISHMENT_DMG_BONUS)
     tooltip.setLearnString(CHANNELING_SPELL + "Calls upon the power of the gods. After two seconds of channeling nearby enemies will be struck by divine magic.", (int lvl) -> (begin
         return "{0}{I0} damage.".format(
         DIVINE_PUNISHMENT_DMG[lvl-1].str())
@@ -212,7 +213,6 @@ function divinePunishment(int abilityId)
         tooltip.setNormalString(true, lvl, CHANNELING_SPELL + "Calls upon the power of the gods. After two seconds of channeling nearby enemies will be struck by divine magic and take {0}{I0} damage.".format(
             DIVINE_PUNISHMENT_DMG[lvl-1].str()
         ))
-    tooltip.setReplaceIntelligence(DIVINE_PUNISHMENT_DMG_BONUS)
     addDynamicTooltipIntelligence(heroType, tooltip)
         
 

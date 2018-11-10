@@ -31,6 +31,7 @@ function ancientKnowledge(int abilityId)
             ..setupWithHotKey("Ancient Knowledge", "D")
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceIntelligence(0)
     tooltip.setLearnString("Increases his maximum hit points for a portion of his maximum mana ponits and increases his maximum mana points by "+
         "a portion of his maximum hit points.", (int lvl) -> (begin
             return "1 hit point for every {0} mana points, 1 mana point for every {1} hit points".format(
@@ -41,7 +42,6 @@ function ancientKnowledge(int abilityId)
         "increases his maximum mana points by 1 for every {1} points of his maximum hit points.").format(
             ANCIENT_KNOWLEDGE_HP_BONUS[lvl-1].toExactString(), ANCIENT_KNOWLEDGE_MP_BONUS[lvl-1].toExactString())
         )
-    tooltip.setReplaceIntelligence(0)
     addDynamicTooltipIntelligence(heroType, tooltip)
 
 constant real array TIDAL_FURY_HIT_DMG = [75, 125, 175, 225, 275]
@@ -72,6 +72,9 @@ function tidalFury(int abilityId)
                 ..setTargetsAllowed(lvl, "none")
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip
+        ..setReplaceStrength(TIDAL_FURY_HIT_DMG_BONUS)
+        ..setReplaceIntelligence(TIDAL_FURY_WAVE_DMG_BONUS)
     tooltip.setLearnString("Knocks nearby enemy units back, dealing damage and releasing a crushing wave for every enemy unit hit. The wave deals damage to every enemy it passes through.", (int lvl) -> (begin
         return "{0}{S0} knockback damage, {1}{I0} wave damage.".format(
         TIDAL_FURY_HIT_DMG[lvl-1].str(), TIDAL_FURY_WAVE_DMG[lvl-1].str())
@@ -79,9 +82,6 @@ function tidalFury(int abilityId)
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, "Knocks nearby enemy units back, dealing {0}{S0} damage and releasing a crushing wave for every enemy unit hit. The wave deals {1}{I0} damage to every enemy it passes through.".format(
             TIDAL_FURY_HIT_DMG[lvl-1].str(), TIDAL_FURY_WAVE_DMG[lvl-1].str()))
-    tooltip
-        ..setReplaceStrength(TIDAL_FURY_HIT_DMG_BONUS)
-        ..setReplaceIntelligence(TIDAL_FURY_WAVE_DMG_BONUS)
     addDynamicTooltipBoth(heroType, tooltip)
 
 
@@ -132,6 +132,7 @@ function giantFish(int abilityId)
                 ..setAreaofEffect(lvl, FISH_AOE[lvl-1])
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceIntelligence(FISH_DAMAGE_BONUS)
     tooltip.setLearnString("Throws a giant fish at the target location, damaging and slowing enemies in the area.", (int lvl) -> (begin
         return "{0}{I0} damage, {1}% attack speed. {2}% movement speed, {3} seconds.".format(
             FISH_DAMAGE[lvl-1].str(), FISH_ATTACK_SPEED[lvl-1].str(), FISH_MOVE_SPEED[lvl-1].str(), FISH_SLOW_DURATION[lvl-1].str())
@@ -139,7 +140,6 @@ function giantFish(int abilityId)
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, "Throws a giant fish at the target location, dealing {0}{I0} magic damage and slowing attack speed by {1}% and movement speed by {2}% for {3} seconds.".format(
             FISH_DAMAGE[lvl-1].str(), FISH_ATTACK_SPEED[lvl-1].str(), FISH_MOVE_SPEED[lvl-1].str(), FISH_SLOW_DURATION[lvl-1].str()))
-    tooltip.setReplaceIntelligence(FISH_DAMAGE_BONUS)
     addDynamicTooltipIntelligence(heroType, tooltip)
 
 
@@ -177,6 +177,7 @@ function manaShield(int abilityId)
                 ..setTargetsAllowed(lvl, "none")
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceIntelligence(0)
     tooltip.setLearnString("Reduces incoming damage at the cost of mana. Also drains mana while activated.", (int lvl) -> (begin
         return "{0}% reduction, {1} mana points per blocked damage point.".format(
             (MANA_SHIELD_REDUCTION[lvl-1]*100).str(), MANA_PER_DAMAGE[lvl-1].toExactString()
@@ -188,7 +189,6 @@ function manaShield(int abilityId)
             (MANA_SHIELD_REDUCTION[lvl-1]*100).str(), MANA_PER_DAMAGE[lvl-1].toExactString()
         ))
         tooltip.setTurnOffString(false, lvl, "Deactivate Mana Shield to stop draining mana.")
-    tooltip.setReplaceIntelligence(0)
     addDynamicTooltipIntelligence(heroType, tooltip)
 
 
@@ -228,6 +228,7 @@ function ritualOfTheSeas(int abilityId)
                 ..setTargetsAllowed(lvl, "none")
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceIntelligence(RITUAL_HP_DRAIN_BONUS, RITUAL_MANA_DRAIN_BONUS)
     tooltip.setLearnString(CHANNELING_SPELL + "Sends out magical energy, that drains hit points and mana from nearby enemies.|nThe Sea Druid gets {0}% of the hit points and {1}% of the mana drained from enemy heroes.".format(
         RITUAL_HP_RATIO.str(), RITUAL_MANA_RATIO.str()), (int lvl) -> (begin
         return "{0}{I0} damage, {1}{I1} mana, lasts for {2} waves.".format(
@@ -237,7 +238,6 @@ function ritualOfTheSeas(int abilityId)
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, CHANNELING_SPELL + "Sends out magical energy, that drain {0}{I0} hit points and {1}{I1} mana from nearby enemies.|nLasts for {2} waves.|nThe Sea Druid gets {3}% of the hit points and {4}% of the mana drained from enemy heroes.".format(
             RITUAL_HP_DRAIN[lvl-1].str(), RITUAL_MANA_DRAIN[lvl-1].str(), RITUAL_WAVE_COUNT[lvl-1].str(), RITUAL_HP_RATIO.str(), RITUAL_MANA_RATIO.str()))
-    tooltip.setReplaceIntelligence(RITUAL_HP_DRAIN_BONUS, RITUAL_MANA_DRAIN_BONUS)
     addDynamicTooltipIntelligence(heroType, tooltip)
 
 function setupStats()

@@ -29,6 +29,7 @@ function passive(int abilityId)
 
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceStrength(0)
     tooltip.setLearnString("Each attack deals additional void damage.", (int lvl) -> (begin
         return "{0} damage.".format(
             VOODOO_ARROW_DAMAGE[lvl-1].str())
@@ -38,7 +39,6 @@ function passive(int abilityId)
         tooltip.setNormalString(false, lvl, "Each attack deals {0} additional void damage.".format( 
             VOODOO_ARROW_DAMAGE[lvl-1].str())
         )
-    tooltip.setReplaceStrength(0)
     addDynamicTooltipStrength(heroType, tooltip)
 
 
@@ -67,6 +67,7 @@ function abilityQ(int abilityId)
                 ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceStrength(GHOST_ARROWS_DAMAGE_BONUS)
     tooltip.setLearnString("Summons Ghost Arrows to pierce the target enemy unit dealing damage.", (int lvl) -> (begin
         return "{0}{S0} damage.".format(
             GHOST_ARROWS_DAMAGE[lvl-1].str())
@@ -76,7 +77,6 @@ function abilityQ(int abilityId)
         tooltip.setNormalString(true, lvl, "Summons Ghost Arrows to pierce the target enemy unit dealing {0}{S0} damage.".format(
             GHOST_ARROWS_DAMAGE[lvl-1].str())
         )
-    tooltip.setReplaceStrength(GHOST_ARROWS_DAMAGE_BONUS)
     addDynamicTooltipStrength(heroType, tooltip)
 
 
@@ -113,6 +113,7 @@ function abilityW(int abilityId)
                 ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceIntelligence(MIND_CURSE_MANA_DRAIN_BONUS, MIND_CURSE_DURATION_BONUS)
     tooltip.setLearnString("Burns mana of the target enemy unit over time and silences it.", (int lvl) -> (begin
         return "{0}{I0} mana per second, {1}{I1} seconds.".format(
         MIND_CURSE_MANA_DRAIN[lvl-1].str(),
@@ -122,7 +123,6 @@ function abilityW(int abilityId)
         tooltip.setNormalString(true, lvl, "Burns {0}{I0} mana per second of the target enemy unit over time and silences it for {1}{I1} seconds.".format(
             MIND_CURSE_MANA_DRAIN[lvl-1].str(),
         MIND_CURSE_DURATION[lvl-1].toExactString()))
-    tooltip.setReplaceIntelligence(MIND_CURSE_MANA_DRAIN_BONUS, MIND_CURSE_DURATION_BONUS)
     addDynamicTooltipIntelligence(heroType, tooltip)
 
 
@@ -162,6 +162,7 @@ function abilityE(int abilityId)
                 ..setManaCost(lvl, MANA[lvl-1])
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceIntelligence(0)
     tooltip.setLearnString("Summons an immobile serpentine ward to attack nearby enemies for {0} seconds. Attacked targets have their armor and movement speed reduced. Stacks up to {1} times.".format(SERPENT_WARD_DURATION.toExactString(), SERPENT_POSION_MAX_STACKS.toString()), (int lvl) -> (begin
         return "{0} armor, {1}% movement speed per attack, {2} seconds.".format(
         (SERPENT_POISON_ARMOR*SERPENT_STACKS[lvl-1]/10).toExactString(),
@@ -176,7 +177,6 @@ function abilityE(int abilityId)
             SERPENT_WARD_DURATION.toExactString(),
             SERPENT_POSION_MAX_STACKS.toString()))
 
-    tooltip.setReplaceIntelligence(0)
     addDynamicTooltipIntelligence(heroType, tooltip)
         
 constant real array BBV_DAMAGE = [40, 55, 70, 85, 90]
@@ -209,6 +209,7 @@ function abilityR(int abilityId)
                 ..setEffects(lvl, "X000")
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceIntelligence(BBV_DAMAGE_BONUS)
     tooltip.setLearnString("Deals void damage to all enemy heroes while channeling.".format(BBV_DURATION.toExactString()), (int lvl) -> (begin
         return "{0}{I0} damage per second.".format(
         BBV_DAMAGE[lvl-1].str())
@@ -217,7 +218,6 @@ function abilityR(int abilityId)
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, "Deals {0}{I0} void damage per second to all enemy heroes while channeling.".format(
             BBV_DAMAGE[lvl-1].str()))
-    tooltip.setReplaceIntelligence(BBV_DAMAGE_BONUS)
     addDynamicTooltipIntelligence(heroType, tooltip)
 
 

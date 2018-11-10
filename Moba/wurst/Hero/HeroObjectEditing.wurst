@@ -207,6 +207,7 @@ public function AbilityDefinition.setupWithHotKey(string name, string hotkey)
             ..setLevelSkipRequirement(4)
         return
 
+/*
 public function bonus(int statValue, real atHundred) returns string
     return (atHundred*statValue/100).toString()
 
@@ -276,7 +277,7 @@ public function string.evaluateCooldown(real cooldown) returns string
 
 public function string.evaluateBonus(LinkedList<real> replaceStrength, int strength, LinkedList<real> replaceIntelligence, int intelligence, real cooldown, bool const) returns string
     return this.evaluateStrength(replaceStrength, strength, const).evaluateIntelligence(replaceIntelligence, intelligence, const).evaluateCooldown(cooldown)
-    
+*/    
 
 abstract class DynamicElement
     function evaluate(int _strength, int _intelligence, real _cooldown, bool _const) returns string
@@ -322,15 +323,15 @@ class DynamicCooldown extends DynamicElement
 public class DynamicTooltip
     
     private int abilityTypeId
-    private string array[5] normalString
+    /*private string array[5] normalString
     private string array[5] turnOffString
-    private string array[5] learnLevelString
+    private string array[5] learnLevelString*/
 
     private LinkedList<DynamicElement> array[5] normalList
     private LinkedList<DynamicElement> array[5] turnOffList
     private LinkedList<DynamicElement> array[5] learnLevelList
 
-    private string learnString
+    //private string learnString
 
     private LinkedList<DynamicElement> learnList
 
@@ -355,22 +356,6 @@ public class DynamicTooltip
         if compiletime
             this.aDef = ABIL_DEF_MAP.get(this.abilityTypeId)
 
-    /*construct(AbilityDefinition aDef)
-        this.abilityTypeId = aDef.getNewId()
-        this.useTurnOff = false
-        idToTooltip.put(abilityTypeId, this)
-        this.aDef = aDef*/
-
-
-    private function min(int a, int b) returns int
-        if a == -1 and b == -1
-            return -1
-        else if a == -1
-            return 2
-        else if b == -1
-            return 1
-        else
-            return a <= b? 1:2
 
     function evaluateList(LinkedList<DynamicElement> list, int strength, int intelligence, real cooldown, bool const) returns string
         string s = ""
@@ -393,9 +378,15 @@ public class DynamicTooltip
                 string referenceType = tooltip.charAt(i+1)
                 if(referenceType=="I")
                     int id = S2I(tooltip.charAt(i+2))
+                    if replaceIntelligence.size() <= id
+                        if compiletime
+                            compileError("Replace int list missing entry: "+I2S(id)+ " for tooltip:\""+tooltip+"\"")
                     list.add(new DynamicIntelligence(replaceIntelligence.get(id)))
                 else if(referenceType=="S")
                     int id = S2I(tooltip.charAt(i+2))
+                    if replaceStrength.size() <= id
+                        if compiletime
+                            compileError("Replace str list missing entry: "+I2S(id)+ " for tooltip:\""+tooltip+"\"")
                     list.add(new DynamicStrength(replaceStrength.get(id)))
                 else if(referenceType=="C")
                     list.add(new DynamicCooldown())
@@ -420,7 +411,7 @@ public class DynamicTooltip
         for replacement in replacements
             replaceStrength.add(replacement)
 
-    function finalize()
+    /*function finalize()
         for i = 0 to 4
             this.normalList[i] = this.convertToList(this.normalString[i])
             this.normalString[i] = ""
@@ -430,7 +421,7 @@ public class DynamicTooltip
             this.learnLevelList[i] = this.convertToList(this.learnLevelString[i])
             this.learnLevelString[i] = ""
         this.learnList = this.convertToList(this.learnString)
-        this.learnString = ""
+        this.learnString = ""*/
         
     function writeData()
         if aDef == null or not COMPILETIME_TOOLTIPS
@@ -443,40 +434,48 @@ public class DynamicTooltip
                 aDef.setTooltipTurnOffExtended(i, this.evaluateTurnOffString(i))
 
     function setLearnString(string intro, LevelString levelString)
-        this.learnString = intro + "\n"
+        string newString = intro + "\n"
+        //this.learnString = intro + "\n"
 
         for i = 1 to 5
-            this.learnString += getLevelString(i) + levelString.getString(i)
-            this.learnLevelString[i-1] = levelString.getString(i)
+            newString += getLevelString(i) + levelString.getString(i)
+            this.learnLevelList[i-1] = this.convertToList(levelString.getString(i))
+            //this.learnLevelString[i-1] = levelString.getString(i)
 
         destroy levelString
-        this.learnString += "\n "
+        newString += "\n "
+        this.learnList = this.convertToList(newString)
 
 
     function setNormalString(boolean showCooldown, int level, string normalString)
-        this.normalString[level-1] = normalString
+        string newString = normalString
+        //this.normalString[level-1] = normalString
 
         if showCooldown
             //this.normalString[level - 1] += "\n" + "Cooldown: " + "<" + this.getAbilityTypeId().toRawCode() + ",Cool"+level.toString()+">" + "\n "
             if compiletime
-                this.normalString[level - 1] += "\n" + "Cooldown: " + "<" + this.getAbilityTypeId().toRawCode() + ",Cool"+level.toString()+">" + "\n "
+                newString += "\n" + "Cooldown: " + "<" + this.getAbilityTypeId().toRawCode() + ",Cool"+level.toString()+">" + "\n "
             else
-                this.normalString[level - 1] += "\n" + "Cooldown: " + "{CD}" + "\n "
+            newString += "\n" + "Cooldown: " + "{CD}" + "\n "
         else
-            this.normalString[level - 1] += "\n "
+        newString += "\n "
+
+        this.normalList[level - 1] = this.convertToList(newString)
 
 
     function setTurnOffString(boolean showCooldown, int level, string turnOffString)
         this.useTurnOff = true
-        this.turnOffString[level-1] = turnOffString
+        string newString = turnOffString
+        //this.turnOffString[level-1] = turnOffString
 
         if showCooldown
             if compiletime
-                this.turnOffString[level - 1] += "\n" + "Cooldown: " + "<" + this.getAbilityTypeId().toRawCode() + ",Cool"+level.toString()+">" + "\n "
+                newString += "\n" + "Cooldown: " + "<" + this.getAbilityTypeId().toRawCode() + ",Cool"+level.toString()+">" + "\n "
             else
-                this.turnOffString[level - 1] += "\n" + "Cooldown: " + "{CD}" + "\n "
+            newString += "\n" + "Cooldown: " + "{CD}" + "\n "
         else
-            this.turnOffString[level - 1] += "\n "
+            newString += "\n "
+        this.turnOffList[level - 1] = this.convertToList(newString)
 
 
     

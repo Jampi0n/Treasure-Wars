@@ -31,6 +31,7 @@ function passive(int abilityId)
             ..setupIcon("PASSpell_Nature_ResistNature")
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceIntelligence(0)
     tooltip.setLearnString("Increases the Ancient's hit point regeneration.", (int lvl) -> (begin
         return "{0}% increased regeneration".format(
             REGENERATION_HIT_POINT_REGEN[lvl-1].str())
@@ -39,7 +40,6 @@ function passive(int abilityId)
         tooltip.setNormalString(false, lvl, "Increases the Ancient's hit point regeneration by {0}%.".format(
             REGENERATION_HIT_POINT_REGEN[lvl-1].str())
         )
-    tooltip.setReplaceIntelligence(0)
     addDynamicTooltipIntelligence(heroType, tooltip)
 
 constant real array DEVOUR_HEAL = [150, 225, 300, 375, 400]
@@ -92,6 +92,7 @@ function devourUnit(int abilityId)
 
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceIntelligence(DEVOUR_HEAL_BONUS)
     tooltip.setLearnString(CHANNELING_SPELL + "Grabs the target enemy unit to devour it, healing the hero.", (int lvl) -> (begin
         return "{0}{I0} hit points healed, {1} seconds cooldown.".format( DEVOUR_HEAL[lvl-1].str(), DEVOUR_COOLDOWN[lvl-1].str())
     end) )
@@ -99,7 +100,6 @@ function devourUnit(int abilityId)
         tooltip.setNormalString(true, lvl, CHANNELING_SPELL + "Grabs the target enemy unit to devour it, healing the hero for {0}{I0} hit points.".format(
             DEVOUR_HEAL[lvl-1].str()
         ))
-    tooltip.setReplaceIntelligence(DEVOUR_HEAL_BONUS)
     addDynamicTooltipIntelligence(heroType, tooltip)
 
 
@@ -132,6 +132,7 @@ function entanglingRoots(int abilityId)
 
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceIntelligence(ENTANGLE_HIT_DAMAGE_BONUS, ENTANGLE_DURATION_BONUS)
     tooltip.setLearnString("Releases thorns in a line, damaging and entangling every enemy unit they pass through.", (int lvl) -> (begin
         return "{0}{I0} damage, {1}{I1} second.".format( ENTANGLE_HIT_DAMAGE[lvl-1].str(), ENTANGLE_DURATION[lvl-1].toExactString() )
     end) )
@@ -140,7 +141,6 @@ function entanglingRoots(int abilityId)
         tooltip.setNormalString(true, lvl, "Releases thorns in a line, dealing {0}{I0} damage and entangling every enemy unit they pass through for {1}{I1} seconds.".format(
             ENTANGLE_HIT_DAMAGE[lvl-1].str(), ENTANGLE_DURATION[lvl-1].toExactString()
         ))
-    tooltip.setReplaceIntelligence(ENTANGLE_HIT_DAMAGE_BONUS, ENTANGLE_DURATION_BONUS)
     addDynamicTooltipIntelligence(heroType, tooltip)
 
 
@@ -172,6 +172,7 @@ function root(int abilityId)
                 ..setTooltipTurnOff(lvl, "(E) Uproot - [|cffffcc00Level "+lvl.toString()+"|r]")
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceStrength(ROOT_AOE_DAMAGE_BONUS)    
     tooltip.setLearnString("Burrows the Ancient's roots into the ground, rendering it immobile, but allowing to hurl enormous rocks dealing area of effect damage. The Ancient's armor and willpower are increased while rooted.", (int lvl) -> (begin
         return "{0}{S0} area of effect damage, {1} bonus armor and willpower.".format( ROOT_AOE_DAMAGE[lvl-1].str(), ROOT_RESISTANCE[lvl-1].str())
     end) )
@@ -180,8 +181,7 @@ function root(int abilityId)
         tooltip.setNormalString(true, lvl, "Burrows the Ancient's roots into the ground, rendering it immobile, but allowing to hurl enormous rocks dealing {0}{S0} area of effect damage. The Ancient's armor and willpower are increased by {1} while rooted.".format(
             ROOT_AOE_DAMAGE[lvl-1].str(), ROOT_RESISTANCE[lvl-1].str()
         ))
-        tooltip.setTurnOffString(false, lvl, "Allows the Ancient to pull itself up out of the ground so that it can move and engage units in melee combat.")
-    tooltip.setReplaceStrength(ROOT_AOE_DAMAGE_BONUS)        
+        tooltip.setTurnOffString(false, lvl, "Allows the Ancient to pull itself up out of the ground so that it can move and engage units in melee combat.")    
     addDynamicTooltipStrength(heroType, tooltip)
 
 constant int NATURES_WRATH_DUMMY_BUFF = compiletime(createDummyBuff())
@@ -212,6 +212,7 @@ function naturesWrath(int abilityId)
                 ..setMovementSpeedIncrease(lvl, 0)
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceIntelligence(NATURES_WRATH_TOTAL_DAMAGE_BONUS)
     tooltip.setLearnString("Covers the ancient in a storm of sharp leaves, that deal damage to nearby enemies.", (int lvl) -> (begin
         return "{0}{I0} damage over {1} seconds, {2} seconds cooldown.".format( 
             NATURES_WRATH_TOTAL_DAMAGE[lvl-1].str(), NATURES_WRATH_DURATION[lvl-1].str(), NATURES_WRATH_COOLDOWN[lvl-1].str()
@@ -222,7 +223,6 @@ function naturesWrath(int abilityId)
         tooltip.setNormalString(true, lvl, "Covers the ancient in a storm of sharp leaves, that deal {0}{I0} damage to nearby enemies over {1} seconds.".format(
             NATURES_WRATH_TOTAL_DAMAGE[lvl-1].str(), NATURES_WRATH_DURATION[lvl-1].str()
         ))
-    tooltip.setReplaceIntelligence(NATURES_WRATH_TOTAL_DAMAGE_BONUS)
     addDynamicTooltipIntelligence(heroType, tooltip)
 
 
