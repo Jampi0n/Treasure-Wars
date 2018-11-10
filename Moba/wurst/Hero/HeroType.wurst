@@ -286,26 +286,20 @@ public class HeroType
 public function addDynamicTooltipStrength(HeroType herotype, DynamicTooltip tooltip)
     if(herotype!=null)
         herotype.dynamicStrength.add(tooltip)
-        //tooltip.finalize()
     if compiletime
-        //tooltip.finalize()
         tooltip.writeData()
             
 public function addDynamicTooltipIntelligence(HeroType herotype, DynamicTooltip tooltip)
     if(herotype!=null)
         herotype.dynamicIntelligence.add(tooltip)
-        //tooltip.finalize()
     if compiletime
-        //tooltip.finalize()
         tooltip.writeData()
 
 public function addDynamicTooltipBoth(HeroType herotype, DynamicTooltip tooltip)
     if(herotype!=null)
         herotype.dynamicIntelligence.add(tooltip)
         herotype.dynamicStrength.add(tooltip)
-        //tooltip.finalize()
     if compiletime
-        //tooltip.finalize()
         tooltip.writeData()
 
 init
