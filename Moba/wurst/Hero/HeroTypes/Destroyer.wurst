@@ -49,7 +49,7 @@ constant real array BREATH_DAMAGE = [75, 125, 175, 225, 275]
 constant real BREATH_DAMAGE_BONUS = 80
 
 constant int array BREATH_ARMOR_REDUCTION = [30, 35, 40, 45, 50]
-constant real BREATH_DURATION = 3
+constant real BREATH_DURATION = 4
 
 BuffType buffMeltingBreath
 
@@ -60,7 +60,7 @@ constant int BREATH_ABILITY_ID = compiletime(createNegativeBuffAbility(5, BREATH
 function abilityQ(int abilityId)
 
     if compiletime
-        int array MANA = [90, 95, 100, 105, 110]
+        int array MANA = [80, 80, 80, 80, 80]
         real array COOLDOWN = [8, 8, 8, 8, 8]
         real array RANGE = [450, 450, 450, 450, 450]
         let aDef = new AbilityDefinitionBreathofFrostCreep(abilityId)
@@ -103,7 +103,7 @@ constant real array IMMOLATION_DAMAGE = [32, 44, 56, 68, 80]
 constant real IMMOLATION_DAMAGE_BONUS = 30
 
 constant int array IMMOLATION_ATTACK_SPEED = [18, 26, 34, 42, 50]
-constant real array IMMOLATION_MANA_DRAIN = [6, 7.2, 8.4, 9.6, 10.8]
+constant real array IMMOLATION_MANA_DRAIN = [5, 6.2, 7.4, 8.6, 9.8]
 
 BuffType buffImmolation
 constant IMMOLATION_BUFF_ID = compiletime(BUFF_ID_GEN.next())
@@ -157,7 +157,7 @@ constant real array WALL_DURATION = [4, 4.5, 5, 5.5, 6]
 function abilityE(int abilityId)
 
     if compiletime
-        int array MANA = [90, 90, 90, 90, 90]
+        int array MANA = [90, 85, 80, 75, 70]
         real array COOLDOWN = [17, 16, 15, 14, 13]
         real array RANGE = [1000, 1000, 1000, 1000, 1000]
         let aDef = new AbilityDefinitionIllidanChannel(abilityId)
@@ -224,7 +224,7 @@ BuffType buffRage
 function abilityR(int abilityId)
 
     if compiletime
-        int array MANA = [140, 150, 160, 170, 180]
+        int array MANA = [140, 145, 150, 155, 160]
         real array COOLDOWN = [75, 75, 75, 75, 75]
         real RANGE = 900
         let aDef = new AbilityDefinitionIllidanChannel(abilityId)
@@ -272,8 +272,8 @@ function setupStats()
         ..setStat(Stat.AS, 19, 53)
         ..setStat(Stat.HP, 14, 43)
         ..setStat(Stat.HR, 32, 69)
-        ..setStat(Stat.MP, 19, 34)
-        ..setStat(Stat.MR, 17, 38)
+        ..setStat(Stat.MP, 21, 37)
+        ..setStat(Stat.MR, 19, 45)
         ..setStat(Stat.MS, 14, 37)
         ..setStat(Stat.STR, 17, 55)
         ..setStat(Stat.AGI, 13, 34)
@@ -516,7 +516,7 @@ function initHeroType()
             if heroDestroyer.hasAbility(IMMOLATION_BUFF_ID)
                 let dmg = IMMOLATION_DAMAGE[level-1].bonus(heroDestroyer.getInt(), IMMOLATION_DAMAGE_BONUS) * 0.2
                 //use hp to not trigger damage event
-                heroDestroyer.addHP(-(2 * dmg.reduceMagic(heroDestroyer.getWp())))
+                heroDestroyer.addHP(-(0.5 * dmg.reduceMagic(heroDestroyer.getWp())))
                 group g = CreateGroup()
                 g.enumUnitsInRange(heroDestroyer.getPos(), 250)
                 while true

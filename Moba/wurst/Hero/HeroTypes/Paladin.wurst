@@ -87,7 +87,7 @@ function shieldBash(int abilityId)
 
 constant real array BATTLE_ROAR_AOE = [600, 700, 800, 900, 1000]
 constant int array BATTLE_ROAR_AS = [30, 35, 40, 45, 50]
-constant int array BATTLE_ROAR_MS = [30, 35, 40, 45, 50]
+constant int array BATTLE_ROAR_MS = [10, 15, 20, 25, 30]
 constant real array BATTLE_ROAR_DURATION = [5, 6, 7, 8, 9]
 constant real BATTLE_ROAR_DURATION_BONUS = 2
 
@@ -180,7 +180,7 @@ function holyShield(int abilityId)
 
 constant real DIVINE_PUNISHMENT_AOE = 600
 constant real array DIVINE_PUNISHMENT_DMG = [250, 375, 500, 625, 750]
-constant real DIVINE_PUNISHMENT_DMG_BONUS = 400
+constant real DIVINE_PUNISHMENT_DMG_BONUS = 250
 
 
 function divinePunishment(int abilityId)
@@ -407,7 +407,7 @@ function teamFightAI(HeroAI ai)
                 count++
 
     if count != 0
-        if ai.issue("howlofterror")
+        if ai.issue("tranquility")
             return
 
 
