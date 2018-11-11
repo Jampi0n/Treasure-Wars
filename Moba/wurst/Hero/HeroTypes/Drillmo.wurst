@@ -53,7 +53,7 @@ function passive(int abilityId)
     addDynamicTooltipStrength(heroType, tooltip)
 
 constant real array PULL_DAMAGE = [50, 125, 200, 275, 350]
-constant real PULL_DAMAGE_BONUS = 180
+constant real PULL_DAMAGE_BONUS = 140
 constant real array PULL_COOLDOWN = [18, 16, 14, 12, 10]
 
 function pull(int abilityId)
@@ -147,7 +147,7 @@ function spikeBall(int abilityId)
         ))
     addDynamicTooltipStrength(heroType, tooltip)
 
-constant int array SPEED_BOOST = [20, 35, 50, 65, 80]
+constant int array SPEED_BOOST = [20, 25, 30, 35, 40]
 constant int SPEED_BOOST_BONUS = 40
 constant real array SPEED_BOOST_DURATION = [6, 8, 10, 12, 14]
 
@@ -199,9 +199,9 @@ function speedBoost(int abilityId)
 
 constant int ROCKET_BUFF_ID = compiletime(createDummyBuff())
 constant real array ROCKET_DMG = [200, 275, 350, 425, 500]
-constant real ROCKET_DMG_BONUS = 200
+constant real ROCKET_DMG_BONUS = 170
 constant real array ROCKET_RANGE = [2000, 3000, 4000, 5000, 6000]
-constant real array ROCKET_COOLDOWN = [40, 35, 30, 25, 20]
+constant real array ROCKET_COOLDOWN = [44, 40, 36, 32, 28]
 
 function rocket(int abilityId)
 

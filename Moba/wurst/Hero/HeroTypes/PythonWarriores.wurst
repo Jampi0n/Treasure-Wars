@@ -52,15 +52,15 @@ function envenomedBlades(int abilityId)
             )
     addDynamicTooltipIntelligence(heroType, tooltip)
     
-constant real array MISTWALK_DURATION = [5, 5.5, 6, 6.5, 7]
-constant real MISTWALK_DURATION_BONUS = 4
+constant real array MISTWALK_DURATION = [3, 3.5, 4, 4.5, 5]
+constant real MISTWALK_DURATION_BONUS = 3
 
 
 function mistwalk(int abilityId)
 
     if compiletime
         int array MANA = [100, 90, 80, 70, 60]
-        real array COOLDOWN = [18, 18, 18, 18, 18]
+        real array COOLDOWN = [25, 25, 25, 25, 25]
 
         let aDef = new AbilityDefinitionRoar(abilityId)
             ..setupIcon("BTNNoxiousFumes")
@@ -91,9 +91,9 @@ function mistwalk(int abilityId)
     addDynamicTooltipIntelligence(heroType, tooltip)
 
 constant int array POISON_SPIT_SLOW_MS = [-30, -35, -40, -45, -50]
-constant real array POISON_SPIT_DOT = [20, 28, 36, 44, 52]
-constant real POISON_SPIT_DOT_BONUS = 50.
-constant int array POISON_SPIT_ARMOR_REDUCTION = [-5, -10, -15, -20, -25]
+constant real array POISON_SPIT_DOT = [25, 35, 45, 55, 65]
+constant real POISON_SPIT_DOT_BONUS = 80.
+constant int array POISON_SPIT_ARMOR_REDUCTION = [-10, -15, -20, -25, -30]
 constant real array POISON_SPIT_DURATION = [6, 7, 8, 9, 10]
 constant real array POISON_SPIT_AOE = [200, 225, 250, 275, 300]
 
@@ -185,9 +185,9 @@ function empoweredStrike(int abilityId)
 
 
 constant real array PARALYZING_STRIKE_DAMAGE = [200, 250, 300, 350, 400]
-constant real PARALYZING_STRIKE_DAMAGE_BONUS = 200
+constant real PARALYZING_STRIKE_DAMAGE_BONUS = 180
 constant real array PARALYZING_STRIKE_DURATION = [1.6, 1.8, 2, 2.2, 2.4]
-constant real PARALYZING_STRIKE_DURATION_BONUS = 0.4
+constant real PARALYZING_STRIKE_DURATION_BONUS = 0.3
 
 
 function paralyzingStrike(int abilityId)
