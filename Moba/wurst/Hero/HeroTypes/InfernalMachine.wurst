@@ -345,11 +345,10 @@ function onSpellCast()
         ArtilleryDetection.fireArtillery(caster.getOwner(), FLAME_THROWER_ARTILLERY, caster.getPos(), vec2(GetSpellTargetX(), GetSpellTargetY()))
 
     else if spellId == ABILITY_RAPID_FIRE
-        /*
         if caster.getTypeId() == HERO_INFERNAL_MACHINE
             doAfter( 0, () -> onRapid(caster, level))
         else
-            doAfter( 0, () -> onRapidEnd(caster, level))*/
+            doAfter( 0, () -> onRapidEnd(caster, level))
 
 class AttackOrderTrack
 
