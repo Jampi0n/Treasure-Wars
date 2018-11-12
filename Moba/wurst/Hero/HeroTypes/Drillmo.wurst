@@ -52,8 +52,8 @@ function passive(int abilityId)
         )
     addDynamicTooltipStrength(heroType, tooltip)
 
-constant real array PULL_DAMAGE = [50, 125, 200, 275, 350]
-constant real PULL_DAMAGE_BONUS = 140
+constant real array PULL_DAMAGE = [50, 100, 150, 200, 250]
+constant real PULL_DAMAGE_BONUS = 80
 constant real array PULL_COOLDOWN = [18, 16, 14, 12, 10]
 
 function pull(int abilityId)
@@ -95,7 +95,7 @@ function pull(int abilityId)
     addDynamicTooltipStrength(heroType, tooltip)
 
 constant real array SPIKE_BALL_DMG = [60, 100, 140, 180, 220]
-constant real SPIKE_BALL_DMG_BONUS = 150
+constant real SPIKE_BALL_DMG_BONUS = 120
 constant real array SPIKE_BALL_STUN = [1.4, 1.8, 2.2, 2.6, 3]
 constant real array SPIKE_BALL_DOT_DURATION = [4, 4, 4, 4, 4]
 constant real array SPIKE_BALL_DOT_DMG = [40, 70, 100, 130, 160]
@@ -139,7 +139,7 @@ function spikeBall(int abilityId)
         )
     end) )
     for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, CHANNELING_SPELL + "Slams the ground with a massive spike ball, dealing {0}{S0} damage stunning targets in an area in front of the hero for {1} seconds. After that targets will be bleeding and take additional {2}{S1} damage over {3}.".format(
+        tooltip.setNormalString(true, lvl, CHANNELING_SPELL + "Slams the ground with a massive spike ball, dealing {0}{S0} damage stunning targets in an area in front of the hero for {1} seconds. After that targets will be bleeding and take additional {2}{S1} damage over {3} seconds.".format(
             SPIKE_BALL_DMG[lvl-1].str(),
             SPIKE_BALL_STUN[lvl-1].toSmartString(),
             SPIKE_BALL_DOT_DMG[lvl-1].str(),
@@ -198,8 +198,8 @@ function speedBoost(int abilityId)
     addDynamicTooltipIntelligence(heroType, tooltip)
 
 constant int ROCKET_BUFF_ID = compiletime(createDummyBuff())
-constant real array ROCKET_DMG = [200, 275, 350, 425, 500]
-constant real ROCKET_DMG_BONUS = 170
+constant real array ROCKET_DMG = [180, 240, 300, 360, 420]
+constant real ROCKET_DMG_BONUS = 140
 constant real array ROCKET_RANGE = [2000, 3000, 4000, 5000, 6000]
 constant real array ROCKET_COOLDOWN = [44, 40, 36, 32, 28]
 
