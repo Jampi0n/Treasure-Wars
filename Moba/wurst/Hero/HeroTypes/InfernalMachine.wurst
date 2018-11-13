@@ -105,14 +105,14 @@ function bash(int abilityId)
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(0)
-    tooltip.setLearnString("Increases the movement speed of the Infernal Machine and causes the next attack to stun the target and deal bonus damage. Lasts {0} seconds.".format(BASH_BUFF_DURATION.str()), (int lvl) -> (begin
+    tooltip.setLearnString("Increases the movement speed of the Infernal Machine and causes the next attack to stun the target and deal bonus damage. Lasts {0} seconds.".format(BASH_BUFF_DURATION.toSmartString()), (int lvl) -> (begin
         return "{0} bonus damage, {1} seconds stun.".format(
             BASH_DAMAGE_BONUS[lvl-1].str(), BASH_STUN_DURATION[lvl-1].toSmartString()
             )
     end) )
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, "Increases the movement speed of the Infernal Machine and causes the next attack to stun the target for {0} seconds and deal {1} bonus bonus damage. Lasts {2} seconds.".format(
-            BASH_STUN_DURATION[lvl-1].toString(), BASH_DAMAGE_BONUS[lvl-1].str(), BASH_BUFF_DURATION.toSmartString()
+            BASH_STUN_DURATION[lvl-1].toSmartString(), BASH_DAMAGE_BONUS[lvl-1].str(), BASH_BUFF_DURATION.toSmartString()
         ))
     addDynamicTooltipIntelligence(heroType, tooltip)
 
@@ -262,12 +262,12 @@ function rapidFire(int abilityId)
     tooltip.setReplaceIntelligence(0)
     tooltip.setLearnString("Enables a rapid firing ranged attack for the Infernal Machine, that stuns enemies it hits for a short time. Bash is disabled while under the effect of Rapid Fire.|nLasts {0} seconds.".format(RAPID_FIRE_DURATION.str()), (int lvl) -> (begin
         return "+{0}% attack speed, {1} stun duration.".format(
-            RAPID_FIRE_ATTACK_SPEED[lvl-1].str(), RAPID_FIRE_STUN_DURATION[lvl-1].toString()
+            RAPID_FIRE_ATTACK_SPEED[lvl-1].str(), RAPID_FIRE_STUN_DURATION[lvl-1].toSmartString()
         )
     end) )
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, "Enables a rapid firing ranged attack with {0}% faster attack speed for the Infernal Machine, that stuns enemies it hits for {1} seconds. Bash is disabled while under the effect of Rapid Fire.|nLasts {2} seconds.".format(
-            RAPID_FIRE_ATTACK_SPEED[lvl-1].str(), RAPID_FIRE_STUN_DURATION[lvl-1].toString(), RAPID_FIRE_DURATION.str()
+            RAPID_FIRE_ATTACK_SPEED[lvl-1].str(), RAPID_FIRE_STUN_DURATION[lvl-1].toSmartString(), RAPID_FIRE_DURATION.str()
         ))
     addDynamicTooltipIntelligence(heroType, tooltip)
 
