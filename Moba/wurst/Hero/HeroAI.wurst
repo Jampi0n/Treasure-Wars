@@ -15,6 +15,7 @@ constant team2AIs = new LinkedList<HeroAI>
 
 public constant real TEAM_FIGHT_RANGE = 1200
 constant real HALF_DISTANCE = 11200
+constant real UPDATE_INTERVAL = 0.25
 
 public enum AbilityTargetType
     INSTANT
@@ -47,6 +48,7 @@ enum AIState
     RETREAT_TEMP_AI //retreats to the next tower, should be initiated, if a bad fight is assumed
     HEAL //waits at the altar to be fully healed
     TEAM_FIGHT //engages against nearby enemies, should be initiated, if a favoured fight is assumed
+    BUY_UPGRADES //goes to a blacksmith and buys upgrades, if hero doesn't want or can't buy items, state goes to Attack
 
 public interface Filter
     function filter(unit u) returns boolean
@@ -294,6 +296,7 @@ public function HeroAI.addTeam(boolean firstTeam)
 public class HeroAI
     
     private CPlayer owner
+    private player owningPlayer
     private Hero hero
     private HeroType heroType
     private unit heroUnit
@@ -328,12 +331,22 @@ public class HeroAI
     private static constant updateTimer = getTimer()
     
 
+    private boolean hasAllItems = false
     private LinkedList<int> itemBuild
     private string skillBuild
 
     protected static HeroAI array heroAIs
 
     private boolean paused = false
+
+
+    //buy upgrades
+    private int desiredUpgrade = -1
+    private unit targetBlacksmith = null
+    private int wantedUpgrades = 0
+    private boolean noMoreUpgrades = false
+    private real upgradeTimer = 0
+    private int upgradeGold = 0
 
     function aiMessage(string _msg)
         
@@ -348,6 +361,9 @@ public class HeroAI
 
     function getOwner() returns CPlayer
         return this.owner
+
+    function getOwningPlayer() returns player
+        return this.owningPlayer
     
     function getHero() returns Hero
         return this.hero
@@ -405,7 +421,7 @@ public class HeroAI
             let g = CreateGroup()
             unit u
             int count = 0
-            let owner = this.heroUnit.getOwner()
+            let owner = this.getOwningPlayer()
             g.enumUnitsInRange(this.heroUnit.getPos(), 1000)
             while(true)
                 u = FirstOfGroup(g)
@@ -424,7 +440,7 @@ public class HeroAI
 
     static function classInit()
 
-        updateTimer.startPeriodic(0.15, function updateStatic)
+        updateTimer.startPeriodic(UPDATE_INTERVAL, function updateStatic)
         CreateTrigger()
             ..registerAnyUnitEvent(EVENT_PLAYER_HERO_LEVEL)
             ..addAction(() ->(begin
@@ -447,6 +463,7 @@ public class HeroAI
 
     construct(CPlayer owner, aidifficulty diff)
         this.owner = owner
+        this.owningPlayer = owner.getPlayer()
         this.hero = Hero.getHero(owner)
         this.heroType = hero.getHeroType()
         this.heroUnit = this.hero.toUnit()
@@ -541,7 +558,7 @@ public class HeroAI
         //print("---buy specific item "+GetObjectName(whichItem.getTypeId()))
         boolean ret = false
         let recipe = whichItem.getRecipe()
-        let owningPlayer = this.owner.getPlayer()
+        let owningPlayer = this.getOwningPlayer()
 
         if owningPlayer.getGold() >= 400
 
@@ -616,15 +633,23 @@ public class HeroAI
         return ret
 
     function buyItems()
-        if itemBuild.size() == 0
+        if itemBuild.size() == 0 or hasAllItems
             return
 
+        int numberOfFinishedItems = 0
         for i = 0 to 5
             Item itm = itemBuild.get(i).getItem()
             if not this.heroUnit.hasItemById(itm.getTypeId())
-                if this.owner.getPlayer().getGold() >= 400
+                if this.getOwningPlayer().getGold() >= 400
                     if not buySpecificItem(itm)
                         break
+            else
+                numberOfFinishedItems++
+
+        if numberOfFinishedItems == 6 //buy all upgrades, once all items have been bought
+            this.hasAllItems = true
+            if not this.noMoreUpgrades
+                this.wantedUpgrades = 100
 
 
 
@@ -732,7 +757,8 @@ public class HeroAI
                 let dist = this.heroUnit.getPos().distanceTo(this.homeLoc)
                 if dist<300
                     this.changeState(AIState.HEAL)
-                    this.buyItems()
+                    if wantedUpgrades == 0
+                        this.buyItems()
                 else
                     if not casting
                         this.heroType.retreatAI(this)
@@ -742,6 +768,18 @@ public class HeroAI
 
             else if this.state == AIState.HEAL
                 if this.heroUnit.getHP() >= this.heroUnit.getMaxHP()*0.9 and this.heroUnit.getMana() >= this.heroUnit.getMaxMana()*0.9
+                    this.changeState(AIState.BUY_UPGRADES)
+                    if(not this.noMoreUpgrades)
+                        this.upgradeTimer = 4
+                        this.desiredUpgrade = HeroAI.findNextUpgrade(this.owner.getTeam())
+                        this.targetBlacksmith = HeroAI.findNextBlacksmith(this.owner.getTeam(), this.heroUnit.getPos())
+                        if this.desiredUpgrade == -1 or this.targetBlacksmith == null
+                            this.noMoreUpgrades = true
+                            this.wantedUpgrades = 0
+                        
+
+            else if this.state == AIState.BUY_UPGRADES
+                if this.getOwningPlayer().getGold() < 1200 or wantedUpgrades <= 0 or this.noMoreUpgrades
                     this.changeState(AIState.ATTACK)
                     let rand = GetRandomInt(1, 3)
                     if rand == 1
@@ -752,6 +790,41 @@ public class HeroAI
                         this.lane = Lane.MID
 
                     updateTargetLoc()
+                else
+                    
+                    let smithPos = targetBlacksmith.getPos()
+                    let dist = this.heroUnit.getPos().distanceTo(smithPos)
+                    if dist<300
+                        if this.upgradeTimer > 0
+                            this.desiredUpgrade = HeroAI.findNextUpgrade(this.owner.getTeam())
+                            this.targetBlacksmith = HeroAI.findNextBlacksmith(this.owner.getTeam(), this.heroUnit.getPos())
+                            if this.desiredUpgrade == -1 or this.targetBlacksmith == null
+                                this.noMoreUpgrades = true
+                                this.wantedUpgrades = 0
+                            else
+                                if(IssueNeutralImmediateOrderById(this.getOwningPlayer(), this.targetBlacksmith, this.desiredUpgrade))
+                                    this.wantedUpgrades--
+                                    print("["+this.heroUnit.getName()+"]: bought upgrade: "+GetObjectName(this.desiredUpgrade)+" ("+I2S(this.desiredUpgrade)+")")
+                                    if( this.wantedUpgrades == 0) //does not want any upgrades at the moment, so hero can go back and buy items
+                                        this.changeState(AIState.RETREAT)
+                                else
+                                    this.upgradeTimer -= UPDATE_INTERVAL
+                        else
+                            this.changeState(AIState.ATTACK)
+                            let rand = GetRandomInt(1, 3)
+                            if rand == 1
+                                this.lane = Lane.TOP
+                            else if rand == 2
+                                this.lane = Lane.BOT
+                            else
+                                this.lane = Lane.MID
+        
+                            updateTargetLoc()
+                    else if this.heroUnit.getCurrentOrder() != OrderId("move") and not casting
+                        this.heroUnit.issuePointOrder("move", smithPos)
+                    
+                    
+
 
             else if this.state == AIState.ATTACK
                 if this.heroUnit.getHP() <= this.heroUnit.getMaxHP()*0.4
@@ -773,7 +846,7 @@ public class HeroAI
                         if u == null
                             break
                         g.removeUnit(u)
-                        if u.isTargetable(this.heroUnit.getOwner(), false, true)
+                        if u.isTargetable(this.getOwningPlayer(), false, true)
                             if u.isType(UNIT_TYPE_HERO)
                                 heroNearby = true
                                 break
@@ -825,7 +898,8 @@ public class HeroAI
                 let dist = this.heroUnit.getPos().distanceTo(this.homeLoc)
                 if dist<300
                     this.changeState(AIState.HEAL)
-                    this.buyItems()
+                    if wantedUpgrades == 0
+                        this.buyItems()
                 else if this.heroUnit.getHP() <= this.heroUnit.getMaxHP()*0.4
                     this.changeState(AIState.RETREAT)
                 else
@@ -880,6 +954,55 @@ public class HeroAI
 
     function togglePause()
         this.paused = not this.paused
+
+    // for every 5000 gold the AI gets, it buys one upgrade
+    function addGold(int gold)
+        if not this.noMoreUpgrades
+            this.upgradeGold += gold
+            if this.upgradeGold > 5000
+                this.wantedUpgrades++
+                this.upgradeGold -= 5000
+
+                print(this.heroUnit.getOwner().getColor().toColor().toColorString()+"["+this.heroUnit.getName()+"]|r "+" wants upgrades: "+I2S(this.wantedUpgrades))
+
+    static function findNextUpgrade(Team t) returns int
+        if t != Team.TEAM1 and t!= Team.TEAM2
+            error("")
+        let teamPlayer = (t==Team.TEAM1) ? players[TEAM_PLAYER_TEAM_1] : players[TEAM_PLAYER_TEAM_2]
+        int array upgrades
+        int max = 5
+        int index = -1
+        for i = 0 to 3
+            upgrades[i] = GetPlayerTechCount(teamPlayer, UPGRADES[i], true)
+            if upgrades[i] < max
+                max = upgrades[i]
+                index = i
+
+        int ret = -1
+        if index != -1
+            ret = UPGRADE_ITEMS[index]
+
+        return ret
+
+    static function findNextBlacksmith(Team t, vec2 pos) returns unit
+        unit ret = null
+        real minDist = 1000000
+        if t == Team.TEAM1
+            for i=0 to 1
+                if blacksmithAliveTeam1[i]
+                    let dist = pos.distanceTo(udg_GreenBlacksmith[i].getPos())
+                    if dist < minDist 
+                        minDist = dist
+                        ret = udg_GreenBlacksmith[i]
+        else
+            for i=0 to 1
+                if blacksmithAliveTeam2[i]
+                    let dist = pos.distanceTo(udg_BrownBlacksmith[i].getPos())
+                    if dist < minDist 
+                        minDist = dist
+                        ret = udg_BrownBlacksmith[i]
+        return ret
+
 
 /*
     Determines the win chance of a team, if a fight is initiated at a certain position.

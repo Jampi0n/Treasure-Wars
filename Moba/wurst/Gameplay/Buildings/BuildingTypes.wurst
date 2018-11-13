@@ -39,6 +39,12 @@ public boolean array barracksAliveTeam2 = [true, true, true]
 public boolean array workshopAliveTeam1 = [true, true]
 public boolean array workshopAliveTeam2 = [true, true]
 
+public boolean array blacksmithAliveTeam1 = [true, true]
+public boolean array blacksmithAliveTeam2 = [true, true]
+
+public int array UPGRADES = ['R000', 'R001', 'R002', 'R003']
+public int array UPGRADE_ITEMS = ['I002', 'I003', 'I004', 'I005']
+
 int farmsTeam1 = 26
 int farmsTeam2 = farmsTeam1
 
@@ -232,6 +238,14 @@ function onBuildingDeath()
         else if unitId == BLACKSMITH
             bounty = 150
             globalBounty = 150
+
+            for i=0 to 1
+                if(building==udg_GreenBlacksmith[i])
+                    blacksmithAliveTeam1[i] = false
+
+                else if(building==udg_BrownBlacksmith[i])
+                    blacksmithAliveTeam2[i] = false
+
 
         else if unitId == CASTLE
 

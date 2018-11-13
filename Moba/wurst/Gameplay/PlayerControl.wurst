@@ -7,6 +7,7 @@ import ClosureTimers
 import Assets
 import Constants
 import initlater HeroControl
+import initlater HeroAI
 /*
 * This package handles players
 *
@@ -531,6 +532,9 @@ public class CPlayer
     function addGoldEx(int gold)
         this.getPlayer().addGold(gold)
         this.statGoldGained += gold
+        let ai = getAI(this.getPlayer().getId())
+        if ai != null
+            ai.addGold(gold)
 
 
 
