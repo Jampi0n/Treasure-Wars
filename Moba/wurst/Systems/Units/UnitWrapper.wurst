@@ -109,7 +109,7 @@ public class UnitWrapper
         else
             if not this.assocUnit.isType(UNIT_TYPE_STRUCTURE)
                 if this.assocUnit.getAbilityLevel('Aloc') == 0
-                    if not unnkownUnitTypes.contains(this.assocUnit.getTypeId())
+                    if not unnkownUnitTypes.has(this.assocUnit.getTypeId())
                         unnkownUnitTypes.add(this.assocUnit.getTypeId())
                         print("Warning unnkown unit type: "+GetUnitName(this.assocUnit))
             statBaseValue[Stat.AD.toInt()] = 0

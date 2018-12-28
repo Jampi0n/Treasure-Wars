@@ -579,7 +579,7 @@ public class HeroAI
                                 //some items require one item several times
                                 if this.heroUnit.hasItemById(required2.getTypeId())
 
-                                    if requiredRequirements.contains(required2) or recipe.getRequiredItems().contains(required2.getId()) //already in list
+                                    if requiredRequirements.has(required2) or recipe.getRequiredItems().has(required2.getId()) //already in list
                                         if this.heroUnit.countItemsOfType(required2.getTypeId()) > 1
                                             missingGold -= required2.getGoldCost()
                                             requiredRequirements.add(required2)
