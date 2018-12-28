@@ -51,7 +51,7 @@ function passive(int abilityId)
     addDynamicTooltipStrength(heroType, tooltip)
 
 
-constant int SHADOW_STRIKE_SHADOW_UNIT = 'H01M'
+constant int SHADOW_STRIKE_SHADOW_UNIT = 'h01M'
 
 constant real array SHADOW_STRIKE_DAMAGE = [75, 125, 175, 225, 275]
 constant real SHADOW_STRIKE_DAMAGE_BONUS = 80
@@ -69,6 +69,7 @@ function abilityQ(int abilityId)
             ..setAnimationNames("spell")
             ..setLightningEffects("")
             ..setRequirements(NOT_SPINNING.toRawCode())
+            ..setCheckDependencies(true)
 
         for lvl = 1 to 5
             aDef
@@ -116,7 +117,7 @@ constant real DEATH_SPIN_DURATION = 3.0
 
 BuffType buffDeathSpin
 
-constant int DEATH_SPIN_BUFF_ID = compiletime(createAuraBuff("Death Spin", "This unit is under the effect of Death Spin, it cannot attack.", Icons.bTNWhirlwind))
+constant int DEATH_SPIN_BUFF_ID = compiletime(createAuraBuff("Death Spin", "This unit is under the effect of Death Spin; it cannot attack.", Icons.bTNWhirlwind))
 constant int DEATH_SPIN_ABILITY_ID = compiletime(createNegativeBuffAbility(5, DEATH_SPIN_BUFF_ID, Abilities.lordofFlameMissile, "chest"))
 
 constant int DEATH_SPIN_DISABLE_ATTACK = compiletime(ABIL_ID_GEN.next())
@@ -130,14 +131,14 @@ function abilityW(int abilityId)
             ..setCargoCapacity(1, 0)
 
         int array MANA = [75, 75, 75, 75, 75]
-
+        real array COOLDOWN = [10, 9, 8, 7, 6]
         let aDef = new AbilityDefinitionBeserk(abilityId)
             ..setupIcon(Icons.bTNWhirlwind)
             ..setupWithHotKey("Death Spin", "W")
 
         for lvl = 1 to 5
             aDef
-                ..setCooldown(lvl, 0)
+                ..setCooldown(lvl, COOLDOWN[lvl-1])
                 ..setManaCost(lvl, MANA[lvl-1])
                 ..setTargetsAllowed(lvl, "none")
                 ..setAttackSpeedIncrease(lvl, 0)
@@ -169,7 +170,7 @@ constant real array CRIPPLING_PAIN_DURATION= [3, 3.5, 4, 4.5, 5]
 
 BuffType buffCripplingPain
 
-constant int CRIPPLING_PAIN_BUFF_ID = compiletime(createAuraBuff("Crippling Pain", "This unit is under the effect of Crippling Pain, it has reduced movement speed.", Icons.bTNCripple))
+constant int CRIPPLING_PAIN_BUFF_ID = compiletime(createAuraBuff("Crippling Pain", "This unit is under the effect of Crippling Pain; it has reduced movement speed.", Icons.bTNCripple))
 constant int CRIPPLING_PAIN_ABILITY_ID = compiletime(createNegativeBuffAbility(5, CRIPPLING_PAIN_BUFF_ID, Abilities.lordofFlameMissile, "chest"))
 
 constant real CRIPPLING_PAIN_AOE = 1500
@@ -184,6 +185,7 @@ function abilityE(int abilityId)
             ..setupIcon(Icons.bTNCripple)
             ..setupWithHotKey("Crippling Pain", "E")
             ..setRequirements(NOT_SPINNING.toRawCode())
+            ..setCheckDependencies(true)
 
         for lvl = 1 to 5
             aDef
