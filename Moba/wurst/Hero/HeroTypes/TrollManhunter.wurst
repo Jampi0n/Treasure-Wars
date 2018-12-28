@@ -14,17 +14,20 @@ constant ABILITY_DEATH_SPIN = 'AY4W'
 constant ABILITY_CRIPPLING_PAIN = 'AY4E'
 constant ABILITY_MIRROR_IMAGE = 'AY4R'
 
+constant SOUND_SHADOW_STRIKE = new SoundDefinition(Sounds.metalHeavySliceFlesh2, false, true)
+constant SOUND_CRIPPLING_PAIN = new SoundDefinition(Sounds.howlOfTerror, false, true)
+
 constant NOT_SPINNING = compiletime(UNIT_ID_GEN.next())
 unit notSpinning
 player heroOwner
 
-public constant real array BLEEDING_WOUND_DMG = [25, 35, 45, 55, 65]
+public constant real array BLEEDING_WOUND_DMG = [4, 6, 8, 10, 12]
 public constant real BLEEDING_WOUND_DURATION = 6.0
 
 BuffType buffBleedingWound
 
 constant int BLEEDING_WOUND_BUFF_ID = compiletime(createAuraBuff("Bleeding Wound", "This unit was hit by Melting Breath; it has reduced armor.", Icons.bTNCleavingAttack))
-constant int BLEEDING_WOUND_ABILITY_ID = compiletime(createNegativeBuffAbility(5, BLEEDING_WOUND_BUFF_ID, Abilities.lordofFlameMissile, "chest"))
+constant int BLEEDING_WOUND_ABILITY_ID = compiletime(createNegativeBuffAbility(5, BLEEDING_WOUND_BUFF_ID, "FatalWoundV2.mdx", "chest"))
 
 
 function passive(int abilityId)
@@ -38,7 +41,7 @@ function passive(int abilityId)
     tooltip.setReplaceStrength(0)
     tooltip.setLearnString( "Attacking an enemy unit applies one stack of Bleeding Wound. If the target was not attacked for {0} seconds, "+
                             "all stacks are lost. Each stack deals physical damage over time:".format(BLEEDING_WOUND_DURATION.toSmartString()), (int lvl) -> (begin
-        return "{0}% damage per second.".format(
+        return "{0} damage per second.".format(
             BLEEDING_WOUND_DMG[lvl-1].toSmartString())
     end) )
     
@@ -69,6 +72,7 @@ function abilityQ(int abilityId)
             ..setAnimationNames("spell")
             ..setLightningEffects("")
             ..setRequirements(NOT_SPINNING.toRawCode())
+            ..setArtTarget("")
             ..setCheckDependencies(true)
 
         for lvl = 1 to 5
@@ -107,13 +111,15 @@ function spinDummy()
         ..setSightRadiusNight(0)
         ..setUpgradesUsed("")
         ..setUnitSoundSet("")
-        ..setName("end Death Spin")
+        ..setName("Cannot be cast during Death Spin")
 
 constant real array DEATH_SPIN_DAMAGE = [50, 75, 100, 125, 150]
 constant real DEATH_SPIN_DAMAGE_BONUS = 50
 
 constant int array DEATH_SPIN_DEFENSE = [20, 25, 30, 35, 40]
 constant real DEATH_SPIN_DURATION = 3.0
+
+constant real DEATH_SPIN_AOE = 250
 
 BuffType buffDeathSpin
 
@@ -154,7 +160,7 @@ function abilityW(int abilityId)
             DEATH_SPIN_DEFENSE[lvl-1].toString())
     end) )
     for lvl = 1 to 5
-        tooltip.setNormalString(false, lvl, "Causes a bladestorm of destructive force around the Troll Manhunter, increasing armor and willpower by {0} and dealing {1} damage per second to nearby enemy units.\nLasts {2} seconds.".format(
+        tooltip.setNormalString(false, lvl, "Causes a bladestorm of destructive force around the Troll Manhunter, increasing armor and willpower by {0} and dealing {1}{S0{1}} damage per second to nearby enemy units.\nLasts {2} seconds.".format(
             DEATH_SPIN_DEFENSE[lvl-1].toString(),
             DEATH_SPIN_DAMAGE[lvl-1].toSmartString(),
             DEATH_SPIN_DURATION.toSmartString()))
@@ -171,7 +177,7 @@ constant real array CRIPPLING_PAIN_DURATION= [3, 3.5, 4, 4.5, 5]
 BuffType buffCripplingPain
 
 constant int CRIPPLING_PAIN_BUFF_ID = compiletime(createAuraBuff("Crippling Pain", "This unit is under the effect of Crippling Pain; it has reduced movement speed.", Icons.bTNCripple))
-constant int CRIPPLING_PAIN_ABILITY_ID = compiletime(createNegativeBuffAbility(5, CRIPPLING_PAIN_BUFF_ID, Abilities.lordofFlameMissile, "chest"))
+constant int CRIPPLING_PAIN_ABILITY_ID = compiletime(createNegativeBuffAbility(5, CRIPPLING_PAIN_BUFF_ID, Abilities.crippleTarget, "chest"))
 
 constant real CRIPPLING_PAIN_AOE = 1500
 
@@ -186,6 +192,7 @@ function abilityE(int abilityId)
             ..setupWithHotKey("Crippling Pain", "E")
             ..setRequirements(NOT_SPINNING.toRawCode())
             ..setCheckDependencies(true)
+            ..setArtCaster("")
 
         for lvl = 1 to 5
             aDef
@@ -219,6 +226,8 @@ public constant real array MIRROR_IMAGE_DMG_FACTOR = [35, 40, 45, 50, 55]
 
 constant real array MIRROR_IMAGE_DURATION = [8, 9, 10, 11, 12]
 
+constant real ANIMATION_DELAY = 0.7
+
 public BuffType buffMirrorImage // the actual effect is in OnAttack
 
 constant int MIRROR_IMAGE_BUFF_ID = compiletime(createAuraBuff("Mirror Image", "This unit is under the effect of Mirror Image; it deals reduced damage.", Icons.bTNMirrorImage))
@@ -236,10 +245,6 @@ function abilityR(int abilityId)
             ..setupIcon(Icons.bTNMirrorImage)
             ..setupWithHotKey("Mirror Image", "R")
             ..setLightningEffects("")
-            ..setArtTarget("")
-            ..setMissileArt("")
-            ..setArtSpecial("")
-            ..setLightningEffects("")
             ..setCheckDependencies(true)
             ..setRequirements(NOT_SPINNING.toRawCode())
 
@@ -252,7 +257,8 @@ function abilityR(int abilityId)
                 ..setDamageTaken(lvl, 1.0)
                 ..setDamageDealt(lvl, 1.0)
                 ..setDurationHero(lvl, MIRROR_IMAGE_DURATION[lvl-1])
-                ..setAnimationDelay(lvl, 0.0)
+                ..setDurationNormal(lvl, MIRROR_IMAGE_DURATION[lvl-1])
+                ..setAnimationDelay(lvl, ANIMATION_DELAY)
 
 
     let tooltip = new DynamicTooltip(abilityId)
@@ -304,17 +310,20 @@ function onSpellCast()
     let pos = caster.getPos()
 
     if(spellId==ABILITY_SHADOW_STRIKE)
+        
         let target = GetSpellTargetUnit()
         let targetPos = target.getPos()
         let angle = pos.angleTo(targetPos)
         let spawnPos = targetPos.polarOffset(angle, 100)
         let illusion = createUnit(caster.getOwner(), SHADOW_STRIKE_SHADOW_UNIT, spawnPos, angle+angle(bj_PI))
         illusion.setAnimation("attack")
-        illusion.setVertexColor(255, 255, 255, 100)
+        illusion.setVertexColor(255, 255, 255, 200)
         doAfter(0.3) ->
             //deal damage
+            SOUND_SHADOW_STRIKE.playOnPoint(caster.getPos().toVec3()).snd.setVolume(150)
             caster.dealDamage(target, SHADOW_STRIKE_DAMAGE[level-1].bonus(caster.getStr(), SHADOW_STRIKE_DAMAGE_BONUS), ReductionType.PHYSICAL)
-        doAfter(0.83) ->
+        doAfter(0.85) ->
+            addEffect(Abilities.mirrorImageDeathCaster, spawnPos).destr()
             illusion.remove()
 
     if(spellId==ABILITY_DEATH_SPIN)
@@ -322,6 +331,7 @@ function onSpellCast()
         caster.addBuff(caster, DEATH_SPIN_DURATION, buffDeathSpin, level)
 
     if(spellId==ABILITY_CRIPPLING_PAIN)
+        SOUND_CRIPPLING_PAIN.playOnPoint(pos.toVec3()).snd.setVolume(150)
         let g = CreateGroup()
         g.enumUnitsInRange(pos, CRIPPLING_PAIN_AOE)
         unit u
@@ -331,18 +341,21 @@ function onSpellCast()
                 break
             g.removeUnit(u)
             if BuffList.hasBuffType(u, buffBleedingWound)
-                let stacks = BuffList.getBuffOfType(u, buffBleedingWound).getData()
+                let bleedingWound = BuffList.getBuffOfType(u, buffBleedingWound)
+                let stacks = bleedingWound.getData()
 
-                caster.dealDamage(u, CRIPPLING_PAIN_DAMAGE[level-1].bonus(caster.getInt(), CRIPPLING_PAIN_DAMAGE_BONUS), ReductionType.MAGIC)
+                caster.dealDamage(u, stacks * CRIPPLING_PAIN_DAMAGE[level-1].bonus(caster.getInt(), CRIPPLING_PAIN_DAMAGE_BONUS), ReductionType.MAGIC)
+
                 u.wrapper().addStatRelativeBonus(Stat.MS, -10 * CRIPPLING_PAIN_SLOW[level-1] * stacks )
-
                 let b = u.addBuffReduced(caster, CRIPPLING_PAIN_DURATION[level-1], buffCripplingPain, level)
                 b.setData(stacks * CRIPPLING_PAIN_SLOW[level-1])
+
+                bleedingWound.dispel()
 
         g.destr()
 
     if(spellId==ABILITY_MIRROR_IMAGE)
-        doAfter(0.1) ->
+        doAfter(0.01 + ANIMATION_DELAY) ->
             let g = CreateGroup()
             g.enumUnitsOfPlayer(caster.getOwner(), null)
             unit u
@@ -424,7 +437,27 @@ function initHeroType()
             let target = whichBuff.getTarget()
             target.addAbility(DEATH_SPIN_DISABLE_ATTACK)
             AddUnitAnimationProperties(target, "spin", true)
+            let level = whichBuff.getLevel()
+            target.wrapper()
+                ..addStatAbsoluteBonus(Stat.AR, DEATH_SPIN_DEFENSE[level-1])
+                ..addStatAbsoluteBonus(Stat.AGI, DEATH_SPIN_DEFENSE[level-1])
+        end))
 
+        buffDeathSpin.setPeriodicTime(0.25)
+        buffDeathSpin.addPeriodicFunction( (Buff whichBuff) -> (begin
+            let caster = whichBuff.getCaster()
+            let g = CreateGroup()
+            let level = whichBuff.getLevel()
+            g.enumUnitsInRange(caster.getPos(), DEATH_SPIN_AOE)
+            unit u
+            while true
+                u = FirstOfGroup(g)
+                if u == null
+                    break
+                g.removeUnit(u)
+                if u.isTargetable(heroOwner, false, true)
+                    caster.dealDamage(u, 0.25 * DEATH_SPIN_DAMAGE[level-1].bonus(caster.getStr(), DEATH_SPIN_DAMAGE_BONUS), ReductionType.PHYSICAL)
+            g.destr()
         end))
 
         buffDeathSpin.addEndFunction( (Buff whichBuff) -> (begin
@@ -432,6 +465,10 @@ function initHeroType()
             let target = whichBuff.getTarget()
             target.removeAbility(DEATH_SPIN_DISABLE_ATTACK)
             AddUnitAnimationProperties(target, "spin", false)
+            let level = whichBuff.getLevel()
+            target.wrapper()
+                ..addStatAbsoluteBonus(Stat.AR, -DEATH_SPIN_DEFENSE[level-1])
+                ..addStatAbsoluteBonus(Stat.AGI, -DEATH_SPIN_DEFENSE[level-1])
         end))
 
         abilityList = new LinkedList<int>

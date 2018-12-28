@@ -84,7 +84,7 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
                 let mirrorImage = BuffList.getBuffOfType(source, buffMirrorImage)
                 let level = mirrorImage.getLevel()
 
-                currentDamage = currentDamage * MIRROR_IMAGE_DMG_FACTOR[level-1]
+                currentDamage = currentDamage * MIRROR_IMAGE_DMG_FACTOR[level-1] / 100
 
             // critical strike - TROLL BERSERKER
             if advanced and source.isType(UNIT_TYPE_HERO) and BuffList.hasBuffType(source, buffCriticalStrike) and not target.isType(UNIT_TYPE_STRUCTURE)
