@@ -1,0 +1,465 @@
+package TrollManhunter
+
+//14
+
+import HeroType
+import ClosureTimers
+
+public constant HERO_TROLL_MANHUNTER = 'H01L'
+HeroType heroType = null
+
+public constant ABILITY_BLEEDING_WOUND = 'AY4P'
+constant ABILITY_SHADOW_STRIKE = 'AY4Q'
+constant ABILITY_DEATH_SPIN = 'AY4W'
+constant ABILITY_CRIPPLING_PAIN = 'AY4E'
+constant ABILITY_MIRROR_IMAGE = 'AY4R'
+
+constant NOT_SPINNING = compiletime(UNIT_ID_GEN.next())
+unit notSpinning
+player heroOwner
+
+public constant real array BLEEDING_WOUND_DMG = [25, 35, 45, 55, 65]
+public constant real BLEEDING_WOUND_DURATION = 6.0
+
+BuffType buffBleedingWound
+
+constant int BLEEDING_WOUND_BUFF_ID = compiletime(createAuraBuff("Bleeding Wound", "This unit was hit by Melting Breath; it has reduced armor.", Icons.bTNCleavingAttack))
+constant int BLEEDING_WOUND_ABILITY_ID = compiletime(createNegativeBuffAbility(5, BLEEDING_WOUND_BUFF_ID, Abilities.lordofFlameMissile, "chest"))
+
+
+function passive(int abilityId)
+    if compiletime
+        createNoEffectAbiltiy(abilityId)
+            ..setupIcon(Icons.pASBTNCleavingAttack)
+            ..setupWithHotKey("Bleeding Wound", "D")
+
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceStrength(0)
+    tooltip.setLearnString( "Attacking an enemy unit applies one stack of Bleeding Wound. If the target was not attacked for {0} seconds, "+
+                            "all stacks are lost. Each stack deals physical damage over time:".format(BLEEDING_WOUND_DURATION.toSmartString()), (int lvl) -> (begin
+        return "{0}% damage per second.".format(
+            BLEEDING_WOUND_DMG[lvl-1].toSmartString())
+    end) )
+    
+    for lvl = 1 to 5
+        tooltip.setNormalString(false, lvl, "Attacking an enemy unit applies one stack of Bleeding Wound. If the target was not attacked for {0} seconds, "+
+        "all stacks are lost. Each stack deals {1} physical damage per second.".format(
+            BLEEDING_WOUND_DURATION.toSmartString(),
+            BLEEDING_WOUND_DMG[lvl-1].toSmartString())
+        )
+    addDynamicTooltipStrength(heroType, tooltip)
+
+
+constant int SHADOW_STRIKE_SHADOW_UNIT = 'H01M'
+
+constant real array SHADOW_STRIKE_DAMAGE = [75, 125, 175, 225, 275]
+constant real SHADOW_STRIKE_DAMAGE_BONUS = 80
+
+
+function abilityQ(int abilityId)
+
+    if compiletime
+        int array MANA = [80, 80, 80, 80, 80]
+        real array COOLDOWN = [8, 8, 8, 8, 8]
+        real array RANGE = [600, 650, 700, 750, 800]
+        let aDef = new AbilityDefinitionFarseerChainLightning(abilityId)
+            ..setupIcon(Icons.bTNShadowStrike)
+            ..setupWithHotKey("Shadow Strike", "Q")
+            ..setAnimationNames("spell")
+            ..setLightningEffects("")
+            ..setRequirements(NOT_SPINNING.toRawCode())
+
+        for lvl = 1 to 5
+            aDef
+                ..setCooldown(lvl, COOLDOWN[lvl-1])
+                ..setManaCost(lvl, MANA[lvl-1])
+                ..setCastRange(lvl, RANGE[lvl-1])
+                ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
+                ..setDamageperTarget(lvl, 0)
+                ..setNumberofTargetsHit(lvl, 1)
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceStrength(SHADOW_STRIKE_DAMAGE_BONUS)
+    tooltip.setLearnString("Summons an illusion of the Troll Manhunter behind the target to attack it with a venomous strike.", (int lvl) -> (begin
+        return "{0}{S0} damage.".format(
+            SHADOW_STRIKE_DAMAGE[lvl-1].str())
+    end) )
+    
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, "Summons an illusion of the Troll Manhunter behind the target to attack it with a venomous strike, dealing {0}{S0} damage.".format(
+            SHADOW_STRIKE_DAMAGE[lvl-1].str()
+            ))
+    addDynamicTooltipStrength(heroType, tooltip)
+
+
+function spinDummy()
+    new UnitDefinition(NOT_SPINNING, 'hfoo')
+        ..setNormalAbilities("Aloc")
+        ..setModelFile("")
+        ..setShadowImageUnit("")
+        ..setAttacksEnabled(0)
+        ..setMovementType(MovementType.Fly)
+        ..setCollisionSize(0)
+        ..setFoodCost(0)
+        ..setSightRadiusDay(0)
+        ..setSightRadiusNight(0)
+        ..setUpgradesUsed("")
+        ..setUnitSoundSet("")
+        ..setName("end Death Spin")
+
+constant real array DEATH_SPIN_DAMAGE = [50, 75, 100, 125, 150]
+constant real DEATH_SPIN_DAMAGE_BONUS = 50
+
+constant int array DEATH_SPIN_DEFENSE = [20, 25, 30, 35, 40]
+constant real DEATH_SPIN_DURATION = 3.0
+
+BuffType buffDeathSpin
+
+constant int DEATH_SPIN_BUFF_ID = compiletime(createAuraBuff("Death Spin", "This unit is under the effect of Death Spin, it cannot attack.", Icons.bTNWhirlwind))
+constant int DEATH_SPIN_ABILITY_ID = compiletime(createNegativeBuffAbility(5, DEATH_SPIN_BUFF_ID, Abilities.lordofFlameMissile, "chest"))
+
+constant int DEATH_SPIN_DISABLE_ATTACK = compiletime(ABIL_ID_GEN.next())
+
+function abilityW(int abilityId)
+
+    if compiletime
+        spinDummy()
+
+        new AbilityDefinitionCargoHoldBurrow(DEATH_SPIN_DISABLE_ATTACK)
+            ..setCargoCapacity(1, 0)
+
+        int array MANA = [75, 75, 75, 75, 75]
+
+        let aDef = new AbilityDefinitionBeserk(abilityId)
+            ..setupIcon(Icons.bTNWhirlwind)
+            ..setupWithHotKey("Death Spin", "W")
+
+        for lvl = 1 to 5
+            aDef
+                ..setCooldown(lvl, 0)
+                ..setManaCost(lvl, MANA[lvl-1])
+                ..setTargetsAllowed(lvl, "none")
+                ..setAttackSpeedIncrease(lvl, 0)
+                ..setDamageTakenIncrease(lvl, 0)
+                ..setMovementSpeedIncrease(lvl, 0)
+                ..setDurationHero(lvl, 0.01)
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceStrength(DEATH_SPIN_DAMAGE_BONUS)
+    tooltip.setLearnString("Causes a bladestorm of destructive force around the Troll Manhunter, increasing armor and willpower and dealing damage per second to nearby enemy units.\nLasts {0} seconds.".format(DEATH_SPIN_DURATION.toSmartString()), (int lvl) -> (begin
+        return "{0}{S0} damage per second, {1} armor and willpower.".format(
+            DEATH_SPIN_DAMAGE[lvl-1].toSmartString(),
+            DEATH_SPIN_DEFENSE[lvl-1].toString())
+    end) )
+    for lvl = 1 to 5
+        tooltip.setNormalString(false, lvl, "Causes a bladestorm of destructive force around the Troll Manhunter, increasing armor and willpower by {0} and dealing {1} damage per second to nearby enemy units.\nLasts {2} seconds.".format(
+            DEATH_SPIN_DEFENSE[lvl-1].toString(),
+            DEATH_SPIN_DAMAGE[lvl-1].toSmartString(),
+            DEATH_SPIN_DURATION.toSmartString()))
+    addDynamicTooltipStrength(heroType, tooltip)
+
+
+constant real array CRIPPLING_PAIN_DAMAGE = [20, 30, 40, 50, 60]
+constant real CRIPPLING_PAIN_DAMAGE_BONUS = 30
+
+constant int array CRIPPLING_PAIN_SLOW = [8, 10, 12, 14, 16]
+
+constant real array CRIPPLING_PAIN_DURATION= [3, 3.5, 4, 4.5, 5]
+
+BuffType buffCripplingPain
+
+constant int CRIPPLING_PAIN_BUFF_ID = compiletime(createAuraBuff("Crippling Pain", "This unit is under the effect of Crippling Pain, it has reduced movement speed.", Icons.bTNCripple))
+constant int CRIPPLING_PAIN_ABILITY_ID = compiletime(createNegativeBuffAbility(5, CRIPPLING_PAIN_BUFF_ID, Abilities.lordofFlameMissile, "chest"))
+
+constant real CRIPPLING_PAIN_AOE = 1500
+
+function abilityE(int abilityId)
+
+    if compiletime
+        int array MANA = [90, 85, 80, 75, 70]
+        real array COOLDOWN = [17, 16, 15, 14, 13]
+        let aDef = new AbilityDefinitionPitLordHowlofTerror(abilityId)
+            ..setAnimationNames("spell,slam")
+            ..setupIcon(Icons.bTNCripple)
+            ..setupWithHotKey("Crippling Pain", "E")
+            ..setRequirements(NOT_SPINNING.toRawCode())
+
+        for lvl = 1 to 5
+            aDef
+                ..setCooldown(lvl, COOLDOWN[lvl-1])
+                ..setManaCost(lvl, MANA[lvl-1])
+                ..setTargetsAllowed(lvl, "none")
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceIntelligence(CRIPPLING_PAIN_DAMAGE_BONUS)
+    tooltip.setLearnString(("Damages and slows enemies affected by Bleeding Wound."+
+    " Deals damage and slows for every stack of Bleeding Wound, but consumes all stacks."), (int lvl) -> (begin
+        return "{0}{I0} damage, {1}% slow, {2} seconds.".format(
+            CRIPPLING_PAIN_DAMAGE[lvl-1].toSmartString(),
+            CRIPPLING_PAIN_SLOW[lvl-1].toString(),
+            CRIPPLING_PAIN_DURATION[lvl-1].toSmartString())
+    end) )
+    
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, ("Damages and slows enemies affected by Bleeding Wound."+
+        " Deals {0}{I0} damage and slows by {1}% for every stack of Bleeding Wound for {2} seconds, but consumes all stacks.").format(
+            CRIPPLING_PAIN_DAMAGE[lvl-1].toSmartString(),
+            CRIPPLING_PAIN_SLOW[lvl-1].toString(),
+            CRIPPLING_PAIN_DURATION[lvl-1].toSmartString()))
+    addDynamicTooltipIntelligence(heroType, tooltip)
+
+
+        
+constant int MIRROR_IMAGE_ILLUSIONS = 3
+
+public constant real array MIRROR_IMAGE_DMG_FACTOR = [35, 40, 45, 50, 55]
+
+constant real array MIRROR_IMAGE_DURATION = [8, 9, 10, 11, 12]
+
+public BuffType buffMirrorImage // the actual effect is in OnAttack
+
+constant int MIRROR_IMAGE_BUFF_ID = compiletime(createAuraBuff("Mirror Image", "This unit is under the effect of Mirror Image; it deals reduced damage.", Icons.bTNMirrorImage))
+constant int MIRROR_IMAGE_ABILITY_ID = compiletime(createPositiveBuffAbility(5, MIRROR_IMAGE_BUFF_ID, "", ""))
+
+
+
+function abilityR(int abilityId)
+
+    if compiletime
+        int array MANA = [140, 145, 150, 155, 160]
+        real array COOLDOWN = [75, 75, 75, 75, 75]
+        let aDef = new AbilityDefinitionBladeMasterMirrorImage(abilityId)
+            ..setAnimationNames("spell")
+            ..setupIcon(Icons.bTNMirrorImage)
+            ..setupWithHotKey("Mirror Image", "R")
+            ..setLightningEffects("")
+            ..setArtTarget("")
+            ..setMissileArt("")
+            ..setArtSpecial("")
+            ..setLightningEffects("")
+            ..setCheckDependencies(true)
+            ..setRequirements(NOT_SPINNING.toRawCode())
+
+        for lvl = 1 to 5
+            aDef
+                ..setCooldown(lvl, COOLDOWN[lvl-1])
+                ..setManaCost(lvl, MANA[lvl-1])
+                ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
+                ..setNumberofImages(lvl, MIRROR_IMAGE_ILLUSIONS)
+                ..setDamageTaken(lvl, 1.0)
+                ..setDamageDealt(lvl, 1.0)
+                ..setDurationHero(lvl, MIRROR_IMAGE_DURATION[lvl-1])
+                ..setAnimationDelay(lvl, 0.0)
+
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceIntelligence(0)
+    tooltip.setLearnString(("Summons {0} illusions of the Troll Manhunter."+
+    " During the effect of Mirror Image the Troll Manhunter and his illusion deal reduced damage.").format(MIRROR_IMAGE_ILLUSIONS.toString()), (int lvl) -> (begin
+        return "{0}% damage, {1} seconds".format(
+            MIRROR_IMAGE_DMG_FACTOR[lvl-1].str(),
+            MIRROR_IMAGE_DURATION[lvl-1].str())
+    end) )
+    
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, ("Summons {0} illusions of the Troll Manhunter."+
+        " During the effect of Mirror Image the Troll Manhunter and his illusion only deal {1}% damage.\nLasts {2} seconds.").format(
+            MIRROR_IMAGE_ILLUSIONS.str(),
+            MIRROR_IMAGE_DMG_FACTOR[lvl-1].str(),
+            MIRROR_IMAGE_DURATION[lvl-1].str())
+        )
+    addDynamicTooltipIntelligence(heroType, tooltip)
+
+
+
+function setupStats()
+    heroType
+        //..setStat(Stat.AD, 5, 40)
+        ..setStat(Stat.AR, 12, 28)
+        ..setStat(Stat.AS, 19, 53)
+        ..setStat(Stat.HP, 14, 43)
+        ..setStat(Stat.HR, 32, 69)
+        ..setStat(Stat.MP, 21, 37)
+        ..setStat(Stat.MR, 19, 45)
+        ..setStat(Stat.MS, 14, 37)
+        ..setStat(Stat.STR, 17, 55)
+        ..setStat(Stat.AGI, 13, 34)
+        ..setStat(Stat.INT, 11, 33)
+
+
+
+
+
+
+
+
+
+function onSpellCast()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+    let pos = caster.getPos()
+
+    if(spellId==ABILITY_SHADOW_STRIKE)
+        let target = GetSpellTargetUnit()
+        let targetPos = target.getPos()
+        let angle = pos.angleTo(targetPos)
+        let spawnPos = targetPos.polarOffset(angle, 100)
+        let illusion = createUnit(caster.getOwner(), SHADOW_STRIKE_SHADOW_UNIT, spawnPos, angle+angle(bj_PI))
+        illusion.setAnimation("attack")
+        illusion.setVertexColor(255, 255, 255, 100)
+        doAfter(0.3) ->
+            //deal damage
+            caster.dealDamage(target, SHADOW_STRIKE_DAMAGE[level-1].bonus(caster.getStr(), SHADOW_STRIKE_DAMAGE_BONUS), ReductionType.PHYSICAL)
+        doAfter(0.83) ->
+            illusion.remove()
+
+    if(spellId==ABILITY_DEATH_SPIN)
+        caster.removeAbility('Bbsk')
+        caster.addBuff(caster, DEATH_SPIN_DURATION, buffDeathSpin, level)
+
+    if(spellId==ABILITY_CRIPPLING_PAIN)
+        let g = CreateGroup()
+        g.enumUnitsInRange(pos, CRIPPLING_PAIN_AOE)
+        unit u
+        while true
+            u = FirstOfGroup(g)
+            if u == null
+                break
+            g.removeUnit(u)
+            if BuffList.hasBuffType(u, buffBleedingWound)
+                let stacks = BuffList.getBuffOfType(u, buffBleedingWound).getData()
+
+                caster.dealDamage(u, CRIPPLING_PAIN_DAMAGE[level-1].bonus(caster.getInt(), CRIPPLING_PAIN_DAMAGE_BONUS), ReductionType.MAGIC)
+                u.wrapper().addStatRelativeBonus(Stat.MS, -10 * CRIPPLING_PAIN_SLOW[level-1] * stacks )
+
+                let b = u.addBuffReduced(caster, CRIPPLING_PAIN_DURATION[level-1], buffCripplingPain, level)
+                b.setData(stacks * CRIPPLING_PAIN_SLOW[level-1])
+
+        g.destr()
+
+    if(spellId==ABILITY_MIRROR_IMAGE)
+        doAfter(0.1) ->
+            let g = CreateGroup()
+            g.enumUnitsOfPlayer(caster.getOwner(), null)
+            unit u
+            while true
+                u = FirstOfGroup(g)
+                if u == null
+                    break
+                g.removeUnit(u)
+                if u.getTypeId() == HERO_TROLL_MANHUNTER
+                    u.addBuff(caster, MIRROR_IMAGE_DURATION[level-1], buffMirrorImage, level)
+
+            g.destr()
+        
+function onAttack(unit attacker, unit target, boolean _isActive)
+    let level = attacker.getAbilityLevel(ABILITY_BLEEDING_WOUND)
+    if level != 0 and target.isTargetable(attacker.getOwner(), false, true) and not target.isType(UNIT_TYPE_STRUCTURE)
+        target.addBuffReduced( attacker, BLEEDING_WOUND_DURATION, buffBleedingWound, level)
+
+function retreatAI(HeroAI _ai)
+
+function attackAI(HeroAI _ai)
+
+function teamFightAI(HeroAI _ai)
+            
+@compiletime
+function setupTooltips()
+
+    passive(ABILITY_BLEEDING_WOUND)
+    abilityQ(ABILITY_SHADOW_STRIKE)
+    abilityW(ABILITY_DEATH_SPIN)
+    abilityE(ABILITY_CRIPPLING_PAIN)
+    abilityR(ABILITY_MIRROR_IMAGE)
+
+
+function initHeroType()
+    setupStats()
+    setupTooltips()
+    heroType.setSkillBuild("QWQWQWQWQWEEEEE")
+    delayInit(5) ->
+        heroType
+            ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
+            ..addOnSpellCastFunc(function onSpellCast)
+            ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
+            ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
+            ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+            ..addItem(ITEM_ID_HEAVY_BOOTS)
+            ..addItem(ITEM_ID_BLOOD_SWORD)
+            ..addItem(ITEM_ID_INFERNAL_BOW)
+            ..addItem(ITEM_ID_RUNIC_ARMOR)
+            ..addItem(ITEM_ID_SACRIFICIAL_DAGGER)
+            ..addItem(ITEM_ID_CURSED_SWORD)
+
+        var abilityList = new LinkedList<int>
+        ..add(BLEEDING_WOUND_ABILITY_ID)
+        buffBleedingWound = new BuffType(false, true)
+        buffBleedingWound.setup(abilityList, BLEEDING_WOUND_BUFF_ID)
+
+        buffBleedingWound.addFirstFunction( (Buff whichBuff) -> (begin
+            whichBuff.setData(1)
+        end))
+
+        buffBleedingWound.addStackFunction( (Buff whichBuff) -> (begin
+            whichBuff.setData(whichBuff.getData()+1)
+        end))
+
+        buffBleedingWound.setPeriodicTime(0.25)
+        buffBleedingWound.addPeriodicFunction( (Buff whichBuff) -> (begin
+            let level = whichBuff.getLevel()
+            whichBuff.getCaster().dealDamage(whichBuff.getTarget(), 0.25 * BLEEDING_WOUND_DMG[level-1], ReductionType.PHYSICAL)
+        end))
+
+        abilityList = new LinkedList<int>
+        ..add(DEATH_SPIN_ABILITY_ID)
+        buffDeathSpin = new BuffType(false, true)
+        buffDeathSpin.setup(abilityList, DEATH_SPIN_BUFF_ID)
+
+        buffDeathSpin.addFirstFunction( (Buff whichBuff) -> (begin
+            notSpinning.setOwner(players[PLAYER_NEUTRAL_PASSIVE], false)
+            let target = whichBuff.getTarget()
+            target.addAbility(DEATH_SPIN_DISABLE_ATTACK)
+            AddUnitAnimationProperties(target, "spin", true)
+
+        end))
+
+        buffDeathSpin.addEndFunction( (Buff whichBuff) -> (begin
+            notSpinning.setOwner(heroOwner, false)
+            let target = whichBuff.getTarget()
+            target.removeAbility(DEATH_SPIN_DISABLE_ATTACK)
+            AddUnitAnimationProperties(target, "spin", false)
+        end))
+
+        abilityList = new LinkedList<int>
+        ..add(CRIPPLING_PAIN_ABILITY_ID)
+        buffCripplingPain = new BuffType(false, true)
+        buffCripplingPain.setup(abilityList, CRIPPLING_PAIN_BUFF_ID)
+
+        buffCripplingPain.addEndFunction( (Buff whichBuff) -> (begin
+            let stacks = whichBuff.getData()
+            whichBuff.getTarget().wrapper()
+                ..addStatRelativeBonus(Stat.MS, 10 * stacks)
+        end))
+
+
+        abilityList = new LinkedList<int>
+        ..add(MIRROR_IMAGE_ABILITY_ID)
+        buffMirrorImage = new BuffType(false, true)
+        buffMirrorImage.setup(abilityList, MIRROR_IMAGE_BUFF_ID)
+
+    
+function createHeroType(Hero hero)
+    let heroUnit = hero.toUnit()
+    heroOwner = heroUnit.getOwner()
+    notSpinning = createUnit(heroOwner, NOT_SPINNING, heroUnit.getPos(), angle(0))
+    
+
+
+init
+    
+    heroType = new HeroType(HERO_TROLL_MANHUNTER, Icons.bTNHeadhunter, 14, false)
+        ..setOnInitFunction(() -> initHeroType())
+        ..setOnCreateFunction((Hero hero) -> createHeroType(hero))
+        

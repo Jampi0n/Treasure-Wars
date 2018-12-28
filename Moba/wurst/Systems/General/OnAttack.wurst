@@ -10,6 +10,7 @@ import initlater SeaDruid
 import initlater TrollBerserker
 import initlater Paladin
 import initlater Destroyer
+import initlater TrollManhunter
 import StandardTextTags
 import HashMap
 import GameTimer
@@ -77,6 +78,13 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
 
             //===============================================================================
 
+            // mirror image - TROLL MANHUNTER
+            if BuffList.hasBuffType(source, buffMirrorImage)
+                
+                let mirrorImage = BuffList.getBuffOfType(source, buffMirrorImage)
+                let level = mirrorImage.getLevel()
+
+                currentDamage = currentDamage * MIRROR_IMAGE_DMG_FACTOR[level-1]
 
             // critical strike - TROLL BERSERKER
             if advanced and source.isType(UNIT_TYPE_HERO) and BuffList.hasBuffType(source, buffCriticalStrike) and not target.isType(UNIT_TYPE_STRUCTURE)
