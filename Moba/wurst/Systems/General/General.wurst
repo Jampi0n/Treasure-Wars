@@ -108,7 +108,8 @@ public function real.reduce(int stat, real reduction) returns real
 public function unit.addBuff(unit caster, real duration, BuffType buffType, int level) returns Buff
     Buff ret = null
     if this.isAlive()
-        ret = new Buff(this, caster, duration, buffType, level)
+        new Buff(this, caster, duration, buffType, level)
+        ret = BuffList.getBuffOfType(this, buffType)
     return ret
 
 public function unit.addBuffReduced(unit caster, real duration, BuffType buffType, int level) returns Buff
@@ -118,7 +119,8 @@ public function unit.addBuffReduced(unit caster, real duration, BuffType buffTyp
         realDuration = realDuration * 0.85
     Buff ret = null
     if this.isAlive()
-        ret = new Buff(this, caster, realDuration, buffType, level)
+        new Buff(this, caster, realDuration, buffType, level)
+        ret = BuffList.getBuffOfType(this, buffType)
     return ret
 
 
