@@ -3,7 +3,7 @@ package SeaDruid
 //3
 
 import HeroType
-import Knockback3
+import Knockback2d
 import Missile
 import TimerUtils
 import ClosureTimers
@@ -272,7 +272,7 @@ function onSpellCast()
             if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
                 caster.dealDamage(target, hitDmg, ReductionType.PHYSICAL)
                 if target.isMovable() and not target.isType(UNIT_TYPE_FLYING)
-                    Knockback3.add(target, caster.getPos().polarOffset(caster.getPos().angleTo(target.getPos()), 500), 500)
+                    Knockback2d.knockback(target, caster.getPos().polarOffset(caster.getPos().angleTo(target.getPos()), 500), 1000)
 
                 new Missile(caster, caster.getPos().withZ(80), 900, caster.getPos().angleTo(target.getPos()), Abilities.crushingWaveMissile)
                     ..hitOnce()

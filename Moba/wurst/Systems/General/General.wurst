@@ -7,7 +7,6 @@ import UnitWrapper
 import initlater HeroControl
 import initlater PlayerControl
 import ClosureTimers
-import Knockback3
 import UnitType
 import initlater ItemIdGeneration
 import initlater ItemShopSystem
@@ -288,8 +287,6 @@ public class ChannelTeleport
 
 
 init
-    Knockback3.destroyDestructableSpeedThreshold = 999999999.
-
     setHitBoxFunction( (unit u) -> (begin
         real ret = 32
         if u.isType(UNIT_TYPE_HERO)

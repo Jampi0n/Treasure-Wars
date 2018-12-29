@@ -6,7 +6,7 @@ import HeroType
 import TimerUtils
 import HashMap
 import ErrorHandling
-import Knockback3
+import Knockback2d
 
 
 
@@ -257,7 +257,7 @@ function onSpellCast()
 
     else if spellId == ABILITY_JUMP
         if caster.isMovable()
-            Knockback3.add(caster, vec2(GetSpellTargetX(),GetSpellTargetY()), 500)
+            Knockback2d.knockback(caster, vec2(GetSpellTargetX(),GetSpellTargetY()), 1200)
 
     else if spellId == ABILITY_UNBREAKABLE
         caster.removeAbility(UNBREAKABLE_DUMMY_BUFF)
