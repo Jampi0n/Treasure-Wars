@@ -4,6 +4,7 @@ package TrollManhunter
 
 import HeroType
 import ClosureTimers
+import UnitTypeConfig
 
 public constant HERO_TROLL_MANHUNTER = 'H01L'
 HeroType heroType = null
@@ -222,11 +223,11 @@ function abilityE(int abilityId)
         
 constant int MIRROR_IMAGE_ILLUSIONS = 1
 
+unit mirrorImageUnit
+
 public constant real array MIRROR_IMAGE_DMG_FACTOR = [35, 40, 45, 50, 55]
 
 constant real array MIRROR_IMAGE_DURATION = [80, 9, 10, 11, 12]
-
-constant real ANIMATION_DELAY = 0.5
 
 public BuffType buffMirrorImage // the actual effect is in OnAttack
 
@@ -240,11 +241,11 @@ function abilityR(int abilityId)
     if compiletime
         int array MANA = [140, 145, 150, 155, 160]
         real array COOLDOWN = [75, 75, 75, 75, 75]
-        let aDef = new AbilityDefinitionBladeMasterMirrorImage(abilityId)
+        let aDef = new AbilityDefinitionRoar(abilityId)
             ..setAnimationNames("spell")
+            ..setArtCaster("")
             ..setupIcon("BTNSpell_Shadow_ShadowWard")
             ..setupWithHotKey("Mirror Image", "R")
-            ..setLightningEffects("")
             ..setCheckDependencies(true)
             ..setRequirements(NOT_SPINNING.toRawCode())
 
@@ -252,19 +253,14 @@ function abilityR(int abilityId)
             aDef
                 ..setCooldown(lvl, COOLDOWN[lvl-1])
                 ..setManaCost(lvl, MANA[lvl-1])
-                ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
-                ..setNumberofImages(lvl, MIRROR_IMAGE_ILLUSIONS)
-                ..setDamageTaken(lvl, 1.0)
-                ..setDamageDealt(lvl, 1.0)
-                ..setDurationHero(lvl, MIRROR_IMAGE_DURATION[lvl-1])
-                ..setDurationNormal(lvl, MIRROR_IMAGE_DURATION[lvl-1])
-                ..setAnimationDelay(lvl, ANIMATION_DELAY)
+                ..setTargetsAllowed(lvl, "none")
 
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(0)
     tooltip.setLearnString(("Summons {0} illusions of the Troll Manhunter."+
-    " During the effect of Mirror Image the Troll Manhunter and his illusion deal reduced damage.").format(MIRROR_IMAGE_ILLUSIONS.toString()), (int lvl) -> (begin
+    " During the effect of Mirror Image the Troll Manhunter and his illusion deal reduced damage."+
+    " Illusions fully apply Bleeding Wound and hit effects from items.").format(MIRROR_IMAGE_ILLUSIONS.toString()), (int lvl) -> (begin
         return "{0}% damage, {1} seconds".format(
             MIRROR_IMAGE_DMG_FACTOR[lvl-1].str(),
             MIRROR_IMAGE_DURATION[lvl-1].str())
@@ -272,7 +268,8 @@ function abilityR(int abilityId)
     
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, ("Summons {0} illusions of the Troll Manhunter."+
-        " During the effect of Mirror Image the Troll Manhunter and his illusion only deal {1}% damage.\nLasts {2} seconds.").format(
+        " During the effect of Mirror Image the Troll Manhunter and his illusion only deal {1}% damage."+
+        " Illusions fully apply Bleeding Wound and hit effects from items.\nLasts {2} seconds.").format(
             MIRROR_IMAGE_ILLUSIONS.str(),
             MIRROR_IMAGE_DMG_FACTOR[lvl-1].str(),
             MIRROR_IMAGE_DURATION[lvl-1].str())
@@ -360,20 +357,9 @@ function onSpellCast()
         g.destr()
 
     if(spellId==ABILITY_MIRROR_IMAGE)
-        doAfter(0.01 + ANIMATION_DELAY) ->
-            let g = CreateGroup()
-            g.enumUnitsOfPlayer(caster.getOwner(), null)
-            unit u
-            while true
-                u = FirstOfGroup(g)
-                if u == null
-                    break
-                g.removeUnit(u)
-                if u.getTypeId() == HERO_TROLL_MANHUNTER
-                    u.addBuff(caster, MIRROR_IMAGE_DURATION[level-1], buffMirrorImage, level)
-                    if u!=caster
-                        u.wrapper().copyFrom(caster)
-            g.destr()
+        mirrorImageUnit = createUnit(caster.getOwner(), MIRROR_IMAGE_UNIT_ID, caster.getPos(), caster.getFacingAngle())
+        let mirrorWrapper = mirrorImageUnit.wrapper()
+        mirrorWrapper.copyFrom(caster)
         
 /*function onAttack(unit attacker, unit target, boolean _isActive)
     let level = attacker.getAbilityLevel(ABILITY_BLEEDING_WOUND)
