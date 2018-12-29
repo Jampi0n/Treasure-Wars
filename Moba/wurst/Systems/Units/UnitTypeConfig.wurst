@@ -49,6 +49,8 @@ public constant SERPENT_WARD = createUnitType(400, 'o003', 25, 15, 0, 32, Units.
 
 public constant WALL = createUnitType(200, 'o001', 0, 0, 0, 32, Units.serpentWard)
 
+public constant MIRROR_IMAGE_UNIT_ID = createUnitType(400, 'h01M', 100, 40, 10, 64, "Models\\TrollManhunter.mdx")
+
 public constant HYDRA = createUnitType(3500, 'n00I', 0, 300, 100, 160, Units.hydra)
 public constant DRAGON_TURTLE = createUnitType(2000, 'n00K', 0, 300, 100, 160, Units.dragonSeaTurtleRange)
 
