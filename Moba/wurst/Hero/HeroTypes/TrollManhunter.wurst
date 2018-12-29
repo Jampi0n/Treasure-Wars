@@ -160,7 +160,7 @@ function abilityW(int abilityId)
             DEATH_SPIN_DEFENSE[lvl-1].toString())
     end) )
     for lvl = 1 to 5
-        tooltip.setNormalString(false, lvl, "Causes a bladestorm of destructive force around the Troll Manhunter, increasing armor and willpower by {0} and dealing {1}{S0{1}} damage per second to nearby enemy units.\nLasts {2} seconds.".format(
+        tooltip.setNormalString(false, lvl, "Causes a bladestorm of destructive force around the Troll Manhunter, increasing armor and willpower by {0} and dealing {1}{S0} damage per second to nearby enemy units.\nLasts {2} seconds.".format(
             DEATH_SPIN_DEFENSE[lvl-1].toString(),
             DEATH_SPIN_DAMAGE[lvl-1].toSmartString(),
             DEATH_SPIN_DURATION.toSmartString()))
