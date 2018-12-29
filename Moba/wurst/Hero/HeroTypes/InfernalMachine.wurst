@@ -509,7 +509,7 @@ function initHeroType()
             let intel = whichBuff.getCaster().getInt()
             whichBuff.setData(intel)
 
-            if whichBuff.getTarget().isType(UNIT_TYPE_HERO)
+            if whichBuff.getTarget().isHeroAllowIllusion()
                 wrapper.addStatRelativeBonus(Stat.STR, 10 * INNER_FIRE_DMG[level-1].bonus(intel, INNER_FIRE_DMG_BONUS).toInt() )
             else
                 wrapper.addStatRelativeBonus(Stat.AD, 10 * INNER_FIRE_DMG[level-1].bonus(intel, INNER_FIRE_DMG_BONUS).toInt() )
@@ -522,7 +522,7 @@ function initHeroType()
             let wrapper = whichBuff.getTarget().wrapper()
             let intel = whichBuff.getData()
 
-            if whichBuff.getTarget().isType(UNIT_TYPE_HERO)
+            if whichBuff.getTarget().isHeroAllowIllusion()
                 wrapper.addStatRelativeBonus(Stat.STR, -10 * INNER_FIRE_DMG[level-1].bonus(intel, INNER_FIRE_DMG_BONUS).toInt() )
             else
                 wrapper.addStatRelativeBonus(Stat.AD, -10 * INNER_FIRE_DMG[level-1].bonus(intel, INNER_FIRE_DMG_BONUS).toInt() )

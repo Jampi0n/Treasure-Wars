@@ -10,6 +10,7 @@ import initlater HeroControl
 import PlayerControl
 import ErrorHandling
 import LinkedList
+import ObjectIds
 
 import public BonusMod
 
@@ -103,7 +104,7 @@ public class UnitWrapper
 
         if uType != null
             updateBaseStatsUnits()
-        else if this.assocUnit.isType(UNIT_TYPE_HERO)
+        else if this.assocUnit.isHeroAllowIllusion()
             statBaseValue[Stat.AD.toInt()] = statBaseValue[Stat.STR.toInt()]
             statBaseValue[Stat.AR.toInt()] = 0
         else
@@ -111,7 +112,7 @@ public class UnitWrapper
                 if this.assocUnit.getAbilityLevel('Aloc') == 0
                     if not unnkownUnitTypes.has(this.assocUnit.getTypeId())
                         unnkownUnitTypes.add(this.assocUnit.getTypeId())
-                        print("Warning unnkown unit type: "+GetUnitName(this.assocUnit))
+                        print("Warning unnkown unit type: "+GetUnitName(this.assocUnit) + " "+GetUnitTypeId(this.assocUnit).toRawCode())
             statBaseValue[Stat.AD.toInt()] = 0
             statBaseValue[Stat.AR.toInt()] = 0
 
@@ -141,7 +142,7 @@ public class UnitWrapper
             this.addStatAbsoluteBonus(Stat.HP, 0)
 
     function updateBaseStatsHero()
-        if not this.assocUnit.isType(UNIT_TYPE_HERO)
+        if not this.assocUnit.isHeroAllowIllusion()
             print("Base stats for non-hero units are constant and must not be updated.")
         statBaseValue[Stat.STR.toInt()] = this.assocUnit.getStr(false)
         statBaseValue[Stat.AGI.toInt()] = this.assocUnit.getAgi(false)
@@ -203,7 +204,7 @@ public class UnitWrapper
         if whichStat != Stat.MS and whichStat != Stat.HR and whichStat!= Stat.MR and whichStat!= Stat.HP and whichStat!= Stat.MP and whichStat != Stat.CD
             this.toUnit().setBonus(whichStat, this.statsTotalBonus[whichStat.toInt()])
             //update ability tooltips
-            if this.toUnit().isType(UNIT_TYPE_HERO) and (whichStat == Stat.STR or whichStat == Stat.INT)
+            if this.toUnit().isHeroAllowIllusion() and (whichStat == Stat.STR or whichStat == Stat.INT)
                 let hero = Hero.getHero(this.toUnit())
                 if hero != null
                     let hType = hero.getHeroType()
@@ -284,6 +285,21 @@ public class UnitWrapper
     function getStatTotalValue(Stat whichStat) returns int
         return this.getStatTotalBonus(whichStat) + this.getStatBaseValue(whichStat)
 
+    /**
+    Copies stats from a unit to this unit.
+    **/
+    function copyFrom(unit u)
+        print("copy")
+        let uWrapper = u.wrapper()
+        for int i = 0 to STAT_COUNT-1
+            //this.assocUnit.setBonus(intToStat(i), 0)
+            this.statBaseValue[i] = uWrapper.statBaseValue[i]
+            this.statsAbsoluteBonus[i] = uWrapper.statsAbsoluteBonus[i]
+            this.statsRelativeBonus[i] = uWrapper.statsRelativeBonus[i]
+            this.statsAbsoluteBonusReal[i] = uWrapper.statsAbsoluteBonusReal[i]
+            this.statsTotalBonus[i] = uWrapper.statsTotalBonus[i]
+            updateTotalStatBonus(intToStat(i))
+
     function incBlue()
         blueCount++
         if blueCount == 1
@@ -320,7 +336,7 @@ public function unit.getDefaultMovementSpeed() returns real
     return this.wrapper().defaultMovementSpeed
 
 public function unit.updateDefaultMovementSpeed()
-    if this.isType(UNIT_TYPE_HERO)
+    if this.isHeroAllowIllusion()
         this.wrapper().defaultMovementSpeed = GetUnitDefaultMoveSpeed(this) + GetPlayerTechCount(this.getOwner(), UPG_MS, true) 
         //print(GetUnitDefaultMoveSpeed(this) + GetPlayerTechCount(this.getOwner(), UPG_MS, true))
 
@@ -352,7 +368,7 @@ function regenerate()
             
             u.healMana(u.wrapper().statsTotalBonus[Stat.MR.toInt()]/100)
 
-            if(u.isType(UNIT_TYPE_HERO)) and false
+            if(u.isHeroAllowIllusion()) and false
                 print(u.wrapper().statsTotalBonus[Stat.HR.toInt()]/100)
                 print(u.wrapper().statsTotalBonus[Stat.MR.toInt()]/100)*/
 

@@ -53,7 +53,7 @@ function itemBloodSword(int itemId)
 
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             
-            if attacker.isType(UNIT_TYPE_HERO) and attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
+            if attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
                 target.addBuffReduced(attacker, buffDur.toReal(), bloodSwordBuff, 1)
                 target.addEffect(Abilities.orbCorruptionSpecialArt, "chest").destr()
         end))
@@ -103,7 +103,7 @@ function itemSpikedArmor(int itemId)
             ..addStatBonusAbsolute(Stat.AR, ar)
             ..addStatBonusAbsolute(Stat.HP, hp)
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if target.isType(UNIT_TYPE_HERO) and not attacker.isType(UNIT_TYPE_STRUCTURE)
+            if target.isHeroAllowIllusion() and not attacker.isType(UNIT_TYPE_STRUCTURE)
                 let dmg = target.countItemsOfType(convertItemId(itemId)) * spikeDmg
                 target.dealDamage(attacker, dmg.toReal(), ReductionType.PHYSICAL)
         end))

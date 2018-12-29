@@ -359,7 +359,7 @@ function teamFightAI(HeroAI ai)
                 break
             g.removeUnit(u)
             if u.isTargetable(hero.getOwner(), false, true)
-                if u.isType(UNIT_TYPE_HERO)
+                if u.isHeroAllowIllusion()
                     count++
 
         g.destr()

@@ -95,7 +95,7 @@ function itemSpikedMail(int itemId)
             ..addStatBonusAbsolute(Stat.AR, ar)
             ..addStatBonusAbsolute(Stat.HP, hp)
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if target.isType(UNIT_TYPE_HERO) and not attacker.isType(UNIT_TYPE_STRUCTURE)
+            if target.isHeroAllowIllusion() and not attacker.isType(UNIT_TYPE_STRUCTURE)
                 let dmg = target.countItemsOfType(convertItemId(itemId)) * spikeDmg
                 target.dealDamage(attacker, dmg.toReal(), ReductionType.PHYSICAL)
         end))
@@ -147,7 +147,7 @@ function itemMace(int itemId)
 
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             
-            if attacker.isType(UNIT_TYPE_HERO) and attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
+            if attacker.isHeroAllowIllusion() and attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
                 target.addBuffReduced( attacker, bleedDuration.toReal(), maceBuff, 1)
                 target.addEffect(Abilities.hydraliskImpact, "chest").destr()
         end))
@@ -205,7 +205,7 @@ function itemHammerOfMight(int itemId)
 
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             
-            if attacker.isType(UNIT_TYPE_HERO) and attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
+            if attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
                 target.addBuffReduced( attacker, armorDuration.toReal(), hammerBuff, 1)
                 target.addEffect(Abilities.bloodElfSpellThiefMISSILE, "chest").destr()
         end))
@@ -310,7 +310,7 @@ function itemWarHorn(int itemId)
         BUFF_WAR_HORN.setup(abilityList, WAR_HORN_BUFF_ID)
         BUFF_WAR_HORN.addFirstFunction((Buff thisBuff) -> (begin
             let target = thisBuff.getTarget()
-            if target.isType(UNIT_TYPE_HERO)
+            if target.isHeroAllowIllusion()
                 target.wrapper().addStatRelativeBonus(Stat.STR, adBonus*10)
             else
                 target.wrapper().addStatRelativeBonus(Stat.AD, adBonus*10)
@@ -318,14 +318,14 @@ function itemWarHorn(int itemId)
 
         BUFF_WAR_HORN.addEndFunction((Buff thisBuff) -> (begin
             let target = thisBuff.getTarget()
-            if target.isType(UNIT_TYPE_HERO)
+            if target.isHeroAllowIllusion()
                 target.wrapper().addStatRelativeBonus(Stat.STR, -adBonus*10)
             else
                 target.wrapper().addStatRelativeBonus(Stat.AD, -adBonus*10)
         end))
 
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if not target.isType(UNIT_TYPE_HERO) and not target.isType(UNIT_TYPE_STRUCTURE) and attacker.isType(UNIT_TYPE_HERO)
+            if not target.isHeroAllowIllusion() and not target.isType(UNIT_TYPE_STRUCTURE) and attacker.isHeroAllowIllusion()
                 let dmg = attacker.countItemsOfType(convertItemId(itemId)) * unitDmg
                 attacker.dealDamage(target, dmg.toReal(), ReductionType.PHYSICAL)
         end))

@@ -116,7 +116,6 @@ function itemBow(int itemId)
             ..addStatBonusAbsolute(Stat.STR, str)
 
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if not target.isType(UNIT_TYPE_HERO) and not target.isType(UNIT_TYPE_STRUCTURE) and attacker.isType(UNIT_TYPE_HERO)
                 let dmg = attacker.countItemsOfType(convertItemId(itemId)) * unitDmg
                 attacker.dealDamage(target, dmg.toReal(), ReductionType.PHYSICAL)
         end))
@@ -150,7 +149,7 @@ function itemSpikes(int itemId)
             ..setGoldCost(600)
     else
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if target.isType(UNIT_TYPE_HERO)
+            if target.isHeroAllowIllusion() and not attacker.isType(UNIT_TYPE_STRUCTURE)
                 let dmg = target.countItemsOfType(convertItemId(itemId)) * spikeDmg
                 target.dealDamage(attacker, dmg.toReal(), ReductionType.PHYSICAL)
         end))

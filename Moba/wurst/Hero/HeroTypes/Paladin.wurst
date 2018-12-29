@@ -360,7 +360,7 @@ function attackAI(HeroAI ai)
                 break
             g.removeUnit(u)
             if u.isTargetable(hero.getOwner(), false, true) and not u.isType(UNIT_TYPE_STRUCTURE)
-                if u.isType(UNIT_TYPE_HERO)
+                if u.isHeroAllowIllusion()
                     count += 5
                 else
                     count ++
@@ -402,7 +402,7 @@ function teamFightAI(HeroAI ai)
             break
         g.removeUnit(u)
         if u.isTargetable(hero.getOwner(), false, true)
-            if u.isType(UNIT_TYPE_HERO)
+            if u.isHeroAllowIllusion()
                 count++
 
     if count != 0
@@ -418,7 +418,7 @@ function teamFightAI(HeroAI ai)
             break
         g.removeUnit(u)
         if u.isTargetable(hero.getOwner(), false, true)
-            if u.isType(UNIT_TYPE_HERO)
+            if u.isHeroAllowIllusion()
                 count++
 
     g.destr()

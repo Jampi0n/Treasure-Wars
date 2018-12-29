@@ -664,7 +664,7 @@ init
     end))
 
     OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-        if attacker.getAbilityLevel(TOWER_FOCUS_ABILITY_ID)>0 and target.isType(UNIT_TYPE_HERO)
+        if attacker.getAbilityLevel(TOWER_FOCUS_ABILITY_ID)>0 and target.isHeroAllowIllusion()
             target.addBuffReduced(attacker, TOWER_FOCUS_DUR, buffTowerFocus, 1)
     end))
         

@@ -87,7 +87,7 @@ public function unit.findAreaTarget(real range, real aoe, int heroValue) returns
                 nearby.removeUnit(u)
             
                 if not u.isType(UNIT_TYPE_STRUCTURE) and u.isAlive() and u.isVisible(owner) and IsUnitEnemy(u, owner)
-                    if u.isType(UNIT_TYPE_HERO)
+                    if u.isHeroNoIllusion()
                         currentValue += heroValue
                     else
                         currentValue++
@@ -118,21 +118,21 @@ public function unit.findTarget(real range, AbilityTargetFocus focus, AbilityTar
         newPrio = 0
         valid = false
         if not u.isType(UNIT_TYPE_STRUCTURE) and u.isAlive() and u.isVisible(this.getOwner())
-            if focus == AbilityTargetFocus.ALLY_HERO and u.isType(UNIT_TYPE_HERO) and u.getOwner().isAllyOf(this.getOwner()) and u!=this
+            if focus == AbilityTargetFocus.ALLY_HERO and u.isHeroNoIllusion() and u.getOwner().isAllyOf(this.getOwner()) and u!=this
                 valid = true
-            else if focus == AbilityTargetFocus.ALLY_UNIT and not u.isType(UNIT_TYPE_HERO) and u.getOwner().isAllyOf(this.getOwner()) and u.getOwner() != this.getOwner()
+            else if focus == AbilityTargetFocus.ALLY_UNIT and not u.isHeroNoIllusion() and u.getOwner().isAllyOf(this.getOwner()) and u.getOwner() != this.getOwner()
                 valid = true
             else if focus == AbilityTargetFocus.ALLY and u.getOwner().isAllyOf(this.getOwner()) and u.getOwner() != this.getOwner()
                 valid = true
-            else if focus == AbilityTargetFocus.FRIEND_HERO and u.isType(UNIT_TYPE_HERO) and (u.getOwner().isAllyOf(this.getOwner()) or u.getOwner() == this.getOwner())
+            else if focus == AbilityTargetFocus.FRIEND_HERO and u.isHeroNoIllusion() and (u.getOwner().isAllyOf(this.getOwner()) or u.getOwner() == this.getOwner())
                 valid = true
-            else if focus == AbilityTargetFocus.FRIEND_UNIT and not u.isType(UNIT_TYPE_HERO) and (u.getOwner().isAllyOf(this.getOwner()) or u.getOwner() == this.getOwner())
+            else if focus == AbilityTargetFocus.FRIEND_UNIT and not u.isHeroNoIllusion() and (u.getOwner().isAllyOf(this.getOwner()) or u.getOwner() == this.getOwner())
                 valid = true
             else if focus == AbilityTargetFocus.FRIEND and (u.getOwner().isAllyOf(this.getOwner()) or u.getOwner() == this.getOwner())
                 valid = true
-            else if focus == AbilityTargetFocus.ENEMY_HERO and u.isType(UNIT_TYPE_HERO) and u.getOwner().isEnemyOf(this.getOwner()) and not u.isType(UNIT_TYPE_ANCIENT)
+            else if focus == AbilityTargetFocus.ENEMY_HERO and u.isHeroNoIllusion() and u.getOwner().isEnemyOf(this.getOwner()) and not u.isType(UNIT_TYPE_ANCIENT)
                 valid = true            
-            else if focus == AbilityTargetFocus.ENEMY_UNIT and not u.isType(UNIT_TYPE_HERO) and u.getOwner().isEnemyOf(this.getOwner()) and not u.isType(UNIT_TYPE_ANCIENT)
+            else if focus == AbilityTargetFocus.ENEMY_UNIT and not u.isHeroNoIllusion() and u.getOwner().isEnemyOf(this.getOwner()) and not u.isType(UNIT_TYPE_ANCIENT)
                 valid = true
             else if focus == AbilityTargetFocus.ENEMY and u.getOwner().isEnemyOf(this.getOwner()) and not u.isType(UNIT_TYPE_ANCIENT)
                 valid = true
@@ -429,7 +429,7 @@ public class HeroAI
                     break
                 g.removeUnit(u)
                 if IsUnitAlly(u, owner)
-                    if not u.isType(UNIT_TYPE_HERO)
+                    if not u.isHeroNoIllusion()
                         count++
 
             g.destr()
@@ -847,7 +847,7 @@ public class HeroAI
                             break
                         g.removeUnit(u)
                         if u.isTargetable(this.getOwningPlayer(), false, true)
-                            if u.isType(UNIT_TYPE_HERO)
+                            if u.isHeroNoIllusion()
                                 heroNearby = true
                                 break
 
@@ -1080,7 +1080,7 @@ function determineWinChance(boolean firstTeam, vec2 pos) returns real
                                 else
                                     towerStrength2 += 150
 
-            else if u.isType(UNIT_TYPE_HERO)
+            else if u.isHeroNoIllusion()
                 if uTeam1
                     heroStrength1 += determineHeroStrength(u)
                 else if uTeam2
@@ -1194,7 +1194,7 @@ init
     end))
 
     /*OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-        if attacker.isType(UNIT_TYPE_HERO)
+        if attacker.isHeroNoIllusion()
             let ai = HeroAI.heroAIs[attacker.getOwner().getId()]
             if ai != null
                 ai.attacking = false

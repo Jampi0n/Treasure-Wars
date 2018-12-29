@@ -5,8 +5,8 @@ import BuildingTypes
 import LinkedList
 import HashMap
 import DamageDetection
-import Constants
 import HeroAI
+import General
 
 class TowerPos
     real x
@@ -111,7 +111,7 @@ public class Tower
         let attacker = GetEventDamageSource()
         let target = GetTriggerUnit()
 
-        if target.isType(UNIT_TYPE_HERO) and attacker.isType(UNIT_TYPE_HERO) and GetEventDamage() > 0.1
+        if target.isHeroAllowIllusion() and attacker.isHeroAllowIllusion() and GetEventDamage() > 0.1
             if IsUnitAlly(attacker, players[TEAM_PLAYER_TEAM_1]) and IsUnitAlly(target, players[TEAM_PLAYER_TEAM_2])
                 for TowerPos pos in towerPos2
                     if pos.inRange(attacker, 800)
@@ -137,7 +137,7 @@ public class Tower
                 if currentTarget == null
                     currentTarget = attacked
 
-                if currentTarget.isType(UNIT_TYPE_HERO)
+                if currentTarget.isHeroNoIllusion()
                     let ai = getAI(currentTarget.getOwner().getId())
                     if ai != null
                         ai.attackedByTower()

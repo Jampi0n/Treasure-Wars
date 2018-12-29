@@ -28,6 +28,14 @@ public enum ReductionType
     MAGIC
     NONE
 
+/** Instead of checking the unit directly, its type is checked.
+    Illusions of heroes are identified as heroes.*/
+public function unit.isHeroAllowIllusion() returns boolean
+    return IsUnitIdType(this.getTypeId(), UNIT_TYPE_HERO)
+
+public function unit.isHeroNoIllusion() returns boolean
+    return this.isType(UNIT_TYPE_HERO)
+
 public function printWarning(string warning)
     if warning != ""
         //print(warning)
@@ -63,7 +71,7 @@ public function unit.isMovable() returns boolean
 
 public function unit.getStr() returns int
     int ret
-    if this.isType(UNIT_TYPE_HERO)
+    if this.isHeroAllowIllusion()
         ret = GetHeroStr(this, true)
     else
         ret = this.wrapper().getStatTotalBonus(Stat.STR) + this.wrapper().getStatBaseValue(Stat.STR)
@@ -71,7 +79,7 @@ public function unit.getStr() returns int
 
 public function unit.getWp() returns int
     int ret
-    if this.isType(UNIT_TYPE_HERO)
+    if this.isHeroAllowIllusion()
         ret = GetHeroAgi(this, true)
     else
         ret = this.wrapper().getStatTotalValue(Stat.AGI)
@@ -79,7 +87,7 @@ public function unit.getWp() returns int
 
 public function unit.getInt() returns int
     int ret
-    if this.isType(UNIT_TYPE_HERO)
+    if this.isHeroAllowIllusion()
         ret = GetHeroInt(this, true)
     else
         ret = this.wrapper().getStatTotalBonus(Stat.INT) + this.wrapper().getStatBaseValue(Stat.INT)
@@ -119,7 +127,8 @@ public function unit.addBuffReduced(unit caster, real duration, BuffType buffTyp
         realDuration = realDuration * 0.85
     Buff ret = null
     if this.isAlive()
-        ret = new Buff(this, caster, realDuration, buffType, level)
+        new Buff(this, caster, realDuration, buffType, level)
+        ret = BuffList.getBuffOfType(this, buffType)
     return ret
 
 
@@ -292,7 +301,7 @@ init
 
     setHitBoxFunction( (unit u) -> (begin
         real ret = 32
-        if u.isType(UNIT_TYPE_HERO)
+        if u.isHeroAllowIllusion()
             ret = 64
         else
             let unitType = UnitType.getUnitType(u.getTypeId())

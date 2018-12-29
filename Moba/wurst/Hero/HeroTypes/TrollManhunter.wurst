@@ -24,16 +24,16 @@ player heroOwner
 public constant real array BLEEDING_WOUND_DMG = [4, 6, 8, 10, 12]
 public constant real BLEEDING_WOUND_DURATION = 6.0
 
-BuffType buffBleedingWound
+public BuffType buffBleedingWound
 
-constant int BLEEDING_WOUND_BUFF_ID = compiletime(createAuraBuff("Bleeding Wound", "This unit was hit by Melting Breath; it has reduced armor.", Icons.bTNCleavingAttack))
+constant int BLEEDING_WOUND_BUFF_ID = compiletime(createAuraBuff("Bleeding Wound", "This unit was hit by Melting Breath; it has reduced armor.", "BTNBloodSpike"))
 constant int BLEEDING_WOUND_ABILITY_ID = compiletime(createNegativeBuffAbility(5, BLEEDING_WOUND_BUFF_ID, "FatalWoundV2.mdx", "chest"))
 
 
 function passive(int abilityId)
     if compiletime
         createNoEffectAbiltiy(abilityId)
-            ..setupIcon(Icons.pASBTNCleavingAttack)
+            ..setupIcon("PASBloodSpike")
             ..setupWithHotKey("Bleeding Wound", "D")
 
 
@@ -176,7 +176,7 @@ constant real array CRIPPLING_PAIN_DURATION= [3, 3.5, 4, 4.5, 5]
 
 BuffType buffCripplingPain
 
-constant int CRIPPLING_PAIN_BUFF_ID = compiletime(createAuraBuff("Crippling Pain", "This unit is under the effect of Crippling Pain; it has reduced movement speed.", Icons.bTNCripple))
+constant int CRIPPLING_PAIN_BUFF_ID = compiletime(createAuraBuff("Crippling Pain", "This unit is under the effect of Crippling Pain; it has reduced movement speed.", "BTNTorment"))
 constant int CRIPPLING_PAIN_ABILITY_ID = compiletime(createNegativeBuffAbility(5, CRIPPLING_PAIN_BUFF_ID, Abilities.crippleTarget, "chest"))
 
 constant real CRIPPLING_PAIN_AOE = 1500
@@ -188,7 +188,7 @@ function abilityE(int abilityId)
         real array COOLDOWN = [17, 16, 15, 14, 13]
         let aDef = new AbilityDefinitionPitLordHowlofTerror(abilityId)
             ..setAnimationNames("spell,slam")
-            ..setupIcon(Icons.bTNCripple)
+            ..setupIcon("BTNTorment")
             ..setupWithHotKey("Crippling Pain", "E")
             ..setRequirements(NOT_SPINNING.toRawCode())
             ..setCheckDependencies(true)
@@ -220,17 +220,17 @@ function abilityE(int abilityId)
 
 
         
-constant int MIRROR_IMAGE_ILLUSIONS = 3
+constant int MIRROR_IMAGE_ILLUSIONS = 1
 
 public constant real array MIRROR_IMAGE_DMG_FACTOR = [35, 40, 45, 50, 55]
 
-constant real array MIRROR_IMAGE_DURATION = [8, 9, 10, 11, 12]
+constant real array MIRROR_IMAGE_DURATION = [80, 9, 10, 11, 12]
 
-constant real ANIMATION_DELAY = 0.7
+constant real ANIMATION_DELAY = 0.5
 
 public BuffType buffMirrorImage // the actual effect is in OnAttack
 
-constant int MIRROR_IMAGE_BUFF_ID = compiletime(createAuraBuff("Mirror Image", "This unit is under the effect of Mirror Image; it deals reduced damage.", Icons.bTNMirrorImage))
+constant int MIRROR_IMAGE_BUFF_ID = compiletime(createAuraBuff("Mirror Image", "This unit is under the effect of Mirror Image; it deals reduced damage.", "BTNSpell_Shadow_ShadowWard"))
 constant int MIRROR_IMAGE_ABILITY_ID = compiletime(createPositiveBuffAbility(5, MIRROR_IMAGE_BUFF_ID, "", ""))
 
 
@@ -242,7 +242,7 @@ function abilityR(int abilityId)
         real array COOLDOWN = [75, 75, 75, 75, 75]
         let aDef = new AbilityDefinitionBladeMasterMirrorImage(abilityId)
             ..setAnimationNames("spell")
-            ..setupIcon(Icons.bTNMirrorImage)
+            ..setupIcon("BTNSpell_Shadow_ShadowWard")
             ..setupWithHotKey("Mirror Image", "R")
             ..setLightningEffects("")
             ..setCheckDependencies(true)
@@ -284,16 +284,16 @@ function abilityR(int abilityId)
 function setupStats()
     heroType
         //..setStat(Stat.AD, 5, 40)
-        ..setStat(Stat.AR, 12, 28)
-        ..setStat(Stat.AS, 19, 53)
-        ..setStat(Stat.HP, 14, 43)
-        ..setStat(Stat.HR, 32, 69)
-        ..setStat(Stat.MP, 21, 37)
-        ..setStat(Stat.MR, 19, 45)
-        ..setStat(Stat.MS, 14, 37)
-        ..setStat(Stat.STR, 17, 55)
-        ..setStat(Stat.AGI, 13, 34)
-        ..setStat(Stat.INT, 11, 33)
+        ..setStat(Stat.AR, 6, 21)
+        ..setStat(Stat.AS, 63, 97)
+        ..setStat(Stat.HP, 12, 33)
+        ..setStat(Stat.HR, 16, 32)
+        ..setStat(Stat.MP, 17, 32)
+        ..setStat(Stat.MR, 18, 30)
+        ..setStat(Stat.MS, 34, 64)
+        ..setStat(Stat.STR, 12, 35)
+        ..setStat(Stat.AGI, 8, 26)
+        ..setStat(Stat.INT, 12, 25)
 
 
 
@@ -321,6 +321,10 @@ function onSpellCast()
         doAfter(0.3) ->
             //deal damage
             SOUND_SHADOW_STRIKE.playOnPoint(caster.getPos().toVec3()).snd.setVolume(150)
+            let bleedingWoundLevel = caster.getAbilityLevel(ABILITY_BLEEDING_WOUND)
+            if bleedingWoundLevel > 0
+                let b = target.addBuffReduced(caster, BLEEDING_WOUND_DURATION, buffBleedingWound, bleedingWoundLevel)
+                b.setData(b.getData()+3)
             caster.dealDamage(target, SHADOW_STRIKE_DAMAGE[level-1].bonus(caster.getStr(), SHADOW_STRIKE_DAMAGE_BONUS), ReductionType.PHYSICAL)
         doAfter(0.85) ->
             addEffect(Abilities.mirrorImageDeathCaster, spawnPos).destr()
@@ -342,15 +346,16 @@ function onSpellCast()
             g.removeUnit(u)
             if BuffList.hasBuffType(u, buffBleedingWound)
                 let bleedingWound = BuffList.getBuffOfType(u, buffBleedingWound)
-                let stacks = bleedingWound.getData()
-
+                let stacks = bleedingWound.getData() div 4
+                bleedingWound.dispel()
                 caster.dealDamage(u, stacks * CRIPPLING_PAIN_DAMAGE[level-1].bonus(caster.getInt(), CRIPPLING_PAIN_DAMAGE_BONUS), ReductionType.MAGIC)
 
                 u.wrapper().addStatRelativeBonus(Stat.MS, -10 * CRIPPLING_PAIN_SLOW[level-1] * stacks )
-                let b = u.addBuffReduced(caster, CRIPPLING_PAIN_DURATION[level-1], buffCripplingPain, level)
-                b.setData(stacks * CRIPPLING_PAIN_SLOW[level-1])
+                if u.isAlive()
+                    let b = u.addBuffReduced(caster, CRIPPLING_PAIN_DURATION[level-1], buffCripplingPain, level)
+                    b.setData(stacks * CRIPPLING_PAIN_SLOW[level-1])
 
-                bleedingWound.dispel()
+                
 
         g.destr()
 
@@ -366,13 +371,15 @@ function onSpellCast()
                 g.removeUnit(u)
                 if u.getTypeId() == HERO_TROLL_MANHUNTER
                     u.addBuff(caster, MIRROR_IMAGE_DURATION[level-1], buffMirrorImage, level)
-
+                    if u!=caster
+                        u.wrapper().copyFrom(caster)
             g.destr()
         
-function onAttack(unit attacker, unit target, boolean _isActive)
+/*function onAttack(unit attacker, unit target, boolean _isActive)
     let level = attacker.getAbilityLevel(ABILITY_BLEEDING_WOUND)
     if level != 0 and target.isTargetable(attacker.getOwner(), false, true) and not target.isType(UNIT_TYPE_STRUCTURE)
-        target.addBuffReduced( attacker, BLEEDING_WOUND_DURATION, buffBleedingWound, level)
+        let b = target.addBuffReduced( attacker, BLEEDING_WOUND_DURATION, buffBleedingWound, level)
+        b.setData(b.getData()+3)*/
 
 function retreatAI(HeroAI _ai)
 
@@ -396,7 +403,7 @@ function initHeroType()
     heroType.setSkillBuild("QWQWQWQWQWEEEEE")
     delayInit(5) ->
         heroType
-            ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
+            //..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
             ..addOnSpellCastFunc(function onSpellCast)
             ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
             ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
@@ -408,6 +415,9 @@ function initHeroType()
             ..addItem(ITEM_ID_SACRIFICIAL_DAGGER)
             ..addItem(ITEM_ID_CURSED_SWORD)
 
+    
+        /*  bleeding wound: every attack increases actual stacks by 4, so bladestorm can increase by 1 every 0.25 seconds
+            So dmg is 0.25 * 1/4 -> (interval) * (4 stacks)  */
         var abilityList = new LinkedList<int>
         ..add(BLEEDING_WOUND_ABILITY_ID)
         buffBleedingWound = new BuffType(false, true)
@@ -424,7 +434,8 @@ function initHeroType()
         buffBleedingWound.setPeriodicTime(0.25)
         buffBleedingWound.addPeriodicFunction( (Buff whichBuff) -> (begin
             let level = whichBuff.getLevel()
-            whichBuff.getCaster().dealDamage(whichBuff.getTarget(), 0.25 * BLEEDING_WOUND_DMG[level-1], ReductionType.PHYSICAL)
+            print("Stacks: "+whichBuff.getData().toString())
+            whichBuff.getCaster().dealDamage(whichBuff.getTarget(), 1.0/16.0 * whichBuff.getData() * BLEEDING_WOUND_DMG[level-1], ReductionType.PHYSICAL)
         end))
 
         abilityList = new LinkedList<int>
@@ -456,6 +467,9 @@ function initHeroType()
                     break
                 g.removeUnit(u)
                 if u.isTargetable(heroOwner, false, true)
+                    let bleedingWoundLevel = caster.getAbilityLevel(ABILITY_BLEEDING_WOUND)
+                    if bleedingWoundLevel > 0
+                        u.addBuffReduced(caster, BLEEDING_WOUND_DURATION, buffBleedingWound, bleedingWoundLevel)
                     caster.dealDamage(u, 0.25 * DEATH_SPIN_DAMAGE[level-1].bonus(caster.getStr(), DEATH_SPIN_DAMAGE_BONUS), ReductionType.PHYSICAL)
             g.destr()
         end))
@@ -498,7 +512,7 @@ function createHeroType(Hero hero)
 
 init
     
-    heroType = new HeroType(HERO_TROLL_MANHUNTER, Icons.bTNHeadhunter, 14, false)
+    heroType = new HeroType(HERO_TROLL_MANHUNTER, "BTNHeroTrollManhunter", 14, false)
         ..setOnInitFunction(() -> initHeroType())
         ..setOnCreateFunction((Hero hero) -> createHeroType(hero))
         

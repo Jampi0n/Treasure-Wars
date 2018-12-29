@@ -525,7 +525,7 @@ function initHeroType()
                         break
                     g.removeUnit(u)
                     if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(owner, false, true)
-                        if u.isType(UNIT_TYPE_HERO)
+                        if u.isHeroAllowIllusion()
                             heroDestroyer.dealDamage(u, 2 * dmg, ReductionType.MAGIC)
                         else
                             heroDestroyer.dealDamage(u, dmg, ReductionType.MAGIC)

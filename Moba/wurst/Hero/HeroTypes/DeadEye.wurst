@@ -271,7 +271,7 @@ function onDamage()
 
 function onAttack(unit attacker, unit target, boolean _isActive)
     let level = attacker.getAbilityLevel(ABILITY_BLACK_ARROW)
-    if level!=0 and target.isTargetable(attacker.getOwner(), false, true) and target.isVisible(attacker.getOwner()) and not target.isType(UNIT_TYPE_STRUCTURE) and not target.isType(UNIT_TYPE_HERO)
+    if level!=0 and target.isTargetable(attacker.getOwner(), false, true) and target.isVisible(attacker.getOwner()) and not target.isType(UNIT_TYPE_STRUCTURE) and not target.isHeroAllowIllusion()
         doAfter(0, () -> (begin
             if(target.getHP() <= BLACK_ARROW_THRESHOLD[level-1])
                 let pos =  target.getPos()
@@ -400,7 +400,7 @@ function teamFightAI(HeroAI ai)
             break
         g.removeUnit(u)
         if u.isTargetable(hero.getOwner(), false, true)
-            if u.isType(UNIT_TYPE_HERO)
+            if u.isHeroAllowIllusion()
                 count++
 
     g.destr()

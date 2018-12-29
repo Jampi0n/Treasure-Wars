@@ -338,7 +338,7 @@ class RitualOfTheSeas
                             let manaDrained = min( target.getMana(), manaDrain.reduceMagic(target.getWp()))
                             let hpDrained = min( target.getHP(), hpDrain.reduceMagic(target.getWp()))
 
-                            if target.isType(UNIT_TYPE_HERO)
+                            if target.isHeroAllowIllusion()
                                 caster.healMana(caster, manaDrained * RITUAL_MANA_RATIO/100 )
                                 caster.healHP(caster, hpDrained * RITUAL_HP_RATIO/100 )
 
@@ -391,7 +391,7 @@ function attackAI(HeroAI ai)
                 break
             g.removeUnit(u)
             if u.isTargetable(hero.getOwner(), false, true) and not u.isType(UNIT_TYPE_STRUCTURE)
-                if u.isType(UNIT_TYPE_HERO)
+                if u.isHeroAllowIllusion()
                     count += 3
                 else
                     count ++
@@ -427,7 +427,7 @@ function teamFightAI(HeroAI ai)
             break
         g.removeUnit(u)
         if u.isTargetable(hero.getOwner(), false, true)
-            if u.isType(UNIT_TYPE_HERO)
+            if u.isHeroAllowIllusion()
                 count++
 
     if count != 0
@@ -443,7 +443,7 @@ function teamFightAI(HeroAI ai)
             break
         g.removeUnit(u)
         if u.isTargetable(hero.getOwner(), false, true)
-            if u.isType(UNIT_TYPE_HERO)
+            if u.isHeroAllowIllusion()
                 count++
 
     g.destr()
