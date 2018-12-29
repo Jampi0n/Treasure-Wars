@@ -256,7 +256,7 @@ public class Recipe extends Item
                             //some items require one item several times
                             if hero.hasItemById(required2.getTypeId())
 
-                                if requiredRequirements.contains(required2) or recipe.requiredItems.contains(required2.getId()) //already in list
+                                if requiredRequirements.has(required2) or recipe.requiredItems.has(required2.getId()) //already in list
                                     if hero.countItemsOfType(required2.getTypeId()) > 1
                                         missingGold -= required2.getGoldCost()
                                         requiredRequirements.add(required2)

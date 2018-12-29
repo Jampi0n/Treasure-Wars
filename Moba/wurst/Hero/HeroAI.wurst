@@ -579,7 +579,7 @@ public class HeroAI
                                 //some items require one item several times
                                 if this.heroUnit.hasItemById(required2.getTypeId())
 
-                                    if requiredRequirements.contains(required2) or recipe.getRequiredItems().contains(required2.getId()) //already in list
+                                    if requiredRequirements.has(required2) or recipe.getRequiredItems().has(required2.getId()) //already in list
                                         if this.heroUnit.countItemsOfType(required2.getTypeId()) > 1
                                             missingGold -= required2.getGoldCost()
                                             requiredRequirements.add(required2)
@@ -804,7 +804,7 @@ public class HeroAI
                             else
                                 if(IssueNeutralImmediateOrderById(this.getOwningPlayer(), this.targetBlacksmith, this.desiredUpgrade))
                                     this.wantedUpgrades--
-                                    print("["+this.heroUnit.getName()+"]: bought upgrade: "+GetObjectName(this.desiredUpgrade)+" ("+I2S(this.desiredUpgrade)+")")
+                                    //print("["+this.heroUnit.getName()+"]: bought upgrade: "+GetObjectName(this.desiredUpgrade)+" ("+I2S(this.desiredUpgrade)+")")
                                     if( this.wantedUpgrades == 0) //does not want any upgrades at the moment, so hero can go back and buy items
                                         this.changeState(AIState.RETREAT)
                                 else
@@ -963,7 +963,7 @@ public class HeroAI
                 this.wantedUpgrades++
                 this.upgradeGold -= 5000
 
-                print(this.heroUnit.getOwner().getColor().toColor().toColorString()+"["+this.heroUnit.getName()+"]|r "+" wants upgrades: "+I2S(this.wantedUpgrades))
+                //print(this.heroUnit.getOwner().getColor().toColor().toColorString()+"["+this.heroUnit.getName()+"]|r "+" wants upgrades: "+I2S(this.wantedUpgrades))
 
     static function findNextUpgrade(Team t) returns int
         if t != Team.TEAM1 and t!= Team.TEAM2
