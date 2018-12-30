@@ -59,16 +59,18 @@ function shieldBash(int abilityId)
         int array MANA = [50, 50, 50, 50, 50]
         real array COOLDOWN = [6, 6, 6, 6, 6]
 
-        let aDef = new AbilityDefinitionPitLordHowlofTerror(abilityId)
+        let aDef = new AbilityDefinitionIllidanChannel(abilityId)
             ..setAnimationNames("spell,throw")
             ..setupIcon("BTNAbility_Warrior_ShieldBash")
             ..setupWithHotKey("Shield Bash", "Q")
             ..setArtCaster("")
+            ..setupChannel(TargetType.POINT, "thunderbolt", 0.5)
 
         for lvl = 1 to 5
             aDef
                 ..setCooldown(lvl, COOLDOWN[lvl-1])
                 ..setManaCost(lvl, MANA[lvl-1])
+                ..setCastRange(lvl, 99999)
                 ..setTargetsAllowed(lvl, "none")
 
     let tooltip = new DynamicTooltip(abilityId)
@@ -299,9 +301,10 @@ function onSpellCast()
 
     if spellId == ABILITY_SHIELD_BASH //shield bash
         let casterPos = caster.getPos()
+        let casterAngle = casterPos.angleTo(vec2(GetSpellTargetX(), GetSpellTargetY()))
         SOUND_SHIELD_BASH.playOnPoint(casterPos.toVec3()).snd.setVolume(150)
         group nearby = CreateGroup()
-        nearby.enumUnitsInRange(casterPos.polarOffset(caster.getFacingAngle(), 140), 180)
+        nearby.enumUnitsInRange(casterPos.polarOffset(casterAngle, 120), 220)
 
         let dmg = SHIELD_BASH_DMG[level-1].bonus(caster.getStr(), SHIELD_BASH_DMG_BONUS)
         let dur = SHIELD_BASH_DURATION[level-1]
@@ -342,7 +345,6 @@ function onSpellCast()
 
 
 
-
 function retreatAI(HeroAI ai)
     ai.issue("roar")
 
@@ -354,7 +356,8 @@ function attackAI(HeroAI ai)
         let g = CreateGroup()
         unit u
         int count = 0
-        g.enumUnitsInRange(hero.getPos().polarOffset(hero.getFacingAngle(), 140), 180)
+        let targetPos = hero.getPos().polarOffset(hero.getFacingAngle(), 120)
+        g.enumUnitsInRange(targetPos, 220)
         while(true)
             u = FirstOfGroup(g)
             if u == null
@@ -367,7 +370,7 @@ function attackAI(HeroAI ai)
                     count ++
 
         if count >= 5
-            if ai.issue("howlofterror")
+            if ai.issue("thunderbolt", targetPos)
                 return
         
         g.destr()

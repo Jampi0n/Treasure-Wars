@@ -13,6 +13,8 @@ import LinkedList
 
 import public BonusMod
 
+public constant DEFAULT_HERO_SPEED = 270.0
+
 public interface CalculateTotalBonus
     function calculate(UnitWrapper whichWrapper, Stat whichStat)
 
@@ -321,7 +323,7 @@ public function unit.getDefaultMovementSpeed() returns real
 
 public function unit.updateDefaultMovementSpeed()
     if this.isType(UNIT_TYPE_HERO)
-        this.wrapper().defaultMovementSpeed = GetUnitDefaultMoveSpeed(this) + GetPlayerTechCount(this.getOwner(), UPG_MS, true) 
+        this.wrapper().defaultMovementSpeed = DEFAULT_HERO_SPEED + GetPlayerTechCount(this.getOwner(), UPG_MS, true) 
         //print(GetUnitDefaultMoveSpeed(this) + GetPlayerTechCount(this.getOwner(), UPG_MS, true))
 
 public function unit.setMovementSpeed(real newSpeed)

@@ -30,7 +30,7 @@ public constant real BLEEDING_WOUND_DURATION = 6.0
 
 public BuffType buffBleedingWound
 
-constant int BLEEDING_WOUND_BUFF_ID = compiletime(createAuraBuff("Bleeding Wound", "This unit was hit by Melting Breath; it has reduced armor.", "BTNBloodSpike"))
+constant int BLEEDING_WOUND_BUFF_ID = compiletime(createAuraBuff("Bleeding Wound", "This is under the effect of Bleeding Wound; it takes damage over time.", "BTNBloodSpike"))
 constant int BLEEDING_WOUND_ABILITY_ID = compiletime(createNegativeBuffAbility(5, BLEEDING_WOUND_BUFF_ID, "FatalWoundV2.mdx", "chest"))
 
 
@@ -50,8 +50,8 @@ function passive(int abilityId)
     end) )
     
     for lvl = 1 to 5
-        tooltip.setNormalString(false, lvl, "Attacking an enemy unit or damaging it with a spell applies one stack of Bleeding Wound. If the target was not attacked for {0} seconds, "+
-        "all stacks are lost. Each stack deals {1} physical damage per second.".format(
+        tooltip.setNormalString(false, lvl, ("Attacking an enemy unit or damaging it with a spell applies one stack of Bleeding Wound. If the target was not attacked for {0} seconds, "+
+        "all stacks are lost. Each stack deals {1} physical damage per second.").format(
             BLEEDING_WOUND_DURATION.toSmartString(),
             BLEEDING_WOUND_DMG[lvl-1].toSmartString())
         )
@@ -196,8 +196,8 @@ constant real CRIPPLING_PAIN_AOE = 1500
 function abilityE(int abilityId)
 
     if compiletime
-        int array MANA = [90, 85, 80, 75, 70]
-        real array COOLDOWN = [17, 16, 15, 14, 13]
+        int array MANA = [80, 85, 90, 95, 100]
+        real array COOLDOWN = [5, 5, 5, 5, 5]
         let aDef = new AbilityDefinitionPitLordHowlofTerror(abilityId)
             ..setAnimationNames("spell,slam")
             ..setupIcon("BTNTorment")
@@ -236,9 +236,9 @@ constant int MIRROR_IMAGE_ILLUSIONS = 1
 
 unit mirrorImageUnit
 
-public constant real array MIRROR_IMAGE_DMG_FACTOR = [35, 40, 45, 50, 55]
+//public constant real array MIRROR_IMAGE_DMG_FACTOR = [35, 40, 45, 50, 55]
 
-constant real array MIRROR_IMAGE_DURATION = [80, 9, 10, 11, 12]
+constant real array MIRROR_IMAGE_DURATION = [18, 21, 24, 27, 30]
 
 public BuffType buffMirrorImage // the actual effect is in OnAttack
 
@@ -250,8 +250,8 @@ constant int MIRROR_IMAGE_ABILITY_ID = compiletime(createPositiveBuffAbility(5, 
 function abilityR(int abilityId)
 
     if compiletime
-        int array MANA = [140, 145, 150, 155, 160]
-        real array COOLDOWN = [75, 75, 75, 75, 75]
+        int array MANA = [125, 125, 125, 125, 125]
+        real array COOLDOWN = [80, 75, 70, 65, 60]
         let aDef = new AbilityDefinitionRoar(abilityId)
             ..setAnimationNames("spell")
             ..setArtCaster("")
@@ -324,15 +324,15 @@ function onSpellCast()
         illusion.setAnimation("attack")
         illusion.setVertexColor(255, 255, 255, 200)
         doAfter(0.3) ->
-            //deal damage
-            SOUND_SHADOW_STRIKE.playOnPoint(caster.getPos().toVec3()).snd.setVolume(150)
-            let bleedingWoundLevel = caster.getAbilityLevel(ABILITY_BLEEDING_WOUND)
-            if bleedingWoundLevel > 0
-                let b = target.addBuffReduced(caster, BLEEDING_WOUND_DURATION, buffBleedingWound, bleedingWoundLevel)
-                b.setData(b.getData()+3)
+            if target.isTargetable(caster.getOwner(), false, true)
+                SOUND_SHADOW_STRIKE.playOnPoint(caster.getPos().toVec3()).snd.setVolume(150)
+                let bleedingWoundLevel = caster.getAbilityLevel(ABILITY_BLEEDING_WOUND)
+                if bleedingWoundLevel > 0
+                    let b = target.addBuffReduced(caster, BLEEDING_WOUND_DURATION, buffBleedingWound, bleedingWoundLevel)
+                    b.setData(b.getData()+3)
 
-            target.addBuffReduced(caster, SHADOW_STRIKE_SLOW_DURATION[level-1], buffShadowStrike, level)
-            caster.dealDamage(target, SHADOW_STRIKE_DAMAGE[level-1].bonus(caster.getStr(), SHADOW_STRIKE_DAMAGE_BONUS), ReductionType.PHYSICAL)
+                target.addBuffReduced(caster, SHADOW_STRIKE_SLOW_DURATION[level-1], buffShadowStrike, level)
+                caster.dealDamage(target, SHADOW_STRIKE_DAMAGE[level-1].bonus(caster.getStr(), SHADOW_STRIKE_DAMAGE_BONUS), ReductionType.PHYSICAL)
         doAfter(0.85) ->
             addEffect(Abilities.mirrorImageDeathCaster, spawnPos).destr()
             illusion.remove()
@@ -369,6 +369,7 @@ function onSpellCast()
     if(spellId==ABILITY_MIRROR_IMAGE)
         mirrorImageUnit = createUnit(caster.getOwner(), MIRROR_IMAGE_UNIT_ID, caster.getPos(), caster.getFacingAngle())
         mirrorImageUnit.setTimedLife(MIRROR_IMAGE_DURATION[level-1])
+        mirrorImageUnit.setVertexColor(255, 255, 255, 200)
         let wrapper = mirrorImageUnit.wrapper()
         wrapper.addStatAbsoluteBonus(Stat.AS, caster.wrapper().getStatTotalBonus(Stat.AS))
         wrapper.addStatAbsoluteBonus(Stat.HP, caster.wrapper().getStatTotalBonus(Stat.HP))

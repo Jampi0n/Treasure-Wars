@@ -53,7 +53,8 @@ constant real WORKSHOP_REBUILD_TIME = 60
 
 constant int SHOP_SHARING = 'Aall'
 
-constant int TOWER_FOCUS_ARMOR = 25
+constant int TOWER_FOCUS_MAX_STACKS = 10
+constant int TOWER_FOCUS_ARMOR = 10
 constant real TOWER_FOCUS_DUR = 4
 constant int TOWER_FOCUS_ABILITY_ID = 'A00O'
 
@@ -645,22 +646,23 @@ init
 
     buffTowerFocus.addFirstFunction( (Buff whichBuff) -> (begin
         whichBuff.getTarget().wrapper()
-            ..addStatAbsoluteBonus(Stat.AR, -TOWER_FOCUS_ARMOR)
+            ..addStatRelativeBonus(Stat.AR, -TOWER_FOCUS_ARMOR * 10)
         whichBuff.setData(1)
     end))
 
     buffTowerFocus.addStackFunction( (Buff whichBuff) -> (begin
-        let stacks = whichBuff.getData() + 1
-        whichBuff.setData(stacks)
-        whichBuff.getTarget().wrapper()
-            ..addStatAbsoluteBonus(Stat.AR, -TOWER_FOCUS_ARMOR)
+        var stacks = whichBuff.getData() + 1
+        if stacks <= TOWER_FOCUS_MAX_STACKS
+            whichBuff.setData(stacks)
+            whichBuff.getTarget().wrapper()
+                ..addStatRelativeBonus(Stat.AR, -TOWER_FOCUS_ARMOR * 10)
     end))
 
 
     buffTowerFocus.addEndFunction( (Buff whichBuff) -> (begin
         let stacks = whichBuff.getData()
         whichBuff.getTarget().wrapper()
-            ..addStatAbsoluteBonus(Stat.AR, TOWER_FOCUS_ARMOR * stacks)
+            ..addStatRelativeBonus(Stat.AR, TOWER_FOCUS_ARMOR * stacks * 10)
     end))
 
     OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin

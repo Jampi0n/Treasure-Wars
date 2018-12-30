@@ -29,7 +29,9 @@ PQWER
 
 /*  This flag can be set to false to disable setting tooltips at compiletime
 **  Could speed up compiling the map. For the moment it is required due to a bug in 1.30 */
-public constant COMPILETIME_TOOLTIPS = true
+public constant COMPILETIME_TOOLTIPS_NORMAL = false
+public constant COMPILETIME_TOOLTIPS_LEARN = true
+
 public constant ABIL_DEF_MAP = new HashMap<int,AbilityDefinition>
 
 public constant DYNAMIC_TOOLTIPS = true
@@ -324,14 +326,17 @@ public class DynamicTooltip
         return this.useTurnOff
 
     function writeData()
-        if aDef == null or not COMPILETIME_TOOLTIPS
+        if aDef == null
             return
-        aDef.setTooltipLearnExtended(this.evaluateLearnString())
-        for i = 1 to 5
-            aDef.setTooltipNormalExtended(i, this.evaluateNormalString(i))
-        if this.getUseTurnOff()
+        if COMPILETIME_TOOLTIPS_LEARN
+            aDef.setTooltipLearnExtended(this.evaluateLearnString())
+
+        if COMPILETIME_TOOLTIPS_NORMAL
             for i = 1 to 5
-                aDef.setTooltipTurnOffExtended(i, this.evaluateTurnOffString(i))
+                aDef.setTooltipNormalExtended(i, this.evaluateNormalString(i))
+            if this.getUseTurnOff()
+                for i = 1 to 5
+                    aDef.setTooltipTurnOffExtended(i, this.evaluateTurnOffString(i))
 
     function setReplaceIntelligence(vararg real replacements)
         for replacement in replacements
