@@ -43,7 +43,7 @@ function focus(int abilityId)
         ))
     addDynamicTooltipStrength(heroType, tooltip)
 
-public constant real array CRITICAL_DAMAGE_MULT = [100, 130, 160, 190, 220]
+public constant real array CRITICAL_DAMAGE_MULT = [80, 100, 120, 140, 160]
 
 constant int CRITICAL_BUFF_ID = compiletime(createAuraBuff("Critical Strike", "This unit's next attack will deal more damage.", "BTN_CR_BLOOD"))
 constant int CRITICAL_ABILITY_ID = compiletime(createPositiveBuffAbility(5, CRITICAL_BUFF_ID, "", ""))
@@ -181,7 +181,7 @@ constant int array GROWTH_HP_REGEN = [8, 12, 16, 20, 24]
 
 constant real array GROWTH_DURATION = [15, 15, 15, 15, 15]
 
-constant real array GROWTH_FEAR_DURATION = [2, 2.5, 3, 3.5 ,4]
+constant real array GROWTH_FEAR_DURATION = [1.5, 1.75, 2, 2.25 ,2.5]
 constant real GROWTH_FEAR_AOE = 900
 
 constant int GROWTH_BUFF_ID = compiletime(createAuraBuff("Berserk", "This unit's maximum hit points and hit point regeneration are increased.", "BTNDireGrowth"))
@@ -319,15 +319,15 @@ function onSpellCast()
 function setupStats()
     heroType
         //..setStat(Stat.AD, 5, 40)
-        ..setStat(Stat.AR, 7, 29)
+        ..setStat(Stat.AR, 27, 51)
         ..setStat(Stat.AS, 19, 58)
         ..setStat(Stat.HP, 11, 39)
         ..setStat(Stat.HR, 15, 34)
         ..setStat(Stat.MP, 10, 27)
         ..setStat(Stat.MR, 12, 37)
-        ..setStat(Stat.MS, 12, 41)
-        ..setStat(Stat.STR, 17, 69)
-        ..setStat(Stat.AGI, 7, 26)
+        ..setStat(Stat.MS, 12, 31)
+        ..setStat(Stat.STR, 14, 62)
+        ..setStat(Stat.AGI, 27, 39)
         ..setStat(Stat.INT, 4, 11)
 
 function retreatAI(HeroAI ai)

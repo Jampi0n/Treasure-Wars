@@ -5,6 +5,7 @@ import StandardTextTags
 import initlater HeroControl
 import PlayerControl
 import Constants
+import Assets
 
 public function createUnitType(int baseHp, int unitId, int bounty, int baseAttack, int upgradeAttack, int attackUpgradeId, int baseArmor, int upgradeArmor, int armorUpgradeId, int hitBox, string modelPath) returns int
     new UnitType(baseHp, unitId, bounty, baseAttack, upgradeAttack, attackUpgradeId, baseArmor, upgradeArmor, armorUpgradeId, hitBox, modelPath)
@@ -125,6 +126,9 @@ function onUnitDeath()
                 killingPlayer.getCPlayer()
                     ..addGoldEx(bounty)
                     ..addUnitKill()
+                let pos = dyingUnit.getPos()
+                addEffect(UI.goldCredit ,pos).destr()
+
                 createGoldBountyTextTag(dyingUnit, bounty, killingPlayer)
                 //xp
 

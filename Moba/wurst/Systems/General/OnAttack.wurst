@@ -20,6 +20,8 @@ import initlater ItemShopSystem
 public constant ADVANCED_ONHIT =  'A00I'
 public constant DEFAULT_ONHIT = 'A008'
 
+public constant LAST_HIT_THRESHOLD = 50.0
+
 boolean magicDamage
 
 public function setMagicDamage(boolean magic)
@@ -77,6 +79,13 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
 
             //===============================================================================
 
+            // the following effects are independant from damage dealt
+
+            // revenant buff
+            if source.hasAbility(REVENANT_BUFF_ID) and not target.isType(UNIT_TYPE_STRUCTURE)
+                target.addBuffReduced(source, 2, REVENANT_SLOW_BUFF, 1)
+
+            // the following effects manage the damage dealt (attacker based)
 
             // critical strike - TROLL BERSERKER
             if advanced and source.isType(UNIT_TYPE_HERO) and BuffList.hasBuffType(source, buffCriticalStrike) and not target.isType(UNIT_TYPE_STRUCTURE)
@@ -90,9 +99,7 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
             if deathFrenzyLevel != 0
                 currentDamage *= 1 + DEATH_FRENZY_BONUS[deathFrenzyLevel-1]/100 * (1-source.getLife()/GetUnitState(source, UNIT_STATE_MAX_LIFE))
 
-            // revenant buff
-            if source.hasAbility(REVENANT_BUFF_ID) and not target.isType(UNIT_TYPE_STRUCTURE)
-                target.addBuffReduced(source, 2, REVENANT_SLOW_BUFF, 1)
+            // the following effects manage damage taken (target based)
 
             //heavy armored
             if isAttack and target.getAbilityLevel(ABILITY_HEAVY_ARMORED) > 0
@@ -104,6 +111,9 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
 
             if isAttack and target.isType(UNIT_TYPE_HERO)
                 currentDamage = currentDamage - 20 * target.countItemsOfType(convertItemId(ITEM_ID_HOLY_SHIELD))
+
+
+            //the following effects make use of the final damage
 
             // turtle buff
             if isAttack and target.hasAbility(TURTLE_BUFF_ID)
@@ -151,6 +161,11 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
                     if target.isAlive() or target.isType(UNIT_TYPE_HERO)
                         wrapper.addStatAbsoluteBonusReal(Stat.AGI, (wp*1000).toInt() )
                 end))
+
+            // last hit helper
+            if isAttack and source.isType(UNIT_TYPE_HERO) and not target.isType(UNIT_TYPE_HERO) and not target.isType(UNIT_TYPE_STRUCTURE)
+                if target.getLife() - currentDamage <= LAST_HIT_THRESHOLD
+                    currentDamage += LAST_HIT_THRESHOLD
 
 
             //===============================================================================

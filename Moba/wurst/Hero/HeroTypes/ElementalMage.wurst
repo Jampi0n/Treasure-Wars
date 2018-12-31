@@ -56,8 +56,8 @@ constant int array FROST_BOLT_SLOW = [40, 45, 50, 55, 60]
 constant real array FROST_BOLT_DURATION = [2.5, 3, 3.5, 4, 4.5]
 
 
-constant real array FROST_BOLT_DAMAGE = [75, 120, 165, 210, 255]
-constant real FROST_BOLT_DAMAGE_BONUS = 140
+constant real array FROST_BOLT_DAMAGE = [70, 100, 130, 160, 190]
+constant real FROST_BOLT_DAMAGE_BONUS = 120
 
 
 function abilityQ(int abilityId)
@@ -97,7 +97,7 @@ function abilityQ(int abilityId)
 constant real array FIRE_BLINK_MAX_RANGE =[700, 700, 700, 700, 700]
 constant real array FIRE_BLINK_COOLDOWN = [13, 13, 13, 13, 13]
 
-constant real array FIRE_BLINK_DAMAGE = [80, 140, 200, 260, 320]
+constant real array FIRE_BLINK_DAMAGE = [80, 125, 170, 215, 260]
 constant real FIRE_BLINK_DAMAGE_BONUS = 150
 
 constant real FIRE_BLINK_AOE = 300
@@ -328,7 +328,7 @@ function onSpellCast()
 function setupStats()
     heroType
         //..setStat(Stat.AD, 5, 40)
-        ..setStat(Stat.AR, 7, 14)
+        ..setStat(Stat.AR, 27, 41)
         ..setStat(Stat.AS, 31, 86)
         ..setStat(Stat.HP, 8, 39)
         ..setStat(Stat.HR, 7, 21)
@@ -336,7 +336,7 @@ function setupStats()
         ..setStat(Stat.MR, 23, 56)
         ..setStat(Stat.MS, 11, 42)
         ..setStat(Stat.STR, 22, 74)
-        ..setStat(Stat.AGI, 9, 17)
+        ..setStat(Stat.AGI, 29, 47)
         ..setStat(Stat.INT, 18, 57)
 
 function retreatAI(HeroAI _ai)

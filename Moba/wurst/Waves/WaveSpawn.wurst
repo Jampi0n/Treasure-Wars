@@ -9,6 +9,9 @@ import BuildingTypes
 import ErrorHandling
 import General
 import HashSet
+import SoundUtils
+
+constant SOUND_FIRST_SPAWN = new SoundDefinition(Sounds.clanInvitation, false, false)
 
 constant real SPAWN_INTERVAL = 50
 boolean spawnStarted = false
@@ -68,6 +71,19 @@ public function startSpawning()
     else
         if DEBUG_MODE
             spawnWave()
+
+        doAfter(SPAWN_INTERVAL) ->
+            SOUND_FIRST_SPAWN.play()
+            print("|cffffcc00The battle begins!|r")
+
+            if GetLocalPlayer().getId() <= HERO_PLAYER_TEAM_1_LAST
+                PingMinimap(udg_GreenBarracks[0].getX(), udg_GreenBarracks[0].getY(), 5)
+                PingMinimap(udg_GreenBarracks[1].getX(), udg_GreenBarracks[1].getY(), 5)
+                PingMinimap(udg_GreenBarracks[2].getX(), udg_GreenBarracks[2].getY(), 5)
+            else
+                PingMinimap(udg_BrownBarracks[0].getX(), udg_BrownBarracks[0].getY(), 5)
+                PingMinimap(udg_BrownBarracks[1].getX(), udg_BrownBarracks[1].getY(), 5)
+                PingMinimap(udg_BrownBarracks[2].getX(), udg_BrownBarracks[2].getY(), 5)
 
         doPeriodically(SPAWN_INTERVAL, (CallbackPeriodic cb) -> (begin
             if spawnStopped

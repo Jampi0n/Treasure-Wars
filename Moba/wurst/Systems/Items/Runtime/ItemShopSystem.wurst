@@ -7,11 +7,15 @@ import LinkedList
 import ItemShopRequirements
 import UnitWrapper
 import Constants
+import StandardTextTags
+import SoundUtils
 
-//This package is imported ny other item packages, but they use initlater to avoid cyclic requirements. So the initialization of this
+//This package is imported by other item packages, but they use initlater to avoid cyclic requirements. So the initialization of this
 //package is manually called by other packages and not by using init, because init is after all other item packages.
 //Init only contains functions that can be executed later.
 
+constant SOUND_ITEM_BUY = new SoundDefinition(Sounds.receiveGold, false, true)
+constant SOUND_RECIPE_TOO_EXPENSIVE = new SoundDefinition(Sounds.error, false, false)
 
 /*  ==========================================================================================================================
 **
@@ -203,6 +207,8 @@ public class Recipe extends Item
     
     protected Item resultItem
 
+    private static constant itemBought = new  HashMap<item,bool>()
+
     construct(int id, int itemTypeId, int gold, string requiredItems, Item resultItem)
         super(id, itemTypeId, gold)
         this.requiredItems = stringToList(requiredItems, ",")
@@ -212,6 +218,7 @@ public class Recipe extends Item
     //this event happens before the gold is added
     //it is needed, because there is upkeep
     static function onItemSell()
+        itemBought.remove(GetSoldItem())
         let owner = GetTriggerPlayer()
         let itemTypeId = GetSoldItem().getTypeId()
         let itm = itemMap.get(itemTypeId)
@@ -221,6 +228,14 @@ public class Recipe extends Item
             doAfter(0) ->
                 owner.setGold(newGold)
 
+    static function buyItemFinish(unit hero, item whichItem)
+        if not itemBought.has(whichItem)
+            standardTextTag(hero.getPos(), whichItem.getName())
+                ..setColor(255, 220, 0, 255)
+
+            SOUND_ITEM_BUY.playOnPoint(hero.getPos3Zero()).snd.setVolume(125)
+            itemBought.put(whichItem, true)
+        
 
     static function onItemGet(unit hero, item whichItem)
         let itemTypeId = whichItem.getTypeId()
@@ -228,6 +243,8 @@ public class Recipe extends Item
       
 
         if not (itm instanceof Recipe)
+            if itm != null
+                buyItemFinish(hero, whichItem)
             return
 
 
@@ -272,7 +289,7 @@ public class Recipe extends Item
             for int req in recipe.requiredItems
                 GetItemOfTypeFromUnitBJ(hero, itemType[req].itemTypeId).remove()
 
-            hero.addItemById(recipe.resultItem.itemTypeId)
+            buyItemFinish(hero, hero.addItemById(recipe.resultItem.itemTypeId))
         else
             //do not use addGoldEx, because this is not considered gaining gold
 
@@ -286,14 +303,15 @@ public class Recipe extends Item
     
                 destroy requiredRequirements
 
-                hero.addItemById(recipe.resultItem.itemTypeId)
                 owner.addGold(-missingGold)
-                printTimedToPlayer("You have enough gold, so the item was bought directly.", 5, owner)
+                buyItemFinish(hero, hero.addItemById(recipe.resultItem.itemTypeId))
+                //printTimedToPlayer("You have enough gold, so the item was bought directly.", 5, owner)
             else
                 //remove
                 owner.addGold(recipe.gold)
                 printTimedToPlayer("Missing items: "+missingItems +" Missing gold: "+(recipe.gold + missingGold - owner.getGold()).toString(), 5, owner)
-                printTimedToPlayer("Item price refunded.", 5, owner)
+                SOUND_RECIPE_TOO_EXPENSIVE.playForPlayer(owner)
+                //printTimedToPlayer("Item price refunded.", 5, owner)
 
     
     protected static function onItemGetTrigger()

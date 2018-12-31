@@ -44,13 +44,13 @@ function ancientKnowledge(int abilityId)
         )
     addDynamicTooltipIntelligence(heroType, tooltip)
 
-constant real array TIDAL_FURY_HIT_DMG = [75, 125, 175, 225, 275]
+constant real array TIDAL_FURY_HIT_DMG = [75, 110, 145, 180, 215]
 constant real TIDAL_FURY_HIT_DMG_BONUS = 120
 
 constant real array TIDAL_FURY_WAVE_DMG = [20, 35, 50, 65, 80]
 constant real TIDAL_FURY_WAVE_DMG_BONUS = 60
 
-constant real TIDAL_FURY_AOE = 300
+constant real TIDAL_FURY_AOE = 400
 
 
 function tidalFury(int abilityId)
@@ -85,8 +85,8 @@ function tidalFury(int abilityId)
     addDynamicTooltipBoth(heroType, tooltip)
 
 
-constant real array FISH_DAMAGE = [100, 150, 200, 250, 300]
-constant real FISH_DAMAGE_BONUS = 200
+constant real array FISH_DAMAGE = [100, 140, 180, 220, 260]
+constant real FISH_DAMAGE_BONUS = 140
 
 constant int array FISH_ATTACK_SPEED = [30, 40, 50, 60, 70]
 constant int array FISH_MOVE_SPEED = [30, 40, 50, 60, 70]
@@ -95,11 +95,13 @@ constant real array FISH_SLOW_DURATION = [3, 3.5, 4, 4.5, 5]
 
 constant real array FISH_AOE = [200, 225, 250, 275, 300]
 
+constant int FISH_SPEED = 1000
+
 constant int FISH_BUFF_ID = compiletime(createAuraBuff("Giant Fish", "This unit was hit by a giant fish; its movement and attack speed are slowed.", "BTNDeepseaMurloc"))
 constant int FISH_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, FISH_BUFF_ID, Abilities.stasisTotemTarget, "overhead"))
 
 constant int FISH_IMPACT = compiletime(ArtilleryDetection.createDetectionDummy())
-constant int FISH_ARTILLERY = compiletime(ArtilleryDetection.createArtilleryDummy(0, 0, 50, 3, "Fesh_Final2.mdx", 600, 0.3, FISH_IMPACT))
+constant int FISH_ARTILLERY = compiletime(ArtilleryDetection.createArtilleryDummy(0, 0, 50, 3, "Fesh_Final2.mdx", FISH_SPEED, 0.3, FISH_IMPACT))
 
 constant SOUND_FISH_IMPACT = new SoundDefinition(Sounds.artilleryCorpseExplodeDeath1, false, true)
 
@@ -243,15 +245,15 @@ function ritualOfTheSeas(int abilityId)
 function setupStats()
     heroType
         //..setStat(Stat.AD, 10, 35)
-        ..setStat(Stat.AR, 9, 24)
-        ..setStat(Stat.AS, 0, 8)
+        ..setStat(Stat.AR, 32, 51)
+        ..setStat(Stat.AS, 23, 32)
         ..setStat(Stat.HP, 14, 61)
         ..setStat(Stat.HR, 14, 42)
         ..setStat(Stat.MP, 19, 84)
         ..setStat(Stat.MR, 18, 75)
-        ..setStat(Stat.MS, 6, 27)
+        ..setStat(Stat.MS, 25, 42)
         ..setStat(Stat.STR, 20, 74)
-        ..setStat(Stat.AGI, 12, 27)
+        ..setStat(Stat.AGI, 35, 59)
         ..setStat(Stat.INT, 13, 47)
 
 function onSpellCast()

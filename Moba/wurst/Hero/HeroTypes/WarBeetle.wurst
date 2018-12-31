@@ -48,12 +48,12 @@ function passive(int abilityId)
 constant int BEETLE_BITE = 'A00N'
 constant int VENOMOUS_BEETLE = 'u002'
 
-constant real array BITE_DAMAGE = [100, 160, 220, 280, 340]
-constant real BITE_DAMAGEL_BONUS = 180
+constant real array BITE_DAMAGE = [100, 140, 180, 220, 260]
+constant real BITE_DAMAGEL_BONUS = 150
 
 constant int BITE_SLOW = 200
-constant real array BITE_SLOW_DURATION = [0.8, 1.2, 1.6, 2, 2.4]
-constant real BITE_SLOW_DURATION_BONUS = 0.7
+constant real array BITE_SLOW_DURATION = [1, 1.4, 1.8, 2.2, 2.6]
+constant real BITE_SLOW_DURATION_BONUS = 0.8
 
 BuffType buffBite
 constant BITE_BUFF_ID = compiletime(createAuraBuff("Venomous Beetle", "This unit was bitten by a Venomous Beetle; it is slowed.", Icons.bTNCarrionScarabs))
@@ -322,7 +322,7 @@ class VenoumosBeetle
 function setupStats()
     heroType
         //..setStat(Stat.AD, 5, 40)
-        ..setStat(Stat.AR, 17, 41)
+        ..setStat(Stat.AR, 37, 51)
         ..setStat(Stat.AS, 11, 42)
         ..setStat(Stat.HP, 14, 59)
         ..setStat(Stat.HR, 12, 31)
@@ -330,7 +330,7 @@ function setupStats()
         ..setStat(Stat.MR, 12, 35)
         ..setStat(Stat.MS, 4, 32)
         ..setStat(Stat.STR, 21, 64)
-        ..setStat(Stat.AGI, 14, 36)
+        ..setStat(Stat.AGI, 34, 56)
         ..setStat(Stat.INT, 11, 37)
 
 function retreatAI(HeroAI ai)
