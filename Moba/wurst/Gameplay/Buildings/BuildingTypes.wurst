@@ -14,6 +14,7 @@ import ErrorHandling
 import HeroControl
 import Buff
 import ObjectEditingPreset
+import SoundUtils
 import Assets
 import LinkedList
 import OnAttack
@@ -48,21 +49,30 @@ public int array UPGRADE_ITEMS = ['I002', 'I003', 'I004', 'I005']
 int farmsTeam1 = 26
 int farmsTeam2 = farmsTeam1
 
-constant real BARRACKS_REBUILD_TIME = 180
+constant real BARRACKS_REBUILD_TIME = 300
 constant real WORKSHOP_REBUILD_TIME = 60
 
 constant int SHOP_SHARING = 'Aall'
 
-constant int TOWER_FOCUS_MAX_STACKS = 10
-constant int TOWER_FOCUS_ARMOR = 10
-constant real TOWER_FOCUS_DUR = 4
+constant int TOWER_FOCUS_MAX_STACKS = 5
+constant int TOWER_FOCUS_ARMOR = 20
+constant real TOWER_FOCUS_DUR = 5
 constant int TOWER_FOCUS_ABILITY_ID = 'A00O'
 
 BuffType buffTowerFocus
 
 constant int TOWER_FOCUS_BUFF_ID = compiletime(createAuraBuff("Tower Focus", "This unit was hit by a Tower; it has reduced armor.", Icons.bTNHumanWatchTower))
 constant int TOWER_FOCUS_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, TOWER_FOCUS_BUFF_ID, "", "chest"))
-    
+
+constant SOUND_UPGRADE = new SoundDefinition(Sounds.blacksmithWhat1, false, true)
+constant SOUND_REPAIR_1 = new SoundDefinition(Sounds.peonRepair1, false, true)
+constant SOUND_REPAIR_2 = new SoundDefinition(Sounds.peonRepair2, false, true)
+constant SOUND_REPAIR_3 = new SoundDefinition(Sounds.peonRepair3, false, true)
+constant SOUND_SIEGE_ENGINE = new SoundDefinition(Sounds.steamTankWhat3, false, true)
+constant SOUND_MORTAR_TEAM = new SoundDefinition(Sounds.mortarTeamReady1, false, true)
+constant SOUND_TOME = new SoundDefinition(Sounds.tomes, false, true)
+constant SOUND_CALL_TO_ARMS = new SoundDefinition(Sounds.humanCallToArmsWhat1, false, true)
+
 let a = "|cffffcc00gdg|r"
 
 enum VictoryState
@@ -279,7 +289,19 @@ function onBuildingAbility()
     let itemTypeId = GetSoldItem().getTypeId()
     let building = GetTriggerUnit()
     let hero = GetBuyingUnit()
+    let heroPos = hero.getPos3Zero()
+    bool buildingAbilityUsed = true
     if itemTypeId == 'I000' //Rebuild Workshop
+        doPeriodicallyCounted(1, 5, (CallbackCounted cb) -> begin
+            let r = GetRandomInt(1, 3)
+            if r == 1
+                SOUND_REPAIR_1.playOnPoint(heroPos).snd.setVolume(350)
+            else if r == 2
+                SOUND_REPAIR_2.playOnPoint(heroPos).snd.setVolume(350)
+            else
+                SOUND_REPAIR_3.playOnPoint(heroPos).snd.setVolume(350)
+        end)
+        
         building.removeAbility(SHOP_SHARING)
 
         let count = (WORKSHOP_REBUILD_TIME / 0.1 +0.5).toInt()
@@ -308,6 +330,7 @@ function onBuildingAbility()
                 building.setHP(max(0.5, (1-cb.getCount()/count) * building.getMaxHP() ) )
         end))
     else if itemTypeId == 'I001' //Siege Engine
+        SOUND_SIEGE_ENGINE.playOnPoint(heroPos).snd.setVolume(150)
         if building == udg_GreenWorkShop[0]
             let spawnedUnit = spawnUnit(true, TANK, gg_rct_GreenWorkShopTop.getCenter())
             let pathUnit = new PathUnit(spawnedUnit)
@@ -330,6 +353,7 @@ function onBuildingAbility()
             addLaneUnitCount(Team.TEAM2, Lane.BOT, 1)
 
     else if itemTypeId == 'I007' //Mortar Team
+        SOUND_MORTAR_TEAM.playOnPoint(heroPos).snd.setVolume(150)
         if building == udg_GreenWorkShop[0]
             let spawnedUnit = spawnUnit(true, MORTAR_TEAM, gg_rct_GreenWorkShopTop.getCenter())
             let pathUnit = new PathUnit(spawnedUnit)
@@ -353,6 +377,7 @@ function onBuildingAbility()
         
 
     else if itemTypeId == 'I002' //Melee Attack
+        SOUND_UPGRADE.playOnPoint(heroPos).snd.setVolume(150)
         let current = GetPlayerTechCount(building.getOwner(), 'R000', true)
         if current == 4
             SetPlayerTechMaxAllowed(building.getOwner(), itemTypeId, 0)
@@ -371,6 +396,7 @@ function onBuildingAbility()
         g.destr()
 
     else if itemTypeId == 'I003' //Ranged Attack
+        SOUND_UPGRADE.playOnPoint(heroPos).snd.setVolume(150)
         let current = GetPlayerTechCount(building.getOwner(), 'R001', true)
         if current == 4
             SetPlayerTechMaxAllowed(building.getOwner(), itemTypeId, 0)
@@ -389,6 +415,7 @@ function onBuildingAbility()
         g.destr()
 
     else if itemTypeId == 'I004' //Heavy Armor
+        SOUND_UPGRADE.playOnPoint(heroPos).snd.setVolume(150)
         let current = GetPlayerTechCount(building.getOwner(), 'R002', true)
         if current == 4
             SetPlayerTechMaxAllowed(building.getOwner(), itemTypeId, 0)
@@ -407,6 +434,7 @@ function onBuildingAbility()
         g.destr()
 
     else if itemTypeId == 'I005' //Light Armor
+        SOUND_UPGRADE.playOnPoint(heroPos).snd.setVolume(150)
         let current = GetPlayerTechCount(building.getOwner(), 'R003', true)
         if current == 4
             SetPlayerTechMaxAllowed(building.getOwner(), itemTypeId, 0)
@@ -425,7 +453,7 @@ function onBuildingAbility()
         g.destr()
 
     else if itemTypeId == 'I006' //Call to Arms
-
+        SOUND_CALL_TO_ARMS.playOnPoint(heroPos).snd.setVolume(350)
         if building.getOwner().getCPlayer().getTeam() == Team.TEAM1
             removeMilitaTeam1 = false
             for i = 0 to 15
@@ -525,24 +553,50 @@ function onBuildingAbility()
         new ChannelTeleport(hero, targetPos, 3, 200)
 
     //stats
-    else if itemTypeId == 'I00B' //Strength
+    
+    else  if itemTypeId == 'I00B' //Strength
         hero.wrapper().addStatAbsoluteBonus(Stat.STR, 1)
+        SOUND_TOME.playOnPoint(heroPos).snd.setVolume(150)
+        hero.addEffect(Abilities.aIimTarget, "chest").destr()
     else if itemTypeId == 'I00C' //Willpower
         hero.wrapper().addStatAbsoluteBonus(Stat.AGI, 1)
+        SOUND_TOME.playOnPoint(heroPos).snd.setVolume(150)
+        hero.addEffect(Abilities.aIimTarget, "chest").destr()
     else if itemTypeId == 'I00D' //Intelligenace
         hero.wrapper().addStatAbsoluteBonus(Stat.INT, 1)
+        SOUND_TOME.playOnPoint(heroPos).snd.setVolume(150)
+        hero.addEffect(Abilities.aIimTarget, "chest").destr()
     else if itemTypeId == 'I00E' //Armor
         hero.wrapper().addStatAbsoluteBonus(Stat.AR, 1)
+        SOUND_TOME.playOnPoint(heroPos).snd.setVolume(150)
+        hero.addEffect(Abilities.aIimTarget, "chest").destr()
     else if itemTypeId == 'I00F' //Attack Speed
         hero.wrapper().addStatAbsoluteBonus(Stat.AS, 1)
+        SOUND_TOME.playOnPoint(heroPos).snd.setVolume(150)
+        hero.addEffect(Abilities.aIimTarget, "chest").destr()
     else if itemTypeId == 'I00G' //Hit Points
         hero.wrapper().addStatAbsoluteBonus(Stat.HP, 15)
+        SOUND_TOME.playOnPoint(heroPos).snd.setVolume(150)
+        hero.addEffect(Abilities.aIimTarget, "chest").destr()
     else if itemTypeId == 'I00H' //Mana Point
         hero.wrapper().addStatAbsoluteBonus(Stat.MP, 10)
+        SOUND_TOME.playOnPoint(heroPos).snd.setVolume(150)
+        hero.addEffect(Abilities.aIimTarget, "chest").destr()
     else if itemTypeId == 'I00I' //Hit Point Regeneration
         hero.wrapper().addStatAbsoluteBonus(Stat.HR, 3)
+        SOUND_TOME.playOnPoint(heroPos).snd.setVolume(150)
+        hero.addEffect(Abilities.aIimTarget, "chest").destr()
     else if itemTypeId == 'I00J' //Mana Point Regeneration
         hero.wrapper().addStatAbsoluteBonus(Stat.MR, 1)
+        SOUND_TOME.playOnPoint(heroPos).snd.setVolume(150)
+        hero.addEffect(Abilities.aIimTarget, "chest").destr()
+    else
+        buildingAbilityUsed = false
+
+    if buildingAbilityUsed
+        standardTextTag(hero.getPos(), GetObjectName(itemTypeId)).setColor(255, 220, 0, 255)
+        GetSoldItem().remove()
+
 
 
 function onMilitiaDespawn()

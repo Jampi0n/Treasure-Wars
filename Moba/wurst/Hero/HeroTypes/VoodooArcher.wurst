@@ -42,8 +42,8 @@ function passive(int abilityId)
     addDynamicTooltipStrength(heroType, tooltip)
 
 
-constant real array GHOST_ARROWS_DAMAGE = [100, 160, 220, 280, 340]
-constant real GHOST_ARROWS_DAMAGE_BONUS = 160
+constant real array GHOST_ARROWS_DAMAGE = [75, 125, 175, 225, 275]
+constant real GHOST_ARROWS_DAMAGE_BONUS = 140
 
 
 function abilityQ(int abilityId)
@@ -179,8 +179,8 @@ function abilityE(int abilityId)
 
     addDynamicTooltipIntelligence(heroType, tooltip)
         
-constant real array BBV_DAMAGE = [40, 55, 70, 85, 90]
-constant real BBV_DAMAGE_BONUS = 60
+constant real array BBV_DAMAGE = [40, 50, 60, 70, 80]
+constant real BBV_DAMAGE_BONUS = 50
 constant real BBV_DURATION = 4
 
 constant integer BUFF_ID_ON_DEATH_COIL = compiletime(createDummyBuff())
@@ -224,7 +224,7 @@ function abilityR(int abilityId)
 function setupStats()
     heroType
         //..setStat(Stat.AD, 5, 40)
-        ..setStat(Stat.AR, 11, 27)
+        ..setStat(Stat.AR, 31, 47)
         ..setStat(Stat.AS, 14, 48)
         ..setStat(Stat.HP, 11, 39)
         ..setStat(Stat.HR, 11, 29)
@@ -232,7 +232,7 @@ function setupStats()
         ..setStat(Stat.MR, 15, 29)
         ..setStat(Stat.MS, 31, 51)
         ..setStat(Stat.STR, 14, 71)
-        ..setStat(Stat.AGI, 8, 23)
+        ..setStat(Stat.AGI, 28, 43)
         ..setStat(Stat.INT, 9, 33)
 
 function onDamage()

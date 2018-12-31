@@ -145,8 +145,8 @@ function poisonSpit(int abilityId)
             (-POISON_SPIT_SLOW_MS[lvl-1]).str()+"%", (-POISON_SPIT_ARMOR_REDUCTION[lvl-1]).str(), POISON_SPIT_DOT[lvl-1].str(), POISON_SPIT_DURATION[lvl-1].str()))
     addDynamicTooltipIntelligence(heroType, tooltip)
 
-constant real array EMPOWERED_STRIKE_DAMAGE = [80, 140, 200, 260, 320]
-constant real EMPOWERED_STRIKE_DAMAGE_BONUS = 150
+constant real array EMPOWERED_STRIKE_DAMAGE = [85, 130, 175, 220, 265]
+constant real EMPOWERED_STRIKE_DAMAGE_BONUS = 125
 
 
 function empoweredStrike(int abilityId)
@@ -184,8 +184,8 @@ function empoweredStrike(int abilityId)
     addDynamicTooltipStrength(heroType, tooltip)
 
 
-constant real array PARALYZING_STRIKE_DAMAGE = [200, 250, 300, 350, 400]
-constant real PARALYZING_STRIKE_DAMAGE_BONUS = 180
+constant real array PARALYZING_STRIKE_DAMAGE = [160, 200, 240, 280, 320]
+constant real PARALYZING_STRIKE_DAMAGE_BONUS = 150
 constant real array PARALYZING_STRIKE_DURATION = [1.6, 1.8, 2, 2.2, 2.4]
 constant real PARALYZING_STRIKE_DURATION_BONUS = 0.3
 
@@ -234,7 +234,7 @@ group spitDummies = CreateGroup()
 function setupStats()
     heroType
         //..setStat(Stat.AD, 10, 40)
-        ..setStat(Stat.AR, 11, 27)
+        ..setStat(Stat.AR, 31, 47)
         ..setStat(Stat.AS, 27, 64)
         ..setStat(Stat.HP, 8, 39)
         ..setStat(Stat.HR, 18, 54)
@@ -242,7 +242,7 @@ function setupStats()
         ..setStat(Stat.MR, 16, 39)
         ..setStat(Stat.MS, 17, 71)
         ..setStat(Stat.STR, 13, 53)
-        ..setStat(Stat.AGI, 18, 34)
+        ..setStat(Stat.AGI, 38, 54)
         ..setStat(Stat.INT, 7, 43)
 
 function onSpellCast()

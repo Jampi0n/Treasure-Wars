@@ -49,8 +49,8 @@ function blackArrow(int abilityId)
     addDynamicTooltipStrength(heroType, tooltip)
 
 
-constant real array PIERCING_SHOT_DAMAGE = [80, 135, 190, 245, 300]
-constant real PIERCING_SHOT_DAMAGE_BONUS = 150
+constant real array PIERCING_SHOT_DAMAGE = [80, 120, 160, 200, 240]
+constant real PIERCING_SHOT_DAMAGE_BONUS = 125
 
 function piercingShot(int abilityId)
 
@@ -243,7 +243,7 @@ int skeletonCount = 0
 function setupStats()
     heroType
         //..setStat(Stat.AD, 5, 40)
-        ..setStat(Stat.AR, 4, 16)
+        ..setStat(Stat.AR, 24, 36)
         ..setStat(Stat.AS, 34, 88)
         ..setStat(Stat.HP, 7, 32)
         ..setStat(Stat.HR, 4, 19)
@@ -251,7 +251,7 @@ function setupStats()
         ..setStat(Stat.MR, 7, 22)
         ..setStat(Stat.MS, 6, 21)
         ..setStat(Stat.STR, 16, 91)
-        ..setStat(Stat.AGI, 4, 11)
+        ..setStat(Stat.AGI, 24, 31)
         ..setStat(Stat.INT, 6, 23)
 
 function onDamage()

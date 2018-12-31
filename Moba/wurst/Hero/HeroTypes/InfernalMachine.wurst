@@ -62,7 +62,7 @@ function passive(int abilityId)
         ))
     addDynamicTooltipIntelligence(heroType, tooltip)
 
-public constant int array BASH_DAMAGE_BONUS = [60, 100, 140, 180, 220]
+public constant int array BASH_DAMAGE_BONUS = [50, 85, 120, 155, 190]
 constant real array BASH_STUN_DURATION = [1.2, 1.4, 1.6, 1.8, 2]
 constant real BASH_BUFF_DURATION = 4
 constant int array BASH_MOVEMENT_SPEED = [100, 125, 150, 175, 200]
@@ -405,7 +405,7 @@ class AttackOrderTrack
 function setupStats()
     heroType
         //..setStat(Stat.AD, 5, 40)
-        ..setStat(Stat.AR, 11, 39)
+        ..setStat(Stat.AR, 31, 59)
         ..setStat(Stat.AS, 7, 22)
         ..setStat(Stat.HP, 13, 52)
         ..setStat(Stat.HR, 17, 34)
@@ -413,7 +413,7 @@ function setupStats()
         ..setStat(Stat.MR, 13, 28)
         ..setStat(Stat.MS, 18, 41)
         ..setStat(Stat.STR, 17, 52)
-        ..setStat(Stat.AGI, 10, 35)
+        ..setStat(Stat.AGI, 30, 55)
         ..setStat(Stat.INT, 6, 16)
 
 
