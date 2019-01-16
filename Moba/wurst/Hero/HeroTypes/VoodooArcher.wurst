@@ -126,7 +126,7 @@ function abilityW(int abilityId)
     addDynamicTooltipIntelligence(heroType, tooltip)
 
 
-constant int array SERPEND_WARD_HP = [0, 150, 300, 450, 600]
+constant int array SERPEND_WARD_HP = [0, 50, 100, 150, 200]
 constant real SERPENT_WARD_DURATION = 30
 constant real array SERPENT_POISON_DURATION = [2, 2.25, 2.5, 2.75, 3]
 
