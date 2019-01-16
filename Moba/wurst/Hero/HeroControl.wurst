@@ -40,6 +40,10 @@ public class Hero
     private timerdialog reviveWindow
     private boolean firstTeam
 
+    //animation speed
+    private static trigger onSpellStartTrigger
+    private static trigger onSpellEndTrigger
+
     private int array [5] skillIds
 
     private real array [4] defaultCooldown
@@ -55,6 +59,16 @@ public class Hero
         onDamageTrigger.addAction(function onDamageStatic)
         onDeathTrigger.addAction(function onDeathStatic)
         onLevelUpTrigger.addAction(function onLevelUpStatic)
+
+        onSpellStartTrigger = CreateTrigger()
+            ..addAction(() -> (begin
+            GetTriggerUnit().setTimeScale(HeroType.getAnimationSpeed(GetSpellAbilityId()))
+        end))
+
+        onSpellEndTrigger = CreateTrigger()
+            ..addAction(() -> (begin
+            GetTriggerUnit().setTimeScale(1)
+        end))
 
         CreateTrigger()
             ..addAction(() -> (begin
@@ -96,6 +110,9 @@ public class Hero
         onLevelUpTrigger.registerUnitEvent(this.hero, EVENT_UNIT_HERO_LEVEL)
         onSpellCastTrigger = this.heroType.getOnSpellCastTrigger()
         onSpellCastTrigger.registerUnitEvent(this.hero, EVENT_UNIT_SPELL_EFFECT)
+
+        onSpellStartTrigger.registerUnitEvent(this.hero, EVENT_UNIT_SPELL_CAST)
+        onSpellEndTrigger.registerUnitEvent(this.hero, EVENT_UNIT_SPELL_ENDCAST)
 
         let wrapper = this.hero.wrapper()
 
@@ -242,6 +259,7 @@ public class Hero
             
         this.hero.revive(pos, true)
         this.hero.setMana(this.hero.getMaxMana())
+        this.hero.setTimeScale(1)
         this.upgrade()
         if this.heroGlow != null
             this.heroGlow

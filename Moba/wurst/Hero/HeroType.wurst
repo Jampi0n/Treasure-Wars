@@ -16,6 +16,7 @@ import public initlater HeroAI
 import public initlater HeroControl
 import public ItemIdGeneration
 import Preloader
+import ErrorHandling
 
 int array SLOT_ID
 
@@ -51,6 +52,8 @@ public class HeroType
 
     private OnCreateFunction onCreateFunction = null
     private OnInitFunction onInitFunction = null
+
+    private static constant animationSpeedMap = new HashMap<int,real>
 
     private boolean hasAI = false
 
@@ -281,6 +284,18 @@ public class HeroType
 
         //print(id.toRawCode())
         return id
+
+    static function getAnimationSpeed(int abilityId) returns real
+        if animationSpeedMap.has(abilityId)
+            return animationSpeedMap.get(abilityId)
+        else
+            return 1.0
+
+    static function setAnimationSpeed(int abilityId, real speed)
+        if not animationSpeedMap.has(abilityId)  
+            animationSpeedMap.put(abilityId, speed)
+        else
+            error("Multiple animation speeds for id: " + abilityId.toString())
     
 
 public function addDynamicTooltipStrength(HeroType herotype, DynamicTooltip tooltip)
