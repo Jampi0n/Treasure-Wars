@@ -10,6 +10,7 @@ import Constants
 import initlater WaveSpawn
 
 constant SHOW_STATE_COLORS = false
+constant UPDATE_INTERVAL = 0.05
 
 enum PathState
     HOME_TOWN
@@ -59,7 +60,7 @@ public class PathUnit
                 this.assocUnit.setVertexColor(255,100,100,255)
 
     static function classInit()
-        periodicTimer.startPeriodic(0.05, function updateMovementStatic)
+        periodicTimer.startPeriodic(UPDATE_INTERVAL, function updateMovementStatic)
         doPeriodically(1, (CallbackPeriodic cb) -> (begin
             //print("["+instances.toString()+"]orders: "+moveOrders.toString())
             operations = 0
