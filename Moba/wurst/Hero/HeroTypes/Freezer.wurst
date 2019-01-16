@@ -63,7 +63,7 @@ constant real NOVA_AOE_DMG_BONUS = 100
 
 constant real NOVA_AOE = 250
 
-constant real array NOVA_DURATION = [2, 2.5, 3, 3.5, 4]
+constant real array NOVA_DURATION = [1.6, 2, 2.4, 2.8, 3.2]
 constant real NOVA_DURATION_BONUS = 1
 
 constant int array NOVA_MS = [30, 30, 30, 30, 30]
@@ -172,7 +172,7 @@ function frostArmor(int abilityId)
             ARMOR_DURATION.str()))
     addDynamicTooltipIntelligence(heroType, tooltip)
 
-constant int array FROST_WYRM_HP = [250, 500, 750, 1000, 1250]
+constant int array FROST_WYRM_HP = [100, 300, 500, 750, 1000]
 constant int array FROST_WYRM_DMG = [10, 20, 30, 40, 50]
 
 constant int FROST_WYRM_INT_FACTOR = 50
