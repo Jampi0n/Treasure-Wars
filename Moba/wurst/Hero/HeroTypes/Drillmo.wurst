@@ -6,7 +6,6 @@ import HeroType
 import TimerUtils
 import ClosureTimers
 import DamageDetection
-//import Fx
 
 public constant HERO_DRILLMO = 'H00L'
 HeroType heroType = null
@@ -93,6 +92,7 @@ function pull(int abilityId)
             PULL_DAMAGE[lvl-1].str()
         ))
     addDynamicTooltipStrength(heroType, tooltip)
+    HeroType.setAnimationSpeed(abilityId, 1.33)
 
 constant real array SPIKE_BALL_DMG = [60, 100, 140, 180, 220]
 constant real SPIKE_BALL_DMG_BONUS = 120
@@ -112,7 +112,7 @@ function spikeBall(int abilityId)
     if compiletime
         int array MANA = [110, 120, 130, 140, 150]
         real array COOLDOWN = [8, 8, 8, 8, 8]
-        let aDef = new AbilityDefinitionIllidanChannel(abilityId)
+        let aDef = new AbilityDefinitionPitLordHowlofTerror(abilityId)
             ..setAnimationNames("spell,slam")
             ..setupIcon("BTNSpikeBall")
             ..setupWithHotKey("Spike Ball", "W")
@@ -120,7 +120,7 @@ function spikeBall(int abilityId)
             ..setArtEffect("")
             ..setMissileArt("")
             ..setArtTarget("")
-            ..setupChannel(TargetType.INSTANT, "thunderclap", 0.8)
+            //..setupChannel(TargetType.INSTANT, "thunderclap", 0.8)
 
         for lvl = 1 to 5
             aDef
@@ -146,6 +146,7 @@ function spikeBall(int abilityId)
             SPIKE_BALL_DOT_DURATION[lvl-1].toSmartString()
         ))
     addDynamicTooltipStrength(heroType, tooltip)
+    HeroType.setAnimationSpeed(abilityId, 2)
 
 constant int array SPEED_BOOST = [20, 25, 30, 35, 40]
 constant int SPEED_BOOST_BONUS = 40
@@ -240,6 +241,7 @@ function rocket(int abilityId)
             ROCKET_DMG[lvl-1].str()
         ))
     addDynamicTooltipStrength(heroType, tooltip)
+    HeroType.setAnimationSpeed(abilityId, 1.33)
 
 class Pull
 
@@ -250,7 +252,7 @@ class Pull
     private angle direction
     private unit pulledUnit = null
     private boolean hasPulled = false
-    //private Fx fx
+    private effect fx
 
     construct(unit caster, int level, vec2 target)
         this.caster = caster
@@ -260,10 +262,13 @@ class Pull
             ..setData(this castTo int)
             ..startPeriodic(0.02, function updateStatic)
 
-        //this.fx = new Fx(target, Units.wisp1)
+        this.fx = addEffect(Units.wisp1, target)
+        if not DEBUG_MODE
+            fx.setAlpha(0)
+        this.caster.setTimeScale(3)
 
     function update()
-        this.count++
+        this.count+=3
         if count >= 70-25 or caster.getCurrentOrder() != OrderId("thunderbolt") or (hasPulled and not pulledUnit.isAlive())
             destroy this
         else
@@ -278,11 +283,11 @@ class Pull
                     relativePos = 1
 
                 pos = this.caster.getPos().polarOffset(direction, 700 * relativePos)
-                //this.fx.setXY(pos)
+                this.fx.setPos(pos)
                 if not hasPulled
                     real minDistance = 100
                     unit minUnit = null
-                    group nearby = enumUnitsInHitBoxRange(pos, 40)
+                    group nearby = enumUnitsInHitBoxRange(pos, 64)
                 
                     while(not nearby.isEmpty())
                         unit target = FirstOfGroup(nearby)
@@ -313,7 +318,8 @@ class Pull
 
     ondestroy
         this.checkTimer.release()
-        //destroy this.fx
+        this.caster.setTimeScale(1)
+        this.fx.destr()
         if this.pulledUnit != null
             this.pulledUnit.setPos(this.pulledUnit.getPos())
 
@@ -326,8 +332,8 @@ function onSpellCast()
         new Pull(caster, level, vec2(GetSpellTargetX(), GetSpellTargetY()))
 
     else if spellId == ABILITY_SPIKE_BALL
-        doAfter(0.5, () -> (begin
-            if caster.getCurrentOrder() == OrderId("thunderclap")
+        doAfter(0.0, () -> (begin
+            if caster.getCurrentOrder() == OrderId("thunderclap") or true
                 let ballPos = caster.getPos().polarOffset(caster.getFacingAngle(), 140)
                 group nearby = CreateGroup()
                 nearby.enumUnitsInRange(ballPos, 250)
