@@ -53,7 +53,7 @@ public function unit.dealDamageNoEvent(unit target, real amount, ReductionType r
 **  By having all in this function, the order the functions run can be set the easiest.
 **
 */
-function handleDamageAmount(unit source, unit target, boolean isAttack, boolean _isActive, boolean advanced)
+function handleDamageAmount(unit source, unit target, boolean isAttack, boolean _isActive, boolean advanced) returns real
     let originalDamage = GetEventDamage()
     real currentDamage = originalDamage
 
@@ -162,11 +162,6 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
                         wrapper.addStatAbsoluteBonusReal(Stat.AGI, (wp*1000).toInt() )
                 end))
 
-            // last hit helper
-            if isAttack and source.isType(UNIT_TYPE_HERO) and not target.isType(UNIT_TYPE_HERO) and not target.isType(UNIT_TYPE_STRUCTURE)
-                if target.getLife() - currentDamage <= LAST_HIT_THRESHOLD
-                    currentDamage += LAST_HIT_THRESHOLD
-
 
             //===============================================================================
 
@@ -194,6 +189,8 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
 
         BlzSetEventDamage(currentDamage)
         setMagicDamage(false)
+
+    return currentDamage
 
 
 
@@ -301,7 +298,7 @@ public class OnAttack
             localAttacked = true
 
 
-        handleDamageAmount(localAttacker, localTarget, localAttacked, localActive, advanced)
+        var finalDmg = handleDamageAmount(localAttacker, localTarget, localAttacked, localActive, advanced)
 
         //use a list with arguments, as a onAttack function could trigger an onAttack event and overwrite the variables
         if localAttacked and not localTarget.isType(UNIT_TYPE_ANCIENT) //untargetable
@@ -310,6 +307,11 @@ public class OnAttack
 
             for OnAttackFunctionAdvanced onAttack in onAttackFunctionListAdvanced
                 onAttack.onAttack(localAttacker, localTarget, localActive, advanced)
+
+        // last hit helper
+        if localAttacked and localAttacker.isType(UNIT_TYPE_HERO) and not localTarget.isType(UNIT_TYPE_HERO) and not localTarget.isType(UNIT_TYPE_STRUCTURE)
+            if localTarget.getLife() - finalDmg <= LAST_HIT_THRESHOLD
+                localAttacker.dealDamageAlways(localTarget, LAST_HIT_THRESHOLD, ReductionType.NONE)
 
         
 
