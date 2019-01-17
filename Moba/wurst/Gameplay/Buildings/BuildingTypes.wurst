@@ -49,8 +49,8 @@ public int array UPGRADE_ITEMS = ['I002', 'I003', 'I004', 'I005']
 int farmsTeam1 = 26
 int farmsTeam2 = farmsTeam1
 
-constant real BARRACKS_REBUILD_TIME = 300
-constant real WORKSHOP_REBUILD_TIME = 60
+constant real BARRACKS_REBUILD_TIME = -1 //300 // -1 means the building cannot be rebuilt
+constant real WORKSHOP_REBUILD_TIME = -1 //60 // -1 means the building cannot be rebuilt
 
 constant int SHOP_SHARING = 'Aall'
 
@@ -184,62 +184,82 @@ function onBuildingDeath()
             bounty = 250
             globalBounty = 250
 
-            let newBuilding = createUnit(building.getOwner(), BARRACKS_REBUILD, building.getPos(), (270).fromDeg())
-                ..setAnimation("birth")
-                ..setTimeScale(60/BARRACKS_REBUILD_TIME)
-                ..setHP(0.5)
-            UnitAddType(newBuilding, UNIT_TYPE_ANCIENT)
-            
-
-            for i=0 to 2
+            if BARRACKS_REBUILD_TIME != -1
+                let newBuilding = createUnit(building.getOwner(), BARRACKS_REBUILD, building.getPos(), (270).fromDeg())
+                    ..setAnimation("birth")
+                    ..setTimeScale(60/BARRACKS_REBUILD_TIME)
+                    ..setHP(0.5)
+                UnitAddType(newBuilding, UNIT_TYPE_ANCIENT)
                 
-                let count = (BARRACKS_REBUILD_TIME / 0.1 +0.5).toInt()
 
-                if(building==udg_GreenBarracks[i])
-                    udg_GreenBarracks[i] = newBuilding
-                    barracksAliveTeam1[i] = false
-                    doPeriodicallyCounted(0.1, count, (CallbackCounted cb) -> (begin
-                        if cb.isLast()
-                            let owner = newBuilding.getOwner()
-                            let pos = newBuilding.getPos()
-                            newBuilding.remove()
-                            udg_GreenBarracks[i] = createUnit(owner, BARRACKS, pos, (270).fromDeg())
-                            barracksAliveTeam1[i] = true
-                        else
-                            newBuilding.setHP(max(0.5, (1-cb.getCount()/count) * newBuilding.getMaxHP() ) )
-                    end))
-                else if(building==udg_BrownBarracks[i])
-                    udg_BrownBarracks[i] = newBuilding
-                    barracksAliveTeam2[i] = false
-                    doPeriodicallyCounted(0.1, count, (CallbackCounted cb) -> (begin
-                        if cb.isLast()
-                            let owner = newBuilding.getOwner()
-                            let pos = newBuilding.getPos()
-                            newBuilding.remove()
-                            udg_BrownBarracks[i] = createUnit(owner, BARRACKS, pos, (270).fromDeg())
-                            barracksAliveTeam2[i] = true
-                        else
-                            newBuilding.setHP(max(0.5, (1-cb.getCount()/count) * newBuilding.getMaxHP() ) )
-                    end))
+                for i=0 to 2
+                    
+                    let count = (BARRACKS_REBUILD_TIME / 0.1 +0.5).toInt()
+
+                    if(building==udg_GreenBarracks[i])
+                        udg_GreenBarracks[i] = newBuilding
+                        barracksAliveTeam1[i] = false
+                        doPeriodicallyCounted(0.1, count, (CallbackCounted cb) -> (begin
+                            if cb.isLast()
+                                let owner = newBuilding.getOwner()
+                                let pos = newBuilding.getPos()
+                                newBuilding.remove()
+                                udg_GreenBarracks[i] = createUnit(owner, BARRACKS, pos, (270).fromDeg())
+                                barracksAliveTeam1[i] = true
+                            else
+                                newBuilding.setHP(max(0.5, (1-cb.getCount()/count) * newBuilding.getMaxHP() ) )
+                        end))
+                    else if(building==udg_BrownBarracks[i])
+                        udg_BrownBarracks[i] = newBuilding
+                        barracksAliveTeam2[i] = false
+                        doPeriodicallyCounted(0.1, count, (CallbackCounted cb) -> (begin
+                            if cb.isLast()
+                                let owner = newBuilding.getOwner()
+                                let pos = newBuilding.getPos()
+                                newBuilding.remove()
+                                udg_BrownBarracks[i] = createUnit(owner, BARRACKS, pos, (270).fromDeg())
+                                barracksAliveTeam2[i] = true
+                            else
+                                newBuilding.setHP(max(0.5, (1-cb.getCount()/count) * newBuilding.getMaxHP() ) )
+                        end))
+            else
+                for i=0 to 2
+                    if(building==udg_GreenBarracks[i])
+                        udg_GreenBarracks[i] = null
+                        barracksAliveTeam1[i] = false
+                    else if(building==udg_BrownBarracks[i])
+                        udg_BrownBarracks[i] = null
+                        barracksAliveTeam2[i] = false
 
         else if unitId == WORKSHOP
             bounty = 150
             globalBounty = 150
 
-            let newBuilding = createUnit(building.getOwner(), WORKSHOP_REBUILD, building.getPos(), (270).fromDeg())
-                ..setAnimation("birth")
-                ..setTimeScale(0)
-                ..setHP(0.5)
-            UnitAddType(newBuilding, UNIT_TYPE_ANCIENT)
+            if WORKSHOP_REBUILD_TIME != -1
+                let newBuilding = createUnit(building.getOwner(), WORKSHOP_REBUILD, building.getPos(), (270).fromDeg())
+                    ..setAnimation("birth")
+                    ..setTimeScale(0)
+                    ..setHP(0.5)
+                UnitAddType(newBuilding, UNIT_TYPE_ANCIENT)
 
-            for i=0 to 1
-                if(building==udg_GreenWorkShop[i])
-                    udg_GreenWorkShop[i] = newBuilding
-                    workshopAliveTeam1[i] = false
+                for i=0 to 1
+                    if(building==udg_GreenWorkShop[i])
+                        udg_GreenWorkShop[i] = newBuilding
+                        workshopAliveTeam1[i] = false
 
-                else if(building==udg_BrownWorkShop[i])
-                    workshopAliveTeam2[i] = false
-                    udg_BrownWorkShop[i] = newBuilding
+                    else if(building==udg_BrownWorkShop[i])
+                        workshopAliveTeam2[i] = false
+                        udg_BrownWorkShop[i] = newBuilding
+            else
+                for i=0 to 1
+                    if(building==udg_GreenWorkShop[i])
+                        udg_GreenWorkShop[i] = null
+                        workshopAliveTeam1[i] = false
+
+                    else if(building==udg_BrownWorkShop[i])
+                        workshopAliveTeam2[i] = false
+                        udg_BrownWorkShop[i] = null
+                    
 
 
         else if unitId == ARCANE_VAULT
