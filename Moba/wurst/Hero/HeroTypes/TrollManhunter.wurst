@@ -485,7 +485,7 @@ function initHeroType()
                 if u == null
                     break
                 g.removeUnit(u)
-                if u.isTargetable(heroOwner, false, true)
+                if u.isTargetable(heroOwner, false, true) and not u.isType(UNIT_TYPE_STRUCTURE)
                     let bleedingWoundLevel = caster.getAbilityLevel(ABILITY_BLEEDING_WOUND)
                     if bleedingWoundLevel > 0
                         u.addBuffReduced(caster, BLEEDING_WOUND_DURATION, buffBleedingWound, bleedingWoundLevel)
