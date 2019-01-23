@@ -256,7 +256,7 @@ function abilityR(int abilityId)
     end) )
     
     for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, "Marks the target enemy unit as his prey. The Destroyer will have move {2}% faster when moving towards the prey. Every attack against the prey deals {0} bonus damage and slows the prey. Lasts {0} seconds.".format(
+        tooltip.setNormalString(true, lvl, "Marks the target enemy unit as his prey. The Destroyer will have move {2}% faster when moving towards the prey. Every attack against the prey deals {1} bonus damage and slows the prey. Lasts {0} seconds.".format(
             PREY_DURATION.str(),
             PREY_BONUS_DAMAGE[lvl-1].str(),
             PREY_MOVE_SPEED[lvl-1].str())
