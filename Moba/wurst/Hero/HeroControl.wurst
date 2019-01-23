@@ -142,13 +142,15 @@ public class Hero
         wrapper.addStatAbsoluteBonus(Stat.HP, this.heroType.getBase(Stat.HP) * 15 + HP_PER_LEVEL )
         wrapper.addStatAbsoluteBonus(Stat.MP, this.heroType.getBase(Stat.MP) * 10 )
 
+        wrapper.addStatAbsoluteBonus(Stat.MS, this.heroType.getBase(Stat.MS) )
+
         //upgrade level 1
         SetPlayerTechResearched(upgradePlayer, UPG_AD , this.heroType.getBase(Stat.AD))
         SetPlayerTechResearched(upgradePlayer, UPG_AR , this.heroType.getBase(Stat.AR))
         SetPlayerTechResearched(upgradePlayer, UPG_AS , this.heroType.getBase(Stat.AS))
 
-        SetPlayerTechResearched(upgradePlayer, UPG_MS , this.heroType.getBase(Stat.MS))
-        this.hero.updateDefaultMovementSpeed()
+        //SetPlayerTechResearched(upgradePlayer, UPG_MS , this.heroType.getBase(Stat.MS))
+        //this.hero.updateDefaultMovementSpeed()
 
         SetHeroStr(this.hero, this.heroType.getBase(Stat.STR) + STRENGTH_BONUS , true)
         SetHeroAgi(this.hero, this.heroType.getBase(Stat.AGI), true)
@@ -208,10 +210,12 @@ public class Hero
 
         wrapper.addStatAbsoluteBonus(Stat.HP, (newLvl - this.level) * HP_PER_LEVEL )
 
-        SetPlayerTechResearched(upgradePlayer, UPG_MS , this.heroType.calculateStat(Stat.MS, newLvl))
-        this.hero.updateDefaultMovementSpeed()
+        //SetPlayerTechResearched(upgradePlayer, UPG_MS , this.heroType.calculateStat(Stat.MS, newLvl))
+        //this.hero.updateDefaultMovementSpeed()
 
-        //this.hero.wrapper().addStatAbsoluteBonus(Stat.MS, this.heroType.calculateStat(Stat.MS, lvl) - this.heroType.calculateStat(Stat.MS, lvl-1))
+        this.hero.wrapper().addStatAbsoluteBonus(Stat.MS, this.heroType.calculateStat(Stat.MS, newLvl) - this.heroType.calculateStat(Stat.MS, this.level))
+
+
 
         SetHeroStr(this.hero, this.heroType.calculateStat(Stat.STR, newLvl) + STRENGTH_BONUS , true)
         SetHeroAgi(this.hero, this.heroType.calculateStat(Stat.AGI, newLvl), true)

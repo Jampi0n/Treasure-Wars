@@ -40,8 +40,8 @@ public class UnitWrapper
     private static constant unitMap = new HashMap<unit, UnitWrapper>()
     private unit assocUnit
 
-    protected real currentMovementSpeed
-    protected real defaultMovementSpeed
+    //protected real currentMovementSpeed
+    //protected real defaultMovementSpeed
 
     private int array[STAT_COUNT] statBaseValue
     //has no effect, is just needed to determine the actual bonus for relative bonus
@@ -81,8 +81,8 @@ public class UnitWrapper
 
         unitMap.put(assocUnit, this)
 
-        this.currentMovementSpeed = assocUnit.getMoveSpeed()
-        this.defaultMovementSpeed = GetUnitDefaultMoveSpeed(this.assocUnit)
+        //this.currentMovementSpeed = assocUnit.getMoveSpeed()
+        statBaseValue[Stat.MS.toInt()] = GetUnitDefaultMoveSpeed(this.assocUnit).toInt()
 
         this.buffList = null // new BuffList  create BuffList only when needed
 
@@ -123,7 +123,7 @@ public class UnitWrapper
         
         statBaseValue[Stat.MP.toInt()] = this.assocUnit.getMaxMana().toInt()
         statBaseValue[Stat.MR.toInt()] = 0
-        statBaseValue[Stat.MS.toInt()] = this.defaultMovementSpeed.toInt()
+        //statBaseValue[Stat.MS.toInt()] = this.defaultMovementSpeed.toInt()
     
     ondestroy
         objectCount--
@@ -158,7 +158,7 @@ public class UnitWrapper
         
         statBaseValue[Stat.MP.toInt()] = 100 + GetPlayerTechCount(this.assocUnit.getOwner(), UPG_MP, true) * 10
         statBaseValue[Stat.MR.toInt()] = 0
-        statBaseValue[Stat.MS.toInt()] = this.defaultMovementSpeed.toInt()
+        //statBaseValue[Stat.MS.toInt()] = this.defaultMovementSpeed.toInt()
         statBaseValue[Stat.CD.toInt()] = 0
 
     protected static function getWrapper(unit whichUnit) returns UnitWrapper
@@ -216,7 +216,7 @@ public class UnitWrapper
                         
         else
             if whichStat == Stat.MS
-                this.toUnit().setMovementSpeed( this.getStatBaseValue(whichStat) + this.statsTotalBonus[whichStat.toInt()].toReal() )
+                this.toUnit().setMoveSpeed( this.getStatBaseValue(whichStat) + this.statsTotalBonus[whichStat.toInt()].toReal() )
             else if whichStat == Stat.HP
                 this.toUnit().setMaxHP(this.getStatTotalValue(Stat.HP), true)
             else if whichStat == Stat.MP
@@ -315,7 +315,7 @@ public class UnitWrapper
 public function unit.wrapper() returns UnitWrapper
     return UnitWrapper.getWrapper(this)
 
-public function unit.getCurrentMovementSpeed() returns real
+/*public function unit.getCurrentMovementSpeed() returns real
     return this.wrapper().currentMovementSpeed
 
 public function unit.getDefaultMovementSpeed() returns real
@@ -324,12 +324,12 @@ public function unit.getDefaultMovementSpeed() returns real
 public function unit.updateDefaultMovementSpeed()
     if this.isType(UNIT_TYPE_HERO)
         this.wrapper().defaultMovementSpeed = DEFAULT_HERO_SPEED + GetPlayerTechCount(this.getOwner(), UPG_MS, true) 
-        //print(GetUnitDefaultMoveSpeed(this) + GetPlayerTechCount(this.getOwner(), UPG_MS, true))
+        //print(GetUnitDefaultMoveSpeed(this) + GetPlayerTechCount(this.getOwner(), UPG_MS, true))*/
 
-public function unit.setMovementSpeed(real newSpeed)
+/*public function unit.setMovementSpeed(real newSpeed)
     this.wrapper().currentMovementSpeed = newSpeed
     //print("set ms to "+newSpeed.toString())
-    this.setMoveSpeed(newSpeed)
+    this.setMoveSpeed(newSpeed)*/
 
 
 
