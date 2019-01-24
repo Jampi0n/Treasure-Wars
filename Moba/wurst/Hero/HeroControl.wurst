@@ -265,6 +265,17 @@ public class Hero
         this.hero.setMana(this.hero.getMaxMana())
         this.hero.setTimeScale(1)
         this.upgrade()
+        if this.hero.getMoveSpeed() < 100
+            let wrapper = this.hero.wrapper()
+            print(this.hero.getName()+" has very low movement speed after revive.")
+            print("getStatTotalValue = "+wrapper.getStatTotalValue(Stat.MS).toString())
+            print("getStatTotalBonus = "+wrapper.getStatTotalBonus(Stat.MS).toString())
+            print("getStatAbsoluteBonus = "+wrapper.getStatAbsoluteBonus(Stat.MS).toString())
+            print("getStatRelativeBonus = "+wrapper.getStatRelativeBonus(Stat.MS).toString())
+            print("getStatBaseValue = "+wrapper.getStatBaseValue(Stat.MS).toString())
+            print("actual ms = "+this.hero.getMoveSpeed().toString())
+            print("default ms = "+this.hero.getDefaultMovespeed().toString() )
+
         if this.heroGlow != null
             this.heroGlow
                 ..setXY(pos)
