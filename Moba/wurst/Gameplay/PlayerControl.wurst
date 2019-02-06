@@ -505,6 +505,8 @@ public class CPlayer
         new CPlayer(players[TEAM_PLAYER_TEAM_2], Team.TEAM2, PlayerType.ARMY)
 
         new CPlayer(players[PLAYER_NEUTRAL_AGGRESSIVE], Team.NEUTRAL_HOSTILE, PlayerType.NEUTRAL)
+        new CPlayer(players[CREEP_SPECIAL_OWNER], Team.NEUTRAL_HOSTILE, PlayerType.NEUTRAL)
+
         for i=PLAYER_NEUTRAL_AGGRESSIVE+1 to PLAYER_NEUTRAL_PASSIVE
             new CPlayer(players[i], Team.NEUTRAL_PASSIVE, PlayerType.NEUTRAL)
     
@@ -522,6 +524,11 @@ public class CPlayer
         SetPlayerAlliance(players[TEAM_PLAYER_TEAM_2], players[PLAYER_NEUTRAL_AGGRESSIVE], ALLIANCE_PASSIVE, true)
         SetPlayerAlliance(players[PLAYER_NEUTRAL_AGGRESSIVE], players[TEAM_PLAYER_TEAM_1], ALLIANCE_PASSIVE, true)
         SetPlayerAlliance(players[PLAYER_NEUTRAL_AGGRESSIVE], players[TEAM_PLAYER_TEAM_2], ALLIANCE_PASSIVE, true)
+
+        SetPlayerAlliance(players[TEAM_PLAYER_TEAM_1], players[CREEP_SPECIAL_OWNER], ALLIANCE_PASSIVE, true)
+        SetPlayerAlliance(players[TEAM_PLAYER_TEAM_2], players[CREEP_SPECIAL_OWNER], ALLIANCE_PASSIVE, true)
+        SetPlayerAlliance(players[CREEP_SPECIAL_OWNER], players[TEAM_PLAYER_TEAM_1], ALLIANCE_PASSIVE, true)
+        SetPlayerAlliance(players[CREEP_SPECIAL_OWNER], players[TEAM_PLAYER_TEAM_2], ALLIANCE_PASSIVE, true)
 
     function addGoldEx(real gold)
         this.realGold += gold

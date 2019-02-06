@@ -628,7 +628,7 @@ public class HeroAI
                     if not this.heroUnit.isInventoryFull()
                         owningPlayer.addGold(- whichItem.getGoldCost())
                         this.heroUnit.addItemById(whichItem.getTypeId())
-                         ret = true
+                        ret = true
 
         return ret
 
