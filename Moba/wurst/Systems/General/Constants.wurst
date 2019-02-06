@@ -21,6 +21,10 @@ public constant TEAM_PLAYER_TEAM_2 = 11
 public constant TEAM_NAME_TEAM_1 = "Green"
 public constant TEAM_NAME_TEAM_2 = "Brown"
 
+public constant int CREEP_NORMAL_OWNER = PLAYER_NEUTRAL_AGGRESSIVE
+public constant int CREEP_SPECIAL_OWNER = 23
+public constant int CREEP_ICON_OWNER = PLAYER_NEUTRAL_PASSIVE
+
 public constant MAX_HIT_BOX = 200.
 
 public int objectCount = 0
@@ -37,9 +41,9 @@ public enum Team
     NEUTRAL_PASSIVE
 
 init
-    SetCreepCampFilterState( false )
+    SetCreepCampFilterState( true )
     SetAllyColorFilterState( 0 )
-    EnableMinimapFilterButtons( true, false )
+    EnableMinimapFilterButtons( true, true )
     /*CreateTrigger()
         ..registerTimerEvent(5, true)
         ..addAction(() -> (begin

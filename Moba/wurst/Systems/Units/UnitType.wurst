@@ -7,16 +7,16 @@ import PlayerControl
 import Constants
 import Assets
 
-public function createUnitType(int baseHp, int unitId, int bounty, int baseAttack, int upgradeAttack, int attackUpgradeId, int baseArmor, int upgradeArmor, int armorUpgradeId, int hitBox, string modelPath) returns int
-    new UnitType(baseHp, unitId, bounty, baseAttack, upgradeAttack, attackUpgradeId, baseArmor, upgradeArmor, armorUpgradeId, hitBox, modelPath)
+public function createUnitType(int baseHp, int unitId, int bounty, int baseAttack, int upgradeAttack, int attackUpgradeId, int baseArmor, int upgradeArmor, int armorUpgradeId, int hitBox, string modelPath, int powerLevel) returns int
+    new UnitType(baseHp, unitId, bounty, baseAttack, upgradeAttack, attackUpgradeId, baseArmor, upgradeArmor, armorUpgradeId, hitBox, modelPath, powerLevel)
     return unitId
 
-public function createUnitType(int baseHp, int unitId, int bounty, int baseAttack, int baseArmor, int hitBox, string modelPath) returns int
-    new UnitType(baseHp, unitId, bounty, baseAttack, 0, 0, baseArmor, 0, 0, hitBox, modelPath)
+public function createUnitType(int baseHp, int unitId, int bounty, int baseAttack, int baseArmor, int hitBox, string modelPath, int powerLevel) returns int
+    new UnitType(baseHp, unitId, bounty, baseAttack, 0, 0, baseArmor, 0, 0, hitBox, modelPath, powerLevel)
     return unitId
 
 public function createUnitType(int unitId) returns int
-    new UnitType(100, unitId, 0, 0, 0, 0, 0, 0, 0, 32, "")
+    new UnitType(100, unitId, 0, 0, 0, 0, 0, 0, 0, 32, "", 0)
     return unitId
 
 public class UnitType
@@ -38,9 +38,14 @@ public class UnitType
 
     private int hitBox
 
+    private int powerLevel // used instead of the actual unit level, so creeps can have level 0 and have green camp icons.
+
     private string modelPath
 
-    construct(int baseHp, int unitId, int bounty, int baseAttack, int upgradeAttack, int attackUpgradeId, int baseArmor, int upgradeArmor, int armorUpgradeId, int hitBox, string modelPath)
+    construct(int baseHp, int unitId, int bounty, int baseAttack, int upgradeAttack, int attackUpgradeId, int baseArmor, int upgradeArmor, int armorUpgradeId, int hitBox, string modelPath, int powerLevel)
+        this.setup(baseHp, unitId, bounty, baseAttack, upgradeAttack, attackUpgradeId, baseArmor, upgradeArmor, armorUpgradeId, hitBox, modelPath, powerLevel)
+
+    private function setup(int baseHp, int unitId, int bounty, int baseAttack, int upgradeAttack, int attackUpgradeId, int baseArmor, int upgradeArmor, int armorUpgradeId, int hitBox, string modelPath, int powerLevel)
         objectCount++
         this.unitId = unitId
         this.bounty = bounty
@@ -53,6 +58,7 @@ public class UnitType
         this.baseHp = baseHp
         this.hitBox = hitBox
         this.modelPath = modelPath
+        this.powerLevel = powerLevel
         unitIdToUnitType.put(unitId, this)
 
     static function getUnitType(int unitId) returns UnitType
@@ -72,6 +78,10 @@ public class UnitType
 
     function getBaseHp() returns int
         return this.baseHp
+
+    function getPowerLevel() returns int
+        return this.powerLevel
+
 
     function getUpgradeAttack(player owner) returns int
         if this.upgradeAttack != 0
@@ -106,7 +116,7 @@ function onUnitDeath()
         // army unit dies
         if dyingCPlayer.getTeam() == Team.TEAM1 or dyingCPlayer.getTeam() == Team.TEAM2
             let bounty = dyingType.getBounty()
-            let xp = dyingUnit.getLevel()*10
+            let xp = dyingType.getPowerLevel()*10
             let xpAllyFactor = 0.5
             let bountyAllyFactor = 0.25
             /*

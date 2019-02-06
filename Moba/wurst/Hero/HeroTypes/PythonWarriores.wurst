@@ -47,7 +47,7 @@ function envenomedBlades(int abilityId)
     end) )
     for lvl = 1 to 5
         tooltip.setNormalString(false, lvl, "Attacks deal {0}{I0} poison damage every second for {1} seconds.".format(
-            ENVENOMED_BLADES_DAMAGE[lvl-1].str()+ENVENOMED_BLADES_DAMAGE_BONUS.getBonusString(C_INT), 
+            ENVENOMED_BLADES_DAMAGE[lvl-1].str(), 
             ENVENOMED_BLADES_DURATION[lvl-1].str())
             )
     addDynamicTooltipIntelligence(heroType, tooltip)

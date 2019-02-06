@@ -12,6 +12,7 @@ import ObjectEditingPreset
 import LinkedList
 import OnAttack
 import General
+import Creeps
 
 constant REVIVE_TIME = 300.
 constant MAX_LEVEL = 5
@@ -21,6 +22,7 @@ vec2 spawnPos
 angle facing
 
 int creepLevel
+unit hydraIcon
 
 constant int array HP = [0, 2000, 4000, 6000, 8000, 10000]
 constant int array DMG = [0, 50, 100, 150, 200, 250]
@@ -38,11 +40,11 @@ BuffType buffAcidBreath
 
 constant int ACID_BREATH_BUFF_ID = compiletime(createAuraBuff("Acid Breath", "This unit was hit by a Hydra; it moves and attacks slower and has reduced armor.", Icons.bTNCorrosiveBreath))
 constant int ACID_BREATH_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, ACID_BREATH_BUFF_ID, Abilities.bottleImpact, "chest"))
-    
 
 function onHydraDeath()
     unit target = GetTriggerUnit()
     if target == udg_Hydra
+        hydraIcon.hide()
         DEATH_SOUND.play().snd.setVolume(150)
 
         let killer = GetKillingUnit()
@@ -72,7 +74,8 @@ function onHydraDeath()
             killer.getOwner().getCPlayer().statHydrasKilled++
 
         doAfter(REVIVE_TIME, () -> (begin
-            udg_Hydra = createUnit(Player(PLAYER_NEUTRAL_AGGRESSIVE), HYDRA, spawnPos, facing)
+            udg_Hydra = createUnit(players[CREEP_SPECIAL_OWNER], HYDRA, spawnPos, facing)
+            hydraIcon.show()
             SetUnitAcquireRange(udg_Hydra, 200)
             if creepLevel < MAX_LEVEL
                 creepLevel++
@@ -105,8 +108,13 @@ function unit.hydraBonus()
 init
  
     spawnPos = udg_Hydra.getPos()
+    hydraIcon = createUnit(players[CREEP_ICON_OWNER], HYDRA_ICON, spawnPos, angle(0))
+    SetAltMinimapIcon("UI\\Minimap\\minimap-hydra.blp")
+    UnitSetUsesAltIcon(hydraIcon, true)
     facing = udg_Hydra.getFacingAngle()
     creepLevel = 0
+
+
 
     let lvl = creepLevel
     doAfter(0) ->
@@ -118,7 +126,7 @@ init
             ..addStatAbsoluteBonus(Stat.AS, ATTACK_SPEED[lvl])
 
     CreateTrigger()
-        ..registerPlayerUnitEvent(Player(PLAYER_NEUTRAL_AGGRESSIVE), EVENT_PLAYER_UNIT_DEATH, null)
+        ..registerPlayerUnitEvent(players[CREEP_SPECIAL_OWNER], EVENT_PLAYER_UNIT_DEATH, null)
         ..addAction(function onHydraDeath)
 
     buffAcidBreath = new BuffType(false, true)

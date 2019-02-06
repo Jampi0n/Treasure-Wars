@@ -21,6 +21,10 @@ constant int HEAL_BUFF_ID = compiletime(createDummyBuff())
 
 constant int MAX_CAMP_LEVEL = 20
 
+
+/*  Normal creeps are owned by neutral hostile and will show their green creep icon.
+    Boss creeps are owned by a different player to not show creep icons.
+    Instead an icon dummy owned by neutral passive shows the creep camp.*/
 constant BUFF_MAP = new HashMap<int, BuffConfiguration>
 
 constant BuffType TURTLE_BUFF = new BuffType(true, false) //return dmg
@@ -220,6 +224,9 @@ public class CreepCamp
     private int totalLevel
     private real respawnDuration = 10
     private int campLevel = 0
+    private boolean usesIcon = false
+    private unit iconUnit = null
+    private vec2 campPosition //this is the center of the creep camp
 
     construct()
         alive = 0
@@ -227,13 +234,31 @@ public class CreepCamp
         creepCamps.add(this)
         creepTypes = new LinkedList<Creep>
 
+    private function initCampPosition()
+        var pos = vec2(0,0)
+        for c in creepTypes
+            if c.unitTypeId == REVENANT_BOSS
+                usesIcon = true
+        for c in creepTypes
+            pos+=c.spawnPos
+
+
+        campPosition = pos * (1.0/creepTypes.size())
+
+        if usesIcon
+            iconUnit = CreateUnit(players[CREEP_ICON_OWNER], REVENANT_ICON, campPosition.x, campPosition.y, 0)
+            
+    function getCampPosition() returns vec2
+        return this.campPosition
+
+    
     private function addUnitInit(unit creepUnit)
         SetUnitAcquireRange(creepUnit, 200)
         allCreeps.addUnit(creepUnit)
         alive++
         unitToCamp.put(creepUnit, this)
         creepTypes.add(new Creep(creepUnit))
-        totalLevel += creepUnit.getLevel()
+        totalLevel += UnitType.getUnitType(creepUnit.getTypeId()).getPowerLevel()
 
         let customBuff = BuffConfiguration.unitTypeToBuffConfig.get(creepUnit.getTypeId()).customBuff
         if customBuff != null
@@ -251,13 +276,19 @@ public class CreepCamp
     private function respawn()
         if campLevel < MAX_CAMP_LEVEL
             campLevel++
+
+        let owner = usesIcon ? players[CREEP_SPECIAL_OWNER] : players[CREEP_NORMAL_OWNER]
+
         for c in creepTypes
-            let creepUnit = createUnit(players[PLAYER_NEUTRAL_AGGRESSIVE], c.unitTypeId, c.spawnPos, c.facing)
+            let creepUnit = createUnit(owner, c.unitTypeId, c.spawnPos, c.facing)
             addUnitRespawn(creepUnit)
 
             let buffConfig = BuffConfiguration.unitTypeToBuffConfig.get(c.unitTypeId)
             if buffConfig != null and buffConfig.customBuff != null
-                    creepUnit.addBuff(creepUnit, -1, buffConfig.customBuff, 1)
+                creepUnit.addBuff(creepUnit, -1, buffConfig.customBuff, 1)
+
+        if usesIcon
+            iconUnit.show()
 
 
     private static function onKill(unit u, unit killer)
@@ -291,6 +322,8 @@ public class CreepCamp
                 allCreeps.removeUnit(u)
                 camp.alive--
                 if camp.alive == 0
+                    if camp.usesIcon
+                        camp.iconUnit.hide()
                     doAfter(camp.respawnDuration, -> camp.respawn())
 
             let killer = GetKillingUnit()
@@ -300,12 +333,15 @@ public class CreepCamp
                     onKill(u, Hero.getHero(pId).toUnit())
 
 
+
+
     private static function onDamage()
         let target = GetTriggerUnit()
         if(target.hasAbility(HEAL_BUFF_ID))
             target.removeAbility(HEAL_BUFF_ID)
 
-    private static function initCreep(unit creepUnit, CreepCamp camp)
+    private static function initCreep(unit creepUnit, CreepCamp camp) returns CreepCamp
+        CreepCamp ret = null
         if not allCreeps.contains(creepUnit)
 
             CreepCamp newCamp = camp == null ? new CreepCamp : camp
@@ -321,24 +357,40 @@ public class CreepCamp
                     break
                 g.removeUnit(u)
                 initCreep(u, newCamp)
+
             
             g.destr()
+            ret = newCamp
+        return ret
 
 
     protected static function initialize()
 
-        GroupEnumUnitsOfPlayer(ENUM_GROUP, players[PLAYER_NEUTRAL_AGGRESSIVE], null)
         unit u
+        GroupEnumUnitsOfPlayer(ENUM_GROUP, players[CREEP_NORMAL_OWNER], null)
+        while true
+            u = FirstOfGroup(ENUM_GROUP)
+            if u == null
+                break
+            ENUM_GROUP.removeUnit(u)
+            let initializedCamp = initCreep(u, null)
+            if initializedCamp != null
+                initializedCamp.initCampPosition()
+
+        GroupEnumUnitsOfPlayer(ENUM_GROUP, players[CREEP_SPECIAL_OWNER], null)
         while true
             u = FirstOfGroup(ENUM_GROUP)
             if u == null
                 break
             ENUM_GROUP.removeUnit(u)
             if u.getTypeId() != HYDRA and u.getTypeId() != DRAGON_TURTLE
-                initCreep(u, null)
+                let initializedCamp = initCreep(u, null)
+                if initializedCamp != null
+                    initializedCamp.initCampPosition()
 
         CreateTrigger()
-        ..registerPlayerUnitEvent(players[PLAYER_NEUTRAL_AGGRESSIVE], EVENT_PLAYER_UNIT_DEATH, null)
+        ..registerPlayerUnitEvent(players[CREEP_NORMAL_OWNER], EVENT_PLAYER_UNIT_DEATH, null)
+        ..registerPlayerUnitEvent(players[CREEP_SPECIAL_OWNER], EVENT_PLAYER_UNIT_DEATH, null)
         ..addAction(function onDeath)
 
         addOnDamageFunc(Condition(function onDamage))
