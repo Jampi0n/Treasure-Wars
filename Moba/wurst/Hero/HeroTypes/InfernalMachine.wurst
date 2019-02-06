@@ -602,27 +602,23 @@ function createHeroType(Hero hero)
 
 
     CreateTrigger()
-        ..registerUnitEvent(heroUnit, EVENT_UNIT_DEATH)
-        ..addAction(() -> (begin
-            if GetTriggerUnit().getTypeId() == HERO_INFERNAL_MACHINE_MORPH
-                let u = GetTriggerUnit()
-                onRapidEnd(u, u.getAbilityLevel(ABILITY_RAPID_FIRE))
-
+    ..registerUnitEvent(heroUnit, EVENT_UNIT_DEATH)
+    ..addAction(() -> (begin
+        if GetTriggerUnit().getTypeId() == HERO_INFERNAL_MACHINE_MORPH
+            let u = GetTriggerUnit()
+            onRapidEnd(u, u.getAbilityLevel(ABILITY_RAPID_FIRE))
     end))
 
     CreateTrigger()
-        ..registerUnitEvent(heroUnit, EVENT_UNIT_HERO_SKILL)
-        ..addAction(() -> (begin
-            let u = GetTriggerUnit()
+    ..registerUnitEvent(heroUnit, EVENT_UNIT_HERO_SKILL)
+    ..addAction(() -> (begin
+        let u = GetTriggerUnit()
 
-
-                
-
-            if GetLearnedSkill() == ABILITY_RAPID_FIRE and u.getTypeId() == HERO_INFERNAL_MACHINE_MORPH
-                let newLevel = u.getAbilityLevel(ABILITY_RAPID_FIRE)
-                onRapidEndStats(u, newLevel - 1)
-                onRapidStats(u, newLevel)
-        end))
+        if GetLearnedSkill() == ABILITY_RAPID_FIRE and u.getTypeId() == HERO_INFERNAL_MACHINE_MORPH
+            let newLevel = u.getAbilityLevel(ABILITY_RAPID_FIRE)
+            onRapidEndStats(u, newLevel - 1)
+            onRapidStats(u, newLevel)
+    end))
 
 init
     heroType = new HeroType(HERO_INFERNAL_MACHINE, Icons.bTNInfernalCannon, 8, true)

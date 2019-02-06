@@ -18,39 +18,39 @@ function itemSkullAxe(int itemId)
     int str = 18
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} strength|nRestores {1} hit points and {2} mana points per kill.".format(
-                str.toString(), hp.toString(), mana.toString()
-            ))
-            ..setGoldCost(1900)
-            ..addRequirement(ITEM_ID_WAR_AXE)
-            ..addRequirement(ITEM_ID_SKULL)
+        ..setDescription("+ {0} strength|nRestores {1} hit points and {2} mana points per kill.".format(
+            str.toString(), hp.toString(), mana.toString()
+        ))
+        ..setGoldCost(1900)
+        ..addRequirement(ITEM_ID_WAR_AXE)
+        ..addRequirement(ITEM_ID_SKULL)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.STR, str)
+        ..addStatBonusAbsolute(Stat.STR, str)
         CreateTrigger()
-            ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
-            ..addAction(() -> (begin
-                let killer = GetKillingUnit()
-                let count = killer.countItemsOfType(convertItemId(ITEM_ID_SKULL_AXE))
-                if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and count!=0
-                    killer.healMana(killer, 10. * count)
-                    killer.healHP(killer, 16. * count)
-                    killer.addEffect(Abilities.spiritTouchTarget, "origin").destr()
-                    killer.addEffect(Abilities.vampiricAuraTarget, "origin").destr()
-            end))
+        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
+        ..addAction(() -> (begin
+            let killer = GetKillingUnit()
+            let count = killer.countItemsOfType(convertItemId(ITEM_ID_SKULL_AXE))
+            if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and count!=0
+                killer.healMana(killer, 10. * count)
+                killer.healHP(killer, 16. * count)
+                killer.addEffect(Abilities.spiritTouchTarget, "origin").destr()
+                killer.addEffect(Abilities.vampiricAuraTarget, "origin").destr()
+        end))
 
 function itemGauntletOfProtection(int itemId)
     int ar = 30
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} armor".format(
-                ar.toString()
-            ))
-            ..setGoldCost(1450)
-            ..addRequirement(ITEM_ID_PLATED_GAUNTLETS)
+        ..setDescription("+ {0} armor".format(
+            ar.toString()
+        ))
+        ..setGoldCost(1450)
+        ..addRequirement(ITEM_ID_PLATED_GAUNTLETS)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.AR, ar)
+        ..addStatBonusAbsolute(Stat.AR, ar)
 
 function itemHeavyBoots(int itemId)
     int ms = 40
@@ -58,25 +58,25 @@ function itemHeavyBoots(int itemId)
     int hp = 225
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+{1} armor\n+ {2} hit points\n+ {0} movement speed|nMovement speed bonus from boots does not stack.".format(
-                ms.toString(), ar.toString(), hp.toString()
-            ))
-            ..setGoldCost(2400)
-            ..addRequirement(ITEM_ID_LIGHT_BOOTS)
+        ..setDescription("+{1} armor\n+ {2} hit points\n+ {0} movement speed|nMovement speed bonus from boots does not stack.".format(
+            ms.toString(), ar.toString(), hp.toString()
+        ))
+        ..setGoldCost(2400)
+        ..addRequirement(ITEM_ID_LIGHT_BOOTS)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.AR, ar)
-            ..addStatBonusAbsolute(Stat.HP, hp)
+        ..addStatBonusAbsolute(Stat.AR, ar)
+        ..addStatBonusAbsolute(Stat.HP, hp)
 
-            ..addPickupFunction(()->(begin
-                if isUnique() and hasNot(convertItemId(ITEM_ID_LIGHT_BOOTS)) and hasNot(convertItemId(ITEM_ID_BOOTS_OF_DARKNESS))
-                    getTriggerHero().wrapper().addStatAbsoluteBonus(Stat.MS, ms)
-            end))
+        ..addPickupFunction(()->(begin
+            if isUnique() and hasNot(convertItemId(ITEM_ID_LIGHT_BOOTS)) and hasNot(convertItemId(ITEM_ID_BOOTS_OF_DARKNESS))
+                getTriggerHero().wrapper().addStatAbsoluteBonus(Stat.MS, ms)
+        end))
 
-            ..addDropFunction(()->(begin
-                if isUnique() and hasNot(convertItemId(ITEM_ID_LIGHT_BOOTS)) and hasNot(convertItemId(ITEM_ID_BOOTS_OF_DARKNESS))
-                    getTriggerHero().wrapper().addStatAbsoluteBonus(Stat.MS, -ms)
-            end))
+        ..addDropFunction(()->(begin
+            if isUnique() and hasNot(convertItemId(ITEM_ID_LIGHT_BOOTS)) and hasNot(convertItemId(ITEM_ID_BOOTS_OF_DARKNESS))
+                getTriggerHero().wrapper().addStatAbsoluteBonus(Stat.MS, -ms)
+        end))
 
 function itemSpikedMail(int itemId)
     int ar = 12
@@ -84,16 +84,16 @@ function itemSpikedMail(int itemId)
     int spikeDmg = 20
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} armor\n+ {1} hit points|nEnemies attacking the hero will take {2} damage.".format(
-                ar.toString(), hp.toString(), spikeDmg.toString()
-            ))
-            ..setGoldCost(1800)
-            ..addRequirement(ITEM_ID_SPIKES)
-            ..addRequirement(ITEM_ID_LEATHER_ARMOR)
+        ..setDescription("+ {0} armor\n+ {1} hit points|nEnemies attacking the hero will take {2} damage.".format(
+            ar.toString(), hp.toString(), spikeDmg.toString()
+        ))
+        ..setGoldCost(1800)
+        ..addRequirement(ITEM_ID_SPIKES)
+        ..addRequirement(ITEM_ID_LEATHER_ARMOR)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.AR, ar)
-            ..addStatBonusAbsolute(Stat.HP, hp)
+        ..addStatBonusAbsolute(Stat.AR, ar)
+        ..addStatBonusAbsolute(Stat.HP, hp)
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             if target.isType(UNIT_TYPE_HERO) and not attacker.isType(UNIT_TYPE_STRUCTURE)
                 let dmg = target.countItemsOfType(convertItemId(itemId)) * spikeDmg
@@ -105,16 +105,16 @@ function itemHeavyArmor(int itemId)
     int hp = 260
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} armor\n+ {1} hit points".format(
-                ar.toString(), hp.toString()
-            ))
-            ..setGoldCost(1850)
-            ..addRequirement(ITEM_ID_LEATHER_ARMOR)
-            ..addRequirement(ITEM_ID_GEM_OF_HEALTH)
+        ..setDescription("+ {0} armor\n+ {1} hit points".format(
+            ar.toString(), hp.toString()
+        ))
+        ..setGoldCost(1850)
+        ..addRequirement(ITEM_ID_LEATHER_ARMOR)
+        ..addRequirement(ITEM_ID_GEM_OF_HEALTH)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.AR, ar)
-            ..addStatBonusAbsolute(Stat.HP, hp)
+        ..addStatBonusAbsolute(Stat.AR, ar)
+        ..addStatBonusAbsolute(Stat.HP, hp)
 
 constant int MACE_BUFF_ID = compiletime(createAuraBuff("Bleeding", "This unit is bleeding; it takes damage over time.", "BTNMaceStrikeGlowless"))
 constant int MACE_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, MACE_BUFF_ID, "", ""))
@@ -126,19 +126,19 @@ function itemMace(int itemId)
     if compiletime
 
         itemId.getTypeDef()
-            ..setDescription("+ {0} strength|nAttacks deal {1} bleeding damage over {2} seconds. This effect does not stack.".format(
-                str.toString(), bleedDmg.toString(), bleedDuration.toString()
-            ))
-            ..setGoldCost(1900)
-            ..addRequirement(ITEM_ID_SPIKES)
-            ..addRequirement(ITEM_ID_WAR_AXE)
+        ..setDescription("+ {0} strength|nAttacks deal {1} bleeding damage over {2} seconds. This effect does not stack.".format(
+            str.toString(), bleedDmg.toString(), bleedDuration.toString()
+        ))
+        ..setGoldCost(1900)
+        ..addRequirement(ITEM_ID_SPIKES)
+        ..addRequirement(ITEM_ID_WAR_AXE)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.STR, str)
+        ..addStatBonusAbsolute(Stat.STR, str)
 
         BuffType maceBuff = new BuffType(false, false)
         var abilityList = new LinkedList<int>
-            ..add(MACE_ABILTIY_ID)
+        ..add(MACE_ABILTIY_ID)
         maceBuff.setup(abilityList, MACE_BUFF_ID)
         maceBuff.setPeriodicTime(1)
         maceBuff.addPeriodicFunction((Buff thisBuff)-> (begin
@@ -159,17 +159,17 @@ function itemSteelArmor(int itemId)
     int hp = 115
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} armor\n+ {1} willpower\n+ {2} hit points".format(
-                ar.toString(), wp.toString(), hp.toString()
-            ))
-            ..setGoldCost(1700)
-            ..addRequirement(ITEM_ID_MAGE_GLOVES)
-            ..addRequirement(ITEM_ID_LEATHER_ARMOR)
+        ..setDescription("+ {0} armor\n+ {1} willpower\n+ {2} hit points".format(
+            ar.toString(), wp.toString(), hp.toString()
+        ))
+        ..setGoldCost(1700)
+        ..addRequirement(ITEM_ID_MAGE_GLOVES)
+        ..addRequirement(ITEM_ID_LEATHER_ARMOR)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.AR, ar)
-            ..addStatBonusAbsolute(Stat.AGI, wp)
-            ..addStatBonusAbsolute(Stat.HP, hp)
+        ..addStatBonusAbsolute(Stat.AR, ar)
+        ..addStatBonusAbsolute(Stat.AGI, wp)
+        ..addStatBonusAbsolute(Stat.HP, hp)
 
 constant int HAMMER_BUFF_ID = compiletime(createAuraBuff("Break Armor", "This unit's armor is broken; it has reduced armor.", "BTNINV_Hammer_10"))
 constant int HAMMER_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, HAMMER_BUFF_ID, "", ""))
@@ -181,19 +181,19 @@ function itemHammerOfMight(int itemId)
     int armorDuration = 6
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} strength|nAttacks reduce the target's armor by {1}% for {2} seconds.".format(
-                str.toString(), armorDmg.toString(), armorDuration.toString()
-            ))
-            ..setGoldCost(1900)
-            ..addRequirement(ITEM_ID_SPIKES)
-            ..addRequirement(ITEM_ID_HAMMER_OF_STRENGTH)
+        ..setDescription("+ {0} strength|nAttacks reduce the target's armor by {1}% for {2} seconds.".format(
+            str.toString(), armorDmg.toString(), armorDuration.toString()
+        ))
+        ..setGoldCost(1900)
+        ..addRequirement(ITEM_ID_SPIKES)
+        ..addRequirement(ITEM_ID_HAMMER_OF_STRENGTH)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.STR, str)
+        ..addStatBonusAbsolute(Stat.STR, str)
 
         BuffType hammerBuff = new BuffType(false, false)
         var abilityList = new LinkedList<int>
-            ..add(HAMMER_ABILTIY_ID)
+        ..add(HAMMER_ABILTIY_ID)
         hammerBuff.setup(abilityList, HAMMER_BUFF_ID)
         hammerBuff.addFirstFunction((Buff thisBuff) -> (begin
             thisBuff.getTarget().wrapper().addStatRelativeBonus(Stat.AR, -armorDmg*10)
@@ -241,41 +241,41 @@ function itemWarDrum(int itemId)
     int msBonus = 40
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("Increases nearby unit's attack speed by {0}% and movement speed by {1}. This effect does not stack".format(
-                asBonus.toString(), msBonus.toString()
-            ))
-            ..setGoldCost(3100)
-            ..addRequirement(ITEM_ID_GLOVES_OF_HASTE)
-            ..addRequirement(ITEM_ID_LIGHT_BOOTS)
+        ..setDescription("Increases nearby unit's attack speed by {0}% and movement speed by {1}. This effect does not stack".format(
+            asBonus.toString(), msBonus.toString()
+        ))
+        ..setGoldCost(3100)
+        ..addRequirement(ITEM_ID_GLOVES_OF_HASTE)
+        ..addRequirement(ITEM_ID_LIGHT_BOOTS)
     else
         itemId.getItem()
-            ..addPickupFunction(() -> (begin
-                if isUnique() and hasNot(convertItemId(ITEM_ID_WAR_HORN))
-                    auraHeroes.addUnit(getTriggerHero())
-            end))
-            ..addDropFunction(() -> (begin
-                if isUnique() and hasNot(convertItemId(ITEM_ID_WAR_HORN))
-                    auraHeroes.removeUnit(getTriggerHero())
-            end))
+        ..addPickupFunction(() -> (begin
+            if isUnique() and hasNot(convertItemId(ITEM_ID_WAR_HORN))
+                auraHeroes.addUnit(getTriggerHero())
+        end))
+        ..addDropFunction(() -> (begin
+            if isUnique() and hasNot(convertItemId(ITEM_ID_WAR_HORN))
+                auraHeroes.removeUnit(getTriggerHero())
+        end))
 
         var abilityList = new LinkedList<int>
-            ..add(WAR_DRUM_ABILTIY_ID)
+        ..add(WAR_DRUM_ABILTIY_ID)
         BUFF_WAR_DRUM.setup(abilityList, WAR_DRUM_BUFF_ID)
         BUFF_WAR_DRUM.addFirstFunction((Buff thisBuff) -> (begin
             thisBuff.getTarget().wrapper()
-                ..addStatAbsoluteBonus(Stat.MS, msBonus)
-                ..addStatAbsoluteBonus(Stat.AS, asBonus)
+            ..addStatAbsoluteBonus(Stat.MS, msBonus)
+            ..addStatAbsoluteBonus(Stat.AS, asBonus)
         end))
 
         BUFF_WAR_DRUM.addEndFunction((Buff thisBuff) -> (begin
             thisBuff.getTarget().wrapper()
-                ..addStatAbsoluteBonus(Stat.MS, -msBonus)
-                ..addStatAbsoluteBonus(Stat.AS, -asBonus)
+            ..addStatAbsoluteBonus(Stat.MS, -msBonus)
+            ..addStatAbsoluteBonus(Stat.AS, -asBonus)
         end))
 
         CreateTrigger()
-            ..registerTimerEvent(0.25, true)
-            ..addAction(() -> (begin
+        ..registerTimerEvent(0.25, true)
+        ..addAction(() -> (begin
             ForGroup(auraHeroes, function checkAura)
         end) )
     
@@ -286,27 +286,27 @@ function itemWarHorn(int itemId)
     int unitDmg = 25
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+{0} strength|nDeals {1} additional damage to units.|nIncreases nearby unit's strength by {2}%.".format(
-                str.toString(), unitDmg.toString(), adBonus.toString()
-            ))
-            ..setGoldCost(3100)
-            ..addRequirement(ITEM_ID_HAMMER_OF_STRENGTH)
-            ..addRequirement(ITEM_ID_WAR_AXE)
-            ..addRequirement(ITEM_ID_BOW)
+        ..setDescription("+{0} strength|nDeals {1} additional damage to units.|nIncreases nearby unit's strength by {2}%.".format(
+            str.toString(), unitDmg.toString(), adBonus.toString()
+        ))
+        ..setGoldCost(3100)
+        ..addRequirement(ITEM_ID_HAMMER_OF_STRENGTH)
+        ..addRequirement(ITEM_ID_WAR_AXE)
+        ..addRequirement(ITEM_ID_BOW)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.STR, str)
-            ..addPickupFunction(() -> (begin
-                if isUnique() and hasNot(convertItemId(ITEM_ID_WAR_DRUM))
-                    auraHeroes.addUnit(getTriggerHero())
-            end))
-            ..addDropFunction(() -> (begin
-                if isUnique() and hasNot(convertItemId(ITEM_ID_WAR_DRUM))
-                    auraHeroes.removeUnit(getTriggerHero())
-            end))
+        ..addStatBonusAbsolute(Stat.STR, str)
+        ..addPickupFunction(() -> (begin
+            if isUnique() and hasNot(convertItemId(ITEM_ID_WAR_DRUM))
+                auraHeroes.addUnit(getTriggerHero())
+        end))
+        ..addDropFunction(() -> (begin
+            if isUnique() and hasNot(convertItemId(ITEM_ID_WAR_DRUM))
+                auraHeroes.removeUnit(getTriggerHero())
+        end))
 
         var abilityList = new LinkedList<int>
-            ..add(WAR_HORN_ABILTIY_ID)
+        ..add(WAR_HORN_ABILTIY_ID)
         BUFF_WAR_HORN.setup(abilityList, WAR_HORN_BUFF_ID)
         BUFF_WAR_HORN.addFirstFunction((Buff thisBuff) -> (begin
             let target = thisBuff.getTarget()
@@ -335,15 +335,15 @@ function itemHeavyHelmet(int itemId)
     int hr = 50
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} armor\n+ {1} hit point regeneration per 10 seconds".format(
-                ar.toString(), hr.toString()
-            ))
-            ..setGoldCost(1600)
-            ..addRequirement(ITEM_ID_RING_OF_HEALTH)
+        ..setDescription("+ {0} armor\n+ {1} hit point regeneration per 10 seconds".format(
+            ar.toString(), hr.toString()
+        ))
+        ..setGoldCost(1600)
+        ..addRequirement(ITEM_ID_RING_OF_HEALTH)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.AR, ar)
-            ..addStatBonusAbsolute(Stat.HR, hr)
+        ..addStatBonusAbsolute(Stat.AR, ar)
+        ..addStatBonusAbsolute(Stat.HR, hr)
 
 function itemRavenSword(int itemId)
     int voidDmg = 16
@@ -351,16 +351,16 @@ function itemRavenSword(int itemId)
     int str = 15
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} strength\n+ {1}% attack speed|nDeals {2} additional void damage.".format(
-                str.toString(), as.toString(), voidDmg.toString()
-            ))
-            ..setGoldCost(1900)
-            ..addRequirement(ITEM_ID_DAGGER)
-            ..addRequirement(ITEM_ID_GEM_OF_DARKNESS)
+        ..setDescription("+ {0} strength\n+ {1}% attack speed|nDeals {2} additional void damage.".format(
+            str.toString(), as.toString(), voidDmg.toString()
+        ))
+        ..setGoldCost(1900)
+        ..addRequirement(ITEM_ID_DAGGER)
+        ..addRequirement(ITEM_ID_GEM_OF_DARKNESS)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.STR, str)
-            ..addStatBonusAbsolute(Stat.AS, as)
+        ..addStatBonusAbsolute(Stat.STR, str)
+        ..addStatBonusAbsolute(Stat.AS, as)
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             if attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
                 attacker.dealDamage(target, voidDmg.toReal() * attacker.countItemsOfType(convertItemId(itemId)) , ReductionType.NONE)

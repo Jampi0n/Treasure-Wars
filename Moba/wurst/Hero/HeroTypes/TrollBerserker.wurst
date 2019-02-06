@@ -460,24 +460,24 @@ function initHeroType()
 function createHeroType(Hero hero)
     let heroUnit = hero.toUnit()
     CreateTrigger()
-        ..registerUnitEvent(heroUnit, EVENT_UNIT_DEATH)
-        ..addAction(() -> (begin
-            if GetTriggerUnit().getTypeId() == HERO_TROLL_BERSERKER_MELEE
-                let u = GetTriggerUnit()
-                onSwitchToRanged(u, u.getAbilityLevel(ABILITY_SWITCH_WEAPONS))
+    ..registerUnitEvent(heroUnit, EVENT_UNIT_DEATH)
+    ..addAction(() -> (begin
+        if GetTriggerUnit().getTypeId() == HERO_TROLL_BERSERKER_MELEE
+            let u = GetTriggerUnit()
+            onSwitchToRanged(u, u.getAbilityLevel(ABILITY_SWITCH_WEAPONS))
 
     end))
 
     CreateTrigger()
-        ..registerUnitEvent(heroUnit, EVENT_UNIT_HERO_SKILL)
-        ..addAction(() -> (begin
-            let u = GetTriggerUnit()
+    ..registerUnitEvent(heroUnit, EVENT_UNIT_HERO_SKILL)
+    ..addAction(() -> (begin
+        let u = GetTriggerUnit()
 
-            if GetLearnedSkill() == ABILITY_SWITCH_WEAPONS and u.getTypeId() == HERO_TROLL_BERSERKER_MELEE
-                let newLevel = u.getAbilityLevel(ABILITY_SWITCH_WEAPONS)
-                onRangedStats(u, newLevel - 1)
-                onMeleeStats(u, newLevel)
-        end))
+        if GetLearnedSkill() == ABILITY_SWITCH_WEAPONS and u.getTypeId() == HERO_TROLL_BERSERKER_MELEE
+            let newLevel = u.getAbilityLevel(ABILITY_SWITCH_WEAPONS)
+            onRangedStats(u, newLevel - 1)
+            onMeleeStats(u, newLevel)
+    end))
 
 init
     heroType = new HeroType(HERO_TROLL_BERSERKER, Icons.bTNForestTroll, 7, true)

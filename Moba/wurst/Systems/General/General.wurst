@@ -318,10 +318,10 @@ init
     if DEBUG_MODE
         doAfter(1, () -> print("DEBUG_MODE is enabled."))
         CreateTrigger()
-            ..registerPlayerChatEvent(players[0], "buff", false)
-            ..addAction(() -> (begin
-                debugBuff()
-            end))
+        ..registerPlayerChatEvent(players[0], "buff", false)
+        ..addAction(() -> (begin
+            debugBuff()
+        end))
 
     //prevent teamkill
     let trg = CreateTrigger()

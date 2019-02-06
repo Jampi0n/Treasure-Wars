@@ -286,31 +286,31 @@ init
     if DEBUG_MODE
         // you can spawn new heroes in DEBUG_MODE
         CreateTrigger()
-            ..registerPlayerChatEvent(players[0], "hero ", false)
-            ..addAction(() -> (begin
-                let i = GetEventPlayerChatString().substring(5).toInt()
+        ..registerPlayerChatEvent(players[0], "hero ", false)
+        ..addAction(() -> (begin
+            let i = GetEventPlayerChatString().substring(5).toInt()
 
 
 
-                if i >= 0 and i<=MAX_HERO_COUNT-1 and Hero.getHero(i) == null
+            if i >= 0 and i<=MAX_HERO_COUNT-1 and Hero.getHero(i) == null
 
-                    
+                
 
-                    new CPlayer(players[i], i<=4?Team.TEAM1:Team.TEAM2, PlayerType.HERO)
-                    createRandomHero(getCPlayer(i), false)
+                new CPlayer(players[i], i<=4?Team.TEAM1:Team.TEAM2, PlayerType.HERO)
+                createRandomHero(getCPlayer(i), false)
 
 
-                    if not itemCarry
-                        itemCarry = true
-                        let carry = createUnit(players[0], 'Hmkg', gg_rct_BrownAltar.getLeftBot(), angle(0))
-                        UnitAddType(carry, UNIT_TYPE_ANCIENT)
-                        carry.addBuff(carry, -1, DISARMED, 1)
+                if not itemCarry
+                    itemCarry = true
+                    let carry = createUnit(players[0], 'Hmkg', gg_rct_BrownAltar.getLeftBot(), angle(0))
+                    UnitAddType(carry, UNIT_TYPE_ANCIENT)
+                    carry.addBuff(carry, -1, DISARMED, 1)
 
-                    SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_VISION, true)
-                    SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_CONTROL, true)
-                    SetPlayerAlliance(players[0], players[i], ALLIANCE_SHARED_CONTROL, true)
-                    SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_ADVANCED_CONTROL, true)
-            end))
+                SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_VISION, true)
+                SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_CONTROL, true)
+                SetPlayerAlliance(players[0], players[i], ALLIANCE_SHARED_CONTROL, true)
+                SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_ADVANCED_CONTROL, true)
+        end))
 
 
         CreateTrigger()
@@ -399,54 +399,54 @@ init
 
         // teleport heroes mid
         CreateTrigger()
-            ..registerPlayerChatEvent(players[0], "mid ", false)
-            ..addAction(() -> (begin
-                let i = GetEventPlayerChatString().substring(4).toInt()
-                let hero = Hero.getHero(i)
-                if hero != null
-                    hero.toUnit().setXY(gg_rct_CenterMid.getCenter())
-            end))
+        ..registerPlayerChatEvent(players[0], "mid ", false)
+        ..addAction(() -> (begin
+            let i = GetEventPlayerChatString().substring(4).toInt()
+            let hero = Hero.getHero(i)
+            if hero != null
+                hero.toUnit().setXY(gg_rct_CenterMid.getCenter())
+        end))
 
         CreateTrigger()
-            ..registerPlayerChatEvent(players[0], "mid", true)
-            ..addAction(() -> (begin
-                let hero = Hero.getHero(0)
-                if hero != null
-                    hero.toUnit().setXY(gg_rct_CenterMid.getCenter())
-            end))
+        ..registerPlayerChatEvent(players[0], "mid", true)
+        ..addAction(() -> (begin
+            let hero = Hero.getHero(0)
+            if hero != null
+                hero.toUnit().setXY(gg_rct_CenterMid.getCenter())
+        end))
 
         CreateTrigger()
-            ..registerPlayerChatEvent(players[0], "g", true)
-            ..addAction(() -> (begin
-                players[0].addGold(100000)
-            end))
+        ..registerPlayerChatEvent(players[0], "g", true)
+        ..addAction(() -> (begin
+            players[0].addGold(100000)
+        end))
 
         CreateTrigger()
-            ..registerPlayerChatEvent(players[0], "castle", true)
-            ..addAction(() -> (begin
-                let hero = Hero.getHero(0)
-                if hero != null
-                    hero.toUnit().setXY(gg_rct_BrownCastle.getCenter())
-                    hero.toUnit().wrapper().addStatAbsoluteBonus(Stat.STR, 10000)
-                    hero.toUnit().wrapper().addStatAbsoluteBonus(Stat.AS, 200)
-                    hero.toUnit().wrapper().addStatAbsoluteBonus(Stat.HP, 10000)
-            end))
+        ..registerPlayerChatEvent(players[0], "castle", true)
+        ..addAction(() -> (begin
+            let hero = Hero.getHero(0)
+            if hero != null
+                hero.toUnit().setXY(gg_rct_BrownCastle.getCenter())
+                hero.toUnit().wrapper().addStatAbsoluteBonus(Stat.STR, 10000)
+                hero.toUnit().wrapper().addStatAbsoluteBonus(Stat.AS, 200)
+                hero.toUnit().wrapper().addStatAbsoluteBonus(Stat.HP, 10000)
+        end))
 
         CreateTrigger()
-            ..registerPlayerChatEvent(players[0], "lvl ", false)
-            ..addAction(() -> (begin
-                let i = GetEventPlayerChatString().substring(4).toInt()
-                let hero = Hero.getHero(i)
-                if hero != null
-                    hero.toUnit().setLevel(25, false)
-            end))
+        ..registerPlayerChatEvent(players[0], "lvl ", false)
+        ..addAction(() -> (begin
+            let i = GetEventPlayerChatString().substring(4).toInt()
+            let hero = Hero.getHero(i)
+            if hero != null
+                hero.toUnit().setLevel(25, false)
+        end))
 
         CreateTrigger()
-            ..registerPlayerChatEvent(players[0], "lvl", true)
-            ..addAction(() -> (begin
-                let hero = Hero.getHero(0)
-                if hero != null
-                    hero.toUnit().setLevel(25, false)
-            end))
+        ..registerPlayerChatEvent(players[0], "lvl", true)
+        ..addAction(() -> (begin
+            let hero = Hero.getHero(0)
+            if hero != null
+                hero.toUnit().setLevel(25, false)
+        end))
 
      //SetHeroLevel(hero.toUnit(), 25, true)

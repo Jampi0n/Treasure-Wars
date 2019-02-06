@@ -359,15 +359,15 @@ function regenerate()
                 print(u.wrapper().statsTotalBonus[Stat.MR.toInt()]/100)*/
 
 init
-    onUnitIndex(() -> UnitWrapper.create(getIndexedUnit()))
-    onUnitDeindex(() -> getDeindexedUnit().wrapper().destr() )
+    onUnitIndex(() -> UnitWrapper.create(getIndexingUnit()))
+    onUnitDeindex(() -> getIndexingUnit().wrapper().destr() )
 
     CreateTrigger()
-        ..addAction(function regenerate)
-        ..registerTimerEvent(0.1, true)
+    ..addAction(function regenerate)
+    ..registerTimerEvent(0.1, true)
 
     CreateTrigger()
-        ..registerPlayerChatEvent(players[0], "-s", true)
-        ..addAction(() -> (begin
-            Hero.getHero(players[0]).toUnit().wrapper().printStats()
-        end))
+    ..registerPlayerChatEvent(players[0], "-s", true)
+    ..addAction(() -> (begin
+        Hero.getHero(players[0]).toUnit().wrapper().printStats()
+    end))

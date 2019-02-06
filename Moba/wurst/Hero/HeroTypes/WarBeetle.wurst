@@ -488,16 +488,16 @@ function initHeroType()
 function createHeroType(Hero hero)
     let heroUnit = hero.toUnit()
     CreateTrigger()
-        ..registerUnitEvent(heroUnit, EVENT_UNIT_HERO_SKILL)
-        ..addAction(() -> (begin
-            let u = GetTriggerUnit()
-            if GetLearnedSkill() == ABILITY_HARD_SHELL
-                let newLevel = u.getAbilityLevel(ABILITY_HARD_SHELL)
-                if newLevel!= 1
-                    u.wrapper().addStatAbsoluteBonus(Stat.AR, -HARD_SHELL_ARMOR[newLevel-2])
+    ..registerUnitEvent(heroUnit, EVENT_UNIT_HERO_SKILL)
+    ..addAction(() -> (begin
+        let u = GetTriggerUnit()
+        if GetLearnedSkill() == ABILITY_HARD_SHELL
+            let newLevel = u.getAbilityLevel(ABILITY_HARD_SHELL)
+            if newLevel!= 1
+                u.wrapper().addStatAbsoluteBonus(Stat.AR, -HARD_SHELL_ARMOR[newLevel-2])
 
-                u.wrapper().addStatAbsoluteBonus(Stat.AR, HARD_SHELL_ARMOR[newLevel-1])
-        end))
+            u.wrapper().addStatAbsoluteBonus(Stat.AR, HARD_SHELL_ARMOR[newLevel-1])
+    end))
 
 
 

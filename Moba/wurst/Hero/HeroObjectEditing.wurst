@@ -49,7 +49,7 @@ public function real.str() returns string
     return this.toInt().toString()
 
 public function int.str() returns string
-        return this.toString()
+    return this.toString()
 
 public function AbilityDefinition.setLearnString(string intro, LevelString levelString)
     string learnString = intro+"\n"
@@ -124,25 +124,25 @@ public function AbilityDefinitionIllidanChannel.setupChannel(TargetType targetTy
             this.setOptions(lvl, 3)
 
 public function AbilityDefinition.setupIcon(string name)
-        string sNormal = name
-        string sLearn
+    string sNormal = name
+    string sLearn
 
-        if name.length() < 20 or not name.startsWith("ReplaceableTextures")
-            sNormal = "ReplaceableTextures\\CommandButtons\\" + sNormal
-        if not name.endsWith(".blp")
-            sNormal += ".blp"
+    if name.length() < 20 or not name.startsWith("ReplaceableTextures")
+        sNormal = "ReplaceableTextures\\CommandButtons\\" + sNormal
+    if not name.endsWith(".blp")
+        sNormal += ".blp"
 
-            
-        if name.startsWith("PAS")
-            sLearn = "ReplaceableTextures\\CommandButtons\\BTN" + name.substring(3) + ".blp"
-        else
-            sLearn = sNormal
-
-
+        
+    if name.startsWith("PAS")
+        sLearn = "ReplaceableTextures\\CommandButtons\\BTN" + name.substring(3) + ".blp"
+    else
+        sLearn = sNormal
 
 
-        this.setIconResearch(sLearn)
-        this.setIconNormal(sNormal)
+
+
+    this.setIconResearch(sLearn)
+    this.setIconNormal(sNormal)
 
 public function AbilityDefinition.setTurnOff(string name, string hotkey)
     for i = 1 to 5
