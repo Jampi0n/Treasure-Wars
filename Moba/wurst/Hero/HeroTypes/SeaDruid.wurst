@@ -33,10 +33,10 @@ function ancientKnowledge(int abilityId)
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(0)
     tooltip.setLearnString("Increases his maximum hit points for a portion of his maximum mana ponits and increases his maximum mana points by "+
-        "a portion of his maximum hit points.", (int lvl) -> (begin
-            return "1 hit point for every {0} mana points, 1 mana point for every {1} hit points".format(
-            ANCIENT_KNOWLEDGE_HP_BONUS[lvl-1].toExactString(), ANCIENT_KNOWLEDGE_MP_BONUS[lvl-1].toExactString())
-        end) )
+    "a portion of his maximum hit points.", (int lvl) -> (begin
+        return "1 hit point for every {0} mana points, 1 mana point for every {1} hit points".format(
+        ANCIENT_KNOWLEDGE_HP_BONUS[lvl-1].toExactString(), ANCIENT_KNOWLEDGE_MP_BONUS[lvl-1].toExactString())
+    end) )
     for lvl = 1 to 5
         tooltip.setNormalString(false, lvl, ("Increases maximum hit points by 1 for every {0} points of his maximum mana points and "+
         "increases his maximum mana points by 1 for every {1} points of his maximum hit points.").format(
@@ -475,28 +475,28 @@ function initHeroType()
     setupStats()
     setupTooltips()
     heroType
-        ..setSkillBuild("QWEQQWEQWQEWEWE")
-        ..setBonusCalculation((UnitWrapper whichWrapper, Stat whichStat) -> (begin
-            let lvl = whichWrapper.toUnit().getAbilityLevel(ABILITY_ANCIENT_KNOWLEDGE)
-            if lvl == 0
+    ..setSkillBuild("QWEQQWEQWQEWEWE")
+    ..setBonusCalculation((UnitWrapper whichWrapper, Stat whichStat) -> (begin
+        let lvl = whichWrapper.toUnit().getAbilityLevel(ABILITY_ANCIENT_KNOWLEDGE)
+        if lvl == 0
+            UnitWrapper.defaultCalcualtion.calculate(whichWrapper, whichStat)
+        else
+            if whichStat == Stat.HP or whichStat == Stat.MP //if hp or mana was changed, calculate special values.
+                let hp = Stat.HP.toInt()
+                let mp = Stat.MP.toInt()
+                UnitWrapper.defaultCalcualtion.calculate(whichWrapper, Stat.HP)
+                UnitWrapper.defaultCalcualtion.calculate(whichWrapper, Stat.MP)
+                let hpBonus = whichWrapper.statsTotalBonus[hp]
+                let mpBonus = whichWrapper.statsTotalBonus[mp]
+                //print("hpBonus = "+hpBonus.toString()+", mpBonus = "+mpBonus.toString())
+                whichWrapper.statsTotalBonus[hp] = hpBonus + ((1/ANCIENT_KNOWLEDGE_HP_BONUS[lvl-1]) * (mpBonus + whichWrapper.getStatBaseValue(Stat.MP)) ).toInt()
+                whichWrapper.statsTotalBonus[mp] = mpBonus + ((1/ANCIENT_KNOWLEDGE_MP_BONUS[lvl-1]) * (hpBonus + whichWrapper.getStatBaseValue(Stat.HP)) ).toInt()
+                //print("newHpBonus = "+whichWrapper.statsTotalBonus[hp].toString()+", newHpBonus = "+whichWrapper.statsTotalBonus[mp].toString())
+                whichWrapper.applyTotalStatBonus(Stat.HP)
+                whichWrapper.applyTotalStatBonus(Stat.MP)
+            else //else calculate default values
                 UnitWrapper.defaultCalcualtion.calculate(whichWrapper, whichStat)
-            else
-                if whichStat == Stat.HP or whichStat == Stat.MP //if hp or mana was changed, calculate special values.
-                    let hp = Stat.HP.toInt()
-                    let mp = Stat.MP.toInt()
-                    UnitWrapper.defaultCalcualtion.calculate(whichWrapper, Stat.HP)
-                    UnitWrapper.defaultCalcualtion.calculate(whichWrapper, Stat.MP)
-                    let hpBonus = whichWrapper.statsTotalBonus[hp]
-                    let mpBonus = whichWrapper.statsTotalBonus[mp]
-                    //print("hpBonus = "+hpBonus.toString()+", mpBonus = "+mpBonus.toString())
-                    whichWrapper.statsTotalBonus[hp] = hpBonus + ((1/ANCIENT_KNOWLEDGE_HP_BONUS[lvl-1]) * (mpBonus + whichWrapper.getStatBaseValue(Stat.MP)) ).toInt()
-                    whichWrapper.statsTotalBonus[mp] = mpBonus + ((1/ANCIENT_KNOWLEDGE_MP_BONUS[lvl-1]) * (hpBonus + whichWrapper.getStatBaseValue(Stat.HP)) ).toInt()
-                    //print("newHpBonus = "+whichWrapper.statsTotalBonus[hp].toString()+", newHpBonus = "+whichWrapper.statsTotalBonus[mp].toString())
-                    whichWrapper.applyTotalStatBonus(Stat.HP)
-                    whichWrapper.applyTotalStatBonus(Stat.MP)
-                else //else calculate default values
-                    UnitWrapper.defaultCalcualtion.calculate(whichWrapper, whichStat)
-        end))
+    end))
     delayInit(5) ->
         heroType
             ..addOnSpellCastFunc(function onSpellCast)
@@ -566,17 +566,17 @@ function initHeroType()
 
 function createHeroType(Hero hero)
     CreateTrigger()
-        ..addAction(() -> (begin
-            GetTriggerUnit().wrapper()
-                ..updateTotalStatBonus(Stat.HP)
-                ..updateTotalStatBonus(Stat.MP)
-        end))
-        ..registerUnitEvent(hero.toUnit(), EVENT_UNIT_HERO_SKILL)
+    ..addAction(() -> (begin
+        GetTriggerUnit().wrapper()
+            ..updateTotalStatBonus(Stat.HP)
+            ..updateTotalStatBonus(Stat.MP)
+    end))
+    ..registerUnitEvent(hero.toUnit(), EVENT_UNIT_HERO_SKILL)
 
 init
     heroType = new HeroType(HERO_SEA_DRUID, "BTNSeaDruid", 3, true)
-        ..setOnInitFunction(() -> initHeroType())
-        ..setOnCreateFunction((Hero hero) -> createHeroType(hero))
+    ..setOnInitFunction(() -> initHeroType())
+    ..setOnCreateFunction((Hero hero) -> createHeroType(hero))
       
 
    

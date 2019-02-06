@@ -563,46 +563,45 @@ function createHeroType(Hero hero)
     let heroUnit = hero.toUnit()
     uprooted_dummy[hero.toUnit().getOwner().getId()] = createUnit(hero.toUnit().getOwner(), UPROOTED, hero.toUnit().getPos(), angle(0))
     CreateTrigger()
-        ..registerUnitEvent(hero.toUnit(), EVENT_UNIT_ISSUED_POINT_ORDER)
-        ..addAction(() ->(begin
-            let u = GetTriggerUnit()
-            if GetIssuedOrderId() == OrderId("smart") and u.getTypeId() == HERO_TREE_ROOTED
-                let pos = vec2( GetOrderPointX(), GetOrderPointY() )
-                doAfter(0, () -> u.issuePointOrder("attack", pos))
+    ..registerUnitEvent(hero.toUnit(), EVENT_UNIT_ISSUED_POINT_ORDER)
+    ..addAction(() ->(begin
+        let u = GetTriggerUnit()
+        if GetIssuedOrderId() == OrderId("smart") and u.getTypeId() == HERO_TREE_ROOTED
+            let pos = vec2( GetOrderPointX(), GetOrderPointY() )
+            doAfter(0, () -> u.issuePointOrder("attack", pos))
     end))
 
     CreateTrigger()
-        ..registerUnitEvent(heroUnit, EVENT_UNIT_HERO_SKILL)
-        ..addAction(() -> (begin
-            let u = GetTriggerUnit()
-            if GetLearnedSkill() == ABILITY_REGENERATION
-                let newLevel = u.getAbilityLevel(ABILITY_REGENERATION)
-                if newLevel!= 1
-                    u.wrapper().addStatRelativeBonus(Stat.HR, -REGENERATION_HIT_POINT_REGEN[newLevel-2]*10)
+    ..registerUnitEvent(heroUnit, EVENT_UNIT_HERO_SKILL)
+    ..addAction(() -> (begin
+        let u = GetTriggerUnit()
+        if GetLearnedSkill() == ABILITY_REGENERATION
+            let newLevel = u.getAbilityLevel(ABILITY_REGENERATION)
+            if newLevel!= 1
+                u.wrapper().addStatRelativeBonus(Stat.HR, -REGENERATION_HIT_POINT_REGEN[newLevel-2]*10)
 
-                u.wrapper().addStatRelativeBonus(Stat.HR, REGENERATION_HIT_POINT_REGEN[newLevel-1]*10)
+            u.wrapper().addStatRelativeBonus(Stat.HR, REGENERATION_HIT_POINT_REGEN[newLevel-1]*10)
 
-                
+            
 
-            else if GetLearnedSkill() == ABILITY_ROOT and u.getTypeId() == HERO_TREE_ROOTED
-                let newLevel = u.getAbilityLevel(ABILITY_ROOT)
-                onUprootStats(u, newLevel - 1)
-                onRootStats(u, newLevel)
-        end))
+        else if GetLearnedSkill() == ABILITY_ROOT and u.getTypeId() == HERO_TREE_ROOTED
+            let newLevel = u.getAbilityLevel(ABILITY_ROOT)
+            onUprootStats(u, newLevel - 1)
+            onRootStats(u, newLevel)
+    end))
 
     CreateTrigger()
-        ..registerUnitEvent(heroUnit, EVENT_UNIT_DEATH)
-        ..addAction(() -> (begin
-            if GetTriggerUnit().getTypeId() == HERO_TREE_ROOTED
-                let u = GetTriggerUnit()
-                onUproot(u, u.getAbilityLevel(ABILITY_ROOT))
-
+    ..registerUnitEvent(heroUnit, EVENT_UNIT_DEATH)
+    ..addAction(() -> (begin
+        if GetTriggerUnit().getTypeId() == HERO_TREE_ROOTED
+            let u = GetTriggerUnit()
+            onUproot(u, u.getAbilityLevel(ABILITY_ROOT))
     end))
 
 init
     heroType = new HeroType(HERO_TREE, Icons.bTNTreant, 4, true)
-        ..setOnInitFunction(() -> initHeroType())
-        ..setOnCreateFunction((Hero hero) -> createHeroType(hero))
+    ..setOnInitFunction(() -> initHeroType())
+    ..setOnCreateFunction((Hero hero) -> createHeroType(hero))
 
    
 

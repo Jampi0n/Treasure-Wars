@@ -101,17 +101,17 @@ function itemSkull(int itemId)
     int mana = 8 // trigger
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("Restores {0} mana points per kill.".format(mana.toString()))
-            ..setGoldCost(550)
+        ..setDescription("Restores {0} mana points per kill.".format(mana.toString()))
+        ..setGoldCost(550)
     else
         CreateTrigger()
-            ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
-            ..addAction(() -> (begin
-                let killer = GetKillingUnit()
-                if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and killer.hasItemById(convertItemId(ITEM_ID_SKULL))
-                    killer.healMana(killer, 8. * killer.countItemsOfType(convertItemId(ITEM_ID_SKULL)))
-                    killer.addEffect(Abilities.spiritTouchTarget, "origin").destr()
-            end))
+        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
+        ..addAction(() -> (begin
+            let killer = GetKillingUnit()
+            if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and killer.hasItemById(convertItemId(ITEM_ID_SKULL))
+                killer.healMana(killer, 8. * killer.countItemsOfType(convertItemId(ITEM_ID_SKULL)))
+                killer.addEffect(Abilities.spiritTouchTarget, "origin").destr()
+        end))
 
 function itemVoodooDoll(int itemId)
     int mp = 5
@@ -160,12 +160,12 @@ function itemApprenticeScroll(int itemId)
             ..setGoldCost(500)
     else
         CreateTrigger()
-            ..registerAnyUnitEvent(EVENT_PLAYER_HERO_LEVEL)
-            ..addAction(() -> (begin
-                let hero = GetTriggerUnit()
-                if hero.hasItemById(convertItemId(ITEM_ID_APPRENTICES_SCROLL))
-                    hero.healMana(hero, hero.getMaxMana()*0.35)
-                    hero.addEffect(Abilities.aImaTarget, "chest").destr()
+        ..registerAnyUnitEvent(EVENT_PLAYER_HERO_LEVEL)
+        ..addAction(() -> (begin
+            let hero = GetTriggerUnit()
+            if hero.hasItemById(convertItemId(ITEM_ID_APPRENTICES_SCROLL))
+                hero.healMana(hero, hero.getMaxMana()*0.35)
+                hero.addEffect(Abilities.aImaTarget, "chest").destr()
         end))
 
 @compiletime

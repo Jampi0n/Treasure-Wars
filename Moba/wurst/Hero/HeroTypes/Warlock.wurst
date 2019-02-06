@@ -247,18 +247,18 @@ function onSpellCast()
 
     if spellId == ABILITY_FIREBOLT
         new Missile(caster, caster.getPos().withZ(80), 1000, caster.getPos().angleTo(vec2(GetSpellTargetX(), GetSpellTargetY())), Abilities.demonHunterMissile)
-                ..hitOnce()
-                ..setSize(40)
-                ..setHitCondition((Missile missile, unit target) -> (begin
-                return not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(missile.getOwner().getOwner(), false, true)
-            end) )
-                ..setHitFunction((Missile missile, unit target) -> (begin
-                let missileCaster = missile.getOwner()
-                missileCaster.dealDamage(Missile.getMissileTarget(), (FIREBOLT_DAMAGE[level-1]).bonus(missileCaster.getInt(), FIREBOLT_DAMAGE_BONUS), ReductionType.MAGIC)
-                missile.destr()
+        ..hitOnce()
+        ..setSize(40)
+        ..setHitCondition((Missile missile, unit target) -> (begin
+            return not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(missile.getOwner().getOwner(), false, true)
+        end) )
+        ..setHitFunction((Missile missile, unit target) -> (begin
+            let missileCaster = missile.getOwner()
+            missileCaster.dealDamage(Missile.getMissileTarget(), (FIREBOLT_DAMAGE[level-1]).bonus(missileCaster.getInt(), FIREBOLT_DAMAGE_BONUS), ReductionType.MAGIC)
+            missile.destr()
 
-            end) )
-                ..setMaxRange(800)
+        end) )
+        ..setMaxRange(800)
 
     else if spellId == ABILITY_INFERNAL_METEOR
         let pos = vec2(GetSpellTargetX(), GetSpellTargetY())
@@ -358,90 +358,90 @@ function initHeroType()
             ..addItem(ITEM_ID_RUNIC_ARMOR)
 
         buffRayOfDeath = new BuffType(false, true)
-            ..addEndFunction((Buff whichBuff) ->(begin
-                whichBuff.getTarget().removeAbility(BUFF_ID_RAY_OF_DEATH)
-            end))
-            ..addExpireFunction((Buff whichBuff) ->(begin
-                let caster = whichBuff.getCaster()
-                let pos = whichBuff.getTarget().getPos()
+        ..addEndFunction((Buff whichBuff) ->(begin
+            whichBuff.getTarget().removeAbility(BUFF_ID_RAY_OF_DEATH)
+        end))
+        ..addExpireFunction((Buff whichBuff) ->(begin
+            let caster = whichBuff.getCaster()
+            let pos = whichBuff.getTarget().getPos()
 
-                addEffect("NoxCloudExplosion.mdx", pos).destr()
+            addEffect("NoxCloudExplosion.mdx", pos).destr()
 
-                group nearby = CreateGroup()
-                nearby.enumUnitsInRange(pos, RAY_OF_DEATH_AFTER_AOE)
+            group nearby = CreateGroup()
+            nearby.enumUnitsInRange(pos, RAY_OF_DEATH_AFTER_AOE)
 
-                let dmg = RAY_OF_DEATH_AFTER_DAMAGE[caster.getAbilityLevel(ABILITY_RAY_OF_DEATH)-1].bonus(caster.getInt(), RAY_OF_DEATH_AFTER_DAMAGE_BONUS)
+            let dmg = RAY_OF_DEATH_AFTER_DAMAGE[caster.getAbilityLevel(ABILITY_RAY_OF_DEATH)-1].bonus(caster.getInt(), RAY_OF_DEATH_AFTER_DAMAGE_BONUS)
 
-                while(not nearby.isEmpty())
-                    unit target = FirstOfGroup(nearby)
-                    nearby.removeUnit(target)
-                    if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
-                        caster.dealDamage(target, dmg, ReductionType.MAGIC)
-            
-                nearby.destr()
+            while(not nearby.isEmpty())
+                unit target = FirstOfGroup(nearby)
+                nearby.removeUnit(target)
+                if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
+                    caster.dealDamage(target, dmg, ReductionType.MAGIC)
+        
+            nearby.destr()
 
-            end))
-            ..setPeriodicTime(0.1)
-            ..addPeriodicFunction((Buff whichBuff) ->(begin
-                let target = whichBuff.getTarget()
-                let caster = whichBuff.getCaster()
-                if not caster.getCurrentOrder() == OrderId("magicleash") or not target.isTargetable(caster.getOwner(), false, true)
-                    whichBuff.dispel()
-                else
-                    caster.dealDamage(target, 0.1 * RAY_OF_DEATH_DAMAGE[caster.getAbilityLevel(ABILITY_RAY_OF_DEATH)-1].bonus(caster.getInt(), RAY_OF_DEATH_DAMAGE_BONUS), ReductionType.MAGIC)
-                    target.addEffect(Abilities.illidanMissile, "chest").destr()
-            end))
+        end))
+        ..setPeriodicTime(0.1)
+        ..addPeriodicFunction((Buff whichBuff) ->(begin
+            let target = whichBuff.getTarget()
+            let caster = whichBuff.getCaster()
+            if not caster.getCurrentOrder() == OrderId("magicleash") or not target.isTargetable(caster.getOwner(), false, true)
+                whichBuff.dispel()
+            else
+                caster.dealDamage(target, 0.1 * RAY_OF_DEATH_DAMAGE[caster.getAbilityLevel(ABILITY_RAY_OF_DEATH)-1].bonus(caster.getInt(), RAY_OF_DEATH_DAMAGE_BONUS), ReductionType.MAGIC)
+                target.addEffect(Abilities.illidanMissile, "chest").destr()
+        end))
 
         buffSoulBurn = new BuffType(false, true)
         var abilityList = new LinkedList<int>
-            ..add(ABILITY_ID_SOUL_BURN)
+        ..add(ABILITY_ID_SOUL_BURN)
         buffSoulBurn
-            ..setup(abilityList, BUFF_ID_SOUL_BURN)
-            ..setPeriodicTime(0.5)
-            ..addPeriodicFunction((Buff whichBuff) ->(begin
-                let target = whichBuff.getTarget()
-                let caster = whichBuff.getCaster()
-                if target.isTargetable(caster.getOwner(), false, true)
-                    caster.dealDamage(target, 0.5 * SOUL_BURN_DAMAGE[caster.getAbilityLevel(ABILITY_SOUL_BURN)-1].bonus(caster.getInt(), SOUL_BURN_DAMAGE_BONUS), ReductionType.MAGIC)
-            end))
+        ..setup(abilityList, BUFF_ID_SOUL_BURN)
+        ..setPeriodicTime(0.5)
+        ..addPeriodicFunction((Buff whichBuff) ->(begin
+            let target = whichBuff.getTarget()
+            let caster = whichBuff.getCaster()
+            if target.isTargetable(caster.getOwner(), false, true)
+                caster.dealDamage(target, 0.5 * SOUL_BURN_DAMAGE[caster.getAbilityLevel(ABILITY_SOUL_BURN)-1].bonus(caster.getInt(), SOUL_BURN_DAMAGE_BONUS), ReductionType.MAGIC)
+        end))
 
     CreateTrigger()
-        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
-        ..addAction(() ->(begin
-            let u = GetTriggerUnit()
-            if BuffList.hasBuffType(u, buffSoulBurn)
-                let pos = u.getPos()
-                let whichBuff = BuffList.getBuffOfType(u, buffSoulBurn)
-                let caster = whichBuff.getCaster()
-                let level = whichBuff.getLevel()
+    ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
+    ..addAction(() ->(begin
+        let u = GetTriggerUnit()
+        if BuffList.hasBuffType(u, buffSoulBurn)
+            let pos = u.getPos()
+            let whichBuff = BuffList.getBuffOfType(u, buffSoulBurn)
+            let caster = whichBuff.getCaster()
+            let level = whichBuff.getLevel()
 
-                group nearby = CreateGroup()
-                nearby.enumUnitsInRange(pos, SOUL_BURN_AOE)
+            group nearby = CreateGroup()
+            nearby.enumUnitsInRange(pos, SOUL_BURN_AOE)
 
-                let dur = whichBuff.getRemaining()
+            let dur = whichBuff.getRemaining()
 
-                while(not nearby.isEmpty())
-                    unit target = FirstOfGroup(nearby)
-                    nearby.removeUnit(target)
-                    if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true) and not BuffList.hasBuffType(target, buffSoulBurn)
-                        target.addBuffReduced(caster, dur, buffSoulBurn, level)
-            
-                nearby.destr()
+            while(not nearby.isEmpty())
+                unit target = FirstOfGroup(nearby)
+                nearby.removeUnit(target)
+                if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true) and not BuffList.hasBuffType(target, buffSoulBurn)
+                    target.addBuffReduced(caster, dur, buffSoulBurn, level)
+        
+            nearby.destr()
     end))
 
 function createHeroType(Hero hero)
     let heroUnit = hero.toUnit()
     CreateTrigger()
-        ..registerUnitEvent(heroUnit, EVENT_UNIT_HERO_SKILL)
-        ..addAction(() -> (begin
-            let u = GetTriggerUnit()
-            if GetLearnedSkill() == ABILITY_FEL_MAGIC
-                let newLevel = u.getAbilityLevel(ABILITY_FEL_MAGIC)
-                if newLevel!= 1
-                    u.wrapper().addStatRelativeBonus(Stat.INT, -FEL_MAGIC_INTEL[newLevel-2]*10)
+    ..registerUnitEvent(heroUnit, EVENT_UNIT_HERO_SKILL)
+    ..addAction(() -> (begin
+        let u = GetTriggerUnit()
+        if GetLearnedSkill() == ABILITY_FEL_MAGIC
+            let newLevel = u.getAbilityLevel(ABILITY_FEL_MAGIC)
+            if newLevel!= 1
+                u.wrapper().addStatRelativeBonus(Stat.INT, -FEL_MAGIC_INTEL[newLevel-2]*10)
 
-                u.wrapper().addStatRelativeBonus(Stat.INT, FEL_MAGIC_INTEL[newLevel-1]*10)
-        end))
+            u.wrapper().addStatRelativeBonus(Stat.INT, FEL_MAGIC_INTEL[newLevel-1]*10)
+    end))
 
     
         

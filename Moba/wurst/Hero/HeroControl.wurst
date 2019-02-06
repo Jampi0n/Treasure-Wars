@@ -61,34 +61,34 @@ public class Hero
         onLevelUpTrigger.addAction(function onLevelUpStatic)
 
         onSpellStartTrigger = CreateTrigger()
-            ..addAction(() -> (begin
+        ..addAction(() -> (begin
             GetTriggerUnit().setTimeScale(HeroType.getAnimationSpeed(GetSpellAbilityId()))
         end))
 
         onSpellEndTrigger = CreateTrigger()
-            ..addAction(() -> (begin
+        ..addAction(() -> (begin
             GetTriggerUnit().setTimeScale(1)
         end))
 
         CreateTrigger()
-            ..addAction(() -> (begin
-                let heroUnit = GetTriggerUnit()
-                let hero = unitToHero.get(heroUnit)
-                if hero != null
-                    for i = 0 to 3
-                        hero.defaultCooldown[i] = BlzGetAbilityCooldown(hero.skillIds[i], hero.toUnit().getAbilityLevel(hero.skillIds[i]))
-                    hero.updateCooldowns()
+        ..addAction(() -> (begin
+            let heroUnit = GetTriggerUnit()
+            let hero = unitToHero.get(heroUnit)
+            if hero != null
+                for i = 0 to 3
+                    hero.defaultCooldown[i] = BlzGetAbilityCooldown(hero.skillIds[i], hero.toUnit().getAbilityLevel(hero.skillIds[i]))
+                hero.updateCooldowns()
 
-            end))
-            ..registerAnyUnitEvent(EVENT_PLAYER_HERO_SKILL)
+        end))
+        ..registerAnyUnitEvent(EVENT_PLAYER_HERO_SKILL)
 
 
     function setup()
         firstTeam = this.owner.getId() <= HERO_PLAYER_TEAM_1_LAST
 
         this.heroType = HeroType.getHeroType(this.hero.getTypeId())
-            ..updateTooltipsStr(this.hero)
-            ..updateTooltipsInt(this.hero)
+        ..updateTooltipsStr(this.hero)
+        ..updateTooltipsInt(this.hero)
         let upgradePlayer = owner.getPlayer()
 
         this.skillIds[0] = this.heroType.getAbilityId(AbilitySlot.Q)

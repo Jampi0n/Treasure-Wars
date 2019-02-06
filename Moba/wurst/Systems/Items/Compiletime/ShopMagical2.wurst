@@ -14,25 +14,25 @@ function itemSkullPendant(int itemId)
     int killMana = 15 //trigger
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} mana points\n +{1} hit points|nRestores {2} mana points per kill.".format(
-                mp.toString(), hp.toString(), killMana.toString()
-            ))
-            ..setGoldCost(2100)
-            ..addRequirement(ITEM_ID_SKULL)
-            ..addRequirement(ITEM_ID_MAGE_AMULET)
+        ..setDescription("+ {0} mana points\n +{1} hit points|nRestores {2} mana points per kill.".format(
+            mp.toString(), hp.toString(), killMana.toString()
+        ))
+        ..setGoldCost(2100)
+        ..addRequirement(ITEM_ID_SKULL)
+        ..addRequirement(ITEM_ID_MAGE_AMULET)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.HP, hp)
-            ..addStatBonusAbsolute(Stat.MP, mp)
+        ..addStatBonusAbsolute(Stat.HP, hp)
+        ..addStatBonusAbsolute(Stat.MP, mp)
 
         CreateTrigger()
-            ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
-            ..addAction(() -> (begin
-                let killer = GetKillingUnit()
-                if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and killer.hasItemById(convertItemId(ITEM_ID_SKULL_PENDANT))
-                    killer.healMana(killer, 15. * killer.countItemsOfType(convertItemId(ITEM_ID_SKULL_PENDANT)))
-                    killer.addEffect(Abilities.spiritTouchTarget, "origin").destr()
-            end))
+        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
+        ..addAction(() -> (begin
+            let killer = GetKillingUnit()
+            if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and killer.hasItemById(convertItemId(ITEM_ID_SKULL_PENDANT))
+                killer.healMana(killer, 15. * killer.countItemsOfType(convertItemId(ITEM_ID_SKULL_PENDANT)))
+                killer.addEffect(Abilities.spiritTouchTarget, "origin").destr()
+        end))
 
 
 function itemVisionWard(int itemId)
@@ -43,19 +43,19 @@ function itemVisionWard(int itemId)
     if compiletime
 
         itemId.getTypeDef()
-            ..setDescription("+ {0} mana points\n+ {1} hit points\n+ {2} intelligence|nAttacks drain {3} mana from the target.|nActive:|nSummons an invulnerable and immovable ward that provides vision in an area.".format(
-                mp.toString(), hp.toString(), intel.toString(), mana.toString()
-            ))
-            ..setGoldCost(3450)
-            ..addRequirement(ITEM_ID_MAGIC_STAFF)
-            ..addRequirement(ITEM_ID_GEM_OF_MANA)
-            ..addRequirement(ITEM_ID_GEM_OF_HEALTH)
-            ..setAbility('A00D')
+        ..setDescription("+ {0} mana points\n+ {1} hit points\n+ {2} intelligence|nAttacks drain {3} mana from the target.|nActive:|nSummons an invulnerable and immovable ward that provides vision in an area.".format(
+            mp.toString(), hp.toString(), intel.toString(), mana.toString()
+        ))
+        ..setGoldCost(3450)
+        ..addRequirement(ITEM_ID_MAGIC_STAFF)
+        ..addRequirement(ITEM_ID_GEM_OF_MANA)
+        ..addRequirement(ITEM_ID_GEM_OF_HEALTH)
+        ..setAbility('A00D')
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.MP, mp)
-            ..addStatBonusAbsolute(Stat.HP, hp)
-            ..addStatBonusAbsolute(Stat.INT, intel)
+        ..addStatBonusAbsolute(Stat.MP, mp)
+        ..addStatBonusAbsolute(Stat.HP, hp)
+        ..addStatBonusAbsolute(Stat.INT, intel)
 
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             if attacker.hasItemById(convertItemId(itemId)) and target.getMana() > 0 and not target.isType(UNIT_TYPE_STRUCTURE)
@@ -73,12 +73,12 @@ function itemVoodooMask(int itemId)
     int voidDmg = 15
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("Attacks deal {0} additional void damage.|nRestores {1} mana points everytime you are attacked.".format(
-                voidDmg.toString(), mp.toString()
-            ))
-            ..setGoldCost(1750)
-            ..addRequirement(ITEM_ID_VOODOO_DOLL)
-            ..addRequirement(ITEM_ID_GEM_OF_DARKNESS)
+        ..setDescription("Attacks deal {0} additional void damage.|nRestores {1} mana points everytime you are attacked.".format(
+            voidDmg.toString(), mp.toString()
+        ))
+        ..setGoldCost(1750)
+        ..addRequirement(ITEM_ID_VOODOO_DOLL)
+        ..addRequirement(ITEM_ID_GEM_OF_DARKNESS)
     else
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             if target.hasItemById(convertItemId(itemId)) and not attacker.isType(UNIT_TYPE_STRUCTURE)
@@ -98,41 +98,41 @@ function itemGhostHood(int itemId)
     int wp = 16
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} mana points\n+ {1} hit points\n+ {2} armor\n+ {3} willpower".format(
-                mp.toString(), hp.toString(), ar.toString(), wp.toString()
-            ))
-            ..setGoldCost(1825)
-            ..addRequirement(ITEM_ID_MAGE_ARMOR)
-            ..addRequirement(ITEM_ID_MAGE_GLOVES)
+        ..setDescription("+ {0} mana points\n+ {1} hit points\n+ {2} armor\n+ {3} willpower".format(
+            mp.toString(), hp.toString(), ar.toString(), wp.toString()
+        ))
+        ..setGoldCost(1825)
+        ..addRequirement(ITEM_ID_MAGE_ARMOR)
+        ..addRequirement(ITEM_ID_MAGE_GLOVES)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.MP, mp)
-            ..addStatBonusAbsolute(Stat.AGI, wp)
-            ..addStatBonusAbsolute(Stat.HP, hp)
-            ..addStatBonusAbsolute(Stat.AR, ar)
+        ..addStatBonusAbsolute(Stat.MP, mp)
+        ..addStatBonusAbsolute(Stat.AGI, wp)
+        ..addStatBonusAbsolute(Stat.HP, hp)
+        ..addStatBonusAbsolute(Stat.AR, ar)
 
 function itemEvilBook(int itemId)
     int intel = 30
     int factor = 50 //trigger
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} intelligence|nRestores {1}% of your mana, when you level up. This effect does not stack.".format(
-                intel.toString(), factor.toString()
-            ))
-            ..setGoldCost(1700)
-            ..addRequirement(ITEM_ID_APPRENTICES_SCROLL)
-            ..addRequirement(ITEM_ID_SPELL_BOOK)
+        ..setDescription("+ {0} intelligence|nRestores {1}% of your mana, when you level up. This effect does not stack.".format(
+            intel.toString(), factor.toString()
+        ))
+        ..setGoldCost(1700)
+        ..addRequirement(ITEM_ID_APPRENTICES_SCROLL)
+        ..addRequirement(ITEM_ID_SPELL_BOOK)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.INT, intel)
+        ..addStatBonusAbsolute(Stat.INT, intel)
 
         CreateTrigger()
-            ..registerAnyUnitEvent(EVENT_PLAYER_HERO_LEVEL)
-            ..addAction(() -> (begin
-                let hero = GetTriggerUnit()
-                if hero.hasItemById(convertItemId(ITEM_ID_EVIL_BOOK))
-                    hero.healMana(hero, hero.getMaxMana()*0.5)
-                    hero.addEffect(Abilities.aImaTarget, "chest").destr()
+        ..registerAnyUnitEvent(EVENT_PLAYER_HERO_LEVEL)
+        ..addAction(() -> (begin
+            let hero = GetTriggerUnit()
+            if hero.hasItemById(convertItemId(ITEM_ID_EVIL_BOOK))
+                hero.healMana(hero, hero.getMaxMana()*0.5)
+                hero.addEffect(Abilities.aImaTarget, "chest").destr()
         end))
             
 function itemFrostRing(int itemId)
@@ -140,16 +140,16 @@ function itemFrostRing(int itemId)
     int mr = 20
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} mana points\n+ {1} mana point regeneration per 10 seconds".format(
-                mp.toString(), mr.toString()
-            ))
-            ..setGoldCost(1900)
-            ..addRequirement(ITEM_ID_GEM_OF_MANA)
-            ..addRequirement(ITEM_ID_MANA_RING)
+        ..setDescription("+ {0} mana points\n+ {1} mana point regeneration per 10 seconds".format(
+            mp.toString(), mr.toString()
+        ))
+        ..setGoldCost(1900)
+        ..addRequirement(ITEM_ID_GEM_OF_MANA)
+        ..addRequirement(ITEM_ID_MANA_RING)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.MP, mp)
-            ..addStatBonusAbsolute(Stat.MR, mr)
+        ..addStatBonusAbsolute(Stat.MP, mp)
+        ..addStatBonusAbsolute(Stat.MR, mr)
 
 function itemScepterOfTheTides(int itemId)
     int intel = 25
@@ -157,15 +157,15 @@ function itemScepterOfTheTides(int itemId)
     int manaDrain = 10
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} intelligence|nDrains {1} mana and deals {2} void damage per attack.".format(
-                intel.toString(), manaDrain.toString(), voidDmg.toString()
-            ))
-            ..setGoldCost(2050)
-            ..addRequirement(ITEM_ID_MAGIC_STAFF)
-            ..addRequirement(ITEM_ID_GEM_OF_DARKNESS)
+        ..setDescription("+ {0} intelligence|nDrains {1} mana and deals {2} void damage per attack.".format(
+            intel.toString(), manaDrain.toString(), voidDmg.toString()
+        ))
+        ..setGoldCost(2050)
+        ..addRequirement(ITEM_ID_MAGIC_STAFF)
+        ..addRequirement(ITEM_ID_GEM_OF_DARKNESS)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.INT, intel)
+        ..addStatBonusAbsolute(Stat.INT, intel)
 
 
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
@@ -185,24 +185,24 @@ function itemBootsOfDarkness(int itemId)
     int intelFactor = 12
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} movement speed\n+ {1}% intelligence|nAttacks deal {2} additional void damage.|nMovement speed bonus from boots does not stack.".format(
-                ms.toString(), intelFactor.toString(), voidDmg.toString()
-            ))
-            ..setGoldCost(2400)
-            ..addRequirement(ITEM_ID_LIGHT_BOOTS)
-            ..addRequirement(ITEM_ID_GEM_OF_DARKNESS)
+        ..setDescription("+ {0} movement speed\n+ {1}% intelligence|nAttacks deal {2} additional void damage.|nMovement speed bonus from boots does not stack.".format(
+            ms.toString(), intelFactor.toString(), voidDmg.toString()
+        ))
+        ..setGoldCost(2400)
+        ..addRequirement(ITEM_ID_LIGHT_BOOTS)
+        ..addRequirement(ITEM_ID_GEM_OF_DARKNESS)
     else
         itemId.getItem()
-            ..addPickupFunction(()->(begin
-                if isUnique() and hasNot(convertItemId(ITEM_ID_HEAVY_BOOTS)) and hasNot(convertItemId(ITEM_ID_LIGHT_BOOTS))
-                    getTriggerHero().wrapper().addStatAbsoluteBonus(Stat.MS, ms)
-            end))
+        ..addPickupFunction(()->(begin
+            if isUnique() and hasNot(convertItemId(ITEM_ID_HEAVY_BOOTS)) and hasNot(convertItemId(ITEM_ID_LIGHT_BOOTS))
+                getTriggerHero().wrapper().addStatAbsoluteBonus(Stat.MS, ms)
+        end))
 
-            ..addDropFunction(()->(begin
-                if isUnique() and hasNot(convertItemId(ITEM_ID_HEAVY_BOOTS)) and hasNot(convertItemId(ITEM_ID_LIGHT_BOOTS))
-                    getTriggerHero().wrapper().addStatAbsoluteBonus(Stat.MS, -ms)
-            end))
-            ..addStatBonusRelative(Stat.INT, intelFactor*10)
+        ..addDropFunction(()->(begin
+            if isUnique() and hasNot(convertItemId(ITEM_ID_HEAVY_BOOTS)) and hasNot(convertItemId(ITEM_ID_LIGHT_BOOTS))
+                getTriggerHero().wrapper().addStatAbsoluteBonus(Stat.MS, -ms)
+        end))
+        ..addStatBonusRelative(Stat.INT, intelFactor*10)
 
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             if attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
@@ -216,17 +216,17 @@ function itemMagmaCrystal(int itemId)
     int magicDmg = 20
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} hit points\n+ {1} mana points|nAttacks deal {2} additional magic damage.".format(
-                hp.toString(), mp.toString(), magicDmg.toString()
-            ))
-            ..setGoldCost(1750)
-            ..addRequirement(ITEM_ID_GEM_OF_DARKNESS)
-            ..addRequirement(ITEM_ID_GEM_OF_HEALTH)
-            ..addRequirement(ITEM_ID_GEM_OF_MANA)
+        ..setDescription("+ {0} hit points\n+ {1} mana points|nAttacks deal {2} additional magic damage.".format(
+            hp.toString(), mp.toString(), magicDmg.toString()
+        ))
+        ..setGoldCost(1750)
+        ..addRequirement(ITEM_ID_GEM_OF_DARKNESS)
+        ..addRequirement(ITEM_ID_GEM_OF_HEALTH)
+        ..addRequirement(ITEM_ID_GEM_OF_MANA)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.MP, mp)
-            ..addStatBonusAbsolute(Stat.HP, hp)
+        ..addStatBonusAbsolute(Stat.MP, mp)
+        ..addStatBonusAbsolute(Stat.HP, hp)
 
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             if attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
@@ -239,24 +239,24 @@ function itemCursedMask(int itemId)
     int killMana = 12 //trigger
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} intelligence|nRestores {1} mana points per kill.".format(
-                intel.toString(), killMana.toString()
-            ))
-            ..setGoldCost(2000)
-            ..addRequirement(ITEM_ID_SKULL)
-            ..addRequirement(ITEM_ID_WIZARDS_HAT)
+        ..setDescription("+ {0} intelligence|nRestores {1} mana points per kill.".format(
+            intel.toString(), killMana.toString()
+        ))
+        ..setGoldCost(2000)
+        ..addRequirement(ITEM_ID_SKULL)
+        ..addRequirement(ITEM_ID_WIZARDS_HAT)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.INT, intel)
+        ..addStatBonusAbsolute(Stat.INT, intel)
 
         CreateTrigger()
-            ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
-            ..addAction(() -> (begin
-                let killer = GetKillingUnit()
-                if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and killer.hasItemById(convertItemId(ITEM_ID_CURSED_MASK))
-                    killer.healMana(killer, 12. * killer.countItemsOfType(convertItemId(ITEM_ID_CURSED_MASK)))
-                    killer.addEffect(Abilities.spiritTouchTarget, "origin").destr()
-            end))
+        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
+        ..addAction(() -> (begin
+            let killer = GetKillingUnit()
+            if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and killer.hasItemById(convertItemId(ITEM_ID_CURSED_MASK))
+                killer.healMana(killer, 12. * killer.countItemsOfType(convertItemId(ITEM_ID_CURSED_MASK)))
+                killer.addEffect(Abilities.spiritTouchTarget, "origin").destr()
+        end))
 
 
 function itemAncientStoneTablet(int itemId)
@@ -264,16 +264,16 @@ function itemAncientStoneTablet(int itemId)
     int wp = 25
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} hit points\n+ {1} willpower".format(
-                hp.toString(), wp.toString()
-            ))
-            ..setGoldCost(1800)
-            ..addRequirement(ITEM_ID_GEM_OF_HEALTH)
-            ..addRequirement(ITEM_ID_MAGE_GLOVES)
+        ..setDescription("+ {0} hit points\n+ {1} willpower".format(
+            hp.toString(), wp.toString()
+        ))
+        ..setGoldCost(1800)
+        ..addRequirement(ITEM_ID_GEM_OF_HEALTH)
+        ..addRequirement(ITEM_ID_MAGE_GLOVES)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.HP, hp)
-            ..addStatBonusAbsolute(Stat.AGI, wp)
+        ..addStatBonusAbsolute(Stat.HP, hp)
+        ..addStatBonusAbsolute(Stat.AGI, wp)
 
 function itemBattlemageArmor(int itemId)
     int mp = 75
@@ -281,17 +281,17 @@ function itemBattlemageArmor(int itemId)
     int ar = 15
     if compiletime
         itemId.getTypeDef()
-            ..setDescription("+ {0} mana points\n+ {1} hit points\n+ {2} armor".format(
-                mp.toString(), hp.toString(), ar.toString()
-            ))
-            ..setGoldCost(1700)
-            ..addRequirement(ITEM_ID_MAGE_ARMOR)
-            ..addRequirement(ITEM_ID_GEM_OF_HEALTH)
+        ..setDescription("+ {0} mana points\n+ {1} hit points\n+ {2} armor".format(
+            mp.toString(), hp.toString(), ar.toString()
+        ))
+        ..setGoldCost(1700)
+        ..addRequirement(ITEM_ID_MAGE_ARMOR)
+        ..addRequirement(ITEM_ID_GEM_OF_HEALTH)
     else
         itemId.getItem()
-            ..addStatBonusAbsolute(Stat.MP, mp)
-            ..addStatBonusAbsolute(Stat.HP, hp)
-            ..addStatBonusAbsolute(Stat.AR, ar)
+        ..addStatBonusAbsolute(Stat.MP, mp)
+        ..addStatBonusAbsolute(Stat.HP, hp)
+        ..addStatBonusAbsolute(Stat.AR, ar)
 
 
 @compiletime
