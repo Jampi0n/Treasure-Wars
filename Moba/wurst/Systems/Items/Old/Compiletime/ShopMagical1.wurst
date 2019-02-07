@@ -1,0 +1,185 @@
+package ShopMagical1
+
+import initlater ItemShopSystem
+import ItemShopInitialize
+import ItemIdGeneration
+import Stats
+import OnAttack
+import General
+import Assets
+
+
+
+
+
+function itemMageAmulet(int itemId)
+    int mp = 100
+    int hp = 100
+    if compiletime
+        itemId.getTypeDef()
+            ..setDescription("+ {0} mana points\n +{1} hit points".format(mp.toString(), hp.toString()))
+            ..setGoldCost(825)
+    else
+        itemId.getItem()
+            ..addStatBonusAbsolute(Stat.MP, mp)
+            ..addStatBonusAbsolute(Stat.HP, hp)
+
+
+function itemMageGloves(int itemId)
+    int wp = 8
+    if compiletime
+        itemId.getTypeDef()
+        ..setDescription("+ {0} willpower".format(wp.toString()))
+            ..setGoldCost(400)
+    else
+        itemId.getItem()
+            ..addStatBonusAbsolute(Stat.AGI, wp)
+
+
+function itemManaRing(int itemId)
+    int mr = 10
+    if compiletime
+        itemId.getTypeDef()
+            ..setDescription("+ {0} mana point regeneration per 10 seconds".format(mr.toString()))
+            ..setGoldCost(500)
+    else
+        itemId.getItem()
+            ..addStatBonusAbsolute(Stat.MR, mr)
+
+
+function itemMageArmor(int itemId)
+    int mp = 50
+    int hp = 60
+    int ar = 8
+    if compiletime
+        itemId.getTypeDef()
+            ..setDescription("+ {0} mana points\n +{1} hit points\n +{2} armor".format(mp.toString(), hp.toString(), ar.toString()))
+            ..setGoldCost(800)
+    else
+        itemId.getItem()
+            ..addStatBonusAbsolute(Stat.MP, mp)
+            ..addStatBonusAbsolute(Stat.HP, hp)
+            ..addStatBonusAbsolute(Stat.AR, ar)
+
+
+function itemWizardsHat(int itemId)
+    int intel = 8
+    if compiletime
+        itemId.getTypeDef()
+            ..setDescription("+ {0} intelligence".format(intel.toString()))
+            ..setGoldCost(400)
+    else
+        itemId.getItem()
+            ..addStatBonusAbsolute(Stat.INT, intel)
+
+            
+function itemGemOfMana(int itemId)
+    int mp = 100
+    if compiletime
+        itemId.getTypeDef()
+            ..setDescription("+ {0} mana points".format(mp.toString()))
+            ..setGoldCost(500)
+    else
+        itemId.getItem()
+            ..addStatBonusAbsolute(Stat.MP, mp)
+            
+function itemGemOfDarkness(int itemId)
+    int voidDmg = 12
+    if compiletime
+        itemId.getTypeDef()
+            ..setDescription("Attacks deal {0} additional void damage.".format(voidDmg.toString()))
+            ..setGoldCost(500)
+    else
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if attacker.hasItemById(convertItemId(itemId)) and not target.isType(UNIT_TYPE_STRUCTURE)
+                attacker.dealDamage(target, voidDmg.toReal() * attacker.countItemsOfType(convertItemId(itemId)) , ReductionType.NONE)
+                target.addEffect(Abilities.avengerMissile, "chest").destr()
+        end))
+
+
+function itemSkull(int itemId)
+    int mana = 8 // trigger
+    if compiletime
+        itemId.getTypeDef()
+        ..setDescription("Restores {0} mana points per kill.".format(mana.toString()))
+        ..setGoldCost(550)
+    else
+        CreateTrigger()
+        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
+        ..addAction(() -> (begin
+            let killer = GetKillingUnit()
+            if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and killer.hasItemById(convertItemId(ITEM_ID_SKULL))
+                killer.healMana(killer, 8. * killer.countItemsOfType(convertItemId(ITEM_ID_SKULL)))
+                killer.addEffect(Abilities.spiritTouchTarget, "origin").destr()
+        end))
+
+function itemVoodooDoll(int itemId)
+    int mp = 5
+    if compiletime
+        itemId.getTypeDef()
+            ..setDescription("Restores {0} mana points everytime you are attacked.".format(mp.toString()))
+            ..setGoldCost(600)
+    else
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if target.hasItemById(convertItemId(itemId)) and not attacker.isType(UNIT_TYPE_STRUCTURE)
+                target.healMana(target, mp.toReal() * target.countItemsOfType(convertItemId(itemId)))
+                target.addEffect(Abilities.spiritTouchTarget, "origin").destr()
+        end))
+
+function itemSpellBook(int itemId)
+    int intel = 16
+    if compiletime
+        itemId.getTypeDef()
+            ..setDescription("+ {0} intelligence".format(intel.toString()))
+            ..setGoldCost(800)
+    else
+        itemId.getItem()
+            ..addStatBonusAbsolute(Stat.INT, intel)
+
+function itemMagicStaff(int itemId)
+    int mana = 7
+    if compiletime
+        itemId.getTypeDef()
+            ..setDescription("Attacks drain {0} mana from the target.".format(mana.toString()))
+            ..setGoldCost(640)
+    else
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if attacker.hasItemById(convertItemId(itemId)) and target.getMana() > 0 and not target.isType(UNIT_TYPE_STRUCTURE)
+                let manaDrained = min(mana.toReal() * attacker.countItemsOfType(convertItemId(itemId)) , target.getMana())
+                attacker.healMana(attacker, manaDrained)
+                attacker.damageMana(target, manaDrained, ReductionType.NONE)
+                target.addEffect(Abilities.arcaneTowerAttack, "chest").destr()
+        end))
+
+
+function itemApprenticeScroll(int itemId)
+    int factor = 35 //trigger
+    if compiletime
+        itemId.getTypeDef()
+            ..setDescription("Restores {0}% of your mana, when you level up. This effect does not stack.".format(factor.toString()))
+            ..setGoldCost(500)
+    else
+        CreateTrigger()
+        ..registerAnyUnitEvent(EVENT_PLAYER_HERO_LEVEL)
+        ..addAction(() -> (begin
+            let hero = GetTriggerUnit()
+            if hero.hasItemById(convertItemId(ITEM_ID_APPRENTICES_SCROLL))
+                hero.healMana(hero, hero.getMaxMana()*0.35)
+                hero.addEffect(Abilities.aImaTarget, "chest").destr()
+        end))
+
+@compiletime
+public function shopMagical1Init()
+    itemMageAmulet(ITEM_ID_MAGE_AMULET)
+    itemMageGloves(ITEM_ID_MAGE_GLOVES)
+    itemManaRing(ITEM_ID_MANA_RING)
+    itemMageArmor(ITEM_ID_MAGE_ARMOR)
+    itemWizardsHat(ITEM_ID_WIZARDS_HAT)
+    itemGemOfMana(ITEM_ID_GEM_OF_MANA)
+    itemGemOfDarkness(ITEM_ID_GEM_OF_DARKNESS)
+    itemSkull(ITEM_ID_SKULL)
+    itemVoodooDoll(ITEM_ID_VOODOO_DOLL)
+    itemSpellBook(ITEM_ID_SPELL_BOOK)
+    itemMagicStaff(ITEM_ID_MAGIC_STAFF)
+    itemApprenticeScroll(ITEM_ID_APPRENTICES_SCROLL)
+

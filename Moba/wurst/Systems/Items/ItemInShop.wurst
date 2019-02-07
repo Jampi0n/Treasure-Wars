@@ -1,0 +1,237 @@
+package ItemInShop
+
+import ErrorHandling
+import LinkedList
+import ImageString
+import HashMap
+import HashList
+import ObjectIdGenerator
+import ItemObjEditing
+import ObjectIds
+import ChangeTexture
+import initlater ShopGUI
+
+
+constant ITEM_DEFINITIONS = new HashMap<int, ItemDefinition>
+
+public function getItemDefintion(int itemId) returns ItemDefinition
+    if not compiletime
+        error("getItemDefintion cannot be used at runtime")
+
+    return ITEM_DEFINITIONS.get(itemId)
+
+public function iconFromItem(int itemId) returns int
+    return ("T"+itemId.toRawCode().substring(1)).fromRawCode()
+
+
+//compiletime to create an item object + icon texture
+public function newItem(string icon) returns int
+    let id = ITEM_ID_GEN.next()
+    if compiletime
+        createTexture(icon, iconFromItem(id))
+        let iDef = new ItemDefinition(id, 'rde1')
+            ..setInterfaceIcon(icon)
+            ..setAbilities("")
+            ..setActivelyUsed(false)
+            ..setCooldownGroup("")
+            ..setDescription("")
+            ..setDroppedWhenCarrierDies(false)
+            ..setUseAutomaticallyWhenAcquired(false)
+            ..setPerishable(false)
+            ..setNumberofCharges(0)
+            ..setIgnoreCooldown(false)
+            ..setLumberCost(0)
+        ITEM_DEFINITIONS.put(id, iDef)
+    return id
+
+
+public class ItemInShop
+    private int itemId
+    private int category
+    private int iconId
+    private int totalCost
+    private int singleCost
+    private LinkedList<ItemInShop> requirements
+    private HashList<ItemInShop> buildsInto //transitive closure
+    private static constant allItems = new LinkedList<ItemInShop>
+
+    private ImageStringType name
+    private ImageStringType description
+    private ImageStringType nameTopLeft
+
+    private static LinkedList<ItemInShop> array itemsInCategory
+    private static ItemInShop array itemsInCategoryArray
+    private static int array itemsPerCategory
+    private static constant itemToIndex = new HashMap<ItemInShop,int>
+
+    private static constant itemIdToItemInShop = new HashMap<int,ItemInShop>
+
+    static function classInit()
+        itemsInCategory[0] = new LinkedList<ItemInShop>()
+        itemsInCategory[1] = new LinkedList<ItemInShop>()
+        itemsInCategory[2] = new LinkedList<ItemInShop>()
+        itemsInCategory[3] = new LinkedList<ItemInShop>()
+        itemsInCategory[4] = new LinkedList<ItemInShop>()
+        itemsInCategory[5] = new LinkedList<ItemInShop>()
+
+    /*
+        Retrieves the object to this item id. It never returns null.
+    */
+    static function retrieveItemFromId(int itemId) returns ItemInShop
+        if itemIdToItemInShop.has(itemId)
+            return itemIdToItemInShop.get(itemId)
+        else
+            return new ItemInShop(itemId)
+
+    /*
+        creates an empty object. The object itself can be initialized later,
+        but it can already be used as reference. Calculations depending on other
+        items are done after all items have been initialized in finalize().
+    */
+    construct(int itemId)
+        this.itemId = itemId
+        itemIdToItemInShop.put(itemId, this)
+        this.requirements = new LinkedList<ItemInShop>
+        this.buildsInto = new HashList<ItemInShop>
+        allItems.add(this)
+
+    function setupItem(int category, int iconId, int totalCost)
+        this.category = category
+        this.iconId = iconId
+        this.totalCost = totalCost
+        this.singleCost = -1
+        itemsInCategory[this.category].add(this)
+
+
+    /*construct(int itemId, int category, int iconId, int totalCost)
+        itemIdToItemInShop.put(itemId, this)
+        this.itemId = itemId
+        this.category = category
+        this.iconId = iconId
+        this.totalCost = totalCost
+        this.singleCost = totalCost
+        this.requirements = new LinkedList<ItemInShop>
+        this.buildsInto = new HashList<ItemInShop>
+        allItems.add(this)
+        itemsInCategory[this.category].add(this)*/
+
+        /*let itm = createItem(itemId, vec2(0,0))
+
+        this.name = new ImageStringType(600, Origin.MIDDLE_CENTER, itm.getName(), 1)
+        this.nameTopLeft = new ImageStringType(600, Origin.TOP_LEFT, itm.getName() + "|n||gold| " + COLOR_GOLD.toColorString() + (this.totalCost).toString() +"|r", 0.9)
+        this.description = new ImageStringType(900, Origin.TOP_LEFT, itm.getExtendedTooltip(), 0.8)
+        
+
+        /*this.name = new ImageStringType(400, Origin.MIDDLE_CENTER, "name", 1)
+        this.nameTopLeft = new ImageStringType(500, Origin.TOP_LEFT, "name", 1)
+        this.description = new ImageStringType(540, Origin.TOP_LEFT, "desc", 0.8)*/
+
+        /*itm.remove()*/
+
+    function setupStrings(string name, string desc)
+        this.nameTopLeft = new ImageStringType(600, Origin.TOP_LEFT, name + "|n||gold| " + COLOR_GOLD.toColorString() + (this.totalCost).toString() +"|r", 0.9)
+        this.description = new ImageStringType(900, Origin.TOP_LEFT, desc, 0.8)
+
+
+    function addRequirement(ItemInShop requirement)
+        this.requirements.add(requirement)
+
+    function getItemId() returns int
+        return this.itemId
+
+    function getIconId() returns int
+        return this.iconId
+        
+    function getTotalCost() returns int
+        return this.totalCost
+
+    function getSingleCost() returns int
+        return this.singleCost
+
+    function getRequirements() returns LinkedList<ItemInShop>
+        return this.requirements
+
+    function getBuildsInto() returns HashList<ItemInShop>
+        return this.buildsInto
+
+    function getName() returns ImageStringType
+        return this.name
+
+    function getNameTopLeft() returns ImageStringType
+        return this.nameTopLeft
+
+    function getDescription() returns ImageStringType
+        return this.description
+
+    function calculateGoldCost()
+        int childrenCost = 0
+        for ItemInShop child in this.requirements
+            childrenCost += child.totalCost
+
+        this.singleCost = this.totalCost - childrenCost
+
+
+    /** After all items have been created the buildsInto lists are built.**/
+    static function finalize()
+        for ItemInShop itm in allItems
+            itm.calculateGoldCost()
+
+        for ItemInShop itm in allItems
+
+            for ItemInShop child in itm.requirements
+                addBuildsInto(child, itm)
+
+            LinkedList<ItemInShop> sortingList = new LinkedList<ItemInShop>()
+            for ItemInShop b in itm.buildsInto
+                sortingList.add(b)
+
+            itm.buildsInto.clear()
+            sortingList.sortWith((a,b) -> ( a.getTotalCost() - b.getTotalCost() ) )
+
+            for ItemInShop b in sortingList
+                itm.buildsInto.add(b)
+
+            destroy sortingList
+
+
+        for i = 0 to 5
+            itemsInCategory[i].sortWith((a,b) -> ( a.getTotalCost() - b.getTotalCost() ) )
+
+        for i = 0 to 5
+            itemsPerCategory[i] = itemsInCategory[i].size()
+            int j = 0
+            for ItemInShop itm in itemsInCategory[i]
+                itemsInCategoryArray[i * MAX_ITEMS_IN_LIST + j] = itm
+                itemToIndex.put(itm, i * MAX_ITEMS_IN_LIST + j)
+                j++
+
+    private static function addBuildsInto(ItemInShop child, ItemInShop parent)
+        if not child.buildsInto.has(parent)
+            child.buildsInto.add(parent)
+
+        for ItemInShop childChild in child.requirements
+            addBuildsInto(childChild, parent)
+
+    static function getArrayIndex(ItemInShop itm) returns int
+        return itemToIndex.get(itm)
+
+    static function getIndex(ItemInShop itm) returns int
+        return itemToIndex.get(itm) mod MAX_ITEMS_IN_LIST
+
+    static function getCategory(ItemInShop itm) returns int
+        return itemToIndex.get(itm) div MAX_ITEMS_IN_LIST
+
+    static function getItemFromList(int category, int index) returns ItemInShop
+        return itemsInCategoryArray[category * MAX_ITEMS_IN_LIST + index]
+
+    static function getItemCount(int category) returns int
+        return itemsPerCategory[category]
+
+    static function getItemList(int category) returns LinkedList<ItemInShop>
+        return itemsInCategory[category]
+
+    static function getItemFromId(int itemId) returns ItemInShop
+        return itemIdToItemInShop.get(itemId)
+
+init
+    ItemInShop.classInit()

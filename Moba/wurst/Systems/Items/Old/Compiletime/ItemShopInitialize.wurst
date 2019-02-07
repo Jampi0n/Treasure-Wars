@@ -1,0 +1,244 @@
+package ItemShopInitialize
+
+import LinkedList
+import HashMap
+import ObjectIdGenerator
+import ItemObjEditing
+import ObjectIds
+import AbilityObjEditing
+import ErrorHandling
+
+/*  ==========================================================================================================================
+**
+**  compiletime & runtime globals
+**
+**  ==========================================================================================================================*/
+
+public string array compItemRequiredItems //needed at runtime needs two seperators
+public int array compItemGoldCost //needed at runtime 3-4 + 1 seperator
+public int array compItemIdArray //needed at runtime: 4 (no seperator needed)
+public boolean array compItemIsRecipe //needed at runtime 1
+
+/*  ==========================================================================================================================
+**
+**  compiletime
+**
+**  ==========================================================================================================================*/
+
+/*  ==========================================================================================================================
+**
+**  globals
+**
+**  ==========================================================================================================================*/
+
+public int compCurrentItemId = -1
+public ItemDefinition array compItemDefinition
+public string array compItemName
+public string array compItemShopDescription
+public int array compItemPosX
+public int array compItemPosY
+
+public string array compItemDesc
+
+/*  ==========================================================================================================================
+**
+**  Item Object Generation
+**
+**  public function newItem(string name, int goldCost, BuildingDefinition shop, int x, int y, string requiredItems, string icon, string desc) returns int
+**
+**  the return value is a custom id that ranges from 0 to n
+**
+**  requiredItems is a string of this format: id,id,id
+**  the ids need to be casted to strings
+**
+**  ==========================================================================================================================*/
+
+public constant shopList = new LinkedList<Shop>()
+
+/*  ==========================================================================================================================
+**
+**  function to easily create shops
+**
+**  ==========================================================================================================================*/
+
+public class ItemInShop
+    int goldCost
+    int itemId
+
+    construct(int itemId)
+        this.itemId = itemId
+
+    function setupGoldCost()
+        this.goldCost = compItemGoldCost[itemId]
+
+public class Shop
+    string itemsMade
+    string name
+    LinkedList<ItemInShop> soldItems
+    BuildingDefinition bDef
+    construct(int unitId, string name, real size, string model)
+        this.bDef = createShop(unitId, name, size, model)
+        this.itemsMade = ""
+        this.name = name
+        this.soldItems = new LinkedList<ItemInShop>()
+        shopList.add(this)
+
+function createShop(int newId, string name, real size, string model) returns BuildingDefinition
+    let bDef = new BuildingDefinition(newId, 'hvlt')
+        ..setPathingMap("PathTextures\\4x4SimpleSolid.tga")
+        ..setNormalAbilities("Abds,Aall,Apit,Avul")
+        ..setHitPointsMaximumBase(1000)
+        ..setItemsMade("")
+        ..setModelFile(model)
+        ..setShadowImageCenterX(60)..setShadowImageCenterY(60)
+        ..setShadowImageWidth(150)..setShadowImageHeight(150)
+        ..setShadowTextureBuilding("")
+        ..setGroundTexture("")
+        ..setName(name)
+        ..setSelectionScale(2)
+        ..setScalingValue(size)
+        ..setPlacementRequires("")
+    return bDef
+
+/*  ==========================================================================================================================
+**
+**  Main function to create items.
+**  
+**  public function newItem(string name, int goldCost, int shop, int x, int y, string requiredItems, string icon, string desc) returns int
+**
+**  Must be used within the compiletime() magic function
+**
+**  For items that have recipes (requiredItems!="") another item object is created, that is the recipe
+**  Values are automatically created for the recipe based on the original item.
+**
+**  ==========================================================================================================================*/
+
+public function newItem(string name, int whichShop, boolean hasRecipe, string icon) returns int
+    /*
+    There should not be any references to other item variables, as they might not have been initialized.
+    */
+    let shop = whichShop castTo Shop
+    compCurrentItemId++
+    compItemIdArray[compCurrentItemId] = ITEM_ID_GEN.next()
+    compItemName[compCurrentItemId] = name
+    compItemShopDescription[compCurrentItemId] = shop.name
+    compItemIsRecipe[compCurrentItemId] = false
+    compItemRequiredItems[compCurrentItemId] = ""
+
+    compItemDesc[compCurrentItemId] = ""
+
+    compItemDefinition[compCurrentItemId] = newItemDefintion(compItemIdArray[compCurrentItemId])
+        ..presetIcon(icon)
+        ..setName(name)
+        ..setTooltipBasic(name)
+
+    
+    new ItemTypeDef(compCurrentItemId, hasRecipe)
+
+    if hasRecipe //create additional recipe item directly after the main item
+        compCurrentItemId++
+        compItemIdArray[compCurrentItemId] = ITEM_ID_GEN.next()
+        compItemName[compCurrentItemId] = name
+        compItemIsRecipe[compCurrentItemId] = true
+        compItemRequiredItems[compCurrentItemId] = ""
+
+        compItemDesc[compCurrentItemId] = ""
+
+        compItemDefinition[compCurrentItemId] = newItemDefintion(compItemIdArray[compCurrentItemId])
+            ..presetIcon(icon)
+            ..setName(name+" - Recipe")
+            ..setTooltipBasic(name+" - Recipe")
+            ..setUseAutomaticallyWhenAcquired(true)
+
+
+
+        if(shop.itemsMade!="")
+            shop.itemsMade += ","
+        shop.itemsMade += compItemIdArray[compCurrentItemId].toRawCode()
+        shop.bDef.setItemsMade(shop.itemsMade)
+
+        shop.soldItems.add(new ItemInShop(compCurrentItemId))
+
+        return compCurrentItemId - 1
+    else
+        if(shop.itemsMade!="")
+            shop.itemsMade += ","
+        shop.itemsMade += compItemIdArray[compCurrentItemId].toRawCode()
+        shop.bDef.setItemsMade(shop.itemsMade)
+
+        shop.soldItems.add(new ItemInShop(compCurrentItemId))
+
+        return compCurrentItemId
+
+public function newItemDefintion(int itemId) returns ItemDefinition
+    let iDef = new ItemDefinition(itemId, 'ratc')
+        ..setAbilities("")
+        ..setCooldownGroup("")
+        ..setStockReplenishInterval(1)
+        ..setStockStartDelay(0)
+        ..setStockMaximum(1)
+        ..setLevel(1)
+    return iDef
+
+function ItemDefinition.presetIcon(string name)
+    string s = name
+    if name.length() < 20 or not name.startsWith("ReplaceableTextures")
+        s = "ReplaceableTextures\\CommandButtons\\" + s
+    if not name.endsWith(".blp")
+        s += ".blp"
+
+    this.setInterfaceIcon(s)
+
+
+    /*  ==========================================================================================================================
+**
+**
+**  Compiletime class for easier item modification.
+**
+**  ==========================================================================================================================*/
+
+public function int.getTypeDef() returns ItemTypeDef
+    return ItemTypeDef.idToTypeDef.get(this)
+
+public class ItemTypeDef
+
+    private int itemId
+    private string requirements
+    protected static constant idToTypeDef = new HashMap<int, ItemTypeDef>()
+    private boolean hasRecipe //determines whether this item def has a recipe, the item def is never a recipe itself
+
+    construct(int itemId, boolean hasRecipe)
+        this.itemId = itemId
+        idToTypeDef.put(this.itemId, this)
+        this.requirements = ""
+        this.hasRecipe = hasRecipe
+    
+    function getId() returns integer
+        return this.itemId
+
+    function setGoldCost(int gold)
+        compItemGoldCost[this.getId()] = gold
+        if hasRecipe
+            compItemGoldCost[this.getId()+1] = gold
+
+    function setDescription(string newDesc)
+        compItemDesc[this.getId()] = newDesc
+        if hasRecipe
+            compItemDesc[this.getId()+1] = newDesc
+
+    function setAbility(int abilityTypeId)
+        compItemDefinition[this.itemId]
+            ..setAbilities(abilityTypeId.toRawCode())
+            ..setCooldownGroup(abilityTypeId.toRawCode())
+            ..setActivelyUsed(true)
+
+    function addRequirement(int id)
+        if hasRecipe
+            if(this.requirements=="")
+                this.requirements+=id.toString()
+            else
+                this.requirements+=","+id.toString()
+
+            compItemRequiredItems[this.getId()+1] = this.requirements
+        else
+            error("Cannot add requirements to non-recipe items. Name of item:"+compItemName[this.getId()])

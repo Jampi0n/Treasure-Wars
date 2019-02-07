@@ -1,0 +1,44 @@
+package ShopManager
+
+import Constants
+import Execute
+import ShopGUI
+import ClosureTimers
+
+rect visibleArea
+rect array shopRect
+GUI array gui
+
+public function getGUI(int i) returns GUI
+    return gui[i]
+
+init
+    visibleArea = GetPlayableMapRect()
+
+    shopRect[0] = gg_rct_Shop0
+    shopRect[1] = gg_rct_Shop1
+    shopRect[2] = gg_rct_Shop2
+    shopRect[3] = gg_rct_Shop3
+    shopRect[4] = gg_rct_Shop4
+    shopRect[5] = gg_rct_Shop5
+    shopRect[6] = gg_rct_Shop6
+    shopRect[7] = gg_rct_Shop7
+    shopRect[8] = gg_rct_Shop8
+    shopRect[9] = gg_rct_Shop9
+
+    doAfter(1) ->
+        execute() ->
+            for i = HERO_PLAYER_TEAM_1_FIRST to HERO_PLAYER_TEAM_2_LAST
+                gui[i] = new GUI(players[i], null, shopRect[i].getCenter())
+
+
+    for i = HERO_PLAYER_TEAM_1_FIRST to HERO_PLAYER_TEAM_2_LAST
+        CreateTrigger()
+        ..registerPlayerEvent(players[i], EVENT_PLAYER_END_CINEMATIC)
+        ..addAction() ->
+            let id = GetTriggerPlayer().getId()
+            if gui[id].isEnabled()
+                gui[id].closeShop()
+            else
+                gui[id].openShop()
+    
