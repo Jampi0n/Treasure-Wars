@@ -5,6 +5,8 @@ import HeroType
 import ClosureTimers
 import Gameplay
 import HashMap
+import ShopGUI
+import ShopManager
 
 public PickMode pickMode
 timer chooseModeTimer
@@ -61,6 +63,7 @@ function setupCreatedHero(Hero hero)
 
     
     heroUnit.setPos(pos)
+    getGUI(owner.getId()).setInventoryUnit(heroUnit)
     //prevent using skills for first 5 seconds, as skills will be initialized
     UnitModifySkillPoints(heroUnit, -1)
     

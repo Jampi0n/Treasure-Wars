@@ -1,0 +1,92 @@
+package ImageBorder
+
+public BorderStyle humanBorder
+
+class BorderStyle
+
+    string prefix
+
+    real scaling
+
+    real backgroundOffset
+
+    construct(string prefix ,real sourceSize, real backgroundOffset)
+        this.prefix = prefix
+
+        this.scaling = sourceSize / (sourceSize-4) //2px transparent border
+
+        this.backgroundOffset = backgroundOffset / sourceSize
+
+public class ImageBorder
+
+
+
+
+    private vec2 topLeft
+    private vec2 bottomRight
+
+    private BorderStyle borderStyle
+
+
+
+    construct(vec2 topLeft, vec2 bottomRight, BorderStyle borderStyle, real size)
+
+        
+        let width = (bottomRight.x - topLeft.x)
+        let height = (topLeft.y - bottomRight.y)
+
+        this.topLeft = topLeft + vec2(size/2, -size/2)
+        this.bottomRight = bottomRight + vec2(-size/2, size/2 )
+        this.borderStyle = borderStyle
+
+        let scaling = borderStyle.scaling
+
+
+        let widthNoBorder = width - 2 * size
+        let heightNoBorder = height - 2 * size
+
+        let countHor = (widthNoBorder/size).round()
+        let countVer = (heightNoBorder/size).round()
+
+        let widthScaling = widthNoBorder/countHor
+        let heightScaling = heightNoBorder/countVer
+
+        //createUnit(players[0], 'osp1', topLeft, angle(0))
+        //createUnit(players[0], 'osp1', bottomRight, angle(0))
+
+        createImage(borderStyle.prefix+"Back", 0.5 * (topLeft + bottomRight), (width - 2*borderStyle.backgroundOffset*size), (height - 2*borderStyle.backgroundOffset*size), Layer.L3).show()
+
+        createImage(borderStyle.prefix+"TL.tga", this.topLeft, size * scaling, size * scaling, Layer.L3 ).show()
+        createImage(borderStyle.prefix+"BR.tga", this.bottomRight, size * scaling, size * scaling, Layer.L3 ).show()
+        createImage(borderStyle.prefix+"BL.tga", this.topLeft - vec2(0, height-size), size * scaling, size * scaling, Layer.L3 ).show()
+        createImage(borderStyle.prefix+"TR.tga", this.bottomRight + vec2(0, height-size), size * scaling, size * scaling, Layer.L3 ).show()
+
+        real x1 = this.topLeft.x + size/2 + widthScaling/2
+        
+        real y1 = this.topLeft.y
+        real y2 = y1 - height + size
+
+
+        for i = 0 to countHor-1
+            createImage(borderStyle.prefix+"T.tga", vec2(x1 + i*widthScaling, y1), widthScaling * scaling, size * scaling, Layer.L3 ).show()
+            createImage(borderStyle.prefix+"B.tga", vec2(x1 + i*widthScaling, y2), widthScaling * scaling, size * scaling, Layer.L3 ).show()
+
+
+        x1 = this.topLeft.x
+        real x2 = x1 + width - size
+        y1 = this.topLeft.y - size/2 - heightScaling/2
+
+        for i = 0 to countVer-1
+            createImage(borderStyle.prefix+"L.tga", vec2(x1, y1 - i*heightScaling), size * scaling, heightScaling * scaling, Layer.L3 ).show()
+            createImage(borderStyle.prefix+"R.tga", vec2(x2, y1 - i*heightScaling), size * scaling, heightScaling * scaling, Layer.L3 ).show()
+    
+        
+
+
+        /*createImage(borderStyle.leftPath, this.center - vec2(width/2, 0) , 64, height, Layer.L3).show()
+        createImage(borderStyle.rightPath, this.center + vec2(width/2, 0) , 64, height, Layer.L3).show()
+        createImage(borderStyle.topPath, this.center + vec2(0, height/2) , width, 64, Layer.L3).show()
+        createImage(borderStyle.bottomPath, this.center - vec2(0, height/2) , width, 64, Layer.L3).show()*/
+
+init
+    humanBorder = new BorderStyle("Borders\\human", 64, 20)

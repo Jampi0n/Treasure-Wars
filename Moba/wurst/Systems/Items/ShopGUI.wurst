@@ -1,0 +1,874 @@
+package ShopGUI
+
+import ItemInShop
+import HashMap
+import GUIButton
+import ImageString
+import ChangeTexture
+import Icons
+import LinkedList
+import TimerUtils
+import RecipeTreeConfiguration
+import MapBounds
+import ClosureTimers
+import ImageBorder
+import PlayerControl
+
+public constant GRID_SIZE = 16.0
+public constant MAX_ITEMS_IN_LIST = 30
+
+constant BTN_CAT1 = compiletime(createTexture(Icons.bTNPeasant))
+constant BTN_CAT2 = compiletime(createTexture(Icons.bTNPotionBlue))
+constant BTN_CAT3 = compiletime(createTexture(Icons.bTNHeal))
+constant BTN_CAT4 = compiletime(createTexture(Icons.bTNSteelMelee))
+constant BTN_CAT5 = compiletime(createTexture(Icons.bTNBrilliance))
+constant BTN_CAT6 = compiletime(createTexture(Icons.bTNInvulnerable))
+
+constant BTN_CANCEL = compiletime(createTexture(Icons.bTNCancel))
+constant BTN_ACCEPT = compiletime(createTexture(Icons.bTNChestOfGold))
+
+constant stringBuildsInto = new ImageStringType(500, Origin.TOP_LEFT, "Builds Into:", 1)
+constant stringRequires = new ImageStringType(500, Origin.TOP_LEFT, "Recipe:", 1)
+
+constant stringCategories = new ImageStringType(500, Origin.TOP_LEFT, "Categories:", 1)
+constant stringItemList = new ImageStringType(500, Origin.TOP_LEFT, "Item List:", 1)
+
+constant stringCat1 = new ImageStringType(250, Origin.MIDDLE_CENTER, "Starting Items", 0.9)
+constant stringCat2 = new ImageStringType(250, Origin.MIDDLE_CENTER, "Potions", 0.9)
+constant stringCat3 = new ImageStringType(250, Origin.MIDDLE_CENTER, "Utility", 0.9)
+constant stringCat4 = new ImageStringType(250, Origin.MIDDLE_CENTER, "Physical Damage", 0.9)
+constant stringCat5 = new ImageStringType(250, Origin.MIDDLE_CENTER, "Magic Damage", 0.9)
+constant stringCat6 = new ImageStringType(250, Origin.MIDDLE_CENTER, "Defense", 0.9)
+
+constant stringBuy = new ImageStringType(250, Origin.TOP_LEFT, "Buy for:", 1)
+
+constant LINK_COLOR = colorA(100,100,100,255)
+
+tuple gridPos(int x, int y)
+
+
+public function heroIssueBuyItem(unit hero, ItemInShop itm) returns bool
+    if hero == null
+        return false
+    let cost = getItemCostForHero(hero, itm)
+    if cost > hero.getOwner().getGold()
+        return false
+    else
+        hero.getOwner().addGold(-cost)
+        heroRemoveRequiredItems(hero, itm)
+        hero.addItemById(itm.getItemId())
+        return true
+
+
+public function getItemCostForHero(unit hero, ItemInShop itm) returns int
+    if hero == null
+        return itm.getTotalCost()
+    let inv = new HeroInventory(hero)
+    int cost = itm.getSingleCost()
+    for ItemInShop required in itm.getRequirements()
+        cost += getItemCostHelp(hero, required, inv)
+    return cost
+
+function getItemCostHelp(unit hero, ItemInShop itm, HeroInventory inv) returns int
+    int cost = 0
+    if not inv.useItem(itm.getItemId())
+        cost += itm.getSingleCost()
+        for ItemInShop required in itm.getRequirements()
+            cost += getItemCostHelp(hero, required, inv)
+    return cost
+
+function heroRemoveRequiredItems(unit hero, ItemInShop itm)
+    for ItemInShop required in itm.getRequirements()
+        let requiredId = required.getItemId()
+        if hero.hasItemById(requiredId)
+            hero.removeItemById(requiredId)
+        else
+            heroRemoveRequiredItems(hero, required)
+
+/*
+    A hero inventory is a virtual container that stores the number of each item type a hero has.
+    This information is used to determine the cost of item recipes.
+*/
+class HeroInventory
+
+    private HashMap<int,int> itemsInInventory
+    private LinkedList<int> storedKeys
+
+    construct(unit hero)
+        this.itemsInInventory = new HashMap<int,int>
+        this.storedKeys = new LinkedList<int>
+        for i = 0 to 5
+            int itemTypeId = hero.itemInSlot(i).getTypeId()
+            if itemTypeId != 0
+                if this.itemsInInventory.has(itemTypeId)
+                    this.itemsInInventory.put(itemTypeId, this.itemsInInventory.get(itemTypeId) + 1 )
+                else
+                    this.itemsInInventory.put(itemTypeId, 1)
+                    this.storedKeys.add(itemTypeId)
+
+    /*
+        Copies inventory information. This is used in subtrees to not change information for other trees or the main tree.
+    */
+    construct(HeroInventory inv)
+        this.itemsInInventory = new HashMap<int,int>
+        this.storedKeys = new LinkedList<int>
+        for int key in inv.storedKeys
+            this.storedKeys.add(key)
+            this.itemsInInventory.put(key, inv.itemsInInventory.get(key))
+
+    /*
+        Returns whether the hero has an item of this type. If it has, the item is removed,
+        so that this item will be used to reduce the cost of this recipe and can no longer
+        be used to reduce cost of other recipes.
+    */
+    function useItem(int itemTypeId) returns boolean
+        if this.itemsInInventory.get(itemTypeId) > 0
+            this.itemsInInventory.put(itemTypeId, this.itemsInInventory.get(itemTypeId) - 1 )
+            return true
+        else
+            return false
+
+
+    ondestroy
+        destroy this.itemsInInventory
+        destroy this.storedKeys
+
+
+
+
+class RecipeTree
+
+    RecipeTreeNode root
+    GUI gui
+    int usedButtons = 0
+    HeroInventory inv
+
+    construct(GUI gui, ItemInShop recipe)
+        this.gui = gui
+        this.root = new RecipeTreeNode(this, 15, 0, recipe)
+        this.inv = null
+        this.refresh()
+
+    /*
+        Recalculates costs and the checkmarks without recreating buttons or links.
+    */
+    function refresh()
+        if this.inv != null
+            destroy this.inv
+        this.inv = new HeroInventory(gui.getInventoryUnit())
+        this.root.displayCost(true)
+
+    ondestroy
+        destroy this.root
+        destroy this.inv
+        this.root = null
+        this.gui = null
+        this.inv = null
+
+
+
+
+class RecipeTreeNode
+
+    int x
+    int y
+    RecipeTreeNode parent
+    ItemInShop itm
+    int children
+    int childIndex
+    GUI gui
+    RecipeTree tree
+    //lightning link
+    vec2 topLeft
+    vec2 center
+    image forkHor //parent
+    image forkVer //parent
+    image linkToFork // child
+    Button btn
+
+
+    LinkedList<RecipeTreeNode> childrenList
+
+    construct(RecipeTree tree, int x, int y, ItemInShop itm)
+        this.tree = tree
+        this.gui = tree.gui
+        this.x = x
+        this.y = y
+        this.itm = itm
+        this.childrenList = new LinkedList<RecipeTreeNode>
+        int numberOfChildren = this.itm.getRequirements().size()
+        int i = 0
+        this.topLeft = gui.getPosFromGrid(convertX(x), convertY(y) ) + vec2(0, 5 * GRID_SIZE)
+        this.center = topLeft + vec2(2.5 * GRID_SIZE, -2.5 * GRID_SIZE)
+
+        this.btn = this.gui.getRecipeButton(this.tree.usedButtons)
+        this.tree.usedButtons++
+        //print("activate["+this.tree.usedButtons.toString()+"] ("+x.toString()+", "+y.toString()+")")
+        btn.activate(convertX(x), convertY(y), 5, this.itm.getIconId())
+        //btn.setClickBehaviour(0, -2, 4, 4, (_) -> this.gui.clickRequirement(this.itm))
+
+        btn.setBackGround(36, 36, 36, 84, "IconBackground.tga", LINK_COLOR)
+        btn.data = this.itm castTo int
+
+        if y != 0
+            this.linkToFork = createImage("Tree\\Link.tga", this.center + vec2(0, 40), 8, 48, Layer.L2)
+            this.linkToFork.show()
+            this.linkToFork.setColor(LINK_COLOR)
+
+
+        this.children =  itm.getRequirements().size()
+
+
+
+        for ItemInShop child in this.itm.getRequirements()
+            RecipeTreeNode childNode = new RecipeTreeNode(this.tree, getChildX(x, y, i, numberOfChildren), y + 1, child)
+            //childNode.link = addLightning("SHOP", false, this.topLeft + vec2( (i.toReal() / (numberOfChildren-1.0) * GRID_SIZE * 5 ) , 0), childNode.topLeft + vec2(GRID_SIZE*2.5, GRID_SIZE * 5))
+            this.childrenList.add(childNode)
+            i++
+
+        if this.children > 1
+            let leftMost = childrenList.get(0)
+            let rightMost = childrenList.get(numberOfChildren - 1)
+            let width = (rightMost.center.x - leftMost.center.x) * 1.05 // actual size is only 62/64, so this is used to increase width of image
+            let middle = (rightMost.center.x + leftMost.center.x) / 2.0
+            this.forkVer = createImage("Tree\\Link.tga", this.center + vec2(0, -80), 8, 48, Layer.L2)
+            this.forkVer.show()
+            this.forkVer.setColor(LINK_COLOR)
+            this.forkHor = createImage("Tree\\Link.tga", vec2(middle, this.center.y - 100), width, 8, Layer.L2)
+            this.forkHor.show()
+            this.forkHor.setColor(LINK_COLOR)
+
+        else if this.children == 1
+            this.forkVer = createImage("Tree\\Link.tga", this.center + vec2(0, -80), 8, 48, Layer.L2)
+            this.forkVer.show()
+            this.forkVer.setColor(LINK_COLOR)
+
+    function displayCheckedCost(HeroInventory inv, bool root) returns int
+        int cost = 0
+        btn.setChecked(true)
+
+        if not root //3rd row
+            if not inv.useItem(this.itm.getItemId()) 
+                cost += this.itm.getTotalCost()
+            btn.setText(this.itm.getTotalCost().toString(), COLOR_GOLD)
+        else //2nd row
+            cost += this.itm.getSingleCost()
+            for RecipeTreeNode childNode in this.childrenList
+                cost += childNode.displayCheckedCost(inv, false)
+            btn.setText(cost.toString(), COLOR_GOLD)
+
+        return cost
+
+    function displayCost(bool root) returns int
+        int cost = 0
+
+
+        if not root and this.tree.inv.useItem(this.itm.getItemId())
+            let subInv = new HeroInventory(this.tree.inv)
+            displayCheckedCost(subInv, true)
+            destroy subInv
+        else
+            btn.setChecked(false)
+            cost += this.itm.getSingleCost()
+            for RecipeTreeNode childNode in this.childrenList
+                cost += childNode.displayCost(false)
+
+
+
+            btn.setText(cost.toString(), COLOR_GOLD)
+
+
+        return cost
+
+
+    ondestroy
+        for RecipeTreeNode child in this.childrenList
+            destroy child
+
+        //this.link.destr()
+        if this.forkHor != null
+            DestroyImage(this.forkHor)
+            this.forkHor = null
+        if this.forkVer != null
+            DestroyImage(this.forkVer)
+            this.forkVer = null
+        if this.linkToFork != null
+            DestroyImage(this.linkToFork)
+            this.linkToFork = null
+
+
+
+
+    construct(int x, int y, ItemInShop itm, RecipeTreeNode parent, int childIndex)
+        this.x = x
+        this.y = y
+        this.itm =itm
+        this.parent = parent
+        this.children = itm.getRequirements().size()
+        this.childIndex = childIndex
+
+    static function convertX(int x) returns int
+        return x + 3
+
+    static function convertY(int y) returns int
+        return 24 - y*10
+
+
+/*  API:
+        openShop()
+        closeShop()
+
+    Everything else is handled internally.
+*/
+public class GUI
+    private player forPlayer
+    private unit inventoryUnit
+    private bool enabled = false
+    private int selectedRecipeButton = -1
+    private ItemInShop selectedRecipe
+    private int itemsInRecipe
+    private ItemInShop selectedItem
+    private int itemsInBuildsInto
+    private int currentPage
+    private int itemsOnPage
+    private vec2 center
+    private vec2 previousCamerePos
+
+    //arrays use MAX_ITEMS_IN_LIST * this
+    private int arrayOffset
+    private static Button array categoryButtons // size = 6
+    private static Button array buildsIntoButtons // size = 7
+    private static Button array requiredItemButtons // size = 10
+    private static Button array buyableItemsButtons  // size = MAX_ITEMS_IN_LIST
+    private Button selectedItemButton
+    private Button buyButton
+
+    
+
+    private ImageString nameText = null
+    private ImageString recipeNameText = null
+    private ImageString descriptionText = null
+    private ImageString buildsIntoText = null
+    private ImageString requiresText = null
+    private ImageString costText = null
+
+    private RecipeTree recipeTree = null
+   
+
+    private trigger onClickTrigger
+    private HashMap<int,Button> buttonMap
+    private static constant playerMap = new HashMap<player,GUI>
+
+    private static trigger onItemAcquire = CreateTrigger()
+    private static trigger onItemLose = CreateTrigger()
+
+    private timer forceCameraTimer
+
+
+    //
+    private bool mBoardMinimized
+
+    construct(player whichPlayer, unit inventoryUnit, vec2 center)
+        this.center = center
+        this.createBackground()
+        
+        this.selectedItem = ItemInShop.getItemFromList(0,0)
+        this.selectedRecipe = this.selectedItem
+
+        this.forPlayer = whichPlayer
+        this.inventoryUnit = inventoryUnit
+        this.currentPage = -1
+        this.itemsOnPage = 0
+        this.itemsInBuildsInto = 0
+        this.itemsInRecipe = 0
+        this.forceCameraTimer = getTimer()
+        this.forceCameraTimer.setData(this.forPlayer.getId())
+        this.forceCameraTimer.startPeriodic(0.01, function forceCameraStatic)
+        this.forceCameraTimer.pause()
+        this.arrayOffset = (this castTo int) * MAX_ITEMS_IN_LIST
+
+        playerMap.put(whichPlayer, this)
+        this.buttonMap = new HashMap<int,Button>()
+        this.onClickTrigger = CreateTrigger()
+            ..registerPlayerEvent(forPlayer, EVENT_PLAYER_MOUSE_DOWN)
+            ..addAction(function onClickStatic)
+        allocateButtons()
+        setupCategoryButtons()
+        
+
+        setPage(0)
+        this.selectRecipe(this.selectedItem, false, true)
+        this.selectItem(this.selectedItem, true)
+
+        onItemAcquire.registerPlayerUnitEvent(this.forPlayer, EVENT_PLAYER_UNIT_PICKUP_ITEM, null)
+        onItemLose.registerPlayerUnitEvent(this.forPlayer, EVENT_PLAYER_UNIT_DROP_ITEM, null)
+
+
+        /*for i = 0 to 0
+            for j = 0 to 0
+                new Button(this)
+                ..enable()
+                ..activate(i*5, j*5, 5, BTN_CAT1, (Button btn) -> (btn.setHightLight(not btn.isHighlighted())) )*/
+
+    protected static function classInit()
+        onItemAcquire.addAction(function onItemGetStatic)
+        onItemLose.addAction(function onItemDropStatic)
+
+    function openShop()
+        if this.enabled
+            return
+
+        this.enabled = true
+        this.forceCameraTimer.startPeriodic(0.01, function forceCameraStatic)
+
+        this.mBoardMinimized = ScoreTable.isMinimized()
+
+        //show needed buttons
+
+        /*for i = this.arrayOffset to this.arrayOffset + 5
+            GUI.categoryButtons[i].enable()
+
+        for i = this.arrayOffset to this.arrayOffset + 6
+            GUI.buildsIntoButtons[i].enable()
+
+        for i = this.arrayOffset to this.arrayOffset + 9
+            GUI.requiredItemButtons[i].enable()
+
+        for i = this.arrayOffset to this.arrayOffset + 29
+            GUI.buyableItemsButtons[i].enable()*/
+
+        /*selectedItemButton.enable()
+        buyButton.enable()*/
+
+        this.refreshRecipeTree()
+        this.updateInfo()
+        //this.selectRecipe(this.selectedRecipe, true, true)
+
+        previousCamerePos = getCameraTargetPosition()
+
+        if GetLocalPlayer() == this.forPlayer
+            ScoreTable.minimalize(true)
+            ClearSelection()
+            EnableDragSelect(false, false)
+            EnableSelect(false, false)
+            print(this.inventoryUnit.getName())
+            SelectUnit(this.inventoryUnit, true)
+            ClearTextMessages()
+            SetCameraBounds(center.x, center.y, center.x, center.y, center.x, center.y, center.x, center.y)
+            
+
+    function closeShop()
+        if not this.enabled
+            return
+
+        this.enabled = false
+        this.forceCameraTimer.pause()
+
+        /*if this.recipeTree != null
+            destroy this.recipeTree
+            this.recipeTree = null*/
+
+        //hide all buttons
+
+        /*for i = this.arrayOffset to this.arrayOffset + 5
+            GUI.categoryButtons[i].disable()
+
+        for i = this.arrayOffset to this.arrayOffset + 6
+            GUI.buildsIntoButtons[i].disable()
+
+        for i = this.arrayOffset to this.arrayOffset + 9
+            GUI.requiredItemButtons[i].disable()
+
+        for i = this.arrayOffset to this.arrayOffset + 29
+            GUI.buyableItemsButtons[i].disable()*/
+
+        /*selectedItemButton.disable()
+        buyButton.disable()*/
+
+        clearInfo()
+
+        if GetLocalPlayer() == this.forPlayer
+            EnableDragSelect(true, true)
+            EnableSelect(true, true)
+            SetCameraBoundsToRect(playableMapRect)
+            ResetToGameCamera(0)
+            PanCameraToTimed(previousCamerePos.x, previousCamerePos.y, 0)
+            if this.mBoardMinimized
+                ScoreTable.minimalize(true)
+            else
+                ScoreTable.minimalize(false)
+
+    private function allocateButtons()
+        for i = 0 to 5
+            GUI.categoryButtons[this.arrayOffset + i] = new Button(this)
+
+        for i = 0 to 6
+            GUI.buildsIntoButtons[this.arrayOffset + i] = new Button(this)
+
+        for i = 0 to 9
+            GUI.requiredItemButtons[this.arrayOffset + i] = new Button(this)
+
+        selectedItemButton = new Button(this)
+        this.buyButton = new Button(this)
+
+        this.buyButton.activate(44, -10, 5, BTN_ACCEPT)
+        this.buyButton.hide()
+        //this.buyButton.setClickBehaviour(0, 0, 16, 4, (_) -> clickBuyButton()) !!!!
+        this.buyButton.setBackGround(43, 41, 231, 41, "Borders\\ConfirmButton.tga", COLOR_WHITE)
+
+        this.selectedItemButton.activate(3, -10, 5, this.selectedItem.getIconId())
+
+
+        for i = 0 to 29
+            GUI.buyableItemsButtons[this.arrayOffset + i] = new Button(this)
+
+    private function createBackground()
+        new ImageBorder(getPosFromGrid(-64, 32), getPosFromGrid(-35, -30), humanBorder, 96)
+        new ImageBorder(getPosFromGrid(-35, 32), getPosFromGrid(0, -30), humanBorder, 96)
+        new ImageBorder(getPosFromGrid(0, 32), getPosFromGrid(41, -2), humanBorder, 96)
+        new ImageBorder(getPosFromGrid(41, 32), getPosFromGrid(64, -2), humanBorder, 96)
+        new ImageBorder(getPosFromGrid(0, -2), getPosFromGrid(64, -30), humanBorder, 96)
+
+        new ImageString(stringItemList, getPosFromGrid(-32, 29))
+        new ImageString(stringCategories, getPosFromGrid(-57, 29))
+
+        new ImageString(stringCat1, getPosFromGrid(-52, 21) + vec2(0, GRID_SIZE * 2.5))
+        new ImageString(stringCat2, getPosFromGrid(-52, 12) + vec2(0, GRID_SIZE * 2.5))
+        new ImageString(stringCat3, getPosFromGrid(-52, 3) + vec2(0, GRID_SIZE * 2.5))
+        new ImageString(stringCat4, getPosFromGrid(-52, -6) + vec2(0, GRID_SIZE * 2.5))
+        new ImageString(stringCat5, getPosFromGrid(-52, -15) + vec2(0, GRID_SIZE * 2.5))
+        new ImageString(stringCat6, getPosFromGrid(-52, -24) + vec2(0, GRID_SIZE * 2.5))
+
+        new ImageString(stringBuy, getPosFromGrid(45, -9)  + vec2(5, GRID_SIZE * 2.5) , COLOR_GOLD)
+
+        this.buildsIntoText = new ImageString(stringBuildsInto, getPosFromGrid(44, 29))
+        this.requiresText = new ImageString(stringRequires, getPosFromGrid(4, 29))
+
+    private function setupCategoryButtons()
+        GUI.categoryButtons[this.arrayOffset + 0]..activate(-43, 21, 5, BTN_CAT1)
+        //.setClickBehaviour(-18, 0, 4, 4, (_) -> this.setPage(0) )
+        GUI.categoryButtons[this.arrayOffset + 1]..activate(-43, 12, 5, BTN_CAT2)
+        //.setClickBehaviour(-18, 0, 4, 4, (_) -> this.setPage(1) )
+        GUI.categoryButtons[this.arrayOffset + 2]..activate(-43, 3, 5, BTN_CAT3)
+        //.setClickBehaviour(-18, 0, 4, 4, (_) -> this.setPage(2) )
+        GUI.categoryButtons[this.arrayOffset + 3]..activate(-43, -6, 5, BTN_CAT4)
+        //.setClickBehaviour(-18, 0, 4, 4, (_) -> this.setPage(3) )
+        GUI.categoryButtons[this.arrayOffset + 4]..activate(-43, -15, 5, BTN_CAT5)
+        //.setClickBehaviour(-18, 0, 4, 4, (_) -> this.setPage(4) )
+        GUI.categoryButtons[this.arrayOffset + 5]..activate(-43, -24, 5, BTN_CAT6)
+        //.setClickBehaviour(-18, 0, 4, 4, (_) -> this.setPage(5) )
+
+    private function loadBuildsInto()
+        let size = this.selectedItem.getBuildsInto().size()
+        for i = size + this.arrayOffset to itemsInBuildsInto + this.arrayOffset
+            GUI.buildsIntoButtons[i].deactivate()
+        this.itemsInBuildsInto = size
+
+        int j = 0
+        for ItemInShop itm in this.selectedItem.getBuildsInto()
+            GUI.buildsIntoButtons[this.arrayOffset + j].activate(44 + 6 * (j mod 3), 21 - (j div 3) * 6, 5, itm.getIconId())
+            GUI.buildsIntoButtons[this.arrayOffset + j].data = itm castTo int
+            j++
+
+    private function loadInfoButtons(ItemInShop newItem)
+        
+        this.selectedItemButton.changeTexture(newItem.getIconId())
+
+        let cost = getItemCostForHero(inventoryUnit, this.selectedItem)
+        if this.costText != null
+            destroy this.costText
+        this.costText = new ImageString(cost.toString(), getPosFromGrid(54, -9) + vec2(10, GRID_SIZE * 2.5), COLOR_GOLD, 1, false)
+
+    private function loadItemListButton(int i)
+        let itm = ItemInShop.getItemFromList(this.currentPage, i)
+        let offsetI = this.arrayOffset + i
+        GUI.buyableItemsButtons[offsetI].activate(-32 + (i mod 5)*6, 21 - (i div 5)*9, 5, ItemInShop.getItemFromList(this.currentPage, i).getIconId())
+        //GUI.buyableItemsButtons[offsetI].setClickBehaviour(0, -2, 4, 4, (_) -> clickItemList(itm))
+        GUI.buyableItemsButtons[offsetI].setText(ItemInShop.getItemFromList(this.currentPage, i).getTotalCost().toString(), COLOR_GOLD)
+        GUI.buyableItemsButtons[offsetI].setBackGround(36, 36, 36, 84, "IconBackground.tga", LINK_COLOR)
+        GUI.buyableItemsButtons[offsetI].data = itm castTo int
+        if itm == this.selectedRecipe
+            GUI.buyableItemsButtons[offsetI].setHightLight(true)
+            GUI.selectedRecipeButton = i
+        else
+            GUI.buyableItemsButtons[offsetI].setHightLight(false)
+
+
+    private function updateInfo()
+
+        clearInfo()
+        
+        if this.selectedItem != null
+            this.nameText = new ImageString(this.selectedItem.getNameTopLeft(), getPosFromGrid(9, -5) + vec2(0, -8) )
+            this.descriptionText = new ImageString(this.selectedItem.getDescription(), getPosFromGrid(3, -11))
+        if this.selectedRecipe != null
+            //this.recipeNameText = new ImageString(this.selectedRecipe.getNameTopLeft(), getPosFromGrid(11, 32))
+
+
+    function getRecipeButton(int i) returns Button
+        return GUI.requiredItemButtons[this.arrayOffset + i]
+
+    private function refreshRecipeTree()
+        if this.recipeTree != null
+            this.recipeTree.refresh()
+
+    private function loadRecipeTree()
+        if this.selectedRecipe == null
+            return
+
+
+        for i = this.arrayOffset to itemsInRecipe + this.arrayOffset -1
+            GUI.requiredItemButtons[i].deactivate()
+        this.itemsInRecipe = 0
+
+        if this.recipeTree != null
+            destroy this.recipeTree
+        this.recipeTree = new RecipeTree(this, this.selectedRecipe)
+        this.itemsInRecipe = this.recipeTree.usedButtons
+
+
+    private function highlightSelectedItem()
+        for i = this.arrayOffset to itemsInRecipe + this.arrayOffset - 1
+            if GUI.requiredItemButtons[i].data == this.selectedItem castTo int
+                GUI.requiredItemButtons[i].setHightLight(true)
+            else
+                GUI.requiredItemButtons[i].setHightLight(false)
+
+
+    private function selectRecipe(ItemInShop newRecipe, bool keepItem, bool forceRefresh)
+        if newRecipe == this.selectedRecipe and not forceRefresh
+            if not keepItem
+                selectItem(newRecipe, false)
+            return
+
+        if this.selectedRecipeButton != -1
+            GUI.buyableItemsButtons[this.selectedRecipeButton + this.arrayOffset].setHightLight(false)
+
+        this.selectedRecipe = newRecipe
+
+        if not keepItem
+            selectItem(newRecipe, false)
+        else
+            updateInfo()
+
+        //if one uses builds into, the selected Item remains the same, but recipe changes
+        //if one selects a recipe on the left side, selected item is set to the recipe
+        
+        //load recipe
+        loadRecipeTree()
+
+        let cat = ItemInShop.getCategory(newRecipe)
+        if cat == this.currentPage
+            let index = ItemInShop.getIndex(newRecipe)
+            GUI.buyableItemsButtons[index + this.arrayOffset].setHightLight(true)
+            this.selectedRecipeButton = index
+
+        highlightSelectedItem()
+        
+    private function clearInfo()
+        if this.nameText != null
+            destroy this.nameText 
+            this.nameText = null
+
+        if this.recipeNameText != null
+            destroy this.recipeNameText
+            this.recipeNameText = null
+
+        if this.descriptionText != null
+            destroy this.descriptionText
+            this.descriptionText = null
+
+
+
+    private function selectItem(ItemInShop newItem, bool forceRefresh)
+        if newItem == this.selectedItem and not forceRefresh
+            //selectRecipe(newItem, true)
+            return
+
+        this.selectedItem = newItem
+        
+        loadInfoButtons(newItem)
+
+        this.updateInfo()
+        
+        //load builds into
+        loadBuildsInto()
+
+        highlightSelectedItem()
+
+
+    function clickRequirement(ItemInShop itm)
+        selectItem(itm, false)
+
+    private function clickBuildsInto(ItemInShop itm)
+        selectRecipe(itm, false, false)
+
+    private function clickItemList(ItemInShop itm)
+        selectRecipe(itm, false, false)
+
+    private function clickBuyButton()
+        heroIssueBuyItem(this.inventoryUnit, this.selectedItem)
+
+    private function setPage(int newPage)
+        if newPage == this.currentPage
+            return
+        this.selectedRecipeButton = -1
+        if this.currentPage != -1 //at the start
+            GUI.categoryButtons[this.currentPage + this.arrayOffset].setHightLight(false)
+        this.currentPage = newPage
+        GUI.categoryButtons[this.currentPage + this.arrayOffset].setHightLight(true)
+
+        let size = ItemInShop.getItemCount(newPage)
+        for i = size + this.arrayOffset to this.itemsOnPage + this.arrayOffset - 1
+            GUI.buyableItemsButtons[i].deactivate()
+        for i = 0 to size - 1
+            loadItemListButton(i)
+
+        this.itemsOnPage = size
+
+
+    function getPlayer() returns player
+        return this.forPlayer
+
+    function getInventoryUnit() returns unit
+        return this.inventoryUnit
+
+    function setInventoryUnit(unit inventoryUnit)
+        this.inventoryUnit = inventoryUnit
+
+    function isEnabled() returns bool
+        return this.enabled
+
+    function getButtonMap() returns HashMap<int,Button>
+        return this.buttonMap
+
+    function getPosFromGridForButton(int x, int y) returns vec2
+        return this.center+vec2(GRID_SIZE*x, GRID_SIZE*y)
+
+    function getPosFromGrid(int x, int y) returns vec2
+        return this.center+vec2(GRID_SIZE*x, GRID_SIZE*y)
+
+    function getGridFromPos(vec2 pos) returns gridPos
+        let inGrid = pos - this.center
+        let x = (inGrid.x/GRID_SIZE).floor()
+        let y = (inGrid.y/GRID_SIZE).floor()
+        return gridPos(x,y)
+
+    private function onClick(vec2 pos)
+
+        let gridPos = getGridFromPos(pos)
+        let x = gridPos.x
+        let y = gridPos.y
+
+        let clickedButton = buttonMap.get(getGridId(x, y))
+        if clickedButton != null
+            clickedButton.click()
+        else
+            if x <= -39 and x >= -60 //category buttons
+                let y2 = y+24
+                let cat = (y2) div 9
+                let modulo = y2 - 9*cat
+                if modulo >= 0 and modulo <= 5
+                    let page = 5-cat
+                    if page >= 0 and page <= 5
+                        setPage(page)
+            else if x >= -38 and x <= -2 //list buttons
+                let x2 = x+32
+                let y2 = y+26
+                let column = (x2) div 6
+                var row = (y2) div 9
+                let inColumn = x2 - column * 6
+                let inRow = y2 - row * 9
+                row = 5 - row
+                if inColumn <= 4 and inRow <= 6
+                    let clickedItem = ItemInShop.getItemFromList(this.currentPage, row * 5 + column)
+                    if clickedItem != null
+                        this.clickItemList(clickedItem)
+                    //print("click [" + column.toString() + "," + row.toString()+"]")
+
+
+                //print("category: ("+x.toString()+","+y.toString()+")")
+
+
+
+            else if x >= 3 and x <= 37 and y <= 29 and y >= 2 //recipe buttons
+                //print("recipe: ("+x.toString()+","+y.toString()+")")
+
+                for i = this.arrayOffset to this.arrayOffset + this.itemsInRecipe - 1
+                    let btn = GUI.requiredItemButtons[i]
+                    if x >= btn.getX() and x <= btn.getX()+4
+                        if y >= btn.getY()-2 and y <= btn.getY()+4
+                            this.selectItem(btn.data castTo ItemInShop, false)
+
+
+
+            else if x >= 44 and x <= 60
+                //print("builds into: ("+x.toString()+","+y.toString()+")")
+                if y <= -5 and y >= - 10        //buy button
+                    clickBuyButton()
+                else                            //builds into
+                    let x2 = x-44
+                    let y2 = y+21
+                    let column = (x2) div 6
+                    var row = (y2) div 6
+                    let inColumn = x2 - column * 6
+                    let inRow = y2 - row * 9
+                    row = 7 - row
+                    if inColumn <= 4 and inRow <= 6
+                        let clickedItem = GUI.buildsIntoButtons[this.arrayOffset + row * 3 + column].data castTo ItemInShop
+                        if clickedItem != null
+                            this.clickBuildsInto(clickedItem)
+                        //print("click [" + column.toString() + "," + row.toString()+"]")
+
+
+
+    private static function onClickStatic()
+        let clickedGUI = playerMap.get(GetTriggerPlayer())
+
+        if clickedGUI != null and clickedGUI.enabled
+            clickedGUI.onClick(vec2(BlzGetTriggerPlayerMouseX(), BlzGetTriggerPlayerMouseY()))
+
+    private function onItemGet(item _itm)
+        if this.enabled
+            doAfter(0) ->
+                this.refreshRecipeTree()
+
+    private static function onItemGetStatic()
+        let u = GetTriggerUnit()
+        let gui = playerMap.get(u.getOwner())
+        if gui != null and gui.inventoryUnit == u
+            gui.onItemGet(GetManipulatedItem())
+
+    private function onItemDrop(item _itm)
+        if this.enabled
+            doAfter(0) ->
+                this.refreshRecipeTree()
+
+    private static function onItemDropStatic()
+        let u = GetTriggerUnit()
+        let gui = playerMap.get(u.getOwner())
+        if gui != null and gui.inventoryUnit == u
+            gui.onItemDrop(GetManipulatedItem())
+
+    static function getGridId(int x, int y) returns int
+        return 100 * x + y
+
+    function forceCamera()
+        if GetLocalPlayer() == this.forPlayer
+            SetCameraField(CAMERA_FIELD_ROLL, 0, 0)
+            SetCameraField(CAMERA_FIELD_ROTATION, 90, 0)
+            SetCameraField(CAMERA_FIELD_ANGLE_OF_ATTACK, 270, 0)
+            SetCameraField(CAMERA_FIELD_TARGET_DISTANCE, 1900, 0)
+            SetCameraField(CAMERA_FIELD_FARZ, 8000, 0)
+            SetCameraField(CAMERA_FIELD_ZOFFSET, 0, 0)
+            PanCameraToTimed(this.center.x, this.center.y, 0)
+
+    static function forceCameraStatic()
+        let gui = playerMap.get(players[GetExpiredTimer().getData()])
+        if gui != null
+            gui.forceCamera()
+
+            
+
+init
+    GUI.classInit()

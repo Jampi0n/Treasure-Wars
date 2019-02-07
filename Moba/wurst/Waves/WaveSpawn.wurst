@@ -77,6 +77,8 @@ public function startSpawning()
             print("|cffffcc00The battle begins!|r")
 
             if GetLocalPlayer().getId() <= HERO_PLAYER_TEAM_1_LAST
+                print(udg_GreenBarracks[0].getX())
+                print(udg_GreenBarracks[1].getX())
                 PingMinimap(udg_GreenBarracks[0].getX(), udg_GreenBarracks[0].getY(), 5)
                 PingMinimap(udg_GreenBarracks[1].getX(), udg_GreenBarracks[1].getY(), 5)
                 PingMinimap(udg_GreenBarracks[2].getX(), udg_GreenBarracks[2].getY(), 5)

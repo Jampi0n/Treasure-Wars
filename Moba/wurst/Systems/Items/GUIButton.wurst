@@ -1,0 +1,206 @@
+package GUIButton
+
+import initlater ShopGUI
+import ImageString
+import ObjectIdGenerator
+import ChangeTexture
+import UnitObjEditing
+
+constant BUTTON_DUMMY = compiletime(UNIT_ID_GEN.next())
+
+/*   _____
+    |     |
+    |     |
+    '--x--' origin of the dummy model
+*/
+
+constant HIGHLIGHT = compiletime(createTexture("ButtonGlow.tga"))
+constant CHECKED = compiletime(createTexture("CheckMarkSmall.tga"))
+
+public interface OnClick
+    function onClick(Button whichButton)
+
+public class Button
+    private player forPlayer
+    private vec2 pos
+    private vec2 center
+    private unit model
+    private OnClick onClick
+
+    private boolean active  //active buttons are buttons that need to be displayed on the GUI
+                            //inactive buttons wait until they are needed again
+    private GUI gui
+
+    private int textureId
+
+    private int gridX = 0
+    private int gridY = 0
+
+    private ImageString text = null
+    private string textString = ""
+    private colorA textColor = COLOR_WHITE
+
+    private bool hightLight1 = false
+    private unit highLight1Unit= null
+
+    private bool checked = false
+    private unit checkMark = null
+
+    private image background = null
+
+    private bool hidden = false
+
+    int data
+
+    construct(GUI gui)
+        this.gui = gui
+        this.forPlayer = gui.getPlayer()
+        this.model = createUnit(forPlayer, BUTTON_DUMMY, vec2(0,0), (270).fromDeg())
+        this.active = false
+        this.pos = vec2(0,0)
+        this.center =vec2(0,0)
+        this.onClick = null
+        this.model.setVertexColor(255, 255, 255, 0)
+        this.data = 0
+        this.textureId = 0
+
+    function changeColor(colorA col)
+        this.model.setVertexColor(col)
+
+    function setHightLight(bool flag)
+        hightLight1 = flag
+        updateHighLight1()
+
+    function setChecked(bool flag)
+        checked = flag
+        updateChecked()
+
+    function isHighlighted() returns bool
+        return this.hightLight1
+    
+    function isChecked() returns bool
+        return this.checked
+
+    private function updateHighLight1()
+        if hightLight1 and active
+            if highLight1Unit == null
+                highLight1Unit = createUnit(forPlayer, BUTTON_DUMMY, this.pos, (270).fromDeg())
+                highLight1Unit.changeTexture(HIGHLIGHT)
+                highLight1Unit.setScale(1.35)
+                checkMark.setFlyHeight(0.1, 10000) //above highlight
+
+        else
+            if highLight1Unit != null
+                highLight1Unit.remove()
+                highLight1Unit = null
+
+    private function updateChecked()
+        if checked and active
+            if checkMark == null
+                checkMark = createUnit(forPlayer, BUTTON_DUMMY, this.pos, (270).fromDeg())
+                checkMark.changeTexture(CHECKED)
+                checkMark.setScale(1.35)
+                checkMark.setFlyHeight(0.2, 10000) //above highlight
+
+        else
+            if checkMark != null
+                checkMark.remove()
+                checkMark = null
+
+    function activate(int x, int y, int size, int textureId)
+        this.active = true
+        this.hidden = false
+        setHightLight(false)
+        setChecked(false)
+        if not this.hidden
+            this.model.setVertexColor(255, 255, 255, 255)
+
+        this.pos = this.gui.getPosFromGridForButton(x, y) + vec2(GRID_SIZE,0)*(size*0.5) //see origin at top of file
+        this.center = this.pos + vec2(0, GRID_SIZE*0.5*size)
+        this.gridX = x
+        this.gridY = y
+        this.model.setXY(this.pos)
+        this.model.changeTexture(textureId)
+        this.model.setScale(size.toReal() / 4.1)
+        this.textureId = textureId
+        this.removeText()
+        this.removeBackGround()
+
+    function changeTexture(int textureId)
+        this.model.changeTexture(textureId)
+
+    function hide()
+        this.hidden = true
+        this.model.setVertexColor(255, 255, 255, 0)
+
+    function getX() returns int
+        return this.gridX
+
+    function getY() returns int
+        return this.gridY
+
+    function deactivate()
+        if this.active
+            this.active = false
+            this.model.setVertexColor(255, 255, 255, 0)
+            updateHighLight1()
+            updateChecked()
+            if this.background != null
+                this.background.hide()
+
+        this.data = 0
+        this.onClick = null
+        this.removeText()
+        this.removeBackGround()
+
+    function setBackGround(real left, real top, real right, real bottom, string path, colorA col)
+        this.removeBackGround()
+        this.background = createImage(path, this.center + vec2( (right-left)/2, (top-bottom)/2 ), right+left, top+bottom, Layer.L2)
+        this.background.setColor(col)
+        if this.active
+            this.background.show()
+
+    function removeBackGround()
+        if this.background != null
+            DestroyImage(this.background)
+            this.background = null
+
+    function click()
+        if this.onClick != null
+            this.onClick.onClick(this)
+
+    function setText(string message, colorA col)
+        this.hideText()
+        if message == "" or not this.active
+            return
+
+        this.text = new ImageString(message, this.pos + vec2(0, -8), col, 0.8, true)
+        this.textString = message
+        this.textColor = col
+
+    function hideText()
+        if this.text != null
+            destroy this.text
+            this.text = null
+
+    function removeText()
+        this.hideText()
+        this.textString = ""
+
+
+@compiletime
+function initDummy()
+    new UnitDefinition(BUTTON_DUMMY, 'hfoo')
+        ..setNormalAbilities("Avul,Aloc")
+        ..setModelFile("Icon31.mdx")
+        ..setShadowImageUnit("")
+        ..setAttacksEnabled(0)
+        ..setSpeedBase(1)
+        ..setMovementType(MovementType.Fly)
+        ..setMovementHeight(0)
+        ..setCollisionSize(0)
+        ..setUnitSoundSet("")
+        ..setFoodCost(0)
+        ..setUpgradesUsed("")
+        ..setSelectionScale(-5)
+        ..setScalingValue(1)

@@ -165,6 +165,12 @@ public class ScoreTable
 
     static constant playerList = new LinkedList<CPlayer>
 
+    static function isMinimized() returns bool
+        return mBoard.isMinimized()
+
+    static function minimalize(bool flag)
+        mBoard.minimalize(flag)
+
     static function updateHeader(boolean firstTeam)
         let row = (firstTeam ? 0 : CPlayer.team1HeroCount + 1)
         string teamName = firstTeam ?

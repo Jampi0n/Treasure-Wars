@@ -1,0 +1,172 @@
+package ShopPhysical1
+
+import initlater ItemShopSystem
+import ItemShopInitialize
+import UnitWrapper
+import ItemIdGeneration
+import OnAttack
+import General
+
+function itemPlatedGauntlets(int itemId)
+    int armor = 8
+    if compiletime
+        itemId.getTypeDef()
+        ..setDescription("+ {0} armor".format(armor.toString()))
+        ..setGoldCost(400)
+    else
+        itemId.getItem()
+        ..addStatBonusAbsolute(Stat.AR, armor)
+
+
+function itemHammerOfStrength(int itemId)
+    int str = 8
+    if compiletime
+        itemId.getTypeDef()
+        ..setDescription("+ {0} strength".format(str.toString()))
+        ..setGoldCost(400)
+    else
+        itemId.getItem()
+        ..addStatBonusAbsolute(Stat.STR, str)
+
+
+function itemGlovesOfHaste(int itemId)
+    int as = 12
+    if compiletime
+        itemId.getTypeDef()
+        ..setDescription("+ {0}% attack speed".format(as.toString()))
+        ..setGoldCost(400)
+    else
+        itemId.getItem()
+        ..addStatBonusAbsolute(Stat.AS, as)
+
+
+function itemWarAxe(int itemId)
+    int str = 16
+    if compiletime
+        itemId.getTypeDef()
+        ..setDescription("+ {0} strength".format(str.toString()))
+        ..setGoldCost(800)
+    else
+        itemId.getItem()
+        ..addStatBonusAbsolute(Stat.STR, str)
+
+function itemLightBoots(int itemId)
+    int ms = 40
+    if compiletime
+        itemId.getTypeDef()
+        ..setDescription("+ {0} movement speed|nMovement speed bonus from boots does not stack.".format(ms.toString()))
+        ..setGoldCost(500)
+    else
+        itemId.getItem()
+        ..addPickupFunction(()->(begin
+            if isUnique() and hasNot(convertItemId(ITEM_ID_HEAVY_BOOTS)) and hasNot(convertItemId(ITEM_ID_BOOTS_OF_DARKNESS))
+                getTriggerHero().wrapper().addStatAbsoluteBonus(Stat.MS, ms)
+        end))
+
+        ..addDropFunction(()->(begin
+            if isUnique() and hasNot(convertItemId(ITEM_ID_HEAVY_BOOTS)) and hasNot(convertItemId(ITEM_ID_BOOTS_OF_DARKNESS))
+                getTriggerHero().wrapper().addStatAbsoluteBonus(Stat.MS, -ms)
+        end))
+
+function itemLeatherArmor(int itemId)
+    int ar = 10
+    int hp = 100
+    if compiletime
+        itemId.getTypeDef()
+        ..setDescription("+ {0} armor\n+ {1} hit points".format(ar.toString(), hp.toString()))
+        ..setGoldCost(825)
+    else
+        itemId.getItem()
+        ..addStatBonusAbsolute(Stat.AR, ar)
+        ..addStatBonusAbsolute(Stat.HP, hp)
+
+
+
+function itemGemOfHealth(int itemId)
+    int hp = 150
+    if compiletime
+        itemId.getTypeDef()
+        ..setDescription("+ {0} hit points".format(hp.toString()))
+        ..setGoldCost(500)
+    else
+        itemId.getItem()
+        ..addStatBonusAbsolute(Stat.HP, hp)
+
+function itemDagger(int itemId)
+    int str = 10
+    int as = 8
+    if compiletime
+        itemId.getTypeDef()
+        ..setDescription("+ {0} strength\n+ {1}% attack speed".format(str.toString(), as.toString()))
+        ..setGoldCost(800)
+    else
+        itemId.getItem()
+        ..addStatBonusAbsolute(Stat.STR, str)
+        ..addStatBonusAbsolute(Stat.AS, as)
+
+function itemBow(int itemId)
+    int str = 12
+    int unitDmg = 25
+    if compiletime
+        itemId.getTypeDef()
+        ..setDescription("+ {0} strength|nDeals {1} additional damage to units.".format(str.toString(), unitDmg.toString() ))
+        ..setGoldCost(750)
+    else
+        itemId.getItem()
+        ..addStatBonusAbsolute(Stat.STR, str)
+
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if not target.isType(UNIT_TYPE_HERO) and not target.isType(UNIT_TYPE_STRUCTURE) and attacker.isType(UNIT_TYPE_HERO)
+                let dmg = attacker.countItemsOfType(convertItemId(itemId)) * unitDmg
+                attacker.dealDamage(target, dmg.toReal(), ReductionType.PHYSICAL)
+        end))
+
+function itemShield(int itemId)
+    int ar = 8
+    int block = 15 // -> onAttack
+    if compiletime
+        itemId.getTypeDef()
+        ..setDescription("+ {0} armor|nBlocks {1} damage of incoming attacks.".format(ar.toString(), block.toString()))
+        ..setGoldCost(850)
+    else
+        itemId.getItem()
+        ..addStatBonusAbsolute(Stat.AR, ar)
+
+function itemRingOfRegen(int itemId)
+    int hr = 30
+    if compiletime
+        itemId.getTypeDef()
+        ..setDescription("+ {0} hit point regeneration per 10 seconds".format(hr.toString()))
+        ..setGoldCost(500)
+    else
+        itemId.getItem()
+        ..addStatBonusAbsolute(Stat.HR, hr)
+
+function itemSpikes(int itemId)
+    let spikeDmg = 15
+    if compiletime
+        itemId.getTypeDef()
+        ..setDescription("Enemies attacking the hero will take {0} damage.".format(spikeDmg.toString()))
+        ..setGoldCost(600)
+    else
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if target.isType(UNIT_TYPE_HERO)
+                let dmg = target.countItemsOfType(convertItemId(itemId)) * spikeDmg
+                target.dealDamage(attacker, dmg.toReal(), ReductionType.PHYSICAL)
+        end))
+
+@compiletime
+public function shopPhysical1Init()
+    itemGlovesOfHaste(ITEM_ID_GLOVES_OF_HASTE)
+    itemPlatedGauntlets(ITEM_ID_PLATED_GAUNTLETS)
+    itemLightBoots(ITEM_ID_LIGHT_BOOTS)
+    itemWarAxe(ITEM_ID_WAR_AXE)
+    itemHammerOfStrength(ITEM_ID_HAMMER_OF_STRENGTH)
+    itemLeatherArmor(ITEM_ID_LEATHER_ARMOR)
+    itemGemOfHealth(ITEM_ID_GEM_OF_HEALTH)
+    itemDagger(ITEM_ID_DAGGER)
+    itemBow(ITEM_ID_BOW)
+    itemShield(ITEM_ID_SHIELD)
+    itemRingOfRegen(ITEM_ID_RING_OF_HEALTH)
+    itemSpikes(ITEM_ID_SPIKES)
+
