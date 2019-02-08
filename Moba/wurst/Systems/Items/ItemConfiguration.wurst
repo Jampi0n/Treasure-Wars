@@ -9,7 +9,6 @@ import Icons
 import HashMap
 import UnitWrapper
 import ClosureTimers
-import Stats
 
 public int ITEM_ID_CIRCLET = compiletime(newItem(Icons.bTNCirclet))
 public int ITEM_ID_CROWN = compiletime(newItem(Icons.bTNHelmutPurple))
@@ -169,8 +168,8 @@ function circletOfNobility(int itemId)
 function crownOfKings(int itemId)
     setupItem(itemId, 2, 2000)
     setInfo("Crown of Kings", "+10 all stats")
-    addRequirement(ITEM_ID_AGI3)
     addRequirement(ITEM_ID_CIRCLET)
+    addRequirement(ITEM_ID_AGI3)
     addEffectStatBonusAbsolute(Stat.STR, 10)
     addEffectStatBonusAbsolute(Stat.AGI, 10)
     addEffectStatBonusAbsolute(Stat.INT, 10)
