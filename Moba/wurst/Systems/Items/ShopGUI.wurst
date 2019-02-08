@@ -17,6 +17,8 @@ import PlayerControl
 public constant GRID_SIZE = 16.0
 public constant MAX_ITEMS_IN_LIST = 30
 
+constant COLOR_DISABLED = colorA(100, 100, 100, 255)
+
 constant BTN_CAT1 = compiletime(createTexture(Icons.bTNPeasant))
 constant BTN_CAT2 = compiletime(createTexture(Icons.bTNPotionBlue))
 constant BTN_CAT3 = compiletime(createTexture(Icons.bTNHeal))
@@ -46,18 +48,31 @@ constant LINK_COLOR = colorA(100,100,100,255)
 
 tuple gridPos(int x, int y)
 
+public interface BuyCondition
+    function condition(unit hero, bool showMessage) returns boolean
 
-public function heroIssueBuyItem(unit hero, ItemInShop itm) returns bool
+public interface BuySuccess
+    function success(unit hero, item itm)
+
+public interface BuyFailed
+    function failed(unit hero, int itemId, int cost, int gold)
+
+public function heroIssueBuyItem(unit hero, ItemInShop itm, BuySuccess buySuccess, BuyFailed buyFailed) returns item
     if hero == null
-        return false
+        return null
     let cost = getItemCostForHero(hero, itm)
-    if cost > hero.getOwner().getGold()
-        return false
+    let gold = hero.getOwner().getGold()
+    if cost > gold
+        if buyFailed != null
+            buyFailed.failed(hero, itm.getItemId(), cost, gold)
+        return null
     else
         hero.getOwner().addGold(-cost)
         heroRemoveRequiredItems(hero, itm)
-        hero.addItemById(itm.getItemId())
-        return true
+        let boughtItem = hero.addItemById(itm.getItemId())
+        if buySuccess != null
+            buySuccess.success(hero, boughtItem)
+        return boughtItem
 
 
 public function getItemCostForHero(unit hero, ItemInShop itm) returns int
@@ -79,9 +94,10 @@ function getItemCostHelp(unit hero, ItemInShop itm, HeroInventory inv) returns i
 
 function heroRemoveRequiredItems(unit hero, ItemInShop itm)
     for ItemInShop required in itm.getRequirements()
-        let requiredId = required.getItemId()
-        if hero.hasItemById(requiredId)
-            hero.removeItemById(requiredId)
+        let req = hero.getItemById(required.getItemId())
+        if req != null
+            hero.removeItem(req)
+            req.remove()
         else
             heroRemoveRequiredItems(hero, required)
 
@@ -243,42 +259,28 @@ class RecipeTreeNode
             this.forkVer.show()
             this.forkVer.setColor(LINK_COLOR)
 
-    function displayCheckedCost(HeroInventory inv, bool root) returns int
-        int cost = 0
+    function displayCheckedCost(HeroInventory inv)
+
         btn.setChecked(true)
+        btn.setText(getItemCostForHero(this.tree.gui.getInventoryUnit(), this.itm).toString(), COLOR_GOLD)
+        for RecipeTreeNode childNode in this.childrenList
+            childNode.displayCheckedCost(inv)
 
-        if not root //3rd row
-            if not inv.useItem(this.itm.getItemId()) 
-                cost += this.itm.getTotalCost()
-            btn.setText(this.itm.getTotalCost().toString(), COLOR_GOLD)
-        else //2nd row
-            cost += this.itm.getSingleCost()
-            for RecipeTreeNode childNode in this.childrenList
-                cost += childNode.displayCheckedCost(inv, false)
-            btn.setText(cost.toString(), COLOR_GOLD)
 
-        return cost
-
-    function displayCost(bool root) returns int
-        int cost = 0
+    function displayCost(bool root)
 
 
         if not root and this.tree.inv.useItem(this.itm.getItemId())
             let subInv = new HeroInventory(this.tree.inv)
-            displayCheckedCost(subInv, true)
+            displayCheckedCost(subInv)
             destroy subInv
         else
             btn.setChecked(false)
-            cost += this.itm.getSingleCost()
             for RecipeTreeNode childNode in this.childrenList
-                cost += childNode.displayCost(false)
+                childNode.displayCost(false)
 
 
-
-            btn.setText(cost.toString(), COLOR_GOLD)
-
-
-        return cost
+            btn.setText(getItemCostForHero(this.tree.gui.getInventoryUnit(), this.itm).toString(), COLOR_GOLD)
 
 
     ondestroy
@@ -351,6 +353,7 @@ public class GUI
     private ImageString buildsIntoText = null
     private ImageString requiresText = null
     private ImageString costText = null
+    private ImageString buyText = null
 
     private RecipeTree recipeTree = null
    
@@ -363,6 +366,12 @@ public class GUI
     private static trigger onItemLose = CreateTrigger()
 
     private timer forceCameraTimer
+    private int forceCameraCounter
+
+    BuyCondition buyCondition = null
+    BuySuccess buySuccess = null
+    BuyFailed buyFailed = null
+    private bool canBuy = true
 
 
     //
@@ -385,6 +394,7 @@ public class GUI
         this.forceCameraTimer.setData(this.forPlayer.getId())
         this.forceCameraTimer.startPeriodic(0.01, function forceCameraStatic)
         this.forceCameraTimer.pause()
+        this.forceCameraCounter = 0
         this.arrayOffset = (this castTo int) * MAX_ITEMS_IN_LIST
 
         playerMap.put(whichPlayer, this)
@@ -539,7 +549,7 @@ public class GUI
         new ImageString(stringCat5, getPosFromGrid(-52, -15) + vec2(0, GRID_SIZE * 2.5))
         new ImageString(stringCat6, getPosFromGrid(-52, -24) + vec2(0, GRID_SIZE * 2.5))
 
-        new ImageString(stringBuy, getPosFromGrid(45, -9)  + vec2(5, GRID_SIZE * 2.5) , COLOR_GOLD)
+        this.buyText = new ImageString(stringBuy, getPosFromGrid(45, -9)  + vec2(5, GRID_SIZE * 2.5) , COLOR_GOLD)
 
         this.buildsIntoText = new ImageString(stringBuildsInto, getPosFromGrid(44, 29))
         this.requiresText = new ImageString(stringRequires, getPosFromGrid(4, 29))
@@ -578,6 +588,7 @@ public class GUI
         if this.costText != null
             destroy this.costText
         this.costText = new ImageString(cost.toString(), getPosFromGrid(54, -9) + vec2(10, GRID_SIZE * 2.5), COLOR_GOLD, 1, false)
+        this.updateBuyButton(true)
 
     private function loadItemListButton(int i)
         let itm = ItemInShop.getItemFromList(this.currentPage, i)
@@ -707,7 +718,8 @@ public class GUI
         selectRecipe(itm, false, false)
 
     private function clickBuyButton()
-        heroIssueBuyItem(this.inventoryUnit, this.selectedItem)
+        if this.buyCondition == null or this.buyCondition.condition(this.inventoryUnit, true)
+            heroIssueBuyItem(this.inventoryUnit, this.selectedItem, this.buySuccess, this.buyFailed)
 
     private function setPage(int newPage)
         if newPage == this.currentPage
@@ -726,6 +738,31 @@ public class GUI
 
         this.itemsOnPage = size
 
+    private function updateBuyButton(bool forceUpdate)
+        bool canBuyNew
+        if this.inventoryUnit == null
+            canBuyNew = false
+        else
+            if this.buyCondition == null
+                canBuyNew = true
+            else
+                canBuyNew = this.buyCondition.condition(this.inventoryUnit, false)
+
+        canBuyNew = canBuyNew and getItemCostForHero(this.inventoryUnit, this.selectedItem) <= this.inventoryUnit.getOwner().getGold()
+
+        if canBuyNew == this.canBuy and not forceUpdate
+            return
+
+        this.canBuy = canBuyNew
+        //print(canBuyNew)
+        if canBuyNew
+            this.buyText.changeColor(COLOR_GOLD)
+            this.costText.changeColor(COLOR_GOLD)
+        else
+            this.buyText.changeColor(COLOR_DISABLED)
+            this.costText.changeColor(COLOR_DISABLED)
+            
+
 
     function getPlayer() returns player
         return this.forPlayer
@@ -735,6 +772,15 @@ public class GUI
 
     function setInventoryUnit(unit inventoryUnit)
         this.inventoryUnit = inventoryUnit
+
+    function setBuyCondition(BuyCondition buyCondition)
+        this.buyCondition = buyCondition
+
+    function setBuySuccess(BuySuccess buySuccess)
+        this.buySuccess = buySuccess
+
+    function setBuyFailed(BuyFailed buyFailed)
+        this.buyFailed = buyFailed
 
     function isEnabled() returns bool
         return this.enabled
@@ -854,6 +900,9 @@ public class GUI
         return 100 * x + y
 
     function forceCamera()
+        if this.forceCameraCounter mod 25 == 0
+            this.updateBuyButton(false)
+
         if GetLocalPlayer() == this.forPlayer
             SetCameraField(CAMERA_FIELD_ROLL, 0, 0)
             SetCameraField(CAMERA_FIELD_ROTATION, 90, 0)

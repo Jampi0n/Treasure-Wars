@@ -4,6 +4,14 @@ import Constants
 import Execute
 import ShopGUI
 import ClosureTimers
+import SoundUtils
+import StandardTextTags
+
+constant BUY_RANGE = 900
+
+constant SOUND_ITEM_BUY = new SoundDefinition(Sounds.receiveGold, false, false)
+constant SOUND_ITEM_BUY_3D = new SoundDefinition(Sounds.receiveGold, false, true)
+constant SOUND_RECIPE_TOO_EXPENSIVE = new SoundDefinition(Sounds.error, false, false)
 
 rect visibleArea
 rect array shopRect
@@ -12,7 +20,36 @@ GUI array gui
 public function getGUI(int i) returns GUI
     return gui[i]
 
+function buyFailed(unit hero, int _itemId, int cost, int gold)
+    let missing = cost - gold
+    printTimedToPlayer(COLOR_GOLD.toColorString()+"You are missing "+missing.toString()+" gold to buy this item!|r", 5, hero.getOwner())
+    SOUND_RECIPE_TOO_EXPENSIVE.playOnPoint(hero.getPos3Zero())
+
+function buySuccess(unit hero, item itm)
+    SOUND_ITEM_BUY_3D.playOnPoint(hero.getPos3Zero())
+    SOUND_ITEM_BUY.playForPlayer(hero.getOwner())
+    standardTextTag(hero.getPos(), itm.getName())
+        ..setColor(255, 220, 0, 255)
+
+function buyCondition(unit hero, bool firstTeam, bool showMessage) returns bool
+
+    if not hero.isAlive()
+        if showMessage
+            printTimedToPlayer(COLOR_GOLD.toColorString()+"You cannot buy items, while your hero is dead!|r", 5, hero.getOwner())
+        return false
+
+    let shopCenter = firstTeam ? gg_rct_GreenAltar.getCenter() : gg_rct_BrownAltar.getCenter()
+    let dist = hero.getPos().distanceTo(shopCenter)
+    if dist > BUY_RANGE
+        if showMessage
+            printTimedToPlayer(COLOR_GOLD.toColorString()+"You are too far away from the shop to buy items!|r", 5, hero.getOwner())
+        return false
+
+    return true
+
 init
+
+
     visibleArea = GetPlayableMapRect()
 
     shopRect[0] = gg_rct_Shop0
@@ -30,6 +67,10 @@ init
         execute() ->
             for i = HERO_PLAYER_TEAM_1_FIRST to HERO_PLAYER_TEAM_2_LAST
                 gui[i] = new GUI(players[i], null, shopRect[i].getCenter())
+                ..setBuyCondition( (unit hero, bool showMessage) -> buyCondition(hero, i <= HERO_PLAYER_TEAM_1_LAST, showMessage))
+                ..setBuySuccess( (unit hero, item itm) -> buySuccess(hero, itm))
+                ..setBuyFailed( (unit hero, int itemId, int cost, int gold) -> buyFailed(hero, itemId, cost, gold))
+
 
 
     for i = HERO_PLAYER_TEAM_1_FIRST to HERO_PLAYER_TEAM_2_LAST
@@ -42,3 +83,11 @@ init
             else
                 gui[id].openShop()
     
+
+
+/*
+    Removed items are dropped
+    cannot buy items while dead
+    test if desync
+
+*/
