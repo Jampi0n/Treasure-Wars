@@ -8,8 +8,8 @@ import initlater HeroControl
 import initlater PlayerControl
 import ClosureTimers
 import UnitType
-import initlater ItemIdGeneration
-import initlater ItemShopSystem
+//import initlater ItemIdGeneration
+//import initlater ItemShopSystem
 import public Constants
 import Assets
 import DamageDetection
@@ -115,8 +115,8 @@ public function unit.addBuff(unit caster, real duration, BuffType buffType, int 
 public function unit.addBuffReduced(unit caster, real duration, BuffType buffType, int level) returns Buff
     //buff reduction only uses 1/4 of the wp, so it reduces duration not as much as it reduces damage
     real realDuration =  duration.reduce( (this.getWp()/4).toInt() , 0.01 )
-    if this.hasItemById(convertItemId(ITEM_ID_ARCANE_SHIELD))
-        realDuration = realDuration * 0.85
+    /*if this.hasItemById(convertItemId(ITEM_ID_ARCANE_SHIELD))
+        realDuration = realDuration * 0.85*/
     Buff ret = null
     if this.isAlive()
         new Buff(this, caster, realDuration, buffType, level)
@@ -157,8 +157,8 @@ public function unit.damageMana(unit target, real amount, ReductionType reductio
 
 public function unit.healHP(unit target, real amount)
     real realAmount = amount
-    if this.hasItemById(convertItemId(ITEM_ID_BRACER_OF_POWER))
-        realAmount *= 1.15
+    /*if this.hasItemById(convertItemId(ITEM_ID_BRACER_OF_POWER))
+        realAmount *= 1.15*/
 
     realAmount = min(realAmount, target.getMaxHP()-target.getHP())
     target.setHP(target.getHP() + realAmount)
@@ -168,8 +168,8 @@ public function unit.healHP(unit target, real amount)
 
 public function unit.healMana(unit target, real amount)
     real realAmount = amount
-    if this.hasItemById(convertItemId(ITEM_ID_BRACER_OF_POWER))
-        realAmount *= 1.15
+    /*if this.hasItemById(convertItemId(ITEM_ID_BRACER_OF_POWER))
+        realAmount *= 1.15*/
 
     realAmount = min(realAmount, target.getMaxMana()-target.getMana())
     target.setMana(target.getMana() + realAmount)

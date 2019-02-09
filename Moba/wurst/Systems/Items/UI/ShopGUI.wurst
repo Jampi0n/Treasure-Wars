@@ -82,6 +82,9 @@ public function getItemCostForHero(unit hero, ItemInShop itm) returns int
     int cost = itm.getSingleCost()
     for ItemInShop required in itm.getRequirements()
         cost += getItemCostHelp(hero, required, inv)
+
+    destroy inv
+    
     return cost
 
 function getItemCostHelp(unit hero, ItemInShop itm, HeroInventory inv) returns int
@@ -259,21 +262,19 @@ class RecipeTreeNode
             this.forkVer.show()
             this.forkVer.setColor(LINK_COLOR)
 
-    function displayCheckedCost(HeroInventory inv)
+    function displayCheckedCost()
 
         btn.setChecked(true)
         btn.setText(getItemCostForHero(this.tree.gui.getInventoryUnit(), this.itm).toString(), COLOR_GOLD)
         for RecipeTreeNode childNode in this.childrenList
-            childNode.displayCheckedCost(inv)
+            childNode.displayCheckedCost()
 
 
     function displayCost(bool root)
 
 
         if not root and this.tree.inv.useItem(this.itm.getItemId())
-            let subInv = new HeroInventory(this.tree.inv)
-            displayCheckedCost(subInv)
-            destroy subInv
+            displayCheckedCost()
         else
             btn.setChecked(false)
             for RecipeTreeNode childNode in this.childrenList

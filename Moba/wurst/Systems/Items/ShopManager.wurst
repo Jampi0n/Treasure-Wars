@@ -3,9 +3,10 @@ package ShopManager
 import Constants
 import Execute
 import ShopGUI
-import ClosureTimers
+import ItemFinalize
 import SoundUtils
 import StandardTextTags
+import ClosureTimers
 
 constant BUY_RANGE = 900
 
@@ -63,13 +64,12 @@ init
     shopRect[8] = gg_rct_Shop8
     shopRect[9] = gg_rct_Shop9
 
-    doAfter(1) ->
-        execute() ->
-            for i = HERO_PLAYER_TEAM_1_FIRST to HERO_PLAYER_TEAM_2_LAST
-                gui[i] = new GUI(players[i], null, shopRect[i].getCenter())
-                ..setBuyCondition( (unit hero, bool showMessage) -> buyCondition(hero, i <= HERO_PLAYER_TEAM_1_LAST, showMessage))
-                ..setBuySuccess( (unit hero, item itm) -> buySuccess(hero, itm))
-                ..setBuyFailed( (unit hero, int itemId, int cost, int gold) -> buyFailed(hero, itemId, cost, gold))
+    doAfter(0.1) ->
+        for i = HERO_PLAYER_TEAM_1_FIRST to HERO_PLAYER_TEAM_2_LAST
+            gui[i] = new GUI(players[i], null, shopRect[i].getCenter())
+            ..setBuyCondition( (unit hero, bool showMessage) -> buyCondition(hero, i <= HERO_PLAYER_TEAM_1_LAST, showMessage))
+            ..setBuySuccess( (unit hero, item itm) -> buySuccess(hero, itm))
+            ..setBuyFailed( (unit hero, int itemId, int cost, int gold) -> buyFailed(hero, itemId, cost, gold))
 
 
 

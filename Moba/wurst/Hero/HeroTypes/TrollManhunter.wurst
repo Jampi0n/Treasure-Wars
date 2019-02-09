@@ -411,12 +411,12 @@ function initHeroType()
             ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
             ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
             ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
-            ..addItem(ITEM_ID_HEAVY_BOOTS)
-            ..addItem(ITEM_ID_BLOOD_SWORD)
-            ..addItem(ITEM_ID_INFERNAL_BOW)
-            ..addItem(ITEM_ID_RUNIC_ARMOR)
-            ..addItem(ITEM_ID_SACRIFICIAL_DAGGER)
-            ..addItem(ITEM_ID_CURSED_SWORD)
+            //..addItem(ITEM_ID_HEAVY_BOOTS)
+            //..addItem(ITEM_ID_BLOOD_SWORD)
+            //..addItem(ITEM_ID_INFERNAL_BOW)
+            //..addItem(ITEM_ID_RUNIC_ARMOR)
+            //..addItem(ITEM_ID_SACRIFICIAL_DAGGER)
+            //..addItem(ITEM_ID_CURSED_SWORD)
 
     
         /*  bleeding wound: every attack increases actual stacks by 4, so bladestorm can increase by 1 every 0.25 seconds
