@@ -1,0 +1,10 @@
+package ItemFinalize
+
+import Execute
+import ItemInShop
+import Items1
+import ClosureTimers
+
+init
+    doAfter(0.0) ->
+        ItemInShop.finalize()

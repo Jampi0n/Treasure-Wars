@@ -7,8 +7,9 @@ import ItemObjEditing
 import ObjectIds
 import Icons
 import HashMap
-import UnitWrapper
-import ClosureTimers
+import public Execute
+import public UnitWrapper
+import public ClosureTimers
 
 public int ITEM_ID_CIRCLET = compiletime(newItem(Icons.bTNCirclet))
 public int ITEM_ID_CROWN = compiletime(newItem(Icons.bTNHelmutPurple))
@@ -83,19 +84,19 @@ ItemEffect currentItemEffect
 ItemDefinition currentItemDefinition
 ItemInShop currentItemInShop
 
-function addPickupFunction(ItemPickUp onPickUp)
+public function addPickupFunction(ItemPickUp onPickUp)
     if compiletime
         return
         
     currentItemEffect.onPickUp.add(onPickUp)
 
-function addDropFunction(ItemDrop onDrop)
+public function addDropFunction(ItemDrop onDrop)
     if compiletime
         return
 
     currentItemEffect.onDrop.add(onDrop)
 
-function addEffectStatBonusAbsolute(Stat whichStat, int bonus)
+public function addEffectStatBonusAbsolute(Stat whichStat, int bonus)
     if compiletime
         return
 
@@ -107,7 +108,7 @@ function addEffectStatBonusAbsolute(Stat whichStat, int bonus)
         ItemEffect.triggerUnit.wrapper().addStatAbsoluteBonus(whichStat, -bonus)
     end))
 
-function addEffectStatBonusRelative(Stat whichStat, int bonus)
+public function addEffectStatBonusRelative(Stat whichStat, int bonus)
     if compiletime
         return
 
@@ -120,7 +121,7 @@ function addEffectStatBonusRelative(Stat whichStat, int bonus)
     end))
 
 
-function setupItem(int itemId, int category, int goldCost)
+public function setupItem(int itemId, int category, int goldCost)
     if compiletime
         let iDef = getItemDefintion(itemId)
         iDef.setGoldCost(goldCost)
@@ -130,7 +131,7 @@ function setupItem(int itemId, int category, int goldCost)
         currentItemInShop.setupItem(category, iconFromItem(itemId), goldCost)
         currentItemEffect = ItemEffect.retrieveItemEffect(itemId)
 
-function setInfo(string name, string desc)
+public function setInfo(string name, string desc)
     if compiletime
         currentItemDefinition.setName(name)
         currentItemDefinition.setTooltipBasic(name)
@@ -139,7 +140,7 @@ function setInfo(string name, string desc)
     else
         currentItemInShop.setupStrings(name, desc)
 
-function setAbilities(vararg int ids)
+public function setAbilities(vararg int ids)
     if compiletime
         let list = new LinkedList<int>
         for id in ids
@@ -148,59 +149,11 @@ function setAbilities(vararg int ids)
         currentItemDefinition.setAbilities(result)
         currentItemDefinition.setCooldownGroup(result.substring(0, 3))
 
-function addRequirement(int itemId)
+public function addRequirement(int itemId)
     if not compiletime
         let child = ItemInShop.retrieveItemFromId(itemId)
         currentItemInShop.addRequirement(child)
 
 
-function circletOfNobility(int itemId)
-    setupItem(itemId, 1, 750)
-    setInfo("Circlet of Nobility", "+4 all stats")
-    addRequirement(ITEM_ID_AGI3)
-    addRequirement(ITEM_ID_STR3)
-    addRequirement(ITEM_ID_INT3)
-    addEffectStatBonusAbsolute(Stat.STR, 4)
-    addEffectStatBonusAbsolute(Stat.AGI, 4)
-    addEffectStatBonusAbsolute(Stat.INT, 4)
-
-
-function crownOfKings(int itemId)
-    setupItem(itemId, 2, 2000)
-    setInfo("Crown of Kings", "+10 all stats")
-    addRequirement(ITEM_ID_CIRCLET)
-    addRequirement(ITEM_ID_AGI3)
-    addEffectStatBonusAbsolute(Stat.STR, 10)
-    addEffectStatBonusAbsolute(Stat.AGI, 10)
-    addEffectStatBonusAbsolute(Stat.INT, 10)
-
-function agi3(int itemId)
-    setupItem(itemId, 0, 250)
-    setInfo("Slippers of Agility", "+3 agi")
-    addEffectStatBonusAbsolute(Stat.AGI, 3)
-
-function str3(int itemId)
-    setupItem(itemId, 0, 200)
-    setInfo("Gauntlets of Ogre Strength", "+3 str")
-    addEffectStatBonusAbsolute(Stat.STR, 3)
-
-function int3(int itemId)
-    setupItem(itemId, 0, 175)
-    setInfo("Mantle of Intelligence", "+3 int")
-    addEffectStatBonusAbsolute(Stat.INT, 3)
-
-
-@compiletime
-function initItems()
-    circletOfNobility(ITEM_ID_CIRCLET)
-    crownOfKings(ITEM_ID_CROWN)
-    agi3(ITEM_ID_AGI3)
-    str3(ITEM_ID_STR3)
-    int3(ITEM_ID_INT3)
-
-
 init
-    doAfter(0.1) ->
-        ItemEffect.classInit()
-        initItems()
-        ItemInShop.finalize()
+    ItemEffect.classInit()

@@ -15,7 +15,7 @@ import HashMap
 import GameTimer
 import initlater Creeps
 
-import initlater ItemShopSystem
+//import initlater ItemShopSystem
 
 public constant ADVANCED_ONHIT =  'A00I'
 public constant DEFAULT_ONHIT = 'A008'
@@ -105,12 +105,12 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
             if isAttack and target.getAbilityLevel(ABILITY_HEAVY_ARMORED) > 0
                 currentDamage -= HEAVY_ARMOED_REDUCTION[target.getAbilityLevel(ABILITY_HEAVY_ARMORED) - 1]
 
-            // shield - ITEM
+            /*// shield - ITEM
             if isAttack and target.isType(UNIT_TYPE_HERO)
                 currentDamage = currentDamage - 15 * target.countItemsOfType(convertItemId(ITEM_ID_SHIELD))
 
             if isAttack and target.isType(UNIT_TYPE_HERO)
-                currentDamage = currentDamage - 20 * target.countItemsOfType(convertItemId(ITEM_ID_HOLY_SHIELD))
+                currentDamage = currentDamage - 20 * target.countItemsOfType(convertItemId(ITEM_ID_HOLY_SHIELD))*/
 
 
             //the following effects make use of the final damage
@@ -130,20 +130,20 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
                 manaShield.getTarget().damageMana(manaShield.getTarget(), MANA_SHIELD_REDUCTION[level-1] * MANA_PER_DAMAGE[level-1] * currentDamage, ReductionType.NONE)
                 currentDamage = currentDamage * (1.-MANA_SHIELD_REDUCTION[level-1])
         
-            // vampiric goblet - ITEM
+            /*// vampiric goblet - ITEM
             if source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_VAMPIRIC_GOBLET)) and target.isType(UNIT_TYPE_HERO)
                 source.healHP(source, currentDamage * 0.2)
                 source.healMana(source, currentDamage * 0.15)
 
             // wand of blood - ITEM
             if source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_WAND_OF_BLOOD)) and not target.isType(UNIT_TYPE_STRUCTURE)
-                source.healHP(source, currentDamage * 0.08)
+                source.healHP(source, currentDamage * 0.08)*/
 
             // Wild Rage - DESTROYER
             if source.hasAbility(RAGE_BUFF_ID)
                 source.healHP(source, currentDamage * RAGE_LIFE_STEAL)
         
-            // sacrifical dagger - ITEM
+            /*// sacrifical dagger - ITEM
             if isAttack and source.isType(UNIT_TYPE_HERO) and source.hasItemById(convertItemId(ITEM_ID_SACRIFICIAL_DAGGER)) and not target.isType(UNIT_TYPE_STRUCTURE)
                 source.healHP(source, currentDamage * 0.12)
 
@@ -160,7 +160,7 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
                 doAfter(10, () -> (begin
                     if target.isAlive() or target.isType(UNIT_TYPE_HERO)
                         wrapper.addStatAbsoluteBonusReal(Stat.AGI, (wp*1000).toInt() )
-                end))
+                end))*/
 
 
             //===============================================================================
