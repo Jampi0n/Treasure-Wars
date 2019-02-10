@@ -3,8 +3,12 @@ package ItemFinalize
 import Execute
 import ItemInShop
 import Items1
-import ClosureTimers
 
-init
-    doAfter(0.0) ->
+int noWarning = 0
+
+function noWarning()
+    noWarning += ITEM_ID_CROWN
+
+public function itemFinalize()
+    execute() ->
         ItemInShop.finalize()

@@ -9,9 +9,8 @@ import ObjectIdGenerator
 import ItemObjEditing
 import ObjectIds
 import ChangeTexture
-import initlater ShopGUI
 
-
+public constant MAX_ITEMS_IN_LIST = 30
 constant ITEM_DEFINITIONS = new HashMap<int, ItemDefinition>
 
 public function getItemDefintion(int itemId) returns ItemDefinition

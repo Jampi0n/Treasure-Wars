@@ -2,6 +2,12 @@ package Items1
 
 import ItemConfiguration
 
+public int ITEM_ID_CIRCLET = compiletime(newItem(Icons.bTNCirclet))
+public int ITEM_ID_CROWN = compiletime(newItem(Icons.bTNHelmutPurple))
+public int ITEM_ID_AGI3 = compiletime(newItem(Icons.bTNSlippersOfAgility))
+public int ITEM_ID_STR3 = compiletime(newItem(Icons.bTNGauntletsOfOgrePower))
+public int ITEM_ID_INT3 = compiletime(newItem(Icons.bTNMantleOfIntelligence))
+
 function circletOfNobility(int itemId)
     setupItem(itemId, 1, 750)
     setInfo("Circlet of Nobility", "+4 all stats")
@@ -45,6 +51,9 @@ function initItems()
     agi3(ITEM_ID_AGI3)
     str3(ITEM_ID_STR3)
     int3(ITEM_ID_INT3)
+
+    if not compiletime
+        ItemInShop.finalize()
 
 init
     execute() ->
