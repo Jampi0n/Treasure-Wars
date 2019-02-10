@@ -2,20 +2,14 @@ package ItemConfiguration
 
 import StringUtils
 import LinkedList
-import ItemInShop
+import public ItemInShop
+import public Icons
 import ItemObjEditing
 import ObjectIds
-import Icons
 import HashMap
 import public Execute
 import public UnitWrapper
 import public ClosureTimers
-
-public int ITEM_ID_CIRCLET = compiletime(newItem(Icons.bTNCirclet))
-public int ITEM_ID_CROWN = compiletime(newItem(Icons.bTNHelmutPurple))
-public int ITEM_ID_AGI3 = compiletime(newItem(Icons.bTNSlippersOfAgility))
-public int ITEM_ID_STR3 = compiletime(newItem(Icons.bTNGauntletsOfOgrePower))
-public int ITEM_ID_INT3 = compiletime(newItem(Icons.bTNMantleOfIntelligence))
 
 interface ItemPickUp
     function onItemPickUp()

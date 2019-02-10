@@ -6,7 +6,6 @@ import ShopGUI
 import ItemFinalize
 import SoundUtils
 import StandardTextTags
-import ClosureTimers
 
 constant BUY_RANGE = 900
 
@@ -64,7 +63,8 @@ init
     shopRect[8] = gg_rct_Shop8
     shopRect[9] = gg_rct_Shop9
 
-    doAfter(0.1) ->
+    itemFinalize()
+    execute() ->
         for i = HERO_PLAYER_TEAM_1_FIRST to HERO_PLAYER_TEAM_2_LAST
             gui[i] = new GUI(players[i], null, shopRect[i].getCenter())
             ..setBuyCondition( (unit hero, bool showMessage) -> buyCondition(hero, i <= HERO_PLAYER_TEAM_1_LAST, showMessage))
