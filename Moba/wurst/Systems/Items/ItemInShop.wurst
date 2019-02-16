@@ -61,6 +61,7 @@ public class ItemInShop
     private int totalCost
     private int singleCost
     private LinkedList<ItemInShop> requirements
+    private int recipeSize = 1
     private HashList<ItemInShop> buildsIntoDirectly
     private HashList<ItemInShop> buildsIntoTransitively
     private LinkedList<ItemInShop> buildsIntoCombined
@@ -164,6 +165,9 @@ public class ItemInShop
     function getRequirements() returns LinkedList<ItemInShop>
         return this.requirements
 
+    function getRecipeSize() returns int
+        return this.recipeSize
+
     function getBuildsInto() returns LinkedList<ItemInShop>
         return this.buildsIntoCombined
 
@@ -237,6 +241,7 @@ public class ItemInShop
         else
             error("Too many children for item. depth = " + depth.toString())
 
+        parent.recipeSize++
         for ItemInShop childChild in child.requirements
             addBuildsInto(childChild, parent, depth+1)
 
