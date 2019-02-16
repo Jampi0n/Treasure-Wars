@@ -14,8 +14,8 @@ constant BUTTON_DUMMY = compiletime(UNIT_ID_GEN.next())
     '--x--' origin of the dummy model
 */
 
-constant HIGHLIGHT = compiletime(createTexture("ButtonGlow.tga"))
-constant CHECKED = compiletime(createTexture("CheckMarkSmall.tga"))
+constant HIGHLIGHT = compiletime(createTexture("Shop\\ButtonGlow.tga"))
+constant CHECKED = compiletime(createTexture("Shop\\CheckMarkSmall.tga"))
 
 public interface OnClick
     function onClick(Button whichButton)
@@ -192,7 +192,7 @@ public class Button
 function initDummy()
     new UnitDefinition(BUTTON_DUMMY, 'hfoo')
         ..setNormalAbilities("Avul,Aloc")
-        ..setModelFile("Icon31.mdx")
+        ..setModelFile("Shop\\Icon31.mdx")
         ..setShadowImageUnit("")
         ..setAttacksEnabled(0)
         ..setSpeedBase(1)
