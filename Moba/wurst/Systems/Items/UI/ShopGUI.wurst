@@ -14,6 +14,8 @@ import ClosureTimers
 import ImageBorder
 import PlayerControl
 import RecommendedItems
+import ErrorHandling
+import SoundUtils
 
 public constant GRID_SIZE = 16.0
 
@@ -45,6 +47,8 @@ constant stringCat6 = new ImageStringType(250, Origin.MIDDLE_CENTER, "Defense", 
 constant stringBuy = new ImageStringType(250, Origin.TOP_LEFT, "Buy for:", 1)
 
 constant LINK_COLOR = colorA(100,100,100,255)
+
+constant SOUND_CLICK = new SoundDefinition(Sounds.mouseClick1, false, false)
 
 tuple gridPos(int x, int y)
 
@@ -161,17 +165,23 @@ class RecipeTree
     GUI gui
     int usedButtons = 0
     HeroInventory inv
+    bool completed = false
 
     construct(GUI gui, ItemInShop recipe)
         this.gui = gui
         this.root = new RecipeTreeNode(this, 15, 0, recipe)
         this.inv = null
-        this.refresh()
+        doAfter(0.2) ->
+            this.completed = true
+            this.refresh()
 
     /*
         Recalculates costs and the checkmarks without recreating buttons or links.
     */
     function refresh()
+        if not this.completed
+            return
+
         if this.inv != null
             destroy this.inv
         this.inv = new HeroInventory(gui.getInventoryUnit())
@@ -204,6 +214,7 @@ class RecipeTreeNode
     image forkVer //parent
     image linkToFork // child
     Button btn
+    int checkNumber
 
 
     LinkedList<RecipeTreeNode> childrenList
@@ -215,8 +226,6 @@ class RecipeTreeNode
         this.y = y
         this.itm = itm
         this.childrenList = new LinkedList<RecipeTreeNode>
-        int numberOfChildren = this.itm.getRequirements().size()
-        int i = 0
         this.topLeft = gui.getPosFromGrid(convertX(x), convertY(y) ) + vec2(0, 5 * GRID_SIZE)
         this.center = topLeft + vec2(2.5 * GRID_SIZE, -2.5 * GRID_SIZE)
 
@@ -235,21 +244,25 @@ class RecipeTreeNode
             this.linkToFork.setColor(LINK_COLOR)
 
 
-        this.children =  itm.getRequirements().size()
+        this.children =  this.itm.getRequirements().size()
 
 
-
-        for ItemInShop child in this.itm.getRequirements()
-            RecipeTreeNode childNode = new RecipeTreeNode(this.tree, getChildX(x, y, i, numberOfChildren), y + 1, child)
-            //childNode.link = addLightning("SHOP", false, this.topLeft + vec2( (i.toReal() / (numberOfChildren-1.0) * GRID_SIZE * 5 ) , 0), childNode.topLeft + vec2(GRID_SIZE*2.5, GRID_SIZE * 5))
-            this.childrenList.add(childNode)
-            i++
+        this.checkNumber = GetRandomInt(0, 10000000)
+        int check = this.checkNumber
+        doAfter(y * 0.05 + 0.05) ->
+            int i = 0
+            if check == this.checkNumber
+                for ItemInShop child in this.itm.getRequirements()
+                    RecipeTreeNode childNode = new RecipeTreeNode(this.tree, getChildX(this.x, this.y, i, this.children), this.y + 1, child)
+                    //childNode.link = addLightning("SHOP", false, this.topLeft + vec2( (i.toReal() / (numberOfChildren-1.0) * GRID_SIZE * 5 ) , 0), childNode.topLeft + vec2(GRID_SIZE*2.5, GRID_SIZE * 5))
+                    this.childrenList.add(childNode)
+                    i++
 
         if this.children > 1
-            let leftMost = childrenList.get(0)
-            let rightMost = childrenList.get(numberOfChildren - 1)
-            let width = (rightMost.center.x - leftMost.center.x) * 1.05 // actual size is only 62/64, so this is used to increase width of image
-            let middle = (rightMost.center.x + leftMost.center.x) / 2.0
+            let leftMost = gui.getPosFromGrid(convertX(getChildX(x, y, 0, this.children)), 0).x + 2.5 * GRID_SIZE
+            let rightMost = gui.getPosFromGrid(convertX(getChildX(x, y, this.children - 1, this.children)), 0).x + 2.5 * GRID_SIZE
+            let width = (rightMost - leftMost) * 1.05 // actual size is only 62/64, so this is used to increase width of image
+            let middle = (rightMost + leftMost) / 2.0
             this.forkVer = createImage("Shop\\Link.tga", this.center + vec2(0, -80), 8, 48, Layer.L2)
             this.forkVer.show()
             this.forkVer.setColor(LINK_COLOR)
@@ -285,6 +298,9 @@ class RecipeTreeNode
 
 
     ondestroy
+        if this.childrenList.size() != this.children
+            error("!!!")
+
         for RecipeTreeNode child in this.childrenList
             destroy child
 
@@ -337,6 +353,12 @@ public class GUI
     private int itemsOnPage
     private vec2 center
     private vec2 previousCamerePos
+
+    /*
+        Some operations use clickCooldown, to prevent user input for a short time.
+        This time can be used to perform expensive operations over a longer period.
+    */
+    private bool clickCooldown = false
 
     //arrays use MAX_ITEMS_IN_LIST * this
     private int arrayOffset
@@ -428,8 +450,10 @@ public class GUI
         onItemLose.addAction(function onItemDropStatic)
 
     function openShop()
-        if this.enabled or not this.enableOpen
+        if this.enabled or not this.enableOpen or this.clickCooldown
             return
+
+        this.activateCooldown()
 
         this.enabled = true
         this.forceCameraTimer.startPeriodic(0.01, function forceCameraStatic)
@@ -469,9 +493,10 @@ public class GUI
             
 
     function closeShop()
-        if not this.enabled
+        if not this.enabled or this.clickCooldown
             return
 
+        this.activateCooldown()
         this.enabled = false
         this.forceCameraTimer.pause()
 
@@ -631,7 +656,7 @@ public class GUI
         if this.recipeTree != null
             destroy this.recipeTree
         this.recipeTree = new RecipeTree(this, this.selectedRecipe)
-        this.itemsInRecipe = this.recipeTree.usedButtons
+        this.itemsInRecipe = this.selectedRecipe.getRecipeSize()
 
 
     private function highlightSelectedItem()
@@ -648,6 +673,8 @@ public class GUI
                 selectItem(newRecipe, false)
             return
 
+        this.activateCooldown()
+
         if this.selectedRecipeButton != -1
             GUI.buyableItemsButtons[this.selectedRecipeButton + this.arrayOffset].setHightLight(false)
 
@@ -662,7 +689,8 @@ public class GUI
         //if one selects a recipe on the left side, selected item is set to the recipe
         
         //load recipe
-        loadRecipeTree()
+        doAfter(0.05) ->
+            loadRecipeTree()
 
         if this.currentPage == 0
             let index = RecommendedItems.getIndex(this.inventoryUnit.getTypeId(), newRecipe)
@@ -676,7 +704,8 @@ public class GUI
                 GUI.buyableItemsButtons[index + this.arrayOffset].setHightLight(true)
                 this.selectedRecipeButton = index
 
-        highlightSelectedItem()
+        doAfter(0.1) ->
+            highlightSelectedItem()
         
     private function clearInfo()
         if this.nameText != null
@@ -698,16 +727,21 @@ public class GUI
             //selectRecipe(newItem, true)
             return
 
+        this.activateCooldown()
+
         this.selectedItem = newItem
         
         loadInfoButtons(newItem)
 
-        this.updateInfo()
+        doAfter(0.05) ->
+            this.updateInfo()
         
-        //load builds into
-        loadBuildsInto()
+        doAfter(0.1) ->            
+            //load builds into
+            loadBuildsInto()
 
-        highlightSelectedItem()
+        doAfter(0.15) ->            
+            highlightSelectedItem()
 
 
     function clickRequirement(ItemInShop itm)
@@ -726,6 +760,8 @@ public class GUI
     private function setPage(int newPage)
         if newPage == this.currentPage
             return
+
+        this.activateCooldown()
         this.selectedRecipeButton = -1
         if this.currentPage != -1 //at the start
             GUI.categoryButtons[this.currentPage + this.arrayOffset].setHightLight(false)
@@ -736,7 +772,8 @@ public class GUI
         for i = size + this.arrayOffset to this.itemsOnPage + this.arrayOffset - 1
             GUI.buyableItemsButtons[i].deactivate()
         for i = 0 to size - 1
-            loadItemListButton(i)
+            doAfter( (i div 5) * 0.04 ) ->
+                loadItemListButton(i)
 
         this.itemsOnPage = size
 
@@ -830,7 +867,17 @@ public class GUI
         let y = (inGrid.y/GRID_SIZE).floor()
         return gridPos(x,y)
 
+    private function activateCooldown()
+        this.clickCooldown = true
+        doAfter(0.25) ->
+            this.clickCooldown = false
+
+    private function clickAnyButton()
+        SOUND_CLICK.playForPlayer(this.forPlayer).snd.setVolume(125)
+
     private function onClick(vec2 pos)
+        if this.clickCooldown
+            return
 
         let gridPos = getGridFromPos(pos)
         let x = gridPos.x
@@ -848,6 +895,7 @@ public class GUI
                     let page = 5-cat
                     if page >= 0 and page <= 5
                         setPage(page)
+                        clickAnyButton()
             else if x >= -32 and x <= -4 //list buttons
                 let x2 = x+32
                 let y2 = y+26
@@ -860,6 +908,7 @@ public class GUI
                     let clickedItem = this.getItemFromList(this.currentPage, row * 5 + column)
                     if clickedItem != null
                         this.clickItemList(clickedItem)
+                        clickAnyButton()
                     //print("click [" + column.toString() + "," + row.toString()+"]")
 
 
@@ -875,6 +924,7 @@ public class GUI
                     if x >= btn.getX() and x <= btn.getX()+4
                         if y >= btn.getY()-2 and y <= btn.getY()+4
                             this.selectItem(btn.data castTo ItemInShop, false)
+                            clickAnyButton()
 
 
 
@@ -882,6 +932,7 @@ public class GUI
                 //print("builds into: ("+x.toString()+","+y.toString()+")")
                 if y <= -5 and y >= - 10        //buy button
                     clickBuyButton()
+                    clickAnyButton()
                 else                            //builds into
                     let x2 = x-44
                     let y2 = y+21
@@ -894,6 +945,7 @@ public class GUI
                         let clickedItem = GUI.buildsIntoButtons[this.arrayOffset + row * 3 + column].data castTo ItemInShop
                         if clickedItem != null
                             this.clickBuildsInto(clickedItem)
+                            clickAnyButton()
                         //print("click [" + column.toString() + "," + row.toString()+"]")
 
 
