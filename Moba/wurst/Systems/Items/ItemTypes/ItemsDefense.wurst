@@ -1,0 +1,427 @@
+package ItemsDefense
+
+import ItemConfiguration
+
+constant CATEGORY = 5
+
+function itemArcaneShield()
+    let hp = 250
+    let wp = 40
+    let deBuffReduction = 15 // -> General
+    setupItem(ITEM_ID_ARCANE_SHIELD, CATEGORY, 3800)
+    setInfo("Arcane Shield", "+ {0} hit points|n+ {1} willpower|nMost negative buffs last {2}% shorter."
+    .format(hp.toString(), wp.toString(), deBuffReduction.toString()))
+    addRequirement(ITEM_ID_MAGE_GLOVES)
+    addRequirement(ITEM_ID_GEM_OF_HEALTH)
+    addRequirement(ITEM_ID_SHIELD)
+    addStatBonusAbsolute(Stat.HP, hp)
+    addStatBonusAbsolute(Stat.AGI, wp)
+
+function enchantedArmor()
+    let mp = 125
+    let hp = 350
+    let ar = 25
+    let intel = 20
+    setupItem(ITEM_ID_ENCHANTED_ARMOR, CATEGORY, 3950)
+    setInfo("Enchanted Armor", "+ {0} mana points|n+ {1} intelligence|n+ {2} hit points|n+ {3} armor"
+    .format(mp.toString(), intel.toString(), hp.toString(), ar.toString()))
+    addRequirement(ITEM_ID_BATTLEMAGE_ARMOR)
+    addRequirement(ITEM_ID_GEM_OF_HEALTH)
+    addRequirement(ITEM_ID_WIZARDS_HAT)
+    addStatBonusAbsolute(Stat.MP, mp)
+    addStatBonusAbsolute(Stat.HP, hp)
+    addStatBonusAbsolute(Stat.AR, ar)
+    addStatBonusAbsolute(Stat.INT, intel)
+
+function voidArmor()
+    let mp = 150
+    let hp = 275
+    let ar = 20
+    let wp = 20
+    let dmgReduction = 10 // -> onAttack
+    setupItem(ITEM_ID_VOID_ARMOR, CATEGORY, 4250)
+    setInfo("Void Armor", "+ {0} mana points|n+ {1} hit points|n+ {2} armor|n+ {3} willpower|nReduces incoming damage by {4}% and converts it into mana for the hero.|nThis effect does not stack."
+    .format(mp.toString(), hp.toString(), ar.toString(), wp.toString(), dmgReduction.toString()))
+    addRequirement(ITEM_ID_BATTLEMAGE_ARMOR)
+    addRequirement(ITEM_ID_GHOST_HOOD)
+    addStatBonusAbsolute(Stat.MP, mp)
+    addStatBonusAbsolute(Stat.HP, hp)
+    addStatBonusAbsolute(Stat.AR, ar)
+    addStatBonusAbsolute(Stat.AGI, wp)
+
+function armorOfCourage()
+    let ar = 36
+    let wp = 18
+    let hp = 375
+    setupItem(ITEM_ID_ARMOR_OF_COURAGE, CATEGORY, 3950)
+    setInfo("Armor of Courage", "+ {0} armor|n+ {1} willpower|n+ {2} hit points"
+    .format(ar.toString(), wp.toString(), hp.toString()))
+    addRequirement(ITEM_ID_HEAVY_ARMOR)
+    addRequirement(ITEM_ID_STEEL_ARMOR)
+    addStatBonusAbsolute(Stat.AR, ar)
+    addStatBonusAbsolute(Stat.AGI, wp)
+    addStatBonusAbsolute(Stat.HP, hp)
+
+function helmetOfJustice()
+    let intel = 25
+    let killMana = 16 //trigger
+    let ar = 20
+    let hr = 60
+    setupItem(ITEM_ID_HELMET_OF_JUSTICE, CATEGORY, 4050)
+    setInfo("Helmet of Justice", "+ {0} intelligence|n+ {1} armor|n+ {2} hit point regeneration per 10 seconds|nRestores {3} mana points per kill."
+    .format(intel.toString(), ar.toString(), hr.toString(), killMana.toString()))
+    addRequirement(ITEM_ID_HEAVY_HELMET)
+    addRequirement(ITEM_ID_CURSED_MASK)
+    addStatBonusAbsolute(Stat.INT, intel)
+    addStatBonusAbsolute(Stat.HR, hr)
+    addStatBonusAbsolute(Stat.AR, ar)
+
+    if not compiletime
+        CreateTrigger()
+        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
+        ..addAction(() -> (begin
+            let killer = GetKillingUnit()
+            if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and killer.hasItemById(ITEM_ID_HELMET_OF_JUSTICE)
+                killer.healMana(killer, 16. * killer.countItemsOfType(ITEM_ID_HELMET_OF_JUSTICE))
+                killer.addEffect(Abilities.spiritTouchTarget, "chest").destr()
+        end))
+    
+function firehandGauntlets()
+    let mp = 150
+    let hp = 225
+    let magicDmg = 25
+    let ar = 32
+    let as = 18
+    setupItem(ITEM_ID_FIREHAND_GAUNTLETS, CATEGORY, 4150)
+    setInfo("Firehand Gauntlets", "+ {0} armor|n+ {1}% attack speed|n+ {2} hit points|n+ {3} mana points|nAttacks deal {4} additional magic damage."
+    .format(ar.toString(), as.toString(), hp.toString(), mp.toString(), magicDmg.toString()
+    ))
+    addRequirement(ITEM_ID_GAUNTLET_OF_PROTECTION)
+    addRequirement(ITEM_ID_MAGMA_CRYSTAL)
+    addRequirement(ITEM_ID_GLOVES_OF_HASTE)
+    addStatBonusAbsolute(Stat.MP, mp)
+    addStatBonusAbsolute(Stat.HP, hp)
+    addStatBonusAbsolute(Stat.AR, ar)
+    addStatBonusAbsolute(Stat.AS, as)
+
+    if not compiletime
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if attacker.hasItemById(ITEM_ID_FIREHAND_GAUNTLETS) and not target.isType(UNIT_TYPE_STRUCTURE)
+                attacker.dealDamage(target, magicDmg.toReal() * attacker.countItemsOfType(ITEM_ID_FIREHAND_GAUNTLETS) , ReductionType.MAGIC)
+                target.addEffect(Abilities.fireBallMissile, "chest").destr()
+        end))
+
+function spikedArmor()
+    let ar = 36
+    let hp = 340
+    let spikeDmg = 32
+    setupItem(ITEM_ID_SPIKED_ARMOR, CATEGORY, 4100)
+    setInfo("Spiked Armor", "+ {0} armor|n+ {1} hit points|nEnemies attacking the hero will take {2} damage."
+    .format(ar.toString(), hp.toString(), spikeDmg.toString()))
+    addRequirement(ITEM_ID_SPIKED_MAIL)
+    addRequirement(ITEM_ID_HEAVY_ARMOR)
+    addStatBonusAbsolute(Stat.AR, ar)
+    addStatBonusAbsolute(Stat.HP, hp)
+    if not compiletime
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if target.isType(UNIT_TYPE_HERO) and not attacker.isType(UNIT_TYPE_STRUCTURE)
+                let dmg = target.countItemsOfType(ITEM_ID_SPIKED_ARMOR) * spikeDmg
+                target.dealDamage(attacker, dmg.toReal(), ReductionType.PHYSICAL)
+        end))
+    
+function runicArmor()
+    let ar = 15
+    let wp = 45
+    let hp = 350
+    setupItem(ITEM_ID_RUNIC_ARMOR, CATEGORY, 4150)
+    setInfo("Runic Armor", "+ {0} armor|n+ {1} willpower|n+ {2} hit points"
+    .format(ar.toString(), wp.toString(), hp.toString()))
+    addRequirement(ITEM_ID_STEEL_ARMOR)
+    addRequirement(ITEM_ID_ANCIENT_STONE_TABLET)
+    addStatBonusAbsolute(Stat.AR, ar)
+    addStatBonusAbsolute(Stat.AGI, wp)
+    addStatBonusAbsolute(Stat.HP, hp)
+    
+
+constant HOLY_SHIELD_BUFF_ID = compiletime(createAuraBuff("Holy Shield", "This unit is protected by Holy Shield; it is untargetable.", "BTNGoldenShieldHoly"))
+constant HOLY_SHIELD_ABILTIY_ID = compiletime(createPositiveBuffAbility(1, HOLY_SHIELD_BUFF_ID, "Abilities\\Spells\\Human\\DivineShield\\DivineShieldTarget.mdl", ""))
+constant BUFF_HOLY_SHIELD = new BuffType(true, true)
+    
+function holyShield()
+    let dur = 2 //trigger
+    let ar = 15
+    let hp = 225
+    let wp = 25
+    let block = 20 // -> onAttack
+    setupItem(ITEM_ID_HOLY_SHIELD, CATEGORY, 3800)
+    setInfo("Holy Shield", "+ {0} hit points|n+ {1} armor|n+ {2} willpower|nBlocks {3} damage of incoming attacks.|nActive:|nTurns the hero invulnerable for {4} seconds."
+    .format(hp.toString(), ar.toString(), wp.toString(), block.toString(), dur.toString()))
+    setAbilities('A00G')
+    addRequirement(ITEM_ID_SHIELD)
+    addRequirement(ITEM_ID_ANCIENT_STONE_TABLET)
+    addStatBonusAbsolute(Stat.AR, ar)
+    addStatBonusAbsolute(Stat.AGI, wp)
+    addStatBonusAbsolute(Stat.HP, hp)
+
+    if not compiletime
+        var abilityList = new LinkedList<int>
+        ..add(HOLY_SHIELD_ABILTIY_ID)
+        BUFF_HOLY_SHIELD.setup(abilityList, HOLY_SHIELD_BUFF_ID)
+
+        CreateTrigger()
+        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_SPELL_EFFECT)
+        ..addAction(() ->(begin
+            if GetSpellAbilityId() == 'A00G'
+                let hero = GetTriggerUnit()
+                hero.addBuff( hero, 2, BUFF_HOLY_SHIELD, 1)
+                hero.addBuff( hero, 2, UNTARGETABLE, 1)
+        end))
+
+function mageArmor()
+    let mp = 50
+    let hp = 60
+    let ar = 8
+    setupItem(ITEM_ID_MAGE_ARMOR, CATEGORY, 800)
+    setInfo("Mage Armor", "+ {0} mana points|n +{1} hit points|n +{2} armor"
+    .format(mp.toString(), hp.toString(), ar.toString()))
+    addStatBonusAbsolute(Stat.MP, mp)
+    addStatBonusAbsolute(Stat.HP, hp)
+    addStatBonusAbsolute(Stat.AR, ar)
+
+function mageGloves()
+    let wp = 8
+    setupItem(ITEM_ID_MAGE_GLOVES, CATEGORY, 400)
+    setInfo("Mage Gloves", "+ {0} willpower"
+    .format(wp.toString()))
+    addStatBonusAbsolute(Stat.AGI, wp)
+
+
+function ghostHood()
+    let mp = 80
+    let hp = 75
+    let ar = 8
+    let wp = 16
+    setupItem(ITEM_ID_GHOST_HOOD, CATEGORY, 1825)
+    setInfo("Ghost Hood", "+ {0} mana points|n+ {1} hit points|n+ {2} armor|n+ {3} willpower"
+    .format(mp.toString(), hp.toString(), ar.toString(), wp.toString()))
+    addRequirement(ITEM_ID_MAGE_ARMOR)
+    addRequirement(ITEM_ID_MAGE_GLOVES)
+    addStatBonusAbsolute(Stat.MP, mp)
+    addStatBonusAbsolute(Stat.AGI, wp)
+    addStatBonusAbsolute(Stat.HP, hp)
+    addStatBonusAbsolute(Stat.AR, ar)
+
+
+
+function ancientStoneTablet()
+    let hp = 175
+    let wp = 25
+    setupItem(ITEM_ID_ANCIENT_STONE_TABLET, CATEGORY, 1800)
+    setInfo("Ancient Stone Tablet", "+ {0} hit points|n+ {1} willpower"
+    .format(hp.toString(), wp.toString()))
+    addRequirement(ITEM_ID_GEM_OF_HEALTH)
+    addRequirement(ITEM_ID_MAGE_GLOVES)
+    addStatBonusAbsolute(Stat.HP, hp)
+    addStatBonusAbsolute(Stat.AGI, wp)
+
+
+function battlemageArmor()
+    let mp = 75
+    let hp = 180
+    let ar = 15
+    setupItem(ITEM_ID_BATTLEMAGE_ARMOR, CATEGORY, 1700)
+    setInfo("Battlemage Armor", "+ {0} mana points|n+ {1} hit points|n+ {2} armor"
+    .format(mp.toString(), hp.toString(), ar.toString()))
+    addRequirement(ITEM_ID_MAGE_ARMOR)
+    addRequirement(ITEM_ID_GEM_OF_HEALTH)
+    addStatBonusAbsolute(Stat.MP, mp)
+    addStatBonusAbsolute(Stat.HP, hp)
+    addStatBonusAbsolute(Stat.AR, ar)
+
+
+function platedGauntlets()
+    let armor = 8
+    setupItem(ITEM_ID_PLATED_GAUNTLETS, CATEGORY, 400)
+    setInfo("Plated Gauntlets", "+ {0} armor"
+    .format(armor.toString()))
+    addStatBonusAbsolute(Stat.AR, armor)
+
+
+function leatherArmor()
+    let ar = 10
+    let hp = 100
+    setupItem(ITEM_ID_LEATHER_ARMOR, CATEGORY, 825)
+    setInfo("Leather Armor", "+ {0} armor|n+ {1} hit points"
+    .format(ar.toString(), hp.toString()))
+    addStatBonusAbsolute(Stat.AR, ar)
+    addStatBonusAbsolute(Stat.HP, hp)
+
+
+function gemOfHealth()
+    let hp = 150
+    setupItem(ITEM_ID_GEM_OF_HEALTH, CATEGORY, 500)
+    setInfo("Gem Of Health","+ {0} hit points"
+    .format(hp.toString()))
+    addStatBonusAbsolute(Stat.HP, hp)
+
+
+function spikes()
+    let spikeDmg = 15
+    setupItem(ITEM_ID_SPIKES, CATEGORY, 600)
+    setInfo("Spikes", "Enemies attacking the hero will take {0} damage."
+    .format(spikeDmg.toString()))
+    if not compiletime
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if target.isType(UNIT_TYPE_HERO)
+                let dmg = target.countItemsOfType(ITEM_ID_SPIKES) * spikeDmg
+                target.dealDamage(attacker, dmg.toReal(), ReductionType.PHYSICAL)
+        end))
+
+function shield()
+    let ar = 8
+    let block = 15 // -> onAttack
+    setupItem(ITEM_ID_SHIELD, CATEGORY, 850)
+    setInfo("Shield", "+ {0} armor|nBlocks {1} damage of incoming attacks."
+    .format(ar.toString(), block.toString()))
+    addStatBonusAbsolute(Stat.AR, ar)
+
+
+function ringOfHealth()
+    let hr = 30
+    setupItem(ITEM_ID_RING_OF_HEALTH, CATEGORY, 500)
+    setInfo("Ring of Health", "+ {0} hit point regeneration per 10 seconds"
+    .format(hr.toString()))
+    addStatBonusAbsolute(Stat.HR, hr)
+
+
+function gauntletsOfProtection()
+    let ar = 30
+    setupItem(ITEM_ID_GAUNTLET_OF_PROTECTION, CATEGORY, 1450)
+    setInfo("Gauntlets Of Protection", "+ {0} armor"
+    .format(ar.toString()))
+    addRequirement(ITEM_ID_PLATED_GAUNTLETS)
+    addStatBonusAbsolute(Stat.AR, ar)
+
+
+function heavyBoots()
+    let ms = 40
+    let ar = 24
+    let hp = 225
+    setupItem(ITEM_ID_HEAVY_BOOTS, CATEGORY, 2400)
+    setInfo("Heavy Boots", "+{1} armor|n+ {2} hit points|n+ {0} movement speed|nMovement speed bonus from boots does not stack."
+    .format(ms.toString(), ar.toString(), hp.toString()))
+    addStatBonusAbsolute(Stat.AR, ar)
+    addStatBonusAbsolute(Stat.HP, hp)
+    addRequirement(ITEM_ID_LIGHT_BOOTS)
+    addRequirement(ITEM_ID_GEM_OF_HEALTH)
+
+    addPickupFunction(()->(begin
+        if isUnique() and hasNot(ITEM_ID_BOOTS_OF_DARKNESS) and hasNot(ITEM_ID_LIGHT_BOOTS)
+            getTriggerUnit().wrapper().addStatAbsoluteBonus(Stat.MS, ms)
+    end))
+    addDropFunction(()->(begin
+        if isUnique() and hasNot(ITEM_ID_BOOTS_OF_DARKNESS) and hasNot(ITEM_ID_LIGHT_BOOTS)
+            getTriggerUnit().wrapper().addStatAbsoluteBonus(Stat.MS, -ms)
+    end))
+    
+
+function spikedMail()
+    let ar = 12
+    let hp = 130
+    let spikeDmg = 20
+    setupItem(ITEM_ID_SPIKED_MAIL, CATEGORY, 1800)
+    setInfo("Spiked Mail","+ {0} armor|n+ {1} hit points|nEnemies attacking the hero will take {2} damage."
+    .format(ar.toString(), hp.toString(), spikeDmg.toString()))
+    addRequirement(ITEM_ID_SPIKES)
+    addRequirement(ITEM_ID_LEATHER_ARMOR)
+
+    addStatBonusAbsolute(Stat.AR, ar)
+    addStatBonusAbsolute(Stat.HP, hp)
+
+    if not compiletime
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if target.isType(UNIT_TYPE_HERO) and not attacker.isType(UNIT_TYPE_STRUCTURE)
+                let dmg = target.countItemsOfType(ITEM_ID_SPIKED_MAIL) * spikeDmg
+                target.dealDamage(attacker, dmg.toReal(), ReductionType.PHYSICAL)
+        end))
+
+
+function heavyArmor()
+    let ar = 20
+    let hp = 260
+    setupItem(ITEM_ID_HEAVY_ARMOR, CATEGORY, 1850)
+    setInfo("Heavy Armor","+ {0} armor|n+ {1} hit points"
+    .format(ar.toString(), hp.toString()))
+    addRequirement(ITEM_ID_LEATHER_ARMOR)
+    addRequirement(ITEM_ID_GEM_OF_HEALTH)
+    addStatBonusAbsolute(Stat.AR, ar)
+    addStatBonusAbsolute(Stat.HP, hp)
+
+
+function heavyHelmet()
+    let ar = 16
+    let hr = 5
+    setupItem(ITEM_ID_HEAVY_HELMET, CATEGORY, 1600)
+    setInfo("Heavy Helmet","+ {0} armor|n+ {1} hit points regeneration per 10 seconds"
+    .format(ar.toString(), hr.toString()))
+    addRequirement(ITEM_ID_RING_OF_HEALTH)
+    addStatBonusAbsolute(Stat.AR, ar)
+    addStatBonusAbsolute(Stat.HR, hr)
+
+
+function steelArmor()
+    let ar = 12
+    let wp = 15
+    let hp = 115
+    setupItem(ITEM_ID_STEEL_ARMOR, CATEGORY, 1700)
+    setInfo("Steel Armor","+ {0} armor|n+ {1} willpower|n+ {2} hit points"
+    .format(ar.toString(), wp.toString(), hp.toString()))
+    addRequirement(ITEM_ID_MAGE_GLOVES)
+    addRequirement(ITEM_ID_LEATHER_ARMOR)
+    addStatBonusAbsolute(Stat.AR, ar)
+    addStatBonusAbsolute(Stat.AGI, wp)
+    addStatBonusAbsolute(Stat.HP, hp)
+
+
+@compiletime
+function initItems1()
+    itemArcaneShield()
+    enchantedArmor()
+    voidArmor()
+    armorOfCourage()
+    helmetOfJustice()
+    firehandGauntlets()
+    spikedArmor()
+    runicArmor()
+    holyShield()
+    mageArmor()
+
+@compiletime
+function initItems2()
+    mageGloves()
+    ghostHood()
+    ancientStoneTablet()
+    battlemageArmor()
+    platedGauntlets()
+    leatherArmor()
+    gemOfHealth()
+    spikes()
+    shield()
+
+@compiletime
+function initItems3()
+    ringOfHealth()
+    gauntletsOfProtection()
+    heavyBoots()
+    spikedMail()
+    heavyArmor()
+    heavyHelmet()
+    steelArmor()
+
+init
+    execute() ->
+        initItems1()
+    execute() ->
+        initItems2()
+    execute() ->
+        initItems3()

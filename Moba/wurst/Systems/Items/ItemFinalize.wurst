@@ -2,12 +2,11 @@ package ItemFinalize
 
 import Execute
 import ItemInShop
-import Items1
-
-int noWarning = 0
-
-function noWarning()
-    noWarning += ITEM_ID_CROWN
+import public ItemsPotions
+import public ItemsUtility
+import public ItemsDamagePhysical
+import public ItemsDamageMagical
+import public ItemsDefense
 
 public function itemFinalize()
     execute() ->

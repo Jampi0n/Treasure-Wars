@@ -1,15 +1,21 @@
 package ItemConfiguration
 
 import StringUtils
-import LinkedList
+import public LinkedList
 import public ItemInShop
 import public Icons
 import ItemObjEditing
-import ObjectIds
 import HashMap
 import public Execute
 import public UnitWrapper
-import public ClosureTimers
+import public ItemIds
+import public OnAttack
+import public General
+import public Assets
+import public ObjectEditingPreset
+import public Buff
+import public BuffTypeConfig
+
 
 interface ItemPickUp
     function onItemPickUp()
@@ -74,6 +80,7 @@ public class ItemEffect
                 c.onItemDrop()
 
 
+int currentItemId
 ItemEffect currentItemEffect
 ItemDefinition currentItemDefinition
 ItemInShop currentItemInShop
@@ -90,7 +97,7 @@ public function addDropFunction(ItemDrop onDrop)
 
     currentItemEffect.onDrop.add(onDrop)
 
-public function addEffectStatBonusAbsolute(Stat whichStat, int bonus)
+public function addStatBonusAbsolute(Stat whichStat, int bonus)
     if compiletime
         return
 
@@ -102,7 +109,7 @@ public function addEffectStatBonusAbsolute(Stat whichStat, int bonus)
         ItemEffect.triggerUnit.wrapper().addStatAbsoluteBonus(whichStat, -bonus)
     end))
 
-public function addEffectStatBonusRelative(Stat whichStat, int bonus)
+public function addStatBonusRelative(Stat whichStat, int bonus)
     if compiletime
         return
 
@@ -121,6 +128,7 @@ public function setupItem(int itemId, int category, int goldCost)
         iDef.setGoldCost(goldCost)
         currentItemDefinition = iDef
     else
+        currentItemId = itemId
         currentItemInShop = ItemInShop.retrieveItemFromId(itemId)
         currentItemInShop.setupItem(category, iconFromItem(itemId), goldCost)
         currentItemEffect = ItemEffect.retrieveItemEffect(itemId)
@@ -141,13 +149,37 @@ public function setAbilities(vararg int ids)
             list.add(id)
         let result = list.joinBy((int i) -> i.toRawCode(), ",")
         currentItemDefinition.setAbilities(result)
-        currentItemDefinition.setCooldownGroup(result.substring(0, 3))
+        setCooldownGroup(result.substring(0, 3))
+        currentItemDefinition.setActivelyUsed(true)
+
+public function setCooldownGroup(int id)
+    if compiletime
+        currentItemDefinition.setCooldownGroup(id.toRawCode())
+
+public function setCooldownGroup(string str)
+    if compiletime
+        currentItemDefinition.setCooldownGroup(str)
+
+public function consumable(int charges)
+    if compiletime
+        currentItemDefinition.setPerishable(true)
+        currentItemDefinition.setNumberofCharges(charges)
+
+public function consumable()
+    consumable(1)
 
 public function addRequirement(int itemId)
     if not compiletime
         let child = ItemInShop.retrieveItemFromId(itemId)
         currentItemInShop.addRequirement(child)
 
+//returns if the picked up item is the first of its type and if the dropped item is the last of its type
+public function isUnique() returns boolean
+    return getTriggerUnit().countItemsOfType(getTriggerItem().getTypeId()) == 1
+
+//returns if the the hero has not this item
+public function hasNot(int itemTypeId) returns boolean
+    return getTriggerUnit().countItemsOfType(itemTypeId) == 0
 
 init
     ItemEffect.classInit()

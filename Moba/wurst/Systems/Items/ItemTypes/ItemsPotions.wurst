@@ -1,0 +1,27 @@
+package ItemsPotions
+
+import ItemConfiguration
+import AbilityObjEditing
+
+constant CATEGORY = 1
+
+constant ABILITY_HEAL = compiletime(ABIL_ID_GEN.next())
+
+function itemHealthPotion()
+    let heal = 250
+    if compiletime
+        new AbilityDefinitionItemHealLesser(ABILITY_HEAL)
+        ..setCooldown(1, 5)
+        ..setHitPointsGained(1, heal)
+    setupItem(ITEM_ID_HEALTH_POTION, CATEGORY, 150)
+    setInfo("Health Potion","Restores {0} health when used.".format(heal.toString()))  
+    setAbilities(ABILITY_HEAL)
+    consumable()
+
+@compiletime
+function initItems()
+    itemHealthPotion()
+
+init
+    execute() ->
+        initItems()

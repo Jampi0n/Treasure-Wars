@@ -1,0 +1,667 @@
+package ItemsDamageMagical
+
+import ItemConfiguration
+
+constant CATEGORY = 4
+
+function itemBootsOfDarkness()
+    let ms = 40
+    let voidDmg = 15
+    let intelFactor = 12
+    setupItem(ITEM_ID_BOOTS_OF_DARKNESS, CATEGORY, 2400)
+    setInfo("Boots Of Darkness", "+ {0} movement speed|n+ {1}% intelligence|nAttacks deal {2} additional void damage.|nMovement speed bonus from boots does not stack."
+    .format(ms.toString(), intelFactor.toString(), voidDmg.toString()))
+
+    addStatBonusRelative(Stat.INT, intelFactor*10)
+    addPickupFunction(()->(begin
+        if isUnique() and hasNot(ITEM_ID_HEAVY_BOOTS) and hasNot(ITEM_ID_LIGHT_BOOTS)
+            getTriggerUnit().wrapper().addStatAbsoluteBonus(Stat.MS, ms)
+    end))
+
+    addDropFunction(()->(begin
+        if isUnique() and hasNot(ITEM_ID_HEAVY_BOOTS) and hasNot(ITEM_ID_LIGHT_BOOTS)
+            getTriggerUnit().wrapper().addStatAbsoluteBonus(Stat.MS, -ms)
+    end))
+
+    if not compiletime
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if attacker.hasItemById(ITEM_ID_BOOTS_OF_DARKNESS) and not target.isType(UNIT_TYPE_STRUCTURE)
+                attacker.dealDamage(target, voidDmg.toReal() * attacker.countItemsOfType(ITEM_ID_BOOTS_OF_DARKNESS) , ReductionType.NONE)
+                target.addEffect(Abilities.avengerMissile, "chest").destr()
+        end))
+
+
+function itemMageAmulet()
+    int mp = 100
+    int hp = 100
+    setupItem(ITEM_ID_MAGE_AMULET, CATEGORY, 825)
+    setInfo("Mage Amulet", "+ {0} mana points|n +{1} hit points".format(mp.toString(), hp.toString()))
+    addStatBonusAbsolute(Stat.MP, mp)
+    addStatBonusAbsolute(Stat.HP, hp)
+
+
+
+function itemManaRing()
+    int mr = 10
+    
+    setupItem(ITEM_ID_MANA_RING, CATEGORY, 500)
+    setInfo("Ring of Mana", "+ {0} mana point regeneration per 10 seconds".format(mr.toString()))
+
+    addStatBonusAbsolute(Stat.MR, mr)
+
+
+
+function itemWizardsHat()
+    int intel = 8
+    
+    setupItem(ITEM_ID_WIZARDS_HAT, CATEGORY, 400)
+    setInfo("Wizard's Hat", "+ {0} intelligence".format(intel.toString()))
+    
+    addStatBonusAbsolute(Stat.INT, intel)
+
+            
+function itemGemOfMana()
+    int mp = 100
+    
+    setupItem(ITEM_ID_GEM_OF_MANA, CATEGORY, 500)
+    setInfo("Gem of Mana", "+ {0} mana points".format(mp.toString()))
+    
+    addStatBonusAbsolute(Stat.MP, mp)
+            
+function itemGemOfDarkness()
+    int voidDmg = 12
+    
+    setupItem(ITEM_ID_GEM_OF_DARKNESS, CATEGORY, 500)
+    setInfo("Gem of Darkness", "Attacks deal {0} additional void damage.".format(voidDmg.toString()))
+    
+    if not compiletime
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if attacker.hasItemById(ITEM_ID_GEM_OF_DARKNESS) and not target.isType(UNIT_TYPE_STRUCTURE)
+                attacker.dealDamage(target, voidDmg.toReal() * attacker.countItemsOfType(ITEM_ID_GEM_OF_DARKNESS) , ReductionType.NONE)
+                target.addEffect(Abilities.avengerMissile, "chest").destr()
+        end))
+
+
+function itemSkull()
+    int mana = 8 // trigger
+    
+    setupItem(ITEM_ID_SKULL, CATEGORY, 550)
+    setInfo("Skull", "Restores {0} mana points per kill.".format(mana.toString()))
+    if not compiletime
+        CreateTrigger()
+        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
+        ..addAction(() -> (begin
+            let killer = GetKillingUnit()
+            if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and killer.hasItemById(ITEM_ID_SKULL)
+                killer.healMana(killer, 8. * killer.countItemsOfType(ITEM_ID_SKULL))
+                killer.addEffect(Abilities.spiritTouchTarget, "origin").destr()
+        end))
+
+function itemVoodooDoll()
+    int mp = 5
+    
+    setupItem(ITEM_ID_VOODOO_DOLL, CATEGORY, 600)
+    setInfo("Voodoo Doll", "Restores {0} mana points everytime you are attacked.".format(mp.toString()))
+
+    if not compiletime
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if target.hasItemById(ITEM_ID_VOODOO_DOLL) and not attacker.isType(UNIT_TYPE_STRUCTURE)
+                target.healMana(target, mp.toReal() * target.countItemsOfType(ITEM_ID_VOODOO_DOLL))
+                target.addEffect(Abilities.spiritTouchTarget, "origin").destr()
+        end))
+
+function itemSpellBook()
+    int intel = 16
+    
+    setupItem(ITEM_ID_SPELL_BOOK, CATEGORY, 800)
+    setInfo("Spell Book", "+ {0} intelligence".format(intel.toString()))
+    
+    addStatBonusAbsolute(Stat.INT, intel)
+
+function itemMagicStaff()
+    int mana = 7
+    
+    setupItem(ITEM_ID_MAGIC_STAFF, CATEGORY, 640)
+    setInfo("Magic Staff", "Attacks drain {0} mana from the target.".format(mana.toString()))
+    
+    if not compiletime
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if attacker.hasItemById(ITEM_ID_MAGIC_STAFF) and target.getMana() > 0 and not target.isType(UNIT_TYPE_STRUCTURE)
+                let manaDrained = min(mana.toReal() * attacker.countItemsOfType(ITEM_ID_MAGIC_STAFF) , target.getMana())
+                attacker.healMana(attacker, manaDrained)
+                attacker.damageMana(target, manaDrained, ReductionType.NONE)
+                target.addEffect(Abilities.arcaneTowerAttack, "chest").destr()
+        end))
+
+
+function itemApprenticeScroll()
+    int factor = 35 //trigger
+    
+    setupItem(ITEM_ID_APPRENTICES_SCROLL, CATEGORY, 500)
+    setInfo("Apprentice's Scroll", "Restores {0}% of your mana, when you level up. This effect does not stack.".format(factor.toString()))
+
+    if not compiletime
+        CreateTrigger()
+        ..registerAnyUnitEvent(EVENT_PLAYER_HERO_LEVEL)
+        ..addAction(() -> (begin
+            let hero = GetTriggerUnit()
+            if hero.hasItemById(ITEM_ID_APPRENTICES_SCROLL)
+                hero.healMana(hero, hero.getMaxMana()*0.35)
+                hero.addEffect(Abilities.aImaTarget, "chest").destr()
+        end))
+
+
+function itemSkullPendant()
+    int hp = 125
+    int mp = 150
+    int killMana = 15 //trigger
+    setupItem(ITEM_ID_SKULL_PENDANT, CATEGORY, 2100)
+    setInfo("Skull Pendant", "+ {0} mana points|n +{1} hit points|nRestores {2} mana points per kill.".format(
+            mp.toString(), hp.toString(), killMana.toString()
+        ))
+    addRequirement(ITEM_ID_SKULL)
+    addRequirement(ITEM_ID_MAGE_AMULET)
+    
+    addStatBonusAbsolute(Stat.HP, hp)
+    addStatBonusAbsolute(Stat.MP, mp)
+
+    if not compiletime
+        CreateTrigger()
+        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
+        ..addAction(() -> (begin
+            let killer = GetKillingUnit()
+            if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and killer.hasItemById(ITEM_ID_SKULL_PENDANT)
+                killer.healMana(killer, 15. * killer.countItemsOfType(ITEM_ID_SKULL_PENDANT))
+                killer.addEffect(Abilities.spiritTouchTarget, "origin").destr()
+        end))
+
+
+function itemVisionWard()
+    int mp = 225
+    int hp = 225
+    int intel = 25
+    int mana = 10
+    setupItem(ITEM_ID_VISION_WARD, CATEGORY, 3450)
+    setInfo("Vision Ward", "+ {0} mana points|n+ {1} hit points|n+ {2} intelligence|nAttacks drain {3} mana from the target.|nActive:|nSummons an invulnerable and immovable ward that provides vision in an area.".format(
+            mp.toString(), hp.toString(), intel.toString(), mana.toString()
+        ))
+    addRequirement(ITEM_ID_MAGIC_STAFF)
+    addRequirement(ITEM_ID_GEM_OF_MANA)
+    addRequirement(ITEM_ID_GEM_OF_HEALTH)
+    setAbilities('A00D')
+    
+    addStatBonusAbsolute(Stat.MP, mp)
+    addStatBonusAbsolute(Stat.HP, hp)
+    addStatBonusAbsolute(Stat.INT, intel)
+
+    if not compiletime
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if attacker.hasItemById(ITEM_ID_VISION_WARD) and target.getMana() > 0 and not target.isType(UNIT_TYPE_STRUCTURE)
+                let manaDrained = min(mana.toReal() * attacker.countItemsOfType(ITEM_ID_VISION_WARD) , target.getMana())
+                attacker.healMana(attacker, manaDrained)
+                attacker.damageMana(target, manaDrained, ReductionType.NONE)
+                target.addEffect(Abilities.arcaneTowerAttack, "chest").destr()
+        end))
+
+
+
+            
+function itemVoodooMask()
+    int mp = 10
+    int voidDmg = 15
+
+    setupItem(ITEM_ID_VOODOO_MASK, CATEGORY, 1750)
+    setInfo("Voodoo Mask", "Attacks deal {0} additional void damage.|nRestores {1} mana points everytime you are attacked.".format(
+            voidDmg.toString(), mp.toString()
+        ))
+    addRequirement(ITEM_ID_VOODOO_DOLL)
+    addRequirement(ITEM_ID_GEM_OF_DARKNESS)
+
+    if not compiletime
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if target.hasItemById(ITEM_ID_VOODOO_MASK) and not attacker.isType(UNIT_TYPE_STRUCTURE)
+                target.healMana(target, mp.toReal() * target.countItemsOfType(ITEM_ID_VOODOO_MASK))
+                target.addEffect(Abilities.spiritTouchTarget, "origin").destr()
+        end))
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if attacker.hasItemById(ITEM_ID_VOODOO_MASK) and not target.isType(UNIT_TYPE_STRUCTURE)
+                attacker.dealDamage(target, voidDmg.toReal() * attacker.countItemsOfType(ITEM_ID_VOODOO_MASK) , ReductionType.NONE)
+                target.addEffect(Abilities.avengerMissile, "chest").destr()
+        end))
+
+
+function itemEvilBook()
+    int intel = 30
+    int factor = 50 //trigger
+    
+    setupItem(ITEM_ID_EVIL_BOOK, CATEGORY, 1700)
+    setInfo("Evil Book", "+ {0} intelligence|nRestores {1}% of your mana, when you level up. This effect does not stack.".format(
+            intel.toString(), factor.toString()
+        ))
+    addRequirement(ITEM_ID_APPRENTICES_SCROLL)
+    addRequirement(ITEM_ID_SPELL_BOOK)
+    addStatBonusAbsolute(Stat.INT, intel)
+
+    if not compiletime
+        CreateTrigger()
+        ..registerAnyUnitEvent(EVENT_PLAYER_HERO_LEVEL)
+        ..addAction(() -> (begin
+            let hero = GetTriggerUnit()
+            if hero.hasItemById(ITEM_ID_EVIL_BOOK)
+                hero.healMana(hero, hero.getMaxMana()*0.5)
+                hero.addEffect(Abilities.aImaTarget, "chest").destr()
+        end))
+            
+function itemFrostRing()
+    int mp = 200
+    int mr = 20
+    
+    setupItem(ITEM_ID_RING_OF_REGEN, CATEGORY, 1900)
+    setInfo("Ring of Regeneration", "+ {0} mana points|n+ {1} mana point regeneration per 10 seconds".format(
+            mp.toString(), mr.toString()
+        ))
+    addRequirement(ITEM_ID_GEM_OF_MANA)
+    addRequirement(ITEM_ID_MANA_RING)
+    
+    addStatBonusAbsolute(Stat.MP, mp)
+    addStatBonusAbsolute(Stat.MR, mr)
+
+function itemScepterOfTheTides()
+    int intel = 25
+    int voidDmg = 15
+    int manaDrain = 10
+    
+    setupItem(ITEM_ID_SCEPTER_OF_THE_TIDES, CATEGORY, 2050)
+    setInfo("Scepter of the Tides", "+ {0} intelligence|nDrains {1} mana and deals {2} void damage per attack.".format(
+            intel.toString(), manaDrain.toString(), voidDmg.toString()
+        ))
+    addRequirement(ITEM_ID_MAGIC_STAFF)
+    addRequirement(ITEM_ID_GEM_OF_DARKNESS)
+    
+    addStatBonusAbsolute(Stat.INT, intel)
+
+    if not compiletime
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if attacker.hasItemById(ITEM_ID_SCEPTER_OF_THE_TIDES) and not target.isType(UNIT_TYPE_STRUCTURE)
+                let manaDrained = min(manaDrain.toReal() * attacker.countItemsOfType(ITEM_ID_SCEPTER_OF_THE_TIDES) , target.getMana())
+                attacker.dealDamage(target, voidDmg.toReal() * attacker.countItemsOfType(ITEM_ID_SCEPTER_OF_THE_TIDES) , ReductionType.NONE)
+                attacker.healMana(attacker, manaDrained)
+                attacker.damageMana(target, manaDrained, ReductionType.NONE)
+                target.addEffect(Abilities.avengerMissile, "chest").destr()
+                target.addEffect(Abilities.arcaneTowerAttack, "chest").destr()
+        end))
+
+function itemMagmaCrystal()
+    int mp = 125
+    int hp = 190
+    int magicDmg = 20
+    
+    setupItem(ITEM_ID_MAGMA_CRYSTAL, CATEGORY, 1750)
+    setInfo("Magma Crystal", "+ {0} hit points|n+ {1} mana points|nAttacks deal {2} additional magic damage.".format(
+            hp.toString(), mp.toString(), magicDmg.toString()
+        ))
+
+    addRequirement(ITEM_ID_GEM_OF_DARKNESS)
+    addRequirement(ITEM_ID_GEM_OF_HEALTH)
+    addRequirement(ITEM_ID_GEM_OF_MANA)
+    
+    addStatBonusAbsolute(Stat.MP, mp)
+    addStatBonusAbsolute(Stat.HP, hp)
+
+    if not compiletime
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if attacker.hasItemById(ITEM_ID_MAGMA_CRYSTAL) and not target.isType(UNIT_TYPE_STRUCTURE)
+                attacker.dealDamage(target, magicDmg.toReal() * attacker.countItemsOfType(ITEM_ID_MAGMA_CRYSTAL) , ReductionType.MAGIC)
+                target.addEffect(Abilities.fireBallMissile, "chest").destr()
+        end))
+
+function itemCursedMask()
+    int intel = 25
+    int killMana = 12 //trigger
+    
+    setupItem(ITEM_ID_CURSED_MASK, CATEGORY, 2000)
+    setInfo("Cursed Mask", "+ {0} intelligence|nRestores {1} mana points per kill.".format(
+            intel.toString(), killMana.toString()
+        ))
+
+    addRequirement(ITEM_ID_SKULL)
+    addRequirement(ITEM_ID_WIZARDS_HAT)
+    
+    addStatBonusAbsolute(Stat.INT, intel)
+
+    if not compiletime
+        CreateTrigger()
+        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
+        ..addAction(() -> (begin
+            let killer = GetKillingUnit()
+            if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and killer.hasItemById(ITEM_ID_CURSED_MASK)
+                killer.healMana(killer, 12. * killer.countItemsOfType(ITEM_ID_CURSED_MASK))
+                killer.addEffect(Abilities.spiritTouchTarget, "origin").destr()
+        end))
+
+function itemEmeraldPendant()
+    int hp = 275
+    int mp = 275
+    int killMana = 25 //trigger
+    
+    setupItem(ITEM_ID_EMERALD_PENDANT, CATEGORY, 3500)
+    setInfo("Emeral Pendant", "+ {0} mana points|n +{1} hit points|nRestores {2} mana points per kill.".format(
+            mp.toString(), hp.toString(), killMana.toString()
+        ))
+
+    addRequirement(ITEM_ID_SKULL_PENDANT)
+    addRequirement(ITEM_ID_GEM_OF_HEALTH)
+    addRequirement(ITEM_ID_GEM_OF_MANA)
+    
+    addStatBonusAbsolute(Stat.HP, hp)
+    addStatBonusAbsolute(Stat.MP, mp)
+
+    if not compiletime
+        CreateTrigger()
+        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
+        ..addAction(() -> (begin
+            let killer = GetKillingUnit()
+            if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and killer.hasItemById(ITEM_ID_EMERALD_PENDANT)
+                killer.healMana(killer, 25. * killer.countItemsOfType(ITEM_ID_EMERALD_PENDANT))
+                killer.addEffect(Abilities.spiritTouchTarget, "origin").destr()
+        end))
+            
+    
+
+function itemRingOfDarkness()
+    int intel = 25
+    int mr = 15
+
+    int mp = 12
+    int voidDmg = 16
+
+    int voidExplosion = 30 //trigger
+    
+    setupItem(ITEM_ID_RING_OF_DARKNESS, CATEGORY, 3700)
+    setInfo("Ring of Darkness", "+ {0} intelligence|n+ {1} mana point regeneration per 10 seconds|nAttacks deal {2} additional void damage.|nRestores {3} mana points everytime you are attacked.|nKilling a unit creates a void explosion, dealing {4} damage to neaby enemies.".format(
+            intel.toString(), mr.toString(), voidDmg.toString(), mp.toString(), voidExplosion.toString()
+        ))
+
+    addRequirement(ITEM_ID_MANA_RING)
+    addRequirement(ITEM_ID_VOODOO_MASK)
+    
+    addStatBonusAbsolute(Stat.INT, intel)
+    addStatBonusAbsolute(Stat.MR, mr)
+
+    if not compiletime
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if target.hasItemById(ITEM_ID_RING_OF_DARKNESS) and not attacker.isType(UNIT_TYPE_STRUCTURE)
+                target.healMana(target, mp.toReal() * target.countItemsOfType(ITEM_ID_RING_OF_DARKNESS))
+                target.addEffect(Abilities.spiritTouchTarget, "origin").destr()
+        end))
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if attacker.hasItemById(ITEM_ID_RING_OF_DARKNESS) and not target.isType(UNIT_TYPE_STRUCTURE)
+                attacker.dealDamage(target, voidDmg.toReal() * attacker.countItemsOfType(ITEM_ID_RING_OF_DARKNESS) , ReductionType.NONE)
+                target.addEffect(Abilities.avengerMissile, "chest").destr()
+        end))
+
+        CreateTrigger()
+        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
+        ..addAction(() -> (begin
+            let killer = GetKillingUnit()
+            let dyingUnit = GetTriggerUnit()
+            if not dyingUnit.isType(UNIT_TYPE_STRUCTURE) and killer.hasItemById(ITEM_ID_RING_OF_DARKNESS)
+                addEffect(Abilities.annihilationMissile, dyingUnit.getPos()).destr()
+                let g = CreateGroup()
+                g.enumUnitsInRange(dyingUnit.getPos(), 250)
+                for unit u in g
+                    if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(killer.getOwner(), false, true)
+                        killer.dealDamage(u, 30, ReductionType.NONE)
+                g.destr()
+        end))
+            
+
+group blessedHeroes = CreateGroup()
+
+function blessedRegeneration()
+    unit blessedHero = GetEnumUnit()
+    let missingMana = blessedHero.getMaxMana() - blessedHero.getMana()
+    blessedHero.healMana(blessedHero, missingMana * 0.01 * 0.25)
+
+function itemBlessedGoblet()
+    int mp = 300
+    int hp = 150
+    int mr = 1 //trigger ^
+    
+    setupItem(ITEM_ID_BLESSED_GOBLET, CATEGORY, 4000)
+    setInfo("Blessed Goblet", "+ {0} hit points|n+ {1} mana points|nRegenerates {2}% of your missing mana per second.".format(
+            hp.toString(), mp.toString(), mr.toString()
+        ))
+
+    addRequirement(ITEM_ID_RING_OF_REGEN)
+    addRequirement(ITEM_ID_GEM_OF_HEALTH)
+    addRequirement(ITEM_ID_GEM_OF_MANA)
+    
+    addStatBonusAbsolute(Stat.MP, mp)
+    addStatBonusAbsolute(Stat.HP, hp)
+
+    
+    addPickupFunction(() -> (begin
+        if isUnique()
+            blessedHeroes.addUnit(getTriggerUnit())
+    end))
+    addDropFunction(() -> (begin
+        if isUnique()
+            blessedHeroes.removeUnit(getTriggerUnit())
+    end))
+
+    if not compiletime
+        CreateTrigger()
+        ..registerTimerEvent(0.25, true)
+        ..addAction(() -> (begin
+            ForGroup(blessedHeroes, function blessedRegeneration)
+        end) )
+    
+            
+
+function itemWandOfDeath()
+    int intel = 35
+
+    int voidDmg = 20
+    int manaDrain = 10
+
+    int dmgFactor = 2 // -> onAttack
+    int duration = 10 // -> onAttack
+    
+    setupItem(ITEM_ID_WAND_OF_DEATH, CATEGORY, 3900)
+    setInfo("Wand of Death", "+ {0} intelligence|nDrains {1} mana and deals {2} void damage per attack.|nDealing damage, reduces the target's willpower by {3}% of the damage dealt for {4} seconds.|nThis effect does not stack.".format(
+            intel.toString(), manaDrain.toString(), voidDmg.toString(), dmgFactor.toString(), duration.toString()
+        ))
+    addRequirement(ITEM_ID_SCEPTER_OF_THE_TIDES)
+    addRequirement(ITEM_ID_MAGIC_STAFF)
+    addRequirement(ITEM_ID_GEM_OF_DARKNESS)
+    
+    addStatBonusAbsolute(Stat.INT, intel)
+
+    if not compiletime
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if attacker.hasItemById(ITEM_ID_WAND_OF_DEATH) and not target.isType(UNIT_TYPE_STRUCTURE)
+                let manaDrained = min(manaDrain.toReal() * attacker.countItemsOfType(ITEM_ID_WAND_OF_DEATH) , target.getMana())
+                attacker.dealDamage(target, voidDmg.toReal() * attacker.countItemsOfType(ITEM_ID_WAND_OF_DEATH) , ReductionType.NONE)
+                attacker.healMana(attacker, manaDrained)
+                attacker.damageMana(target, manaDrained, ReductionType.NONE)
+                target.addEffect(Abilities.avengerMissile, "chest").destr()
+                target.addEffect(Abilities.arcaneTowerAttack, "chest").destr()
+        end))
+
+
+            
+
+function itemWandOfBlood()
+    int intel = 30
+    int hr = 35
+    int hp = 200
+    int lifesteal = 8 // -> onAttack
+    
+    setupItem(ITEM_ID_WAND_OF_BLOOD, CATEGORY, 3650)
+    setInfo("Wand of Blood", "+ {0} intelligence|n+ {1} hit points|n+ {2} hit point regeneration per 10 seconds|nDealing damage restores hit points equal to {3}% of the damage dealt.|nThis effect does not stack.".format(
+            intel.toString(), hp.toString(), hr.toString(), lifesteal.toString()
+        ))
+    addRequirement(ITEM_ID_MAGIC_STAFF)
+    addRequirement(ITEM_ID_RING_OF_HEALTH)
+    addRequirement(ITEM_ID_GEM_OF_HEALTH)
+    
+    addStatBonusAbsolute(Stat.INT, intel)
+    addStatBonusAbsolute(Stat.HR, hr)
+    addStatBonusAbsolute(Stat.HP, hp)
+
+            
+function itemArcaneBlade()
+    int as = 20
+    int mp = 300
+    int dmg = 20
+    int manaFactor = 5
+    
+    setupItem(ITEM_ID_ARCANE_BLADE, CATEGORY, 3800)
+    setInfo("Arcane Blade", "+ {0} mana points|n+ {1}% attack speed|nDeals {2} + {3}% of your current mana as magic damage.|nThis effect does not stack.".format(
+            mp.toString(), as.toString(), dmg.toString(), manaFactor.toString()
+        ))
+    addRequirement(ITEM_ID_RAVEN_SWORD)
+    addRequirement(ITEM_ID_GEM_OF_MANA)
+    
+    addStatBonusAbsolute(Stat.AS, as)
+    addStatBonusAbsolute(Stat.MP, mp)
+
+    if not compiletime
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if attacker.hasItemById(ITEM_ID_ARCANE_BLADE) and not target.isType(UNIT_TYPE_STRUCTURE)
+                attacker.dealDamage(target, (dmg + attacker.getMana() * manaFactor/100) , ReductionType.MAGIC)
+                target.addEffect(Abilities.farseerMissile, "chest").destr()
+        end))
+
+function itemVampiricGoblet()
+    int intel = 40
+    int hp = 150
+    int mp = 150
+    int hpFactor = 20 // -> onAttack
+    int manaFactor = 15 // -> onAttack
+
+    int killMana = 30 //trigger
+    
+    setupItem(ITEM_ID_VAMPIRIC_GOBLET, CATEGORY, 4750)
+    setInfo("Vampiric Goblet", "+ {0} mana points|n +{1} hit point|n+ {2} intelligence|nRestores {3} mana points per kill.|nDealing damage against heroes restores {4}% of the damage dealt as hitpoints and {5}% as mana points.|nThis effect does not stack.".format(
+            mp.toString(), hp.toString(), intel.toString(), killMana.toString(), hpFactor.toString(), manaFactor.toString()
+        ))
+    addRequirement(ITEM_ID_SKULL_PENDANT)
+    addRequirement(ITEM_ID_CURSED_MASK)
+    
+    addStatBonusAbsolute(Stat.INT, intel)
+    addStatBonusAbsolute(Stat.HP, hp)
+    addStatBonusAbsolute(Stat.MP, mp)
+
+    if not compiletime
+        CreateTrigger()
+        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
+        ..addAction(() -> (begin
+            let killer = GetKillingUnit()
+            if not GetTriggerUnit().isType(UNIT_TYPE_STRUCTURE) and killer.hasItemById(ITEM_ID_VAMPIRIC_GOBLET)
+                killer.healMana(killer, 30. * killer.countItemsOfType(ITEM_ID_VAMPIRIC_GOBLET))
+                killer.addEffect(Abilities.spiritTouchTarget, "origin").destr()
+        end))
+
+
+function itemScrollOfConjuration()
+    int intel = 40
+    int intelFactor = 20
+    
+    setupItem(ITEM_ID_SCROLL_OF_CONJURATION, CATEGORY, 4300)
+    setInfo("Scroll of Conjuration", "+ {0} intelligence|nIncreases your intelligence by {1}%.|nThis effect does not stack.|nRestores all of your mana, when you level up.".format(
+            intel.toString(), intelFactor.toString()
+        ))
+    addRequirement(ITEM_ID_APPRENTICES_SCROLL)
+    addRequirement(ITEM_ID_EVIL_BOOK)
+    addRequirement(ITEM_ID_SPELL_BOOK)
+    
+    addStatBonusAbsolute(Stat.INT, intel)
+
+    addPickupFunction(() -> (begin
+        if isUnique()
+            getTriggerUnit().wrapper().addStatRelativeBonus(Stat.INT,  intelFactor*10)
+    end))
+    addDropFunction(() -> (begin
+        if isUnique()
+            getTriggerUnit().wrapper().addStatRelativeBonus(Stat.INT,  -intelFactor*10)
+    end))
+
+    if not compiletime
+        CreateTrigger()
+        ..registerAnyUnitEvent(EVENT_PLAYER_HERO_LEVEL)
+        ..addAction(() -> (begin
+            let hero = GetTriggerUnit()
+            if hero.hasItemById(ITEM_ID_SCROLL_OF_CONJURATION)
+                hero.healMana(hero, hero.getMaxMana())
+                hero.addEffect(Abilities.aImaTarget, "chest").destr()
+        end))
+
+function itemBracerOfPower()
+    int hp = 200
+    int mp = 200
+    int hr = 30
+    int mr = 30
+    int bonus = 15 //trigger -> General
+    
+    setupItem(ITEM_ID_BRACER_OF_POWER, CATEGORY, 3700)
+    setInfo("Bracer of Power", "+ {0} hit points|n+ {1} mana points|n+ {2} hit point regeneration per 10 seconds|n+ {3} mana point regeneration per 10 seconds|nIncreases all incoming effects that restore hit points or mana points by {4}%.".format(
+            hp.toString(), mp.toString(), hr.toString(), mr.toString(), bonus.toString()
+        ))
+    addRequirement(ITEM_ID_RING_OF_REGEN)
+    addRequirement(ITEM_ID_GEM_OF_HEALTH)
+    addRequirement(ITEM_ID_RING_OF_HEALTH)
+    
+    addStatBonusAbsolute(Stat.HP, hp)
+    addStatBonusAbsolute(Stat.MP, mp)
+    addStatBonusAbsolute(Stat.HR, hr)
+    addStatBonusAbsolute(Stat.MR, mr)
+
+
+@compiletime
+function initItems1()
+    itemMageAmulet()
+    itemManaRing()
+    itemWizardsHat()
+    itemGemOfMana()
+    itemGemOfDarkness()
+    itemSkull()
+    itemVoodooDoll()
+    itemSpellBook()
+    itemMagicStaff()
+    itemApprenticeScroll()
+
+
+@compiletime
+function initItems2()
+    itemSkullPendant()
+    itemVisionWard()
+    itemVoodooMask()
+    itemEvilBook()
+    itemFrostRing()
+    itemScepterOfTheTides()
+    itemBootsOfDarkness()
+    itemMagmaCrystal()
+    itemCursedMask()
+
+@compiletime
+function initItems3()
+    itemEmeraldPendant()
+    itemRingOfDarkness()
+    itemBlessedGoblet()
+    itemWandOfBlood()
+    itemWandOfDeath()
+    itemArcaneBlade()
+    itemVampiricGoblet()
+    itemScrollOfConjuration()
+    itemBracerOfPower()
+
+
+init
+    execute() ->
+        initItems1()
+    execute() ->
+        initItems2()
+    execute() ->
+        initItems3()

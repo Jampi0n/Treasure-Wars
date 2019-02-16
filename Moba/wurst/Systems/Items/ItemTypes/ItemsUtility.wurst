@@ -1,0 +1,146 @@
+package ItemsUtility
+
+import ItemConfiguration
+
+constant CATEGORY = 2
+
+function itemLightBoots()
+    int ms = 40
+    
+    setupItem(ITEM_ID_LIGHT_BOOTS, CATEGORY, 500)
+    setInfo("Light Boots", "+ {0} movement speed|nMovement speed bonus from boots does not stack.".format(ms.toString()))
+    addPickupFunction(()->(begin
+        if isUnique() and hasNot(ITEM_ID_HEAVY_BOOTS) and hasNot(ITEM_ID_BOOTS_OF_DARKNESS)
+            getTriggerUnit().wrapper().addStatAbsoluteBonus(Stat.MS, ms)
+    end))
+
+    addDropFunction(()->(begin
+        if isUnique() and hasNot(ITEM_ID_HEAVY_BOOTS) and hasNot(ITEM_ID_BOOTS_OF_DARKNESS)
+            getTriggerUnit().wrapper().addStatAbsoluteBonus(Stat.MS, -ms)
+    end))
+
+constant int WAR_DRUM_BUFF_ID = compiletime(createAuraBuff("War Drum", "This unit has increased attack and movement speed.", "BTNTribalDrumOfWar"))
+constant int WAR_DRUM_ABILTIY_ID = compiletime(createPositiveBuffAbility(1, WAR_DRUM_BUFF_ID, Abilities.generalAuraTarget, ""))
+constant BuffType BUFF_WAR_DRUM = new BuffType( true, true)        
+constant int WAR_HORN_BUFF_ID = compiletime(createAuraBuff("War Horn", "This unit has increased attack damage.", "BTNHorn"))
+constant int WAR_HORN_ABILTIY_ID = compiletime(createPositiveBuffAbility(1, WAR_HORN_BUFF_ID, Abilities.generalAuraTarget, ""))
+constant BuffType BUFF_WAR_HORN = new BuffType( true, true)       
+group auraHeroes = CreateGroup()
+
+function checkAura()
+    unit auraHero = GetEnumUnit()
+
+    if auraHero.isAlive()
+        group nearby = CreateGroup()
+        nearby.enumUnitsInRange(auraHero.getPos(), 900)
+
+        while(not nearby.isEmpty())
+            unit target = FirstOfGroup(nearby)
+            nearby.removeUnit(target)
+            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(auraHero.getOwner(), true, false)
+                if auraHero.hasItemById(ITEM_ID_WAR_DRUM)
+                    target.addBuff( auraHero, 0.5, BUFF_WAR_DRUM, 1)
+                if auraHero.hasItemById(ITEM_ID_WAR_HORN)
+                    target.addBuff( auraHero, 0.5, BUFF_WAR_HORN, 1)
+
+        nearby.destr()
+
+function itemWarDrum()
+    int asBonus = 20
+    int msBonus = 40
+    
+    setupItem(ITEM_ID_WAR_DRUM, CATEGORY, 3100)
+    setInfo("War Drum", "Increases nearby unit's attack speed by {0}% and movement speed by {1}. This effect does not stack".format(
+            asBonus.toString(), msBonus.toString()
+        ))
+    addRequirement(ITEM_ID_GLOVES_OF_HASTE)
+    addRequirement(ITEM_ID_LIGHT_BOOTS)
+    addPickupFunction(() -> (begin
+        if isUnique() and hasNot(ITEM_ID_WAR_HORN)
+            auraHeroes.addUnit(getTriggerUnit())
+    end))
+    addDropFunction(() -> (begin
+        if isUnique() and hasNot(ITEM_ID_WAR_HORN)
+            auraHeroes.removeUnit(getTriggerUnit())
+    end))
+    if not compiletime
+        var abilityList = new LinkedList<int>
+        ..add(WAR_DRUM_ABILTIY_ID)
+        BUFF_WAR_DRUM.setup(abilityList, WAR_DRUM_BUFF_ID)
+        BUFF_WAR_DRUM.addFirstFunction((Buff thisBuff) -> (begin
+            thisBuff.getTarget().wrapper()
+            ..addStatAbsoluteBonus(Stat.MS, msBonus)
+            ..addStatAbsoluteBonus(Stat.AS, asBonus)
+        end))
+
+        BUFF_WAR_DRUM.addEndFunction((Buff thisBuff) -> (begin
+            thisBuff.getTarget().wrapper()
+            ..addStatAbsoluteBonus(Stat.MS, -msBonus)
+            ..addStatAbsoluteBonus(Stat.AS, -asBonus)
+        end))
+
+        CreateTrigger()
+        ..registerTimerEvent(0.25, true)
+        ..addAction(() -> (begin
+            ForGroup(auraHeroes, function checkAura)
+        end) )
+    
+
+function itemWarHorn()
+    int adBonus = 25
+    int str = 20
+    int unitDmg = 25
+    
+    setupItem(ITEM_ID_WAR_HORN, CATEGORY, 3100)
+    setInfo("War Horn", "+{0} strength|nDeals {1} additional damage to units.|nIncreases nearby unit's strength by {2}%.".format(
+            str.toString(), unitDmg.toString(), adBonus.toString()
+        ))
+    addRequirement(ITEM_ID_HAMMER_OF_STRENGTH)
+    addRequirement(ITEM_ID_WAR_AXE)
+    addRequirement(ITEM_ID_BOW)
+    addStatBonusAbsolute(Stat.STR, str)
+    addPickupFunction(() -> (begin
+        if isUnique() and hasNot(ITEM_ID_WAR_DRUM)
+            auraHeroes.addUnit(getTriggerUnit())
+    end))
+    addDropFunction(() -> (begin
+        if isUnique() and hasNot(ITEM_ID_WAR_DRUM)
+            auraHeroes.removeUnit(getTriggerUnit())
+    end))
+
+    if not compiletime
+        var abilityList = new LinkedList<int>
+        ..add(WAR_HORN_ABILTIY_ID)
+        BUFF_WAR_HORN.setup(abilityList, WAR_HORN_BUFF_ID)
+        BUFF_WAR_HORN.addFirstFunction((Buff thisBuff) -> (begin
+            let target = thisBuff.getTarget()
+            if target.isType(UNIT_TYPE_HERO)
+                target.wrapper().addStatRelativeBonus(Stat.STR, adBonus*10)
+            else
+                target.wrapper().addStatRelativeBonus(Stat.AD, adBonus*10)
+        end))
+
+        BUFF_WAR_HORN.addEndFunction((Buff thisBuff) -> (begin
+            let target = thisBuff.getTarget()
+            if target.isType(UNIT_TYPE_HERO)
+                target.wrapper().addStatRelativeBonus(Stat.STR, -adBonus*10)
+            else
+                target.wrapper().addStatRelativeBonus(Stat.AD, -adBonus*10)
+        end))
+
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if not target.isType(UNIT_TYPE_HERO) and not target.isType(UNIT_TYPE_STRUCTURE) and attacker.isType(UNIT_TYPE_HERO)
+                let dmg = attacker.countItemsOfType(ITEM_ID_WAR_HORN) * unitDmg
+                attacker.dealDamage(target, dmg.toReal(), ReductionType.PHYSICAL)
+        end))
+
+@compiletime
+function initItems1()
+    itemLightBoots()
+    itemWarDrum()
+    itemWarHorn()
+
+
+init
+    execute() ->
+        initItems1()

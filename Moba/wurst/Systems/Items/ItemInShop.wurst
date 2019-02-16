@@ -13,6 +13,14 @@ import ChangeTexture
 public constant MAX_ITEMS_IN_LIST = 30
 constant ITEM_DEFINITIONS = new HashMap<int, ItemDefinition>
 
+public function getIconPath(string icon) returns string
+    string s = icon
+    if icon.length() < 20 or not icon.startsWith("ReplaceableTextures")
+        s = "ReplaceableTextures\\CommandButtons\\" + s
+    if not icon.endsWith(".blp")
+        s += ".blp"
+    return s
+
 public function getItemDefintion(int itemId) returns ItemDefinition
     if not compiletime
         error("getItemDefintion cannot be used at runtime")
@@ -27,9 +35,10 @@ public function iconFromItem(int itemId) returns int
 public function newItem(string icon) returns int
     let id = ITEM_ID_GEN.next()
     if compiletime
-        createTexture(icon, iconFromItem(id))
+        let fullIcon = getIconPath(icon)
+        createTexture(fullIcon, iconFromItem(id))
         let iDef = new ItemDefinition(id, 'rde1')
-            ..setInterfaceIcon(icon)
+            ..setInterfaceIcon(fullIcon)
             ..setAbilities("")
             ..setActivelyUsed(false)
             ..setCooldownGroup("")
@@ -45,13 +54,16 @@ public function newItem(string icon) returns int
 
 
 public class ItemInShop
+
     private int itemId
     private int category
     private int iconId
     private int totalCost
     private int singleCost
     private LinkedList<ItemInShop> requirements
-    private HashList<ItemInShop> buildsInto //transitive closure
+    private HashList<ItemInShop> buildsIntoDirectly
+    private HashList<ItemInShop> buildsIntoTransitively
+    private LinkedList<ItemInShop> buildsIntoCombined
     private static constant allItems = new LinkedList<ItemInShop>
 
     private ImageStringType name
@@ -91,7 +103,9 @@ public class ItemInShop
         this.itemId = itemId
         itemIdToItemInShop.put(itemId, this)
         this.requirements = new LinkedList<ItemInShop>
-        this.buildsInto = new HashList<ItemInShop>
+        this.buildsIntoDirectly = new HashList<ItemInShop>
+        this.buildsIntoTransitively = new HashList<ItemInShop>
+        this.buildsIntoCombined = new LinkedList<ItemInShop>
         allItems.add(this)
 
     function setupItem(int category, int iconId, int totalCost)
@@ -150,8 +164,8 @@ public class ItemInShop
     function getRequirements() returns LinkedList<ItemInShop>
         return this.requirements
 
-    function getBuildsInto() returns HashList<ItemInShop>
-        return this.buildsInto
+    function getBuildsInto() returns LinkedList<ItemInShop>
+        return this.buildsIntoCombined
 
     function getName() returns ImageStringType
         return this.name
@@ -178,17 +192,24 @@ public class ItemInShop
         for ItemInShop itm in allItems
 
             for ItemInShop child in itm.requirements
-                addBuildsInto(child, itm)
+                addBuildsInto(child, itm, 0)
 
+        for ItemInShop itm in allItems
             LinkedList<ItemInShop> sortingList = new LinkedList<ItemInShop>()
-            for ItemInShop b in itm.buildsInto
+            for ItemInShop b in itm.buildsIntoDirectly
+                sortingList.add(b)
+               
+            sortingList.sortWith((a,b) -> ( a.getTotalCost() - b.getTotalCost() ) )
+            for ItemInShop b in sortingList
+                itm.buildsIntoCombined.add(b)
+
+            sortingList.clear()
+            for ItemInShop b in itm.buildsIntoTransitively
                 sortingList.add(b)
 
-            itm.buildsInto.clear()
             sortingList.sortWith((a,b) -> ( a.getTotalCost() - b.getTotalCost() ) )
-
             for ItemInShop b in sortingList
-                itm.buildsInto.add(b)
+                itm.buildsIntoCombined.add(b)
 
             destroy sortingList
 
@@ -204,12 +225,20 @@ public class ItemInShop
                 itemToIndex.put(itm, i * MAX_ITEMS_IN_LIST + j)
                 j++
 
-    private static function addBuildsInto(ItemInShop child, ItemInShop parent)
-        if not child.buildsInto.has(parent)
-            child.buildsInto.add(parent)
+    private static function addBuildsInto(ItemInShop child, ItemInShop parent, int depth)
+        if depth == 0
+            if not child.buildsIntoDirectly.has(parent)
+                child.buildsIntoDirectly.add(parent)
+                if child.buildsIntoTransitively.has(parent)
+                    child.buildsIntoTransitively.remove(parent)
+        else if depth == 1
+            if not child.buildsIntoDirectly.has(parent) and not child.buildsIntoTransitively.has(parent)
+                child.buildsIntoTransitively.add(parent)
+        else
+            error("Too many children for item. depth = " + depth.toString())
 
         for ItemInShop childChild in child.requirements
-            addBuildsInto(childChild, parent)
+            addBuildsInto(childChild, parent, depth+1)
 
     static function getArrayIndex(ItemInShop itm) returns int
         return itemToIndex.get(itm)
@@ -221,7 +250,10 @@ public class ItemInShop
         return itemToIndex.get(itm) div MAX_ITEMS_IN_LIST
 
     static function getItemFromList(int category, int index) returns ItemInShop
-        return itemsInCategoryArray[category * MAX_ITEMS_IN_LIST + index]
+        if index < getItemCount(category)
+            return itemsInCategoryArray[category * MAX_ITEMS_IN_LIST + index]
+        else
+            return null
 
     static function getItemCount(int category) returns int
         return itemsPerCategory[category]

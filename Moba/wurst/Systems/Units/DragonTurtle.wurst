@@ -34,7 +34,6 @@ function onDragonTurtleDeath()
     unit target = GetTriggerUnit()
 
     if target == udg_DragonTurtle
-
         DEATH_SOUND.play().snd.setVolume(150)
         turtleIcon.hide()
 

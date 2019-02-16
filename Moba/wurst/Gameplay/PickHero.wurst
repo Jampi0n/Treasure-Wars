@@ -63,7 +63,8 @@ function setupCreatedHero(Hero hero)
 
     
     heroUnit.setPos(pos)
-    getGUI(owner.getId()).setInventoryUnit(heroUnit)
+    getGUI(owner.getId())
+    ..start(heroUnit)
     //prevent using skills for first 5 seconds, as skills will be initialized
     UnitModifySkillPoints(heroUnit, -1)
     

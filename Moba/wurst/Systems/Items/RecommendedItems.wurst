@@ -1,0 +1,49 @@
+package RecommendedItems
+
+import HashMap
+import ItemInShop
+import ErrorHandling
+
+constant MAX_RECOMMENDED_ITEMS = 6
+
+public class RecommendedItems
+
+    private ItemInShop array[MAX_RECOMMENDED_ITEMS] recommended
+    private int unitId
+    private static constant unitToRecommended = new HashMap<int, RecommendedItems>
+    private constant itemToIndex = new HashMap<ItemInShop,int>
+    private int count = 0
+
+    construct(int unitId)
+        this.unitId = unitId
+        unitToRecommended.put(this.unitId, this)
+
+    function addItem(int itemId)
+        if this.count >= MAX_RECOMMENDED_ITEMS
+            error("Only " + MAX_RECOMMENDED_ITEMS.toString() + " items can be recommended!")
+        else
+            this.recommended[this.count] = ItemInShop.getItemFromId(itemId)
+            itemToIndex.put(this.recommended[this.count], this.count)
+            this.count++
+
+    static function getCount(int unitId) returns int
+        let rec = unitToRecommended.get(unitId)
+        if rec != null
+            return rec.count
+        else
+            return 0
+
+    static function getIndex(int unitId, ItemInShop itm) returns int
+        let rec = unitToRecommended.get(unitId)
+        if rec != null
+            return rec.itemToIndex.get(itm)
+        else
+            return -1
+
+    static function getItem(int unitId, int index) returns ItemInShop
+        let rec = unitToRecommended.get(unitId)
+        if rec != null
+            return rec.recommended[index]
+        else
+            return null
+            

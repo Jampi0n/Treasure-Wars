@@ -13,12 +13,13 @@ import MapBounds
 import ClosureTimers
 import ImageBorder
 import PlayerControl
+import RecommendedItems
 
 public constant GRID_SIZE = 16.0
 
 constant COLOR_DISABLED = colorA(100, 100, 100, 255)
 
-constant BTN_CAT1 = compiletime(createTexture(Icons.bTNPeasant))
+constant BTN_CAT1 = compiletime(createTexture(Icons.bTNSelectHeroOff))
 constant BTN_CAT2 = compiletime(createTexture(Icons.bTNPotionBlue))
 constant BTN_CAT3 = compiletime(createTexture(Icons.bTNHeal))
 constant BTN_CAT4 = compiletime(createTexture(Icons.bTNSteelMelee))
@@ -34,7 +35,7 @@ constant stringRequires = new ImageStringType(500, Origin.TOP_LEFT, "Recipe:", 1
 constant stringCategories = new ImageStringType(500, Origin.TOP_LEFT, "Categories:", 1)
 constant stringItemList = new ImageStringType(500, Origin.TOP_LEFT, "Item List:", 1)
 
-constant stringCat1 = new ImageStringType(250, Origin.MIDDLE_CENTER, "Starting Items", 0.9)
+constant stringCat1 = new ImageStringType(250, Origin.MIDDLE_CENTER, "Recommended", 0.9)
 constant stringCat2 = new ImageStringType(250, Origin.MIDDLE_CENTER, "Potions", 0.9)
 constant stringCat3 = new ImageStringType(250, Origin.MIDDLE_CENTER, "Utility", 0.9)
 constant stringCat4 = new ImageStringType(250, Origin.MIDDLE_CENTER, "Physical Damage", 0.9)
@@ -225,11 +226,11 @@ class RecipeTreeNode
         btn.activate(convertX(x), convertY(y), 5, this.itm.getIconId())
         //btn.setClickBehaviour(0, -2, 4, 4, (_) -> this.gui.clickRequirement(this.itm))
 
-        btn.setBackGround(36, 36, 36, 84, "IconBackground.tga", LINK_COLOR)
+        btn.setBackGround(36, 36, 36, 84, "Shop\\IconBackground.tga", LINK_COLOR)
         btn.data = this.itm castTo int
 
         if y != 0
-            this.linkToFork = createImage("Tree\\Link.tga", this.center + vec2(0, 40), 8, 48, Layer.L2)
+            this.linkToFork = createImage("Shop\\Link.tga", this.center + vec2(0, 40), 8, 48, Layer.L2)
             this.linkToFork.show()
             this.linkToFork.setColor(LINK_COLOR)
 
@@ -249,15 +250,15 @@ class RecipeTreeNode
             let rightMost = childrenList.get(numberOfChildren - 1)
             let width = (rightMost.center.x - leftMost.center.x) * 1.05 // actual size is only 62/64, so this is used to increase width of image
             let middle = (rightMost.center.x + leftMost.center.x) / 2.0
-            this.forkVer = createImage("Tree\\Link.tga", this.center + vec2(0, -80), 8, 48, Layer.L2)
+            this.forkVer = createImage("Shop\\Link.tga", this.center + vec2(0, -80), 8, 48, Layer.L2)
             this.forkVer.show()
             this.forkVer.setColor(LINK_COLOR)
-            this.forkHor = createImage("Tree\\Link.tga", vec2(middle, this.center.y - 100), width, 8, Layer.L2)
+            this.forkHor = createImage("Shop\\Link.tga", vec2(middle, this.center.y - 100), width, 8, Layer.L2)
             this.forkHor.show()
             this.forkHor.setColor(LINK_COLOR)
 
         else if this.children == 1
-            this.forkVer = createImage("Tree\\Link.tga", this.center + vec2(0, -80), 8, 48, Layer.L2)
+            this.forkVer = createImage("Shop\\Link.tga", this.center + vec2(0, -80), 8, 48, Layer.L2)
             this.forkVer.show()
             this.forkVer.setColor(LINK_COLOR)
 
@@ -325,7 +326,8 @@ class RecipeTreeNode
 public class GUI
     private player forPlayer
     private unit inventoryUnit
-    private bool enabled = false
+    private bool enabled = false //is the GUI open?
+    private bool enableOpen = false //can the GUI be opened?
     private int selectedRecipeButton = -1
     private ItemInShop selectedRecipe
     private int itemsInRecipe
@@ -381,11 +383,12 @@ public class GUI
         this.center = center
         this.createBackground()
         
-        this.selectedItem = ItemInShop.getItemFromList(0,0)
+        this.inventoryUnit = inventoryUnit
+        //start with seconds page, because first depends on hero
+        this.selectedItem = this.getItemFromList(1,0)
         this.selectedRecipe = this.selectedItem
 
         this.forPlayer = whichPlayer
-        this.inventoryUnit = inventoryUnit
         this.currentPage = -1
         this.itemsOnPage = 0
         this.itemsInBuildsInto = 0
@@ -406,7 +409,7 @@ public class GUI
         setupCategoryButtons()
         
 
-        setPage(0)
+        setPage(1)
         this.selectRecipe(this.selectedItem, false, true)
         this.selectItem(this.selectedItem, true)
 
@@ -425,13 +428,12 @@ public class GUI
         onItemLose.addAction(function onItemDropStatic)
 
     function openShop()
-        if this.enabled
+        if this.enabled or not this.enableOpen
             return
 
         this.enabled = true
         this.forceCameraTimer.startPeriodic(0.01, function forceCameraStatic)
 
-        this.mBoardMinimized = ScoreTable.isMinimized()
 
         //show needed buttons
 
@@ -454,14 +456,13 @@ public class GUI
         this.updateInfo()
         //this.selectRecipe(this.selectedRecipe, true, true)
 
-        previousCamerePos = getCameraTargetPosition()
-
+        this.previousCamerePos = getCameraTargetPosition()
+        this.mBoardMinimized = ScoreTable.isMinimized()
         if GetLocalPlayer() == this.forPlayer
             ScoreTable.minimalize(true)
             ClearSelection()
             EnableDragSelect(false, false)
             EnableSelect(false, false)
-            print(this.inventoryUnit.getName())
             SelectUnit(this.inventoryUnit, true)
             ClearTextMessages()
             SetCameraBounds(center.x, center.y, center.x, center.y, center.x, center.y, center.x, center.y)
@@ -512,7 +513,7 @@ public class GUI
         for i = 0 to 5
             GUI.categoryButtons[this.arrayOffset + i] = new Button(this)
 
-        for i = 0 to 6
+        for i = 0 to 11
             GUI.buildsIntoButtons[this.arrayOffset + i] = new Button(this)
 
         for i = 0 to 9
@@ -524,7 +525,7 @@ public class GUI
         this.buyButton.activate(44, -10, 5, BTN_ACCEPT)
         this.buyButton.hide()
         //this.buyButton.setClickBehaviour(0, 0, 16, 4, (_) -> clickBuyButton()) !!!!
-        this.buyButton.setBackGround(43, 41, 231, 41, "Borders\\ConfirmButton.tga", COLOR_WHITE)
+        this.buyButton.setBackGround(43, 41, 231, 41, "Shop\\Borders\\ConfirmButton.tga", COLOR_WHITE)
 
         this.selectedItemButton.activate(3, -10, 5, this.selectedItem.getIconId())
 
@@ -556,29 +557,24 @@ public class GUI
 
     private function setupCategoryButtons()
         GUI.categoryButtons[this.arrayOffset + 0]..activate(-43, 21, 5, BTN_CAT1)
-        //.setClickBehaviour(-18, 0, 4, 4, (_) -> this.setPage(0) )
         GUI.categoryButtons[this.arrayOffset + 1]..activate(-43, 12, 5, BTN_CAT2)
-        //.setClickBehaviour(-18, 0, 4, 4, (_) -> this.setPage(1) )
         GUI.categoryButtons[this.arrayOffset + 2]..activate(-43, 3, 5, BTN_CAT3)
-        //.setClickBehaviour(-18, 0, 4, 4, (_) -> this.setPage(2) )
         GUI.categoryButtons[this.arrayOffset + 3]..activate(-43, -6, 5, BTN_CAT4)
-        //.setClickBehaviour(-18, 0, 4, 4, (_) -> this.setPage(3) )
         GUI.categoryButtons[this.arrayOffset + 4]..activate(-43, -15, 5, BTN_CAT5)
-        //.setClickBehaviour(-18, 0, 4, 4, (_) -> this.setPage(4) )
         GUI.categoryButtons[this.arrayOffset + 5]..activate(-43, -24, 5, BTN_CAT6)
-        //.setClickBehaviour(-18, 0, 4, 4, (_) -> this.setPage(5) )
 
     private function loadBuildsInto()
-        let size = this.selectedItem.getBuildsInto().size()
-        for i = size + this.arrayOffset to itemsInBuildsInto + this.arrayOffset
+        let size = min(this.selectedItem.getBuildsInto().size(), 12)
+        for i = size + this.arrayOffset to itemsInBuildsInto + this.arrayOffset - 1
             GUI.buildsIntoButtons[i].deactivate()
         this.itemsInBuildsInto = size
 
         int j = 0
         for ItemInShop itm in this.selectedItem.getBuildsInto()
-            GUI.buildsIntoButtons[this.arrayOffset + j].activate(44 + 6 * (j mod 3), 21 - (j div 3) * 6, 5, itm.getIconId())
-            GUI.buildsIntoButtons[this.arrayOffset + j].data = itm castTo int
-            j++
+            if j < 12
+                GUI.buildsIntoButtons[this.arrayOffset + j].activate(44 + 6 * (j mod 3), 21 - (j div 3) * 6, 5, itm.getIconId())
+                GUI.buildsIntoButtons[this.arrayOffset + j].data = itm castTo int
+                j++
 
     private function loadInfoButtons(ItemInShop newItem)
         
@@ -591,12 +587,12 @@ public class GUI
         this.updateBuyButton(true)
 
     private function loadItemListButton(int i)
-        let itm = ItemInShop.getItemFromList(this.currentPage, i)
+        let itm = this.getItemFromList(this.currentPage, i)
         let offsetI = this.arrayOffset + i
-        GUI.buyableItemsButtons[offsetI].activate(-32 + (i mod 5)*6, 21 - (i div 5)*9, 5, ItemInShop.getItemFromList(this.currentPage, i).getIconId())
+        GUI.buyableItemsButtons[offsetI].activate(-32 + (i mod 5)*6, 21 - (i div 5)*9, 5, this.getItemFromList(this.currentPage, i).getIconId())
         //GUI.buyableItemsButtons[offsetI].setClickBehaviour(0, -2, 4, 4, (_) -> clickItemList(itm))
-        GUI.buyableItemsButtons[offsetI].setText(ItemInShop.getItemFromList(this.currentPage, i).getTotalCost().toString(), COLOR_GOLD)
-        GUI.buyableItemsButtons[offsetI].setBackGround(36, 36, 36, 84, "IconBackground.tga", LINK_COLOR)
+        GUI.buyableItemsButtons[offsetI].setText(this.getItemFromList(this.currentPage, i).getTotalCost().toString(), COLOR_GOLD)
+        GUI.buyableItemsButtons[offsetI].setBackGround(36, 36, 36, 84, "Shop\\IconBackground.tga", LINK_COLOR)
         GUI.buyableItemsButtons[offsetI].data = itm castTo int
         if itm == this.selectedRecipe
             GUI.buyableItemsButtons[offsetI].setHightLight(true)
@@ -668,11 +664,17 @@ public class GUI
         //load recipe
         loadRecipeTree()
 
-        let cat = ItemInShop.getCategory(newRecipe)
-        if cat == this.currentPage
-            let index = ItemInShop.getIndex(newRecipe)
-            GUI.buyableItemsButtons[index + this.arrayOffset].setHightLight(true)
-            this.selectedRecipeButton = index
+        if this.currentPage == 0
+            let index = RecommendedItems.getIndex(this.inventoryUnit.getTypeId(), newRecipe)
+            if index != -1
+                GUI.buyableItemsButtons[index + this.arrayOffset].setHightLight(true)
+                this.selectedRecipeButton = index
+        else
+            let cat = ItemInShop.getCategory(newRecipe)
+            if cat == this.currentPage
+                let index = ItemInShop.getIndex(newRecipe)
+                GUI.buyableItemsButtons[index + this.arrayOffset].setHightLight(true)
+                this.selectedRecipeButton = index
 
         highlightSelectedItem()
         
@@ -730,7 +732,7 @@ public class GUI
         this.currentPage = newPage
         GUI.categoryButtons[this.currentPage + this.arrayOffset].setHightLight(true)
 
-        let size = ItemInShop.getItemCount(newPage)
+        let size = getItemCount(newPage)
         for i = size + this.arrayOffset to this.itemsOnPage + this.arrayOffset - 1
             GUI.buyableItemsButtons[i].deactivate()
         for i = 0 to size - 1
@@ -772,6 +774,34 @@ public class GUI
 
     function setInventoryUnit(unit inventoryUnit)
         this.inventoryUnit = inventoryUnit
+
+    function getItemFromList(int category, int index) returns ItemInShop
+        if category == 0
+            if index < RecommendedItems.getCount(this.inventoryUnit.getTypeId())
+                return RecommendedItems.getItem(this.inventoryUnit.getTypeId(), index)
+            else
+                return null
+        else
+            return ItemInShop.getItemFromList(category, index)
+    
+    function getItemCount(int category) returns int
+        if category == 0
+            return RecommendedItems.getCount(this.inventoryUnit.getTypeId())
+        else
+            return ItemInShop.getItemCount(category)
+
+    function selectFirst()
+        let itm = getItemFromList(0,0)
+        if itm == null
+            return
+        else
+            this.selectRecipe(itm, false, true)
+            this.setPage(0)
+
+    function start(unit heroUnit)
+        this.setInventoryUnit(heroUnit)
+        this.selectFirst()
+        this.enableOpen = true
 
     function setBuyCondition(BuyCondition buyCondition)
         this.buyCondition = buyCondition
@@ -818,7 +848,7 @@ public class GUI
                     let page = 5-cat
                     if page >= 0 and page <= 5
                         setPage(page)
-            else if x >= -38 and x <= -2 //list buttons
+            else if x >= -32 and x <= -4 //list buttons
                 let x2 = x+32
                 let y2 = y+26
                 let column = (x2) div 6
@@ -827,7 +857,7 @@ public class GUI
                 let inRow = y2 - row * 9
                 row = 5 - row
                 if inColumn <= 4 and inRow <= 6
-                    let clickedItem = ItemInShop.getItemFromList(this.currentPage, row * 5 + column)
+                    let clickedItem = this.getItemFromList(this.currentPage, row * 5 + column)
                     if clickedItem != null
                         this.clickItemList(clickedItem)
                     //print("click [" + column.toString() + "," + row.toString()+"]")
