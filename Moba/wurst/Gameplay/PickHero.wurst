@@ -71,6 +71,7 @@ function setupCreatedHero(Hero hero)
     doAfter(5, -> UnitModifySkillPoints(heroUnit, 1))
 
     if GetLocalPlayer() == heroUnit.getOwner()
+        heroUnit.getOwner().resetToGameCamera(0)
         PanCameraTo(pos.x, pos.y)
 
 
@@ -155,6 +156,7 @@ function allPick()
     for i = 0 to MAX_HERO_COUNT-1
         if(getCPlayer(i).getPlayerType()==PlayerType.HERO)
             patron[i] = createUnit(players[i], 'n006', gg_rct_CenterMid.getCenter(), angle(0))
+            players[i].setCameraTargetControllerNoZ(patron[i], vec2(0,0), false)
             tavernVision[i] = CreateFogModifierRadius(players[i], FOG_OF_WAR_VISIBLE,
                                 gg_rct_CenterMid.getCenterX(),  gg_rct_CenterMid.getCenterX(), 900, true, false)
             FogModifierStart(tavernVision[i])
