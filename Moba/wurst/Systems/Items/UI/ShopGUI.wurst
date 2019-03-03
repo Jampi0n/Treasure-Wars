@@ -174,7 +174,7 @@ class RecipeTree
         this.gui = gui
         this.root = new RecipeTreeNode(this, 15, 0, recipe)
         this.inv = null
-        doAfter(0.15) ->
+        doAfter(0.1) ->
             this.completed = true
             this.refresh()
 
@@ -257,7 +257,7 @@ class RecipeTreeNode
 
         this.checkNumber = GetRandomInt(0, 10000000)
         int check = this.checkNumber
-        doAfter(y * 0.04 + 0.04) ->
+        doAfter(0.03) ->
             int i = 0
             if check == this.checkNumber
                 for ItemInShop child in this.itm.getRequirements()
