@@ -10,7 +10,7 @@ import Constants
 import initlater WaveSpawn
 
 constant SHOW_STATE_COLORS = false
-constant UPDATE_INTERVAL = 0.05
+constant UPDATE_INTERVAL = 0.1
 
 enum PathState
     HOME_TOWN
@@ -141,7 +141,7 @@ public class PathUnit
         this.checkEnter = true
 
     static function onRemove()
-        let removedPathUnit = unitToPathUnit.get(getDeindexedUnit())
+        let removedPathUnit = unitToPathUnit.get(getIndexingUnit())
         if(removedPathUnit!=null)
             destroy removedPathUnit
 
@@ -199,7 +199,7 @@ public class PathUnit
 
         
     function getNextUpdate() returns real
-        return GetRandomReal(1.1, 1.6)
+        return GetRandomReal(1.1, 1.9)
 
     static function onAttackStatic()
         PathUnit pathUnit = unitToPathUnit.get(GetAttacker())
