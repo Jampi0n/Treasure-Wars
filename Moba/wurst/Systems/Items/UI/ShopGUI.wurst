@@ -16,6 +16,9 @@ import PlayerControl
 import RecommendedItems
 import ErrorHandling
 import SoundUtils
+import Constants
+
+import ItemIds
 
 public constant GRID_SIZE = 16.0
 
@@ -115,11 +118,11 @@ function heroRemoveRequiredItems(unit hero, ItemInShop itm)
 class HeroInventory
 
     private HashMap<int,int> itemsInInventory
-    private LinkedList<int> storedKeys
+    //private LinkedList<int> storedKeys
 
     construct(unit hero)
         this.itemsInInventory = new HashMap<int,int>
-        this.storedKeys = new LinkedList<int>
+        //this.storedKeys = new LinkedList<int>
         for i = 0 to 5
             int itemTypeId = hero.itemInSlot(i).getTypeId()
             if itemTypeId != 0
@@ -127,17 +130,17 @@ class HeroInventory
                     this.itemsInInventory.put(itemTypeId, this.itemsInInventory.get(itemTypeId) + 1 )
                 else
                     this.itemsInInventory.put(itemTypeId, 1)
-                    this.storedKeys.add(itemTypeId)
+                    //this.storedKeys.add(itemTypeId)
 
     /*
         Copies inventory information. This is used in subtrees to not change information for other trees or the main tree.
     */
-    construct(HeroInventory inv)
+    /*construct(HeroInventory inv)
         this.itemsInInventory = new HashMap<int,int>
         this.storedKeys = new LinkedList<int>
         for int key in inv.storedKeys
             this.storedKeys.add(key)
-            this.itemsInInventory.put(key, inv.itemsInInventory.get(key))
+            this.itemsInInventory.put(key, inv.itemsInInventory.get(key))*/
 
     /*
         Returns whether the hero has an item of this type. If it has, the item is removed,
@@ -154,7 +157,7 @@ class HeroInventory
 
     ondestroy
         destroy this.itemsInInventory
-        destroy this.storedKeys
+        //destroy this.storedKeys
 
 
 
@@ -171,7 +174,7 @@ class RecipeTree
         this.gui = gui
         this.root = new RecipeTreeNode(this, 15, 0, recipe)
         this.inv = null
-        doAfter(0.2) ->
+        doAfter(0.15) ->
             this.completed = true
             this.refresh()
 
@@ -231,6 +234,11 @@ class RecipeTreeNode
 
         this.btn = this.gui.getRecipeButton(this.tree.usedButtons)
         this.tree.usedButtons++
+        if this.gui.selectedItem == this.itm
+            this.btn.setHightLight(true)
+        else
+            this.btn.setHightLight(false)
+
         //print("activate["+this.tree.usedButtons.toString()+"] ("+x.toString()+", "+y.toString()+")")
         btn.activate(convertX(x), convertY(y), 5, this.itm.getIconId())
         //btn.setClickBehaviour(0, -2, 4, 4, (_) -> this.gui.clickRequirement(this.itm))
@@ -249,7 +257,7 @@ class RecipeTreeNode
 
         this.checkNumber = GetRandomInt(0, 10000000)
         int check = this.checkNumber
-        doAfter(y * 0.05 + 0.05) ->
+        doAfter(y * 0.04 + 0.04) ->
             int i = 0
             if check == this.checkNumber
                 for ItemInShop child in this.itm.getRequirements()
@@ -345,9 +353,9 @@ public class GUI
     private bool enabled = false //is the GUI open?
     private bool enableOpen = false //can the GUI be opened?
     private int selectedRecipeButton = -1
-    private ItemInShop selectedRecipe
+    protected ItemInShop selectedRecipe
     private int itemsInRecipe
-    private ItemInShop selectedItem
+    protected ItemInShop selectedItem
     private int itemsInBuildsInto
     private int currentPage
     private int itemsOnPage
@@ -438,7 +446,6 @@ public class GUI
         onItemAcquire.registerPlayerUnitEvent(this.forPlayer, EVENT_PLAYER_UNIT_PICKUP_ITEM, null)
         onItemLose.registerPlayerUnitEvent(this.forPlayer, EVENT_PLAYER_UNIT_DROP_ITEM, null)
 
-
         /*for i = 0 to 0
             for j = 0 to 0
                 new Button(this)
@@ -456,7 +463,7 @@ public class GUI
         this.activateCooldown()
 
         this.enabled = true
-        this.forceCameraTimer.startPeriodic(0.01, function forceCameraStatic)
+        this.forceCameraTimer.startPeriodic(1.0/32.0, function forceCameraStatic)
 
 
         //show needed buttons
@@ -482,7 +489,8 @@ public class GUI
 
         this.previousCamerePos = getCameraTargetPosition()
         this.mBoardMinimized = ScoreTable.isMinimized()
-        if GetLocalPlayer() == this.forPlayer
+        this.forceCamera()
+        if GetLocalPlayer() == this.forPlayer and not IS_REPLAY
             ScoreTable.minimalize(true)
             ClearSelection()
             EnableDragSelect(false, false)
@@ -490,7 +498,7 @@ public class GUI
             SelectUnit(this.inventoryUnit, true)
             ClearTextMessages()
             SetCameraBounds(center.x, center.y, center.x, center.y, center.x, center.y, center.x, center.y)
-            
+
 
     function closeShop()
         if not this.enabled or this.clickCooldown
@@ -523,7 +531,7 @@ public class GUI
 
         clearInfo()
 
-        if GetLocalPlayer() == this.forPlayer
+        if GetLocalPlayer() == this.forPlayer and not IS_REPLAY
             EnableDragSelect(true, true)
             EnableSelect(true, true)
             SetCameraBoundsToRect(playableMapRect)
@@ -704,8 +712,8 @@ public class GUI
                 GUI.buyableItemsButtons[index + this.arrayOffset].setHightLight(true)
                 this.selectedRecipeButton = index
 
-        doAfter(0.1) ->
-            highlightSelectedItem()
+        //doAfter(0.2) ->
+            //highlightSelectedItem()
         
     private function clearInfo()
         if this.nameText != null
@@ -733,15 +741,14 @@ public class GUI
         
         loadInfoButtons(newItem)
 
-        doAfter(0.05) ->
-            this.updateInfo()
+        this.updateInfo()
         
+        doAfter(0.1) ->            
+            highlightSelectedItem()
+
         doAfter(0.1) ->            
             //load builds into
             loadBuildsInto()
-
-        doAfter(0.15) ->            
-            highlightSelectedItem()
 
 
     function clickRequirement(ItemInShop itm)
@@ -810,6 +817,13 @@ public class GUI
         return this.inventoryUnit
 
     function setInventoryUnit(unit inventoryUnit)
+        if this.inventoryUnit == null
+            let rec = RecommendedItems.getItem(this.inventoryUnit.getTypeId(), 0)
+            if rec != null
+                this.selectedItem = rec
+                setPage(0)
+                this.selectRecipe(this.selectedItem, false, true)
+                this.selectItem(this.selectedItem, true)
         this.inventoryUnit = inventoryUnit
 
     function getItemFromList(int category, int index) returns ItemInShop
@@ -982,10 +996,12 @@ public class GUI
         return 100 * x + y
 
     function forceCamera()
-        if this.forceCameraCounter mod 25 == 0
+        this.forceCameraCounter++
+        if this.forceCameraCounter >= 16
+            this.forceCameraCounter = 0
             this.updateBuyButton(false)
 
-        if GetLocalPlayer() == this.forPlayer
+        if GetLocalPlayer() == this.forPlayer and not IS_REPLAY
             SetCameraField(CAMERA_FIELD_ROLL, 0, 0)
             SetCameraField(CAMERA_FIELD_ROTATION, 90, 0)
             SetCameraField(CAMERA_FIELD_ANGLE_OF_ATTACK, 270, 0)
@@ -999,7 +1015,19 @@ public class GUI
         if gui != null
             gui.forceCamera()
 
+    
+    function performanceTestSelectRecipe()
+        let item1 = ItemInShop.getItemFromId(ITEM_ID_VOID_ARMOR)
+        let item2 = ItemInShop.getItemFromId(ITEM_ID_FIREHAND_GAUNTLETS)
+
+        if this.selectedRecipe == item1
+            this.clickItemList(item2)
+        else
+            this.clickItemList(item1)
             
+
+    function performanceTestPage()
+        this.setPage( (this.currentPage + 1) mod 6)
 
 init
     GUI.classInit()

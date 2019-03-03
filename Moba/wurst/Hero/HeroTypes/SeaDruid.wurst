@@ -474,8 +474,13 @@ function setupTooltips()
 function initHeroType()
     setupStats()
     setupTooltips()
-    heroType
-    ..setSkillBuild("QWEQQWEQWQEWEWE")
+    heroType..setSkillBuild("QWEQQWEQWQEWEWE")
+    ..addItem(ITEM_ID_HEAVY_BOOTS)
+    ..addItem(ITEM_ID_BLESSED_GOBLET)
+    ..addItem(ITEM_ID_BRACER_OF_POWER)
+    ..addItem(ITEM_ID_SPIKED_ARMOR)
+    ..addItem(ITEM_ID_ARCANE_BLADE)
+    ..addItem(ITEM_ID_ARCANE_SHIELD)
     ..setBonusCalculation((UnitWrapper whichWrapper, Stat whichStat) -> (begin
         let lvl = whichWrapper.toUnit().getAbilityLevel(ABILITY_ANCIENT_KNOWLEDGE)
         if lvl == 0
@@ -503,12 +508,6 @@ function initHeroType()
             ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
             ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
             ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
-            //..addItem(ITEM_ID_HEAVY_BOOTS)
-            //..addItem(ITEM_ID_BLESSED_GOBLET)
-            //..addItem(ITEM_ID_BRACER_OF_POWER)
-            //..addItem(ITEM_ID_SPIKED_ARMOR)
-            //..addItem(ITEM_ID_ARCANE_BLADE)
-            //..addItem(ITEM_ID_ARCANE_SHIELD)
 
         buffFish = new BuffType(false, true)
 

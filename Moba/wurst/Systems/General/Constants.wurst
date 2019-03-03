@@ -27,6 +27,20 @@ public constant int CREEP_ICON_OWNER = PLAYER_NEUTRAL_PASSIVE
 
 public constant MAX_HIT_BOX = 200.
 
+public constant IS_REPLAY = getIsReplay()
+
+function getIsReplay() returns bool
+    var firstPlayer = players[0]
+    while firstPlayer.getController() != MAP_CONTROL_USER or firstPlayer.getSlotState() != PLAYER_SLOT_STATE_PLAYING
+        firstPlayer = players[firstPlayer.getId() + 1]
+
+    let u = createUnit(firstPlayer, 'hfoo', vec2(0,0), angle(0))
+    SelectUnit(u, true)
+    let selected = IsUnitSelected(u, firstPlayer)
+    u.remove()
+
+    return selected and not ReloadGameCachesFromDisk()
+
 public int objectCount = 0
 
 public enum Lane
@@ -49,3 +63,6 @@ init
         ..addAction(() -> (begin
             print("object count = "+objectCount.toString())
     end))*/
+
+    if IS_REPLAY
+        print("Enjoy watching your replay of Treasure Wars!")

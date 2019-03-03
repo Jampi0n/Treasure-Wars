@@ -434,19 +434,19 @@ function setupTooltips()
 function initHeroType()
     setupStats()
     setupTooltips()
-    heroType.setSkillBuild("WQEWQWWQWQQEEEE")
+    heroType..setSkillBuild("WQEWQWWQWQQEEEE")
+    ..addItem(ITEM_ID_HEAVY_BOOTS)
+    ..addItem(ITEM_ID_RUNIC_ARMOR)
+    ..addItem(ITEM_ID_FIREHAND_GAUNTLETS)
+    ..addItem(ITEM_ID_BLOOD_SWORD)
+    ..addItem(ITEM_ID_SPIKED_ARMOR)
+    ..addItem(ITEM_ID_CURSED_SWORD)
     delayInit(5) ->
         heroType
             ..addOnSpellCastFunc(function onSpellCast)
             ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
             ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
             ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
-            //..addItem(ITEM_ID_HEAVY_BOOTS)
-            //..addItem(ITEM_ID_RUNIC_ARMOR)
-            //..addItem(ITEM_ID_FIREHAND_GAUNTLETS)
-            //..addItem(ITEM_ID_BLOOD_SWORD)
-            //..addItem(ITEM_ID_SPIKED_ARMOR)
-            //..addItem(ITEM_ID_CURSED_SWORD)
     
     
 

@@ -15,6 +15,8 @@ import public LinkedList
 import public initlater HeroAI
 import public initlater HeroControl
 //import public ItemIdGeneration
+import public ItemIds
+import RecommendedItems
 import Preloader
 import ErrorHandling
 
@@ -67,6 +69,7 @@ public class HeroType
     static int heroTypeCount = 0
 
     private LinkedList<int> itemBuild = new LinkedList<int>
+    private RecommendedItems recommendedItems
     private string skillBuild = ""
 
     private string icon = "ReplaceableTextures\\CommandButtons\\BTNSelectHeroOn.blp"
@@ -99,6 +102,8 @@ public class HeroType
         preloadAbility(this.getAbilityId(AbilitySlot.R))
         preloadAbility(this.getAbilityId(AbilitySlot.PASSIVE))
         preloadUnit(this.getUnitId())
+
+        this.recommendedItems = new RecommendedItems(unitId)
 
         heroTypes[heroTypeCount] = this
         heroTypeCount++
@@ -221,11 +226,13 @@ public class HeroType
 
     function getItemBuild() returns LinkedList<int>
         return this.itemBuild
+
     function getSkillBuild() returns string
         return this.skillBuild
 
     function addItem(int itemId)
-        this.itemBuild.add(itemId)
+        this.recommendedItems.addItem(itemId)
+        //this.itemBuild.add(itemId)
 
     function setSkillBuild(string skillBuild)
         if skillBuild.length() != 25
