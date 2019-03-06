@@ -9,6 +9,8 @@ import UnitType
 import BuildingTypes
 //import OnAttack
 import ErrorHandling
+import RecommendedItems
+import ShopGUI
 
 constant team1AIs = new LinkedList<HeroAI>
 constant team2AIs = new LinkedList<HeroAI>
@@ -633,8 +635,20 @@ public class HeroAI
         return ret*/
 
     function buyItems()
-        if itemBuild.size() == 0 or hasAllItems
+        if hasAllItems
             return
+
+        let unitTypeId = this.heroType.getUnitId()
+        for i = 0 to RecommendedItems.getCount(unitTypeId) - 1
+            let itm = RecommendedItems.getItem(unitTypeId, i)
+            if not this.heroUnit.hasItemById(itm.getItemId())
+                let bought = heroIssueBuyItem(this.heroUnit, itm, null, null)
+                if bought == null
+                    break
+                else
+                    if i == RecommendedItems.getCount(unitTypeId) - 1
+                        hasAllItems = true
+        
 
         /*int numberOfFinishedItems = 0
         for i = 0 to 5
