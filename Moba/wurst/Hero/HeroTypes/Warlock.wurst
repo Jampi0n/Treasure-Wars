@@ -7,6 +7,10 @@ import ClosureTimers
 import HeroType
 
 public constant HERO_WARLOCK = 'H00H'
+constant THIS_HERO = HERO_WARLOCK
+constant THIS_ID = 5
+constant THIS_BUTTON_POS = 5 //button pos from 0 to 11
+constant THIS_ICON = Icons.bTNGuldan
 HeroType heroType = null
 
 constant ABILITY_FEL_MAGIC = 'AZ5P'
@@ -337,11 +341,11 @@ function setupTooltips()
     infernalMeteor(ABILITY_INFERNAL_METEOR)
     soulburn(ABILITY_SOUL_BURN)
     rayOfDeath(ABILITY_RAY_OF_DEATH)
+    createHeroButton(THIS_ID, THIS_BUTTON_POS, THIS_ICON)
 
 
 function initHeroType()
     setupStats()
-    setupTooltips()
     heroType..setSkillBuild("WEQEWEWEWEWQQQQ")
     ..addItem(ITEM_ID_BOOTS_OF_DARKNESS)
     ..addItem(ITEM_ID_ENCHANTED_ARMOR)
@@ -446,6 +450,9 @@ function createHeroType(Hero hero)
     
         
 init
-    heroType = new HeroType(HERO_WARLOCK, Icons.bTNGuldan, 5, true)
-        ..setOnInitFunction(() -> initHeroType())
-        ..setOnCreateFunction((Hero hero) -> createHeroType(hero))
+    heroType = new HeroType(THIS_HERO, THIS_ICON, THIS_ID, true)
+    ..setOnInitFunction(() -> initHeroType())
+    ..setOnCreateFunction((Hero hero) -> createHeroType(hero))
+
+    setupTooltips()
+    addButtonToTavern(THIS_ID, THIS_BUTTON_POS, heroType, 0)

@@ -10,6 +10,10 @@ import DamageDetection
 import SoundUtils
 
 public constant HERO_DEADEYE = 'H00I'
+constant THIS_HERO = HERO_DEADEYE
+constant THIS_ID = 1
+constant THIS_BUTTON_POS = 1 //button pos from 0 to 11
+constant THIS_ICON = Icons.bTNSkeletonArcher
 HeroType heroType = null
 
 constant ABILITY_BLACK_ARROW = 'AZ1P'
@@ -425,7 +429,7 @@ function setupTooltips()
     terror(ABILITY_TERROR)
     boneBrothers(ABILITY_BONE_BROTHERS)
     deathpact(ABILITY_DEATH_PACT)
-
+    createHeroButton(THIS_ID, THIS_BUTTON_POS, THIS_ICON)
 
 
 function initHeroType()
@@ -437,7 +441,6 @@ function initHeroType()
     ..addItem(ITEM_ID_RUNIC_ARMOR)
     ..addItem(ITEM_ID_SACRIFICIAL_DAGGER)
     ..addItem(ITEM_ID_CURSED_SWORD)
-    setupTooltips()
     delayInit(5) ->
         heroType
             ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
@@ -458,6 +461,9 @@ function initHeroType()
     
 init
     
-    heroType = new HeroType(HERO_DEADEYE, Icons.bTNSkeletonArcher, 1, true)
-        ..setOnInitFunction(() -> initHeroType())
+    heroType = new HeroType(THIS_HERO, THIS_ICON, THIS_ID, true)
+    ..setOnInitFunction(() -> initHeroType())
+
+    setupTooltips()
+    addButtonToTavern(THIS_ID, THIS_BUTTON_POS, heroType, 0)
         

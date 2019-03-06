@@ -11,7 +11,10 @@ import Knockback2d
 
 
 public constant HERO_WAR_BEETLE = 'H00S'
-
+constant THIS_HERO = HERO_WAR_BEETLE
+constant THIS_ID = 10
+constant THIS_BUTTON_POS = 10 //button pos from 0 to 11
+constant THIS_ICON = "BTNWarBeetle.blp"
 HeroType heroType = null
 
 constant UPROOTED = compiletime(UNIT_ID_GEN.next())
@@ -418,10 +421,10 @@ function setupTooltips()
     warstomp(ABILITY_WAR_STOMP)
     jump(ABILITY_JUMP)
     unbreakable(ABILITY_UNBREAKABLE)
+    createHeroButton(THIS_ID, THIS_BUTTON_POS, THIS_ICON)
 
 function initHeroType()
     setupStats()
-    setupTooltips()
     heroType..setSkillBuild("QWEQWQWQWQWEEEE")
     ..addItem(ITEM_ID_HEAVY_BOOTS)
     ..addItem(ITEM_ID_RUNIC_ARMOR)
@@ -502,9 +505,12 @@ function createHeroType(Hero hero)
 
 
 init
-    heroType = new HeroType(HERO_WAR_BEETLE, "BTNWarBeetle.blp", 10, true)
-        ..setOnInitFunction(() -> initHeroType())
-        ..setOnCreateFunction((Hero hero) -> createHeroType(hero))
+    heroType = new HeroType(THIS_HERO, THIS_ICON, THIS_ID, true)
+    ..setOnInitFunction(() -> initHeroType())
+    ..setOnCreateFunction((Hero hero) -> createHeroType(hero))
+
+    setupTooltips()
+    addButtonToTavern(THIS_ID, THIS_BUTTON_POS, heroType, 0)
 
    
 

@@ -11,6 +11,10 @@ import Fx
 import SoundUtils
 
 public constant HERO_SEA_DRUID = 'H00K'
+constant THIS_HERO = HERO_SEA_DRUID
+constant THIS_ID = 3
+constant THIS_BUTTON_POS = 3 //button pos from 0 to 11
+constant THIS_ICON = "BTNSeaDruid"
 HeroType heroType = null
 
 constant ABILITY_ANCIENT_KNOWLEDGE = 'AZ3P'
@@ -32,6 +36,7 @@ function ancientKnowledge(int abilityId)
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(0)
+    tooltip.setSummary("Increases hit points by a portion of his maximum mana points and vice versa.")
     tooltip.setLearnString("Increases his maximum hit points for a portion of his maximum mana ponits and increases his maximum mana points by "+
     "a portion of his maximum hit points.", (int lvl) -> (begin
         return "1 hit point for every {0} mana points, 1 mana point for every {1} hit points".format(
@@ -469,11 +474,11 @@ function setupTooltips()
     giantFish(ABILITY_GIANT_FISH)
     manaShield(ABILITY_MANA_SHIELD)
     ritualOfTheSeas(ABILITY_RITUAL_OF_THE_SEAS)
+    createHeroButton(THIS_ID, THIS_BUTTON_POS, THIS_ICON)
 
 
 function initHeroType()
     setupStats()
-    setupTooltips()
     heroType..setSkillBuild("QWEQQWEQWQEWEWE")
     ..addItem(ITEM_ID_HEAVY_BOOTS)
     ..addItem(ITEM_ID_BLESSED_GOBLET)
@@ -573,9 +578,12 @@ function createHeroType(Hero hero)
     ..registerUnitEvent(hero.toUnit(), EVENT_UNIT_HERO_SKILL)
 
 init
-    heroType = new HeroType(HERO_SEA_DRUID, "BTNSeaDruid", 3, true)
+    heroType = new HeroType(THIS_HERO, THIS_ICON, THIS_ID, true)
     ..setOnInitFunction(() -> initHeroType())
     ..setOnCreateFunction((Hero hero) -> createHeroType(hero))
+
+    setupTooltips()
+    addButtonToTavern(THIS_ID, THIS_BUTTON_POS, heroType, 0)
       
 
    

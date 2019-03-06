@@ -1,4 +1,4 @@
-package PythonWarriores
+package PythonWarrioress
 
 //0
 
@@ -17,7 +17,11 @@ constant ABILITY_POISON_SPIT = 'AZ0W'
 constant ABILITY_EMPOWERED_STRIKE = 'AZ0E'
 constant ABILITY_PARALYZING_STRIKE = 'AZ0R'
 
-public constant HERO_PYTHON_WARRIORES = 'H00J'
+public constant HERO_PYTHON_WARRIORESS = 'H00J'
+constant THIS_HERO = HERO_PYTHON_WARRIORESS
+constant THIS_ID = 0
+constant THIS_BUTTON_POS = 0 //button pos from 0 to 11
+constant THIS_ICON = "BTNGreenViper"
 HeroType heroType = null
 
 //Balancing and Object Editing
@@ -81,12 +85,12 @@ function mistwalk(int abilityId)
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(MISTWALK_DURATION_BONUS)
-    tooltip.setLearnString("Turns the Python Warriores invisibile.", (int lvl) -> (begin
+    tooltip.setLearnString("Turns the Python Warrioress invisibile.", (int lvl) -> (begin
         return "{0}{I0} seconds.".format( MISTWALK_DURATION[lvl-1].toExactString())
     end) )
     
     for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, "Turns the Python Warriores invisibile for {0}{I0} seconds.".format(
+        tooltip.setNormalString(true, lvl, "Turns the Python Warrioress invisibile for {0}{I0} seconds.".format(
             MISTWALK_DURATION[lvl-1].toExactString()))
     addDynamicTooltipIntelligence(heroType, tooltip)
 
@@ -217,13 +221,13 @@ function paralyzingStrike(int abilityId)
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(PARALYZING_STRIKE_DAMAGE_BONUS, PARALYZING_STRIKE_DURATION_BONUS)
-    tooltip.setLearnString("Deals massive magical damage to the target, stunning it and teleports the Python Warriores behind the target.", (int lvl) -> (begin
+    tooltip.setLearnString("Deals massive magical damage to the target, stunning it and teleports the Python Warrioress behind the target.", (int lvl) -> (begin
         return "{0}{I0} damage, {1}{I1} seconds stun.".format(
         PARALYZING_STRIKE_DAMAGE[lvl-1].str(),
         PARALYZING_STRIKE_DURATION[lvl-1].toExactString())
     end) )
     for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, "Deals {0}{I0} magical damage to the target, stunning it for {1}{I1} seconds and teleports the Python Warriores behind the target.".format(
+        tooltip.setNormalString(true, lvl, "Deals {0}{I0} magical damage to the target, stunning it for {1}{I1} seconds and teleports the Python Warrioress behind the target.".format(
             PARALYZING_STRIKE_DAMAGE[lvl-1].str(),
             PARALYZING_STRIKE_DURATION[lvl-1].toExactString()))
     addDynamicTooltipIntelligence(heroType, tooltip)
@@ -362,10 +366,10 @@ function setupTooltips()
     poisonSpit(ABILITY_POISON_SPIT)
     empoweredStrike(ABILITY_EMPOWERED_STRIKE)
     paralyzingStrike(ABILITY_PARALYZING_STRIKE)
+    createHeroButton(THIS_ID, THIS_BUTTON_POS, THIS_ICON)
 
 function initHeroType()
     setupStats()
-    setupTooltips()
     heroType..setSkillBuild("WEQEEWEWEWWQQQQ")
     ..addItem(ITEM_ID_BOOTS_OF_DARKNESS)
     ..addItem(ITEM_ID_ENCHANTED_ARMOR)
@@ -463,9 +467,11 @@ function initHeroType()
 
 
 init
-    heroType = new HeroType(HERO_PYTHON_WARRIORES, "BTNGreenViper", 0, true)
-        ..setOnInitFunction(() -> initHeroType())
-    
+    heroType = new HeroType(THIS_HERO, THIS_ICON, THIS_ID, true)
+    ..setOnInitFunction(() -> initHeroType())
+
+    setupTooltips()
+    addButtonToTavern(THIS_ID, THIS_BUTTON_POS, heroType, 0)
 
 
 

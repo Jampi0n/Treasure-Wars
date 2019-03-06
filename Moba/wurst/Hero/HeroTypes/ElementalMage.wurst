@@ -9,7 +9,10 @@ import Fx
 
 
 public constant HERO_ELEMENTAL_MAGE = 'H00P'
-
+constant THIS_HERO = HERO_ELEMENTAL_MAGE
+constant THIS_ID = 11
+constant THIS_BUTTON_POS = 11 //button pos from 0 to 11
+constant THIS_ICON = "BTNCloakOfResistance"
 HeroType heroType = null
 
 
@@ -168,6 +171,7 @@ function abilityE(int abilityId)
                 ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setSummary("Reduces the target's willpower and attacks against it will deal additional magic damage. After {0} attacks the target is stunned.".format(MARK_REQUIRED_STACKS.str()))
     tooltip.setReplaceIntelligence(MARK_DMG_BONUS)
     tooltip.setLearnString("Reduces the target unit's willpower and makes it take additional magic damage, when the Elemental Mage attacks. After {2} attacks the target is stunned for {0} seconds. Lasts {1} seconds.".format(
         MARK_STUN.toExactString(), MARK_DURATION.toExactString(), MARK_REQUIRED_STACKS.str()
@@ -355,6 +359,7 @@ function setupTooltips()
     abilityW(ABILITY_FIRE_BLINK)
     abilityE(ABILITY_ELEMENTAL_MARK)
     abilityR(ABILITY_FROST_AND_FLAME)
+    createHeroButton(THIS_ID, THIS_BUTTON_POS, THIS_ICON)
 
 
 function initHeroType()
@@ -366,7 +371,6 @@ function initHeroType()
     ..addItem(ITEM_ID_BLESSED_GOBLET)
     ..addItem(ITEM_ID_ARCANE_SHIELD)
     ..addItem(ITEM_ID_WAR_DRUM)
-    setupTooltips()
     delayInit(5) ->
         heroType
             ..addOnSpellCastFunc(function onSpellCast)
@@ -507,8 +511,11 @@ function initHeroType()
         end))
 
 init
-    heroType = new HeroType(HERO_ELEMENTAL_MAGE, "BTNCloakOfResistance", 11, false)
-        ..setOnInitFunction(() -> initHeroType())
+    heroType = new HeroType(THIS_HERO, THIS_ICON, THIS_ID, false)
+    ..setOnInitFunction(() -> initHeroType())
+
+    setupTooltips()
+    addButtonToTavern(THIS_ID, THIS_BUTTON_POS, heroType, 0)
 
    
 

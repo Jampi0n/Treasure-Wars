@@ -7,6 +7,7 @@ import Gameplay
 import HashMap
 import ShopGUI
 import ShopManager
+import ErrorHandling
 
 public PickMode pickMode
 timer chooseModeTimer
@@ -14,11 +15,17 @@ timer pickTimer
 timerdialog timerWindow
 trigger chooseModeTrigger
 trigger onPickTrigger
+trigger onClickButtonTrigger
+int clickedButtonId
+int array playerGoldArray
+bool locked = false
 region pickRegion
 
 unit array tavern
 unit array patron
 fogmodifier array tavernVision
+int array tavernButtons
+HashMap<int, HeroType> buttonToHeroType
 
 HeroType array remainingHeroTypes
 int remainingHeroTypesCount
@@ -124,10 +131,10 @@ function removeHeroType(HeroType herotype, boolean removeFromTavern)
     remainingHeroTypes[remainingHeroTypesCount-1]=null
     remainingHeroTypesCount--
 
-    if removeFromTavern
+    /*if removeFromTavern
         for i = 0 to MAX_HERO_COUNT-1
             if(getCPlayer(i).getPlayerType()==PlayerType.HERO)
-                SetPlayerTechMaxAllowed(players[i], herotype.getUnitId(), 0)
+                SetPlayerTechMaxAllowed(players[i], herotype.getUnitId(), 0)*/
         
 
 
@@ -142,19 +149,27 @@ function allRandom()
     allHeroesPicked()
     
 function allPick()
-    int pickTime = DEBUG_MODE?10:60
+    int pickTime = DEBUG_MODE?1000:60
     print("|cffffcc00All Pick was chosen. You have " + pickTime.toString() + " seconds to pick a Hero!|r")
 
     tavern[0] = createUnit(players[PLAYER_NEUTRAL_PASSIVE], 'n002', gg_rct_Tavern0.getCenter(), angle(0) )
     tavern[0].setColor(PLAYER_COLOR_RED)
     tavern[1] = createUnit(players[PLAYER_NEUTRAL_PASSIVE], 'n003', gg_rct_Tavern1.getCenter(), angle(0) )
     tavern[1].setColor(PLAYER_COLOR_BLUE)
-    /*tavern[2] = createUnit(players[PLAYER_NEUTRAL_PASSIVE], 'n004', gg_rct_Tavern2.getCenter(), angle(0) )
+    tavern[2] = createUnit(players[PLAYER_NEUTRAL_PASSIVE], 'n004', gg_rct_Tavern2.getCenter(), angle(0) )
     tavern[2].setColor(PLAYER_COLOR_YELLOW)
     tavern[3] = createUnit(players[PLAYER_NEUTRAL_PASSIVE], 'n005', gg_rct_Tavern3.getCenter(), angle(0) )
-    tavern[3].setColor(PLAYER_COLOR_GREEN)*/
+    tavern[3].setColor(PLAYER_COLOR_GREEN)
+
+    for i = 0 to 47
+        tavern[i div 12].addAbility(tavernButtons[i])
+    
+
+
+
     for i = 0 to MAX_HERO_COUNT-1
         if(getCPlayer(i).getPlayerType()==PlayerType.HERO)
+            players[i].setGold(HERO_GOLD_COST)
             patron[i] = createUnit(players[i], 'n006', gg_rct_CenterMid.getCenter(), angle(0))
             players[i].setCameraTargetControllerNoZ(patron[i], vec2(0,0), false)
             tavernVision[i] = CreateFogModifierRadius(players[i], FOG_OF_WAR_VISIBLE,
@@ -165,19 +180,50 @@ function allPick()
    
 
     pickRegion = CreateRegion()
-        ..addRect(bj_mapInitialPlayableArea)
+    ..addRect(bj_mapInitialPlayableArea)
     onPickTrigger = CreateTrigger()
-        ..addAction(function onPick)
-        ..registerEnterRegion(pickRegion, null)
+    ..addAction(function onPick)
+    ..registerEnterRegion(pickRegion, null)
+
+    onClickButtonTrigger = CreateTrigger()
+    ..addAction(function onClick)
+    for i = 0 to 3
+        onClickButtonTrigger.registerUnitEvent(tavern[i], EVENT_UNIT_SPELL_EFFECT)
 
     pickTimer = getTimer()
-        ..start(pickTime.toReal(), function allPickEnd)
+    ..start(pickTime.toReal(), function allPickEnd)
 
     doAfter(1, () -> (begin
         timerWindow = CreateTimerDialog(pickTimer)
         TimerDialogSetTitle(timerWindow,"Pick hero:")
         TimerDialogDisplay(timerWindow, true)
     end))
+
+function onClick()
+    if locked
+        error("Two players bought at the same time.")
+        return
+
+    locked = true
+    clickedButtonId = GetSpellAbilityId()
+    let triggerTavern = GetTriggerUnit()
+    for i = HERO_PLAYER_TEAM_1_FIRST to HERO_PLAYER_TEAM_2_LAST
+        playerGoldArray[i] = players[i].getGold()
+
+    doAfter(0) ->
+        player triggerPlayer = null
+        for i = HERO_PLAYER_TEAM_1_FIRST to HERO_PLAYER_TEAM_2_LAST
+            if playerGoldArray[i] - players[i].getGold() == HERO_GOLD_COST
+                triggerPlayer = players[i]
+                break
+
+        triggerTavern.removeAbility(clickedButtonId)
+        createUnit(triggerPlayer, buttonToHeroType.get(clickedButtonId).getUnitId() , tavern[0].getPos(), angle(0))
+
+        locked = false
+
+
+
 
 function onPick()
     unit pickedUnit = GetTriggerUnit()
@@ -196,7 +242,7 @@ function allPickEnd()
     timerWindow = null
     pickRegion.clearRect(bj_mapInitialPlayableArea)
     pickRegion.destr()
-    for i = 0 to 1//3
+    for i = 0 to 3
         tavern[i].remove()
         tavern[i]=null
     for i = 0 to MAX_HERO_COUNT-1
@@ -214,9 +260,13 @@ function allPickEnd()
             FogModifierStop(tavernVision[i])
             DestroyFogModifier(tavernVision[i])
 
+    onClickButtonTrigger
+    ..clearActions()
+    ..destr()
+
     onPickTrigger
-        ..clearActions()
-        ..destr()   
+    ..clearActions()
+    ..destr()   
 
     allHeroesPicked()
 
@@ -277,6 +327,44 @@ function startPickMode()
 
     print("|cffffcc00"+players[adminPlayer].getName()+" has 30 seconds to pick a mode!|r")
     print("|cffffcc00Available modes are all random (-ar) and all pick (-ap).|r")
+
+
+public function addButtonToTavern(int heroId, int buttonPos, HeroType heroType, int tavernId)
+    let buttonId = getAbilityOffset(heroId) + 66 //B
+    let q = heroType.getAbilityId(AbilitySlot.Q)
+    let w = heroType.getAbilityId(AbilitySlot.W)
+    let e = heroType.getAbilityId(AbilitySlot.E)
+    let r = heroType.getAbilityId(AbilitySlot.R)
+    let passive = heroType.getAbilityId(AbilitySlot.PASSIVE)
+    let nameQ = "(Q) |cffffcc00" + GetObjectName(q) + "|r"
+    let nameW = "(W) |cffffcc00" + GetObjectName(w) + "|r"
+    let nameE = "(E) |cffffcc00" + GetObjectName(e) + "|r"
+    let nameR = "(R) |cffffcc00" + GetObjectName(r) + "|r"
+    let namePassive = "(Passive) |cffffcc00" + GetObjectName(passive) + "|r"
+    let tooltipQ = DynamicTooltip.getDynamicTooltip(q).getSummary()
+    let tooltipW = DynamicTooltip.getDynamicTooltip(w).getSummary()
+    let tooltipE = DynamicTooltip.getDynamicTooltip(e).getSummary()
+    let tooltipR = DynamicTooltip.getDynamicTooltip(r).getSummary()
+    let tooltipPassive = DynamicTooltip.getDynamicTooltip(passive).getSummary()
+    if tavernButtons[12 * tavernId + buttonPos] != -1
+        error("tavernButtons["+(12 * tavernId + buttonPos).toString()+"] = " + tavernButtons[12 * tavernId + buttonPos].toString())
+    else
+        tavernButtons[12 * tavernId + buttonPos] = buttonId
+        buttonToHeroType.put(getAbilityOffset(heroId) + 66, heroType)
+        BlzSetAbilityTooltip(buttonId, GetObjectName(heroType.getUnitId()), 1)
+        let tooltip = namePassive + "|n" + tooltipPassive + "|n|n" + 
+        nameQ + "|n" + tooltipQ + "|n|n" + 
+        nameW + "|n" + tooltipW + "|n|n" + 
+        nameE + "|n" + tooltipE + "|n|n" + 
+        nameR + "|n" + tooltipR
+        BlzSetAbilityExtendedTooltip(buttonId, tooltip, 1)
+        if BlzGetAbilityExtendedTooltip(buttonId, 1) != tooltip
+            error("Tooltip for hero " + GetObjectName(heroType.getUnitId()) + " was not correctly generated.")
+
+public function initBeforeHeroType()
+    buttonToHeroType = new HashMap<int, HeroType>()
+    for i = 0 to 47
+        tavernButtons[i] = -1
 
 init
     doAfter(0, ()-> startPickMode())
