@@ -1,26 +1,77 @@
 package ItemsPotions
 
 import ItemConfiguration
-import AbilityObjEditing
 
 constant CATEGORY = 1
 
-constant ABILITY_HEAL = compiletime(ABIL_ID_GEN.next())
+constant ABILITY_HEALTH_POTION = compiletime(ABIL_ID_GEN.next())
+constant ABILITY_MANA_POTION = compiletime(ABIL_ID_GEN.next())
+
+constant ABILITY_HEALING_SALVE = compiletime(ABIL_ID_GEN.next())
+constant ABILITY_CLARITY_POTION = compiletime(ABIL_ID_GEN.next())
 
 function itemHealthPotion()
-    let heal = 250
+    let amount = 400
     if compiletime
-        new AbilityDefinitionItemHealLesser(ABILITY_HEAL)
+        new AbilityDefinitionItemHealLesser(ABILITY_HEALTH_POTION)
         ..setCooldown(1, 5)
-        ..setHitPointsGained(1, heal)
+        ..setHitPointsGained(1, amount)
     setupItem(ITEM_ID_HEALTH_POTION, CATEGORY, 150)
-    setInfo("Health Potion","Restores {0} health when used.".format(heal.toString()))  
-    setAbilities(ABILITY_HEAL)
+    setInfo("Health Potion","Restores {0} health when used.".format(amount.toString()))  
+    setAbilities(ABILITY_HEALTH_POTION)
     consumable()
+
+function itemManaPotion()
+    let amount = 250
+    if compiletime
+        new AbilityDefinitionItemManaRestoreLesser(ABILITY_MANA_POTION)
+        ..setCooldown(1, 5)
+        ..setManaPointsGained(1, amount)
+    setupItem(ITEM_ID_MANA_POTION, CATEGORY, 150)
+    setInfo("Mana Potion","Restores {0} mana when used.".format(amount.toString()))  
+    setAbilities(ABILITY_MANA_POTION)
+    consumable()
+
+function itemHealingSalve()
+    let amount = 500
+    let duration = 15
+    let charges = 3
+    if compiletime
+        new AbilityDefinitionPotionofRejuvI(ABILITY_HEALING_SALVE)
+        ..setCooldown(1, duration.toReal())
+        ..setManaRegenerated(1, 0)
+        ..setLifeRegenerated(1, amount.toReal())
+        ..setDispelOnAttack(1, false)
+        ..setDurationHero(1, duration.toReal())
+        ..setDurationNormal(1, duration.toReal())
+    setupItem(ITEM_ID_HEALING_SALVE, CATEGORY, 100)
+    setInfo("Healing Salve","Restores {0} hit points over {1} seconds when used.|nContains {2} charges.".format(amount.toString(), duration.toString(), charges.toString()))  
+    setAbilities(ABILITY_HEALING_SALVE)
+    consumable(charges)
+
+function itemClarityPotion()
+    let amount = 300
+    let duration = 15
+    let charges = 3
+    if compiletime
+        new AbilityDefinitionPotionofRejuvI(ABILITY_CLARITY_POTION)
+        ..setCooldown(1, duration.toReal())
+        ..setManaRegenerated(1, amount.toReal())
+        ..setLifeRegenerated(1, 0)
+        ..setDispelOnAttack(1, false)
+        ..setDurationHero(1, duration.toReal())
+        ..setDurationNormal(1, duration.toReal())
+    setupItem(ITEM_ID_CLARITY_POTION, CATEGORY, 100)
+    setInfo("Clarity Potion","Restores {0} mana points over {1} seconds when used.|nContains {2} charges.".format(amount.toString(), duration.toString(), charges.toString()))  
+    setAbilities(ABILITY_CLARITY_POTION)
+    consumable(charges)
 
 @compiletime
 function initItems()
     itemHealthPotion()
+    itemManaPotion()
+    itemHealingSalve()
+    itemClarityPotion()
 
 init
     execute() ->
