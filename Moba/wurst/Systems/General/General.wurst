@@ -16,7 +16,6 @@ import Assets
 import DamageDetection
 import HashMap
 import ErrorHandling
-import initlater OnAttack
 
 
 public boolean gameOver = false
@@ -131,10 +130,8 @@ public function unit.dealDamageAlways(unit target, real amount, ReductionType re
     if reductionType == ReductionType.MAGIC
         let wp = target.getWp()
         newAmount = amount.reduceMagic(wp)
-        setMagicDamage(true)
     else
         newAmount = amount
-        setMagicDamage(false)
 
     UnitDamageTarget(this, target, newAmount, false, true, ATTACK_TYPE_NORMAL, damageType, WEAPON_TYPE_WHOKNOWS)
 
