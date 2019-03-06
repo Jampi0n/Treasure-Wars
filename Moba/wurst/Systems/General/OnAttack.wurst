@@ -22,10 +22,6 @@ public constant DEFAULT_ONHIT = 'A008'
 
 public constant LAST_HIT_THRESHOLD = 50.0
 
-boolean magicDamage
-
-public function setMagicDamage(boolean magic)
-    magicDamage = magic
 
 /*
     ADVANCED_ONHIT can temporarily replace the default on hit abiltiy to get a temporary special attack, that depends
@@ -98,6 +94,20 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
             let deathFrenzyLevel = source.getAbilityLevel(ABILITY_DEATH_FRENZY)
             if deathFrenzyLevel != 0
                 currentDamage *= 1 + DEATH_FRENZY_BONUS[deathFrenzyLevel-1]/100 * (1-source.getLife()/GetUnitState(source, UNIT_STATE_MAX_LIFE))
+
+            // ignore armor - ITEM
+            // ignores 30% of the target's armor
+            if isAttack and source.countItemsOfType(42) > 0
+                let armorFactor = 0.7
+                let currentArmor = target.getArmor()
+                if currentArmor > 0
+                    // currentDamage = damageWithoutArmor / (1 + ARMOR_REDUCTION * armor)
+                    // damageWithoutArmor = currentDamage * (1 + ARMOR_REDUCTION * armor)
+                    // wantedDamage = damageWithoutArmor / (1 + ARMOR_REDUCTION * armor * armorFactor) 
+                    // wantedDamage = currentDamage * (1 + ARMOR_REDUCTION * armor) / (1 + ARMOR_REDUCTION * armor * armorFactor) 
+                    let damageWithoutArmor = currentDamage * (1 + ARMOR_REDUCTION * currentArmor)
+                    currentDamage = damageWithoutArmor / (1 + ARMOR_REDUCTION * currentArmor * armorFactor) 
+                    
 
             // the following effects manage damage taken (target based)
 
@@ -188,7 +198,6 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
             //DamageTag.addDamage(target, currentDamage)
 
         BlzSetEventDamage(currentDamage)
-        setMagicDamage(false)
 
     return currentDamage
 
