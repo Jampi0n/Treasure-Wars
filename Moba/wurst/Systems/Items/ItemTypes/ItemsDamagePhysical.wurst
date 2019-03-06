@@ -385,8 +385,110 @@ function itemRavenSword()
                 target.addEffect(Abilities.avengerMissile, "chest").destr()
         end))
 
+
+            
+constant ARMOR_BREAKER_BUFF_ID = compiletime(createAuraBuff("Armor Breaker", "This unit's armor is broken; it has reduced armor.", "BTNHammer1"))
+constant ARMOR_BREAKER_ABILITY_ID = compiletime(createNegativeBuffAbility(1, ARMOR_BREAKER_BUFF_ID, "", ""))
+            
+constant ABILITY_ARMOR_BREAKER_SLAM = compiletime(ABIL_ID_GEN.next())
+
+function itemArmorBreaker()
+    let str = 20
+    let armorDmg = 35
+    let armorDuration = 6
+    let activeDmg = 150
+    let activeArmor = 50
+    let activeDuration = 6
+    let cooldown = 45
+
+    if compiletime
+        new AbilityDefinitionPitLordHowlofTerror(ABILITY_ARMOR_BREAKER_SLAM)
+        ..setCooldown(1, cooldown.toReal())
+        ..setTargetsAllowed(1, "none")
+        ..setArtCaster("")
+        ..setManaCost(1, 0)
+    else
+        CreateTrigger()
+        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_SPELL_EFFECT)
+        ..addAction() -> 
+            if GetSpellAbilityId() == ABILITY_ARMOR_BREAKER_SLAM
+                let caster = GetTriggerUnit()
+                let pos = caster.getPos()
+                addEffect(Abilities.thunderclapCaster, pos).destr()
+
+
+    setupItem(ITEM_ID_ARMOR_BREAKER, CATEGORY, 3325)
+    setAbilities(ABILITY_ARMOR_BREAKER_SLAM)
+    setInfo("Armor Breaker", "+ {0} strength|n|cffffcc00Passive:|r|nAttacks reduce the target's armor by {1}% for {2} seconds.".format(
+            str.toString(), armorDmg.toString(), armorDuration.toString()
+        )+ "|n|cffffcc00Active:|r|nSlams the ground, dealing {0} damage and reducing the armor of affected units by {1}% for {2} seconds.".format(
+            activeDmg.toString(), activeArmor.toString(), activeDuration.toString()
+        ) )
+
+    addStatBonusAbsolute(Stat.STR, str)
+
+    if not compiletime
+        BuffType hammerBuff = new BuffType(false, false)
+        var abilityList = new LinkedList<int>
+        ..add(ARMOR_BREAKER_ABILITY_ID)
+        hammerBuff.setup(abilityList, ARMOR_BREAKER_BUFF_ID)
+        hammerBuff.addFirstFunction((Buff thisBuff) -> (begin
+            thisBuff.getTarget().wrapper().addStatRelativeBonus(Stat.AR, -armorDmg*10)
+        end))
+
+        hammerBuff.addEndFunction((Buff thisBuff) -> (begin
+            thisBuff.getTarget().wrapper().addStatRelativeBonus(Stat.AR, armorDmg*10)
+        end))
+
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            
+            if attacker.isType(UNIT_TYPE_HERO) and attacker.hasItemById(ITEM_ID_ARMOR_BREAKER) and not target.isType(UNIT_TYPE_STRUCTURE)
+                target.addBuffReduced( attacker, armorDuration.toReal(), hammerBuff, 1)
+                target.addEffect(Abilities.bloodElfSpellThiefMISSILE, "chest").destr()
+        end))
+
+
+constant CHILLING_BLADE_BUFF_ID = compiletime(createAuraBuff("Chilling Blade", "This unit was hit by Chilling Blade; it has reduced movement speed.", "BTNMysticDagger"))
+constant CHILLING_BLADE_ABILITY_ID = compiletime(createNegativeBuffAbility(1, CHILLING_BLADE_BUFF_ID, Abilities.frostDamage, "chest"))
+
+function itemChillingBlade()
+    let str = 20
+    let slowAmount = 30
+    let slowDuration = 2
+    setupItem(ITEM_ID_CHILLING_DAGGER, CATEGORY, 3950)
+    setInfo("Chilling Blade", "+ {0} strength|n|cffffcc00Passive:|r|nAttacks reduce the target's movement speed by {1}% for {2} seconds".format(
+            str.toString(), slowAmount.toString(), slowDuration.toString()
+        )+ "|n|cffffcc00Active:|r|nasd" )
+
+    addStatBonusAbsolute(Stat.STR, str)
+
+    if not compiletime
+        BuffType slowBuff = new BuffType(false, false)
+        var abilityList = new LinkedList<int>
+        ..add(CHILLING_BLADE_ABILITY_ID)
+        slowBuff.setup(abilityList, CHILLING_BLADE_BUFF_ID)
+        slowBuff.addFirstFunction((Buff thisBuff) -> (begin
+            let wrapper = thisBuff.getTarget().wrapper()
+            wrapper.addStatRelativeBonus(Stat.MS, -slowAmount*10)
+            wrapper.incBlue()
+        end))
+
+        slowBuff.addEndFunction((Buff thisBuff) -> (begin
+            let wrapper = thisBuff.getTarget().wrapper()
+            wrapper.addStatRelativeBonus(Stat.MS, slowAmount*10)
+            wrapper.decBlue()
+        end))
+
+        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+            if attacker.hasItemById(ITEM_ID_CHILLING_DAGGER) and not target.isType(UNIT_TYPE_STRUCTURE)
+                target.addBuffReduced( attacker, slowDuration.toReal(), slowBuff, 1)
+        end))
+
 @compiletime
 function initItems1()
+    //itemArmorBreaker()
+    //itemChillingBlade()
+
     itemGlovesOfHaste()
     itemWarAxe()
     itemHammerOfStrength()

@@ -6,6 +6,9 @@ import Icons
 
 //potions
 public constant ITEM_ID_HEALTH_POTION = compiletime(newItem(Icons.bTNPotionGreenSmall))
+public constant ITEM_ID_MANA_POTION = compiletime(newItem(Icons.bTNPotionBlueSmall))
+public constant ITEM_ID_HEALING_SALVE = compiletime(newItem(Icons.bTNHealingSalve))
+public constant ITEM_ID_CLARITY_POTION = compiletime(newItem(Icons.bTNLesserClarityPotion))
 
 //utility
 public constant ITEM_ID_LIGHT_BOOTS = compiletime(newItem("BTNNatureSlippers"))
@@ -28,6 +31,13 @@ public constant ITEM_ID_BLOOD_SWORD = compiletime(newItem("BTNBarbarianBrutalSla
 public constant ITEM_ID_ENCHANTED_BLADE = compiletime(newItem("BTN_RunicBlade_CR"))
 public constant ITEM_ID_AXE_OF_DECAY = compiletime(newItem("BTNINV_Axe_15"))
 public constant ITEM_ID_SACRIFICIAL_DAGGER = compiletime(newItem("BTNBloodStinger"))
+
+public constant ITEM_ID_AXE_OF_EMBERS = compiletime(newItem("BTN_AxeOfAshes"))
+public constant ITEM_ID_ARMOR_BREAKER = compiletime(newItem("BTNHammer1"))
+public constant ITEM_ID_RUNE_BLADE = compiletime(newItem("BTN_RunicBlade_CR"))
+public constant ITEM_ID_SOUL_TORMENTOR = compiletime(newItem("BTNCursedSword"))
+public constant ITEM_ID_SWORD_OF_THE_BLOOD_STEALER = compiletime(newItem("BTNBarbarianBrutalSlasher"))
+public constant ITEM_ID_CHILLING_DAGGER = compiletime(newItem("BTNMysticDagger"))
 
 //magic damage
 public constant ITEM_ID_BOOTS_OF_DARKNESS = compiletime(newItem("BTNWalkersOfDarkness"))
