@@ -12,6 +12,9 @@ function itemBootsOfDarkness()
     setInfo("Boots Of Darkness", "+ {0} movement speed|n+ {1}% intelligence|nAttacks deal {2} additional void damage.|nMovement speed bonus from boots does not stack."
     .format(ms.toString(), intelFactor.toString(), voidDmg.toString()))
 
+    addRequirement(ITEM_ID_LIGHT_BOOTS)
+    addRequirement(ITEM_ID_GEM_OF_DARKNESS)
+
     addStatBonusRelative(Stat.INT, intelFactor*10)
     addPickupFunction(()->(begin
         if isUnique() and hasNot(ITEM_ID_HEAVY_BOOTS) and hasNot(ITEM_ID_LIGHT_BOOTS)
