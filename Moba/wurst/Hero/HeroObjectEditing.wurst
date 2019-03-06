@@ -255,10 +255,15 @@ public class DynamicTooltip
     
     private int abilityTypeId
 
+    private string learnIntro
     private LinkedList<DynamicElement> array[5] normalList
     private LinkedList<DynamicElement> array[5] turnOffList
     private LinkedList<DynamicElement> array[5] learnLevelList
     private LinkedList<DynamicElement> learnList
+
+    /*A short summary of the skill. Defaults to learnIntro. If learnIntro is too long, it is recommended to add
+    a short summary, to keep tavern tooltips short.*/
+    private string summary = ""
 
     private boolean useTurnOff
 
@@ -347,9 +352,12 @@ public class DynamicTooltip
             replaceStrength.add(replacement)
         
 
+    function setSummary(string summary)
+        this.summary = summary
+
     function setLearnString(string intro, LevelString levelString)
         string newString = intro + "\n"
-
+        this.learnIntro = intro
         for i = 1 to 5
             newString += getLevelString(i) + levelString.getString(i)
             this.learnLevelList[i-1] = this.convertToList(levelString.getString(i))
@@ -388,6 +396,14 @@ public class DynamicTooltip
         this.turnOffList[level - 1] = this.convertToList(newString)
 
 
+    function getLearnIntro() returns string
+        return this.learnIntro
+
+    function getSummary() returns string
+        if this.summary == ""
+            return this.getLearnIntro()
+        else
+            return this.summary
     
     function evaluateLearnStringLevel(int level, int strength, int intelligence, bool const) returns string
         return this.evaluateList(this.learnLevelList[level-1], strength, intelligence, -1, const)

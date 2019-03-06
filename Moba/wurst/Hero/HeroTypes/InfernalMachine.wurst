@@ -11,6 +11,10 @@ import ClosureTimers
 
 public constant HERO_INFERNAL_MACHINE = 'H017'
 public constant HERO_INFERNAL_MACHINE_MORPH = 'H01D'
+constant THIS_HERO = HERO_INFERNAL_MACHINE
+constant THIS_ID = 8
+constant THIS_BUTTON_POS = 8 //button pos from 0 to 11
+constant THIS_ICON = Icons.bTNInfernalCannon
 HeroType heroType = null
 
 
@@ -310,7 +314,7 @@ function onRapidEnd(unit caster, int level) // remove bonus
 
 function onAttack(unit attacker, unit target, boolean _isActive, boolean advanced)
     if target.isTargetable(attacker.getOwner(), false, true) and not target.isType(UNIT_TYPE_STRUCTURE)
-        if attacker.getTypeId() == HERO_INFERNAL_MACHINE and BuffList.hasBuffType(attacker, buffBash)
+        if attacker.getTypeId() == THIS_HERO and BuffList.hasBuffType(attacker, buffBash)
             let bash = BuffList.getBuffOfType(attacker, buffBash)
             target.addBuffReduced(attacker, BASH_STUN_DURATION[bash.getLevel()-1], STUNNED, 1)
             attacker.dealDamage(target, BASH_DAMAGE_BONUS[bash.getLevel()-1].toReal(), ReductionType.PHYSICAL)
@@ -345,7 +349,7 @@ function onSpellCast()
         ArtilleryDetection.fireArtillery(caster.getOwner(), FLAME_THROWER_ARTILLERY, caster.getPos(), vec2(GetSpellTargetX(), GetSpellTargetY()))
 
     else if spellId == ABILITY_RAPID_FIRE
-        if caster.getTypeId() == HERO_INFERNAL_MACHINE
+        if caster.getTypeId() == THIS_HERO
             doAfter( 0, () -> onRapid(caster, level))
         else
             doAfter( 0, () -> onRapidEnd(caster, level))
@@ -446,7 +450,7 @@ function teamFightAI(HeroAI ai)
 
     if target.isTargetable(hero.getOwner(), false, true)
 
-        if hero.getTypeId() == HERO_INFERNAL_MACHINE
+        if hero.getTypeId() == THIS_HERO
             if target.getPos().distanceTo(hero.getPos()) < 600
                 ai.issue("chemicalrage")
                 ai.issue("berserk")
@@ -464,11 +468,11 @@ function setupTooltips()
     innerFire(ABILITY_INNER_FIRE)
     flameThrower(ABILITY_FLAME_THROWER)
     rapidFire(ABILITY_RAPID_FIRE)
+    createHeroButton(THIS_ID, THIS_BUTTON_POS, THIS_ICON)
 
 
 function initHeroType()
     setupStats()
-    setupTooltips()
     heroType..setSkillBuild("QEWQQWQEQWEWEWE")
     ..addItem(ITEM_ID_HEAVY_BOOTS)
     ..addItem(ITEM_ID_RUNIC_ARMOR)
@@ -621,9 +625,12 @@ function createHeroType(Hero hero)
     end))
 
 init
-    heroType = new HeroType(HERO_INFERNAL_MACHINE, Icons.bTNInfernalCannon, 8, true)
-        ..setOnInitFunction(() -> initHeroType())
-        ..setOnCreateFunction((Hero hero) -> createHeroType(hero))
+    heroType = new HeroType(THIS_HERO, THIS_ICON, THIS_ID, true)
+    ..setOnInitFunction(() -> initHeroType())
+    ..setOnCreateFunction((Hero hero) -> createHeroType(hero))
+
+    setupTooltips()
+    addButtonToTavern(THIS_ID, THIS_BUTTON_POS, heroType, 0)
 
    
 

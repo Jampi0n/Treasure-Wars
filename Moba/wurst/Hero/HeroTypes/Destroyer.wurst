@@ -9,6 +9,10 @@ import ClosureTimers
 import DamageDetection
 
 public constant HERO_DESTROYER = 'H00R'
+constant THIS_HERO = HERO_DESTROYER
+constant THIS_ID = 13
+constant THIS_BUTTON_POS = 1 //button pos from 0 to 11
+constant THIS_ICON = "BTNEligor"
 HeroType heroType = null
 
 public constant ABILITY_DEATH_FRENZY = 'AY3P'
@@ -137,6 +141,7 @@ function abilityW(int abilityId)
                 ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
 
     let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setSummary("Damages nearby enemy units and increases the Destroyer's attack speed at the cost of mana and health. Can be turned off.")
     tooltip.setReplaceIntelligence(IMMOLATION_DAMAGE_BONUS)
     tooltip.setLearnString("Engulfs the Destroyer in flames, damaging nearby enemies and the Destroyer himself. Heroes take double damage. Also increases the Destroyer's attack speed.|nDrains mana until deactivated.", (int lvl) -> (begin
         return "{0}{I0} damage per second, {1}% attack speed.".format(
@@ -249,6 +254,7 @@ function abilityR(int abilityId)
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(0)
+    tooltip.setSummary("Increases the Destroyer's movement speed when chasing the targeted unit and causes his attacks against the target to deal more damage and slow.")
     tooltip.setLearnString("Marks the target enemy unit as his prey. The Destroyer will have increased movmement speed when moving towards the prey. Every attack against the prey deals bonus damage and slows the prey. Lasts {0} seconds.".format(PREY_DURATION.toExactString()), (int lvl) -> (begin
         return "{0} damage, {1}% movement speed".format(
             PREY_BONUS_DAMAGE[lvl-1].str(),
@@ -385,11 +391,11 @@ function setupTooltips()
     abilityW(ABILITY_IMMOLATION)
     abilityE(ABILITY_BONE_WALL)
     abilityR(ABILITY_WILD_RAGE)
+    createHeroButton(THIS_ID, THIS_BUTTON_POS, THIS_ICON)
 
 
 function initHeroType()
     setupStats()
-    setupTooltips()
     heroType..setSkillBuild("QWQWQWQWQWEEEEE")
     ..addItem(ITEM_ID_HEAVY_BOOTS)
     ..addItem(ITEM_ID_BLOOD_SWORD)
@@ -559,9 +565,12 @@ function initHeroType()
     
 init
     
-    heroType = new HeroType(HERO_DESTROYER, "BTNEligor", 13, false)
-        ..setOnInitFunction(() -> initHeroType())
-        ..setOnCreateFunction((Hero h) -> begin
+    heroType = new HeroType(THIS_HERO, THIS_ICON, THIS_ID, false)
+    ..setOnInitFunction(() -> initHeroType())
+    ..setOnCreateFunction((Hero h) -> begin
         heroDestroyer = h.toUnit()
     end)
+
+    setupTooltips()
+    addButtonToTavern(THIS_ID, THIS_BUTTON_POS, heroType, 1)
         

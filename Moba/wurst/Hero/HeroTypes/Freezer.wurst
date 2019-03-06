@@ -9,6 +9,10 @@ import HashMap
 import OnAttack
 
 public constant HERO_FREEZER = 'H00V'
+constant THIS_HERO = HERO_FREEZER
+constant THIS_ID = 9
+constant THIS_BUTTON_POS = 9 //button pos from 0 to 11
+constant THIS_ICON = Icons.bTNFrostArmor
 HeroType heroType = null
 
 constant ABILITY_COLD_HAND = 'AZ9P'
@@ -208,6 +212,7 @@ function frostWyrm(int abilityId)
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(FROST_WYRM_INT_FACTOR.toReal())  
+    tooltip.setSummary("Summons a powerful Frost Wyrm, that slows enemies it attacks.")
     tooltip.setLearnString("Summons a powerful Frost Wyrm. The Frost Wyrm's attack speed and hit points scale with the respective stats of the Hero. The Frost Wyrm's attacks slow the targets.", (int lvl) -> (begin
         return "{0}{I0} bonus damage, {1} bonus hit points, {2}% slow for {3} seconds.".format(
             FROST_WYRM_DMG[lvl-1].str(),
@@ -477,6 +482,7 @@ function setupTooltips()
     frostArmor(ABILITY_FROST_ARMOR)
     frostWyrm(ABILITY_FROST_WYRM)
     freeze(ABILITY_FREEZE)
+    createHeroButton(THIS_ID, THIS_BUTTON_POS, THIS_ICON)
 
 function initHeroType()
     setupStats()
@@ -487,7 +493,6 @@ function initHeroType()
     ..addItem(ITEM_ID_SCROLL_OF_CONJURATION)
     ..addItem(ITEM_ID_VAMPIRIC_GOBLET)
     ..addItem(ITEM_ID_RUNIC_ARMOR)
-    setupTooltips()
     delayInit(5) ->
         heroType
             ..addOnSpellCastFunc(function onSpellCast)
@@ -663,6 +668,9 @@ function createHeroType(Hero hero)
     
         
 init
-    heroType = new HeroType(HERO_FREEZER, Icons.bTNFrostArmor, 9, true)
-        ..setOnInitFunction(() -> initHeroType())
-        ..setOnCreateFunction((Hero hero) -> createHeroType(hero))
+    heroType = new HeroType(THIS_HERO, THIS_ICON, THIS_ID, true)
+    ..setOnInitFunction(() -> initHeroType())
+    ..setOnCreateFunction((Hero hero) -> createHeroType(hero))
+
+    setupTooltips()
+    addButtonToTavern(THIS_ID, THIS_BUTTON_POS, heroType, 0)
