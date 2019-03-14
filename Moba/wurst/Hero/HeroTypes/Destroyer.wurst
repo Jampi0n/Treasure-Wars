@@ -71,7 +71,8 @@ function abilityQ(int abilityId)
             ..setupIcon("BTNFlameBurst")
             ..setupWithHotKey("Melting Breath", "Q")
             ..setAnimationNames("spell,channel")
-            ..setMissileArt(Abilities.breathOfFireMissile)
+            ..setMissileArt("BreathOfFireMissile3.mdx")
+            ..setMissileSpeed(800)
 
         for lvl = 1 to 5
             aDef
@@ -82,10 +83,10 @@ function abilityQ(int abilityId)
                 ..setDamage(lvl, 0.01)
                 ..setDamagePerSecond(lvl, 0.01)
                 ..setBuffs(lvl, BUFF_ID_ON_BREATH.toRawCode())
-                ..setDistance(lvl, 375)
-                ..setFinalArea(lvl, 300)
+                ..setDistance(lvl, 325)
+                ..setFinalArea(lvl, 175)
                 ..setMaxDamage(lvl, 99999)
-                ..setAreaofEffect(lvl, 125)
+                ..setAreaofEffect(lvl, 100)
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(BREATH_DAMAGE_BONUS)
