@@ -536,7 +536,12 @@ public class GUI
         if GetLocalPlayer() == this.forPlayer and not IS_REPLAY
             EnableDragSelect(true, true)
             EnableSelect(true, true)
-            SetCameraBoundsToRect(playableMapRect)
+            print(playableMin.x.toString()+","+playableMin.y.toString()+" "+playableMax.x.toString()+","+playableMax.y.toString())
+            let minX = playableMin.x + GetCameraMargin(CAMERA_MARGIN_LEFT)
+            let minY = playableMin.y + GetCameraMargin(CAMERA_MARGIN_BOTTOM)
+            let maxX = playableMax.x - GetCameraMargin(CAMERA_MARGIN_RIGHT)
+            let maxY = playableMax.y - GetCameraMargin(CAMERA_MARGIN_TOP)
+            SetCameraBounds(minX, minY, minX, maxY, maxX, maxY, maxX, minY)
             ResetToGameCamera(0)
             PanCameraToTimed(previousCamerePos.x, previousCamerePos.y, 0)
             if this.mBoardMinimized
