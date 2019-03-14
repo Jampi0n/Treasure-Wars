@@ -536,7 +536,6 @@ public class GUI
         if GetLocalPlayer() == this.forPlayer and not IS_REPLAY
             EnableDragSelect(true, true)
             EnableSelect(true, true)
-            print(playableMin.x.toString()+","+playableMin.y.toString()+" "+playableMax.x.toString()+","+playableMax.y.toString())
             let minX = playableMin.x + GetCameraMargin(CAMERA_MARGIN_LEFT)
             let minY = playableMin.y + GetCameraMargin(CAMERA_MARGIN_BOTTOM)
             let maxX = playableMax.x - GetCameraMargin(CAMERA_MARGIN_RIGHT)
