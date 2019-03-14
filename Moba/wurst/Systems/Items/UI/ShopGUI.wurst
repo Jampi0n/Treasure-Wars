@@ -361,6 +361,7 @@ public class GUI
     private int itemsOnPage
     private vec2 center
     private vec2 previousCamerePos
+    private int inventoryUnitTypeId
 
     /*
         Some operations use clickCooldown, to prevent user input for a short time.
@@ -414,6 +415,7 @@ public class GUI
         this.createBackground()
         
         this.inventoryUnit = inventoryUnit
+        this.inventoryUnitTypeId = this.inventoryUnit.getTypeId()
         //start with seconds page, because first depends on hero
         this.selectedItem = this.getItemFromList(1,0)
         this.selectedRecipe = this.selectedItem
@@ -701,7 +703,7 @@ public class GUI
             loadRecipeTree()
 
         if this.currentPage == 0
-            let index = RecommendedItems.getIndex(this.inventoryUnit.getTypeId(), newRecipe)
+            let index = RecommendedItems.getIndex(this.inventoryUnitTypeId, newRecipe)
             if index != -1
                 GUI.buyableItemsButtons[index + this.arrayOffset].setHightLight(true)
                 this.selectedRecipeButton = index
@@ -817,19 +819,12 @@ public class GUI
         return this.inventoryUnit
 
     function setInventoryUnit(unit inventoryUnit)
-        if this.inventoryUnit == null
-            let rec = RecommendedItems.getItem(this.inventoryUnit.getTypeId(), 0)
-            if rec != null
-                this.selectedItem = rec
-                setPage(0)
-                this.selectRecipe(this.selectedItem, false, true)
-                this.selectItem(this.selectedItem, true)
         this.inventoryUnit = inventoryUnit
 
     function getItemFromList(int category, int index) returns ItemInShop
         if category == 0
-            if index < RecommendedItems.getCount(this.inventoryUnit.getTypeId())
-                return RecommendedItems.getItem(this.inventoryUnit.getTypeId(), index)
+            if index < RecommendedItems.getCount(this.inventoryUnitTypeId)
+                return RecommendedItems.getItem(this.inventoryUnitTypeId, index)
             else
                 return null
         else
@@ -837,7 +832,7 @@ public class GUI
     
     function getItemCount(int category) returns int
         if category == 0
-            return RecommendedItems.getCount(this.inventoryUnit.getTypeId())
+            return RecommendedItems.getCount(this.inventoryUnitTypeId)
         else
             return ItemInShop.getItemCount(category)
 
@@ -851,6 +846,7 @@ public class GUI
 
     function start(unit heroUnit)
         this.setInventoryUnit(heroUnit)
+        this.inventoryUnitTypeId = heroUnit.getTypeId()
         this.selectFirst()
         this.enableOpen = true
 
