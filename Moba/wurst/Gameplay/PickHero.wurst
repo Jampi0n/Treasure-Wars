@@ -72,6 +72,9 @@ function setupCreatedHero(Hero hero)
     heroUnit.setPos(pos)
     getGUI(owner.getId())
     ..start(heroUnit)
+    if GetLocalPlayer() == owner
+        ClearTextMessages()
+    printTimedToPlayer("You can now open/close the shop by pressing escape.", 25, owner)
     //prevent using skills for first 5 seconds, as skills will be initialized
     UnitModifySkillPoints(heroUnit, -1)
     
@@ -149,7 +152,7 @@ function allRandom()
     allHeroesPicked()
     
 function allPick()
-    int pickTime = DEBUG_MODE?1000:60
+    int pickTime = DEBUG_MODE?10:60
     print("|cffffcc00All Pick was chosen. You have " + pickTime.toString() + " seconds to pick a Hero!|r")
 
     tavern[0] = createUnit(players[PLAYER_NEUTRAL_PASSIVE], 'n002', gg_rct_Tavern0.getCenter(), angle(0) )
