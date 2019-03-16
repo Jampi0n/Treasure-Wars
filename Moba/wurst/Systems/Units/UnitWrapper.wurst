@@ -162,7 +162,10 @@ public class UnitWrapper
         statBaseValue[Stat.CD.toInt()] = 0
 
     protected static function getWrapper(unit whichUnit) returns UnitWrapper
-        return unitMap.get(whichUnit)
+        let w = unitMap.get(whichUnit)
+        if w == null
+            return new UnitWrapper(whichUnit)
+        return w
 
     //custom destroy function, so unit wrapper is destroyed last and can be used in the clean up routines
     protected function destr()
