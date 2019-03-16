@@ -93,7 +93,7 @@ function shieldBash(int abilityId)
 
 constant real array BATTLE_ROAR_AOE = [600, 700, 800, 900, 1000]
 constant int array BATTLE_ROAR_AS = [30, 35, 40, 45, 50]
-constant int array BATTLE_ROAR_MS = [10, 15, 20, 25, 30]
+constant int array BATTLE_ROAR_MS = [30, 30, 30, 30, 30]
 constant real array BATTLE_ROAR_DURATION = [5, 6, 7, 8, 9]
 constant real BATTLE_ROAR_DURATION_BONUS = 2
 
@@ -136,18 +136,19 @@ function battleRoar(int abilityId)
             BATTLE_ROAR_DURATION[lvl-1].toExactString()))
     addDynamicTooltipIntelligence(heroType, tooltip)
 
-constant real array HOLY_SHIELD_DURATION = [2, 2.5, 3, 3.5, 4]
+constant real array HOLY_SHIELD_DURATION = [2, 2.25, 2.5, 2.75, 3]
+constant real array HOLY_SHIELD_COOLDOWN = [17, 15, 13, 11, 9]
 constant real HOLY_SHIELD_DURATION_BONUS = 2
 
 constant int BUFF_ID_HOLY_SHIELD = compiletime(createAuraBuff("Holy Shield", "This unit is protected by Holy Shield; it is untargetable.", "BTNAngelicShield"))
 constant int ABILITY_HOLY_SHIELD_BUFF = compiletime(createPositiveBuffAbility(5, BUFF_ID_HOLY_SHIELD, "Abilities\\Spells\\Human\\DivineShield\\DivineShieldTarget.mdl", "origin"))
 
 
+
 function holyShield(int abilityId)
 
     if compiletime
-        int array MANA = [80, 90, 100, 110, 120]
-        real array COOLDOWN = [14, 14, 14, 14, 14]
+        int array MANA = [80, 80, 80, 80, 80]
         real array RANGE = [600, 600, 600, 600, 600]
 
         let aDef = new AbilityDefinitionIllidanChannel(abilityId)
@@ -160,7 +161,7 @@ function holyShield(int abilityId)
 
         for lvl = 1 to 5
             aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
+                ..setCooldown(lvl, HOLY_SHIELD_COOLDOWN[lvl-1])
                 ..setManaCost(lvl, MANA[lvl-1])
                 ..setCastRange(lvl, RANGE[lvl-1])
                 ..setArtDuration(lvl, 0)
@@ -174,8 +175,8 @@ function holyShield(int abilityId)
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(HOLY_SHIELD_DURATION_BONUS)
     tooltip.setLearnString("Turns the target frendly hero untargetable.", (int lvl) -> (begin
-        return "{0}{I0} seconds.".format(
-        HOLY_SHIELD_DURATION[lvl-1].toExactString())
+        return "{0}{I0} seconds, {1} seconds cooldown.".format(
+        HOLY_SHIELD_DURATION[lvl-1].toExactString(), HOLY_SHIELD_COOLDOWN[lvl-1].toExactString())
     end) )
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, "Turns the target frendly hero untargetable for {0}{I0} seconds.".format(
@@ -192,7 +193,7 @@ constant real DIVINE_PUNISHMENT_DMG_BONUS = 250
 function divinePunishment(int abilityId)
 
     if compiletime
-        int array MANA = [170, 185, 200, 215, 230]
+        int array MANA = [150, 150, 150, 150, 150]
         real array COOLDOWN = [90, 90, 90, 90, 90]
         
         let aDef = new AbilityDefinitionKeeperoftheGroveTranquility(abilityId)

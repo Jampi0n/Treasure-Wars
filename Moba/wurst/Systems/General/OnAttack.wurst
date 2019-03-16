@@ -148,10 +148,6 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
             // wand of blood - ITEM
             if source.isType(UNIT_TYPE_HERO) and source.hasItemById(ITEM_ID_WAND_OF_BLOOD) and not target.isType(UNIT_TYPE_STRUCTURE)
                 source.healHP(source, currentDamage * 0.08)
-
-            // Wild Rage - DESTROYER
-            if source.hasAbility(RAGE_BUFF_ID)
-                source.healHP(source, currentDamage * RAGE_LIFE_STEAL)
         
             // sacrifical dagger - ITEM
             if isAttack and source.isType(UNIT_TYPE_HERO) and source.hasItemById(ITEM_ID_SACRIFICIAL_DAGGER) and not target.isType(UNIT_TYPE_STRUCTURE)
