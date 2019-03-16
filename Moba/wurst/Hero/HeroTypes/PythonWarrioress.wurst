@@ -188,10 +188,10 @@ function empoweredStrike(int abilityId)
     addDynamicTooltipStrength(heroType, tooltip)
 
 
-constant real array PARALYZING_STRIKE_DAMAGE = [160, 200, 240, 280, 320]
-constant real PARALYZING_STRIKE_DAMAGE_BONUS = 150
+constant real array PARALYZING_STRIKE_DAMAGE = [165, 200, 235, 270, 305]
+constant real PARALYZING_STRIKE_DAMAGE_BONUS = 130
 constant real array PARALYZING_STRIKE_DURATION = [1.6, 1.8, 2, 2.2, 2.4]
-constant real PARALYZING_STRIKE_DURATION_BONUS = 0.3
+constant real PARALYZING_STRIKE_DURATION_BONUS = 0.25
 
 
 function paralyzingStrike(int abilityId)

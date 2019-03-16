@@ -49,7 +49,7 @@ function passive(int abilityId)
 
 constant integer BUFF_ID_ON_BREATH = compiletime(createDummyBuff())
 
-constant real array BREATH_DAMAGE = [75, 120, 165, 210, 255]
+constant real array BREATH_DAMAGE = [70, 100, 130, 160, 190]
 constant real BREATH_DAMAGE_BONUS = 80
 
 constant int array BREATH_ARMOR_REDUCTION = [30, 35, 40, 45, 50]
@@ -158,14 +158,14 @@ function abilityW(int abilityId)
 
 
 constant int array WALL_NUMBER = [6, 7, 8, 9, 10]
-constant real array WALL_DURATION = [4, 4.5, 5, 5.5, 6]
+constant real array WALL_DURATION = [3, 3.5, 4, 4.5, 5]
 
 function abilityE(int abilityId)
 
     if compiletime
-        int array MANA = [90, 85, 80, 75, 70]
+        int array MANA = [70, 70, 70, 70, 70]
         real array COOLDOWN = [17, 16, 15, 14, 13]
-        real array RANGE = [1000, 1000, 1000, 1000, 1000]
+        real array RANGE = [800, 850, 900, 950, 1000]
         let aDef = new AbilityDefinitionIllidanChannel(abilityId)
             ..setAnimationNames("spell")
             ..setupIcon("BTNNecromancy")
@@ -193,23 +193,12 @@ function abilityE(int abilityId)
 
 
         
-constant real array RAGE_SELF_DAMAGE = [30, 40, 50, 60, 70]
 
-constant real RAGE_DURATION = 15
-constant real RAGE_DURATION_BONUS = 4
-
-constant int array RAGE_DAMAGE_BONUS = [40, 50, 60, 70, 80]
-
-public constant real RAGE_LIFE_STEAL = 0.35
-
-public constant int RAGE_BUFF_ID = compiletime(createAuraBuff("Wild Rage", "This unit has increased damage and is healed for dealing damage. It takes damage over time.", Icons.bTNUnholyFrenzy))
-constant int RAGE_ABILITY_ID = compiletime(createPositiveBuffAbility(5, RAGE_BUFF_ID, Abilities.unholyFrenzyTarget, "overhead"))
-
-constant real array PREY_BONUS_DAMAGE = [30, 40, 50, 60, 70]
+constant real array PREY_BONUS_DAMAGE = [25, 35, 45, 55, 65]
 constant real PREY_DURATION = 15
-constant int array PREY_MOVE_SPEED = [20, 25, 30, 35, 40]
+constant int array PREY_MOVE_SPEED = [30, 40, 50, 60, 70]
 
-constant int PREY_SLOW = 50
+constant int PREY_SLOW = 35
 constant real PREY_SLOW_DURATION = 1
 
 BuffType buffPreyTarget
@@ -225,7 +214,6 @@ constant int PREY_SLOW_ABILITY_ID = compiletime(createNegativeBuffAbility(5, PRE
 constant int PREY_CASTER_BUFF_ID = compiletime(createAuraBuff("Hunter", "This unit is the Hunter; it's movement speed is increased while moving towards the target.", Icons.bTNUnholyFrenzy))
 constant int PREY_CASTER_ABILITY_ID = compiletime(createPositiveBuffAbility(5, PREY_CASTER_BUFF_ID, Abilities.unholyFrenzyTarget, "overhead"))
 
-BuffType buffRage
 
 function abilityR(int abilityId)
 
@@ -276,15 +264,15 @@ function setupStats()
     heroType
         //..setStat(Stat.AD, 5, 40)
         ..setStat(Stat.AR, 32, 53)
-        ..setStat(Stat.AS, 19, 53)
-        ..setStat(Stat.HP, 14, 43)
+        ..setStat(Stat.AS, 13, 36)
+        ..setStat(Stat.HP, 11, 41)
         ..setStat(Stat.HR, 32, 69)
-        ..setStat(Stat.MP, 21, 37)
+        ..setStat(Stat.MP, 21, 39)
         ..setStat(Stat.MR, 19, 45)
-        ..setStat(Stat.MS, 14, 37)
-        ..setStat(Stat.STR, 17, 55)
+        ..setStat(Stat.MS, 10, 32)
+        ..setStat(Stat.STR, 14, 42)
         ..setStat(Stat.AGI, 33, 49)
-        ..setStat(Stat.INT, 11, 33)
+        ..setStat(Stat.INT, 13, 34)
 
 function onDamage()
     let target = GetTriggerUnit()
@@ -539,26 +527,6 @@ function initHeroType()
                             heroDestroyer.dealDamage(u, dmg, ReductionType.MAGIC)
             else
                 whichBuff.dispel()
-        end))
-
-
-        abilityList = new LinkedList<int>
-        ..add(RAGE_ABILITY_ID)
-        buffRage = new BuffType(true, true)
-        buffRage.setup(abilityList, RAGE_BUFF_ID)
-
-        buffRage.setPeriodicTime(0.2)
-        buffRage.addPeriodicFunction((Buff whichBuff) -> (begin
-            //use hp to not trigger damage event
-            heroDestroyer.addHP(-0.2 * (RAGE_SELF_DAMAGE[whichBuff.getLevel()-1].reduceMagic(heroDestroyer.getInt())))
-        end))
-
-        buffRage.addFirstFunction( (Buff whichBuff) -> (begin
-            heroDestroyer.wrapper().addStatAbsoluteBonus(Stat.AD, RAGE_DAMAGE_BONUS[whichBuff.getLevel()-1])
-        end))
-
-        buffRage.addEndFunction( (Buff whichBuff) -> (begin
-            heroDestroyer.wrapper().addStatAbsoluteBonus(Stat.AD, -RAGE_DAMAGE_BONUS[whichBuff.getLevel()-1])
         end))
 
 

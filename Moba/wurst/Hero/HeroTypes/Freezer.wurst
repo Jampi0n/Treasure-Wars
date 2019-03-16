@@ -33,7 +33,7 @@ function setupStats()
         ..setStat(Stat.MP, 25, 78)
         ..setStat(Stat.MR, 19, 63)
         ..setStat(Stat.MS, 7, 43)
-        ..setStat(Stat.STR, 11, 57)
+        ..setStat(Stat.STR, 3, 21)
         ..setStat(Stat.AGI, 31, 43)
         ..setStat(Stat.INT, 18, 63)
 
@@ -60,15 +60,15 @@ function coldHand(int abilityId)
     addDynamicTooltipIntelligence(heroType, tooltip)
 
 constant real array NOVA_TARGET_DMG =[50, 65, 80, 95, 110]
-constant real NOVA_TARGET_DMG_BONUS = 75
+constant real NOVA_TARGET_DMG_BONUS = 65
 
 constant real array NOVA_AOE_DMG =[50, 75, 100, 125, 150]
-constant real NOVA_AOE_DMG_BONUS = 100
+constant real NOVA_AOE_DMG_BONUS = 90
 
 constant real NOVA_AOE = 250
 
 constant real array NOVA_DURATION = [1.6, 2, 2.4, 2.8, 3.2]
-constant real NOVA_DURATION_BONUS = 1
+constant real NOVA_DURATION_BONUS = 1.5
 
 constant int array NOVA_MS = [30, 30, 30, 30, 30]
 constant int array NOVA_AS = [20, 20, 20, 20, 20]
@@ -233,10 +233,10 @@ function frostWyrm(int abilityId)
 
 
 constant real FREEZE_AOE = 900
-constant real array FREEZE_DMG = [90, 105, 120, 135, 150]
+constant real array FREEZE_DMG = [80, 100, 120, 140, 160]
 constant real FREEZE_DMG_BONUS = 100
 
-constant real array FREEZE_DURATION = [2, 2.25, 2.5, 2.75, 3]
+constant real array FREEZE_DURATION = [2.5, 2.75, 3, 3.25, 3.5]
 
 constant int FREEZE_DEF = 100
 
@@ -249,8 +249,8 @@ constant int FREEZE_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, FREEZE
 function freeze(int abilityId)
 
     if compiletime
-        int array MANA = [350, 375, 400, 425, 450]
-        real array COOLDOWN = [150, 150, 150, 150, 150]
+        int array MANA = [350, 350, 350, 350, 350]
+        real array COOLDOWN = [150, 140, 130, 120, 110]
 
         generateDummyUnit()
         let aDef = new AbilityDefinitionKeeperoftheGroveTranquility(abilityId)

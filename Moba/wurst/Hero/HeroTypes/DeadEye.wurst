@@ -53,8 +53,8 @@ function blackArrow(int abilityId)
     addDynamicTooltipStrength(heroType, tooltip)
 
 
-constant real array PIERCING_SHOT_DAMAGE = [80, 120, 160, 200, 240]
-constant real PIERCING_SHOT_DAMAGE_BONUS = 125
+constant real array PIERCING_SHOT_DAMAGE = [80, 115, 150, 185, 210]
+constant real PIERCING_SHOT_DAMAGE_BONUS = 110
 
 function piercingShot(int abilityId)
 
@@ -97,7 +97,7 @@ function piercingShot(int abilityId)
     addDynamicTooltipStrength(heroType, tooltip)
 
 constant real array TERROR_DURATION = [2, 2.6, 3.2, 3.8, 4.4]
-constant real TERROR_DURATION_BONUS = 4
+constant real TERROR_DURATION_BONUS = 2
 real array TERROR_AOE = [600, 650, 700, 750, 800]
 
 constant BUFF_TERROR = new BuffType(false, true)
@@ -105,8 +105,8 @@ constant BUFF_TERROR = new BuffType(false, true)
 function terror(int abilityId)
 
     if compiletime
-        int array MANA = [90, 100, 110, 120, 130]
-        real array COOLDOWN = [16, 16, 16, 16, 16]
+        int array MANA = [70, 70, 70, 70, 70]
+        real array COOLDOWN = [13, 12, 11, 10, 9]
         let aDef = new AbilityDefinitionPitLordHowlofTerror(abilityId)
             ..setAnimationNames("spell,slam")
             ..setupIcon("BTNHowlOfTerror")
@@ -132,7 +132,7 @@ function terror(int abilityId)
     addDynamicTooltipIntelligence(heroType, tooltip)
 
 real array BONE_BROTHERS_COOLDOWN = [18, 15, 12, 9, 6]
-real array BONE_BROTHERS_RANGE = [600, 700, 800, 900, 1000]
+real array BONE_BROTHERS_RANGE = [600, 750, 900, 1050, 1200]
 
 function boneBrothers(int abilityId)
 
@@ -166,8 +166,8 @@ function boneBrothers(int abilityId)
     addDynamicTooltipIntelligence(heroType, tooltip)
 
         
-constant real array DEATH_COIL_DMG_BASE = [200, 275, 350, 425, 500]
-constant real array DEATH_COIL_DMG_FACTOR = [20, 35, 50, 65, 80]
+constant real array DEATH_COIL_DMG_BASE = [200, 250, 300, 350, 400]
+constant real array DEATH_COIL_DMG_FACTOR = [15, 20, 25, 30, 35]
 constant real DEATH_COIL_DMG_BASE_BONUS = 250
 constant real DEATH_COIL_DMG_FACTOR_BONUS = 60
 constant real DEATH_COIL_DURATION = 10
@@ -355,7 +355,7 @@ function onSpellCast()
                 count++
             skeleton = FirstOfGroup(skeletons)
         skeletonCount = count
-        doAfter(1, () -> (begin
+        doAfter(0.25, () -> (begin
             caster.getOwner().setAbilityAvailable(ABILITY_DEATH_PACT, false)
             caster.addAbility(ABILITY_DEATH_COIL)
             caster.setAbilityLevel(ABILITY_DEATH_COIL, level)
