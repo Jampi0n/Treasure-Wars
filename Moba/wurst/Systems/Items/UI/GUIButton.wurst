@@ -155,7 +155,7 @@ public class Button
 
     function setBackGround(real left, real top, real right, real bottom, string path, colorA col)
         this.removeBackGround()
-        this.background = createImage(path, this.center + vec2( (right-left)/2, (top-bottom)/2 ), right+left, top+bottom, Layer.L2)
+        this.background = createImage(path, this.center + vec2( (right-left)/2, (top-bottom)/2 ), right+left, top+bottom, ImageLayer.L2)
         this.background.setColor(col)
         if this.active
             this.background.show()

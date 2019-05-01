@@ -247,7 +247,7 @@ class RecipeTreeNode
         btn.data = this.itm castTo int
 
         if y != 0
-            this.linkToFork = createImage("Shop\\Link.tga", this.center + vec2(0, 40), 8, 48, Layer.L2)
+            this.linkToFork = createImage("Shop\\Link.tga", this.center + vec2(0, 40), 8, 48, ImageLayer.L2)
             this.linkToFork.show()
             this.linkToFork.setColor(LINK_COLOR)
 
@@ -271,15 +271,15 @@ class RecipeTreeNode
             let rightMost = gui.getPosFromGrid(convertX(getChildX(x, y, this.children - 1, this.children)), 0).x + 2.5 * GRID_SIZE
             let width = (rightMost - leftMost) * 1.05 // actual size is only 62/64, so this is used to increase width of image
             let middle = (rightMost + leftMost) / 2.0
-            this.forkVer = createImage("Shop\\Link.tga", this.center + vec2(0, -80), 8, 48, Layer.L2)
+            this.forkVer = createImage("Shop\\Link.tga", this.center + vec2(0, -80), 8, 48, ImageLayer.L2)
             this.forkVer.show()
             this.forkVer.setColor(LINK_COLOR)
-            this.forkHor = createImage("Shop\\Link.tga", vec2(middle, this.center.y - 100), width, 8, Layer.L2)
+            this.forkHor = createImage("Shop\\Link.tga", vec2(middle, this.center.y - 100), width, 8, ImageLayer.L2)
             this.forkHor.show()
             this.forkHor.setColor(LINK_COLOR)
 
         else if this.children == 1
-            this.forkVer = createImage("Shop\\Link.tga", this.center + vec2(0, -80), 8, 48, Layer.L2)
+            this.forkVer = createImage("Shop\\Link.tga", this.center + vec2(0, -80), 8, 48, ImageLayer.L2)
             this.forkVer.show()
             this.forkVer.setColor(LINK_COLOR)
 

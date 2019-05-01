@@ -54,12 +54,12 @@ public class ImageBorder
         //createUnit(players[0], 'osp1', topLeft, angle(0))
         //createUnit(players[0], 'osp1', bottomRight, angle(0))
 
-        createImage(borderStyle.prefix+"Back", 0.5 * (topLeft + bottomRight), (width - 2*borderStyle.backgroundOffset*size), (height - 2*borderStyle.backgroundOffset*size), Layer.L3).show()
+        createImage(borderStyle.prefix+"Back", 0.5 * (topLeft + bottomRight), (width - 2*borderStyle.backgroundOffset*size), (height - 2*borderStyle.backgroundOffset*size), ImageLayer.L3).show()
 
-        createImage(borderStyle.prefix+"TL.tga", this.topLeft, size * scaling, size * scaling, Layer.L3 ).show()
-        createImage(borderStyle.prefix+"BR.tga", this.bottomRight, size * scaling, size * scaling, Layer.L3 ).show()
-        createImage(borderStyle.prefix+"BL.tga", this.topLeft - vec2(0, height-size), size * scaling, size * scaling, Layer.L3 ).show()
-        createImage(borderStyle.prefix+"TR.tga", this.bottomRight + vec2(0, height-size), size * scaling, size * scaling, Layer.L3 ).show()
+        createImage(borderStyle.prefix+"TL.tga", this.topLeft, size * scaling, size * scaling, ImageLayer.L3 ).show()
+        createImage(borderStyle.prefix+"BR.tga", this.bottomRight, size * scaling, size * scaling, ImageLayer.L3 ).show()
+        createImage(borderStyle.prefix+"BL.tga", this.topLeft - vec2(0, height-size), size * scaling, size * scaling, ImageLayer.L3 ).show()
+        createImage(borderStyle.prefix+"TR.tga", this.bottomRight + vec2(0, height-size), size * scaling, size * scaling, ImageLayer.L3 ).show()
 
         real x1 = this.topLeft.x + size/2 + widthScaling/2
         
@@ -68,8 +68,8 @@ public class ImageBorder
 
 
         for i = 0 to countHor-1
-            createImage(borderStyle.prefix+"T.tga", vec2(x1 + i*widthScaling, y1), widthScaling * scaling, size * scaling, Layer.L3 ).show()
-            createImage(borderStyle.prefix+"B.tga", vec2(x1 + i*widthScaling, y2), widthScaling * scaling, size * scaling, Layer.L3 ).show()
+            createImage(borderStyle.prefix+"T.tga", vec2(x1 + i*widthScaling, y1), widthScaling * scaling, size * scaling, ImageLayer.L3 ).show()
+            createImage(borderStyle.prefix+"B.tga", vec2(x1 + i*widthScaling, y2), widthScaling * scaling, size * scaling, ImageLayer.L3 ).show()
 
 
         x1 = this.topLeft.x
@@ -77,16 +77,16 @@ public class ImageBorder
         y1 = this.topLeft.y - size/2 - heightScaling/2
 
         for i = 0 to countVer-1
-            createImage(borderStyle.prefix+"L.tga", vec2(x1, y1 - i*heightScaling), size * scaling, heightScaling * scaling, Layer.L3 ).show()
-            createImage(borderStyle.prefix+"R.tga", vec2(x2, y1 - i*heightScaling), size * scaling, heightScaling * scaling, Layer.L3 ).show()
+            createImage(borderStyle.prefix+"L.tga", vec2(x1, y1 - i*heightScaling), size * scaling, heightScaling * scaling, ImageLayer.L3 ).show()
+            createImage(borderStyle.prefix+"R.tga", vec2(x2, y1 - i*heightScaling), size * scaling, heightScaling * scaling, ImageLayer.L3 ).show()
     
         
 
 
-        /*createImage(borderStyle.leftPath, this.center - vec2(width/2, 0) , 64, height, Layer.L3).show()
-        createImage(borderStyle.rightPath, this.center + vec2(width/2, 0) , 64, height, Layer.L3).show()
-        createImage(borderStyle.topPath, this.center + vec2(0, height/2) , width, 64, Layer.L3).show()
-        createImage(borderStyle.bottomPath, this.center - vec2(0, height/2) , width, 64, Layer.L3).show()*/
+        /*createImage(borderStyle.leftPath, this.center - vec2(width/2, 0) , 64, height, ImageLayer.L3).show()
+        createImage(borderStyle.rightPath, this.center + vec2(width/2, 0) , 64, height, ImageLayer.L3).show()
+        createImage(borderStyle.topPath, this.center + vec2(0, height/2) , width, 64, ImageLayer.L3).show()
+        createImage(borderStyle.bottomPath, this.center - vec2(0, height/2) , width, 64, ImageLayer.L3).show()*/
 
 init
     humanBorder = new BorderStyle("Shop\\Borders\\human", 64, 20)
