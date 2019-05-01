@@ -44,16 +44,15 @@ public class UnitWrapper
     //protected real defaultMovementSpeed
 
     private int array[STAT_COUNT] statBaseValue
-    //has no effect, is just needed to determine the actual bonus for relative bonus
-
     private int array[STAT_COUNT] statsAbsoluteBonus //default = 0
+    private int array[STAT_COUNT] statsAbsoluteBonusReal //default = 0
     private int array[STAT_COUNT] statsRelativeBonus //default = 0.00
 
-    private int array[STAT_COUNT] statsAbsoluteBonusReal //default = 0
     /*
         Use integer to avoid rounding errors. 1000 means 100% or 1
     */
     int array[STAT_COUNT] statsTotalBonus //default = 0
+    // total = (base + absolute) * (1 + relative/1000)
 
     private static constant unnkownUnitTypes = new LinkedList<int>()
 
@@ -81,9 +80,6 @@ public class UnitWrapper
 
         unitMap.put(assocUnit, this)
 
-        //this.currentMovementSpeed = assocUnit.getMoveSpeed()
-        statBaseValue[Stat.MS.toInt()] = GetUnitDefaultMoveSpeed(this.assocUnit).toInt()
-
         this.buffList = null // new BuffList  create BuffList only when needed
 
         for int i = 0 to STAT_COUNT-1
@@ -92,16 +88,21 @@ public class UnitWrapper
             statsRelativeBonus[i] = 0
             statsTotalBonus[i] = 0
 
-        //Base values should never change for units and only change for heroes on level up.
-
+        // Init base values
+        statBaseValue[Stat.MS.toInt()] = GetUnitDefaultMoveSpeed(this.assocUnit).toInt()
         statBaseValue[Stat.STR.toInt()] = this.assocUnit.getStr(false)
         statBaseValue[Stat.AGI.toInt()] = this.assocUnit.getAgi(false)
         statBaseValue[Stat.INT.toInt()] = this.assocUnit.getInt(false)
+        statBaseValue[Stat.AR.toInt()] = this.assocUnit.getArmor().toInt()
+        statBaseValue[Stat.AD.toInt()] = 0 // strength
+        statBaseValue[Stat.AS.toInt()] = 0 //not needed as only absolute bonus will be used
+        statBaseValue[Stat.HR.toInt()] = 0
+        statBaseValue[Stat.MR.toInt()] = 0
+        statBaseValue[Stat.HP.toInt()] = this.assocUnit.getMaxHP().toInt()
+        statBaseValue[Stat.MP.toInt()] = this.assocUnit.getMaxMana().toInt()
         statBaseValue[Stat.CD.toInt()] = 0
 
         let uType = UnitType.getUnitType(this.assocUnit.getTypeId())
-
-        statBaseValue[Stat.HP.toInt()] = this.assocUnit.getMaxHP().toInt()
 
         if uType != null
             updateBaseStatsUnits()
@@ -114,28 +115,11 @@ public class UnitWrapper
                     if not unnkownUnitTypes.has(this.assocUnit.getTypeId())
                         unnkownUnitTypes.add(this.assocUnit.getTypeId())
                         print("Warning unnkown unit type: "+GetUnitName(this.assocUnit))
-            statBaseValue[Stat.AD.toInt()] = 0
-            statBaseValue[Stat.AR.toInt()] = 0
-
-        statBaseValue[Stat.AS.toInt()] = 0 //not needed as this is always a relative bonus
-        
-        statBaseValue[Stat.HR.toInt()] = 0
-        
-        statBaseValue[Stat.MP.toInt()] = this.assocUnit.getMaxMana().toInt()
-        statBaseValue[Stat.MR.toInt()] = 0
-        //statBaseValue[Stat.MS.toInt()] = this.defaultMovementSpeed.toInt()
-    
-    ondestroy
-        objectCount--
-        for int i = 0 to STAT_COUNT-1
-            statsAbsoluteBonus[i] = 0
-            statsRelativeBonus[i] = 0
-            statsTotalBonus[i] = 0
 
     function updateBaseStatsUnits()
         let uType = UnitType.getUnitType(this.assocUnit.getTypeId())
         if uType != null
-            statBaseValue[Stat.AD.toInt()] = uType.getBaseAttack() + uType.getUpgradeAttack(this.assocUnit.getOwner())
+            statBaseValue[Stat.STR.toInt()] = uType.getBaseAttack() + uType.getUpgradeAttack(this.assocUnit.getOwner())
             statBaseValue[Stat.AR.toInt()] = uType.getBaseArmor() + uType.getUpgradeArmor(this.assocUnit.getOwner())
             statBaseValue[Stat.HP.toInt()] = uType.getBaseHp() //(uType.getBaseHp() * ( 1 + 0.1 * uType.getUpgradeArmorCount(this.assocUnit.getOwner()))).round()
             //willpower is same as armor
@@ -149,7 +133,7 @@ public class UnitWrapper
         statBaseValue[Stat.AGI.toInt()] = this.assocUnit.getAgi(false)
         statBaseValue[Stat.INT.toInt()] = this.assocUnit.getInt(false)
 
-        statBaseValue[Stat.AD.toInt()] = statBaseValue[Stat.STR.toInt()] + GetPlayerTechCount(this.assocUnit.getOwner(), UPG_AD, true)
+        statBaseValue[Stat.AD.toInt()] = 0
         statBaseValue[Stat.AR.toInt()] = GetPlayerTechCount(this.assocUnit.getOwner(), UPG_AR, true)
         statBaseValue[Stat.AS.toInt()] = 0
         
@@ -160,6 +144,13 @@ public class UnitWrapper
         statBaseValue[Stat.MR.toInt()] = 0
         //statBaseValue[Stat.MS.toInt()] = this.defaultMovementSpeed.toInt()
         statBaseValue[Stat.CD.toInt()] = 0
+    
+    ondestroy
+        objectCount--
+        for int i = 0 to STAT_COUNT-1
+            statsAbsoluteBonus[i] = 0
+            statsRelativeBonus[i] = 0
+            statsTotalBonus[i] = 0
 
     protected static function getWrapper(unit whichUnit) returns UnitWrapper
         let w = unitMap.get(whichUnit)
@@ -206,16 +197,24 @@ public class UnitWrapper
 
     function applyTotalStatBonus(Stat whichStat)
         if whichStat != Stat.MS and whichStat != Stat.HR and whichStat!= Stat.MR and whichStat!= Stat.HP and whichStat!= Stat.MP and whichStat != Stat.CD
-            this.toUnit().setBonus(whichStat, this.statsTotalBonus[whichStat.toInt()])
-            //update ability tooltips
-            if this.toUnit().isType(UNIT_TYPE_HERO) and (whichStat == Stat.STR or whichStat == Stat.INT)
-                let hero = Hero.getHero(this.toUnit())
-                if hero != null
-                    let hType = hero.getHeroType()
-                    if whichStat == Stat.STR
-                        hType.updateTooltipsStr(this.toUnit())
+            if whichStat == Stat.STR or whichStat == Stat.INT
+                //update ability tooltips
+                if this.toUnit().isType(UNIT_TYPE_HERO)
+                    this.toUnit().setBonus(whichStat, this.statsTotalBonus[whichStat.toInt()])
+                    let hero = Hero.getHero(this.toUnit())
+                    if hero != null
+                        let hType = hero.getHeroType()
+                        if whichStat == Stat.STR
+                            hType.updateTooltipsStr(this.toUnit())
+                        else
+                            hType.updateTooltipsInt(this.toUnit())
+                else
+                    if whichStat == Stat.STR // units get AD increased instead of STR
+                        this.toUnit().setBonus(Stat.AD, this.statsTotalBonus[whichStat.toInt()])
                     else
-                        hType.updateTooltipsInt(this.toUnit())
+                        this.toUnit().setBonus(whichStat, this.statsTotalBonus[whichStat.toInt()])
+            else
+                this.toUnit().setBonus(whichStat, this.statsTotalBonus[whichStat.toInt()])
                         
         else
             if whichStat == Stat.MS

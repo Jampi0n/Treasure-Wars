@@ -82,7 +82,7 @@ function onHydraDeath()
 
             let lvl = creepLevel
             udg_Hydra.wrapper()
-                ..addStatAbsoluteBonus(Stat.AD, DMG[lvl])
+                ..addStatAbsoluteBonus(Stat.STR, DMG[lvl])
                 ..addStatAbsoluteBonus(Stat.HP, HP[lvl])
                 ..addStatAbsoluteBonus(Stat.AR, ARMOR[lvl])
                 ..addStatAbsoluteBonus(Stat.AGI, WILLPOWER[lvl])
@@ -118,7 +118,7 @@ init
     let lvl = creepLevel
     doAfter(0) ->
         udg_Hydra.wrapper()
-            ..addStatAbsoluteBonus(Stat.AD, DMG[lvl])
+            ..addStatAbsoluteBonus(Stat.STR, DMG[lvl])
             ..addStatAbsoluteBonus(Stat.HP, HP[lvl])
             ..addStatAbsoluteBonus(Stat.AR, ARMOR[lvl])
             ..addStatAbsoluteBonus(Stat.AGI, WILLPOWER[lvl])

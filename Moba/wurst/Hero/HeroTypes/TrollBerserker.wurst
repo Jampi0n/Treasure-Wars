@@ -251,7 +251,7 @@ function growth(int abilityId)
             
 
 function onMeleeStats(unit caster, int level) // add bonus
-    caster.wrapper().addStatAbsoluteBonus(Stat.AD, SWITCH_DMG[level-1])
+    caster.wrapper().addStatAbsoluteBonus(Stat.STR, SWITCH_DMG[level-1])
     caster.wrapper().addStatAbsoluteBonus(Stat.MS, SWITCH_MOVE_SPEED[level-1])
 
 function onSwitchToMelee(unit caster, int level) // add bonus
@@ -262,7 +262,7 @@ function onSwitchToMelee(unit caster, int level) // add bonus
     end))
 
 function onRangedStats(unit caster, int level) // remove bonus
-    caster.wrapper().addStatAbsoluteBonus(Stat.AD, -SWITCH_DMG[level-1])
+    caster.wrapper().addStatAbsoluteBonus(Stat.STR, -SWITCH_DMG[level-1])
     caster.wrapper().addStatAbsoluteBonus(Stat.MS, -SWITCH_MOVE_SPEED[level-1])
     
 
@@ -321,7 +321,7 @@ function onSpellCast()
 
 function setupStats()
     heroType
-        //..setStat(Stat.AD, 5, 40)
+        
         ..setStat(Stat.AR, 28, 44)
         ..setStat(Stat.AS, 16, 48)
         ..setStat(Stat.HP, 11, 34)

@@ -408,7 +408,7 @@ class AttackOrderTrack
 
 function setupStats()
     heroType
-        //..setStat(Stat.AD, 5, 40)
+        
         ..setStat(Stat.AR, 31, 59)
         ..setStat(Stat.AS, 7, 22)
         ..setStat(Stat.HP, 13, 52)
@@ -513,11 +513,7 @@ function initHeroType()
             let intel = whichBuff.getCaster().getInt()
             whichBuff.setData(intel)
 
-            if whichBuff.getTarget().isType(UNIT_TYPE_HERO)
-                wrapper.addStatRelativeBonus(Stat.STR, 10 * INNER_FIRE_DMG[level-1].bonus(intel, INNER_FIRE_DMG_BONUS).toInt() )
-            else
-                wrapper.addStatRelativeBonus(Stat.AD, 10 * INNER_FIRE_DMG[level-1].bonus(intel, INNER_FIRE_DMG_BONUS).toInt() )
-
+            wrapper.addStatRelativeBonus(Stat.STR, 10 * INNER_FIRE_DMG[level-1].bonus(intel, INNER_FIRE_DMG_BONUS).toInt() )
             wrapper.addStatAbsoluteBonus(Stat.AR, INNER_FIRE_DEF[level-1].bonus(intel, INNER_FIRE_DEF_BONUS).toInt() )
             wrapper.addStatAbsoluteBonus(Stat.AGI, INNER_FIRE_DEF[level-1].bonus(intel, INNER_FIRE_DEF_BONUS).toInt() )
         end))
@@ -526,11 +522,7 @@ function initHeroType()
             let wrapper = whichBuff.getTarget().wrapper()
             let intel = whichBuff.getData()
 
-            if whichBuff.getTarget().isType(UNIT_TYPE_HERO)
-                wrapper.addStatRelativeBonus(Stat.STR, -10 * INNER_FIRE_DMG[level-1].bonus(intel, INNER_FIRE_DMG_BONUS).toInt() )
-            else
-                wrapper.addStatRelativeBonus(Stat.AD, -10 * INNER_FIRE_DMG[level-1].bonus(intel, INNER_FIRE_DMG_BONUS).toInt() )
-
+            wrapper.addStatRelativeBonus(Stat.STR, -10 * INNER_FIRE_DMG[level-1].bonus(intel, INNER_FIRE_DMG_BONUS).toInt() )
             wrapper.addStatAbsoluteBonus(Stat.AR, -INNER_FIRE_DEF[level-1].bonus(intel, INNER_FIRE_DEF_BONUS).toInt() )
             wrapper.addStatAbsoluteBonus(Stat.AGI, -INNER_FIRE_DEF[level-1].bonus(intel, INNER_FIRE_DEF_BONUS).toInt() )
         end))

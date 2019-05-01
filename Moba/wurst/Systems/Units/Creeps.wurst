@@ -270,7 +270,7 @@ public class CreepCamp
         allCreeps.addUnit(creepUnit)
         alive++
         unitToCamp.put(creepUnit, this)
-        creepUnit.wrapper().addStatRelativeBonus(Stat.AD, campLevel*200)
+        creepUnit.wrapper().addStatRelativeBonus(Stat.STR, campLevel*200)
         creepUnit.wrapper().addStatRelativeBonus(Stat.HP, campLevel*200)
 
     private function respawn()

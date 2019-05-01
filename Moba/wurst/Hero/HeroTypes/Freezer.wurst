@@ -25,7 +25,7 @@ unit array frostWyrm
 
 function setupStats()
     heroType
-        //..setStat(Stat.AD, 5, 40)
+        
         ..setStat(Stat.AR, 27, 38)
         ..setStat(Stat.AS, 0, 26)
         ..setStat(Stat.HP, 7, 29)
@@ -399,7 +399,7 @@ function onSpellCast()
         let wrapper = frostWyrm[pId].wrapper()
         wrapper.addStatAbsoluteBonus(Stat.AS, caster.wrapper().getStatTotalBonus(Stat.AS))
         wrapper.addStatAbsoluteBonus(Stat.HP, caster.wrapper().getStatTotalBonus(Stat.HP) + FROST_WYRM_HP[level-1] )
-        wrapper.addStatAbsoluteBonus(Stat.AD, ( (FROST_WYRM_INT_FACTOR/100) * caster.getInt() ).toInt()  + FROST_WYRM_DMG[level-1] )
+        wrapper.addStatAbsoluteBonus(Stat.STR, ( (FROST_WYRM_INT_FACTOR/100) * caster.getInt() ).toInt()  + FROST_WYRM_DMG[level-1] )
 
     else if spellId == ABILITY_FREEZE
         new Freeze(caster, level)
@@ -634,7 +634,7 @@ function initHeroType()
                 group nearby = CreateGroup()
                 nearby.enumUnitsInRange(target.getPos(), FROST_WYRM_AOE)
 
-                let dmg = attacker.wrapper().getStatTotalValue(Stat.AD) * 0.5
+                let dmg = attacker.wrapper().getStatTotalValue(Stat.STR) * 0.5
                 let level = Hero.getHero(attacker.getOwner()).toUnit().getAbilityLevel(ABILITY_FROST_WYRM)
 
                 if not target.isType(UNIT_TYPE_STRUCTURE)
