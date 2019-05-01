@@ -145,7 +145,6 @@ public class Hero
         wrapper.addStatAbsoluteBonus(Stat.MS, this.heroType.getBase(Stat.MS) )
 
         //upgrade level 1
-        SetPlayerTechResearched(upgradePlayer, UPG_AD , this.heroType.getBase(Stat.AD))
         SetPlayerTechResearched(upgradePlayer, UPG_AR , this.heroType.getBase(Stat.AR))
         SetPlayerTechResearched(upgradePlayer, UPG_AS , this.heroType.getBase(Stat.AS))
 
@@ -190,7 +189,6 @@ public class Hero
         int newLvl = GetHeroLevel(this.hero)
         player upgradePlayer = this.owner.getPlayer()
         let wrapper = this.hero.wrapper()
-        SetPlayerTechResearched(upgradePlayer, UPG_AD , this.heroType.calculateStat(Stat.AD, newLvl))
         SetPlayerTechResearched(upgradePlayer, UPG_AR , this.heroType.calculateStat(Stat.AR, newLvl))
         SetPlayerTechResearched(upgradePlayer, UPG_AS , this.heroType.calculateStat(Stat.AS, newLvl))
         

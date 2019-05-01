@@ -114,18 +114,12 @@ function itemWarHorn()
         BUFF_WAR_HORN.setup(abilityList, WAR_HORN_BUFF_ID)
         BUFF_WAR_HORN.addFirstFunction((Buff thisBuff) -> (begin
             let target = thisBuff.getTarget()
-            if target.isType(UNIT_TYPE_HERO)
-                target.wrapper().addStatRelativeBonus(Stat.STR, adBonus*10)
-            else
-                target.wrapper().addStatRelativeBonus(Stat.AD, adBonus*10)
+            target.wrapper().addStatRelativeBonus(Stat.STR, adBonus*10)
         end))
 
         BUFF_WAR_HORN.addEndFunction((Buff thisBuff) -> (begin
             let target = thisBuff.getTarget()
-            if target.isType(UNIT_TYPE_HERO)
-                target.wrapper().addStatRelativeBonus(Stat.STR, -adBonus*10)
-            else
-                target.wrapper().addStatRelativeBonus(Stat.AD, -adBonus*10)
+            target.wrapper().addStatRelativeBonus(Stat.STR, -adBonus*10)
         end))
 
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
