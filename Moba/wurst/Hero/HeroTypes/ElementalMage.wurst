@@ -275,59 +275,61 @@ function onAttack(unit attacker, unit target, boolean _advanced)
         attacker.dealDamage(target, MARK_DMG[markLevel-1].bonus(attacker.getInt(), MARK_DMG_BONUS), ReductionType.MAGIC)
 
 
-function onSpellCast()
+function castFrostBolt()
     let spellId = GetSpellAbilityId()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
+    let facing = caster.getPos().angleTo(vec2(GetSpellTargetX(), GetSpellTargetY()))
+    new Missile(caster, caster.getPos().withZ(80), 900, facing, Abilities.frostBoltMissile)
+    ..hitOnce()
+    ..setSize(100)
+    ..addModel(Abilities.zigguratFrostMissile)
+    ..setScale(2)
+    ..setMaxRange(800)
+    ..setHitCondition((Missile missile, unit target) -> (begin
+        return not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(missile.getOwner().getOwner(), false, true)
+    end) )
+    ..setHitFunction((Missile missile, unit target) -> (begin
+        let missileCaster = missile.getOwner()
+        missileCaster.dealDamage(Missile.getMissileTarget(), (FROST_BOLT_DAMAGE[level-1]).bonus(missileCaster.getInt(), FROST_BOLT_DAMAGE_BONUS), ReductionType.MAGIC)
+        Missile.getMissileTarget().addBuffReduced(missileCaster, FROST_BOLT_DURATION[level-1], buffFrostBolt, level)
+    end) )
+        
 
-    if(spellId == ABILITY_FROST_BOLT)
-        let facing = caster.getPos().angleTo(vec2(GetSpellTargetX(), GetSpellTargetY()))
-        new Missile(caster, caster.getPos().withZ(80), 900, facing, Abilities.frostBoltMissile)
-            ..hitOnce()
-            ..setSize(100)
-            ..addModel(Abilities.zigguratFrostMissile)
-            ..setScale(2)
-            ..setHitCondition((Missile missile, unit target) -> (begin
-            return not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(missile.getOwner().getOwner(), false, true)
-        end) )
-            ..setHitFunction((Missile missile, unit target) -> (begin
-            let missileCaster = missile.getOwner()
-            missileCaster.dealDamage(Missile.getMissileTarget(), (FROST_BOLT_DAMAGE[level-1]).bonus(missileCaster.getInt(), FROST_BOLT_DAMAGE_BONUS), ReductionType.MAGIC)
-            Missile.getMissileTarget().addBuffReduced(missileCaster, FROST_BOLT_DURATION[level-1], buffFrostBolt, level)
-        end) )
-            ..setMaxRange(800)
-    else if (spellId == ABILITY_FIRE_BLINK)
+function castFireBlink()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+    group nearby = CreateGroup()
 
-        group nearby = CreateGroup()
+    nearby.enumUnitsInRange(vec2(GetSpellTargetX(),GetSpellTargetY()), FIRE_BLINK_AOE)
 
-        nearby.enumUnitsInRange(vec2(GetSpellTargetX(),GetSpellTargetY()), FIRE_BLINK_AOE)
+    let dmg = (FIRE_BLINK_DAMAGE[level-1]).bonus(caster.getInt(), FIRE_BLINK_DAMAGE_BONUS)
+    while(not nearby.isEmpty())
+        unit target = FirstOfGroup(nearby)
+        nearby.removeUnit(target)
+        if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
 
+            caster.dealDamage(target, dmg, ReductionType.MAGIC)
+            target.addEffect(Abilities.redDragonMissile, "chest").destr()
 
+    nearby.destr()
 
-        let dmg = (FIRE_BLINK_DAMAGE[level-1]).bonus(caster.getInt(), FIRE_BLINK_DAMAGE_BONUS)
-        while(not nearby.isEmpty())
-            unit target = FirstOfGroup(nearby)
-            nearby.removeUnit(target)
-            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
+function castElementalMark()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+    let target = GetSpellTargetUnit()
+    target.addBuffReduced(caster, MARK_DURATION, buffElementalMark, level)
 
-                caster.dealDamage(target, dmg, ReductionType.MAGIC)
-                target.addEffect(Abilities.redDragonMissile, "chest").destr()
-
-        nearby.destr()
-
-    else if spellId == ABILITY_ELEMENTAL_MARK
-        let target = GetSpellTargetUnit()
-        target.addBuffReduced(caster, MARK_DURATION, buffElementalMark, level)
-
-    else if spellId == ABILITY_FROST_AND_FLAME
-        let casterPos = caster.getPos()
-        let casterAngle = caster.getFacingAngle()
-        let behindCaster = casterPos.polarOffset(casterAngle, -1000)
-        let targetPos = vec2(GetSpellTargetX(), GetSpellTargetY())
-        ArtilleryDetection.fireArtillery(caster.getOwner(), FF_FLAME_ARTILLERY, behindCaster.polarOffset(casterAngle + angle(bj_PI/2), 600), targetPos)
-        ArtilleryDetection.fireArtillery(caster.getOwner(), FF_FROST_ARTILLERY, behindCaster.polarOffset(casterAngle - angle(bj_PI/2), 600), targetPos)
-
-
+function castFrostAndFlame()
+    let caster = GetTriggerUnit()
+    let casterPos = caster.getPos()
+    let casterAngle = caster.getFacingAngle()
+    let behindCaster = casterPos.polarOffset(casterAngle, -1000)
+    let targetPos = vec2(GetSpellTargetX(), GetSpellTargetY())
+    ArtilleryDetection.fireArtillery(caster.getOwner(), FF_FLAME_ARTILLERY, behindCaster.polarOffset(casterAngle + angle(bj_PI/2), 600), targetPos)
+    ArtilleryDetection.fireArtillery(caster.getOwner(), FF_FROST_ARTILLERY, behindCaster.polarOffset(casterAngle - angle(bj_PI/2), 600), targetPos)
 
 function setupStats()
     heroType
@@ -364,6 +366,10 @@ function setupTooltips()
 
 function initHeroType()
     setupStats()
+    onCast(ABILITY_FROST_BOLT, () -> castFrostBolt())
+    onCast(ABILITY_FIRE_BLINK, () -> castFireBlink())
+    onCast(ABILITY_ELEMENTAL_MARK, () -> castElementalMark())
+    onCast(ABILITY_FROST_AND_FLAME, () -> castFrostAndFlame())
     heroType..setSkillBuild("QWEQWQWQWQWEEEE")
     ..addItem(ITEM_ID_HEAVY_BOOTS)
     ..addItem(ITEM_ID_RUNIC_ARMOR)
@@ -373,7 +379,6 @@ function initHeroType()
     ..addItem(ITEM_ID_WAR_DRUM)
     delayInit(5) ->
         heroType
-            ..addOnSpellCastFunc(function onSpellCast)
             ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, advanced))
             ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
             ..setAttackAI((HeroAI ai) -> (attackAI(ai)))

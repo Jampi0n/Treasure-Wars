@@ -16,6 +16,9 @@ constant THIS_BUTTON_POS = 1 //button pos from 0 to 11
 constant THIS_ICON = Icons.bTNSkeletonArcher
 HeroType heroType = null
 
+group skeletons = CreateGroup()
+int skeletonCount = 0
+
 constant ABILITY_BLACK_ARROW = 'AZ1P'
 constant ABILITY_PIERCING_SHOT = 'AZ1Q'
 constant ABILITY_TERROR = 'AZ1W'
@@ -241,9 +244,6 @@ function deathpact(int abilityId)
     addDynamicTooltipIntelligence(heroType, tooltip)
         
 
-group skeletons = CreateGroup()
-int skeletonCount = 0
-
 function setupStats()
     heroType
         
@@ -289,82 +289,83 @@ function onAttack(unit attacker, unit target, boolean _isActive)
                 end))
         end))
 
-function onSpellCast()
+function castArrow()
     let spellId = GetSpellAbilityId()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
+    let facing = caster.getPos().angleTo(vec2(GetSpellTargetX(), GetSpellTargetY()))
+    new Missile(caster, caster.getPos().withZ(80), 1500, facing, "Abilities\\Weapons\\BallistaMissile\\BallistaMissile.mdl")
+        ..hitOnce()
+        ..setSize(75)
+        ..setScale(1.2)
+        ..addModel(Abilities.avengerMissile)
+        ..setHitCondition((Missile missile, unit target) -> (begin
+        return not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(missile.getOwner().getOwner(), false, true)
+    end) )
+        ..setHitFunction((Missile missile, unit target) -> (begin
+        let missileCaster = missile.getOwner()
+        missileCaster.dealDamage(Missile.getMissileTarget(), (PIERCING_SHOT_DAMAGE[level-1]).bonus(missileCaster.getStr(), PIERCING_SHOT_DAMAGE_BONUS), ReductionType.PHYSICAL)
 
-    if(spellId==ABILITY_TERROR)
-        group nearby = CreateGroup()
-        nearby.enumUnitsInRange(caster.getPos(), TERROR_AOE[level-1])
+    end) )
+        ..setMaxRange(1000)
 
-        let dur = TERROR_DURATION[level-1].bonus(caster.getInt(), TERROR_DURATION_BONUS)
+function castTerror()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+    group nearby = CreateGroup()
+    nearby.enumUnitsInRange(caster.getPos(), TERROR_AOE[level-1])
 
-        while(not nearby.isEmpty())
-            unit target = FirstOfGroup(nearby)
-            nearby.removeUnit(target)
-            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
-                target.addBuffReduced( caster, dur, MISS, 1)
-                target.addBuffReduced( caster, dur, BUFF_TERROR, level)
+    let dur = TERROR_DURATION[level-1].bonus(caster.getInt(), TERROR_DURATION_BONUS)
 
-        nearby.destr()
+    while(not nearby.isEmpty())
+        unit target = FirstOfGroup(nearby)
+        nearby.removeUnit(target)
+        if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
+            target.addBuffReduced( caster, dur, MISS, 1)
+            target.addBuffReduced( caster, dur, BUFF_TERROR, level)
 
-    if(spellId==ABILITY_PIERCING_SHOT)
-        let facing = caster.getPos().angleTo(vec2(GetSpellTargetX(), GetSpellTargetY()))
-        new Missile(caster, caster.getPos().withZ(80), 1500, facing, "Abilities\\Weapons\\BallistaMissile\\BallistaMissile.mdl")
-            ..hitOnce()
-            ..setSize(75)
-            ..setScale(1.2)
-            ..addModel(Abilities.avengerMissile)
-            ..setHitCondition((Missile missile, unit target) -> (begin
-            return not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(missile.getOwner().getOwner(), false, true)
-        end) )
-            ..setHitFunction((Missile missile, unit target) -> (begin
-            let missileCaster = missile.getOwner()
-            missileCaster.dealDamage(Missile.getMissileTarget(), (PIERCING_SHOT_DAMAGE[level-1]).bonus(missileCaster.getStr(), PIERCING_SHOT_DAMAGE_BONUS), ReductionType.PHYSICAL)
+    nearby.destr()
 
-        end) )
-            ..setMaxRange(1000)
+function castBoneBrothers()
+    let caster = GetTriggerUnit()
+    let target = GetSpellTargetUnit()
+    let targetPos = target.getPos()
+    let casterPos = caster.getPos()
+    doAfter(0, () -> (begin
+        target.setPos(casterPos)
+        caster.setPos(targetPos)
+        //target might nor be at the exact place, because it was still occupied by caster
+        target.setPos(casterPos)
+    end))
 
-    if(spellId==ABILITY_BONE_BROTHERS)
-        let target = GetSpellTargetUnit()
-        let targetPos = target.getPos()
-        let casterPos = caster.getPos()
-        doAfter(0, () -> (begin
-            target.setPos(casterPos)
-            caster.setPos(targetPos)
-            //target might nor be at the exact place, because it was still occupied by caster
-            target.setPos(casterPos)
-        end))
+    let lfx = addLightning(LIGHTNING_DRAIN, true, targetPos, casterPos)
+    doAfter(0.5, ()->lfx.destr())
 
-        let lfx = addLightning(LIGHTNING_DRAIN, true, targetPos, casterPos)
-        doAfter(0.5, ()->lfx.destr())
-
-    if(spellId==ABILITY_DEATH_PACT)
-        
-        var skeleton = FirstOfGroup(skeletons)
-        var count = 0
-        
-
-
-        while(skeleton!=null)
-            skeletons.removeUnit(skeleton)
-            if(skeleton.isAlive())
-                skeleton.addEffect("Abilities\\Spells\\Undead\\DeathPact\\DeathPactTarget.mdl", "origin").destr()
-                skeleton.kill()
-                count++
-            skeleton = FirstOfGroup(skeletons)
-        skeletonCount = count
-        doAfter(0.25, () -> (begin
-            caster.getOwner().setAbilityAvailable(ABILITY_DEATH_PACT, false)
-            caster.addAbility(ABILITY_DEATH_COIL)
-            caster.setAbilityLevel(ABILITY_DEATH_COIL, level)
-            heroType.updateTooltipsInt(caster)
-        end))
-        doAfter(DEATH_COIL_DURATION+1, () -> (begin
-            caster.removeAbility(ABILITY_DEATH_COIL)
-            caster.getOwner().setAbilityAvailable(ABILITY_DEATH_PACT, true)
-        end))
+function castDeathPact()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+    var skeleton = FirstOfGroup(skeletons)
+    var count = 0
+    while(skeleton!=null)
+        skeletons.removeUnit(skeleton)
+        if(skeleton.isAlive())
+            skeleton.addEffect("Abilities\\Spells\\Undead\\DeathPact\\DeathPactTarget.mdl", "origin").destr()
+            skeleton.kill()
+            count++
+        skeleton = FirstOfGroup(skeletons)
+    skeletonCount = count
+    doAfter(0.25, () -> (begin
+        caster.getOwner().setAbilityAvailable(ABILITY_DEATH_PACT, false)
+        caster.addAbility(ABILITY_DEATH_COIL)
+        caster.setAbilityLevel(ABILITY_DEATH_COIL, level)
+        heroType.updateTooltipsInt(caster)
+    end))
+    doAfter(DEATH_COIL_DURATION+1, () -> (begin
+        caster.removeAbility(ABILITY_DEATH_COIL)
+        caster.getOwner().setAbilityAvailable(ABILITY_DEATH_PACT, true)
+    end))
 
 
 function retreatAI(HeroAI _ai)
@@ -434,6 +435,11 @@ function setupTooltips()
 
 function initHeroType()
     setupStats()
+    onCast(ABILITY_PIERCING_SHOT, () -> castArrow())
+    onCast(ABILITY_TERROR, () -> castTerror())
+    onCast(ABILITY_BONE_BROTHERS, () -> castBoneBrothers())
+    onCast(ABILITY_DEATH_PACT, () -> castDeathPact())
+
     heroType..setSkillBuild("QWQWQWQWQWEEEEE")
     ..addItem(ITEM_ID_HEAVY_BOOTS)
     ..addItem(ITEM_ID_BLOOD_SWORD)
@@ -444,7 +450,6 @@ function initHeroType()
     delayInit(5) ->
         heroType
             ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
-            ..addOnSpellCastFunc(function onSpellCast)
             ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
             ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
             ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))

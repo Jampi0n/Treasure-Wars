@@ -307,82 +307,82 @@ function setupStats()
         ..setStat(Stat.INT, 12, 25)
 
 
-
-
-
-
-
-
-
-function onSpellCast()
+function castShadowStrike()
     let spellId = GetSpellAbilityId()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
     let pos = caster.getPos()
+    let target = GetSpellTargetUnit()
+    let targetPos = target.getPos()
+    let angle = pos.angleTo(targetPos)
+    let spawnPos = targetPos.polarOffset(angle, 100)
+    let illusion = createUnit(caster.getOwner(), SHADOW_STRIKE_SHADOW_UNIT, spawnPos, angle+angle(bj_PI))
+    illusion.setAnimation("attack")
+    illusion.setVertexColor(255, 255, 255, 200)
+    doAfter(0.3) ->
+        if target.isTargetable(caster.getOwner(), false, true)
+            SOUND_SHADOW_STRIKE.playOnPoint(caster.getPos().toVec3()).snd.setVolume(150)
+            let bleedingWoundLevel = caster.getAbilityLevel(ABILITY_BLEEDING_WOUND)
+            if bleedingWoundLevel > 0
+                let b = target.addBuffReduced(caster, BLEEDING_WOUND_DURATION, buffBleedingWound, bleedingWoundLevel)
+                b.setData(b.getData()+3)
 
-    if(spellId==ABILITY_SHADOW_STRIKE)
-        
-        let target = GetSpellTargetUnit()
-        let targetPos = target.getPos()
-        let angle = pos.angleTo(targetPos)
-        let spawnPos = targetPos.polarOffset(angle, 100)
-        let illusion = createUnit(caster.getOwner(), SHADOW_STRIKE_SHADOW_UNIT, spawnPos, angle+angle(bj_PI))
-        illusion.setAnimation("attack")
-        illusion.setVertexColor(255, 255, 255, 200)
-        doAfter(0.3) ->
-            if target.isTargetable(caster.getOwner(), false, true)
-                SOUND_SHADOW_STRIKE.playOnPoint(caster.getPos().toVec3()).snd.setVolume(150)
-                let bleedingWoundLevel = caster.getAbilityLevel(ABILITY_BLEEDING_WOUND)
-                if bleedingWoundLevel > 0
-                    let b = target.addBuffReduced(caster, BLEEDING_WOUND_DURATION, buffBleedingWound, bleedingWoundLevel)
-                    b.setData(b.getData()+3)
+            target.addBuffReduced(caster, SHADOW_STRIKE_SLOW_DURATION[level-1], buffShadowStrike, level)
+            caster.dealDamage(target, SHADOW_STRIKE_DAMAGE[level-1].bonus(caster.getStr(), SHADOW_STRIKE_DAMAGE_BONUS), ReductionType.PHYSICAL)
+    doAfter(0.85) ->
+        addEffect(Abilities.mirrorImageDeathCaster, spawnPos).destr()
+        illusion.remove()
 
-                target.addBuffReduced(caster, SHADOW_STRIKE_SLOW_DURATION[level-1], buffShadowStrike, level)
-                caster.dealDamage(target, SHADOW_STRIKE_DAMAGE[level-1].bonus(caster.getStr(), SHADOW_STRIKE_DAMAGE_BONUS), ReductionType.PHYSICAL)
-        doAfter(0.85) ->
-            addEffect(Abilities.mirrorImageDeathCaster, spawnPos).destr()
-            illusion.remove()
+function castDeathSpin()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+    caster.removeAbility('Bbsk')
+    caster.addBuff(caster, DEATH_SPIN_DURATION, buffDeathSpin, level)
 
-    if(spellId==ABILITY_DEATH_SPIN)
-        caster.removeAbility('Bbsk')
-        caster.addBuff(caster, DEATH_SPIN_DURATION, buffDeathSpin, level)
+function castCripplingPain()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+    let pos = caster.getPos()
+    SOUND_CRIPPLING_PAIN.playOnPoint(pos.toVec3()).snd.setVolume(150)
+    let g = CreateGroup()
+    g.enumUnitsInRange(pos, CRIPPLING_PAIN_AOE)
+    unit u
+    while true
+        u = FirstOfGroup(g)
+        if u == null
+            break
+        g.removeUnit(u)
+        if BuffList.hasBuffType(u, buffBleedingWound)
+            let bleedingWound = BuffList.getBuffOfType(u, buffBleedingWound)
+            let stacks = bleedingWound.getData() div 4
+            bleedingWound.dispel()
+            caster.dealDamage(u, stacks * CRIPPLING_PAIN_DAMAGE[level-1].bonus(caster.getInt(), CRIPPLING_PAIN_DAMAGE_BONUS), ReductionType.MAGIC)
 
-    if(spellId==ABILITY_CRIPPLING_PAIN)
-        SOUND_CRIPPLING_PAIN.playOnPoint(pos.toVec3()).snd.setVolume(150)
-        let g = CreateGroup()
-        g.enumUnitsInRange(pos, CRIPPLING_PAIN_AOE)
-        unit u
-        while true
-            u = FirstOfGroup(g)
-            if u == null
-                break
-            g.removeUnit(u)
-            if BuffList.hasBuffType(u, buffBleedingWound)
-                let bleedingWound = BuffList.getBuffOfType(u, buffBleedingWound)
-                let stacks = bleedingWound.getData() div 4
-                bleedingWound.dispel()
-                caster.dealDamage(u, stacks * CRIPPLING_PAIN_DAMAGE[level-1].bonus(caster.getInt(), CRIPPLING_PAIN_DAMAGE_BONUS), ReductionType.MAGIC)
+            u.wrapper().addStatRelativeBonus(Stat.MS, -10 * CRIPPLING_PAIN_SLOW[level-1] * stacks )
+            if u.isAlive()
+                let b = u.addBuffReduced(caster, CRIPPLING_PAIN_DURATION[level-1], buffCripplingPain, level)
+                b.setData(stacks * CRIPPLING_PAIN_SLOW[level-1])
 
-                u.wrapper().addStatRelativeBonus(Stat.MS, -10 * CRIPPLING_PAIN_SLOW[level-1] * stacks )
-                if u.isAlive()
-                    let b = u.addBuffReduced(caster, CRIPPLING_PAIN_DURATION[level-1], buffCripplingPain, level)
-                    b.setData(stacks * CRIPPLING_PAIN_SLOW[level-1])
+    g.destr()
 
-                
+function castMirrorImage()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+    mirrorImageUnit = createUnit(caster.getOwner(), MIRROR_IMAGE_UNIT_ID, caster.getPos(), caster.getFacingAngle())
+    mirrorImageUnit.setTimedLife(MIRROR_IMAGE_DURATION[level-1])
+    mirrorImageUnit.setVertexColor(255, 255, 255, 200)
+    let casterWrapper = caster.wrapper()
+    mirrorImageUnit.wrapper()
+    ..addStatAbsoluteBonus(Stat.AS, casterWrapper.getStatTotalBonus(Stat.AS))
+    ..addStatAbsoluteBonus(Stat.HP, casterWrapper.getStatTotalBonus(Stat.HP))
+    ..addStatAbsoluteBonus(Stat.STR, casterWrapper.getStatTotalBonus(Stat.STR))
+    ..addStatAbsoluteBonus(Stat.AR, casterWrapper.getStatTotalBonus(Stat.AR))
+    ..addStatAbsoluteBonus(Stat.AGI, casterWrapper.getStatTotalBonus(Stat.AGI))
+    ..addStatAbsoluteBonus(Stat.MS, casterWrapper.getStatTotalBonus(Stat.MS))
 
-        g.destr()
-
-    if(spellId==ABILITY_MIRROR_IMAGE)
-        mirrorImageUnit = createUnit(caster.getOwner(), MIRROR_IMAGE_UNIT_ID, caster.getPos(), caster.getFacingAngle())
-        mirrorImageUnit.setTimedLife(MIRROR_IMAGE_DURATION[level-1])
-        mirrorImageUnit.setVertexColor(255, 255, 255, 200)
-        let wrapper = mirrorImageUnit.wrapper()
-        wrapper.addStatAbsoluteBonus(Stat.AS, caster.wrapper().getStatTotalBonus(Stat.AS))
-        wrapper.addStatAbsoluteBonus(Stat.HP, caster.wrapper().getStatTotalBonus(Stat.HP))
-        wrapper.addStatAbsoluteBonus(Stat.STR, caster.wrapper().getStatTotalBonus(Stat.STR))
-        wrapper.addStatAbsoluteBonus(Stat.AR, caster.wrapper().getStatTotalBonus(Stat.AR))
-        wrapper.addStatAbsoluteBonus(Stat.AGI, caster.wrapper().getStatTotalBonus(Stat.AGI))
-        wrapper.addStatAbsoluteBonus(Stat.MS, caster.wrapper().getStatTotalBonus(Stat.MS))
         
 function onAttack(unit attacker, unit target, boolean _isActive)
     let level = attacker.getAbilityLevel(ABILITY_BLEEDING_WOUND)
@@ -409,6 +409,10 @@ function setupTooltips()
 
 function initHeroType()
     setupStats()
+    onCast(ABILITY_SHADOW_STRIKE, () -> castShadowStrike())
+    onCast(ABILITY_DEATH_SPIN, () -> castDeathSpin())
+    onCast(ABILITY_CRIPPLING_PAIN, () -> castCripplingPain())
+    onCast(ABILITY_MIRROR_IMAGE, () -> castMirrorImage())
     heroType..setSkillBuild("QWQWQWQWQWEEEEE")
     ..addItem(ITEM_ID_HEAVY_BOOTS)
     ..addItem(ITEM_ID_BLOOD_SWORD)
@@ -419,7 +423,6 @@ function initHeroType()
     delayInit(5) ->
         heroType
             ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
-            ..addOnSpellCastFunc(function onSpellCast)
             ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
             ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
             ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))

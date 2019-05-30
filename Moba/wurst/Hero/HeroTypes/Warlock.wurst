@@ -244,54 +244,59 @@ function rayOfDeath(int abilityId)
         ))
     addDynamicTooltipIntelligence(heroType, tooltip)
 
-function onSpellCast()
+function castFireBolt()
     let spellId = GetSpellAbilityId()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
+    new Missile(caster, caster.getPos().withZ(80), 1000, caster.getPos().angleTo(vec2(GetSpellTargetX(), GetSpellTargetY())), Abilities.demonHunterMissile)
+    ..hitOnce()
+    ..setSize(40)
+    ..setHitCondition((Missile missile, unit target) -> (begin
+        return not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(missile.getOwner().getOwner(), false, true)
+    end) )
+    ..setHitFunction((Missile missile, unit target) -> (begin
+        let missileCaster = missile.getOwner()
+        missileCaster.dealDamage(Missile.getMissileTarget(), (FIREBOLT_DAMAGE[level-1]).bonus(missileCaster.getInt(), FIREBOLT_DAMAGE_BONUS), ReductionType.MAGIC)
+        missile.destr()
 
-    if spellId == ABILITY_FIREBOLT
-        new Missile(caster, caster.getPos().withZ(80), 1000, caster.getPos().angleTo(vec2(GetSpellTargetX(), GetSpellTargetY())), Abilities.demonHunterMissile)
-        ..hitOnce()
-        ..setSize(40)
-        ..setHitCondition((Missile missile, unit target) -> (begin
-            return not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(missile.getOwner().getOwner(), false, true)
-        end) )
-        ..setHitFunction((Missile missile, unit target) -> (begin
-            let missileCaster = missile.getOwner()
-            missileCaster.dealDamage(Missile.getMissileTarget(), (FIREBOLT_DAMAGE[level-1]).bonus(missileCaster.getInt(), FIREBOLT_DAMAGE_BONUS), ReductionType.MAGIC)
-            missile.destr()
+    end) )
+    ..setMaxRange(800)
 
-        end) )
-        ..setMaxRange(800)
+function castInfernalMeteor()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+    let pos = vec2(GetSpellTargetX(), GetSpellTargetY())
+    addEffect(Units.infernalBirth, pos).destr()
+    doAfter(1, () -> (begin
+        group nearby = CreateGroup()
+        nearby.enumUnitsInRange(pos, METEOR_AOE[level-1])
+    
+        let dmg = METEOR_DAMAGE[level - 1].bonus(caster.getInt(), METEOR_DAMAGE_BONUS)
 
-    else if spellId == ABILITY_INFERNAL_METEOR
-        let pos = vec2(GetSpellTargetX(), GetSpellTargetY())
-        addEffect(Units.infernalBirth, pos).destr()
-        doAfter(1, () -> (begin
-            group nearby = CreateGroup()
-            nearby.enumUnitsInRange(pos, METEOR_AOE[level-1])
-        
-            let dmg = METEOR_DAMAGE[level - 1].bonus(caster.getInt(), METEOR_DAMAGE_BONUS)
+        while(not nearby.isEmpty())
+            unit target = FirstOfGroup(nearby)
+            nearby.removeUnit(target)
+            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
+                caster.dealDamage(target, dmg, ReductionType.MAGIC)
+                target.addBuffReduced(caster, METEOR_STUN_DURATION[level-1], STUNNED, 1)
+        nearby.destr()
+    end))
 
-            while(not nearby.isEmpty())
-                unit target = FirstOfGroup(nearby)
-                nearby.removeUnit(target)
-                if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
-                    caster.dealDamage(target, dmg, ReductionType.MAGIC)
-                    target.addBuffReduced(caster, METEOR_STUN_DURATION[level-1], STUNNED, 1)
-            nearby.destr()
-        end))
+function castSoulBurn()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+    let target = GetSpellTargetUnit()
+    target.addBuffReduced(caster, SOUL_BURN_DURATION[level-1], buffSoulBurn, level)
+    target.addBuffReduced(caster, SOUL_BURN_SILENCE[level-1], SILENCED, 1)
 
-    else if spellId == ABILITY_SOUL_BURN
-        let target = GetSpellTargetUnit()
-        target.addBuffReduced(caster, SOUL_BURN_DURATION[level-1], buffSoulBurn, level)
-        target.addBuffReduced(caster, SOUL_BURN_SILENCE[level-1], SILENCED, 1)
-
-    else if spellId == ABILITY_RAY_OF_DEATH
-        let target = GetSpellTargetUnit()
-        target.addBuffReduced(caster, RAY_OF_DEATH_DURATION[level-1], buffRayOfDeath, level)
-
-
+function castRayOfDeath()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+    let target = GetSpellTargetUnit()
+    target.addBuffReduced(caster, RAY_OF_DEATH_DURATION[level-1], buffRayOfDeath, level)
 
 
 function retreatAI(HeroAI _ai)
@@ -346,6 +351,10 @@ function setupTooltips()
 
 function initHeroType()
     setupStats()
+    onCast(ABILITY_FIREBOLT, () -> castFireBolt())
+    onCast(ABILITY_INFERNAL_METEOR, () -> castInfernalMeteor())
+    onCast(ABILITY_SOUL_BURN, () -> castSoulBurn())
+    onCast(ABILITY_RAY_OF_DEATH, () -> castRayOfDeath())
     heroType..setSkillBuild("WEQEWEWEWEWQQQQ")
     ..addItem(ITEM_ID_BOOTS_OF_DARKNESS)
     ..addItem(ITEM_ID_ENCHANTED_ARMOR)
@@ -356,7 +365,6 @@ function initHeroType()
     delayInit(5) ->
 
         heroType
-            ..addOnSpellCastFunc(function onSpellCast)
             ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
             ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
             ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))

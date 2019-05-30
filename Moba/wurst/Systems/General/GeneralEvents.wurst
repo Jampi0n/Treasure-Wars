@@ -1,0 +1,87 @@
+package GeneralEvents
+
+import HashMap
+import ErrorHandling
+
+
+//  Animation Speed
+
+constant ANIMATION_SPEED_MAP = new HashMap<int,real>
+
+public function setAnimationSpeed(int abilityId, real speed)
+    if not ANIMATION_SPEED_MAP.has(abilityId)  
+        ANIMATION_SPEED_MAP.put(abilityId, speed)
+    else
+        error("Multiple animation speeds for id: " + abilityId.toString())
+
+function getAnimationSpeed(int abilityId) returns real
+    if ANIMATION_SPEED_MAP.has(abilityId)
+        return ANIMATION_SPEED_MAP.get(abilityId)
+    else
+        return 1.0
+
+
+// Cast
+
+constant CAST_MAP = new HashMap<int,OnCast>
+
+public interface OnCast
+    function onCast()
+
+public function onCast(int abilityID, OnCast onCast)
+    CAST_MAP.put(abilityID, onCast)
+
+function onCastTrigger()
+    let onCast = CAST_MAP.get(GetSpellAbilityId())
+    if onCast != null
+        onCast.onCast()
+
+// Impact
+
+int array impactBuffId
+OnImpact array impactFunction
+int impactCounter = -1
+
+public interface OnImpact
+    function onImpact(unit source, unit target)
+
+
+public function onImpact(int buffId, OnImpact onImpact)
+    impactCounter++
+    impactBuffId[impactCounter] = buffId
+    impactFunction[impactCounter] = onImpact
+    
+function onImpactTrigger()
+    let source = GetEventDamageSource()
+    let target = GetTriggerUnit()
+    for i = 0 to impactCounter
+        if target.hasAbility(impactBuffId[i])
+            target.removeAbility(impactBuffId[i])
+            impactFunction[i].onImpact(source, target)
+
+        
+    
+    
+
+
+init
+    CreateTrigger()
+    ..addAction(function onCastTrigger)
+    ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_SPELL_EFFECT)
+
+    CreateTrigger()
+    ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_SPELL_CAST)
+    ..addAction(() -> (begin
+        GetTriggerUnit().setTimeScale(getAnimationSpeed(GetSpellAbilityId()))
+    end))
+
+    CreateTrigger()
+    ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_SPELL_ENDCAST)
+    ..addAction(() -> (begin
+        GetTriggerUnit().setTimeScale(1)
+    end))
+
+   
+    
+
+

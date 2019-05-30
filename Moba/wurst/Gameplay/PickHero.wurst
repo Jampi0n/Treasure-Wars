@@ -24,6 +24,7 @@ region pickRegion
 unit array tavern
 unit array patron
 fogmodifier array tavernVision
+bool array playerHasPicked
 int array tavernButtons
 HashMap<int, HeroType> buttonToHeroType
 
@@ -46,6 +47,7 @@ boolean itemCarry = false
 function setupCreatedHero(Hero hero)
     let heroUnit = hero.toUnit()
     player owner = heroUnit.getOwner()
+    playerHasPicked[owner.getId()] = true
     CPlayer cPlayer = owner.getCPlayer()
     owner.setGold(500)
         
@@ -122,7 +124,7 @@ function createRandomHero(CPlayer cPlayer, boolean removeFromTavern)
     removeHeroType(remainingHeroTypes[random], removeFromTavern)
 
 
-function removeHeroType(HeroType herotype, boolean removeFromTavern)
+function removeHeroType(HeroType herotype, boolean _removeFromTavern)
     let index = heroTypeIndex.get(herotype)
 
     //print("remove: "+herotype.getUnitId().toRawCode()+ "at index "+index.toString())
@@ -232,12 +234,11 @@ function onPick()
     unit pickedUnit = GetTriggerUnit()
     CPlayer cPlayer = pickedUnit.getOwner().getCPlayer()
     if(cPlayer.getPlayerType()==PlayerType.HERO)
-        if(Hero.getHero(cPlayer)==null)
-            if HeroType.getHeroType(pickedUnit.getTypeId()) != null
-                Hero hero = new Hero(pickedUnit)
-                setupCreatedHero(hero)
+        if HeroType.getHeroType(pickedUnit.getTypeId()) != null
+            Hero hero = new Hero(pickedUnit)
+            setupCreatedHero(hero)
 
-                removeHeroType(hero.getHeroType(), true)
+            removeHeroType(hero.getHeroType(), true)
 
 function allPickEnd()
     DestroyTimerDialog(timerWindow)
@@ -249,10 +250,10 @@ function allPickEnd()
         tavern[i].remove()
         tavern[i]=null
     for i = 0 to MAX_HERO_COUNT-1
-        if(getCPlayer(i).getPlayerType()==PlayerType.HERO)
+        if getCPlayer(i).getPlayerType()==PlayerType.HERO
             patron[i].remove()
             patron[i]=null
-            if(Hero.getHero(getCPlayer(i))==null)
+            if not playerHasPicked[i]
                 if(GetLocalPlayer()==players[i])
                     print("|cffffcc00You have not picked a hero in time. You will get a random one.")
                 if players[i].getController() == MAP_CONTROL_COMPUTER
@@ -302,6 +303,10 @@ function onModePick()
     endPickMode()
 
 function startPickMode()
+
+    for i = 0 to MAX_HERO_COUNT-1
+        playerHasPicked[i] = false
+
     //copies the array of hero types
     remainingHeroTypesCount = HeroType.heroTypeCount
 
@@ -389,7 +394,7 @@ init
 
 
 
-            if i >= 0 and i<=MAX_HERO_COUNT-1 and Hero.getHero(i) == null
+            if i >= 0 and i<=MAX_HERO_COUNT-1 and not playerHasPicked[i]
 
                 
 
@@ -417,7 +422,7 @@ init
 
 
 
-            if i >= 0 and i<=MAX_HERO_COUNT-1 and Hero.getHero(i) == null
+            if i >= 0 and i<=MAX_HERO_COUNT-1 and not playerHasPicked[i]
 
                 
 
@@ -449,7 +454,7 @@ init
             
 
             for i = HERO_PLAYER_TEAM_2_FIRST to HERO_PLAYER_TEAM_2_LAST
-                if i >= 0 and i<=MAX_HERO_COUNT-1 and Hero.getHero(i) == null
+                if i >= 0 and i<=MAX_HERO_COUNT-1 and not playerHasPicked[i]
 
                     
 

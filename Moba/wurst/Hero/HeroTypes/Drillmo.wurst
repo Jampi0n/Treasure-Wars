@@ -96,7 +96,7 @@ function pull(int abilityId)
             PULL_DAMAGE[lvl-1].str()
         ))
     addDynamicTooltipStrength(heroType, tooltip)
-    HeroType.setAnimationSpeed(abilityId, 1.33)
+    setAnimationSpeed(abilityId, 1.33)
 
 constant real array SPIKE_BALL_DMG = [60, 100, 140, 180, 220]
 constant real SPIKE_BALL_DMG_BONUS = 120
@@ -150,7 +150,7 @@ function spikeBall(int abilityId)
             SPIKE_BALL_DOT_DURATION[lvl-1].toSmartString()
         ))
     addDynamicTooltipStrength(heroType, tooltip)
-    HeroType.setAnimationSpeed(abilityId, 2)
+    setAnimationSpeed(abilityId, 2)
 
 constant int array SPEED_BOOST = [20, 25, 30, 35, 40]
 constant int SPEED_BOOST_BONUS = 40
@@ -245,7 +245,7 @@ function rocket(int abilityId)
             ROCKET_DMG[lvl-1].str()
         ))
     addDynamicTooltipStrength(heroType, tooltip)
-    HeroType.setAnimationSpeed(abilityId, 1.33)
+    setAnimationSpeed(abilityId, 1.33)
 
 class Pull
 
@@ -327,36 +327,40 @@ class Pull
         if this.pulledUnit != null
             this.pulledUnit.setPos(this.pulledUnit.getPos())
 
-function onSpellCast()
+function castPull()
     let spellId = GetSpellAbilityId()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
+    new Pull(caster, level, vec2(GetSpellTargetX(), GetSpellTargetY()))
 
-    if spellId == ABILITY_PULL
-        new Pull(caster, level, vec2(GetSpellTargetX(), GetSpellTargetY()))
+function castSpikeBall()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+    doAfter(0.0, () -> (begin
+        if caster.getCurrentOrder() == OrderId("thunderclap") or true
+            let ballPos = caster.getPos().polarOffset(caster.getFacingAngle(), 140)
+            group nearby = CreateGroup()
+            nearby.enumUnitsInRange(ballPos, 250)
 
-    else if spellId == ABILITY_SPIKE_BALL
-        doAfter(0.0, () -> (begin
-            if caster.getCurrentOrder() == OrderId("thunderclap") or true
-                let ballPos = caster.getPos().polarOffset(caster.getFacingAngle(), 140)
-                group nearby = CreateGroup()
-                nearby.enumUnitsInRange(ballPos, 250)
+            let dmg = SPIKE_BALL_DMG[level-1].bonus(caster.getStr(), SPIKE_BALL_DMG_BONUS)
 
-                let dmg = SPIKE_BALL_DMG[level-1].bonus(caster.getStr(), SPIKE_BALL_DMG_BONUS)
+            while(not nearby.isEmpty())
+                unit target = FirstOfGroup(nearby)
+                nearby.removeUnit(target)
+                if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
+                    caster.dealDamage(target, dmg, ReductionType.PHYSICAL)
+                    target.addBuffReduced( caster, SPIKE_BALL_STUN[level-1], STUNNED, 1)
+                    target.addBuffReduced( caster, SPIKE_BALL_DOT_DURATION[level-1], buffSpikeBall, level)
+            nearby.destr()
+    end))
 
-                while(not nearby.isEmpty())
-                    unit target = FirstOfGroup(nearby)
-                    nearby.removeUnit(target)
-                    if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
-                        caster.dealDamage(target, dmg, ReductionType.PHYSICAL)
-                        target.addBuffReduced( caster, SPIKE_BALL_STUN[level-1], STUNNED, 1)
-                        target.addBuffReduced( caster, SPIKE_BALL_DOT_DURATION[level-1], buffSpikeBall, level)
-                nearby.destr()
-        end))
-
-    else if spellId == ABILITY_SPEED_BOOST
-        caster.addBuff(caster, SPEED_BOOST_DURATION[level-1], buffSpeedBoost, level)
-        caster.removeAbility('Bbsk')
+function castSpeedBoost()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+    caster.addBuff(caster, SPEED_BOOST_DURATION[level-1], buffSpeedBoost, level)
+    caster.removeAbility('Bbsk')
 
 function onDamage()
     let u = GetTriggerUnit()
@@ -438,6 +442,9 @@ function setupTooltips()
 
 function initHeroType()
     setupStats()
+    onCast(ABILITY_PULL, () -> castPull())
+    onCast(ABILITY_SPIKE_BALL, () -> castSpikeBall())
+    onCast(ABILITY_SPEED_BOOST, () -> castSpeedBoost())
     heroType..setSkillBuild("WQEWQWWQWQQEEEE")
     ..addItem(ITEM_ID_HEAVY_BOOTS)
     ..addItem(ITEM_ID_RUNIC_ARMOR)
@@ -447,7 +454,6 @@ function initHeroType()
     ..addItem(ITEM_ID_CURSED_SWORD)
     delayInit(5) ->
         heroType
-            ..addOnSpellCastFunc(function onSpellCast)
             ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
             ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
             ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))

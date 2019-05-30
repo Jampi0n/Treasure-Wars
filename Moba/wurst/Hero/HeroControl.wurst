@@ -35,14 +35,9 @@ public class Hero
     private static constant unitToHero = new HashMap<unit,Hero>
     private constant assistMap = new HashMap<player,real>
     private player lastAssistant = null
-    private trigger onSpellCastTrigger
     private timer reviveTimer
     private timerdialog reviveWindow
     private boolean firstTeam
-
-    //animation speed
-    private static trigger onSpellStartTrigger
-    private static trigger onSpellEndTrigger
 
     private int array [5] skillIds
 
@@ -55,20 +50,15 @@ public class Hero
 
     private unit heroGlow = null
 
+    private unit heroCopy = null
+
     protected static function classInit()
         onDamageTrigger.addAction(function onDamageStatic)
         onDeathTrigger.addAction(function onDeathStatic)
         onLevelUpTrigger.addAction(function onLevelUpStatic)
 
-        onSpellStartTrigger = CreateTrigger()
-        ..addAction(() -> (begin
-            GetTriggerUnit().setTimeScale(HeroType.getAnimationSpeed(GetSpellAbilityId()))
-        end))
 
-        onSpellEndTrigger = CreateTrigger()
-        ..addAction(() -> (begin
-            GetTriggerUnit().setTimeScale(1)
-        end))
+        
 
         CreateTrigger()
         ..addAction(() -> (begin
@@ -84,8 +74,7 @@ public class Hero
 
 
     function setup()
-        firstTeam = this.owner.getId() <= HERO_PLAYER_TEAM_1_LAST
-
+        this.firstTeam = this.owner.getId() <= HERO_PLAYER_TEAM_1_LAST
         this.heroType = HeroType.getHeroType(this.hero.getTypeId())
         ..updateTooltipsStr(this.hero)
         ..updateTooltipsInt(this.hero)
@@ -103,18 +92,22 @@ public class Hero
 
         execute( -> this.heroType.initialize())
         
+        
         unitToHero.put(this.hero, this)
         heroes[this.owner.getId()] = this
         onDamageTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DAMAGED)
         onDeathTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DEATH)
         onLevelUpTrigger.registerUnitEvent(this.hero, EVENT_UNIT_HERO_LEVEL)
-        onSpellCastTrigger = this.heroType.getOnSpellCastTrigger()
-        onSpellCastTrigger.registerUnitEvent(this.hero, EVENT_UNIT_SPELL_EFFECT)
 
-        onSpellStartTrigger.registerUnitEvent(this.hero, EVENT_UNIT_SPELL_CAST)
-        onSpellEndTrigger.registerUnitEvent(this.hero, EVENT_UNIT_SPELL_ENDCAST)
-
+        this.heroCopy = createUnit(this.owner.getPlayer(), this.heroType.getUnitId(), this.hero.getPos(), angle(0))
+        doPeriodicallyTimed(0.3, 360000, cb -> (begin
+            this.heroCopy.setXp(this.hero.getXp(), false)
+            if this.hero.getLevel() == HERO_MAX_LEVEL
+                cb.stop()
+        end))
+            
         let wrapper = this.hero.wrapper()
+        let copyWrapper = this.heroCopy.wrapper()
 
         this.reviveTimer = getTimer()
         ..setData(this castTo int)
@@ -124,6 +117,7 @@ public class Hero
 
         if this.heroType.getBonusCalculation() != null
             wrapper.setBonusCalculation(this.heroType.getBonusCalculation())
+            copyWrapper.setBonusCalculation(wrapper.getBonusCalculation())
         //print("setup completed: "+this.hero.getName())
 
         if this.heroType.getUsesHeroGlow()
@@ -137,12 +131,17 @@ public class Hero
             end))
 
         wrapper.addStatAbsoluteBonus(Stat.MR, this.heroType.getBase(Stat.MR) * 1 )
+        copyWrapper.addStatAbsoluteBonus(Stat.MR, this.heroType.getBase(Stat.MR) * 1 )
         wrapper.addStatAbsoluteBonus(Stat.HR, this.heroType.getBase(Stat.HR) * 3 )
+        copyWrapper.addStatAbsoluteBonus(Stat.HR, this.heroType.getBase(Stat.HR) * 3 )
 
         wrapper.addStatAbsoluteBonus(Stat.HP, this.heroType.getBase(Stat.HP) * 15 + HP_PER_LEVEL )
+        copyWrapper.addStatAbsoluteBonus(Stat.HP, this.heroType.getBase(Stat.HP) * 15 + HP_PER_LEVEL )
         wrapper.addStatAbsoluteBonus(Stat.MP, this.heroType.getBase(Stat.MP) * 10 )
+        copyWrapper.addStatAbsoluteBonus(Stat.MP, this.heroType.getBase(Stat.MP) * 10 )
 
         wrapper.addStatAbsoluteBonus(Stat.MS, this.heroType.getBase(Stat.MS) )
+        copyWrapper.addStatAbsoluteBonus(Stat.MS, this.heroType.getBase(Stat.MS) )
 
         //upgrade level 1
         SetPlayerTechResearched(upgradePlayer, UPG_AR , this.heroType.getBase(Stat.AR))
@@ -155,10 +154,18 @@ public class Hero
         SetHeroAgi(this.hero, this.heroType.getBase(Stat.AGI), true)
         SetHeroInt(this.hero, this.heroType.getBase(Stat.INT), true)
 
+        SetHeroStr(this.heroCopy, this.heroType.getBase(Stat.STR) + STRENGTH_BONUS , true)
+        SetHeroAgi(this.heroCopy, this.heroType.getBase(Stat.AGI), true)
+        SetHeroInt(this.heroCopy, this.heroType.getBase(Stat.INT), true)
+
+        
+
         wrapper.updateBaseStatsHero()
+        copyWrapper.copyBaseStatsFrom(wrapper)
 
         for int i = 0 to 10
             wrapper.updateTotalStatBonus(i castTo Stat)
+            copyWrapper.updateTotalStatBonus(i castTo Stat)
 
         if this.heroType.getOnCreateFunction() != null
             this.heroType.getOnCreateFunction().onCreate(this)
@@ -189,40 +196,52 @@ public class Hero
         int newLvl = GetHeroLevel(this.hero)
         player upgradePlayer = this.owner.getPlayer()
         let wrapper = this.hero.wrapper()
+        let copyWrapper = this.heroCopy.wrapper()
         SetPlayerTechResearched(upgradePlayer, UPG_AR , this.heroType.calculateStat(Stat.AR, newLvl))
         SetPlayerTechResearched(upgradePlayer, UPG_AS , this.heroType.calculateStat(Stat.AS, newLvl))
         
 
         wrapper.addStatAbsoluteBonus(Stat.HP, (this.heroType.calculateStat(Stat.HP, newLvl) - this.heroType.calculateStat(Stat.HP, this.level)) * 15 )
+        copyWrapper.addStatAbsoluteBonus(Stat.HP, (this.heroType.calculateStat(Stat.HP, newLvl) - this.heroType.calculateStat(Stat.HP, this.level)) * 15 )
         //upgrade bug
         //SetPlayerTechResearched(upgradePlayer, UPG_HP , this.heroType.calculateStat(Stat.HP, newLvl))
         //SetPlayerTechResearched(upgradePlayer, UPG_HR , this.heroType.calculateStat(Stat.HR, lvl))
         
         wrapper.addStatAbsoluteBonus(Stat.MP, (this.heroType.calculateStat(Stat.MP, newLvl) - this.heroType.calculateStat(Stat.MP, this.level)) * 10 )
+        copyWrapper.addStatAbsoluteBonus(Stat.MP, (this.heroType.calculateStat(Stat.MP, newLvl) - this.heroType.calculateStat(Stat.MP, this.level)) * 10 )
         //upgrade bug
         //SetPlayerTechResearched(upgradePlayer, UPG_MP , this.heroType.calculateStat(Stat.MP, newLvl))
         //SetPlayerTechResearched(upgradePlayer, UPG_MR , this.heroType.calculateStat(Stat.MR, lvl))
         
         wrapper.addStatAbsoluteBonus(Stat.MR, (this.heroType.calculateStat(Stat.MR, newLvl) - this.heroType.calculateStat(Stat.MR, this.level)) * 1 )
+        copyWrapper.addStatAbsoluteBonus(Stat.MR, (this.heroType.calculateStat(Stat.MR, newLvl) - this.heroType.calculateStat(Stat.MR, this.level)) * 1 )
         wrapper.addStatAbsoluteBonus(Stat.HR, (this.heroType.calculateStat(Stat.HR, newLvl) - this.heroType.calculateStat(Stat.HR, this.level)) * 3 )
+        copyWrapper.addStatAbsoluteBonus(Stat.HR, (this.heroType.calculateStat(Stat.HR, newLvl) - this.heroType.calculateStat(Stat.HR, this.level)) * 3 )
 
         wrapper.addStatAbsoluteBonus(Stat.HP, (newLvl - this.level) * HP_PER_LEVEL )
+        copyWrapper.addStatAbsoluteBonus(Stat.HP, (newLvl - this.level) * HP_PER_LEVEL )
 
         //SetPlayerTechResearched(upgradePlayer, UPG_MS , this.heroType.calculateStat(Stat.MS, newLvl))
         //this.hero.updateDefaultMovementSpeed()
 
-        this.hero.wrapper().addStatAbsoluteBonus(Stat.MS, this.heroType.calculateStat(Stat.MS, newLvl) - this.heroType.calculateStat(Stat.MS, this.level))
-
+        wrapper.addStatAbsoluteBonus(Stat.MS, this.heroType.calculateStat(Stat.MS, newLvl) - this.heroType.calculateStat(Stat.MS, this.level))
+        copyWrapper.addStatAbsoluteBonus(Stat.MS, this.heroType.calculateStat(Stat.MS, newLvl) - this.heroType.calculateStat(Stat.MS, this.level))
 
 
         SetHeroStr(this.hero, this.heroType.calculateStat(Stat.STR, newLvl) + STRENGTH_BONUS , true)
         SetHeroAgi(this.hero, this.heroType.calculateStat(Stat.AGI, newLvl), true)
         SetHeroInt(this.hero, this.heroType.calculateStat(Stat.INT, newLvl), true)
 
+        SetHeroStr(this.heroCopy, this.heroType.calculateStat(Stat.STR, newLvl) + STRENGTH_BONUS , true)
+        SetHeroAgi(this.heroCopy, this.heroType.calculateStat(Stat.AGI, newLvl), true)
+        SetHeroInt(this.heroCopy, this.heroType.calculateStat(Stat.INT, newLvl), true)
+
         wrapper.updateBaseStatsHero()
+        copyWrapper.copyBaseStatsFrom(wrapper)
 
         for int i = 0 to STAT_COUNT - 1
             wrapper.updateTotalStatBonus(i castTo Stat)
+            copyWrapper.updateTotalStatBonus(i castTo Stat)
 
         this.level = newLvl
         
@@ -423,23 +442,7 @@ public class Hero
     static function onDeathStatic()
         unitToHero.get( GetTriggerUnit()).onDeath()
 
-    //kills the Hero without specifying the killer
-    function killHero()
-        this.hero.kill()
-    
-    //kills the Hero, the killer is specified
-    function killHero(unit killer)
-        this.hero.setHP(1)
-        killer.damageTarget(this.hero, 10)
 
-    //kills the Hero. If the killing player is a HeroPlayer,
-    //the corresponding Hero is the killer
-    //else the Hero is killed wihtout a killer.
-    function killHero(CPlayer killer)
-        if(killer.getPlayerType() == PlayerType.HERO)
-            this.killHero(heroes[(killer).getId()].hero)
-        else
-            this.killHero()
 
     function toString() returns string
         return "Hero "+ this.owner.getPlayer().getName() +"="+this.hero.getName()
@@ -490,6 +493,7 @@ public class Hero
         this.getHeroType()
             ..updateTooltipsStr(heroUnit)
             ..updateTooltipsInt(heroUnit)
+
 
         
 function displayTooltip(int pId, AbilitySlot slot)
