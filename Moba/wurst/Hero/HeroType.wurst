@@ -247,23 +247,21 @@ public class HeroType
         if DYNAMIC_TOOLTIPS
             for dynamicTooltip in dynamicStrength
                 let abilityTypeId = dynamicTooltip.getAbilityTypeId()
-                BlzSetAbilityExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateNormalString(whichUnit), whichUnit.getAbilityLevel(abilityTypeId))
-                /*bugged in 1.30
-                BlzSetAbilityResearchExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateLearnString(whichUnit), 1)
+                let lvl = whichUnit.getAbilityLevel(abilityTypeId)-1
+                BlzSetAbilityExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateNormalString(whichUnit), lvl)
+                BlzSetAbilityResearchExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateLearnString(whichUnit), 0)
                 if dynamicTooltip.getUseTurnOff()
-                    BlzSetAbilityActivatedExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateTurnOffString(whichUnit), whichUnit.getAbilityLevel(abilityTypeId))
-                */
+                    BlzSetAbilityActivatedExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateTurnOffString(whichUnit), lvl)
 
     function updateTooltipsInt(unit whichUnit)
         if DYNAMIC_TOOLTIPS
             for dynamicTooltip in dynamicIntelligence
                 let abilityTypeId = dynamicTooltip.getAbilityTypeId()
-                BlzSetAbilityExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateNormalString(whichUnit), whichUnit.getAbilityLevel(abilityTypeId))
-                /*bugged in 1.30
-                BlzSetAbilityResearchExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateLearnString(whichUnit), 1)
+                let lvl = whichUnit.getAbilityLevel(abilityTypeId)-1
+                BlzSetAbilityExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateNormalString(whichUnit), lvl)
+                BlzSetAbilityResearchExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateLearnString(whichUnit), 0)
                 if dynamicTooltip.getUseTurnOff()
-                    BlzSetAbilityActivatedExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateTurnOffString(whichUnit), whichUnit.getAbilityLevel(abilityTypeId))
-                */
+                    BlzSetAbilityActivatedExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateTurnOffString(whichUnit), lvl)
 
     @deprecated("use global function instead")
     function addDynamicTooltipStrength(DynamicTooltip tooltip)

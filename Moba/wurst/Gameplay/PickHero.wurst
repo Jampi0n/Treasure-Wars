@@ -359,14 +359,14 @@ public function addButtonToTavern(int heroId, int buttonPos, HeroType heroType, 
     else
         tavernButtons[12 * tavernId + buttonPos] = buttonId
         buttonToHeroType.put(getAbilityOffset(heroId) + 66, heroType)
-        BlzSetAbilityTooltip(buttonId, GetObjectName(heroType.getUnitId()), 1)
+        BlzSetAbilityTooltip(buttonId, GetObjectName(heroType.getUnitId()), 0)
         let tooltip = namePassive + "|n" + tooltipPassive + "|n|n" + 
         nameQ + "|n" + tooltipQ + "|n|n" + 
         nameW + "|n" + tooltipW + "|n|n" + 
         nameE + "|n" + tooltipE + "|n|n" + 
         nameR + "|n" + tooltipR
-        BlzSetAbilityExtendedTooltip(buttonId, tooltip, 1)
-        if BlzGetAbilityExtendedTooltip(buttonId, 1) != tooltip
+        BlzSetAbilityExtendedTooltip(buttonId, tooltip, 0)
+        if BlzGetAbilityExtendedTooltip(buttonId, 0) != tooltip
             error("Tooltip for hero " + GetObjectName(heroType.getUnitId()) + " was not correctly generated.")
 
 public function initBeforeHeroType()
