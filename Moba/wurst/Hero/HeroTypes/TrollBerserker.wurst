@@ -282,41 +282,41 @@ function onAttack(unit attacker, unit _target, boolean _isActive)
         wrapper.addStatAbsoluteBonus(Stat.STR, FOCUS_BONUS)
         doAfter(FOCUS_DURATION[level-1], () -> (wrapper.addStatAbsoluteBonus(Stat.STR, -FOCUS_BONUS)))
     
-
-
-function onSpellCast()
+function castCritical()
     let spellId = GetSpellAbilityId()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
+    caster.addBuff(caster, 4, buffCriticalStrike, level)
 
-    if(spellId == ABILITY_CRITICAL)
-        caster.addBuff(caster, 4, buffCriticalStrike, level)
+function castSwitchweapons()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+    if caster.getTypeId() == 'H00X'
+        doAfter( SWITCH_DURATION, () -> onSwitchToMelee(caster, level))
+    else
+        doAfter( SWITCH_DURATION, () -> onSwitchToRanged(caster, level))
 
-    else if (spellId == ABILITY_SWITCH_WEAPONS)
-        if caster.getTypeId() == 'H00X'
-            doAfter( SWITCH_DURATION, () -> onSwitchToMelee(caster, level))
-        else
-            doAfter( SWITCH_DURATION, () -> onSwitchToRanged(caster, level))
+function castGrowth()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+    caster.addBuff(caster, GROWTH_DURATION[level-1], buffGrowth, level)
+    group nearby = CreateGroup()
 
-
-    if(spellId == ABILITY_GROWTH)
-        caster.addBuff(caster, GROWTH_DURATION[level-1], buffGrowth, level)
-        group nearby = CreateGroup()
-
-        nearby.enumUnitsInRange(caster.getPos(), GROWTH_FEAR_AOE)
-
-
-        while(not nearby.isEmpty())
-            unit target = FirstOfGroup(nearby)
-            nearby.removeUnit(target)
-            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
-
-                target.addBuffReduced(caster, GROWTH_FEAR_DURATION[level-1], buffGrowthFear, level)
-                target.addBuffReduced(caster, GROWTH_FEAR_DURATION[level-1], ENSNARED, level)
+    nearby.enumUnitsInRange(caster.getPos(), GROWTH_FEAR_AOE)
 
 
-        nearby.destr()
+    while(not nearby.isEmpty())
+        unit target = FirstOfGroup(nearby)
+        nearby.removeUnit(target)
+        if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
 
+            target.addBuffReduced(caster, GROWTH_FEAR_DURATION[level-1], buffGrowthFear, level)
+            target.addBuffReduced(caster, GROWTH_FEAR_DURATION[level-1], ENSNARED, level)
+
+
+    nearby.destr()
 
 
 function setupStats()
@@ -394,6 +394,9 @@ function setupTooltips()
 
 function initHeroType()
     setupStats()
+    onCast(ABILITY_CRITICAL, () -> castCritical())
+    onCast(ABILITY_SWITCH_WEAPONS, () -> castSwitchweapons())
+    onCast(ABILITY_GROWTH, () -> castGrowth())
     heroType..setSkillBuild("QWQWQWQWQWEEEEE")
     ..addItem(ITEM_ID_HEAVY_BOOTS)
     ..addItem(ITEM_ID_BLOOD_SWORD)
@@ -406,7 +409,6 @@ function initHeroType()
 
         heroType
             ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
-            ..addOnSpellCastFunc(function onSpellCast)
             ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
             ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
             ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))

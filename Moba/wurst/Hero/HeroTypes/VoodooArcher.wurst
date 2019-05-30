@@ -247,70 +247,74 @@ function onAttack(unit attacker, unit target, boolean _isActive)
     attacker.dealDamage(target, VOODOO_ARROW_DAMAGE[level-1], ReductionType.NONE)
 
 
-function onSpellCast()
+function castGhostArrows()
     let spellId = GetSpellAbilityId()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
+    let target = GetSpellTargetUnit()
+    let angles = 12
+    let angleStep = bj_PI*2/angles
 
-    if(spellId==ABILITY_GHOST_ARROWS)
-        let target = GetSpellTargetUnit()
-        let angles = 12
-        let angleStep = bj_PI*2/angles
-
-        for i = 0 to angles - 1
-            let mOffset = vec2(0,0).polarOffset(angle(angleStep*i), 250)
-            let facing = angle(angleStep*i+bj_PI)
-            let fx = new Fx((target.getPos()+mOffset).withZ(110), facing, "Models\\LujkaArrow.mdl")
-            doPeriodicallyTimed(0.03, 0.99, (CallbackCounted cb)-> begin
-                fx.setXY(target.getPos()+mOffset)
-                fx.setXYAngle(facing)
+    for i = 0 to angles - 1
+        let mOffset = vec2(0,0).polarOffset(angle(angleStep*i), 250)
+        let facing = angle(angleStep*i+bj_PI)
+        let fx = new Fx((target.getPos()+mOffset).withZ(110), facing, "Models\\LujkaArrow.mdl")
+        doPeriodicallyTimed(0.03, 0.99, (CallbackCounted cb)-> begin
+            fx.setXY(target.getPos()+mOffset)
+            fx.setXYAngle(facing)
+        end)
+        doAfter(1, -> begin
+            doPeriodicallyTimed(0.03, 0.3, (CallbackCounted cb)-> begin
+                fx.setXY(target.getPos()+mOffset*(cb.getCount()/10))
+                if cb.isLast()
+                    destroy fx
             end)
-            doAfter(1, -> begin
-                doPeriodicallyTimed(0.03, 0.3, (CallbackCounted cb)-> begin
-                    fx.setXY(target.getPos()+mOffset*(cb.getCount()/10))
-                    if cb.isLast()
-                        destroy fx
-                end)
-            end)
-        doAfter(1.25) ->
-            caster.dealDamage(target, GHOST_ARROWS_DAMAGE[level-1].bonus(caster.getStr(), GHOST_ARROWS_DAMAGE_BONUS), ReductionType.PHYSICAL)
-            
-
-    if(spellId==ABILITY_MIND_CURSE)
-        let target = GetSpellTargetUnit()
-        let dur = MIND_CURSE_DURATION[level-1].bonus(caster.getInt(), MIND_CURSE_DURATION_BONUS)
-        target.addBuffReduced(caster, dur, buffMindCurseTarget, level)
-        target.addBuffReduced(caster, dur, SILENCED, 1)
-
-    if(spellId==ABILITY_SERPENT_WARD)
-        let ward = createUnit(caster.getOwner(), SERPENT_WARD, vec2(GetSpellTargetX(), GetSpellTargetY()), angle(0))
-        let wrapper = ward.wrapper()
-        ward.setTimedLife(SERPENT_WARD_DURATION)
-
-        wrapper.addStatAbsoluteBonus(Stat.HP, SERPEND_WARD_HP[level-1] )
+        end)
+    doAfter(1.25) ->
+        caster.dealDamage(target, GHOST_ARROWS_DAMAGE[level-1].bonus(caster.getStr(), GHOST_ARROWS_DAMAGE_BONUS), ReductionType.PHYSICAL)
     
 
-    if(spellId==ABILITY_BIG_BAD_VOODOO)
-        let firstTeam = caster.getOwner().getId() <= HERO_PLAYER_TEAM_1_LAST
-        let iFrom = firstTeam ? HERO_PLAYER_TEAM_2_FIRST : HERO_PLAYER_TEAM_1_FIRST
-        let iTo = firstTeam ? HERO_PLAYER_TEAM_2_LAST : HERO_PLAYER_TEAM_1_LAST
-        let fx = caster.addEffect(Abilities.voodooAura, "origin")
-        doPeriodically(0.1, (cb) -> begin
-            if not caster.isAlive() or caster.getCurrentOrder() != OrderId("tranquility")
-                destroy cb
-                fx.destr()
-            else
-                for i = iFrom to iTo
-                    let hero = Hero.getHero(i)
-                    if hero != null
-                        let target = hero.toUnit()
-                        if target.isTargetable(caster.getOwner(), false, true)
-                            caster.dealDamage(target, 0.1 * BBV_DAMAGE[level-1].bonus(caster.getInt(), BBV_DAMAGE_BONUS), ReductionType.NONE)
-                            target.addEffect(Abilities.vengeanceMissile, "overhead").destr()
-                        
-        end)
-        
+function castMindCurse()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+    let target = GetSpellTargetUnit()
+    let dur = MIND_CURSE_DURATION[level-1].bonus(caster.getInt(), MIND_CURSE_DURATION_BONUS)
+    target.addBuffReduced(caster, dur, buffMindCurseTarget, level)
+    target.addBuffReduced(caster, dur, SILENCED, 1)
 
+function castSerpentWard()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+    let ward = createUnit(caster.getOwner(), SERPENT_WARD, vec2(GetSpellTargetX(), GetSpellTargetY()), angle(0))
+    let wrapper = ward.wrapper()
+    ward.setTimedLife(SERPENT_WARD_DURATION)
+
+    wrapper.addStatAbsoluteBonus(Stat.HP, SERPEND_WARD_HP[level-1] )
+
+function castBigBadVoodoo()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+    let firstTeam = caster.getOwner().getId() <= HERO_PLAYER_TEAM_1_LAST
+    let iFrom = firstTeam ? HERO_PLAYER_TEAM_2_FIRST : HERO_PLAYER_TEAM_1_FIRST
+    let iTo = firstTeam ? HERO_PLAYER_TEAM_2_LAST : HERO_PLAYER_TEAM_1_LAST
+    let fx = caster.addEffect(Abilities.voodooAura, "origin")
+    doPeriodically(0.1, (cb) -> begin
+        if not caster.isAlive() or caster.getCurrentOrder() != OrderId("tranquility")
+            destroy cb
+            fx.destr()
+        else
+            for i = iFrom to iTo
+                let hero = Hero.getHero(i)
+                if hero != null
+                    let target = hero.toUnit()
+                    if target.isTargetable(caster.getOwner(), false, true)
+                        caster.dealDamage(target, 0.1 * BBV_DAMAGE[level-1].bonus(caster.getInt(), BBV_DAMAGE_BONUS), ReductionType.NONE)
+                        target.addEffect(Abilities.vengeanceMissile, "overhead").destr()
+                    
+    end)
 
 function retreatAI(HeroAI _ai)
 
@@ -330,6 +334,10 @@ function setupTooltips()
 
 function initHeroType()
     setupStats()
+    onCast(ABILITY_GHOST_ARROWS, () -> castGhostArrows())
+    onCast(ABILITY_MIND_CURSE, () -> castMindCurse())
+    onCast(ABILITY_SERPENT_WARD, () -> castSerpentWard())
+    onCast(ABILITY_BIG_BAD_VOODOO, () -> castBigBadVoodoo())
     heroType..setSkillBuild("QWQWQWQWQWEEEEE")
     ..addItem(ITEM_ID_HEAVY_BOOTS)
     ..addItem(ITEM_ID_BLOOD_SWORD)
@@ -340,7 +348,6 @@ function initHeroType()
     delayInit(5) ->
         heroType
             ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
-            ..addOnSpellCastFunc(function onSpellCast)
             ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
             ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
             ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))

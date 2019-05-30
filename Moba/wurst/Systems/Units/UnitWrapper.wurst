@@ -187,6 +187,9 @@ public class UnitWrapper
     function setBonusCalculation(CalculateTotalBonus bonusCalculation)
         this.bonusCalculation = bonusCalculation
 
+    function getBonusCalculation() returns CalculateTotalBonus
+        return this.bonusCalculation
+
     /**
     Updates the total stat bonus based on base stat, absolute stat bonus and relative stat bonus
     **/
@@ -287,6 +290,11 @@ public class UnitWrapper
 
     function getStatTotalValue(Stat whichStat) returns int
         return this.getStatTotalBonus(whichStat) + this.getStatBaseValue(whichStat)
+
+    function copyBaseStatsFrom(UnitWrapper wrapper)
+        for i = 0 to STAT_COUNT - 1
+            this.statBaseValue[i] = wrapper.statBaseValue[i]
+            this.updateTotalStatBonus(i castTo Stat)
 
     function incBlue()
         blueCount++

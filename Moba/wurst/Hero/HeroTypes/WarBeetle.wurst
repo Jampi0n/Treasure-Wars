@@ -234,38 +234,41 @@ function unbreakable(int abilityId)
     addDynamicTooltipIntelligence(heroType, tooltip)
 
 
-function onSpellCast()
+function castVenomousBeetle()
+    let caster = GetTriggerUnit()
+    new VenoumosBeetle(caster, GetSpellTargetUnit())
+
+function castWarStomp()
     let spellId = GetSpellAbilityId()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
+    group nearby = CreateGroup()
+    nearby.enumUnitsInRange(caster.getPos(), WAR_STOMP_AOE)
 
-    if(spellId == ABILITY_VENOMOUS_BEETLE)
-        new VenoumosBeetle(caster, GetSpellTargetUnit())
+    let dur = WAR_STOMP_DURATION[level-1].bonus(caster.getStr(), WAR_STOMP_DURATION_BONUS)
+    let dmg = WAR_STOMP_DAMAGE[level-1].bonus(caster.getStr(), WAR_STOMP_DAMAGE_BONUS)
 
-    else if (spellId == ABILITY_WAR_STOMP)
-        group nearby = CreateGroup()
-        nearby.enumUnitsInRange(caster.getPos(), WAR_STOMP_AOE)
+    while(not nearby.isEmpty())
+        unit target = FirstOfGroup(nearby)
+        nearby.removeUnit(target)
+        if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
+            caster.dealDamage(target, dmg, ReductionType.PHYSICAL)
+            target.addBuffReduced( caster, dur, STUNNED, 1)
 
-        let dur = WAR_STOMP_DURATION[level-1].bonus(caster.getStr(), WAR_STOMP_DURATION_BONUS)
-        let dmg = WAR_STOMP_DAMAGE[level-1].bonus(caster.getStr(), WAR_STOMP_DAMAGE_BONUS)
+    nearby.destr()
 
-        while(not nearby.isEmpty())
-            unit target = FirstOfGroup(nearby)
-            nearby.removeUnit(target)
-            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
-                caster.dealDamage(target, dmg, ReductionType.PHYSICAL)
-                target.addBuffReduced( caster, dur, STUNNED, 1)
+function castJump()
+    let caster = GetTriggerUnit()
+    if caster.isMovable()
+        Knockback2d.knockback(caster, vec2(GetSpellTargetX(),GetSpellTargetY()), 1200)
 
-        nearby.destr()
-
-    else if spellId == ABILITY_JUMP
-        if caster.isMovable()
-            Knockback2d.knockback(caster, vec2(GetSpellTargetX(),GetSpellTargetY()), 1200)
-
-    else if spellId == ABILITY_UNBREAKABLE
-        caster.removeAbility(UNBREAKABLE_DUMMY_BUFF)
-        caster.addBuff(caster, UNBREAKABLE_DURATION, buffUnbreakable, level)
-        caster.addEffect(Units.wispExplode, "chest").destr()
+function castUnbreakable()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+    caster.removeAbility(UNBREAKABLE_DUMMY_BUFF)
+    caster.addBuff(caster, UNBREAKABLE_DURATION, buffUnbreakable, level)
+    caster.addEffect(Units.wispExplode, "chest").destr()
 
 class VenoumosBeetle
     private unit owner
@@ -425,6 +428,10 @@ function setupTooltips()
 
 function initHeroType()
     setupStats()
+    onCast(ABILITY_VENOMOUS_BEETLE, () -> castVenomousBeetle())
+    onCast(ABILITY_WAR_STOMP, () -> castWarStomp())
+    onCast(ABILITY_JUMP, () -> castJump())
+    onCast(ABILITY_UNBREAKABLE, () -> castUnbreakable())
     heroType..setSkillBuild("QWEQWQWQWQWEEEE")
     ..addItem(ITEM_ID_HEAVY_BOOTS)
     ..addItem(ITEM_ID_RUNIC_ARMOR)
@@ -434,9 +441,7 @@ function initHeroType()
     ..addItem(ITEM_ID_WAR_DRUM)
     ..useHeroGlow()
     delayInit(5) ->
-
         heroType
-            ..addOnSpellCastFunc(function onSpellCast)
             ..useHeroGlow()
             ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
             ..setAttackAI((HeroAI ai) -> (attackAI(ai)))

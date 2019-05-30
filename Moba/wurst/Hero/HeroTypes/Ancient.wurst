@@ -19,6 +19,7 @@ constant THIS_ICON = Icons.bTNTreant
 HeroType heroType = null
 
 constant UPROOTED = compiletime(UNIT_ID_GEN.next())
+unit array uprooted_dummy
 
 constant ABILITY_REGENERATION = 'AZ4P'
 constant ABILITY_EAT_UNIT = 'AZ4Q'
@@ -229,10 +230,6 @@ function naturesWrath(int abilityId)
         ))
     addDynamicTooltipIntelligence(heroType, tooltip)
 
-
-unit array uprooted_dummy
-
-
 class EatTreeAnimation
 
 
@@ -402,55 +399,61 @@ function onAttack(unit attacker, unit target, boolean _isActive)
 
         nearby.destr()
 
-function onSpellCast()
+function castEatUnit()
+    let caster = GetTriggerUnit()
+    new EatTreeAnimation(caster, GetSpellTargetUnit())
+    print("new castEatUnit 1111")
+
+function castRootMorph()
     let spellId = GetSpellAbilityId()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
+    print("new castRootMorph 2222")
+    if caster.getTypeId() == 'H014'
+        caster.setTimeScale(2.57/ROOT_DURATION)
+        doAfter( ROOT_DURATION, () -> onRoot(caster, level))
+    else
+        caster.setTimeScale(2.57/ROOT_DURATION)
+        doAfter( ROOT_DURATION, () -> onUproot(caster, level))
 
-    if(spellId == ABILITY_EAT_UNIT)
-        new EatTreeAnimation(caster, GetSpellTargetUnit())
+function castEntangle()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+    let startPos = caster.getPos()
+    let direction = startPos.angleTo(vec2(GetSpellTargetX(), GetSpellTargetY()))
+    print("new castEntangle 3333")
 
-    else if (spellId == ABILITY_ROOT)
-        if caster.getTypeId() == 'H014'
-            caster.setTimeScale(2.57/ROOT_DURATION)
-            doAfter( ROOT_DURATION, () -> onRoot(caster, level))
-        else
-            caster.setTimeScale(2.57/ROOT_DURATION)
-            doAfter( ROOT_DURATION, () -> onUproot(caster, level))
+    for i = 0 to 8
+        doAfter(0.1 * i, () -> (begin
+            let thisPos = startPos.polarOffset(direction, i*125.)
+            addEffect("Sylvanspear2.mdx", thisPos).destr()
 
-    else if (spellId == ABILITY_IMPALE)
+            group nearby = CreateGroup()
+            nearby.enumUnitsInRange(thisPos, 130)
+    
+            let dur = ENTANGLE_DURATION[level-1].bonus(caster.getInt(), ENTANGLE_DURATION_BONUS)
 
-        let startPos = caster.getPos()
-        let direction = startPos.angleTo(vec2(GetSpellTargetX(), GetSpellTargetY()))
+            while(not nearby.isEmpty())
+                unit u = FirstOfGroup(nearby)
+                nearby.removeUnit(u)
+                if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(caster.getOwner(), false, true) and not u.isType(UNIT_TYPE_FLYING)
+                    
+                    if not BuffList.hasBuffType(u, BUFF_ENTAGLING_ROOTS)
+                        caster.dealDamage(u, ENTANGLE_HIT_DAMAGE[level-1].bonus(caster.getInt(), ENTANGLE_HIT_DAMAGE_BONUS), ReductionType.MAGIC)
 
-        for i = 0 to 8
-            doAfter(0.1 * i, () -> (begin
-                let thisPos = startPos.polarOffset(direction, i*125.)
-                addEffect("Sylvanspear2.mdx", thisPos).destr()
+                    u.addBuffReduced(caster, dur, ENTANGLED, 1)
+                    u.addBuffReduced(caster, dur, BUFF_ENTAGLING_ROOTS, level)
+    
+            nearby.destr()
+        end))
 
-                group nearby = CreateGroup()
-                nearby.enumUnitsInRange(thisPos, 130)
-        
-                let dur = ENTANGLE_DURATION[level-1].bonus(caster.getInt(), ENTANGLE_DURATION_BONUS)
-
-                while(not nearby.isEmpty())
-                    unit u = FirstOfGroup(nearby)
-                    nearby.removeUnit(u)
-                    if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(caster.getOwner(), false, true) and not u.isType(UNIT_TYPE_FLYING)
-                        
-                        if not BuffList.hasBuffType(u, BUFF_ENTAGLING_ROOTS)
-                            caster.dealDamage(u, ENTANGLE_HIT_DAMAGE[level-1].bonus(caster.getInt(), ENTANGLE_HIT_DAMAGE_BONUS), ReductionType.MAGIC)
-
-                        u.addBuffReduced(caster, dur, ENTANGLED, 1)
-                        u.addBuffReduced(caster, dur, BUFF_ENTAGLING_ROOTS, level)
-        
-                nearby.destr()
-            end))
-
-    else if spellId == ABILITY_NATURES_WRATH
-        doAfter(0, () -> caster.removeAbility(NATURES_WRATH_DUMMY_BUFF))
-        new NaturesWrath(caster, level)
-
+function castNaturesWrath()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+    doAfter(0, () -> caster.removeAbility(NATURES_WRATH_DUMMY_BUFF))
+    new NaturesWrath(caster, level)
 
 
 function setupStats()
@@ -531,6 +534,11 @@ function setupTooltips()
 
 function initHeroType()
     setupStats()
+    onCast(ABILITY_EAT_UNIT, () -> castEatUnit())
+    onCast(ABILITY_ROOT, () -> castRootMorph())
+    onCast(ABILITY_IMPALE, () -> castEntangle())
+    onCast(ABILITY_NATURES_WRATH, () -> castNaturesWrath())
+
     heroType..setSkillBuild("QWQWQWQWQWEEEEE")
     ..addItem(ITEM_ID_HEAVY_BOOTS)
     ..addItem(ITEM_ID_RUNIC_ARMOR)
@@ -543,7 +551,6 @@ function initHeroType()
     delayInit(5) ->
         heroType
             ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
-            ..addOnSpellCastFunc(function onSpellCast)
             ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
             ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
             ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))

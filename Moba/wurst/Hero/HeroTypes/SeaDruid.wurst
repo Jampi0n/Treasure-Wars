@@ -261,49 +261,52 @@ function setupStats()
         ..setStat(Stat.AGI, 35, 59)
         ..setStat(Stat.INT, 13, 47)
 
-function onSpellCast()
+function castTidalFury()
     let spellId = GetSpellAbilityId()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
+    let casterPos = caster.getPos()
+    group nearby = CreateGroup()
+    nearby.enumUnitsInRange(casterPos, TIDAL_FURY_AOE)
 
-    if(spellId == ABILITY_TIDAL_FURY)
-        let casterPos = caster.getPos()
-        group nearby = CreateGroup()
-        nearby.enumUnitsInRange(casterPos, TIDAL_FURY_AOE)
+    let hitDmg = TIDAL_FURY_HIT_DMG[level-1].bonus(caster.getStr(), TIDAL_FURY_HIT_DMG_BONUS)
 
-        let hitDmg = TIDAL_FURY_HIT_DMG[level-1].bonus(caster.getStr(), TIDAL_FURY_HIT_DMG_BONUS)
+    while(not nearby.isEmpty())
+        unit target = FirstOfGroup(nearby)
+        nearby.removeUnit(target)
+        if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
+            caster.dealDamage(target, hitDmg, ReductionType.PHYSICAL)
+            if target.isMovable() and not target.isType(UNIT_TYPE_FLYING)
+                Knockback2d.knockback(target, caster.getPos().polarOffset(caster.getPos().angleTo(target.getPos()), 500), 1000)
 
-        while(not nearby.isEmpty())
-            unit target = FirstOfGroup(nearby)
-            nearby.removeUnit(target)
-            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
-                caster.dealDamage(target, hitDmg, ReductionType.PHYSICAL)
-                if target.isMovable() and not target.isType(UNIT_TYPE_FLYING)
-                    Knockback2d.knockback(target, caster.getPos().polarOffset(caster.getPos().angleTo(target.getPos()), 500), 1000)
+            new Missile(caster, caster.getPos().withZ(80), 900, caster.getPos().angleTo(target.getPos()), Abilities.crushingWaveMissile)
+                ..hitOnce()
+                ..setSize(125)
+                ..setHitCondition((Missile missile, unit target) -> (begin
+                return not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(missile.getOwner().getOwner(), false, true)
+            end) )
+                ..setHitFunction((Missile missile, unit target) -> (begin
+                let missileCaster = missile.getOwner()
+                missileCaster.dealDamage(target, (TIDAL_FURY_WAVE_DMG[level-1]).bonus(missileCaster.getInt(), TIDAL_FURY_WAVE_DMG_BONUS), ReductionType.MAGIC)
+    
+            end) )
+                ..setMaxRange(500)
+    nearby.destr()
 
-                new Missile(caster, caster.getPos().withZ(80), 900, caster.getPos().angleTo(target.getPos()), Abilities.crushingWaveMissile)
-                    ..hitOnce()
-                    ..setSize(125)
-                    ..setHitCondition((Missile missile, unit target) -> (begin
-                    return not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(missile.getOwner().getOwner(), false, true)
-                end) )
-                    ..setHitFunction((Missile missile, unit target) -> (begin
-                    let missileCaster = missile.getOwner()
-                    missileCaster.dealDamage(target, (TIDAL_FURY_WAVE_DMG[level-1]).bonus(missileCaster.getInt(), TIDAL_FURY_WAVE_DMG_BONUS), ReductionType.MAGIC)
-        
-                end) )
-                    ..setMaxRange(500)
-        nearby.destr()
+function castGiantFish()
+    let caster = GetTriggerUnit()
+    ArtilleryDetection.fireArtillery(caster.getOwner(), FISH_ARTILLERY, caster.getPos(), vec2(GetSpellTargetX(), GetSpellTargetY()))
 
-    else if(spellId==ABILITY_GIANT_FISH)
-        ArtilleryDetection.fireArtillery(caster.getOwner(), FISH_ARTILLERY, caster.getPos(), vec2(GetSpellTargetX(), GetSpellTargetY()))
 
-    else if spellId == ABILITY_MANA_SHIELD
-        caster.addBuff(caster, -1, buffManaShield, level)
+function castManaShield()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+    caster.addBuff(caster, -1, buffManaShield, level)
 
-    if(spellId == ABILITY_RITUAL_OF_THE_SEAS)
-
-        new RitualOfTheSeas(caster)
+function castRitualOfTheSea()
+    let caster = GetTriggerUnit()
+    new RitualOfTheSeas(caster)
 
 class RitualOfTheSeas
 
@@ -479,6 +482,10 @@ function setupTooltips()
 
 function initHeroType()
     setupStats()
+    onCast(ABILITY_TIDAL_FURY, () -> castTidalFury())
+    onCast(ABILITY_GIANT_FISH, () -> castGiantFish())
+    onCast(ABILITY_MANA_SHIELD, () -> castManaShield())
+    onCast(ABILITY_RITUAL_OF_THE_SEAS, () -> castRitualOfTheSea())
     heroType..setSkillBuild("QWEQQWEQWQEWEWE")
     ..addItem(ITEM_ID_HEAVY_BOOTS)
     ..addItem(ITEM_ID_BLESSED_GOBLET)
@@ -509,7 +516,6 @@ function initHeroType()
     end))
     delayInit(5) ->
         heroType
-            ..addOnSpellCastFunc(function onSpellCast)
             ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
             ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
             ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))

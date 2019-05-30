@@ -21,7 +21,6 @@ constant ABILITY_IMMOLATION = 'AY3W'
 constant ABILITY_BONE_WALL = 'AY3E'
 constant ABILITY_WILD_RAGE = 'AY3R'
 
-unit heroDestroyer = null
 group hitByBreath = CreateGroup()
 
 public constant real array DEATH_FRENZY_BONUS = [25, 35, 45, 55, 65]
@@ -298,72 +297,69 @@ function onAttack(unit attacker, unit target, boolean _isActive)
         target.addEffect(Abilities.stampedeMissileDeath, "origin")
 
 
-function onSpellCast()
+function castBreath()
+    hitByBreath.clear()
+
+function castImmolation()
+    let caster = GetTriggerUnit()
+    caster.addBuff(caster, -1, buffImmolation, 1)
+
+function castBoneWall()
     let spellId = GetSpellAbilityId()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
+    let pos = vec2(GetSpellTargetX(), GetSpellTargetY())
+    let angle1 = caster.getPos().angleTo(pos)
+    let angle2 = angle1.op_minus(angle(bj_PI/2))
+    let facing = angle1
+    let modelPath = "Doodads\\LordaeronSummer\\Props\\SkullPile\\SkullPile0.mdl"
 
-    if(spellId==ABILITY_BREATH)
-        /*let target = GetSpellTargetUnit()
-        target.addBuffReduced(caster, PREY_DURATION, buffPreyTarget, level)
-        caster.addBuff(caster, -1, buffPreyCaster, level)*/
-        hitByBreath.clear()
+    var wall = createUnit(caster.getOwner(), WALL, pos, angle(0))
+    wall.setXY(pos)
+    var model = addEffect(modelPath, pos)
+    model.setRoll(facing)
+    doAfter(WALL_DURATION[level-1]) ->
+        doPeriodicallyCounted(0.05, 20, (CallbackCounted cb) -> begin
+            model.setAlpha((12.75 * cb.getCount()).round() )
+        end)
+        addEffect(Abilities.mirrorImageDeathCaster, pos).destr()
+        model.destr()
+        wall.kill()
 
-    if(spellId==ABILITY_IMMOLATION)
-        caster.addBuff(caster, -1, buffImmolation, 1)
-
-    if(spellId==ABILITY_BONE_WALL)
-        let pos = vec2(GetSpellTargetX(), GetSpellTargetY())
-        let angle1 = caster.getPos().angleTo(pos)
-        let angle2 = angle1.op_minus(angle(bj_PI/2))
-        let facing = angle1
-        let modelPath = "Doodads\\LordaeronSummer\\Props\\SkullPile\\SkullPile0.mdl"
-
-        var wall = createUnit(caster.getOwner(), WALL, pos, angle(0))
-        wall.setXY(pos)
-        var model = addEffect(modelPath, pos)
+    for i = 1 to WALL_NUMBER[level-1]
+        var newPos = pos.polarOffset(angle2, 64. * i)
+        wall = createUnit(caster.getOwner(), WALL, newPos, angle(0))
+        wall.setXY(newPos)
+        model = addEffect(modelPath, newPos)
         model.setRoll(facing)
         doAfter(WALL_DURATION[level-1]) ->
             doPeriodicallyCounted(0.05, 20, (CallbackCounted cb) -> begin
                 model.setAlpha((12.75 * cb.getCount()).round() )
             end)
-            addEffect(Abilities.mirrorImageDeathCaster, pos).destr()
+            addEffect(Abilities.mirrorImageDeathCaster, newPos).destr()
             model.destr()
             wall.kill()
 
-        for i = 1 to WALL_NUMBER[level-1]
-            var newPos = pos.polarOffset(angle2, 64. * i)
-            wall = createUnit(caster.getOwner(), WALL, newPos, angle(0))
-            wall.setXY(newPos)
-            model = addEffect(modelPath, newPos)
-            model.setRoll(facing)
-            doAfter(WALL_DURATION[level-1]) ->
-                doPeriodicallyCounted(0.05, 20, (CallbackCounted cb) -> begin
-                    model.setAlpha((12.75 * cb.getCount()).round() )
-                end)
-                addEffect(Abilities.mirrorImageDeathCaster, newPos).destr()
-                model.destr()
-                wall.kill()
+        newPos = pos.polarOffset(angle2, -64. * i)
+        wall = createUnit(caster.getOwner(), WALL, newPos, angle(0))
+        wall.setXY(newPos)
+        model = addEffect(modelPath, newPos)
+        model.setRoll(facing)
+        doAfter(WALL_DURATION[level-1]) ->
+            doPeriodicallyCounted(0.05, 20, (CallbackCounted cb) -> begin
+                model.setAlpha((12.75 * cb.getCount()).round() )
+            end)
+            addEffect(Abilities.mirrorImageDeathCaster, newPos).destr()
+            model.destr()
+            wall.kill()
 
-            newPos = pos.polarOffset(angle2, -64. * i)
-            wall = createUnit(caster.getOwner(), WALL, newPos, angle(0))
-            wall.setXY(newPos)
-            model = addEffect(modelPath, newPos)
-            model.setRoll(facing)
-            doAfter(WALL_DURATION[level-1]) ->
-                doPeriodicallyCounted(0.05, 20, (CallbackCounted cb) -> begin
-                    model.setAlpha((12.75 * cb.getCount()).round() )
-                end)
-                addEffect(Abilities.mirrorImageDeathCaster, newPos).destr()
-                model.destr()
-                wall.kill()
-    
-
-    if(spellId==ABILITY_WILD_RAGE)
-        let target = GetSpellTargetUnit()
-        target.addBuffReduced(caster, PREY_DURATION, buffPreyTarget, level)
-        caster.addBuff(caster, -1, buffPreyCaster, level)
-        
+function castWildRage()
+    let spellId = GetSpellAbilityId()
+    let target = GetSpellTargetUnit()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+    target.addBuffReduced(caster, PREY_DURATION, buffPreyTarget, level)
+    caster.addBuff(caster, -1, buffPreyCaster, level)
 
 
 function retreatAI(HeroAI _ai)
@@ -385,6 +381,10 @@ function setupTooltips()
 
 function initHeroType()
     setupStats()
+    onCast(ABILITY_BREATH, () -> castBreath())
+    onCast(ABILITY_IMMOLATION, () -> castImmolation())
+    onCast(ABILITY_BONE_WALL, () -> castBoneWall())
+    onCast(ABILITY_WILD_RAGE, () -> castWildRage())
     heroType..setSkillBuild("QWQWQWQWQWEEEEE")
     ..addItem(ITEM_ID_HEAVY_BOOTS)
     ..addItem(ITEM_ID_BLOOD_SWORD)
@@ -395,7 +395,6 @@ function initHeroType()
     delayInit(5) ->
         heroType
             ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
-            ..addOnSpellCastFunc(function onSpellCast)
             ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
             ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
             ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
@@ -498,23 +497,24 @@ function initHeroType()
         buffImmolation.addFirstFunction( (Buff whichBuff) -> (begin
             let level = whichBuff.getLevel()
             whichBuff.setData(level)
-            heroDestroyer.wrapper().addStatAbsoluteBonus(Stat.AS, IMMOLATION_ATTACK_SPEED[level-1])
+            whichBuff.getCaster().wrapper().addStatAbsoluteBonus(Stat.AS, IMMOLATION_ATTACK_SPEED[level-1])
         end))
 
         buffImmolation.addEndFunction( (Buff whichBuff) -> (begin
             let level = whichBuff.getData()
-            heroDestroyer.wrapper().addStatAbsoluteBonus(Stat.AS, -IMMOLATION_ATTACK_SPEED[level-1])
+            whichBuff.getCaster().wrapper().addStatAbsoluteBonus(Stat.AS, -IMMOLATION_ATTACK_SPEED[level-1])
         end))
 
         buffImmolation.addPeriodicFunction((Buff whichBuff) -> (begin
-            let owner = heroDestroyer.getOwner()
+            let caster = whichBuff.getCaster()
+            let owner = caster.getOwner()
             let level = whichBuff.getData()
-            if heroDestroyer.hasAbility(IMMOLATION_BUFF_ID)
-                let dmg = IMMOLATION_DAMAGE[level-1].bonus(heroDestroyer.getInt(), IMMOLATION_DAMAGE_BONUS) * 0.2
+            if caster.hasAbility(IMMOLATION_BUFF_ID)
+                let dmg = IMMOLATION_DAMAGE[level-1].bonus(caster.getInt(), IMMOLATION_DAMAGE_BONUS) * 0.2
                 //use hp to not trigger damage event
-                heroDestroyer.addHP(-(0.5 * dmg.reduceMagic(heroDestroyer.getWp())))
+                caster.addHP(-(0.5 * dmg.reduceMagic(caster.getWp())))
                 group g = CreateGroup()
-                g.enumUnitsInRange(heroDestroyer.getPos(), 250)
+                g.enumUnitsInRange(caster.getPos(), 250)
                 while true
                     let u = FirstOfGroup(g)
                     if u == null
@@ -522,9 +522,9 @@ function initHeroType()
                     g.removeUnit(u)
                     if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(owner, false, true)
                         if u.isType(UNIT_TYPE_HERO)
-                            heroDestroyer.dealDamage(u, 2 * dmg, ReductionType.MAGIC)
+                            caster.dealDamage(u, 2 * dmg, ReductionType.MAGIC)
                         else
-                            heroDestroyer.dealDamage(u, dmg, ReductionType.MAGIC)
+                            caster.dealDamage(u, dmg, ReductionType.MAGIC)
             else
                 whichBuff.dispel()
         end))
@@ -536,9 +536,6 @@ init
     
     heroType = new HeroType(THIS_HERO, THIS_ICON, THIS_ID, false)
     ..setOnInitFunction(() -> initHeroType())
-    ..setOnCreateFunction((Hero h) -> begin
-        heroDestroyer = h.toUnit()
-    end)
 
     setupTooltips()
     addButtonToTavern(THIS_ID, THIS_BUTTON_POS, heroType, 1)
