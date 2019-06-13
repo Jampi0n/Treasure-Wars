@@ -93,7 +93,7 @@ public class StatTable
         columnToPlayer[1] = getCPlayer(TEAM_PLAYER_TEAM_1)
         playerToColumn[TEAM_PLAYER_TEAM_1] = 1
         for i = 0 to MAX_HERO_COUNT-1
-            if Hero.getHero(i) != null
+            if CPlayer.getPlayerHeroes(i).size() != 0
                 columnToPlayer[count] = getCPlayer(i)
                 playerToColumn[i] = count
                 count++
@@ -125,13 +125,8 @@ public class StatTable
         for i = 1 to mBoard.getColumnCount() - 1 
             let cPlayer = columnToPlayer[i]
             let color = cPlayer.getPlayer().getColor().toColor()
-            string icon
+            string icon = cPlayer.getIcon()
 
-            let hero = Hero.getHero(cPlayer)
-            if hero != null
-                icon = hero.getHeroType().getIcon()
-            else
-                icon = Icons.bTNCastle
 
             string name = cPlayer.getPlayer().getName().substring(0, 5)
 
@@ -208,13 +203,8 @@ public class ScoreTable
             ..release() 
 
     static function addIcon(CPlayer p)
-        let row = playerToRow[p.getId()]
-
-        let hero = Hero.getHero(p)
-        let icon = hero == null ? "ReplaceableTextures\\CommandButtons\\BTNSelectHeroOn.blp" : hero.getHeroType().getIcon()
-
-        mBoard.getItem(row, 0)
-            ..setIcon(icon)
+        mBoard.getItem(playerToRow[p.getId()], 0)
+            ..setIcon(p.getIcon())
             ..release() 
 
     static function update()
@@ -229,8 +219,7 @@ public class ScoreTable
             rowToPlayer[row] = p
             playerToRow[p.getId()] = row
 
-            let hero = Hero.getHero(p)
-            let icon = hero == null ? "ReplaceableTextures\\CommandButtons\\BTNSelectHeroOn.blp" : hero.getHeroType().getIcon()
+            let icon = p.getIcon()
 
             mBoard.getItem(row, 0)
                 ..setStyle(true, true)
@@ -352,7 +341,11 @@ public class CPlayer
     protected int deaths = 0
     protected int assists = 0
 
+    private LinkedList<Hero> playerHeroes = new LinkedList<Hero>
+
     private real realGold = 0
+    private real realXp = 0
+
     int statGoldGained = 0
     real statDamageDealt = 0
     real statDamageTaken = 0
@@ -366,6 +359,7 @@ public class CPlayer
     protected static CPlayer array idToPlayer
     private Team team
     private PlayerType playertype
+    private string icon = "ReplaceableTextures\\CommandButtons\\BTNSelectHeroOn.blp"
 
     construct(player p, Team t, PlayerType pType)
         objectCount++
@@ -434,6 +428,19 @@ public class CPlayer
 
     function getPlayerType() returns PlayerType
         return this.playertype
+
+    function getIcon() returns string
+        return this.icon
+
+    function addHero(Hero whichHero)
+        this.playerHeroes.add(whichHero)
+
+    static function getPlayerHeroes(int playerId) returns LinkedList<Hero>
+        return getCPlayer(playerId).playerHeroes
+
+    @deprecated
+    static function getPlayerHero(int playerId, int heroIndex) returns Hero
+        return getPlayerHeroes(playerId).get(heroIndex)
 
     static function getAllyHeroPlayers(Team t) returns LinkedList<CPlayer>
         LinkedList<CPlayer> ret
@@ -549,8 +556,13 @@ public class CPlayer
         if ai != null
             ai.addGold(gold)
 
-
-
+    function addXp(real xp)
+        this.realXp += xp
+        let intXp = this.realXp.toInt()
+        let heroes = CPlayer.getPlayerHeroes(this.playerId)
+        for Hero hero in heroes
+            hero.toUnit().addXp(intXp, true)
+        this.realXp -= intXp
 
 init
     CPlayer.initPlayers()

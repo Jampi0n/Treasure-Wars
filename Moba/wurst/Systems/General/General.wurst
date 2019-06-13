@@ -196,7 +196,7 @@ public function unit.dispelBuffs(boolean positive, boolean negative)
     this.dispelPhysicallBuffs(positive, negative)
 
 public function player.getFullName() returns string
-    let hero = Hero.getHero(this)
+    let hero = CPlayer.getPlayerHero(this.getId(), 0)
     if(hero != null)
         return this.getName()+ " ("+hero.toUnit().getName()+")"
     else

@@ -65,7 +65,7 @@ function onHydraDeath()
             PingMinimap(target.getX(), target.getY(), 3)
 
             for CPlayer killerHero in killingTeam
-                let hero = Hero.getHero(killerHero)
+                let hero = CPlayer.getPlayerHero(killerHero.getId(), 0)
                 if hero != null
                     hero.toUnit().hydraBonus()
                     hero.addXp(250)

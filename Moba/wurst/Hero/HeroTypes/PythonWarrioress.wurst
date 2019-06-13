@@ -4,7 +4,6 @@ package PythonWarrioress
 
 import HeroType
 import ClosureTimers
-import OnUnitEnterLeave
 import SoundUtils
 
 constant SOUND_PARALYZING_STRIKE = new SoundDefinition(Sounds.shadowStrikeBirth1, false, true)
@@ -101,9 +100,8 @@ constant int array POISON_SPIT_ARMOR_REDUCTION = [-10, -15, -20, -25, -30]
 constant real array POISON_SPIT_DURATION = [6, 7, 8, 9, 10]
 constant real array POISON_SPIT_AOE = [200, 225, 250, 275, 300]
 
-constant integer ABILITY_POISON_SPIT_SLOWED = compiletime(ABIL_ID_GEN.next())
-constant integer ABILITY_POISON_SPIT_ARMOR_REDUCED = compiletime(ABIL_ID_GEN.next())
-constant integer BUFF_ID_POISON_SPIT = 'B00B'
+
+constant POISON_SPIT_ARTILLERY = compiletime(ArtilleryDetection.createArtilleryDummy(0, 120, 160, 1, "Models\\GreatElderHydraAcidSpewV.153.mdl", 500, 0.3))
 
 constant POISON_SPIT_BUFF_ID = compiletime(createAuraBuff("Poison Spit", "This unit stands inside Poison Spit. It has slowed movement speed reduced armor. The poison deals damage over time.", "BTNSlowSpellGreen"))
 constant POISON_SPIT_ABILITY_ID = compiletime(createNegativeBuffAbility(5, POISON_SPIT_BUFF_ID, "Units\\Undead\\PlagueCloud\\PlagueCloudtarget.mdl", "chest"))
@@ -233,8 +231,6 @@ function paralyzingStrike(int abilityId)
     addDynamicTooltipIntelligence(heroType, tooltip)
 
 
-group spitDummies = CreateGroup()
-
 function setupStats()
     heroType
         
@@ -257,17 +253,31 @@ function castMistwalk()
     caster.addBuff( caster, (MISTWALK_DURATION[level-1]).bonus(caster.getInt(), MISTWALK_DURATION_BONUS), INVIS, 1)
 
 function castPoisonSpit()
-    let spellId = GetSpellAbilityId()
     let caster = GetTriggerUnit()
-    let level = caster.getAbilityLevel(spellId)
-    let x = GetSpellTargetX()
-    let y = GetSpellTargetY()
-    let attacker = createUnit(caster.getOwner(), 'u000', caster.getPos(), angle(Atan2(y - caster.getY(), x - caster.getX())))
-    attacker.setAbilityLevel('A007', level)
+    ArtilleryDetection.fireArtillery(caster, POISON_SPIT_ARTILLERY, caster.getPos(), vec2(GetSpellTargetX(), GetSpellTargetY())) (unit detectionUnit, unit caster, int data) ->
+        let level = caster.getAbilityLevel(ABILITY_POISON_SPIT)
+        let targetPos = detectionUnit.getPos()
+        SOUND_POISON_SPIT.playOnPoint(targetPos.toVec3())
+        for i = 0 to 9 + level*3
+            let angle = i/(10 + level*3)*2*bj_PI
+            let fxPos = targetPos.polarOffset(angle(angle), POISON_SPIT_AOE[level-1]-50)
+            let e = addEffect("Units\\Undead\\PlagueCloud\\PlagueCloudtarget.mdl", fxPos)
+            doAfter(POISON_SPIT_DURATION[level-1], () -> e.destr())
 
-    if(not attacker.issuePointOrder("attackground", vec2(x,y)))
-        print("failed to order attackground")
-    attacker.setTimedLife(1)
+        doPeriodicallyTimed(0.25, POISON_SPIT_DURATION[level-1]) (CallbackCounted cb) ->
+
+            group nearby = CreateGroup()
+            nearby.enumUnitsInRange(targetPos, POISON_SPIT_AOE[level-1])
+        
+            while(not nearby.isEmpty())
+                unit target = FirstOfGroup(nearby)
+                nearby.removeUnit(target)
+                if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
+                    target.addBuff( caster, 0.5, BUFF_POISON_SPIT, level)
+        
+            nearby.destr()
+
+
 
 function castEmpoweredStrike()
     let spellId = GetSpellAbilityId()
@@ -295,28 +305,6 @@ function onAttack(unit attacker, unit target, boolean _isActive)
     let level = attacker.getAbilityLevel(ABILITY_ENVENOMED_BLADES)
     if level != 0 and target.isTargetable(attacker.getOwner(), false, true) and not target.isType(UNIT_TYPE_STRUCTURE)
         target.addBuffReduced( attacker, ENVENOMED_BLADES_DURATION[level-1], BUFF_ENVENOMED_BLADES, level)
-
-
-//in for group
-function poisonSpitPeriodic()
-    unit poisonSpitDummy = GetEnumUnit()
-    int level = poisonSpitDummy.getTypeId()+1-'n007'
-    player owner =poisonSpitDummy.getOwner()
-    unit hero =  Hero.getHero(owner).toUnit()
-    if(level>3)
-        level = poisonSpitDummy.getTypeId()+4-'n00A'
-
-    group nearby = CreateGroup()
-    nearby.enumUnitsInRange(poisonSpitDummy.getPos(), POISON_SPIT_AOE[level-1])
-
-    while(not nearby.isEmpty())
-        unit target = FirstOfGroup(nearby)
-        nearby.removeUnit(target)
-        if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(poisonSpitDummy.getOwner(), false, true)
-            target.addBuff( hero, 0.5, BUFF_POISON_SPIT, level)
-
-    nearby.destr()
-
 
 
 
@@ -404,10 +392,10 @@ function initHeroType()
         
 
         //Poison Spit
+
         abilityList = new LinkedList<int>
-            ..add(ABILITY_POISON_SPIT_ARMOR_REDUCED)
-            ..add(ABILITY_POISON_SPIT_SLOWED)
-        BUFF_POISON_SPIT.setup(abilityList, BUFF_ID_POISON_SPIT)
+            ..add(POISON_SPIT_ABILITY_ID)
+        BUFF_POISON_SPIT.setup(abilityList, POISON_SPIT_BUFF_ID)
         BUFF_POISON_SPIT.addApplyFunction( (Buff thisBuff) -> (begin
             thisBuff.getCaster().dealDamage(thisBuff.getTarget(), 
             (POISON_SPIT_DOT[thisBuff.getLevel()-1]).bonus(thisBuff.getCaster().getInt(), POISON_SPIT_DOT_BONUS)/4
@@ -425,46 +413,6 @@ function initHeroType()
             wrapper.addStatAbsoluteBonus( Stat.AR, -POISON_SPIT_ARMOR_REDUCTION[thisBuff.getLevel()-1] )
         end) )
 
-        onEnter(() -> (begin
-            let spitDummy = getEnterLeaveUnit()
-            int level = spitDummy.getTypeId()+1-'n007'
-            if(level>3)
-                level = spitDummy.getTypeId()+4-'n00A'
-
-            if level >= 1 and level <= 5
-                spitDummy.setTimedLife(POISON_SPIT_DURATION[level-1])
-                spitDummies.addUnit(spitDummy)
-                SOUND_POISON_SPIT.playOnPoint(spitDummy.getPos3Zero())
-
-
-                real x
-                real y
-                real angle
-                for i = 0 to 9 + level*3
-                    angle = i/(10 + level*3)*2*bj_PI
-                    x = spitDummy.getX() + (POISON_SPIT_AOE[level-1]-50) * angle.cos()
-                    y = spitDummy.getY() + (POISON_SPIT_AOE[level-1]-50) * angle.sin()
-                    var e = AddSpecialEffect("Units\\Undead\\PlagueCloud\\PlagueCloudtarget.mdl", x, y)
-                    doAfter(5.+level, () -> DestroyEffect(e))
-
-        end) )
-
-        onLeave(() -> (begin
-            let spitDummy = getEnterLeaveUnit()
-            int level = spitDummy.getTypeId()+1-'n007'
-            if(level>3)
-                level = spitDummy.getTypeId()+4-'n00A'
-
-            if level >= 1 and level <= 5
-                
-                spitDummies.removeUnit(spitDummy)
-        end) )
-
-        let spitPeriodicTrigger = CreateTrigger()
-        spitPeriodicTrigger.registerTimerEvent(0.25, true)
-        spitPeriodicTrigger.addAction(() -> (begin
-            ForGroup(spitDummies, function poisonSpitPeriodic)
-        end) )
 
 
     

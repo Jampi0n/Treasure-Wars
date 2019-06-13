@@ -58,7 +58,7 @@ function onDragonTurtleDeath()
             
 
             for CPlayer killerHero in killingTeam
-                let hero = Hero.getHero(killerHero)
+                let hero = CPlayer.getPlayerHero(killerHero.getId(),0)
                 if hero != null
                     killerHero.dragonTurtleBonus()
                     hero.addXp(150)

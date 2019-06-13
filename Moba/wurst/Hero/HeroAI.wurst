@@ -1,6 +1,5 @@
 package HeroAI
 
-import PlayerControl
 import HeroType
 import TimerUtils
 import ClosureTimers
@@ -264,8 +263,8 @@ public class TeamFight
         unit currentTarget = null
 
         for i = firstTeam ? HERO_PLAYER_TEAM_2_FIRST : HERO_PLAYER_TEAM_1_FIRST to firstTeam ? HERO_PLAYER_TEAM_2_LAST : HERO_PLAYER_TEAM_1_LAST
-            let hero = Hero.getHero(i)
-            if hero!=null
+            let heroes = CPlayer.getPlayerHeroes(i)
+            for Hero hero in heroes
                 let heroUnit = hero.toUnit()
                 if hero.toUnit().getPos().distanceTo(this.teamFightLoc) < TEAM_FIGHT_RANGE and hero.toUnit().isAlive() and hero.toUnit().isTargetable(firstTeam ? players[TEAM_PLAYER_TEAM_1] : players[TEAM_PLAYER_TEAM_2], false, true)
                     if hero.toUnit().isVisible(firstTeam ? players[TEAM_PLAYER_TEAM_1] : players[TEAM_PLAYER_TEAM_2])
@@ -466,7 +465,7 @@ public class HeroAI
     construct(CPlayer owner, aidifficulty diff)
         this.owner = owner
         this.owningPlayer = owner.getPlayer()
-        this.hero = Hero.getHero(owner)
+        this.hero = CPlayer.getPlayerHero(owner.getId(), 0)
         this.heroType = hero.getHeroType()
         this.heroUnit = this.hero.toUnit()
         this.firstTeam = owner.getId() <= HERO_PLAYER_TEAM_1_LAST

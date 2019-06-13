@@ -21,7 +21,7 @@ constant ABILITY_FROST_ARMOR = 'AZ9W'
 constant ABILITY_FROST_WYRM = 'AZ9E'
 constant ABILITY_FREEZE = 'AZ9R'
 
-unit array frostWyrm
+constant SUMMON_MAP = new HashMap<unit,unit>
 
 function setupStats()
     heroType
@@ -396,10 +396,10 @@ function castFrostWyrm()
     let spellId = GetSpellAbilityId()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
-    let pId = caster.getOwner().getId()
-    frostWyrm[pId].kill()
-    frostWyrm[pId] = createUnit(caster.getOwner(), FROST_WYRM, caster.getPos(), angle(0))
-    let wrapper = frostWyrm[pId].wrapper()
+    SUMMON_MAP.get(caster).kill()
+    let frostWyrm = createUnit(caster.getOwner(), FROST_WYRM, caster.getPos(), angle(0))
+    SUMMON_MAP.put(caster, frostWyrm)
+    let wrapper = frostWyrm.wrapper()
     wrapper.addStatAbsoluteBonus(Stat.AS, caster.wrapper().getStatTotalBonus(Stat.AS))
     wrapper.addStatAbsoluteBonus(Stat.HP, caster.wrapper().getStatTotalBonus(Stat.HP) + FROST_WYRM_HP[level-1] )
     wrapper.addStatAbsoluteBonus(Stat.STR, ( (FROST_WYRM_INT_FACTOR/100) * caster.getInt() ).toInt()  + FROST_WYRM_DMG[level-1] )
@@ -415,7 +415,9 @@ function retreatAI(HeroAI _ai)
 function attackAI(HeroAI ai)
     let hero = ai.getHeroUnit()
 
-    if not frostWyrm[hero.getOwner().getId()].isAlive()
+    let frostWyrm = SUMMON_MAP.get(hero)
+
+    if not frostWyrm.isAlive()
         ai.issue("roar")
 
     unit target
@@ -429,15 +431,16 @@ function attackAI(HeroAI ai)
         if not ai.getAttacking()
             ai.attack(target)
 
-    if frostWyrm[hero.getOwner().getId()].getCurrentOrder() != OrderId("patrol")
-        frostWyrm[hero.getOwner().getId()].issueTargetOrder("patrol", hero)
+    if frostWyrm.getCurrentOrder() != OrderId("patrol")
+        frostWyrm.issueTargetOrder("patrol", hero)
  
 function teamFightAI(HeroAI ai)
     let ulti = heroType.getAbilityId( AbilitySlot.R)
     let hero = ai.getHeroUnit()
 
+    let frostWyrm = SUMMON_MAP.get(hero)
 
-    if not frostWyrm[hero.getOwner().getId()].isAlive()
+    if not frostWyrm.isAlive()
         ai.issue("roar")
 
 
@@ -476,8 +479,8 @@ function teamFightAI(HeroAI ai)
         if not ai.getAttacking()
             ai.attack(target)
 
-        if frostWyrm[hero.getOwner().getId()].getCurrentOrder() != OrderId("attack")
-            frostWyrm[hero.getOwner().getId()].issueTargetOrder("attack", target)
+        if frostWyrm.getCurrentOrder() != OrderId("attack")
+            frostWyrm.issueTargetOrder("attack", target)
 
 @compiletime
 function setupTooltips()
@@ -643,7 +646,7 @@ function initHeroType()
                 nearby.enumUnitsInRange(target.getPos(), FROST_WYRM_AOE)
 
                 let dmg = attacker.wrapper().getStatTotalValue(Stat.STR) * 0.5
-                let level = Hero.getHero(attacker.getOwner()).toUnit().getAbilityLevel(ABILITY_FROST_WYRM)
+                let level = SUMMON_MAP.get(attacker).getAbilityLevel(ABILITY_FROST_WYRM)
 
                 if not target.isType(UNIT_TYPE_STRUCTURE)
                     target.addBuffReduced(attacker, FROST_BREATH_DUR[level-1], buffFrostBreath, level)
@@ -665,20 +668,18 @@ function initHeroType()
                 attacker.addBuffReduced(armorBuff.getCaster(), ARMOR_SLOW_DURATION[level-1].bonus(armorBuff.getData(), ARMOR_SLOW_DURATION_BONUS), buffFrostArmorSlow, level)
         end))
 
+        CreateTrigger()
+        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
+        ..addAction() ->
+            if GetTriggerUnit().getTypeId() == FROST_WYRM
+                SUMMON_MAP.remove(GetTriggerUnit())
+
    
-function createHeroType(Hero hero)
-    let pId = hero.toUnit().getOwner().getId()
 
-    frostWyrm[pId] = null
-
-
-
-    
         
 init
     heroType = new HeroType(THIS_HERO, THIS_ICON, THIS_ID, true)
     ..setOnInitFunction(() -> initHeroType())
-    ..setOnCreateFunction((Hero hero) -> createHeroType(hero))
 
     setupTooltips()
     addButtonToTavern(THIS_ID, THIS_BUTTON_POS, heroType, 0)

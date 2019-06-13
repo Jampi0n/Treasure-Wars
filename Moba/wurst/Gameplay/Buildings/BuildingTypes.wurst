@@ -98,8 +98,7 @@ function setVictoryState(VictoryState newState)
 
 		//stops heroes from reviving
 		for i = 0 to MAX_HERO_COUNT-1
-			let hero = Hero.getHero(i)
-			if hero != null
+			for Hero hero in CPlayer.getPlayerHeroes(i)
 				hero.destroyTimer()
 
 

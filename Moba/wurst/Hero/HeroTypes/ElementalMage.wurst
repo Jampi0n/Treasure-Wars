@@ -187,10 +187,8 @@ function abilityE(int abilityId)
     addDynamicTooltipIntelligence(heroType, tooltip)
 
 
-constant int FF_FROST_IMPACT = compiletime(ArtilleryDetection.createDetectionDummy())
-constant int FF_FROST_ARTILLERY = compiletime(ArtilleryDetection.createArtilleryDummy(0, 0, 600, 2.5, Abilities.frostWyrmMissile, 1600, 0.1, FF_FROST_IMPACT))
-constant int FF_FLAME_IMPACT = compiletime(ArtilleryDetection.createDetectionDummy())
-constant int FF_FLAME_ARTILLERY = compiletime(ArtilleryDetection.createArtilleryDummy(0, 0, 600, 2.5, Abilities.redDragonMissile, 1600, 0.1, FF_FLAME_IMPACT))
+constant int FF_FROST_ARTILLERY = compiletime(ArtilleryDetection.createArtilleryDummy(0, 0, 600, 2.5, Abilities.frostWyrmMissile, 1600, 0.1))
+constant int FF_FLAME_ARTILLERY = compiletime(ArtilleryDetection.createArtilleryDummy(0, 0, 600, 2.5, Abilities.redDragonMissile, 1600, 0.1))
 
 constant real array FF_IMPACT_DAMAGE = [140, 170, 200, 230, 260]
 constant real FF_IMPACT_DAMAGE_BONUS = 125
@@ -328,8 +326,38 @@ function castFrostAndFlame()
     let casterAngle = caster.getFacingAngle()
     let behindCaster = casterPos.polarOffset(casterAngle, -1000)
     let targetPos = vec2(GetSpellTargetX(), GetSpellTargetY())
-    ArtilleryDetection.fireArtillery(caster.getOwner(), FF_FLAME_ARTILLERY, behindCaster.polarOffset(casterAngle + angle(bj_PI/2), 600), targetPos)
-    ArtilleryDetection.fireArtillery(caster.getOwner(), FF_FROST_ARTILLERY, behindCaster.polarOffset(casterAngle - angle(bj_PI/2), 600), targetPos)
+    ArtilleryDetection.fireArtillery(caster, FF_FROST_ARTILLERY, behindCaster.polarOffset(casterAngle - angle(bj_PI/2), 600), targetPos) (unit impact, unit caster, int data) ->
+    
+    ArtilleryDetection.fireArtillery(caster, FF_FLAME_ARTILLERY, behindCaster.polarOffset(casterAngle + angle(bj_PI/2), 600), targetPos) (unit impact, unit caster, int data) ->
+        group nearby = CreateGroup()
+        let level = caster.getAbilityLevel(ABILITY_FROST_AND_FLAME)
+        nearby.enumUnitsInRange(impact.getPos(), FF_AOE)
+
+        
+        Fx fx
+
+        for i = 0 to 10
+            fx = new Fx(impact.getPos().polarOffset(GetRandomDirectionDeg().fromDeg(), GetRandomReal(0, 300)), Abilities.flameStrikeEmbers)
+            fx.setScale(2)
+            doAfter(0.5, () -> destroy fx)
+
+        for i = 0 to 10
+            fx = new Fx(impact.getPos().polarOffset(GetRandomDirectionDeg().fromDeg(), GetRandomReal(0, 300)), Abilities.breathOfFrostTarget)
+            fx.setScale(2)
+            destroy fx
+            
+
+        let dmg = (FF_IMPACT_DAMAGE[level-1]).bonus(caster.getInt(), FF_IMPACT_DAMAGE_BONUS)
+        let dur = FF_BUFF_DURATION[level-1].bonus(caster.getInt(), FF_BUFF_DURATION_BONUS)
+        while(not nearby.isEmpty())
+            unit target = FirstOfGroup(nearby)
+            nearby.removeUnit(target)
+            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(impact.getOwner(), false, true)
+                caster.dealDamage(target, dmg, ReductionType.MAGIC)
+                target.addBuffReduced(caster, dur, buffFFBuff, level)
+
+        nearby.destr()
+
 
 function setupStats()
     heroType
@@ -483,37 +511,6 @@ function initHeroType()
                 ..addStatAbsoluteBonus(Stat.AGI, MARK_WP_REDUCTION[level - 1])
         end))
 
-        ArtilleryDetection.registerArtilleryHit(FF_FLAME_IMPACT, (unit impact) ->(begin
-            group nearby = CreateGroup()
-            let caster = Hero.getHero(impact.getOwner()).toUnit()
-            let level = caster.getAbilityLevel(ABILITY_FROST_AND_FLAME)
-            nearby.enumUnitsInRange(impact.getPos(), FF_AOE)
-
-            
-            Fx fx
-
-            for i = 0 to 10
-                fx = new Fx(impact.getPos().polarOffset(GetRandomDirectionDeg().fromDeg(), GetRandomReal(0, 300)), Abilities.flameStrikeEmbers)
-                fx.setScale(2)
-                doAfter(0.5, () -> destroy fx)
-
-            for i = 0 to 10
-                fx = new Fx(impact.getPos().polarOffset(GetRandomDirectionDeg().fromDeg(), GetRandomReal(0, 300)), Abilities.breathOfFrostTarget)
-                fx.setScale(2)
-                destroy fx
-                
-
-            let dmg = (FF_IMPACT_DAMAGE[level-1]).bonus(caster.getInt(), FF_IMPACT_DAMAGE_BONUS)
-            let dur = FF_BUFF_DURATION[level-1].bonus(caster.getInt(), FF_BUFF_DURATION_BONUS)
-            while(not nearby.isEmpty())
-                unit target = FirstOfGroup(nearby)
-                nearby.removeUnit(target)
-                if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(impact.getOwner(), false, true)
-                    caster.dealDamage(target, dmg, ReductionType.MAGIC)
-                    target.addBuffReduced(caster, dur, buffFFBuff, level)
-
-            nearby.destr()
-        end))
 
 init
     heroType = new HeroType(THIS_HERO, THIS_ICON, THIS_ID, false)
