@@ -142,7 +142,7 @@ function onUnitDeath()
                 createGoldBountyTextTag(dyingUnit, bounty, killingPlayer)
                 //xp
 
-                let killingHero = Hero.getHero(killingPlayer)
+                let killingHero = CPlayer.getPlayerHero(killingPlayer.getId(), 0)
                 if killingHero != null
                     killingHero.toUnit().addXp(xp, true)
 
@@ -160,7 +160,7 @@ function onUnitDeath()
             for CPlayer cPlayer in killingAllies
                 player p = cPlayer.getPlayer()
                 if p != killingPlayer
-                    let hero = Hero.getHero(p)
+                    let hero = CPlayer.getPlayerHero(p.getId(), 0)
                     if hero != null
                         hero.addXp( teamXp)
                         cPlayer.addGoldEx(teamBounty)

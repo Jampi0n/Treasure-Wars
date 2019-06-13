@@ -297,23 +297,19 @@ function castBigBadVoodoo()
     let spellId = GetSpellAbilityId()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
-    let firstTeam = caster.getOwner().getId() <= HERO_PLAYER_TEAM_1_LAST
-    let iFrom = firstTeam ? HERO_PLAYER_TEAM_2_FIRST : HERO_PLAYER_TEAM_1_FIRST
-    let iTo = firstTeam ? HERO_PLAYER_TEAM_2_LAST : HERO_PLAYER_TEAM_1_LAST
     let fx = caster.addEffect(Abilities.voodooAura, "origin")
     doPeriodically(0.1, (cb) -> begin
         if not caster.isAlive() or caster.getCurrentOrder() != OrderId("tranquility")
             destroy cb
             fx.destr()
         else
-            for i = iFrom to iTo
-                let hero = Hero.getHero(i)
-                if hero != null
+            for CPlayer cPlayer in CPlayer.getEnemyHeroPlayers(caster.getOwner())
+                for Hero hero in CPlayer.getPlayerHeroes(cPlayer.getId())
                     let target = hero.toUnit()
                     if target.isTargetable(caster.getOwner(), false, true)
                         caster.dealDamage(target, 0.1 * BBV_DAMAGE[level-1].bonus(caster.getInt(), BBV_DAMAGE_BONUS), ReductionType.NONE)
                         target.addEffect(Abilities.vengeanceMissile, "overhead").destr()
-                    
+                
     end)
 
 function retreatAI(HeroAI _ai)
@@ -415,7 +411,7 @@ function initHeroType()
 
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             if attacker.getTypeId() == SERPENT_WARD and not target.isType(UNIT_TYPE_STRUCTURE)
-                let hero = Hero.getHero(attacker.getOwner()).toUnit()
+                let hero = CPlayer.getPlayerHero(attacker.getOwner().getId(), 0).toUnit()
                 let level = hero.getAbilityLevel(ABILITY_SERPENT_WARD)
                 target.addBuffReduced(hero, SERPENT_POISON_DURATION[level-1], buffSerpentPoison, level)
         end))

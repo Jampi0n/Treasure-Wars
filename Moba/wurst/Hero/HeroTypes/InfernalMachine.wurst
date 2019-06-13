@@ -184,8 +184,7 @@ constant real array FLAME_THROWER_AOE = [350, 350, 350, 350, 350]
 constant int FLAME_THROWER_BUFF_ID = compiletime(createAuraBuff("Flame Thrower", "This unit was hit by Flame Thrower; it takes damage over time.", Icons.bTNWallOfFire))
 constant int FLAME_THROWER_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, FLAME_THROWER_BUFF_ID, Abilities.breathOfFireDamage, "origin"))
 
-constant int FLAME_THROWER_IMPACT = compiletime(ArtilleryDetection.createDetectionDummy())
-constant int FLAME_THROWER_ARTILLERY = compiletime(ArtilleryDetection.createArtilleryDummy(30, 20, 210, 2.5, Abilities.redDragonMissile, 900, 0.3, FLAME_THROWER_IMPACT))
+constant int FLAME_THROWER_ARTILLERY = compiletime(ArtilleryDetection.createArtilleryDummy(30, 20, 210, 2.5, Abilities.redDragonMissile, 900, 0.3))
 
 
 BuffType buffFlameThrower
@@ -346,7 +345,34 @@ function castInnerFire()
 
 function castFlameThrower()
     let caster = GetTriggerUnit()
-    ArtilleryDetection.fireArtillery(caster.getOwner(), FLAME_THROWER_ARTILLERY, caster.getPos(), vec2(GetSpellTargetX(), GetSpellTargetY()))
+    ArtilleryDetection.fireArtillery(caster, FLAME_THROWER_ARTILLERY, caster.getPos(), vec2(GetSpellTargetX(), GetSpellTargetY())) (unit impact, unit caster, int data) ->
+        group nearby = CreateGroup()
+        let level = caster.getAbilityLevel(ABILITY_FLAME_THROWER)
+        nearby.enumUnitsInRange(impact.getPos(), FLAME_THROWER_AOE[level-1])
+
+        
+        var fx = new Fx(impact.getPos(), Abilities.liquidfire)
+        fx.setScale(3.5)
+        doAfter(1, () -> destroy fx)
+
+        for i = 0 to 10
+            fx = new Fx(impact.getPos().polarOffset(GetRandomDirectionDeg().fromDeg(), GetRandomReal(0, 300)), Abilities.flameStrikeEmbers)
+            fx.setScale(2)
+            doAfter(0.5, () -> destroy fx)
+            
+
+        let dmg = (FLAME_THROWER_DAMAGE[level-1]).bonus(caster.getInt(), FLAME_THROWER_DAMAGE_BONUS)
+        while(not nearby.isEmpty())
+            unit target = FirstOfGroup(nearby)
+            nearby.removeUnit(target)
+            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(impact.getOwner(), false, true)
+
+                caster.dealDamage(target, dmg, ReductionType.MAGIC)
+                target.addBuffReduced(caster, FLAME_THROWER_DURATION[level-1], buffFlameThrower, level)
+
+        nearby.destr()
+
+        addEffect(Abilities.demolisherFireMissile, impact.getPos()).destr()
 
 
 function castRapidFire()
@@ -549,36 +575,6 @@ function initHeroType()
                 caster.dealDamage(target, 0.25 * FLAME_THROWER_DOT[whichBuff.getLevel()-1].bonus(caster.getInt(), FLAME_THROWER_DOT_BONUS), ReductionType.MAGIC)
         end))
 
-        ArtilleryDetection.registerArtilleryHit(FLAME_THROWER_IMPACT, (unit impact) ->(begin
-            group nearby = CreateGroup()
-            let caster = Hero.getHero(impact.getOwner()).toUnit()
-            let level = caster.getAbilityLevel(ABILITY_FLAME_THROWER)
-            nearby.enumUnitsInRange(impact.getPos(), FLAME_THROWER_AOE[level-1])
-
-            
-            var fx = new Fx(impact.getPos(), Abilities.liquidfire)
-            fx.setScale(3.5)
-            doAfter(1, () -> destroy fx)
-
-            for i = 0 to 10
-                fx = new Fx(impact.getPos().polarOffset(GetRandomDirectionDeg().fromDeg(), GetRandomReal(0, 300)), Abilities.flameStrikeEmbers)
-                fx.setScale(2)
-                doAfter(0.5, () -> destroy fx)
-                
-
-            let dmg = (FLAME_THROWER_DAMAGE[level-1]).bonus(caster.getInt(), FLAME_THROWER_DAMAGE_BONUS)
-            while(not nearby.isEmpty())
-                unit target = FirstOfGroup(nearby)
-                nearby.removeUnit(target)
-                if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(impact.getOwner(), false, true)
-
-                    caster.dealDamage(target, dmg, ReductionType.MAGIC)
-                    target.addBuffReduced(caster, FLAME_THROWER_DURATION[level-1], buffFlameThrower, level)
-
-            nearby.destr()
-
-            addEffect(Abilities.demolisherFireMissile, impact.getPos()).destr()
-        end))
 
         CreateTrigger()
         ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)

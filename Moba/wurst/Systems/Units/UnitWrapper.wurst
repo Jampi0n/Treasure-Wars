@@ -348,7 +348,7 @@ public function unit.getBuffList() returns BuffList
 
 function regenerate()
     for i = 0 to MAX_HERO_COUNT-1
-        let hero = Hero.getHero(i)
+        let hero = CPlayer.getPlayerHero(i, 0)
         if hero != null
             let heroUnit = hero.toUnit()
             if heroUnit.isAlive()
@@ -379,5 +379,5 @@ init
     CreateTrigger()
     ..registerPlayerChatEvent(players[0], "-s", true)
     ..addAction(() -> (begin
-        Hero.getHero(players[0]).toUnit().wrapper().printStats()
+        CPlayer.getPlayerHero(0, 0).toUnit().wrapper().printStats()
     end))

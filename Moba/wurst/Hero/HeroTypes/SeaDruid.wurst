@@ -105,8 +105,7 @@ constant int FISH_SPEED = 1000
 constant int FISH_BUFF_ID = compiletime(createAuraBuff("Giant Fish", "This unit was hit by a giant fish; its movement and attack speed are slowed.", "BTNDeepseaMurloc"))
 constant int FISH_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, FISH_BUFF_ID, Abilities.stasisTotemTarget, "overhead"))
 
-constant int FISH_IMPACT = compiletime(ArtilleryDetection.createDetectionDummy())
-constant int FISH_ARTILLERY = compiletime(ArtilleryDetection.createArtilleryDummy(0, 0, 50, 3, "Fesh_Final2.mdx", FISH_SPEED, 0.3, FISH_IMPACT))
+constant int FISH_ARTILLERY = compiletime(ArtilleryDetection.createArtilleryDummy(0, 0, 50, 3, "Fesh_Final2.mdx", FISH_SPEED, 0.3))
 
 constant SOUND_FISH_IMPACT = new SoundDefinition(Sounds.artilleryCorpseExplodeDeath1, false, true)
 
@@ -295,8 +294,29 @@ function castTidalFury()
 
 function castGiantFish()
     let caster = GetTriggerUnit()
-    ArtilleryDetection.fireArtillery(caster.getOwner(), FISH_ARTILLERY, caster.getPos(), vec2(GetSpellTargetX(), GetSpellTargetY()))
+    ArtilleryDetection.fireArtillery(caster, FISH_ARTILLERY, caster.getPos(), vec2(GetSpellTargetX(), GetSpellTargetY())) (unit detectionUnit, unit caster, int data) ->
+        group nearby = CreateGroup()
+        let level = caster.getAbilityLevel(ABILITY_GIANT_FISH)
+        nearby.enumUnitsInRange(detectionUnit.getPos(), FISH_AOE[level-1])
 
+        let dmg = FISH_DAMAGE[level-1].bonus(caster.getInt(), FISH_DAMAGE_BONUS)
+
+        while(not nearby.isEmpty())
+            unit target = FirstOfGroup(nearby)
+            nearby.removeUnit(target)
+            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(detectionUnit.getOwner(), false, true)
+
+                caster.dealDamage(target, dmg, ReductionType.MAGIC)
+                target.addBuffReduced(caster, FISH_SLOW_DURATION[level-1], buffFish, level)
+
+        nearby.destr()
+
+        let fx = new Fx(detectionUnit.getPos(), Abilities.stampedeMissileDeath)
+        fx.setScale(3)
+        destroy fx
+
+        SOUND_FISH_IMPACT.playOnPoint(detectionUnit.getPos3Zero()).snd.setVolume(120)
+        
 
 function castManaShield()
     let spellId = GetSpellAbilityId()
@@ -538,32 +558,6 @@ function initHeroType()
             whichBuff.getTarget().wrapper()
                 ..addStatAbsoluteBonus(Stat.AS, FISH_ATTACK_SPEED[level - 1])
                 ..addStatRelativeBonus(Stat.MS, FISH_MOVE_SPEED[level - 1]*10)
-        end))
-
-        ArtilleryDetection.registerArtilleryHit(FISH_IMPACT, (unit impact) ->(begin
-            group nearby = CreateGroup()
-            let caster = Hero.getHero(impact.getOwner()).toUnit()
-            let level = caster.getAbilityLevel(ABILITY_GIANT_FISH)
-            nearby.enumUnitsInRange(impact.getPos(), FISH_AOE[level-1])
-
-            let dmg = FISH_DAMAGE[level-1].bonus(caster.getInt(), FISH_DAMAGE_BONUS)
-
-            while(not nearby.isEmpty())
-                unit target = FirstOfGroup(nearby)
-                nearby.removeUnit(target)
-                if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(impact.getOwner(), false, true)
-
-                    caster.dealDamage(target, dmg, ReductionType.MAGIC)
-                    target.addBuffReduced(caster, FISH_SLOW_DURATION[level-1], buffFish, level)
-
-            nearby.destr()
-
-            let fx = new Fx(impact.getPos(), Abilities.stampedeMissileDeath)
-            fx.setScale(3)
-            destroy fx
-
-            SOUND_FISH_IMPACT.playOnPoint(impact.getPos3Zero()).snd.setVolume(120)
-
         end))
 
         buffManaShield = new BuffType(true, true) // the actual effect is in OnAttack

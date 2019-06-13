@@ -330,7 +330,7 @@ public class CreepCamp
             if killer != null
                 let pId = killer.getOwner().getId()
                 if pId <= HERO_PLAYER_TEAM_2_LAST
-                    onKill(u, Hero.getHero(pId).toUnit())
+                    onKill(u,CPlayer.getPlayerHero(pId, 0).toUnit())
 
 
 
