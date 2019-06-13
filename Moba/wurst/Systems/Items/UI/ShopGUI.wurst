@@ -59,7 +59,7 @@ public interface BuyCondition
     function condition(unit hero, bool showMessage) returns boolean
 
 public interface BuySuccess
-    function success(unit hero, item itm)
+    function success(unit hero, item itm, int totalCost)
 
 public interface BuyFailed
     function failed(unit hero, int itemId, int cost, int gold)
@@ -76,9 +76,12 @@ public function heroIssueBuyItem(unit hero, ItemInShop itm, BuySuccess buySucces
     else
         hero.getOwner().addGold(-cost)
         heroRemoveRequiredItems(hero, itm)
-        let boughtItem = hero.addItemById(itm.getItemId())
+        let boughtItem = createItem(itm.getItemId(), hero.getPos()) // above all the shops, change to a region, but don't want to edit map file atm
+        
+        hero.addItemHandle(boughtItem)
+
         if buySuccess != null
-            buySuccess.success(hero, boughtItem)
+            buySuccess.success(hero, boughtItem, itm.getTotalCost())
         return boughtItem
 
 
@@ -885,6 +888,9 @@ public class GUI
         this.clickCooldown = true
         doAfter(0.25) ->
             this.clickCooldown = false
+
+    function hasClickCooldown() returns bool
+        return this.clickCooldown
 
     private function clickAnyButton()
         SOUND_CLICK.playForPlayer(this.forPlayer).snd.setVolume(125)

@@ -29,6 +29,23 @@ public function printWarning(string warning)
     if warning != ""
         //print(warning)
 
+/*
+    Every update to any hero button unhides all buttons.
+    Possible updates:
+        main hero dies
+        main hero revives
+        main hero levels up
+        main hero learns skill
+        secondary hero levels up
+*/
+public function hideSecondaryHeroButtons()
+    doAfter(0) ->
+        for j = 1 to 6
+            getOriginFrame(ORIGIN_FRAME_HERO_BUTTON, j).hide()
+            getOriginFrame(ORIGIN_FRAME_HERO_HP_BAR, j).hide()
+            getOriginFrame(ORIGIN_FRAME_HERO_MANA_BAR, j).hide()
+            getOriginFrame(ORIGIN_FRAME_HERO_BUTTON_INDICATOR, j).hide()
+
 public function unit.isTargetable(player source, boolean allowFriends, boolean allowEnemies) returns boolean
     boolean ret = true
     if this == null
