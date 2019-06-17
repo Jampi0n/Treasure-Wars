@@ -86,32 +86,33 @@ init
     itemFinalize()
     execute() ->
         for i = HERO_PLAYER_TEAM_1_FIRST to HERO_PLAYER_TEAM_2_LAST
-            gui[i] = new GUI(players[i], null, shopRect[i].getCenter())
+            gui[i] = new GUI(players[i], null)
             ..setBuyCondition( (unit hero, bool showMessage) -> buyCondition(hero, i <= HERO_PLAYER_TEAM_1_LAST, showMessage))
             ..setBuySuccess( (unit hero, item itm, int totalCost) -> buySuccess(hero, itm, totalCost))
             ..setBuyFailed( (unit hero, int itemId, int cost, int gold) -> buyFailed(hero, itemId, cost, gold))
 
     for i = HERO_PLAYER_TEAM_1_FIRST to HERO_PLAYER_TEAM_2_LAST
         CreateTrigger()
-        ..registerPlayerEvent(players[i], EVENT_PLAYER_END_CINEMATIC)
+        ..registerPlayerKeyPress(players[i], OSKEY_ESCAPE, OSKEY_META.NONE, true)
         ..addAction() ->
             let id = GetTriggerPlayer().getId()
-            if not gui[id].hasClickCooldown()
-                hideSecondaryHeroButtons()
-                if gui[id].isEnabled()
-                    gui[id].closeShop()
-                    let mainHero = CPlayer.getPlayerHeroes(id).getFirst().toUnit()
-                    if GetLocalPlayer().getId() == id
-                        ClearSelection()
-                        SelectUnit(mainHero,true)
-                    for Hero h in CPlayer.getPlayerHeroes(id)
-                        Hero.copyInventory(h.getCopy(), h.toUnit())
-                        h.getCopy().hide()
-                else
-                    for Hero h in CPlayer.getPlayerHeroes(id)
-                        h.getCopy().show()
-                        Hero.copyInventory(h.toUnit(), h.getCopy())
-                    gui[id].openShop()
+            hideSecondaryHeroButtons()
+            if gui[id].isEnabled()
+                gui[id].closeShop()
+                print("close")
+                let mainHero = CPlayer.getPlayerHeroes(id).getFirst().toUnit()
+                if GetLocalPlayer().getId() == id
+                    ClearSelection()
+                    SelectUnit(mainHero,true)
+                for Hero h in CPlayer.getPlayerHeroes(id)
+                    Hero.copyInventory(h.getCopy(), h.toUnit())
+                    h.getCopy().hide()
+            else
+                for Hero h in CPlayer.getPlayerHeroes(id)
+                    h.getCopy().show()
+                    Hero.copyInventory(h.toUnit(), h.getCopy())
+                gui[id].openShop()
+                print("open")
     
 
 
