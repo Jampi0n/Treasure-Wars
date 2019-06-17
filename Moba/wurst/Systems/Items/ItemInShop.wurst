@@ -2,13 +2,11 @@ package ItemInShop
 
 import ErrorHandling
 import LinkedList
-import ImageString
 import HashMap
 import HashList
 import ObjectIdGenerator
 import ItemObjEditing
 import ObjectIds
-import ChangeTexture
 
 public constant MAX_ITEMS_IN_LIST = 30
 constant ITEM_DEFINITIONS = new HashMap<int, ItemDefinition>
@@ -36,7 +34,6 @@ public function newItem(string icon) returns int
     let id = ITEM_ID_GEN.next()
     if compiletime
         let fullIcon = getIconPath(icon)
-        createTexture(fullIcon, iconFromItem(id))
         let iDef = new ItemDefinition(id, 'rde1')
             ..setInterfaceIcon(fullIcon)
             ..setAbilities("")
@@ -58,6 +55,7 @@ public class ItemInShop
     private int itemId
     private int category
     private int iconId
+    private string icon
     private int totalCost
     private int singleCost
     private LinkedList<ItemInShop> requirements
@@ -67,9 +65,8 @@ public class ItemInShop
     private LinkedList<ItemInShop> buildsIntoCombined
     private static constant allItems = new LinkedList<ItemInShop>
 
-    private ImageStringType name
-    private ImageStringType description
-    private ImageStringType nameTopLeft
+    private string name
+    private string description
 
     private static LinkedList<ItemInShop> array itemsInCategory
     private static ItemInShop array itemsInCategoryArray
@@ -116,6 +113,10 @@ public class ItemInShop
         this.singleCost = -1
         itemsInCategory[this.category].add(this)
 
+        let itm = createItem(itemId, vec2(0,0))
+        this.icon = itm.getIconPath()
+        itm.remove()
+
 
     /*construct(int itemId, int category, int iconId, int totalCost)
         itemIdToItemInShop.put(itemId, this)
@@ -143,9 +144,8 @@ public class ItemInShop
         /*itm.remove()*/
 
     function setupStrings(string name, string desc)
-        this.nameTopLeft = new ImageStringType(600, Origin.TOP_LEFT, name + "|n||gold| " + COLOR_GOLD.toColorString() + (this.totalCost).toString() +"|r", 0.9)
-        this.description = new ImageStringType(900, Origin.TOP_LEFT, desc, 0.8)
-
+        this.name = name
+        this.description = desc
 
     function addRequirement(ItemInShop requirement)
         this.requirements.add(requirement)
@@ -155,6 +155,9 @@ public class ItemInShop
 
     function getIconId() returns int
         return this.iconId
+
+    function getIcon() returns string
+        return this.icon
         
     function getTotalCost() returns int
         return this.totalCost
@@ -171,13 +174,10 @@ public class ItemInShop
     function getBuildsInto() returns LinkedList<ItemInShop>
         return this.buildsIntoCombined
 
-    function getName() returns ImageStringType
+    function getName() returns string
         return this.name
 
-    function getNameTopLeft() returns ImageStringType
-        return this.nameTopLeft
-
-    function getDescription() returns ImageStringType
+    function getDescription() returns string
         return this.description
 
     function calculateGoldCost()

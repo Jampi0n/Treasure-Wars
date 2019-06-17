@@ -1,0 +1,84 @@
+package FrameWrapperDefinitions
+
+import HashMap
+
+
+public abstract class FrameWrapper
+    static constant frameToWrapper = new HashMap<int,FrameWrapper>
+    private framehandle frame
+
+    @inline
+    function wrap(framehandle frame)
+        this.frame = frame
+        frameToWrapper.put(frame.getHandleId(), this)
+
+    @inline
+    function index() returns int
+        return this castTo int
+
+    @inline
+    function frame() returns framehandle
+        return this.frame
+
+    ondestroy
+        frameToWrapper.remove(this.frame.getHandleId())
+        this.frame.remove()
+
+public function framehandle.wrapper() returns FrameWrapper
+    return FrameWrapper.frameToWrapper.get(this.getHandleId())
+
+public function framehandle.index() returns int
+    return FrameWrapper.frameToWrapper.get(this.getHandleId()) castTo int
+
+/*
+    Creates a permanent unique index for an UI frame.
+*/
+public class PermanentIndex extends FrameWrapper
+    static function getNewIndex() returns int
+        return new PermanentIndex() castTo int
+
+public class FrameButton extends FrameWrapper
+    function setIcon(string icon)
+        getFrameByName("TW_Shop_Icon_Icon", this.index()).setTexture(icon, 0, true)
+
+public function framehandle.addIcon(string icon) returns FrameButton
+    let wrapper = new FrameButton
+    let index = wrapper.index()
+    let fh = createFrame("TW_Shop_Icon", this, 0, index)
+    wrapper.wrap(fh)
+    getFrameByName("TW_Shop_Icon_Icon", index).setTexture(icon, 0, true)
+    return wrapper
+
+public class FrameButtonWithCost extends FrameWrapper
+    function setCost(int cost)
+        getFrameByName("TW_Shop_ItemButtonWithCost_Cost", this.index()).setText(cost.toString())
+
+    function setIcon(string icon)
+        getFrameByName("TW_Shop_ItemButtonWithCost_Icon", this.index()).setTexture(icon, 0, true)
+
+    function setSelected(boolean flag)
+        getFrameByName("TW_Shop_ItemButtonWithCost_Icon_Selected", this.index()).setVisible(flag)
+
+    function setChecked(boolean flag)
+        getFrameByName("TW_Shop_ItemButtonWithCost_Icon_Checked", this.index()).setVisible(flag)
+
+public function framehandle.addIconWithCost(string icon, int cost) returns FrameButtonWithCost
+    let wrapper = new FrameButtonWithCost
+    let index = wrapper.index()
+    let fh = createFrame("TW_Shop_ItemButtonWithCost", this, 0, index)
+    wrapper.wrap(fh)
+    getFrameByName("TW_Shop_ItemButtonWithCost_Icon", index).setTexture(icon, 0, true)
+    getFrameByName("TW_Shop_ItemButtonWithCost_Cost", index).setText(cost.toString())
+    return wrapper
+
+public class FrameTextButton extends FrameWrapper
+    function setName(string name)
+        getFrameByName("TW_Shop_Text_Button_Text", this.index()).setText(name)
+
+public function framehandle.addTextButton(string name) returns FrameTextButton
+    let wrapper = new FrameTextButton
+    let index = wrapper.index()
+    let fh = createFrame("TW_Shop_Text_Button", this, 0, index)
+    wrapper.wrap(fh)
+    getFrameByName("TW_Shop_Text_Button_Text", index).setText(name)
+    return wrapper

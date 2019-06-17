@@ -1,0 +1,149 @@
+// -- INCLUDE FILES ---------------------------------------------------------
+
+IncludeFile "UI\FrameDef\UI\EscMenuTemplates.fdf",
+
+
+Frame "GLUETEXTBUTTON" "TW_Shop_Text_Button" INHERITS WITHCHILDREN "EscMenuButtonTemplate"{
+
+	Width  0.125,
+	Height 0.035,
+	
+	ButtonText "TW_Shop_Text_Button_Text",
+	Frame "TEXT" "TW_Shop_Text_Button_Text" INHERITS "EscMenuButtonTextTemplate" {
+		Text "asdu",
+	}
+}
+
+Frame "BUTTON" "TW_Shop_Icon" {
+	
+	Width  0.03,
+	Height 0.03, 
+	
+	Frame "BACKDROP" "TW_Shop_Icon_Icon" {
+		UseActiveContext,
+		Width  0.03,
+		Height 0.03,     
+		SetPoint CENTER, "TW_Shop_Icon", CENTER, 0.0, 0.0,
+	}
+		
+}
+
+Frame "BUTTON" "TW_Shop_ItemButtonWithCost"  {
+
+    Width  0.03,
+    Height 0.042,
+	
+	Frame "BACKDROP" "TW_Shop_ItemButtonWithCost_Background" {
+		Width  0.03,
+		Height 0.042,
+		UseActiveContext,
+		BackdropBackground "Grey.tga",
+		//BackdropBackground  "UI\Widgets\EscMenu\Human\human-options-menu-background.blp",
+		//BackdropCornerFlags "UL|UR|BL|BR|T|L|B|R",
+		//BackdropCornerSize  0.0125,
+		//BackdropBackgroundInsets 0.004 0.004 0.004 0.004,
+		//BackdropEdgeFile  "UI\Widgets\ToolTips\Human\human-tooltip-border.blp",
+		SetPoint TOP, "TW_Shop_ItemButtonWithCost", TOP, 0.0, 0.0,
+		
+		Frame "BACKDROP" "TW_Shop_ItemButtonWithCost_Icon" {
+			//The Icon at the left
+			UseActiveContext,
+			Width  0.03,
+			Height 0.03,        
+			SetPoint TOP, "TW_Shop_ItemButtonWithCost", TOP, 0.0, 0.0,
+			
+			Frame "BACKDROP" "TW_Shop_ItemButtonWithCost_Icon_Selected" {
+				UseActiveContext,
+				Width  0.03,
+				Height 0.03,  
+				SetPoint TOPLEFT, "TW_Shop_ItemButtonWithCost_Icon", TOPLEFT, 0.0, 0.0,
+				BackdropBackground "IconSelected.tga",
+				BackdropBlendAll,
+			}
+			
+			Frame "BACKDROP" "TW_Shop_ItemButtonWithCost_Icon_Checked" {
+				UseActiveContext,
+				Width  0.03,
+				Height 0.03,  
+				SetPoint TOPLEFT, "TW_Shop_ItemButtonWithCost_Icon", TOPLEFT, 0.0, 0.0,
+				BackdropBackground "IconChecked.tga",
+				BackdropBlendAll,
+			}
+		}
+
+		Frame "TEXT" "TW_Shop_ItemButtonWithCost_Cost" {
+			UseActiveContext,
+			SetPoint TOP, "TW_Shop_ItemButtonWithCost", BOTTOM, 0.00, 0.013,
+			Text "0",
+			DecorateFileNames,
+			FrameFont "EscMenuTextFont", 0.01, "",
+			FontJustificationH JUSTIFYCENTER,
+			FontJustificationV JUSTIFYMIDDLE,    
+			FontJustificationOffset 0.0 -0.002,
+			FontFlags "FIXEDSIZE",
+			FontColor 0.99 0.827 0.0705 1.0,
+			FontHighlightColor 0.99 0.827 0.0705 1.0,
+			FontDisabledColor 0.99 0.827 0.0705 1.0,
+			FontShadowColor 0.0 0.0 0.0 0.9,
+			FontShadowOffset 0.001 -0.001,
+		}
+
+	}
+}
+
+
+Frame "BACKDROP" "TW_Shop_Window" {
+	BackdropBackground  "Transparent.tga",
+	BackdropBlendAll,
+}
+
+Frame "FRAME" "TW_Shop_Background" {
+
+    Frame "BACKDROP" "TW_Shop_BackgroundBack"
+	{
+		UseActiveContext,
+		BackdropTileBackground,
+		BackdropBackground  "UI\Widgets\EscMenu\Human\human-options-menu-background.blp",
+		BackdropCornerFlags "UL|UR|BL|BR|T|L|B|R",
+		BackdropCornerSize  0.025,
+		BackdropBackgroundSize  0.25,
+		BackdropBackgroundInsets 0.009 0.009 0.009 0.009,
+		BackdropEdgeFile  "UI\Widgets\EscMenu\Human\human-options-menu-border.blp",
+		SetPoint TOPLEFT, "TW_Shop_Background", TOPLEFT, 0.00, 0.0,
+		SetPoint BOTTOMRIGHT, "TW_Shop_Background", BOTTOMRIGHT, 0.00, 0.0,
+	}
+}
+
+Frame "BACKDROP" "TW_Shop_RecipeTreeBranch" {
+    BackdropBackground  "Branch.tga",
+}
+
+Frame "TEXT" "TW_Shop_Title" {
+	DecorateFileNames,
+	Text "0",
+	FrameFont "EscMenuTextFont", 0.017, "",
+	FontJustificationH JUSTIFYLEFT,
+	FontJustificationV JUSTIFYMIDDLE,    
+	FontJustificationOffset 0.0 -0.002,
+	FontFlags "FIXEDSIZE",
+	FontColor 0.99 0.827 0.0705 1.0,
+	FontHighlightColor 0.99 0.827 0.0705 1.0,
+	FontDisabledColor 0.99 0.827 0.0705 1.0,
+	FontShadowColor 0.0 0.0 0.0 0.9,
+	FontShadowOffset 0.001 -0.001,
+}
+
+Frame "TEXT" "TW_Shop_Text" {
+	DecorateFileNames,
+	Text "0",
+	FrameFont "EscMenuTextFont", 0.0125, "",
+	FontJustificationH JUSTIFYLEFT,
+	FontJustificationV JUSTIFYTOP,    
+	FontJustificationOffset 0.0 -0.002,
+	FontFlags "FIXEDSIZE",
+	FontColor 1.0 1.0 1.0 1.0,
+	FontHighlightColor 0.99 0.827 0.0705 1.0,
+	FontDisabledColor 0.99 0.827 0.0705 1.0,
+	FontShadowColor 0.0 0.0 0.0 0.9,
+	FontShadowOffset 0.001 -0.001,
+}
