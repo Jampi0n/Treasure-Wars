@@ -62,9 +62,16 @@ public class Hero
             let heroUnit = GetTriggerUnit()
             let hero = unitToHero.get(heroUnit)
             if hero != null
-                for i = 0 to 3
-                    hero.defaultCooldown[i] = BlzGetAbilityCooldown(hero.skillIds[i], hero.toUnit().getAbilityLevel(hero.skillIds[i]))
+                //for i = 0 to 3
+                    //hero.defaultCooldown[i] = BlzGetAbilityCooldown(hero.skillIds[i], hero.toUnit().getAbilityLevel(hero.skillIds[i]))
                 hero.updateCooldowns()
+                let copy = hero.heroCopy
+                let skill = GetLearnedSkill()
+                copy.unpause()
+                UnitModifySkillPoints(copy, 1)
+                copy.selectSkill(skill)
+                BlzUnitHideAbility(copy, skill, true)
+                copy.pause()
 
             hideSecondaryHeroButtons()
 
@@ -109,9 +116,12 @@ public class Hero
         end))
         this.heroCopy.setXY(copyPos)
         this.heroCopy.setSkillPoints(0)
+        this.heroCopy.removeAbility('Amov')
+        this.heroCopy.addAbility('Abun')
 
         copyToHero.put(this.heroCopy, this)
         this.heroCopy.hide()
+        this.heroCopy.pause()
             
         let wrapper = this.hero.wrapper()
         let copyWrapper = this.heroCopy.wrapper()
@@ -474,10 +484,11 @@ public class Hero
 
     static function copyInventory(unit copyFrom, unit copyTo)
         for i = 0 to 5
-            copyTo.itemInSlot(i).remove()
-        for i = 0 to 5
+            let itm = copyTo.itemInSlot(i)
             let itmId = copyFrom.itemInSlot(i).getTypeId()
-            copyTo.addItemToSlot(itmId, i)
+            if itm.getTypeId() != itmId
+                itm.remove()
+                copyTo.addItemToSlot(itmId, i)
 
     static function getHero(unit whichUnit) returns Hero
         return unitToHero.get(whichUnit)
@@ -511,7 +522,8 @@ public class Hero
     **  Changing cooldowns of morph abilities crashes the game, once they are used.
     */
     function updateCooldowns()
-        let heroUnit = this.toUnit()/*
+        let heroUnit = this.hero
+        /*
         for i = 0 to 3
             real newCd = (this.defaultCooldown[i]+this.cooldownMod[i]) / (1.0+0.01*heroUnit.wrapper().getStatTotalValue(Stat.CD))
             BlzSetUnitAbilityCooldown(heroUnit, skillIds[i], GetUnitAbilityLevel(heroUnit, skillIds[i]), newCd )  */

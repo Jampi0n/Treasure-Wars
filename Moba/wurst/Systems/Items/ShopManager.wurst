@@ -30,7 +30,7 @@ function buyFailed(unit hero, int _itemId, int cost, int gold)
 function buySuccess(unit hero, item itm, int totalCost)
     if hero.hasItem(itm) // success
         let mainHero = Hero.getOriginal(hero).toUnit()
-        Hero.copyInventory(hero, mainHero)
+        mainHero.addItemById(itm.getTypeId())
         SOUND_ITEM_BUY_3D.playOnPoint(mainHero.getPos3Zero())
         SOUND_ITEM_BUY.playForPlayer(hero.getOwner())
         standardTextTag(mainHero.getPos(), itm.getName())
@@ -40,11 +40,7 @@ function buySuccess(unit hero, item itm, int totalCost)
         // no item was used as recipe, otherwise there would be space
         SOUND_RECIPE_TOO_EXPENSIVE.playForPlayer(hero.getOwner())
         printTimedToPlayer(COLOR_GOLD.toColorString()+"Your inventory is full!|r", 5, hero.getOwner())
-
-        //doAfter(0) -> 
         itm.remove()
-
-        print(itm.getName())
         hero.getOwner().addGold(totalCost)
 
 
@@ -109,8 +105,11 @@ init
                     h.getCopy().hide()
             else
                 for Hero h in CPlayer.getPlayerHeroes(id)
-                    h.getCopy().show()
-                    Hero.copyInventory(h.toUnit(), h.getCopy())
+                    let copy = h.getCopy()
+                    copy.unpause()
+                    copy.show()
+                    Hero.copyInventory(h.toUnit(), copy)
+                    copy.pause()
                 gui[id].openShop()
                 print("open")
     

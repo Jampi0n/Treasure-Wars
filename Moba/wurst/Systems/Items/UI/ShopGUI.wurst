@@ -68,14 +68,34 @@ function getItemCostHelp(unit hero, ItemInShop itm, HeroInventory inv) returns i
             cost += getItemCostHelp(hero, required, inv)
     return cost
 
-function heroRemoveRequiredItems(unit hero, ItemInShop itm)
+int array heroRemoveRequiredItemsSlotItemId
+unit heroRemoveRequiredItemsHero
+
+function heroRemoveRequiredItemsHelp(ItemInShop itm)
     for ItemInShop required in itm.getRequirements()
-        let req = hero.getItemById(required.getItemId())
-        if req != null
-            hero.removeItem(req)
-            req.remove()
+        int slotIndex = -1
+        let itemId = required.getItemId()
+        for slot = 0 to 5
+            if heroRemoveRequiredItemsSlotItemId[slot] == itemId
+                slotIndex = slot
+                break
+
+        if slotIndex != -1
+            let slotItem = heroRemoveRequiredItemsHero.itemInSlot(slotIndex)
+            heroRemoveRequiredItemsHero.removeItem(slotItem)
+            slotItem.remove()
+            heroRemoveRequiredItemsSlotItemId[slotIndex] = 0
         else
-            heroRemoveRequiredItems(hero, required)
+            heroRemoveRequiredItemsHelp(required)
+
+function heroRemoveRequiredItems(unit hero, ItemInShop itm)
+    heroRemoveRequiredItemsHero = hero
+    for slot = 0 to 5
+        heroRemoveRequiredItemsSlotItemId[slot] = hero.itemInSlot(slot).getTypeId()
+
+    heroRemoveRequiredItemsHelp(itm)
+
+
 
 /*
     A hero inventory is a virtual container that stores the number of each item type a hero has.
@@ -83,47 +103,24 @@ function heroRemoveRequiredItems(unit hero, ItemInShop itm)
 */
 class HeroInventory
 
-    private HashMap<int,int> itemsInInventory
-    //private LinkedList<int> storedKeys
+    private static hashtable hTable = InitHashtable()
 
     construct(unit hero)
-        this.itemsInInventory = new HashMap<int,int>
-        //this.storedKeys = new LinkedList<int>
         for i = 0 to 5
             int itemTypeId = hero.itemInSlot(i).getTypeId()
             if itemTypeId != 0
-                if this.itemsInInventory.has(itemTypeId)
-                    this.itemsInInventory.put(itemTypeId, this.itemsInInventory.get(itemTypeId) + 1 )
-                else
-                    this.itemsInInventory.put(itemTypeId, 1)
-                    //this.storedKeys.add(itemTypeId)
+                hTable.saveInt(this castTo int, itemTypeId, 1 + hTable.loadInt(this castTo int, itemTypeId))
 
-    /*
-        Copies inventory information. This is used in subtrees to not change information for other trees or the main tree.
-    */
-    /*construct(HeroInventory inv)
-        this.itemsInInventory = new HashMap<int,int>
-        this.storedKeys = new LinkedList<int>
-        for int key in inv.storedKeys
-            this.storedKeys.add(key)
-            this.itemsInInventory.put(key, inv.itemsInInventory.get(key))*/
-
-    /*
-        Returns whether the hero has an item of this type. If it has, the item is removed,
-        so that this item will be used to reduce the cost of this recipe and can no longer
-        be used to reduce cost of other recipes.
-    */
     function useItem(int itemTypeId) returns boolean
-        if this.itemsInInventory.get(itemTypeId) > 0
-            this.itemsInInventory.put(itemTypeId, this.itemsInInventory.get(itemTypeId) - 1 )
+        let n = hTable.loadInt(this castTo int, itemTypeId)
+        if n > 0
+            hTable.saveInt(this castTo int, itemTypeId, n-1)
             return true
         else
             return false
 
-
     ondestroy
-        destroy this.itemsInInventory
-        //destroy this.storedKeys
+        hTable.flushChild(this castTo int)
 
 
 

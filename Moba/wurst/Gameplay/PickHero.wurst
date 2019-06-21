@@ -291,8 +291,8 @@ function endPickMode()
         allRandom()
 
     chooseModeTrigger
-        ..clearActions()
-        ..destr()
+    ..clearActions()
+    ..destr()
 
 function onModePick()
     string s = GetEventPlayerChatString().toLowerCase()
@@ -320,12 +320,12 @@ function startPickMode()
 
     pickMode = PickMode.UNDECIDED
     chooseModeTrigger = CreateTrigger()
-        ..registerPlayerChatEvent(players[adminPlayer], "-ap", true)
-        ..registerPlayerChatEvent(players[adminPlayer], "-ar", true)
-        ..addAction(function onModePick)
+    ..registerPlayerChatEvent(players[adminPlayer], "-ap", true)
+    ..registerPlayerChatEvent(players[adminPlayer], "-ar", true)
+    ..addAction(function onModePick)
     
     chooseModeTimer= getTimer()
-        ..start(30, function endPickMode)
+    ..start(30, function endPickMode)
 
     doAfter(1, () -> (begin
         if pickMode == PickMode.UNDECIDED
@@ -390,10 +390,8 @@ init
         // you can spawn new heroes in DEBUG_MODE
         CreateTrigger()
         ..registerPlayerChatEvent(players[0], "hero ", false)
-        ..addAction(() -> (begin
+        ..addAction() ->
             let i = GetEventPlayerChatString().substring(5).toInt()
-
-
 
             if i >= 0 and i<=MAX_HERO_COUNT-1 and not playerHasPicked[i]
 
@@ -413,15 +411,12 @@ init
                 SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_CONTROL, true)
                 SetPlayerAlliance(players[0], players[i], ALLIANCE_SHARED_CONTROL, true)
                 SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_ADVANCED_CONTROL, true)
-        end))
 
 
         CreateTrigger()
         ..registerPlayerChatEvent(players[0], "ai ", false)
-        ..addAction(() -> (begin
+        ..addAction() ->
             let i = GetEventPlayerChatString().substring(3).toInt()
-
-
 
             if i >= 0 and i<=MAX_HERO_COUNT-1 and not playerHasPicked[i]
 
@@ -447,13 +442,9 @@ init
                 SetPlayerAlliance(players[0], players[i], ALLIANCE_SHARED_CONTROL, true)
                 SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_ADVANCED_CONTROL, true)
 
-        end))
-
         CreateTrigger()
         ..registerPlayerChatEvent(players[0], "full2", false)
-        ..addAction(() -> (begin
-            
-
+        ..addAction() ->
             for i = HERO_PLAYER_TEAM_2_FIRST to HERO_PLAYER_TEAM_2_LAST
                 if i >= 0 and i<=MAX_HERO_COUNT-1 and not playerHasPicked[i]
 
@@ -483,69 +474,53 @@ init
                     SetPlayerAlliance(players[0], players[i], ALLIANCE_SHARED_CONTROL, true)
                     SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_ADVANCED_CONTROL, true)
 
-        end))
-
 
         CreateTrigger()
         ..registerPlayerChatEvent(players[0], "pause ", false)
-        ..addAction(() -> (begin
+        ..addAction() ->
             let i = GetEventPlayerChatString().substring(6).toInt()
-
-
-
             if i >= 0 and i<=MAX_HERO_COUNT-1 and getAI(i)!=null
                 getAI(i).togglePause()
-                
-
-
-
-        end))
 
         // teleport heroes mid
         CreateTrigger()
         ..registerPlayerChatEvent(players[0], "mid ", false)
-        ..addAction(() -> (begin
+        ..addAction() ->
             let i = GetEventPlayerChatString().substring(4).toInt()
             for Hero hero in CPlayer.getPlayerHeroes(i)
                 hero.toUnit().setXY(gg_rct_CenterMid.getCenter())
-        end))
 
         CreateTrigger()
         ..registerPlayerChatEvent(players[0], "mid", true)
-        ..addAction(() -> (begin
+        ..addAction() ->
             for Hero hero in CPlayer.getPlayerHeroes(0)
                 hero.toUnit().setXY(gg_rct_CenterMid.getCenter())
-        end))
 
         CreateTrigger()
         ..registerPlayerChatEvent(players[0], "g", true)
-        ..addAction(() -> (begin
+        ..addAction() ->
             players[0].addGold(100000)
-        end))
 
         CreateTrigger()
         ..registerPlayerChatEvent(players[0], "castle", true)
-        ..addAction(() -> (begin
+        ..addAction() ->
             for Hero hero in CPlayer.getPlayerHeroes(0)
                 hero.toUnit().setXY(gg_rct_BrownCastle.getCenter())
                 hero.toUnit().wrapper().addStatAbsoluteBonus(Stat.STR, 10000)
                 hero.toUnit().wrapper().addStatAbsoluteBonus(Stat.AS, 200)
                 hero.toUnit().wrapper().addStatAbsoluteBonus(Stat.HP, 10000)
-        end))
 
         CreateTrigger()
         ..registerPlayerChatEvent(players[0], "lvl ", false)
-        ..addAction(() -> (begin
+        ..addAction() ->
             let i = GetEventPlayerChatString().substring(4).toInt()
             for Hero hero in CPlayer.getPlayerHeroes(i)
                 hero.toUnit().setLevel(25, false)
-        end))
 
         CreateTrigger()
         ..registerPlayerChatEvent(players[0], "lvl", true)
-        ..addAction(() -> (begin
+        ..addAction() ->
             for Hero hero in CPlayer.getPlayerHeroes(0)
                 hero.toUnit().setLevel(25, false)
-        end))
 
      //SetHeroLevel(hero.toUnit(), 25, true)
