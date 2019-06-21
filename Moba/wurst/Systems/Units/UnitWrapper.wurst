@@ -27,7 +27,7 @@ public class UnitWrapper
 
     constant static CalculateTotalBonus defaultCalcualtion = (UnitWrapper whichWrapper, Stat whichStat) -> (begin
         int stat = whichStat.toInt()
-        whichWrapper.statsTotalBonus[stat] = ((whichWrapper.getStatAbsoluteBonus(whichStat)) * (1. + whichWrapper.getStatRelativeBonus(whichStat)/1000 ) + (whichWrapper.getStatBaseValue(whichStat) * whichWrapper.getStatRelativeBonus(whichStat)/1000) ).round()
+        UnitWrapper.statsTotalBonus_static[whichWrapper.arrayOffset + stat] = ((whichWrapper.getStatAbsoluteBonus(whichStat)) * (1. + whichWrapper.getStatRelativeBonus(whichStat)/1000 ) + (whichWrapper.getStatBaseValue(whichStat) * whichWrapper.getStatRelativeBonus(whichStat)/1000) ).round()
     end)
 
     private CalculateTotalBonus bonusCalculation = defaultCalcualtion
@@ -43,15 +43,17 @@ public class UnitWrapper
     //protected real currentMovementSpeed
     //protected real defaultMovementSpeed
 
-    private int array[STAT_COUNT] statBaseValue
-    private int array[STAT_COUNT] statsAbsoluteBonus //default = 0
-    private int array[STAT_COUNT] statsAbsoluteBonusReal //default = 0
-    private int array[STAT_COUNT] statsRelativeBonus //default = 0.00
+    private static int array statBaseValue_static
+    private static int array statsAbsoluteBonus_static //default = 0
+    private static int array statsAbsoluteBonusReal_static //default = 0
+    private static int array statsRelativeBonus_static //default = 0.00
+
+    int arrayOffset
 
     /*
         Use integer to avoid rounding errors. 1000 means 100% or 1
     */
-    int array[STAT_COUNT] statsTotalBonus //default = 0
+    static int array statsTotalBonus_static //default = 0
     // total = (base + absolute) * (1 + relative/1000)
 
     private static constant unnkownUnitTypes = new LinkedList<int>()
@@ -63,6 +65,11 @@ public class UnitWrapper
 
     private Team team
 
+    protected static function classInit()
+        CreateTrigger()
+        ..addAction(function regenerate)
+        ..registerTimerEvent(0.1, true)
+
     static function create(unit assocUnit)
         if not unitMap.has(assocUnit)
             new UnitWrapper(assocUnit)
@@ -72,6 +79,7 @@ public class UnitWrapper
 
         this.assocUnit = assocUnit
         this.team = assocUnit.getOwner().getCPlayer().getTeam()
+        this.arrayOffset = (this castTo int) * STAT_COUNT
 
         allUnits[unitWrapperCount] = this.assocUnit
         this.index = unitWrapperCount
@@ -83,32 +91,32 @@ public class UnitWrapper
         this.buffList = null // new BuffList  create BuffList only when needed
 
         for int i = 0 to STAT_COUNT-1
-            statsAbsoluteBonus[i] = 0
-            statsAbsoluteBonusReal[i] = 0
-            statsRelativeBonus[i] = 0
-            statsTotalBonus[i] = 0
+            statsAbsoluteBonus_static[this.arrayOffset + i] = 0
+            statsAbsoluteBonusReal_static[this.arrayOffset + i] = 0
+            statsRelativeBonus_static[this.arrayOffset + i] = 0
+            statsTotalBonus_static[this.arrayOffset + i] = 0
 
         // Init base values
-        statBaseValue[Stat.MS.toInt()] = GetUnitDefaultMoveSpeed(this.assocUnit).toInt()
-        statBaseValue[Stat.STR.toInt()] = this.assocUnit.getStr(false)
-        statBaseValue[Stat.AGI.toInt()] = this.assocUnit.getAgi(false)
-        statBaseValue[Stat.INT.toInt()] = this.assocUnit.getInt(false)
-        statBaseValue[Stat.AR.toInt()] = this.assocUnit.getArmor().toInt()
-        statBaseValue[Stat.AD.toInt()] = 0 // strength
-        statBaseValue[Stat.AS.toInt()] = 0 //not needed as only absolute bonus will be used
-        statBaseValue[Stat.HR.toInt()] = 0
-        statBaseValue[Stat.MR.toInt()] = 0
-        statBaseValue[Stat.HP.toInt()] = this.assocUnit.getMaxHP().toInt()
-        statBaseValue[Stat.MP.toInt()] = this.assocUnit.getMaxMana().toInt()
-        statBaseValue[Stat.CD.toInt()] = 0
+        statBaseValue_static[this.arrayOffset + Stat.MS.toInt()] = GetUnitDefaultMoveSpeed(this.assocUnit).toInt()
+        statBaseValue_static[this.arrayOffset + Stat.STR.toInt()] = this.assocUnit.getStr(false)
+        statBaseValue_static[this.arrayOffset + Stat.AGI.toInt()] = this.assocUnit.getAgi(false)
+        statBaseValue_static[this.arrayOffset + Stat.INT.toInt()] = this.assocUnit.getInt(false)
+        statBaseValue_static[this.arrayOffset + Stat.AR.toInt()] = this.assocUnit.getArmor().toInt()
+        statBaseValue_static[this.arrayOffset + Stat.AD.toInt()] = 0 // strength
+        statBaseValue_static[this.arrayOffset + Stat.AS.toInt()] = 0 //not needed as only absolute bonus will be used
+        statBaseValue_static[this.arrayOffset + Stat.HR.toInt()] = 0
+        statBaseValue_static[this.arrayOffset + Stat.MR.toInt()] = 0
+        statBaseValue_static[this.arrayOffset + Stat.HP.toInt()] = this.assocUnit.getMaxHP().toInt()
+        statBaseValue_static[this.arrayOffset + Stat.MP.toInt()] = this.assocUnit.getMaxMana().toInt()
+        statBaseValue_static[this.arrayOffset + Stat.CD.toInt()] = 0
 
         let uType = UnitType.getUnitType(this.assocUnit.getTypeId())
 
         if uType != null
             updateBaseStatsUnits()
         else if this.assocUnit.isType(UNIT_TYPE_HERO)
-            statBaseValue[Stat.AD.toInt()] = statBaseValue[Stat.STR.toInt()]
-            statBaseValue[Stat.AR.toInt()] = 0
+            statBaseValue_static[this.arrayOffset + Stat.AD.toInt()] = statBaseValue_static[this.arrayOffset + Stat.STR.toInt()]
+            statBaseValue_static[this.arrayOffset + Stat.AR.toInt()] = 0
         else
             if not this.assocUnit.isType(UNIT_TYPE_STRUCTURE)
                 if this.assocUnit.getAbilityLevel('Aloc') == 0
@@ -119,44 +127,54 @@ public class UnitWrapper
     function updateBaseStatsUnits()
         let uType = UnitType.getUnitType(this.assocUnit.getTypeId())
         if uType != null
-            statBaseValue[Stat.STR.toInt()] = uType.getBaseAttack() + uType.getUpgradeAttack(this.assocUnit.getOwner())
-            statBaseValue[Stat.AR.toInt()] = uType.getBaseArmor() + uType.getUpgradeArmor(this.assocUnit.getOwner())
-            statBaseValue[Stat.HP.toInt()] = uType.getBaseHp() //(uType.getBaseHp() * ( 1 + 0.1 * uType.getUpgradeArmorCount(this.assocUnit.getOwner()))).round()
+            statBaseValue_static[this.arrayOffset + Stat.STR.toInt()] = uType.getBaseAttack() + uType.getUpgradeAttack(this.assocUnit.getOwner())
+            statBaseValue_static[this.arrayOffset + Stat.AR.toInt()] = uType.getBaseArmor() + uType.getUpgradeArmor(this.assocUnit.getOwner())
+            statBaseValue_static[this.arrayOffset + Stat.HP.toInt()] = uType.getBaseHp() //(uType.getBaseHp() * ( 1 + 0.1 * uType.getUpgradeArmorCount(this.assocUnit.getOwner()))).round()
             //willpower is same as armor
-            statBaseValue[Stat.AGI.toInt()] = uType.getBaseArmor() + uType.getUpgradeArmor(this.assocUnit.getOwner())
+            statBaseValue_static[this.arrayOffset + Stat.AGI.toInt()] = uType.getBaseArmor() + uType.getUpgradeArmor(this.assocUnit.getOwner())
             this.addStatAbsoluteBonus(Stat.HP, 0)
 
     function updateBaseStatsHero()
         if not this.assocUnit.isType(UNIT_TYPE_HERO)
             print("Base stats for non-hero units are constant and must not be updated.")
-        statBaseValue[Stat.STR.toInt()] = this.assocUnit.getStr(false)
-        statBaseValue[Stat.AGI.toInt()] = this.assocUnit.getAgi(false)
-        statBaseValue[Stat.INT.toInt()] = this.assocUnit.getInt(false)
+        statBaseValue_static[this.arrayOffset + Stat.STR.toInt()] = this.assocUnit.getStr(false)
+        statBaseValue_static[this.arrayOffset + Stat.AGI.toInt()] = this.assocUnit.getAgi(false)
+        statBaseValue_static[this.arrayOffset + Stat.INT.toInt()] = this.assocUnit.getInt(false)
 
-        statBaseValue[Stat.AD.toInt()] = 0
-        statBaseValue[Stat.AR.toInt()] = GetPlayerTechCount(this.assocUnit.getOwner(), UPG_AR, true)
-        statBaseValue[Stat.AS.toInt()] = 0
+        statBaseValue_static[this.arrayOffset + Stat.AD.toInt()] = 0
+        statBaseValue_static[this.arrayOffset + Stat.AR.toInt()] = GetPlayerTechCount(this.assocUnit.getOwner(), UPG_AR, true)
+        statBaseValue_static[this.arrayOffset + Stat.AS.toInt()] = 0
         
-        statBaseValue[Stat.HP.toInt()] = 400 + GetPlayerTechCount(this.assocUnit.getOwner(), UPG_HP, true) * 15
-        statBaseValue[Stat.HR.toInt()] = 0
+        statBaseValue_static[this.arrayOffset + Stat.HP.toInt()] = 400 + GetPlayerTechCount(this.assocUnit.getOwner(), UPG_HP, true) * 15
+        statBaseValue_static[this.arrayOffset + Stat.HR.toInt()] = 0
         
-        statBaseValue[Stat.MP.toInt()] = 100 + GetPlayerTechCount(this.assocUnit.getOwner(), UPG_MP, true) * 10
-        statBaseValue[Stat.MR.toInt()] = 0
+        statBaseValue_static[this.arrayOffset + Stat.MP.toInt()] = 100 + GetPlayerTechCount(this.assocUnit.getOwner(), UPG_MP, true) * 10
+        statBaseValue_static[this.arrayOffset + Stat.MR.toInt()] = 0
         //statBaseValue[Stat.MS.toInt()] = this.defaultMovementSpeed.toInt()
-        statBaseValue[Stat.CD.toInt()] = 0
+        statBaseValue_static[this.arrayOffset + Stat.CD.toInt()] = 0
     
     ondestroy
         objectCount--
         for int i = 0 to STAT_COUNT-1
-            statsAbsoluteBonus[i] = 0
-            statsRelativeBonus[i] = 0
-            statsTotalBonus[i] = 0
+            statsAbsoluteBonus_static[this.arrayOffset + i] = 0
+            statsRelativeBonus_static[this.arrayOffset + i] = 0
+            statsTotalBonus_static[this.arrayOffset + i] = 0
 
     protected static function getWrapper(unit whichUnit) returns UnitWrapper
         let w = unitMap.get(whichUnit)
         if w == null
             return new UnitWrapper(whichUnit)
         return w
+
+    static function regenerate()
+        for i = 0 to MAX_HERO_COUNT-1
+            let heroes = CPlayer.getPlayerHeroes(i)
+            if heroes != null
+                for hero in heroes
+                    let heroUnit = hero.toUnit()
+                    if heroUnit.isAlive()
+                        heroUnit.healHP(heroUnit, statsTotalBonus_static[heroUnit.wrapper().arrayOffset + Stat.HR.toInt()]/100)
+                        heroUnit.healMana(heroUnit, statsTotalBonus_static[heroUnit.wrapper().arrayOffset + Stat.MR.toInt()]/100)
 
     //custom destroy function, so unit wrapper is destroyed last and can be used in the clean up routines
     protected function destr()
@@ -203,7 +221,7 @@ public class UnitWrapper
             if whichStat == Stat.STR or whichStat == Stat.INT
                 //update ability tooltips
                 if this.toUnit().isType(UNIT_TYPE_HERO)
-                    this.toUnit().setBonus(whichStat, this.statsTotalBonus[whichStat.toInt()])
+                    this.toUnit().setBonus(whichStat, statsTotalBonus_static[this.arrayOffset + whichStat.toInt()])
                     let hero = Hero.getHero(this.toUnit())
                     if hero != null
                         let hType = hero.getHeroType()
@@ -213,15 +231,15 @@ public class UnitWrapper
                             hType.updateTooltipsInt(this.toUnit())
                 else
                     if whichStat == Stat.STR // units get AD increased instead of STR
-                        this.toUnit().setBonus(Stat.AD, this.statsTotalBonus[whichStat.toInt()])
+                        this.toUnit().setBonus(Stat.AD, statsTotalBonus_static[this.arrayOffset + whichStat.toInt()])
                     else
-                        this.toUnit().setBonus(whichStat, this.statsTotalBonus[whichStat.toInt()])
+                        this.toUnit().setBonus(whichStat, statsTotalBonus_static[this.arrayOffset + whichStat.toInt()])
             else
-                this.toUnit().setBonus(whichStat, this.statsTotalBonus[whichStat.toInt()])
+                this.toUnit().setBonus(whichStat, statsTotalBonus_static[this.arrayOffset + whichStat.toInt()])
                         
         else
             if whichStat == Stat.MS
-                this.toUnit().setMoveSpeed( this.getStatBaseValue(whichStat) + this.statsTotalBonus[whichStat.toInt()].toReal() )
+                this.toUnit().setMoveSpeed( this.getStatBaseValue(whichStat) + statsTotalBonus_static[this.arrayOffset + whichStat.toInt()].toReal() )
             else if whichStat == Stat.HP
                 this.toUnit().setMaxHP(this.getStatTotalValue(Stat.HP), true)
             else if whichStat == Stat.MP
@@ -235,7 +253,7 @@ public class UnitWrapper
     **/
     function setStatAbsoluteBonus(Stat whichStat, int newValue)
         int stat = whichStat.toInt()
-        this.statsAbsoluteBonus[stat] = newValue
+        statsAbsoluteBonus_static[this.arrayOffset + stat] = newValue
         updateTotalStatBonus(whichStat)
 
 
@@ -244,26 +262,25 @@ public class UnitWrapper
     as soon as it is over 1.
     **/  
     function addStatAbsoluteBonusReal(Stat whichStat, int plusValue)
-        int stat = whichStat.toInt()
-        this.statsAbsoluteBonusReal[stat] += plusValue
-        if this.statsAbsoluteBonusReal[stat].abs() >= 1000
-            addStatAbsoluteBonus(whichStat, (this.statsAbsoluteBonusReal[stat]/1000).toInt() )
-            this.statsAbsoluteBonusReal[stat] -= (this.statsAbsoluteBonusReal[stat]/1000).toInt()*1000
+        let arrayIndex = this.arrayOffset + whichStat.toInt()
+        statsAbsoluteBonusReal_static[arrayIndex] += plusValue
+        if statsAbsoluteBonusReal_static[arrayIndex].abs() >= 1000
+            addStatAbsoluteBonus(whichStat, (statsAbsoluteBonusReal_static[arrayIndex]/1000).toInt() )
+            statsAbsoluteBonusReal_static[arrayIndex] -= (statsAbsoluteBonusReal_static[arrayIndex]/1000).toInt()*1000
             
 
     /**
     Sets the relative stat bonus and updates the total bonus.
     **/
     function setStatRelativeBonus(Stat whichStat, int newValue)
-        int stat = whichStat.toInt()
-        this.statsRelativeBonus[stat] = newValue
+        statsRelativeBonus_static[this.arrayOffset + whichStat.toInt()] = newValue
         updateTotalStatBonus(whichStat)
 
     function addStatAbsoluteBonus(Stat whichStat, int plusValue)
-        this.setStatAbsoluteBonus(whichStat, this.statsAbsoluteBonus[whichStat.toInt()] + plusValue)
+        this.setStatAbsoluteBonus(whichStat, statsAbsoluteBonus_static[this.arrayOffset + whichStat.toInt()] + plusValue)
 
     function addStatRelativeBonus(Stat whichStat, int plusValue)
-        this.setStatRelativeBonus(whichStat, this.statsRelativeBonus[whichStat.toInt()] + plusValue)
+        this.setStatRelativeBonus(whichStat, statsRelativeBonus_static[this.arrayOffset + whichStat.toInt()] + plusValue)
 
     function printStats()
         for i = 0 to STAT_COUNT-1
@@ -271,29 +288,29 @@ public class UnitWrapper
 
     function printStat(Stat whichStat)
         int stat = whichStat.toInt()
-        print(whichStat.toString()+" ( "+statBaseValue[stat].toString()+" + "+statsAbsoluteBonus[stat].toString()+" ) * "+statsRelativeBonus[stat].toString() + "->" +statsTotalBonus[stat].toString() )
+        print(whichStat.toString()+" ( "+statBaseValue_static[this.arrayOffset + stat].toString()+" + "+statsAbsoluteBonus_static[this.arrayOffset + stat].toString()+" ) * "+statsRelativeBonus_static[this.arrayOffset + stat].toString() + "->" +statsTotalBonus_static[this.arrayOffset + stat].toString() )
 
     function toUnit() returns unit
         return this.assocUnit
 
     function getStatAbsoluteBonus(Stat whichStat) returns int
-        return this.statsAbsoluteBonus[whichStat.toInt()]
+        return statsAbsoluteBonus_static[this.arrayOffset + whichStat.toInt()]
 
     function getStatRelativeBonus(Stat whichStat) returns int
-        return this.statsRelativeBonus[whichStat.toInt()]
+        return statsRelativeBonus_static[this.arrayOffset + whichStat.toInt()]
     
     function getStatBaseValue(Stat whichStat) returns int
-        return this.statBaseValue[whichStat.toInt()]
+        return statBaseValue_static[this.arrayOffset + whichStat.toInt()]
 
     function getStatTotalBonus(Stat whichStat) returns int
-        return this.statsTotalBonus[whichStat.toInt()]
+        return statsTotalBonus_static[this.arrayOffset + whichStat.toInt()]
 
     function getStatTotalValue(Stat whichStat) returns int
         return this.getStatTotalBonus(whichStat) + this.getStatBaseValue(whichStat)
 
     function copyBaseStatsFrom(UnitWrapper wrapper)
         for i = 0 to STAT_COUNT - 1
-            this.statBaseValue[i] = wrapper.statBaseValue[i]
+            statBaseValue_static[this.arrayOffset + i] = statBaseValue_static[wrapper.arrayOffset + i]
             this.updateTotalStatBonus(i castTo Stat)
 
     function incBlue()
@@ -346,15 +363,6 @@ public function unit.updateDefaultMovementSpeed()
 public function unit.getBuffList() returns BuffList
     return this.wrapper().buffList
 
-function regenerate()
-    for i = 0 to MAX_HERO_COUNT-1
-        let hero = CPlayer.getPlayerHero(i, 0)
-        if hero != null
-            let heroUnit = hero.toUnit()
-            if heroUnit.isAlive()
-                heroUnit.healHP(heroUnit, heroUnit.wrapper().statsTotalBonus[Stat.HR.toInt()]/100)
-                heroUnit.healMana(heroUnit, heroUnit.wrapper().statsTotalBonus[Stat.MR.toInt()]/100)
-
 
     /*for i = 0 to UnitWrapper.unitWrapperCount-1
         unit u = UnitWrapper.allUnits[i]
@@ -369,12 +377,9 @@ function regenerate()
                 print(u.wrapper().statsTotalBonus[Stat.MR.toInt()]/100)*/
 
 init
+    UnitWrapper.classInit()
     onUnitIndex(() -> UnitWrapper.create(getIndexingUnit()))
     onUnitDeindex(() -> getIndexingUnit().wrapper().destr() )
-
-    CreateTrigger()
-    ..addAction(function regenerate)
-    ..registerTimerEvent(0.1, true)
 
     CreateTrigger()
     ..registerPlayerChatEvent(players[0], "-s", true)

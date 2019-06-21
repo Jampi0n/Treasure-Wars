@@ -185,9 +185,9 @@ function onBuildingDeath()
 
 			if BARRACKS_REBUILD_TIME != -1
 				let newBuilding = createUnit(building.getOwner(), BARRACKS_REBUILD, building.getPos(), (270).fromDeg())
-					..setAnimation("birth")
-					..setTimeScale(60/BARRACKS_REBUILD_TIME)
-					..setHP(0.5)
+				..setAnimation("birth")
+				..setTimeScale(60/BARRACKS_REBUILD_TIME)
+				..setHP(0.5)
 				UnitAddType(newBuilding, UNIT_TYPE_ANCIENT)
 				
 
@@ -236,9 +236,9 @@ function onBuildingDeath()
 
 			if WORKSHOP_REBUILD_TIME != -1
 				let newBuilding = createUnit(building.getOwner(), WORKSHOP_REBUILD, building.getPos(), (270).fromDeg())
-					..setAnimation("birth")
-					..setTimeScale(0)
-					..setHP(0.5)
+				..setAnimation("birth")
+				..setTimeScale(0)
+				..setHP(0.5)
 				UnitAddType(newBuilding, UNIT_TYPE_ANCIENT)
 
 				for i=0 to 1
@@ -682,20 +682,15 @@ public function income()
 
 init
 	CreateTrigger()
-		..addAction(function onBuildingDeath)
-		..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
+	..addAction(function onBuildingDeath)
+	..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
 
 	CreateTrigger()
-		..addAction(function onBuildingAbility)
-		..registerAnyUnitEvent(EVENT_PLAYER_UNIT_SELL_ITEM)
+	..addAction(function onBuildingAbility)
+	..registerAnyUnitEvent(EVENT_PLAYER_UNIT_SELL_ITEM)
 
-	//region reg = CreateRegion()
-	//reg.addRect(gg_rct_GreenMilitiaDespawn)
-	//reg.addRect(gg_rct_BrownMilitiaDespawn)
 
 	CreateTrigger()
-		//..addAction(function onMilitiaDespawn)
-		//..registerEnterRegion(reg, null)
 	..registerTimerEvent(0.1, true)
 	..addAction()->
 		ForGroup(militiaTeam1, function onMilitiaDespawn)
@@ -706,8 +701,8 @@ init
 	BUFF_HOME.setup(abilityList, HOME_BUFF_ID)
 
 	CreateTrigger()
-		..registerTimerEvent(0.2, true)
-		..addAction(function homeInvulnerability)
+	..registerTimerEvent(0.2, true)
+	..addAction(function homeInvulnerability)
 
 
 
@@ -719,7 +714,7 @@ init
 
 	buffTowerFocus.addFirstFunction( (Buff whichBuff) -> (begin
 		whichBuff.getTarget().wrapper()
-			..addStatRelativeBonus(Stat.AR, -TOWER_FOCUS_ARMOR * 10)
+		..addStatRelativeBonus(Stat.AR, -TOWER_FOCUS_ARMOR * 10)
 		whichBuff.setData(1)
 	end))
 
@@ -728,14 +723,14 @@ init
 		if stacks <= TOWER_FOCUS_MAX_STACKS
 			whichBuff.setData(stacks)
 			whichBuff.getTarget().wrapper()
-				..addStatRelativeBonus(Stat.AR, -TOWER_FOCUS_ARMOR * 10)
+			..addStatRelativeBonus(Stat.AR, -TOWER_FOCUS_ARMOR * 10)
 	end))
 
 
 	buffTowerFocus.addEndFunction( (Buff whichBuff) -> (begin
 		let stacks = whichBuff.getData()
 		whichBuff.getTarget().wrapper()
-			..addStatRelativeBonus(Stat.AR, TOWER_FOCUS_ARMOR * stacks * 10)
+		..addStatRelativeBonus(Stat.AR, TOWER_FOCUS_ARMOR * stacks * 10)
 	end))
 
 	OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin

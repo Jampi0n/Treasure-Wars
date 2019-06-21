@@ -521,13 +521,14 @@ function initHeroType()
             if whichStat == Stat.HP or whichStat == Stat.MP //if hp or mana was changed, calculate special values.
                 let hp = Stat.HP.toInt()
                 let mp = Stat.MP.toInt()
+                let arrayOffset = whichWrapper.arrayOffset
                 UnitWrapper.defaultCalcualtion.calculate(whichWrapper, Stat.HP)
                 UnitWrapper.defaultCalcualtion.calculate(whichWrapper, Stat.MP)
-                let hpBonus = whichWrapper.statsTotalBonus[hp]
-                let mpBonus = whichWrapper.statsTotalBonus[mp]
+                let hpBonus = UnitWrapper.statsTotalBonus_static[arrayOffset + hp]
+                let mpBonus = UnitWrapper.statsTotalBonus_static[arrayOffset + mp]
                 //print("hpBonus = "+hpBonus.toString()+", mpBonus = "+mpBonus.toString())
-                whichWrapper.statsTotalBonus[hp] = hpBonus + ((1/ANCIENT_KNOWLEDGE_HP_BONUS[lvl-1]) * (mpBonus + whichWrapper.getStatBaseValue(Stat.MP)) ).toInt()
-                whichWrapper.statsTotalBonus[mp] = mpBonus + ((1/ANCIENT_KNOWLEDGE_MP_BONUS[lvl-1]) * (hpBonus + whichWrapper.getStatBaseValue(Stat.HP)) ).toInt()
+                UnitWrapper.statsTotalBonus_static[arrayOffset + hp] = hpBonus + ((1/ANCIENT_KNOWLEDGE_HP_BONUS[lvl-1]) * (mpBonus + whichWrapper.getStatBaseValue(Stat.MP)) ).toInt()
+                UnitWrapper.statsTotalBonus_static[arrayOffset + mp] = mpBonus + ((1/ANCIENT_KNOWLEDGE_MP_BONUS[lvl-1]) * (hpBonus + whichWrapper.getStatBaseValue(Stat.HP)) ).toInt()
                 //print("newHpBonus = "+whichWrapper.statsTotalBonus[hp].toString()+", newHpBonus = "+whichWrapper.statsTotalBonus[mp].toString())
                 whichWrapper.applyTotalStatBonus(Stat.HP)
                 whichWrapper.applyTotalStatBonus(Stat.MP)
@@ -570,12 +571,17 @@ function initHeroType()
 
 function createHeroType(Hero hero)
     CreateTrigger()
-    ..addAction(() -> (begin
-        GetTriggerUnit().wrapper()
+    ..registerUnitEvent(hero.toUnit(), EVENT_UNIT_HERO_SKILL)
+    ..addAction() ->
+        if GetLearnedSkill() == ABILITY_ANCIENT_KNOWLEDGE
+            GetTriggerUnit().wrapper()
             ..updateTotalStatBonus(Stat.HP)
             ..updateTotalStatBonus(Stat.MP)
-    end))
-    ..registerUnitEvent(hero.toUnit(), EVENT_UNIT_HERO_SKILL)
+            Hero.getHero(GetTriggerUnit()).getCopy().wrapper()
+            ..updateTotalStatBonus(Stat.HP)
+            ..updateTotalStatBonus(Stat.MP)
+
+
 
 init
     heroType = new HeroType(THIS_HERO, THIS_ICON, THIS_ID, true)

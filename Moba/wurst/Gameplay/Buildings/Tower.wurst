@@ -41,18 +41,16 @@ public class Tower
     static function classInit()
 
         CreateTrigger()
-            ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_ATTACKED)
-            ..addAction(() ->(begin
+        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_ATTACKED)
+        ..addAction() ->
             if towerGroup.contains(GetAttacker())
                 towerMap.get(GetAttacker()).onAttack(GetTriggerUnit())
-        end))
 
         CreateTrigger()
-            ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
-            ..addAction(() ->(begin
+        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
+        ..addAction() ->
             if towerGroup.contains(GetTriggerUnit())
                 destroy towerMap.get(GetTriggerUnit())
-        end))
 
         addOnDamageFunc(Condition(function onDamage))
 
