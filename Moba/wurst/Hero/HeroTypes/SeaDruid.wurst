@@ -516,14 +516,14 @@ function initHeroType()
     ..setBonusCalculation((UnitWrapper whichWrapper, Stat whichStat) -> (begin
         let lvl = whichWrapper.toUnit().getAbilityLevel(ABILITY_ANCIENT_KNOWLEDGE)
         if lvl == 0
-            UnitWrapper.defaultCalcualtion.calculate(whichWrapper, whichStat)
+            whichWrapper.defaultBonusCalcualtion(whichStat)
         else
             if whichStat == Stat.HP or whichStat == Stat.MP //if hp or mana was changed, calculate special values.
                 let hp = Stat.HP.toInt()
                 let mp = Stat.MP.toInt()
                 let arrayOffset = whichWrapper.arrayOffset
-                UnitWrapper.defaultCalcualtion.calculate(whichWrapper, Stat.HP)
-                UnitWrapper.defaultCalcualtion.calculate(whichWrapper, Stat.MP)
+                whichWrapper.defaultBonusCalcualtion(Stat.HP)
+                whichWrapper.defaultBonusCalcualtion(Stat.MP)
                 let hpBonus = UnitWrapper.statsTotalBonus_static[arrayOffset + hp]
                 let mpBonus = UnitWrapper.statsTotalBonus_static[arrayOffset + mp]
                 //print("hpBonus = "+hpBonus.toString()+", mpBonus = "+mpBonus.toString())
@@ -533,7 +533,7 @@ function initHeroType()
                 whichWrapper.applyTotalStatBonus(Stat.HP)
                 whichWrapper.applyTotalStatBonus(Stat.MP)
             else //else calculate default values
-                UnitWrapper.defaultCalcualtion.calculate(whichWrapper, whichStat)
+                whichWrapper.defaultBonusCalcualtion(whichStat)
     end))
     delayInit(5) ->
         heroType
@@ -575,9 +575,6 @@ function createHeroType(Hero hero)
     ..addAction() ->
         if GetLearnedSkill() == ABILITY_ANCIENT_KNOWLEDGE
             GetTriggerUnit().wrapper()
-            ..updateTotalStatBonus(Stat.HP)
-            ..updateTotalStatBonus(Stat.MP)
-            Hero.getHero(GetTriggerUnit()).getCopy().wrapper()
             ..updateTotalStatBonus(Stat.HP)
             ..updateTotalStatBonus(Stat.MP)
 

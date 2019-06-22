@@ -444,24 +444,23 @@ public class DynamicTooltip
 
     function evaluateNormalString(int level) returns string
         return evaluateNormalString(level, 100, 100, -1 ,true)
-
+    
     function evaluateNormalString(unit whichUnit) returns string
         let level = whichUnit.getAbilityLevel(this.abilityTypeId)
-        return evaluateNormalString(level, whichUnit.getStr(), whichUnit.getInt(), BlzGetUnitAbilityCooldown(whichUnit, this.abilityTypeId, level), false)
+        return evaluateNormalString(level, whichUnit.getStr(), whichUnit.getInt(), BlzGetUnitAbilityCooldown(whichUnit, this.abilityTypeId, level - 1), false)
 
     function evaluateNormalString(unit whichUnit, int level) returns string
-        return evaluateNormalString(level, whichUnit.getStr(), whichUnit.getInt(), BlzGetUnitAbilityCooldown(whichUnit, this.abilityTypeId, level), false)
-
+        return evaluateNormalString(level, whichUnit.getStr(), whichUnit.getInt(), BlzGetUnitAbilityCooldown(whichUnit, this.abilityTypeId, level - 1), false)
 
     function evaluateTurnOffString(int level) returns string
         return evaluateTurnOffString(level, 100, 100, -1, true)
 
     function evaluateTurnOffString(unit whichUnit) returns string
         let level = whichUnit.getAbilityLevel(this.abilityTypeId)
-        return evaluateTurnOffString(level, whichUnit.getStr(), whichUnit.getInt(), BlzGetUnitAbilityCooldown(whichUnit, this.abilityTypeId, level), false)
+        return evaluateTurnOffString(level, whichUnit.getStr(), whichUnit.getInt(), BlzGetUnitAbilityCooldown(whichUnit, this.abilityTypeId, level - 1), false)
 
     function evaluateTurnOffString(unit whichUnit, int level) returns string
-        return evaluateTurnOffString(level, whichUnit.getStr(), whichUnit.getInt(), BlzGetUnitAbilityCooldown(whichUnit, this.abilityTypeId, level), false)
+        return evaluateTurnOffString(level, whichUnit.getStr(), whichUnit.getInt(), BlzGetUnitAbilityCooldown(whichUnit, this.abilityTypeId, level - 1), false)
 
 
 

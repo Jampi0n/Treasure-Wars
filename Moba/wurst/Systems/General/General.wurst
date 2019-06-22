@@ -48,35 +48,6 @@ function initHeroButtonArray()
         heroButtons[4*j+2] = getOriginFrame(ORIGIN_FRAME_HERO_MANA_BAR, j)
         heroButtons[4*j+3] = getOriginFrame(ORIGIN_FRAME_HERO_BUTTON_INDICATOR, j)
 
-public function hideSecondaryHeroButtons()
-    // 4*1 = 4 to 4*6+3 = 27
-    getTimer().start(0) ->
-        GetExpiredTimer().release()
-        heroButtons[4].hide()
-        heroButtons[5].hide()
-        heroButtons[6].hide()
-        heroButtons[7].hide()
-        heroButtons[8].hide()
-        heroButtons[9].hide()
-        heroButtons[10].hide()
-        heroButtons[11].hide()
-        heroButtons[12].hide()
-        heroButtons[13].hide()
-        heroButtons[14].hide()
-        heroButtons[15].hide()
-        heroButtons[16].hide()
-        heroButtons[17].hide()
-        heroButtons[18].hide()
-        heroButtons[19].hide()
-        heroButtons[20].hide()
-        heroButtons[21].hide()
-        heroButtons[22].hide()
-        heroButtons[23].hide()
-        heroButtons[24].hide()
-        heroButtons[25].hide()
-        heroButtons[26].hide()
-        heroButtons[27].hide()
-    
 
 public function unit.isTargetable(player source, boolean allowFriends, boolean allowEnemies) returns boolean
     boolean ret = true

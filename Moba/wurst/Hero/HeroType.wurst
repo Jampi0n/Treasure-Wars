@@ -54,7 +54,7 @@ public class HeroType
     private static constant heroIdToHeroType = new HashMap<integer, HeroType>
     private int unitId
     private int heroId
-    private OnAttackFunctionAdvanced onAttack = null
+    OnAttackFunctionHero onAttack = null
     private CalculateTotalBonus bonusCalculation = null
 
     private OnCreateFunction onCreateFunction = null
@@ -145,7 +145,7 @@ public class HeroType
         if this.onAttack != null
             this.onAttack.onAttack(attacker, target, isActive, advanced)
 
-    function setOnAttackFunc(OnAttackFunctionAdvanced onAttack)
+    function setOnAttackFunc(OnAttackFunctionHero onAttack)
         this.onAttack = onAttack
 
     /** Calulates the stat of the hero type for a given level */
