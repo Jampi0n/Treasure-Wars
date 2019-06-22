@@ -29,11 +29,9 @@ function buyFailed(unit hero, int _itemId, int cost, int gold)
 
 function buySuccess(unit hero, item itm, int totalCost)
     if hero.hasItem(itm) // success
-        let mainHero = Hero.getOriginal(hero).toUnit()
-        mainHero.addItemById(itm.getTypeId())
-        SOUND_ITEM_BUY_3D.playOnPoint(mainHero.getPos3Zero())
+        SOUND_ITEM_BUY_3D.playOnPoint(hero.getPos3Zero())
         SOUND_ITEM_BUY.playForPlayer(hero.getOwner())
-        standardTextTag(mainHero.getPos(), itm.getName())
+        standardTextTag(hero.getPos(), itm.getName())
             ..setColor(255, 220, 0, 255)
     else // not enough space
         // refund total cost
@@ -46,16 +44,15 @@ function buySuccess(unit hero, item itm, int totalCost)
 
 function buyCondition(unit hero, bool firstTeam, bool showMessage) returns bool
 
-    /*if not hero.isAlive()
+    if not hero.isAlive()
         if showMessage
             printTimedToPlayer(COLOR_GOLD.toColorString()+"You cannot buy items, while your hero is dead!|r", 5, hero.getOwner())
-        return false*/
+        return false
 
-    let mainHero = Hero.getOriginal(hero).toUnit()
 
-    if mainHero.isAlive()
+    if hero.isAlive()
         let shopCenter = firstTeam ? gg_rct_GreenAltar.getCenter() : gg_rct_BrownAltar.getCenter()
-        let dist = mainHero.getPos().distanceTo(shopCenter)
+        let dist = hero.getPos().distanceTo(shopCenter)
         if dist > BUY_RANGE
             if showMessage
                 printTimedToPlayer(COLOR_GOLD.toColorString()+"You are too far away from the shop to buy items!|r", 5, hero.getOwner())
@@ -92,7 +89,6 @@ init
         ..registerPlayerKeyPress(players[i], OSKEY_ESCAPE, OSKEY_META.NONE, true)
         ..addAction() ->
             let id = GetTriggerPlayer().getId()
-            hideSecondaryHeroButtons()
             if gui[id].isEnabled()
                 gui[id].closeShop()
                 print("close")
@@ -100,16 +96,8 @@ init
                 if GetLocalPlayer().getId() == id
                     ClearSelection()
                     SelectUnit(mainHero,true)
-                for Hero h in CPlayer.getPlayerHeroes(id)
-                    Hero.copyInventory(h.getCopy(), h.toUnit())
-                    h.getCopy().hide()
+
             else
-                for Hero h in CPlayer.getPlayerHeroes(id)
-                    let copy = h.getCopy()
-                    copy.unpause()
-                    copy.show()
-                    Hero.copyInventory(h.toUnit(), copy)
-                    copy.pause()
                 gui[id].openShop()
                 print("open")
     

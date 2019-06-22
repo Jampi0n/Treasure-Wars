@@ -15,6 +15,7 @@ import public BonusMod
 
 public constant DEFAULT_HERO_SPEED = 270.0
 
+/** cyc = 1 **/
 public interface CalculateTotalBonus
     function calculate(UnitWrapper whichWrapper, Stat whichStat)
 
@@ -25,12 +26,7 @@ public interface CalculateTotalBonus
 **/
 public class UnitWrapper
 
-    constant static CalculateTotalBonus defaultCalcualtion = (UnitWrapper whichWrapper, Stat whichStat) -> (begin
-        int stat = whichStat.toInt()
-        UnitWrapper.statsTotalBonus_static[whichWrapper.arrayOffset + stat] = ((whichWrapper.getStatAbsoluteBonus(whichStat)) * (1. + whichWrapper.getStatRelativeBonus(whichStat)/1000 ) + (whichWrapper.getStatBaseValue(whichStat) * whichWrapper.getStatRelativeBonus(whichStat)/1000) ).round()
-    end)
-
-    private CalculateTotalBonus bonusCalculation = defaultCalcualtion
+    private CalculateTotalBonus bonusCalculation = null
 
     protected static unit array allUnits
     protected static int unitWrapperCount = 0
@@ -64,6 +60,13 @@ public class UnitWrapper
     private int revealCount = 0
 
     private Team team
+
+    /*
+        In the getWrapper() function, a new wrapper will be created, if it does not exist already.
+        To prevent cyclic function calls this is done with a trigger function.
+    */
+    private static constant CREATE_TRIGGER = CreateTrigger()..addAction(function createWrapper)
+    private static unit createForUnit = null
 
     protected static function classInit()
         CreateTrigger()
@@ -160,10 +163,15 @@ public class UnitWrapper
             statsRelativeBonus_static[this.arrayOffset + i] = 0
             statsTotalBonus_static[this.arrayOffset + i] = 0
 
+    private static function createWrapper()
+        new UnitWrapper(createForUnit)
+
     protected static function getWrapper(unit whichUnit) returns UnitWrapper
         let w = unitMap.get(whichUnit)
         if w == null
-            return new UnitWrapper(whichUnit)
+            createForUnit = whichUnit
+            CREATE_TRIGGER.execute()
+            return unitMap.get(whichUnit)
         return w
 
     static function regenerate()
@@ -208,11 +216,20 @@ public class UnitWrapper
     function getBonusCalculation() returns CalculateTotalBonus
         return this.bonusCalculation
 
+    function defaultBonusCalcualtion(Stat whichStat)
+        int stat = whichStat.toInt()
+        UnitWrapper.statsTotalBonus_static[this.arrayOffset + stat] = ((this.getStatAbsoluteBonus(whichStat)) * (1. + this.getStatRelativeBonus(whichStat)/1000 ) + (this.getStatBaseValue(whichStat) * this.getStatRelativeBonus(whichStat)/1000) ).round()
+    
+
     /**
     Updates the total stat bonus based on base stat, absolute stat bonus and relative stat bonus
     **/
     function updateTotalStatBonus(Stat whichStat)
-        this.bonusCalculation.calculate(this, whichStat)
+        if this.bonusCalculation != null
+            this.bonusCalculation.calculate(this, whichStat)
+        else
+            this.defaultBonusCalcualtion(whichStat)
+            
         this.applyTotalStatBonus(whichStat)
         
 

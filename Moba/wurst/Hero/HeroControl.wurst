@@ -49,8 +49,8 @@ public class Hero
 
     private unit heroGlow = null
 
-    private unit heroCopy = null
-    private static constant copyToHero = new HashMap<unit,Hero>
+    private timer tooltipUpdateTimer
+
 
     protected static function classInit()
         onDamageTrigger.addAction(function onDamageStatic)
@@ -65,15 +65,6 @@ public class Hero
                 //for i = 0 to 3
                     //hero.defaultCooldown[i] = BlzGetAbilityCooldown(hero.skillIds[i], hero.toUnit().getAbilityLevel(hero.skillIds[i]))
                 hero.updateCooldowns()
-                let copy = hero.heroCopy
-                let skill = GetLearnedSkill()
-                copy.unpause()
-                UnitModifySkillPoints(copy, 1)
-                copy.selectSkill(skill)
-                BlzUnitHideAbility(copy, skill, true)
-                copy.pause()
-
-            hideSecondaryHeroButtons()
 
         end))
         ..registerAnyUnitEvent(EVENT_PLAYER_HERO_SKILL)
@@ -82,8 +73,6 @@ public class Hero
     function setup()
         this.firstTeam = this.owner.getId() <= HERO_PLAYER_TEAM_1_LAST
         this.heroType = HeroType.getHeroType(this.hero.getTypeId())
-        ..updateTooltipsStr(this.hero)
-        ..updateTooltipsInt(this.hero)
         let upgradePlayer = owner.getPlayer()
 
         this.skillIds[0] = this.heroType.getAbilityId(AbilitySlot.Q)
@@ -106,25 +95,8 @@ public class Hero
         onDamageTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DAMAGED)
         onDeathTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DEATH)
         onLevelUpTrigger.registerUnitEvent(this.hero, EVENT_UNIT_HERO_LEVEL)
-
-        let copyPos = vec2(18000, 10000)
-        this.heroCopy = createUnit(this.owner.getPlayer(), this.heroType.getUnitId(), copyPos, angle(0))
-        doPeriodicallyTimed(0.3, 360000, cb -> (begin
-            this.heroCopy.setXp(this.hero.getXp(), false)
-            if this.hero.getLevel() == HERO_MAX_LEVEL
-                cb.stop()
-        end))
-        this.heroCopy.setXY(copyPos)
-        this.heroCopy.setSkillPoints(0)
-        this.heroCopy.removeAbility('Amov')
-        this.heroCopy.addAbility('Abun')
-
-        copyToHero.put(this.heroCopy, this)
-        this.heroCopy.hide()
-        this.heroCopy.pause()
             
         let wrapper = this.hero.wrapper()
-        let copyWrapper = this.heroCopy.wrapper()
 
         this.reviveTimer = getTimer()
         ..setData(this castTo int)
@@ -134,7 +106,6 @@ public class Hero
 
         if this.heroType.getBonusCalculation() != null
             wrapper.setBonusCalculation(this.heroType.getBonusCalculation())
-            copyWrapper.setBonusCalculation(wrapper.getBonusCalculation())
         //print("setup completed: "+this.hero.getName())
 
         if this.heroType.getUsesHeroGlow()
@@ -148,17 +119,12 @@ public class Hero
             end))
 
         wrapper.addStatAbsoluteBonus(Stat.MR, this.heroType.getBase(Stat.MR) * 1 )
-        copyWrapper.addStatAbsoluteBonus(Stat.MR, this.heroType.getBase(Stat.MR) * 1 )
         wrapper.addStatAbsoluteBonus(Stat.HR, this.heroType.getBase(Stat.HR) * 3 )
-        copyWrapper.addStatAbsoluteBonus(Stat.HR, this.heroType.getBase(Stat.HR) * 3 )
 
         wrapper.addStatAbsoluteBonus(Stat.HP, this.heroType.getBase(Stat.HP) * 15 + HP_PER_LEVEL )
-        copyWrapper.addStatAbsoluteBonus(Stat.HP, this.heroType.getBase(Stat.HP) * 15 + HP_PER_LEVEL )
         wrapper.addStatAbsoluteBonus(Stat.MP, this.heroType.getBase(Stat.MP) * 10 )
-        copyWrapper.addStatAbsoluteBonus(Stat.MP, this.heroType.getBase(Stat.MP) * 10 )
 
         wrapper.addStatAbsoluteBonus(Stat.MS, this.heroType.getBase(Stat.MS) )
-        copyWrapper.addStatAbsoluteBonus(Stat.MS, this.heroType.getBase(Stat.MS) )
 
         //upgrade level 1
         SetPlayerTechResearched(upgradePlayer, UPG_AR , this.heroType.getBase(Stat.AR))
@@ -171,19 +137,13 @@ public class Hero
         SetHeroAgi(this.hero, this.heroType.getBase(Stat.AGI), true)
         SetHeroInt(this.hero, this.heroType.getBase(Stat.INT), true)
 
-        SetHeroStr(this.heroCopy, this.heroType.getBase(Stat.STR) + STRENGTH_BONUS , true)
-        SetHeroAgi(this.heroCopy, this.heroType.getBase(Stat.AGI), true)
-        SetHeroInt(this.heroCopy, this.heroType.getBase(Stat.INT), true)
 
         
 
         wrapper.updateBaseStatsHero()
-        copyWrapper.copyBaseStatsFrom(wrapper)
 
         for int i = 0 to 10
             wrapper.updateTotalStatBonus(i castTo Stat)
-            copyWrapper.updateTotalStatBonus(i castTo Stat)
-
         if this.heroType.getOnCreateFunction() != null
             this.heroType.getOnCreateFunction().onCreate(this)
 
@@ -191,7 +151,7 @@ public class Hero
         this.heroType.updateTooltipsStr(this.hero)
         this.heroType.updateTooltipsInt(this.hero)
 
-        hideSecondaryHeroButtons()
+        this.tooltipUpdateTimer = getTimer()..setData(this castTo int)
 
 
     construct(CPlayer p, int unitId, vec2 pos, angle facing )
@@ -215,60 +175,44 @@ public class Hero
         int newLvl = GetHeroLevel(this.hero)
         player upgradePlayer = this.owner.getPlayer()
         let wrapper = this.hero.wrapper()
-        let copyWrapper = this.heroCopy.wrapper()
         SetPlayerTechResearched(upgradePlayer, UPG_AR , this.heroType.calculateStat(Stat.AR, newLvl))
         SetPlayerTechResearched(upgradePlayer, UPG_AS , this.heroType.calculateStat(Stat.AS, newLvl))
         
 
         wrapper.addStatAbsoluteBonus(Stat.HP, (this.heroType.calculateStat(Stat.HP, newLvl) - this.heroType.calculateStat(Stat.HP, this.level)) * 15 )
-        copyWrapper.addStatAbsoluteBonus(Stat.HP, (this.heroType.calculateStat(Stat.HP, newLvl) - this.heroType.calculateStat(Stat.HP, this.level)) * 15 )
         //upgrade bug
         //SetPlayerTechResearched(upgradePlayer, UPG_HP , this.heroType.calculateStat(Stat.HP, newLvl))
         //SetPlayerTechResearched(upgradePlayer, UPG_HR , this.heroType.calculateStat(Stat.HR, lvl))
         
         wrapper.addStatAbsoluteBonus(Stat.MP, (this.heroType.calculateStat(Stat.MP, newLvl) - this.heroType.calculateStat(Stat.MP, this.level)) * 10 )
-        copyWrapper.addStatAbsoluteBonus(Stat.MP, (this.heroType.calculateStat(Stat.MP, newLvl) - this.heroType.calculateStat(Stat.MP, this.level)) * 10 )
         //upgrade bug
         //SetPlayerTechResearched(upgradePlayer, UPG_MP , this.heroType.calculateStat(Stat.MP, newLvl))
         //SetPlayerTechResearched(upgradePlayer, UPG_MR , this.heroType.calculateStat(Stat.MR, lvl))
         
         wrapper.addStatAbsoluteBonus(Stat.MR, (this.heroType.calculateStat(Stat.MR, newLvl) - this.heroType.calculateStat(Stat.MR, this.level)) * 1 )
-        copyWrapper.addStatAbsoluteBonus(Stat.MR, (this.heroType.calculateStat(Stat.MR, newLvl) - this.heroType.calculateStat(Stat.MR, this.level)) * 1 )
         wrapper.addStatAbsoluteBonus(Stat.HR, (this.heroType.calculateStat(Stat.HR, newLvl) - this.heroType.calculateStat(Stat.HR, this.level)) * 3 )
-        copyWrapper.addStatAbsoluteBonus(Stat.HR, (this.heroType.calculateStat(Stat.HR, newLvl) - this.heroType.calculateStat(Stat.HR, this.level)) * 3 )
 
         wrapper.addStatAbsoluteBonus(Stat.HP, (newLvl - this.level) * HP_PER_LEVEL )
-        copyWrapper.addStatAbsoluteBonus(Stat.HP, (newLvl - this.level) * HP_PER_LEVEL )
 
         //SetPlayerTechResearched(upgradePlayer, UPG_MS , this.heroType.calculateStat(Stat.MS, newLvl))
         //this.hero.updateDefaultMovementSpeed()
 
         wrapper.addStatAbsoluteBonus(Stat.MS, this.heroType.calculateStat(Stat.MS, newLvl) - this.heroType.calculateStat(Stat.MS, this.level))
-        copyWrapper.addStatAbsoluteBonus(Stat.MS, this.heroType.calculateStat(Stat.MS, newLvl) - this.heroType.calculateStat(Stat.MS, this.level))
 
 
         SetHeroStr(this.hero, this.heroType.calculateStat(Stat.STR, newLvl) + STRENGTH_BONUS , true)
         SetHeroAgi(this.hero, this.heroType.calculateStat(Stat.AGI, newLvl), true)
         SetHeroInt(this.hero, this.heroType.calculateStat(Stat.INT, newLvl), true)
 
-        SetHeroStr(this.heroCopy, this.heroType.calculateStat(Stat.STR, newLvl) + STRENGTH_BONUS , true)
-        SetHeroAgi(this.heroCopy, this.heroType.calculateStat(Stat.AGI, newLvl), true)
-        SetHeroInt(this.heroCopy, this.heroType.calculateStat(Stat.INT, newLvl), true)
 
         wrapper.updateBaseStatsHero()
-        copyWrapper.copyBaseStatsFrom(wrapper)
 
         for int i = 0 to STAT_COUNT - 1
             wrapper.updateTotalStatBonus(i castTo Stat)
-            copyWrapper.updateTotalStatBonus(i castTo Stat)
 
         this.level = newLvl
 
-        hideSecondaryHeroButtons()
-        
     function onLevelUp()
-        this.heroCopy.setXp(this.hero.getXp(), false)
-        this.heroCopy.setSkillPoints(0)
         this.upgrade()
 
     static function onLevelUpStatic()
@@ -460,7 +404,6 @@ public class Hero
         doAfter(0.1) ->
             this.owner.addDeath()
 
-        hideSecondaryHeroButtons()
 
     static function onDeathStatic()
         unitToHero.get( GetTriggerUnit()).onDeath()
@@ -475,12 +418,6 @@ public class Hero
 
     function getLevel() returns int
         return this.level
-
-    function getCopy() returns unit
-        return this.heroCopy
-
-    static function getOriginal(unit u) returns Hero
-        return copyToHero.get(u)
 
     static function copyInventory(unit copyFrom, unit copyTo)
         for i = 0 to 5
@@ -522,15 +459,20 @@ public class Hero
     **  Changing cooldowns of morph abilities crashes the game, once they are used.
     */
     function updateCooldowns()
-        let heroUnit = this.hero
         /*
         for i = 0 to 3
             real newCd = (this.defaultCooldown[i]+this.cooldownMod[i]) / (1.0+0.01*heroUnit.wrapper().getStatTotalValue(Stat.CD))
             BlzSetUnitAbilityCooldown(heroUnit, skillIds[i], GetUnitAbilityLevel(heroUnit, skillIds[i]), newCd )  */
         
-        this.getHeroType()
-            ..updateTooltipsStr(heroUnit)
-            ..updateTooltipsInt(heroUnit)
+        /*
+            Tooltips do not need to be updated instantly. This serves as a cooldown to prevent lag spikes.
+        */
+        tooltipUpdateTimer.start(0.125) ->
+            let hero = GetExpiredTimer().getData() castTo Hero
+            let heroType = hero.getHeroType()
+            let heroUnit = hero.toUnit()
+            heroType.updateTooltipsStr(heroUnit)
+            heroType.updateTooltipsInt(heroUnit)
 
 function charToAbilitySlot(string char) returns AbilitySlot
     AbilitySlot ret = AbilitySlot.PASSIVE
