@@ -1,16 +1,14 @@
 package PathUnit
 
-import Path
-import TimerUtils
 import HashMap
-import GameTimer
 import ClosureTimers
-import UnitIndexer
 import Constants
-import initlater WaveSpawn
+import OnUnitEnterLeave
+import ErrorHandling
 
 constant SHOW_STATE_COLORS = false
-constant UPDATE_INTERVAL = 0.1
+constant UPDATE_INTERVAL = 2.0
+constant NUM_GROUPS = 8
 
 enum PathState
     HOME_TOWN
@@ -18,441 +16,245 @@ enum PathState
     PATH
     ENEMY_TOWN
 
-public function rect.contains(vec2 r, real tolerance)returns boolean
-    return r.x > this.getMinX()-tolerance and r.x < this.getMaxX()+tolerance and r.y > this.getMinY()-tolerance and r.y < this.getMaxY()+tolerance
+constant DISTANCE_THRESHOLD = 360000 // squared
 
-public class PathUnit 
+constant TOP_X_THRESHOLD = -920.0
+constant TOP_Y_THRESHOLD = 4840.0
+constant BOT_X_THRESHOLD = 5030.0
+constant BOT_Y_THRESHOLD = -810.0
 
-    static int operations = 0
-    static int moveOrders = 0
-    static int instances = 0
-    static HashMap<unit,PathUnit> unitToPathUnit = new HashMap<unit,PathUnit>
-    static group pathUnits = CreateGroup()
-    static real gameTime
-    static trigger onAttackTrigger = CreateTrigger()
-    unit assocUnit
-    Path currentPath
-    int currentSubPath
-    static timer periodicTimer = getTimer()
-    private real nextUpdate
-    private real lastAttack
-    private PathState pathState
-    private rect returnRect = null
+public enum AssignedPath
+    GREEN_TOP
+    GREEN_MID
+    GREEN_BOT
+    BROWN_TOP
+    BROWN_MID
+    BROWN_BOT
 
-    boolean checkEnter = false
-    boolean firstTeam
-    rect homeRect
-    rect targetRect
+enum PathStateNew
+    ATTACK_MOVE
+    RETURN_MOVE
+    PASSIVE_MOVE
+    SIEGE_MOVE
 
-    boolean atHome = true
-    boolean atEnemy = false
-
-    function setPathState(PathState newState)
-        this.pathState = newState
-        if SHOW_STATE_COLORS
-            if newState == PathState.HOME_TOWN
-                this.assocUnit.setVertexColor(100,255,100,255)
-            else if newState == PathState.RETURNING
-                this.assocUnit.setVertexColor(100,100,255,255)
-            else if newState == PathState.PATH
-                this.assocUnit.setVertexColor(255,255,255,255)
-            else if newState == PathState.ENEMY_TOWN
-                this.assocUnit.setVertexColor(255,100,100,255)
-
-    static function classInit()
-        periodicTimer.startPeriodic(UPDATE_INTERVAL, function updateMovementStatic)
-        doPeriodically(1, (CallbackPeriodic cb) -> (begin
-            //print("["+instances.toString()+"]orders: "+moveOrders.toString())
-            operations = 0
-            moveOrders = 0
-        end))
-        onUnitDeindex(function onRemove)
-        onAttackTrigger.registerAnyUnitEvent(EVENT_PLAYER_UNIT_ATTACKED)
-        onAttackTrigger.addAction(function onAttackStatic)
-
-
-        /*region brownBase = CreateRegion()
-            ..addRect(gg_rct_BrownBase)
-        region greenBase = CreateRegion()
-            ..addRect(gg_rct_GreenBase) 
-
-        region brownHome = CreateRegion()
-            ..addRect(gg_rct_BrownTopHome)
-            ..addRect(gg_rct_BrownMidHome)
-            ..addRect(gg_rct_BrownBotHome)
-
-        region greenHome = CreateRegion()
-            ..addRect(gg_rct_GreenTopHome)
-            ..addRect(gg_rct_GreenMidHome)
-            ..addRect(gg_rct_GreenBotHome)*/
-
-        /*CreateTrigger()
-            ..registerEnterRegion(brownBase, null)
-            ..addAction(function onBaseEnterBrown)
-        CreateTrigger()
-            ..registerLeaveRegion(brownBase, null)
-            ..addAction(function onBaseLeaveBrown)
-
-        CreateTrigger()
-            ..registerEnterRegion(greenBase, null)
-            ..addAction(function onBaseEnterGreen)
-        CreateTrigger()
-            ..registerLeaveRegion(greenBase, null)
-            ..addAction(function onBaseLeaveGreen)*/
-
-        /*CreateTrigger()
-            ..registerEnterRegion(brownHome, null)
-            ..addAction(function onReturnBrown)
-        CreateTrigger()
-            ..registerEnterRegion(greenHome, null)
-            ..addAction(function onReturnGreen)*/
-
-        CreateTrigger()
-            ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
-            ..addAction(function onDeath)
-
-
-    //prepares a unit to be able to use paths
-    construct(unit u)
-        objectCount++
-        if(unitToPathUnit.has(u))
-            print("Warning! - "+u.getName()+" is already a PathUnit.")
-            destroy(this)
+function getPathStage(AssignedPath path, vec2 pos) returns int
+    if path == GREEN_TOP or path == BROWN_TOP
+        if pos.y < TOP_Y_THRESHOLD
+            return 1
+        else if pos.x > TOP_X_THRESHOLD
+            return 3
         else
-            this.firstTeam = u.getOwner() == players[TEAM_PLAYER_TEAM_1]
-            this.homeRect = firstTeam ? gg_rct_GreenBase : gg_rct_BrownBase
-            this.targetRect = firstTeam ? gg_rct_BrownBase : gg_rct_GreenBase
-            this.assocUnit = u
-            this.currentPath = null
-            this.currentSubPath = 0
-            unitToPathUnit.put(this.assocUnit, this)
-            pathUnits.addUnit(this.assocUnit)
-            this.nextUpdate = getElapsedGameTime() + GetRandomReal(0, 0.1)
-            this.lastAttack = 0
+            return 2
+    if path == GREEN_BOT or path == BROWN_BOT
+        if pos.x < BOT_X_THRESHOLD
+            return 5
+        else if pos.y > BOT_Y_THRESHOLD
+            return 7
+        else
+            return 6
+    if path == GREEN_MID or path == BROWN_MID
+        return 4
 
-            this.setPathState(PathState.HOME_TOWN)
+    error("no matching path")
 
-            
-            doAfter(0, () -> (this.enableEnterCheck()  ) )
+    return 0
 
-            instances++
+group array attackMoveGroup
+group array returnMoveGroup
+group array passiveMoveGroup
+group array siegeMoveGroup
 
-    function enableEnterCheck()
-        this.checkEnter = true
+vec2 array targetPoint
+vec2 array finalPoint
 
-    static function onRemove()
-        let removedPathUnit = unitToPathUnit.get(getIndexingUnit())
-        if(removedPathUnit!=null)
-            destroy removedPathUnit
+function initTargetPoints()
+    targetPoint[2] = gg_rct_GreenCastle.getCenter()
+    targetPoint[3] = gg_rct_CornerTopGreen.getCenter() + vec2(0, 500)
+    targetPoint[4] = gg_rct_CornerTopGreen.getCenter()
+    targetPoint[5] = gg_rct_CornerTopBrown.getCenter()
+    targetPoint[6] = gg_rct_CornerTopBrown.getCenter() + vec2(-500, 0)
+    targetPoint[7] = gg_rct_BrownCastle.getCenter()
 
-    static function onDeath()
-        let removedPathUnit = unitToPathUnit.get(GetTriggerUnit())
-        if(removedPathUnit!=null)
-            destroy removedPathUnit   
+    targetPoint[8] = gg_rct_GreenCastle.getCenter()
+    targetPoint[9] = gg_rct_BrownCastle.getCenter()
+
+    targetPoint[10] = gg_rct_GreenCastle.getCenter()
+    targetPoint[11] = gg_rct_CornerBotGreen.getCenter() + vec2(500, 0)
+    targetPoint[12] = gg_rct_CornerBotGreen.getCenter()
+    targetPoint[13] = gg_rct_CornerBotBrown.getCenter()
+    targetPoint[14] = gg_rct_CornerBotBrown.getCenter() + vec2(0, -500)
+    targetPoint[15] = gg_rct_BrownCastle.getCenter()
+
+    finalPoint[TEAM_PLAYER_TEAM_1] = gg_rct_BrownCastle.getCenter()
+    finalPoint[TEAM_PLAYER_TEAM_2] = gg_rct_GreenCastle.getCenter()
+
+function attackMoveGroup()
+    let u = GetEnumUnit()
+    let pathUnit = PathUnitNew.unitToPathUnit.get(u)
+    if pathUnit == null
+        return
+    let pos = u.getPos()
+    let stage = getPathStage(pathUnit.path, pos)
+    let dist = pos.distanceToSegmentSq(targetPoint[stage*2], targetPoint[stage*2+1])
+    let index = pathUnit.index
+
+    if dist <= DISTANCE_THRESHOLD
+        pathUnit.lastValidPos = pos
+        if pathUnit.direction
+            if gg_rct_BrownBase.contains(pos)
+                pathUnit.state = PathStateNew.SIEGE_MOVE
+                attackMoveGroup[index].removeUnit(u)
+                siegeMoveGroup[index].addUnit(u)
+
+            if not pathUnit.attacking
+                u.issuePointOrder("attack", targetPoint[stage*2+1])
+            else
+                pathUnit.attacking = false
+        else
+            if gg_rct_GreenBase.contains(pos)
+                pathUnit.state = PathStateNew.SIEGE_MOVE
+                attackMoveGroup[index].removeUnit(u)
+                siegeMoveGroup[index].addUnit(u)
+
+            if not pathUnit.attacking
+                u.issuePointOrder("attack", targetPoint[stage*2])
+            else
+                pathUnit.attacking = false
+    else
+        if pathUnit.direction
+            u.issuePointOrder("move", targetPoint[stage*2+1])
+        else
+            u.issuePointOrder("move", targetPoint[stage*2])
+        pathUnit.state = PathStateNew.RETURN_MOVE
+        attackMoveGroup[index].removeUnit(u)
+        returnMoveGroup[index].addUnit(u)
+
+
+
+function returnMoveGroup()
+    let u = GetEnumUnit()
+    let pathUnit = PathUnitNew.unitToPathUnit.get(u)
+    if pathUnit == null
+        return
+    let pos = u.getPos()
+    let stage = getPathStage(pathUnit.path, pos)
+    let dist = pos.distanceToSegmentSq(targetPoint[stage*2], targetPoint[stage*2+1])
+    let index = pathUnit.index
+
+    if dist <= DISTANCE_THRESHOLD
+        pathUnit.lastValidPos = pos
+        if pathUnit.direction
+            if gg_rct_BrownBase.contains(pos)
+                pathUnit.state = PathStateNew.SIEGE_MOVE
+                returnMoveGroup[index].removeUnit(u)
+                siegeMoveGroup[index].addUnit(u)
+            else
+                returnMoveGroup[index].removeUnit(u)
+                attackMoveGroup[index].addUnit(u)
+            u.issuePointOrder("attack", targetPoint[stage*2+1])
+        else
+            if gg_rct_GreenBase.contains(pos)
+                pathUnit.state = PathStateNew.SIEGE_MOVE
+                returnMoveGroup[index].removeUnit(u)
+                siegeMoveGroup[index].addUnit(u)
+            else
+                pathUnit.state = PathStateNew.ATTACK_MOVE
+                returnMoveGroup[index].removeUnit(u)
+                attackMoveGroup[index].addUnit(u)
+            u.issuePointOrder("attack", targetPoint[stage*2])
+    else
+        if pathUnit.direction
+            u.issuePointOrder("move", targetPoint[stage*2+1])
+        else
+            u.issuePointOrder("move", targetPoint[stage*2])
+
+function passiveMoveGroup()
+
+function siegeMoveGroup()
+    let u = GetEnumUnit()
+    let pathUnit = PathUnitNew.unitToPathUnit.get(u)
+    if pathUnit == null
+        return
+    if not pathUnit.attacking
+        u.issuePointOrder("attack", finalPoint[u.getOwner().getId()])
+    else
+        pathUnit.attacking = false
+
+function initMovement()
+    for i = 0 to NUM_GROUPS - 1
+        attackMoveGroup[i] = CreateGroup()
+        returnMoveGroup[i] = CreateGroup()
+        passiveMoveGroup[i] = CreateGroup()
+        siegeMoveGroup[i] = CreateGroup()
+
+        doAfter(UPDATE_INTERVAL*(i/NUM_GROUPS)) () ->
+            doPeriodically(UPDATE_INTERVAL) (CallbackPeriodic cb) ->
+                string sizeString = "group sizes: " + 
+                    attackMoveGroup[i].size().toString() + ", " +
+                    returnMoveGroup[i].size().toString() + ", " +
+                    passiveMoveGroup[i].size().toString() + ", " +
+                    siegeMoveGroup[i].size().toString()
+                print("[" + i.toString() + "] " + sizeString)
+                ForGroup(attackMoveGroup[i], function attackMoveGroup)
+                ForGroup(returnMoveGroup[i], function returnMoveGroup)
+                ForGroup(passiveMoveGroup[i], function passiveMoveGroup)
+                ForGroup(siegeMoveGroup[i], function siegeMoveGroup)
+
+    onLeave() ->
+        let u = getEnterLeaveUnit()
+        let pathUnit = PathUnitNew.unitToPathUnit.get(u)
+        if pathUnit != null
+            let index = pathUnit.index
+            attackMoveGroup[index].removeUnit(u)
+            returnMoveGroup[index].removeUnit(u)
+            passiveMoveGroup[index].removeUnit(u)
+            siegeMoveGroup[index].removeUnit(u)
+            destroy pathUnit
+
+
+
+public class PathUnitNew
+
+    protected int index
+    protected unit whichUnit
+    protected AssignedPath path
+    protected PathStateNew state
+    protected vec2 lastValidPos
+    protected static constant unitToPathUnit = new HashMap<unit,PathUnitNew>
+    protected bool direction
+    protected bool attacking = false
+
+    construct(unit whichUnit, AssignedPath path)
+        this.index = (this castTo int) mod NUM_GROUPS
+        this.whichUnit = whichUnit
+        this.path = path
+        this.state = PathStateNew.ATTACK_MOVE
+        
+        let stage = getPathStage(path, whichUnit.getPos())
+        attackMoveGroup[this.index].addUnit(whichUnit)
+        unitToPathUnit.put(whichUnit, this)
+        this.direction = path == AssignedPath.GREEN_TOP or path == AssignedPath.GREEN_MID or path == AssignedPath.GREEN_BOT
+        if this.direction
+            whichUnit.issuePointOrder("attack", targetPoint[stage*2+1])
+            this.lastValidPos = targetPoint[stage*2]
+        else
+            whichUnit.issuePointOrder("attack", targetPoint[stage*2])
+            this.lastValidPos = targetPoint[stage*2+1]
 
     ondestroy
-        if this.currentPath == GREEN_TOP
-            addLaneUnitCount(Team.TEAM1, Lane.TOP, -1)
-            team1Units.remove(this.assocUnit)
-        else if this.currentPath == GREEN_MID
-            addLaneUnitCount(Team.TEAM1, Lane.MID, -1)
-            team1Units.remove(this.assocUnit)
-        else if this.currentPath == GREEN_BOT
-            addLaneUnitCount(Team.TEAM1, Lane.BOT, -1)
-            team1Units.remove(this.assocUnit)
-        else if this.currentPath == BROWN_TOP
-            addLaneUnitCount(Team.TEAM2, Lane.TOP, -1)
-            team2Units.remove(this.assocUnit)
-        else if this.currentPath == BROWN_MID
-            addLaneUnitCount(Team.TEAM2, Lane.MID, -1)
-            team2Units.remove(this.assocUnit)
-        else if this.currentPath == BROWN_BOT
-            addLaneUnitCount(Team.TEAM2, Lane.BOT, -1)
-            team2Units.remove(this.assocUnit)
-
-        objectCount--
-        unitToPathUnit.remove(this.assocUnit)
-        pathUnits.removeUnit(this.assocUnit)
-        instances--
-
-    function setPath(Path p)
-        this.currentPath = p
-
-        if this.currentPath == GREEN_TOP
-            returnRect = gg_rct_GreenTopHome
-        else if this.currentPath == BROWN_TOP
-            returnRect = gg_rct_BrownTopHome
-        else if this.currentPath == GREEN_MID 
-            returnRect = gg_rct_GreenMidHome
-        else if this.currentPath == BROWN_MID
-            returnRect = gg_rct_BrownMidHome
-        else if this.currentPath == GREEN_BOT
-            returnRect = gg_rct_GreenBotHome      
-        else if this.currentPath == BROWN_BOT
-            returnRect = gg_rct_BrownBotHome
-
-    function setPathFirst(Path p)
-        this.setPath(p)
-        this.assocUnit.issuePointOrder("attack", p.getStartTargetPos())
-        this.nextUpdate = gameTime + 15
-
-
-        
-    function getNextUpdate() returns real
-        return GetRandomReal(1.1, 1.9)
-
-    static function onAttackStatic()
-        PathUnit pathUnit = unitToPathUnit.get(GetAttacker())
-        if( pathUnit!=null)
-            pathUnit.lastAttack = getElapsedGameTime()
-
-        pathUnit = unitToPathUnit.get(GetTriggerUnit())
-        if( pathUnit!=null and GetAttacker().isType(UNIT_TYPE_STRUCTURE))
-            pathUnit.nextUpdate = getElapsedGameTime()+4
-            if(pathUnit.assocUnit.getCurrentOrder()!=OrderId("attack"))
-                pathUnit.assocUnit.issuePointOrder("attack", pathUnit.assocUnit.getPos())
-                moveOrders++
-
-        
-
-    function updateMovement()
-        //print("updateMovement "+this.assocUnit.getName() + " " +this.assocUnit.getHandleId().toString() )
-        if assocUnit == null
-            destroy this
-        else
-        
-            this.nextUpdate = gameTime + this.getNextUpdate()
-
-            if currentPath != null
-        
-
-                //print("continue")
-
-                if this.pathState == PathState.PATH
-                    vec2 v0 = vec2(assocUnit.getX(), assocUnit.getY())
-                    vec2 v1
-                    vec2 v2
-                    real minDistance = -1
-                    int newSubPath = -1
-                    int moveSubPath
-
-
-                    //print(this.currentPath.getSubPathCount()-2)
-                    for i=this.currentSubPath to this.currentPath.getSubPathCount()-2
-
-                        v1 = vec2(this.currentPath.getSubPathX(i), this.currentPath.getSubPathY(i))
-                        //print("v1="+v1.toString())
-                        v2 = vec2(this.currentPath.getSubPathX(i+1), this.currentPath.getSubPathY(i+1))
-                        //print("v2="+v2.toString())
-                        real distance = v0.distanceToSegmentSq(v1, v2).pow(0.5)
-                        //print("["+i.toString()+"] distance="+distance.toString())
-                        //print("minDistance="+minDistance.toString())
-                        if(distance <= minDistance+200 or minDistance==-1)
-                            minDistance = distance
-                            newSubPath = i
-                        //if a subpath is far away, there won't come any close subpathes anymore
-                        if distance>3000 or minDistance<100
-                            break
-                    int newOrder
-                    //string currentOrder =  OrderId2String(this.assocUnit.getCurrentOrder())
-                
-                    //print(minDistance)
-                    
-                    //print(currentOrder)
-
-                    //move two subpathes forward
-                    if(newSubPath+2<=this.currentPath.getSubPathCount()-1)
-                        moveSubPath = newSubPath+2
-                    else
-                        moveSubPath = newSubPath+1
-
-                    v2 = vec2(this.currentPath.getSubPathX(moveSubPath), this.currentPath.getSubPathY(moveSubPath))
-
-                    //addEffect("Abilities\\Weapons\\FarseerMissile\\FarseerMissile.mdl", v2)
-
-                    //print("path: "+this.currentSubPath.toString()+" -> "+newSubPath.toString()+" -> "+moveSubPath.toString())
-
-                    if(minDistance>900)
-                        newOrder = 1
-                    else
-                        newOrder = 2
-
-                    this.currentSubPath = newSubPath
-
-                    //order:
-                        //0 = do nothing
-                        //1 = move back
-                        //2 = continue move
-
-
-                    group nearby = CreateGroup()
-                    nearby.enumUnitsInRange(v0, 500)
-                    
-                    
-
-                    while(true)
-                        unit n = nearby.next()
-                        if(n==null)
-                            break
-                        nearby.removeUnit(n)
-                        if(unitToPathUnit.has(n))
-                            PathUnit nearbyPathUnit = unitToPathUnit.get(n)
-
-                            if(nearbyPathUnit.currentPath == this.currentPath and (nearbyPathUnit.nextUpdate<gameTime or nearbyPathUnit == this) )
-                                
-
-                                if newOrder==1
-                                    n.issuePointOrder("move", v2)
-                                    //print("move back?")
-                                    moveOrders++
-                                    nearbyPathUnit.nextUpdate = gameTime + this.getNextUpdate()
-                                else
-                                    if(gameTime-nearbyPathUnit.lastAttack > 2)
-                                        n.issuePointOrder("attack", v2)
-                                        moveOrders++
-                                        nearbyPathUnit.nextUpdate = gameTime + this.getNextUpdate()
-                                    else
-                                        nearbyPathUnit.nextUpdate = gameTime + this.getNextUpdate()
-
-                                
-                        
-                    nearby.destr()
-                else if this.pathState == PathState.ENEMY_TOWN
-                    if this.assocUnit.getOwner() == players[TEAM_PLAYER_TEAM_1]
-                        this.assocUnit.issuePointOrder("attack", gg_rct_BrownCastle.getCenter())
-                    else if this.assocUnit.getOwner() == players[TEAM_PLAYER_TEAM_2]
-                        this.assocUnit.issuePointOrder("attack", gg_rct_GreenCastle.getCenter())
-                else if this.pathState == PathState.HOME_TOWN
-                    this.assocUnit.issuePointOrder("attack", this.returnRect.getCenter())          
-                else if this.pathState == PathState.RETURNING
-                    this.assocUnit.issuePointOrder("move", this.returnRect.getCenter())          
-                                
-    static function updateMovementGroup()
-        var pU = PathUnit.unitToPathUnit.get(GetEnumUnit())
-
-        if pU.checkEnter
-            if (pU.pathState == PathState.RETURNING or pU.pathState == PathState.HOME_TOWN)
-                if pU.returnRect.contains(pU.assocUnit.getPos(), 64)
-                    pU.setPathState(PathState.PATH)
-                    pU.nextUpdate = 0
-
-        
-            if not pU.atEnemy and pU.targetRect.contains(pU.assocUnit.getPos())
-                pU.atEnemy = true
-                if pU.pathState == PathState.PATH
-                    pU.setPathState(PathState.ENEMY_TOWN)
-                    pU.nextUpdate = gameTime + 1000
-                    //print(pU.assocUnit.getName()+" enter enemy base")
-                    if pU.firstTeam
-                        pU.assocUnit.issuePointOrder("attack", gg_rct_BrownCastle.getRightTop())
-                    else
-                        pU.assocUnit.issuePointOrder("attack", gg_rct_GreenCastle.getLeftBot())     
-                
-            if pU.atHome and not pU.homeRect.contains(pU.assocUnit.getPos())
-                pU.atHome = false
-                if pU.pathState == PathState.HOME_TOWN
-                    pU.nextUpdate = gameTime + 0.5
-                    pU.setPathState(PathState.RETURNING)
-                    //print(pU.assocUnit.getName()+" leave home base")
-                    if pU.returnRect != null
-                        if pU.returnRect.contains(pU.assocUnit.getPos())
-                            pU.setPathState(PathState.PATH)
-                        else
-                            pU.assocUnit.issuePointOrder("move", pU.returnRect.getCenter())
-
-        if(pU.nextUpdate<gameTime)
-            operations++
-            pU.updateMovement()
-
-    static function updateMovementStatic()
-        gameTime = getElapsedGameTime()
-        ForGroup(pathUnits, function updateMovementGroup)
-
-    
-    
-    function onBaseLeave()
-        this.nextUpdate = gameTime + 0.5
-        this.setPathState(PathState.RETURNING)
-        
-
-        if this.returnRect != null
-            if this.returnRect.contains(this.assocUnit.getPos())
-                this.setPathState(PathState.PATH)
-            else
-                this.assocUnit.issuePointOrder("move", this.returnRect.getCenter())
-
-    function onBaseEnter()
-        this.setPathState(PathState.ENEMY_TOWN)
-        this.nextUpdate = gameTime + 1000
-        if this.assocUnit.getOwner() == players[TEAM_PLAYER_TEAM_1]
-            this.assocUnit.issuePointOrder("attack", gg_rct_BrownCastle.getRightTop())
-        else
-            this.assocUnit.issuePointOrder("attack", gg_rct_GreenCastle.getLeftBot())
-
-    //A path unit enters the enemy base
-    static function onBaseEnterGreen()
-        let u = GetTriggerUnit()
-        if u.getOwner() == players[TEAM_PLAYER_TEAM_2]
-            let pathUnit = unitToPathUnit.get(u)
-            if pathUnit != null and pathUnit.checkEnter == true and pathUnit.pathState == PathState.PATH
-                pathUnit.onBaseEnter()
-                //print("onBaseEnterGreen")
-
-    static function onBaseEnterBrown()
-        let u = GetTriggerUnit()
-        if u.getOwner() == players[TEAM_PLAYER_TEAM_1]
-            let pathUnit = unitToPathUnit.get(u)
-            if pathUnit != null and pathUnit.checkEnter == true and pathUnit.pathState == PathState.PATH
-                pathUnit.onBaseEnter()
-                //print("onBaseEnterBrown")
-
-    //A path unit leaves its own base
-
-    static function onBaseLeaveGreen()
-        let u = GetTriggerUnit()
-        if u.getOwner() == players[TEAM_PLAYER_TEAM_1]
-            let pathUnit = unitToPathUnit.get(u)
-            if pathUnit != null and pathUnit.checkEnter == true and pathUnit.pathState == PathState.HOME_TOWN
-                pathUnit.onBaseLeave()
-                //print("onBaseLeaveGreen")
-
-
-    static function onBaseLeaveBrown()
-        let u = GetTriggerUnit()
-        if u.getOwner() == players[TEAM_PLAYER_TEAM_2]
-            let pathUnit = unitToPathUnit.get(u)
-            if pathUnit != null and pathUnit.checkEnter == true and pathUnit.pathState == PathState.HOME_TOWN
-                pathUnit.onBaseLeave()
-                //print("onBaseLeaveBrown")
-
-    /*static function onReturnGreen()
-        let u = GetTriggerUnit()
-        if u.getOwner() == players[TEAM_PLAYER_TEAM_1]
-            let pathUnit = unitToPathUnit.get(u)
-            if pathUnit.currentPath == GREEN_MID
-                //print("green leaves mid")
-            if pathUnit != null and pathUnit.checkEnter == true and (pathUnit.pathState == PathState.RETURNING or pathUnit.pathState == PathState.HOME_TOWN)
-                if pathUnit.returnRect.contains(pathUnit.assocUnit.getPos(), 64)
-                    pathUnit.setPathState(PathState.PATH)
-                    pathUnit.nextUpdate = 0
-                    //print("green -> true")
-                else
-                    //print("green -> wrong")
-
-    static function onReturnBrown()
-        let u = GetTriggerUnit()
-        if u.getOwner() == players[TEAM_PLAYER_TEAM_2]
-            let pathUnit = unitToPathUnit.get(u)
-            if pathUnit != null and pathUnit.checkEnter == true and (pathUnit.pathState == PathState.RETURNING or pathUnit.pathState == PathState.HOME_TOWN)
-                if pathUnit.returnRect.contains(pathUnit.assocUnit.getPos(), 64)
-                    pathUnit.setPathState(PathState.PATH)
-                    pathUnit.nextUpdate = 0
-                    //print("brown -> true")
-                else
-                    //print("brown -> wrong")*/
+        unitToPathUnit.remove(this.whichUnit)
 
 
 
-        
 init
-    PathUnit.classInit()
+    initTargetPoints()
+    initMovement()
+    doAfter(1) () ->
+        FogEnableOff()
+        FogMaskEnableOff()
+
+    CreateTrigger()..registerAnyUnitEvent(EVENT_PLAYER_UNIT_ATTACKED)..addAction() ->
+        let u = GetAttacker()
+        let pathUnit = PathUnitNew.unitToPathUnit.get(u)
+        if pathUnit != null
+            pathUnit.attacking = true
