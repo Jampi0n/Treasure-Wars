@@ -6,7 +6,6 @@ import ClosureTimers
 import initlater WaveSpawn
 import initlater UnitTypeConfig
 import PathUnit
-import Path
 import General
 import BuffTypeConfig
 import UnitWrapper
@@ -352,47 +351,31 @@ function onBuildingAbility()
 		SOUND_SIEGE_ENGINE.playOnPoint(heroPos).snd.setVolume(150)
 		if building == udg_GreenWorkShop[0]
 			let spawnedUnit = spawnUnit(true, TANK, gg_rct_GreenWorkShopTop.getCenter())
-			let pathUnit = new PathUnit(spawnedUnit)
-			pathUnit.setPathFirst(GREEN_TOP)
-			addLaneUnitCount(Team.TEAM1, Lane.TOP, 1)
+			new PathUnitNew(spawnedUnit, AssignedPath.GREEN_TOP)
 		else if building == udg_GreenWorkShop[1]
 			let spawnedUnit = spawnUnit(true, TANK, gg_rct_GreenWorkShopBot.getCenter())
-			let pathUnit = new PathUnit(spawnedUnit)
-			pathUnit.setPathFirst(GREEN_BOT)
-			addLaneUnitCount(Team.TEAM1, Lane.BOT, 1)
+			new PathUnitNew(spawnedUnit, AssignedPath.GREEN_BOT)
 		else if building == udg_BrownWorkShop[0]
 			let spawnedUnit = spawnUnit(false, TANK, gg_rct_BrownWorkShopTop.getCenter())
-			let pathUnit = new PathUnit(spawnedUnit)
-			pathUnit.setPathFirst(BROWN_TOP)
-			addLaneUnitCount(Team.TEAM2, Lane.TOP, 1)
+			new PathUnitNew(spawnedUnit, AssignedPath.BROWN_TOP)
 		else if building == udg_BrownWorkShop[1]
 			let spawnedUnit = spawnUnit(false, TANK, gg_rct_BrownWorkShopBot.getCenter())
-			let pathUnit = new PathUnit(spawnedUnit)
-			pathUnit.setPathFirst(BROWN_BOT)
-			addLaneUnitCount(Team.TEAM2, Lane.BOT, 1)
+			new PathUnitNew(spawnedUnit, AssignedPath.BROWN_BOT)
 
 	else if itemTypeId == 'I007' //Mortar Team
 		SOUND_MORTAR_TEAM.playOnPoint(heroPos).snd.setVolume(150)
 		if building == udg_GreenWorkShop[0]
 			let spawnedUnit = spawnUnit(true, MORTAR_TEAM, gg_rct_GreenWorkShopTop.getCenter())
-			let pathUnit = new PathUnit(spawnedUnit)
-			pathUnit.setPathFirst(GREEN_TOP)
-			addLaneUnitCount(Team.TEAM1, Lane.TOP, 1)
+			new PathUnitNew(spawnedUnit, AssignedPath.GREEN_TOP)
 		else if building == udg_GreenWorkShop[1]
 			let spawnedUnit = spawnUnit(true, MORTAR_TEAM, gg_rct_GreenWorkShopBot.getCenter())
-			let pathUnit = new PathUnit(spawnedUnit)
-			pathUnit.setPathFirst(GREEN_BOT)
-			addLaneUnitCount(Team.TEAM1, Lane.BOT, 1)
+			new PathUnitNew(spawnedUnit, AssignedPath.GREEN_BOT)
 		else if building == udg_BrownWorkShop[0]
 			let spawnedUnit = spawnUnit(false, MORTAR_TEAM, gg_rct_BrownWorkShopTop.getCenter())
-			let pathUnit = new PathUnit(spawnedUnit)
-			pathUnit.setPathFirst(BROWN_TOP)
-			addLaneUnitCount(Team.TEAM2, Lane.TOP, 1)
+			new PathUnitNew(spawnedUnit, AssignedPath.BROWN_TOP)
 		else if building == udg_BrownWorkShop[1]
 			let spawnedUnit = spawnUnit(false, MORTAR_TEAM, gg_rct_BrownWorkShopBot.getCenter())
-			let pathUnit = new PathUnit(spawnedUnit)
-			pathUnit.setPathFirst(BROWN_BOT)
-			addLaneUnitCount(Team.TEAM2, Lane.BOT, 1)
+			new PathUnitNew(spawnedUnit, AssignedPath.BROWN_BOT)
 		
 
 	else if itemTypeId == 'I002' //Melee Attack
