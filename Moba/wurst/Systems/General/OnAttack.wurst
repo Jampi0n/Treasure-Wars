@@ -35,12 +35,6 @@ public function unit.dealDamageNoEvent(unit target, real amount, ReductionType r
     this.dealDamage(target, amount, reductionType)
     enableDamageDetect()
 
-/*function unitSetAfterLife()
-    if prevenDeathUnit != null
-        prevenDeathUnit.removeAbility(PREVENT_DEATH)
-        prevenDeathUnit.setHP(prevenDeathAfterLife)
-        print("now set hp of "+prevenDeathUnit.getName()+" to "+prevenDeathAfterLife.toString())
-        prevenDeathUnit = null*/
 
 /*
 **
@@ -294,7 +288,7 @@ public class OnAttack
 
         countEvents++
         if countEvents > 1000
-            print("Warning. Very high number of damage events per second: "+countEvents.toString())
+            Log.warn("Warning. Very high number of damage events per second: "+countEvents.toString())
 
         if(localTarget.hasAbility('B005')) or localAttacker.getTypeId() == MORTAR_TEAM //passive
             localTarget.removeAbility('B005')

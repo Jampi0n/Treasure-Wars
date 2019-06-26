@@ -279,7 +279,7 @@ public class ScoreTable
 
     static function display()
     
-        print("displaying score")
+        Log.trace("displaying score")
         mBoard.display(true)
 
     static function create()
