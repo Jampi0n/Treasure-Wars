@@ -22,7 +22,8 @@ public class Hero
 
     static constant assistDuration = 10.
 
-    private CPlayer owner
+    private player owner
+    private int ownerId
     private HeroType heroType
     private unit hero
     private integer level
@@ -31,9 +32,9 @@ public class Hero
     private static constant onLevelUpTrigger = CreateTrigger()
     private static string array assistName
     //protected static Hero array heroes
-    private static constant unitToHero = new HashMap<unit,Hero>
-    private constant assistMap = new HashMap<player,real>
-    private player lastAssistant = null
+    private static constant unitToHero = new HashMap<unit, Hero>
+    private constant assistMap = new HashMap<int, real>
+    private int lastAssistant = -1
     private timer reviveTimer
     private timerdialog reviveWindow
     private boolean firstTeam
@@ -71,9 +72,8 @@ public class Hero
 
 
     function setup()
-        this.firstTeam = this.owner.getId() <= HERO_PLAYER_TEAM_1_LAST
+        this.firstTeam = PlayerWrapper.getTeam(this.ownerId) == TEAM_1
         this.heroType = HeroType.getHeroType(this.hero.getTypeId())
-        let upgradePlayer = owner.getPlayer()
 
         this.skillIds[0] = this.heroType.getAbilityId(AbilitySlot.Q)
         this.skillIds[1] = this.heroType.getAbilityId(AbilitySlot.W)
@@ -90,7 +90,7 @@ public class Hero
         
         unitToHero.put(this.hero, this)
         //heroes[this.owner.getId()] = this
-        this.owner.addHero(this)
+        PlayerWrapper.addHero(this.ownerId, this)
 
         onDamageTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DAMAGED)
         onDeathTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DEATH)
@@ -102,7 +102,7 @@ public class Hero
         ..setData(this castTo int)
         this.reviveWindow = CreateTimerDialog(this.reviveTimer)
         TimerDialogDisplay(this.reviveWindow, false)
-        TimerDialogSetTitle(this.reviveWindow, this.owner.getPlayer().getFullColoredName())
+        TimerDialogSetTitle(this.reviveWindow, this.owner.getFullColoredName())
 
         if this.heroType.getBonusCalculation() != null
             wrapper.setBonusCalculation(this.heroType.getBonusCalculation())
@@ -126,8 +126,8 @@ public class Hero
         wrapper.addStatAbsoluteBonus(Stat.MS, this.heroType.getBase(Stat.MS) )
 
         //upgrade level 1
-        SetPlayerTechResearched(upgradePlayer, UPG_AR , this.heroType.getBase(Stat.AR))
-        SetPlayerTechResearched(upgradePlayer, UPG_AS , this.heroType.getBase(Stat.AS))
+        SetPlayerTechResearched(this.owner, UPG_AR , this.heroType.getBase(Stat.AR))
+        SetPlayerTechResearched(this.owner, UPG_AS , this.heroType.getBase(Stat.AS))
 
         //SetPlayerTechResearched(upgradePlayer, UPG_MS , this.heroType.getBase(Stat.MS))
         //this.hero.updateDefaultMovementSpeed()
@@ -153,18 +153,20 @@ public class Hero
         this.tooltipUpdateTimer = getTimer()..setData(this castTo int)
 
 
-    construct(CPlayer p, int unitId, vec2 pos, angle facing )
+    construct(int playerId, int unitId, vec2 pos, angle facing )
         objectCount++
-        this.hero = createUnit(p.getPlayer(), unitId, pos, facing)
-        this.owner = p
+        this.owner = players[playerId]
+        this.ownerId = playerId
         this.level = 1
+        this.hero = createUnit(this.owner, unitId, pos, facing)
         this.setup()
     
     construct(unit u)
         objectCount++
         this.hero = u
         this.level = GetHeroLevel(this.hero)
-        this.owner = u.getOwner().getCPlayer()
+        this.owner = u.getOwner()
+        this.ownerId = owner.getId()
         this.setup()
 
     function toUnit() returns unit
@@ -172,10 +174,9 @@ public class Hero
 
     function upgrade()
         int newLvl = GetHeroLevel(this.hero)
-        player upgradePlayer = this.owner.getPlayer()
         let wrapper = this.hero.wrapper()
-        SetPlayerTechResearched(upgradePlayer, UPG_AR , this.heroType.calculateStat(Stat.AR, newLvl))
-        SetPlayerTechResearched(upgradePlayer, UPG_AS , this.heroType.calculateStat(Stat.AS, newLvl))
+        SetPlayerTechResearched(this.owner, UPG_AR , this.heroType.calculateStat(Stat.AR, newLvl))
+        SetPlayerTechResearched(this.owner, UPG_AS , this.heroType.calculateStat(Stat.AS, newLvl))
         
 
         wrapper.addStatAbsoluteBonus(Stat.HP, (this.heroType.calculateStat(Stat.HP, newLvl) - this.heroType.calculateStat(Stat.HP, this.level)) * 15 )
@@ -218,20 +219,20 @@ public class Hero
         unitToHero.get( GetTriggerUnit()).onLevelUp()
     
     //handles assists
-    function addAssistDuration(player p)
-        this.assistMap.put(p,getElapsedGameTime() + assistDuration)
-        this.lastAssistant = p
+    function addAssistDuration(int playerId)
+        this.assistMap.put(playerId ,getElapsedGameTime() + assistDuration)
+        this.lastAssistant = playerId
 
     function onDamage()
         let damageSource = GetEventDamageSource().getOwner()
         let damageSourceId = damageSource.getId()
         if damageSource != null
             if firstTeam
-                if damageSourceId >= HERO_PLAYER_TEAM_2_FIRST and damageSourceId <= HERO_PLAYER_TEAM_2_LAST
-                    this.addAssistDuration(damageSource)
+                if PlayerWrapper.getTeam(damageSourceId) == TEAM_2
+                    this.addAssistDuration(damageSource.getId())
             else
-                if damageSourceId >= HERO_PLAYER_TEAM_1_FIRST and damageSourceId <= HERO_PLAYER_TEAM_1_LAST
-                    this.addAssistDuration(damageSource)
+                if PlayerWrapper.getTeam(damageSourceId) == TEAM_1
+                    this.addAssistDuration(damageSource.getId())
 
     static function onDamageStatic()
         unitToHero.get( GetTriggerUnit()).onDamage()
@@ -239,7 +240,7 @@ public class Hero
     function revive()
         TimerDialogDisplay(this.reviveWindow, false)
         vec2 pos
-        if this.owner.getTeam() == Team.TEAM1
+        if this.firstTeam
             pos = gg_rct_GreenAltar.getCenter()+vec2(128,128)
         else
             pos = gg_rct_BrownAltar.getCenter()-vec2(128,128)
@@ -278,8 +279,6 @@ public class Hero
         if this.heroGlow != null
             this.heroGlow.setVertexColor(colorA(255, 255, 255, 0))
 
-        let owningPlayer = this.owner.getPlayer()
-
         player killingPlayer = GetKillingUnit().getOwner()
         int killingId = killingPlayer.getId()
 
@@ -298,19 +297,18 @@ public class Hero
                 replaceKiller = true
 
         let gameTime = getElapsedGameTime()
-        let assistList = new LinkedList<player>
+        let assistList = new LinkedList<int>
 
         string assistString
 
-        let enemyList = CPlayer.getEnemyHeroPlayers(this.owner.getTeam())
+        let enemyList = PlayerWrapper.getHeroTeam(not this.firstTeam)
         int i = 0
-        for assistantC in enemyList
-            let assistant = assistantC.getPlayer()
-            let time = this.assistMap.get(assistant)
-            if(time > gameTime and assistant!=killingPlayer)
-                if not replaceKiller or lastAssistant != assistant
-                    assistList.add(assistant)
-                    assistName[i] = assistant.getFullColoredName()
+        for assistantId in enemyList
+            let time = this.assistMap.get(assistantId)
+            if(time > gameTime and assistantId != killingId)
+                if not replaceKiller or lastAssistant != assistantId
+                    assistList.add(assistantId)
+                    assistName[i] = players[assistantId].getFullColoredName()
                     i++
 
 
@@ -333,13 +331,13 @@ public class Hero
 
         if replaceKiller
             if assistMap.get(lastAssistant) > gameTime
-                killingPlayer = lastAssistant
-                killingId = killingPlayer.getId()
+                killingId = lastAssistant
+                killingPlayer = players[lastAssistant]
             else
                 if killingId != TEAM_PLAYER_TEAM_1 and killingId != TEAM_PLAYER_TEAM_2 and killingId != PLAYER_NEUTRAL_AGGRESSIVE
                     unknownKiller = true
 
-        if  not unknownKiller
+        if not unknownKiller
             if killingId <= HERO_PLAYER_TEAM_2_LAST
                 int assistBounty = ASSIST_BOUNTY[assistants]
 
@@ -347,14 +345,14 @@ public class Hero
 
                 if assistants == 0
                     printTimed("{0} was killed by {1} for {2} gold.".format(
-                        owningPlayer.getFullColoredName(), 
+                        owner.getFullColoredName(), 
                         killingPlayer.getFullColoredName(),
                         "|cffffcc00"+killBounty.toString()+"|r"
                     ), 10)
 
                 else
                     printTimed("{0} was killed by {1} for {3} gold. {2} get{5} {4} gold for helping.".format(
-                        owningPlayer.getFullColoredName(), 
+                        owner.getFullColoredName(), 
                         killingPlayer.getFullColoredName(),
                         assistString,
                         "|cffffcc00"+killBounty.toString()+"|r",
@@ -367,28 +365,26 @@ public class Hero
 
                 doAfter(0.1) ->
                     for p in assistList
-                        p.getCPlayer()
-                            ..addGoldEx(assistBounty)
-                            ..addAssist()
-                    killingPlayer.getCPlayer()
-                        ..addGoldEx(killBounty)
-                        ..addHeroKill(killingId <= HERO_PLAYER_TEAM_2_LAST)
+                        PlayerWrapper.addGoldEx(p, assistBounty)
+                        PlayerWrapper.addAssist(p)
+                    PlayerWrapper.addGoldEx(killingId, killBounty)
+                    PlayerWrapper.addHeroKill(killingId, killingId <= HERO_PLAYER_TEAM_2_LAST)
                 
                     let xp = (this.level + 5) * 10.
-                    for cPlayer in CPlayer.getEnemyHeroPlayers(this.owner.getTeam())
-                        cPlayer.addXp(xp)
+                    for p in PlayerWrapper.getHeroTeam(not this.firstTeam)
+                        PlayerWrapper.addXp(p, xp)
 
                     destroy assistList
             else
                 printTimed("{0} was killed by {1}.".format(
-                    owningPlayer.getFullColoredName(), 
+                    owner.getFullColoredName(), 
                     killingPlayer.getName()
                 ), 10)
 
                 destroy assistList
         else
             printTimed("{0} died.".format(
-                owningPlayer.getFullColoredName()
+                owner.getFullColoredName()
             ), 10)
             destroy assistList
 
@@ -397,11 +393,11 @@ public class Hero
         
         this.reviveTimer
             ..start(10.+level*2, function reviveStatic)
-        if GetLocalPlayer() == owningPlayer
+        if GetLocalPlayer() == owner
             TimerDialogDisplay(this.reviveWindow, true)
 
         doAfter(0.1) ->
-            this.owner.addDeath()
+            PlayerWrapper.addDeath(this.ownerId)
 
 
     static function onDeathStatic()
@@ -410,7 +406,7 @@ public class Hero
 
 
     function toString() returns string
-        return "Hero "+ this.owner.getPlayer().getName() +"="+this.hero.getName()
+        return "Hero "+ this.owner.getName() +"="+this.hero.getName()
 
     function getHeroType() returns HeroType
         return this.heroType

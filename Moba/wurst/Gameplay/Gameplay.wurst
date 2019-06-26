@@ -8,7 +8,7 @@ public function allHeroesPicked()
     startSpawning()
 
     for i = 0 to MAX_HERO_COUNT - 1
-        ScoreTable.addIcon(getCPlayer(i))
+        ScoreTable.addIcon(i)
 
 
 

@@ -22,24 +22,34 @@ public enum PlayerType
     ARMY
     NEUTRAL
 
-public function player.getCPlayer() returns CPlayer
-    return CPlayer.idToPlayer[this.getId()]
+public constant TEAM_1 = 1
+public constant TEAM_2 = 2
+public constant TEAM_NEUTRAL = 3
 
-public function getCPlayer(int id) returns CPlayer
-    return CPlayer.idToPlayer[id]
+@inline
+public function invertTeam(int team) returns int
+    int ret
+    if team == TEAM_1
+        ret = TEAM_2
+    else if team == TEAM_2
+        ret = TEAM_1
+    else
+        ret = team
+        error("cannot invert team: " + team.toString())
+    return ret
 
-
+constant EMPTY_INT_LIST = new LinkedList<int>
 
 public class StatTable
 
     static protected multiboard mBoard
 
-    static CPlayer array columnToPlayer
+    static int array columnToPlayer
     static int array playerToColumn
 
     static int rowCount = 0
 
-    static constant playerList = new LinkedList<CPlayer>
+    static constant playerList = new LinkedList<int>
 
     static function setStatTitle(int row, string title)
         mBoard.getItem(row, 0)
@@ -71,35 +81,35 @@ public class StatTable
         rowCount++
 
     static function setRowStats(int column)
-        let cPlayer = columnToPlayer[column]
+        let id = columnToPlayer[column]
         let tmp = rowCount
         rowCount = 2
-        setRowStat(rowCount, column, cPlayer.heroKills.toString())
-        setRowStat(rowCount, column, cPlayer.deaths.toString())
-        setRowStat(rowCount, column, cPlayer.assists.toString())
-        setRowStat(rowCount, column, cPlayer.unitKills.toString())
-        setRowStat(rowCount, column, cPlayer.statDamageDealt.toStatString())
-        setRowStat(rowCount, column, cPlayer.statDamageTaken.toStatString())
-        setRowStat(rowCount, column, cPlayer.statHealingDone.toStatString())
-        setRowStat(rowCount, column, cPlayer.statHealingReceived.toStatString())
-        setRowStat(rowCount, column, cPlayer.statGoldGained.toString())
-        setRowStat(rowCount, column, cPlayer.statHydrasKilled.toString())
-        setRowStat(rowCount, column, cPlayer.statBuildingsRazed.toString())
+        setRowStat(rowCount, column, PlayerWrapper.heroKills[id].toString())
+        setRowStat(rowCount, column, PlayerWrapper.deaths[id].toString())
+        setRowStat(rowCount, column, PlayerWrapper.assists[id].toString())
+        setRowStat(rowCount, column, PlayerWrapper.unitKills[id].toString())
+        setRowStat(rowCount, column, PlayerWrapper.statDamageDealt[id].toStatString())
+        setRowStat(rowCount, column, PlayerWrapper.statDamageTaken[id].toStatString())
+        setRowStat(rowCount, column, PlayerWrapper.statHealingDone[id].toStatString())
+        setRowStat(rowCount, column, PlayerWrapper.statHealingReceived[id].toStatString())
+        setRowStat(rowCount, column, PlayerWrapper.statGoldGained[id].toString())
+        setRowStat(rowCount, column, PlayerWrapper.statHydrasKilled[id].toString())
+        setRowStat(rowCount, column, PlayerWrapper.statBuildingsRazed[id].toString())
 
         rowCount = tmp
 
     static function create()
         int count = 2
-        columnToPlayer[1] = getCPlayer(TEAM_PLAYER_TEAM_1)
+        columnToPlayer[1] = TEAM_PLAYER_TEAM_1
         playerToColumn[TEAM_PLAYER_TEAM_1] = 1
         for i = 0 to MAX_HERO_COUNT-1
-            if CPlayer.getPlayerHeroes(i).size() != 0
-                columnToPlayer[count] = getCPlayer(i)
+            if PlayerWrapper.getPlayerHeroes(i).size() != 0
+                columnToPlayer[count] = i
                 playerToColumn[i] = count
                 count++
 
             if i == HERO_PLAYER_TEAM_1_LAST
-                columnToPlayer[count] = getCPlayer(TEAM_PLAYER_TEAM_2)
+                columnToPlayer[count] = TEAM_PLAYER_TEAM_2
                 playerToColumn[TEAM_PLAYER_TEAM_2] = count
                 count++
 
@@ -123,12 +133,13 @@ public class StatTable
                 ..release()
 
         for i = 1 to mBoard.getColumnCount() - 1 
-            let cPlayer = columnToPlayer[i]
-            let color = cPlayer.getPlayer().getColor().toColor()
-            string icon = cPlayer.getIcon()
+            let id = columnToPlayer[i]
+            let p = players[id]
+            let color = p.getColor().toColor()
+            string icon = PlayerWrapper.getIcon(id)
 
 
-            string name = cPlayer.getPlayer().getName().substring(0, 5)
+            string name = p.getName().substring(0, 5)
 
             mBoard.getItem(0, i)
                 ..setValueColor(color.red, color.green, color.blue, 255)
@@ -153,12 +164,12 @@ public class ScoreTable
     protected static int team1Kills = 0
     protected static int team2Kills = 0
 
-    static CPlayer array rowToPlayer
+    static int array rowToPlayer
     static int array playerToRow
 
     private static real array width
 
-    static constant playerList = new LinkedList<CPlayer>
+    static constant playerList = new LinkedList<int>
 
     static function isMinimized() returns bool
         return mBoard.isMinimized()
@@ -167,7 +178,7 @@ public class ScoreTable
         mBoard.minimalize(flag)
 
     static function updateHeader(boolean firstTeam)
-        let row = (firstTeam ? 0 : CPlayer.team1HeroCount + 1)
+        let row = (firstTeam ? 0 : PlayerWrapper.team1HeroCount + 1)
         string teamName = firstTeam ?
         players[TEAM_PLAYER_TEAM_1].getColor().toColor().toColorString() + TEAM_NAME_TEAM_1 + "|r" :
         players[TEAM_PLAYER_TEAM_2].getColor().toColor().toColorString() + TEAM_NAME_TEAM_2 + "|r"
@@ -202,9 +213,9 @@ public class ScoreTable
             ..setWidth(width[4])
             ..release() 
 
-    static function addIcon(CPlayer p)
-        mBoard.getItem(playerToRow[p.getId()], 0)
-            ..setIcon(p.getIcon())
+    static function addIcon(int id)
+        mBoard.getItem(playerToRow[id], 0)
+            ..setIcon(PlayerWrapper.getIcon(id))
             ..release() 
 
     static function update()
@@ -214,67 +225,72 @@ public class ScoreTable
         updateHeader(true)
         updateHeader(false)
 
-        for CPlayer p in playerList
-            let row = 1 + index + (p.getTeam() == Team.TEAM2 ? 1: 0)
-            rowToPlayer[row] = p
-            playerToRow[p.getId()] = row
+        for int i in playerList
+            let p = players[i]
+            var row = 1 + index
 
-            let icon = p.getIcon()
+            if PlayerWrapper.team[i] == 2
+                row++
+
+            rowToPlayer[row] = i
+            playerToRow[i] = row
+
+            let icon = PlayerWrapper.icon[i]
 
             mBoard.getItem(row, 0)
                 ..setStyle(true, true)
-                ..setValue(p.getPlayer().getNameColored())
+                ..setValue(p.getNameColored())
                 ..setIcon(icon)
                 ..setWidth(width[0])
                 ..release() 
             mBoard.getItem(row, 1)
                 ..setStyle(true, false)
-                ..setValue(p.getHeroKills().toString()) 
+                ..setValue(PlayerWrapper.heroKills[i].toString()) 
                 ..setWidth(width[1])
                 ..release() 
             mBoard.getItem(row, 2)
                 ..setStyle(true, false)
-                ..setValue(p.getDeaths().toString()) 
+                ..setValue(PlayerWrapper.deaths[i].toString()) 
                 ..setWidth(width[2])
                 ..release() 
             mBoard.getItem(row, 3)
                 ..setStyle(true, false)
-                ..setValue(p.getAssists().toString()) 
+                ..setValue(PlayerWrapper.assists[i].toString()) 
                 ..setWidth(width[3])
                 ..release() 
             mBoard.getItem(row, 4)
                 ..setStyle(true, false)
-                ..setValue(p.getUnitKills().toString())
+                ..setValue(PlayerWrapper.unitKills[i].toString())
                 ..setWidth(width[4])
                 ..release() 
             index++
 
-    static function updatePlayerHeroKills(CPlayer p)
-        let row = playerToRow[p.getId()]
+    static function updatePlayerHeroKills(int i)
+        let row = playerToRow[i]
         mBoard.getItem(row, 1)
-            ..setValue(p.getHeroKills().toString()) 
+            ..setValue(PlayerWrapper.heroKills[i].toString()) 
             ..release() 
 
         mBoard.setTitle("Score: "+
         players[TEAM_PLAYER_TEAM_1].getColor().toColor().toColorString()+team1Kills.toString()+"|r / "+
         players[TEAM_PLAYER_TEAM_2].getColor().toColor().toColorString()+team2Kills.toString()+"|r"  )
 
-    static function updatePlayerDeaths(CPlayer p)
-        let row = playerToRow[p.getId()]
+    static function updatePlayerDeaths(int i)
+        let row = playerToRow[i]
         mBoard.getItem(row, 2)
-            ..setValue(p.getDeaths().toString()) 
+            ..setValue(PlayerWrapper.deaths[i].toString()) 
             ..release() 
 
-    static function updatePlayerAssists(CPlayer p)
-        let row = playerToRow[p.getId()]
+    static function updatePlayerAssists(int i)
+        let row = playerToRow[i]
         mBoard.getItem(row, 3)
-            ..setValue(p.getAssists().toString()) 
+            ..setValue(PlayerWrapper.assists[i].toString()) 
             ..release() 
             
-    static function updatePlayerUnitKills(CPlayer p)
-        let row = playerToRow[p.getId()]
+    static function updatePlayerUnitKills(int i)
+        let row = playerToRow[i]
         mBoard.getItem(row, 4)
-            ..setValue(p.getUnitKills().toString())
+            ..setValue(PlayerWrapper.unitKills[i].toString())
             ..release() 
 
     static function display()
@@ -306,264 +322,244 @@ public class ScoreTable
         doAfter(0.02, () -> mBoard.minimalize(false))
         
 
-    static function addPlayer(CPlayer p)
-        doAfter(0.01, () -> (begin
-            playerList.add(p)
-            playerList.sortWith( (CPlayer p1, CPlayer p2) -> (p1.getId() - p2.getId()) )
+    static function addPlayer(int i)
+        doAfter(0.01) ->
+            playerList.add(i)
+            playerList.sortWith( (int p1, int p2) -> (p1 - p2) )
             mBoard.setRowCount(mBoard.getRowCount()+1)
             update()
-            /*for cp in playerList
-                if cp.getTeam() == Team.TEAM1
-                    cp.getPlayer().setState(PLAYER_STATE_RESOURCE_FOOD_USED, CPlayer.team1HeroCount)
-                    cp.getPlayer().setState(PLAYER_STATE_RESOURCE_FOOD_CAP, CPlayer.team2HeroCount)
-                else
-                    cp.getPlayer().setState(PLAYER_STATE_RESOURCE_FOOD_USED, CPlayer.team2HeroCount)
-                    cp.getPlayer().setState(PLAYER_STATE_RESOURCE_FOOD_CAP, CPlayer.team1HeroCount)*/
-        end))
-
-        
 
 
-//player class
-public class CPlayer
+public abstract class PlayerWrapper  
+    static constant team1HeroPlayers = new LinkedList<int>
+    static constant team2HeroPlayers = new LinkedList<int>
 
-    private player assocPlayer
-    private int playerId
-    
-    private static constant team1HeroPlayers = new LinkedList<CPlayer>()
-    private static constant team2HeroPlayers = new LinkedList<CPlayer>()
+    static int team1HeroCount = 0
+    static int team2HeroCount = 0
 
-    protected static int team1HeroCount = 0
-    protected static int team2HeroCount = 0
+    static int array unitKills
+    static int array heroKills
+    static int array deaths
+    static int array assists
 
-    protected int unitKills = 0
-    protected int heroKills = 0
-    protected int deaths = 0
-    protected int assists = 0
+    static LinkedList<Hero> array playerHeroes
 
-    private LinkedList<Hero> playerHeroes = new LinkedList<Hero>
+    static real array realGold
+    static real array realXp
 
-    private real realGold = 0
-    private real realXp = 0
+    static int array statGoldGained
+    static real array statDamageDealt
+    static real array statDamageTaken
+    static real array statHealingReceived
+    static real array statHealingDone
+    static real array statManaHealed
+    static int array statHydrasKilled
+    static int array statDragonTurtlesKilled
+    static int array statBuildingsRazed
 
-    int statGoldGained = 0
-    real statDamageDealt = 0
-    real statDamageTaken = 0
-    real statHealingReceived = 0
-    real statHealingDone = 0
-    real statManaHealed = 0
-    int statHydrasKilled = 0
-    int statDragonTurtlesKilled = 0
-    int statBuildingsRazed = 0
+    static int array team
+    static PlayerType array playerType
+    static string array icon
 
-    protected static CPlayer array idToPlayer
-    private Team team
-    private PlayerType playertype
-    private string icon = "ReplaceableTextures\\CommandButtons\\BTNSelectHeroOn.blp"
+    static function createPlayerWrapper(int id, PlayerType pType)
+        unitKills[id] = 0
+        heroKills[id] = 0
+        deaths[id] = 0
+        assists[id] = 0
 
-    construct(player p, Team t, PlayerType pType)
-        objectCount++
-        this.assocPlayer = p
-        this.playerId = p.getId()
-        this.team = t
-        this.playertype = pType
-        idToPlayer[this.playerId] = this
+        playerHeroes[id] = new LinkedList<Hero>
+
+        realGold[id] = 0.0
+        realXp[id] = 0.0
+
+        statGoldGained[id] = 0
+        statDamageDealt[id] = 0.0
+        statDamageTaken[id] = 0.0
+        statHealingReceived[id] = 0.0
+        statHealingDone[id] = 0.0
+        statManaHealed[id] = 0.0
+        statHydrasKilled[id] = 0
+        statDragonTurtlesKilled[id] = 0
+        statBuildingsRazed[id] = 0
+
+        icon[id] = "ReplaceableTextures\\CommandButtons\\BTNSelectHeroOn.blp"
+
+        PlayerWrapper.team[id] = 0
+        if id >= 0 and id <= HERO_PLAYER_TEAM_1_LAST
+            PlayerWrapper.team[id] = 1
+        else if id >= HERO_PLAYER_TEAM_2_FIRST and id <= HERO_PLAYER_TEAM_2_LAST
+            PlayerWrapper.team[id] = 2
+        else if id == TEAM_PLAYER_TEAM_1
+            PlayerWrapper.team[id] = 1
+        else if id == TEAM_PLAYER_TEAM_2
+            PlayerWrapper.team[id] = 2
+        else if id >= PLAYER_NEUTRAL_PASSIVE and id <= PLAYER_NEUTRAL_AGGRESSIVE
+            PlayerWrapper.team[id] = 3
+
+
+
+        playerType[id] = pType
         if pType == PlayerType.HERO
-            ScoreTable.addPlayer(this)
-            if t == Team.TEAM1
-                team1HeroPlayers.add(this)
+            ScoreTable.addPlayer(id)
+            if PlayerWrapper.team[id] == 1
+                team1HeroPlayers.add(id)
                 team1HeroCount++
-            else
-                team2HeroPlayers.add(this)
+            else if PlayerWrapper.team[id] == 2
+                team2HeroPlayers.add(id)
                 team2HeroCount++
 
-        
+    static function addUnitKill(int id)
+        unitKills[id]++
+        ScoreTable.updatePlayerUnitKills(id)
 
-    function addUnitKill()
-        this.unitKills++
-        ScoreTable.updatePlayerUnitKills(this)
-
-    function addHeroKill(boolean byHero)
-        this.heroKills++
+    static function addHeroKill(int id, boolean byHero)
+        heroKills[id]++
 
         if byHero
-            if this.team == Team.TEAM1
+            if team[id] == TEAM_1
                 ScoreTable.team1Kills++
-            else if this.team == Team.TEAM2
+            else
                 ScoreTable.team2Kills++
 
-            ScoreTable.updatePlayerHeroKills(this)
+            ScoreTable.updatePlayerHeroKills(id)
 
-    function addDeath()
-        this.deaths++
-        ScoreTable.updatePlayerDeaths(this)
+    static function addDeath(int id)
+        deaths[id]++
+        ScoreTable.updatePlayerDeaths(id)
 
-    function addAssist()
-        this.assists++
-        ScoreTable.updatePlayerAssists(this)
+    static function addAssist(int id)
+        assists[id]++
+        ScoreTable.updatePlayerAssists(id)
 
-    function getUnitKills() returns int
-        return this.unitKills
+    static function getUnitKills(int id) returns int
+        return unitKills[id]
 
-    function getHeroKills() returns int
-        return this.heroKills
+    static function getHeroKills(int id) returns int
+        return heroKills[id]
 
-    function getDeaths() returns int
-        return this.deaths
+    static function getDeaths(int id) returns int
+        return deaths[id]
 
-    function getAssists() returns int
-        return this.assists
+    static function getAssists(int id) returns int
+        return assists[id]
 
-    function toString() returns string
-        return "Player = "+assocPlayer.getName()
+    static function toString(int id) returns string
+        return "Player = " + players[id].getName()
 
-    function getPlayer() returns player
-        return this.assocPlayer
-    
-    function getId() returns integer
-        return this.playerId
+    static function getTeam(int id) returns int
+        return team[id]
 
-    function getTeam() returns Team
-        return this.team
+    static function getPlayerType(int id) returns PlayerType
+        return playerType[id]
 
-    function getPlayerType() returns PlayerType
-        return this.playertype
+    static function getIcon(int id) returns string
+        return icon[id]
 
-    function getIcon() returns string
-        return this.icon
+    static function addHero(int id, Hero whichHero)
+        playerHeroes[id].add(whichHero)
 
-    function addHero(Hero whichHero)
-        this.playerHeroes.add(whichHero)
+    static function getPlayerHeroes(int id) returns LinkedList<Hero>
+        return playerHeroes[id]
 
-    static function getPlayerHeroes(int playerId) returns LinkedList<Hero>
-        return getCPlayer(playerId).playerHeroes
+    static function getPlayerHero(int id, int heroIndex) returns Hero
+        return getPlayerHeroes(id).get(heroIndex)
 
-    @deprecated
-    static function getPlayerHero(int playerId, int heroIndex) returns Hero
-        return getPlayerHeroes(playerId).get(heroIndex)
+    static function getHeroTeam(int team) returns LinkedList<int>
+        if team == TEAM_1
+            return team1HeroPlayers
+        else if team == TEAM_2
+            return team2HeroPlayers
+        return EMPTY_INT_LIST
 
-    static function getAllyHeroPlayers(Team t) returns LinkedList<CPlayer>
-        LinkedList<CPlayer> ret
-        if t == Team.TEAM1
-            ret = team1HeroPlayers
-        else if t == Team.TEAM2
-            ret =  team2HeroPlayers
+    static function getHeroTeam(bool firstTeam) returns LinkedList<int>
+        if firstTeam
+            return team1HeroPlayers
         else
-            error("Must be used on TEAM1 or TEAM2")
-            ret =  null
+            return team2HeroPlayers
 
-        return ret
-
-    static function getAllyHeroPlayers(player p) returns LinkedList<CPlayer>
-        return getAllyHeroPlayers(p.getCPlayer().getTeam())
-
-    static function getEnemyHeroPlayers(Team t) returns LinkedList<CPlayer>
-        LinkedList<CPlayer> ret
-        if t == Team.TEAM1
-            ret = team2HeroPlayers
-        else if t == Team.TEAM2
-            ret = team1HeroPlayers
+    static function getTeamHeroCount(int team) returns int
+        if team == TEAM_1
+            return team1HeroCount
+        else if team == TEAM_2
+            return team2HeroCount
         else
-            error("Must be used on TEAM1 or TEAM2")
-            ret = null
+            return 0
 
-        return ret
-
-    static function getEnemyHeroPlayers(player p) returns LinkedList<CPlayer>
-        return getEnemyHeroPlayers(p.getCPlayer().getTeam())
-
-    static function getTeamHeroCount(Team t) returns int
-        int ret
-        if t == Team.TEAM1
-            ret = team1HeroCount
-        else if t == Team.TEAM2
-            ret = team2HeroCount
+    static function getTeamHeroCount(bool firstTeam) returns int
+        if firstTeam
+            return team1HeroCount
         else
-            error("Must be used on TEAM1 or TEAM2")
-            ret = -1
+            return team2HeroCount
 
-        return ret
+    static function addGoldEx(int id, real gold)
+        realGold[id] += gold
+        let intGold = realGold[id].toInt()
+        addGoldEx(id, intGold)
+        realGold[id] -= intGold
 
-    static function invertTeam(Team t) returns Team
-        Team ret
-        if t == Team.TEAM1
-            ret = Team.TEAM2
-        else if t == Team.TEAM2
-            ret = Team.TEAM1
-        else
-            error("Must be used on TEAM1 or TEAM2")
-            ret = t
-
-        return ret
-
-    protected static function initPlayers()
-        var admin = false
-        for i = 0 to MAX_HERO_COUNT-1
-            player p = players[i]
-            SetPlayerState(p, PLAYER_STATE_RESOURCE_FOOD_USED, 1)
-            SetPlayerState(p, PLAYER_STATE_RESOURCE_FOOD_USED, 0)
-            Team t = i <= HERO_PLAYER_TEAM_1_LAST ?Team.TEAM1:Team.TEAM2
-            if p.getSlotState()==PLAYER_SLOT_STATE_PLAYING
-                new CPlayer(p, t, PlayerType.HERO)
-                if p.getController() == MAP_CONTROL_COMPUTER
-                    PauseCompAI(players[i], true)
-                if not admin and p.getController() == MAP_CONTROL_USER
-                    admin = true
-                    adminPlayer = i
-            else
-                new CPlayer(p, t, PlayerType.NONE)
-    
-
-        new CPlayer(players[TEAM_PLAYER_TEAM_1], Team.TEAM1, PlayerType.ARMY)
-        new CPlayer(players[TEAM_PLAYER_TEAM_2], Team.TEAM2, PlayerType.ARMY)
-
-        new CPlayer(players[PLAYER_NEUTRAL_AGGRESSIVE], Team.NEUTRAL_HOSTILE, PlayerType.NEUTRAL)
-        new CPlayer(players[CREEP_SPECIAL_OWNER], Team.NEUTRAL_HOSTILE, PlayerType.NEUTRAL)
-
-        for i=PLAYER_NEUTRAL_AGGRESSIVE+1 to PLAYER_NEUTRAL_PASSIVE
-            new CPlayer(players[i], Team.NEUTRAL_PASSIVE, PlayerType.NEUTRAL)
-    
-        for i=0 to TEAM_PLAYER_TEAM_2
-            for j=0 to TEAM_PLAYER_TEAM_2
-
-                if i < MAX_HERO_COUNT or i == TEAM_PLAYER_TEAM_1 or i == TEAM_PLAYER_TEAM_2
-                    if j < MAX_HERO_COUNT or j == TEAM_PLAYER_TEAM_1 or j == TEAM_PLAYER_TEAM_2
-
-                        if(i!=j and getCPlayer(i).getTeam()==getCPlayer(j).getTeam())
-                            SetPlayerAllianceStateBJ(players[i],players[j], bj_ALLIANCE_ALLIED_VISION)
-                    
-        //armies do not fight vs creeps
-        SetPlayerAlliance(players[TEAM_PLAYER_TEAM_1], players[PLAYER_NEUTRAL_AGGRESSIVE], ALLIANCE_PASSIVE, true)
-        SetPlayerAlliance(players[TEAM_PLAYER_TEAM_2], players[PLAYER_NEUTRAL_AGGRESSIVE], ALLIANCE_PASSIVE, true)
-        SetPlayerAlliance(players[PLAYER_NEUTRAL_AGGRESSIVE], players[TEAM_PLAYER_TEAM_1], ALLIANCE_PASSIVE, true)
-        SetPlayerAlliance(players[PLAYER_NEUTRAL_AGGRESSIVE], players[TEAM_PLAYER_TEAM_2], ALLIANCE_PASSIVE, true)
-
-        SetPlayerAlliance(players[TEAM_PLAYER_TEAM_1], players[CREEP_SPECIAL_OWNER], ALLIANCE_PASSIVE, true)
-        SetPlayerAlliance(players[TEAM_PLAYER_TEAM_2], players[CREEP_SPECIAL_OWNER], ALLIANCE_PASSIVE, true)
-        SetPlayerAlliance(players[CREEP_SPECIAL_OWNER], players[TEAM_PLAYER_TEAM_1], ALLIANCE_PASSIVE, true)
-        SetPlayerAlliance(players[CREEP_SPECIAL_OWNER], players[TEAM_PLAYER_TEAM_2], ALLIANCE_PASSIVE, true)
-
-    function addGoldEx(real gold)
-        this.realGold += gold
-        let intGold = this.realGold.toInt()
-        this.addGoldEx(intGold)
-        this.realGold -= intGold
-
-    function addGoldEx(int gold)
-        this.getPlayer().addGold(gold)
-        this.statGoldGained += gold
-        let ai = getAI(this.getPlayer().getId())
+    static function addGoldEx(int id, int gold)
+        players[id].addGold(gold)
+        statGoldGained[id] += gold
+        let ai = getAI(id)
         if ai != null
             ai.addGold(gold)
 
-    function addXp(real xp)
-        this.realXp += xp
-        let intXp = this.realXp.toInt()
-        let heroes = CPlayer.getPlayerHeroes(this.playerId)
+    static function addXp(int id, real xp)
+        realXp[id] += xp
+        let intXp = realXp[id].toInt()
+        let heroes = getPlayerHeroes(id)
         for Hero hero in heroes
             hero.toUnit().addXp(intXp, true)
-        this.realXp -= intXp
+        realXp[id] -= intXp
+
+
+function initPlayers()
+    var admin = false
+    for i = 0 to MAX_HERO_COUNT-1
+        player p = players[i]
+        SetPlayerState(p, PLAYER_STATE_RESOURCE_FOOD_USED, 1)
+        SetPlayerState(p, PLAYER_STATE_RESOURCE_FOOD_USED, 0)
+        if p.getSlotState()==PLAYER_SLOT_STATE_PLAYING
+            PlayerWrapper.createPlayerWrapper(i, PlayerType.HERO)
+            if p.getController() == MAP_CONTROL_COMPUTER
+                PauseCompAI(players[i], true)
+            if not admin and p.getController() == MAP_CONTROL_USER
+                admin = true
+                adminPlayer = i
+        else
+            PlayerWrapper.createPlayerWrapper(i, PlayerType.NONE)
+
+
+    PlayerWrapper.createPlayerWrapper(TEAM_PLAYER_TEAM_1, PlayerType.ARMY)
+    PlayerWrapper.createPlayerWrapper(TEAM_PLAYER_TEAM_2, PlayerType.ARMY)
+
+    PlayerWrapper.createPlayerWrapper(PLAYER_NEUTRAL_AGGRESSIVE, PlayerType.NEUTRAL)
+    PlayerWrapper.createPlayerWrapper(CREEP_SPECIAL_OWNER, PlayerType.NEUTRAL)
+
+
+    for i=PLAYER_NEUTRAL_AGGRESSIVE+1 to PLAYER_NEUTRAL_PASSIVE
+        PlayerWrapper.createPlayerWrapper(i, PlayerType.NEUTRAL)
+
+    for i=0 to TEAM_PLAYER_TEAM_2
+        for j=0 to TEAM_PLAYER_TEAM_2
+
+            if i < MAX_HERO_COUNT or i == TEAM_PLAYER_TEAM_1 or i == TEAM_PLAYER_TEAM_2
+                if j < MAX_HERO_COUNT or j == TEAM_PLAYER_TEAM_1 or j == TEAM_PLAYER_TEAM_2
+
+                    if i!=j and PlayerWrapper.getTeam(i) == PlayerWrapper.getTeam(j)
+                        SetPlayerAllianceStateBJ(players[i],players[j], bj_ALLIANCE_ALLIED_VISION)
+                
+    //armies do not fight vs creeps
+    SetPlayerAlliance(players[TEAM_PLAYER_TEAM_1], players[PLAYER_NEUTRAL_AGGRESSIVE], ALLIANCE_PASSIVE, true)
+    SetPlayerAlliance(players[TEAM_PLAYER_TEAM_2], players[PLAYER_NEUTRAL_AGGRESSIVE], ALLIANCE_PASSIVE, true)
+    SetPlayerAlliance(players[PLAYER_NEUTRAL_AGGRESSIVE], players[TEAM_PLAYER_TEAM_1], ALLIANCE_PASSIVE, true)
+    SetPlayerAlliance(players[PLAYER_NEUTRAL_AGGRESSIVE], players[TEAM_PLAYER_TEAM_2], ALLIANCE_PASSIVE, true)
+
+    SetPlayerAlliance(players[TEAM_PLAYER_TEAM_1], players[CREEP_SPECIAL_OWNER], ALLIANCE_PASSIVE, true)
+    SetPlayerAlliance(players[TEAM_PLAYER_TEAM_2], players[CREEP_SPECIAL_OWNER], ALLIANCE_PASSIVE, true)
+    SetPlayerAlliance(players[CREEP_SPECIAL_OWNER], players[TEAM_PLAYER_TEAM_1], ALLIANCE_PASSIVE, true)
+    SetPlayerAlliance(players[CREEP_SPECIAL_OWNER], players[TEAM_PLAYER_TEAM_2], ALLIANCE_PASSIVE, true)
 
 init
-    CPlayer.initPlayers()
+    initPlayers()
     doAfter(0, () -> ScoreTable.create())

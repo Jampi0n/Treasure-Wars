@@ -81,7 +81,7 @@ public function unit.getStr() returns int
     if this.isType(UNIT_TYPE_HERO)
         ret = GetHeroStr(this, true)
     else
-        ret = this.wrapper().getStatTotalBonus(Stat.STR) + this.wrapper().getStatBaseValue(Stat.STR)
+        ret = this.wrapper().getStatTotalValue(Stat.STR)
     return ret
 
 public function unit.getWp() returns int
@@ -97,7 +97,7 @@ public function unit.getInt() returns int
     if this.isType(UNIT_TYPE_HERO)
         ret = GetHeroInt(this, true)
     else
-        ret = this.wrapper().getStatTotalBonus(Stat.INT) + this.wrapper().getStatBaseValue(Stat.INT)
+        ret = this.wrapper().getStatTotalValue(Stat.INT)
     return ret
 
 public function real.factor(int statValue, real atHundred) returns real
@@ -179,8 +179,8 @@ public function unit.healHP(unit target, real amount)
     realAmount = min(realAmount, target.getMaxHP()-target.getHP())
     target.setHP(target.getHP() + realAmount)
 
-    target.getOwner().getCPlayer().statHealingReceived += realAmount
-    this.getOwner().getCPlayer().statHealingDone += realAmount
+    PlayerWrapper.statHealingReceived[target.getOwner().getId()] += realAmount
+    PlayerWrapper.statHealingDone[this.getOwner().getId()] += realAmount
 
 public function unit.healMana(unit target, real amount)
     real realAmount = amount
@@ -190,7 +190,7 @@ public function unit.healMana(unit target, real amount)
     realAmount = min(realAmount, target.getMaxMana()-target.getMana())
     target.setMana(target.getMana() + realAmount)
 
-    target.getOwner().getCPlayer().statManaHealed += realAmount
+    PlayerWrapper.statManaHealed[target.getOwner().getId()] += realAmount
 
 public function unit.dispelMagicalBuffs(boolean positive, boolean negative)
     let buffList = this.getBuffList()
@@ -216,7 +216,7 @@ public function unit.dispelBuffs(boolean positive, boolean negative)
     this.dispelPhysicallBuffs(positive, negative)
 
 public function player.getFullName() returns string
-    let hero = CPlayer.getPlayerHero(this.getId(), 0)
+    let hero = PlayerWrapper.getPlayerHero(this.getId(), 0)
     if(hero != null)
         return this.getName()+ " ("+hero.toUnit().getName()+")"
     else

@@ -46,15 +46,15 @@ function onHydraDeath()
         hydraIcon.hide()
         DEATH_SOUND.play().snd.setVolume(150)
 
-        let killer = GetKillingUnit()
-        let killingTeam = CPlayer.getAllyHeroPlayers(killer.getOwner())
+        let killerId = GetKillingUnit().getOwner().getId()
+        let killingTeam = PlayerWrapper.getTeam(killerId)
         boolean killedByTeam = true
 
 
         string teamName
-        if killer.getOwner().getCPlayer().getTeam() == Team.TEAM1
+        if killingTeam == TEAM_1
             teamName = Player(TEAM_PLAYER_TEAM_1).getFullColoredName()
-        else if killer.getOwner().getCPlayer().getTeam() == Team.TEAM2
+        else if killingTeam == TEAM_2
             teamName = Player(TEAM_PLAYER_TEAM_2).getFullColoredName()
         else
             teamName = ""
@@ -64,13 +64,12 @@ function onHydraDeath()
             printTimed("Team "+teamName+" has killed a Hydra. Their heroes gain 3 stat upgrades for every stat. The Hydra will respawn in "+REVIVE_TIME.toInt().toString()+" seconds.", 10)
             PingMinimap(target.getX(), target.getY(), 3)
 
-            for CPlayer killerHero in killingTeam
-                let hero = CPlayer.getPlayerHero(killerHero.getId(), 0)
-                if hero != null
+            for p in PlayerWrapper.getHeroTeam(killingTeam)
+                for hero in PlayerWrapper.getPlayerHeroes(p)
                     hero.toUnit().hydraBonus()
                     hero.addXp(250)
 
-            killer.getOwner().getCPlayer().statHydrasKilled++
+            PlayerWrapper.statHydrasKilled[killerId]++
 
         doAfter(REVIVE_TIME, () -> (begin
             udg_Hydra = createUnit(players[CREEP_SPECIAL_OWNER], HYDRA, spawnPos, facing)
