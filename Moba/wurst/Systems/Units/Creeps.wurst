@@ -303,9 +303,9 @@ public class CreepCamp
 
         let bounty = UnitType.getUnitType(u.getTypeId()).getBounty()
         createGoldBountyTextTag(u, bounty, killer.getOwner())
-        killer.getOwner().getCPlayer()
-            ..addUnitKill()
-            ..addGoldEx(bounty)
+        let killerId = killer.getOwner().getId()
+        PlayerWrapper.addUnitKill(killerId)
+        PlayerWrapper.addGoldEx(killerId, bounty)
 
         killer.healHP(killer, killer.getMaxHP()*0.05)
         killer.healMana(killer, killer.getMaxMana()*0.05)
@@ -330,7 +330,7 @@ public class CreepCamp
             if killer != null
                 let pId = killer.getOwner().getId()
                 if pId <= HERO_PLAYER_TEAM_2_LAST
-                    onKill(u,CPlayer.getPlayerHero(pId, 0).toUnit())
+                    onKill(u, PlayerWrapper.getPlayerHero(pId, 0).toUnit())
 
 
 

@@ -46,21 +46,21 @@ boolean itemCarry = false
 function setupCreatedHero(Hero hero)
     let heroUnit = hero.toUnit()
     player owner = heroUnit.getOwner()
+    let ownerId = owner.getId()
     playerHasPicked[owner.getId()] = true
-    CPlayer cPlayer = owner.getCPlayer()
     owner.setGold(500)
         
     vec2 pos// = gg_rct_CenterMid.getCenter()
     patron[owner.getId()].remove()
 
-    if(cPlayer.getTeam()==Team.TEAM1)
+    if PlayerWrapper.getTeam(ownerId) == TEAM_1
         pos = gg_rct_GreenAltar.getCenter()+vec2(128,128)
     else
         pos = gg_rct_BrownAltar.getCenter()-vec2(128,128)
 
     if owner.getController() == MAP_CONTROL_COMPUTER and owner.getSlotState() == PLAYER_SLOT_STATE_PLAYING
         doAfter(GetRandomReal(1, 3), () -> ( begin
-            let ai = new HeroAI(cPlayer, GetAIDifficulty(owner))
+            let ai = new HeroAI(ownerId, GetAIDifficulty(owner))
             ai.togglePause()
             doAfter(GetRandomReal(48, 52), () -> (begin
                 ai.togglePause()
@@ -87,7 +87,7 @@ function setupCreatedHero(Hero hero)
         PanCameraTo(pos.x, pos.y)
 
 
-function createRandomHeroForAI(CPlayer cPlayer, boolean removeFromTavern)
+function createRandomHeroForAI(int id, boolean removeFromTavern)
     int random
 
 
@@ -96,7 +96,7 @@ function createRandomHeroForAI(CPlayer cPlayer, boolean removeFromTavern)
         if remainingHeroTypes[random].hasAI()
             break
 
-    Hero hero = new Hero(cPlayer, remainingHeroTypes[random].getUnitId() , gg_rct_CenterMid.getCenter(), angle(0))
+    Hero hero = new Hero(id, remainingHeroTypes[random].getUnitId() , gg_rct_CenterMid.getCenter(), angle(0))
     setupCreatedHero(hero)
 
 
@@ -109,10 +109,10 @@ function createRandomHeroForAI(CPlayer cPlayer, boolean removeFromTavern)
 
 
 //creates a random hero for a player
-function createRandomHero(CPlayer cPlayer, boolean removeFromTavern)
+function createRandomHero(int id, boolean removeFromTavern)
     var random = GetRandomInt(0, remainingHeroTypesCount-1)
 
-    Hero hero = new Hero(cPlayer, remainingHeroTypes[random].getUnitId() , gg_rct_CenterMid.getCenter(), angle(0))
+    Hero hero = new Hero(id, remainingHeroTypes[random].getUnitId() , gg_rct_CenterMid.getCenter(), angle(0))
     setupCreatedHero(hero)
 
 
@@ -138,11 +138,11 @@ function removeHeroType(HeroType herotype, boolean _removeFromTavern)
 
 function allRandom()
     for i = 0 to MAX_HERO_COUNT-1
-        if(getCPlayer(i).getPlayerType()==PlayerType.HERO)
+        if PlayerWrapper.getPlayerType(i) == PlayerType.HERO
             if players[i].getController() == MAP_CONTROL_COMPUTER
-                createRandomHeroForAI(getCPlayer(i), false)
+                createRandomHeroForAI(i, false)
             else
-                createRandomHero(getCPlayer(i), false)
+                createRandomHero(i, false)
 
     allHeroesPicked()
     
@@ -166,7 +166,7 @@ function allPick()
 
 
     for i = 0 to MAX_HERO_COUNT-1
-        if(getCPlayer(i).getPlayerType()==PlayerType.HERO)
+        if PlayerWrapper.getPlayerType(i) == PlayerType.HERO
             players[i].setGold(HERO_GOLD_COST)
             patron[i] = createUnit(players[i], 'n006', gg_rct_CenterMid.getCenter(), angle(0))
             players[i].setCameraTargetControllerNoZ(patron[i], vec2(0,0), false)
@@ -225,8 +225,7 @@ function onClick()
 
 function onPick()
     unit pickedUnit = GetTriggerUnit()
-    CPlayer cPlayer = pickedUnit.getOwner().getCPlayer()
-    if(cPlayer.getPlayerType()==PlayerType.HERO)
+    if PlayerWrapper.getPlayerType(pickedUnit.getOwner().getId()) == PlayerType.HERO
         if HeroType.getHeroType(pickedUnit.getTypeId()) != null
             Hero hero = new Hero(pickedUnit)
             setupCreatedHero(hero)
@@ -243,16 +242,16 @@ function allPickEnd()
         tavern[i].remove()
         tavern[i]=null
     for i = 0 to MAX_HERO_COUNT-1
-        if getCPlayer(i).getPlayerType()==PlayerType.HERO
+        if PlayerWrapper.getPlayerType(i) == PlayerType.HERO
             patron[i].remove()
             patron[i]=null
             if not playerHasPicked[i]
                 if(GetLocalPlayer()==players[i])
                     print("|cffffcc00You have not picked a hero in time. You will get a random one.")
                 if players[i].getController() == MAP_CONTROL_COMPUTER
-                    createRandomHeroForAI(getCPlayer(i), false)
+                    createRandomHeroForAI(i, false)
                 else
-                    createRandomHero(getCPlayer(i), false)
+                    createRandomHero(i, false)
 
             FogModifierStop(tavernVision[i])
             DestroyFogModifier(tavernVision[i])
@@ -388,9 +387,8 @@ init
             if i >= 0 and i<=MAX_HERO_COUNT-1 and not playerHasPicked[i]
 
                 
-
-                new CPlayer(players[i], i<=4?Team.TEAM1:Team.TEAM2, PlayerType.HERO)
-                createRandomHero(getCPlayer(i), false)
+                PlayerWrapper.createPlayerWrapper(i, PlayerType.HERO)
+                createRandomHero(i, false)
 
 
                 if not itemCarry
@@ -415,15 +413,15 @@ init
                 
 
                 if i!= 0
-                    new CPlayer(players[i], i<=4?Team.TEAM1:Team.TEAM2, PlayerType.HERO)
+                    PlayerWrapper.createPlayerWrapper(i, PlayerType.HERO)
 
                 //Hero hero = new Hero(createUnit(players[i], 'H00H', gg_rct_CenterMid.getCenter(), angle(0)))
-                createRandomHeroForAI(getCPlayer(i), false)
+                createRandomHeroForAI(i, false)
                 //setupCreatedHero(hero)
 
                 //removeHeroType(hero.getHeroType())
 
-                let ai = new HeroAI(getCPlayer(i), AI_DIFFICULTY_NEWBIE)
+                let ai = new HeroAI(i, AI_DIFFICULTY_NEWBIE)
 
                 doAfter(6) ->
                     ai.buyItems()
@@ -443,17 +441,17 @@ init
                     
 
                     if i!= 0
-                        new CPlayer(players[i], i<=4?Team.TEAM1:Team.TEAM2, PlayerType.HERO)
+                        PlayerWrapper.createPlayerWrapper(i, PlayerType.HERO)
 
                     //Hero hero = new Hero(createUnit(players[i], 'H00H', gg_rct_CenterMid.getCenter(), angle(0)))
-                    createRandomHeroForAI(getCPlayer(i), false)
+                    createRandomHeroForAI(i, false)
                     //setupCreatedHero(hero)
 
                     //removeHeroType(hero.getHeroType())
 
-                    let ai = new HeroAI(getCPlayer(i), AI_DIFFICULTY_INSANE)
+                    let ai = new HeroAI(i, AI_DIFFICULTY_INSANE)
 
-                    for Hero hero in CPlayer.getPlayerHeroes(i)
+                    for Hero hero in PlayerWrapper.getPlayerHeroes(i)
                         hero.toUnit().setLevel(25, false)
 
                     doAfter(6) ->
@@ -479,13 +477,13 @@ init
         ..registerPlayerChatEvent(players[0], "mid ", false)
         ..addAction() ->
             let i = GetEventPlayerChatString().substring(4).toInt()
-            for Hero hero in CPlayer.getPlayerHeroes(i)
+            for Hero hero in PlayerWrapper.getPlayerHeroes(i)
                 hero.toUnit().setXY(gg_rct_CenterMid.getCenter())
 
         CreateTrigger()
         ..registerPlayerChatEvent(players[0], "mid", true)
         ..addAction() ->
-            for Hero hero in CPlayer.getPlayerHeroes(0)
+            for Hero hero in PlayerWrapper.getPlayerHeroes(0)
                 hero.toUnit().setXY(gg_rct_CenterMid.getCenter())
 
         CreateTrigger()
@@ -496,7 +494,7 @@ init
         CreateTrigger()
         ..registerPlayerChatEvent(players[0], "castle", true)
         ..addAction() ->
-            for Hero hero in CPlayer.getPlayerHeroes(0)
+            for Hero hero in PlayerWrapper.getPlayerHeroes(0)
                 hero.toUnit().setXY(gg_rct_BrownCastle.getCenter())
                 hero.toUnit().wrapper().addStatAbsoluteBonus(Stat.STR, 10000)
                 hero.toUnit().wrapper().addStatAbsoluteBonus(Stat.AS, 200)
@@ -506,13 +504,13 @@ init
         ..registerPlayerChatEvent(players[0], "lvl ", false)
         ..addAction() ->
             let i = GetEventPlayerChatString().substring(4).toInt()
-            for Hero hero in CPlayer.getPlayerHeroes(i)
+            for Hero hero in PlayerWrapper.getPlayerHeroes(i)
                 hero.toUnit().setLevel(25, false)
 
         CreateTrigger()
         ..registerPlayerChatEvent(players[0], "lvl", true)
         ..addAction() ->
-            for Hero hero in CPlayer.getPlayerHeroes(0)
+            for Hero hero in PlayerWrapper.getPlayerHeroes(0)
                 hero.toUnit().setLevel(25, false)
 
      //SetHeroLevel(hero.toUnit(), 25, true)

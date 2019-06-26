@@ -44,25 +44,7 @@ function Lane.toInt() returns int
     
     return -1
 
-function setLaneUnitCount(Team t, Lane l, int count)
-    if t == Team.TEAM1
-        laneUnitCountTeam1[l.toInt()] = count
-    else if t == Team.TEAM2
-        laneUnitCountTeam2[l.toInt()] = count
-    else
-        error("Cannot set lane count for this team.")
 
-function getLaneUnitCount(Team t, Lane l) returns int
-    if t == Team.TEAM1
-        return laneUnitCountTeam1[l.toInt()]
-    else if t == Team.TEAM2
-        return laneUnitCountTeam2[l.toInt()]
-    else
-        error("Cannot set lane count for this team.")
-        return -1
-
-public function addLaneUnitCount(Team t, Lane l, int count)
-    setLaneUnitCount(t, l, getLaneUnitCount(t, l)+count)
 
 public function startSpawning()
     if spawnStarted
@@ -164,16 +146,6 @@ function spawnWave()
 
     int i
 
-
-    let greenCountTop = getLaneUnitCount(Team.TEAM1, Lane.TOP)// + topUnitIdsSize
-    let brownCountTop = getLaneUnitCount(Team.TEAM2, Lane.TOP)// + topUnitIdsSize
-
-    let greenCountMid = getLaneUnitCount(Team.TEAM1, Lane.MID)// + midUnitsIdsSize
-    let brownCountMid = getLaneUnitCount(Team.TEAM2, Lane.MID)// + midUnitsIdsSize
-
-    let greenCountBot = getLaneUnitCount(Team.TEAM1, Lane.BOT)// + botUnitsIdsSize
-    let brownCountBot = getLaneUnitCount(Team.TEAM2, Lane.BOT)// + botUnitsIdsSize
-
     income()
 
     counter = 0
@@ -200,34 +172,6 @@ function spawnWave()
         end))
         counter++
 
-
-
-    i = 1
-    while greenCountTop < brownCountTop - 2*i and i <= 3
-        doAfter(counter*0.25, () -> (begin
-            if not spawnStopped
-                if barracksAliveTeam1[0]
-                    unit spawnedUnit
-                    spawnedUnit = spawnUnit(true, MILITIA, gg_rct_GreenSpawnTop.getCenter())
-                    new PathUnitNew(spawnedUnit, AssignedPath.GREEN_TOP)
-
-        end))
-        counter++
-        i ++
-
-    
-    i = 1
-    while brownCountTop < greenCountTop - 2*i and i <= 3
-        doAfter(counter*0.25, () -> (begin
-            if not spawnStopped
-                if barracksAliveTeam2[0]
-                    unit spawnedUnit
-                    spawnedUnit = spawnUnit(false, MILITIA_2, gg_rct_BrownSpawnTop.getCenter())
-                    new PathUnitNew(spawnedUnit, AssignedPath.BROWN_TOP)
-
-        end))
-        counter++
-        i ++
 
 
 
@@ -258,31 +202,6 @@ function spawnWave()
 
 
 
-    i = 1
-    while greenCountMid < brownCountMid - 2*i and i <= 3
-        doAfter(counter*0.25, () -> (begin
-            if not spawnStopped
-                if barracksAliveTeam1[1]
-                    unit spawnedUnit
-                    spawnedUnit = spawnUnit(true, MILITIA, gg_rct_GreenSpawnMid.getCenter())
-                    new PathUnitNew(spawnedUnit, AssignedPath.GREEN_MID)
-
-        end))
-        counter++
-        i ++
-
-    i = 1        
-    while brownCountMid < greenCountMid - 2*i and i <= 3
-        doAfter(counter*0.25, () -> (begin
-            if not spawnStopped
-                if barracksAliveTeam2[1]
-                    unit spawnedUnit
-                    spawnedUnit = spawnUnit(false, MILITIA_2, gg_rct_BrownSpawnMid.getCenter())
-                    new PathUnitNew(spawnedUnit, AssignedPath.BROWN_MID)
-
-        end))
-        counter++
-        i ++
 
 
     counter = 0
@@ -310,30 +229,6 @@ function spawnWave()
         counter++
 
     
-    i = 1
-    while greenCountBot < brownCountBot - 2*i and i <= 3
-        doAfter(counter*0.25, () -> (begin
-            if not spawnStopped
-                if barracksAliveTeam1[2]
-                    unit spawnedUnit
-                    spawnedUnit = spawnUnit(true, MILITIA, gg_rct_GreenSpawnBot.getCenter())
-                    new PathUnitNew(spawnedUnit, AssignedPath.GREEN_BOT)
-        end))
-        counter++
-        i ++
-
-    i = 1
-    while brownCountBot < greenCountBot - 2*i and i <= 3
-        doAfter(counter*0.25, () -> (begin
-            if not spawnStopped
-                if barracksAliveTeam2[2]
-                    unit spawnedUnit
-                    spawnedUnit = spawnUnit(false, MILITIA_2, gg_rct_BrownSpawnBot.getCenter())
-                    new PathUnitNew(spawnedUnit, AssignedPath.BROWN_BOT)
-
-        end))
-        counter++
-        i ++
 
 
     doAfter(6, () -> (begin

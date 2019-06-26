@@ -37,15 +37,15 @@ function onDragonTurtleDeath()
         DEATH_SOUND.play().snd.setVolume(150)
         turtleIcon.hide()
 
-        let killer = GetKillingUnit()
-        let killingTeam = CPlayer.getAllyHeroPlayers(killer.getOwner())
+        let killerId = GetKillingUnit().getOwner().getId()
+        let killingTeam = PlayerWrapper.getTeam(killerId)
         boolean killedByTeam = true
 
 
         string teamName
-        if killer.getOwner().getCPlayer().getTeam() == Team.TEAM1
+        if killingTeam == TEAM_1
             teamName = Player(TEAM_PLAYER_TEAM_1).getFullColoredName()
-        else if killer.getOwner().getCPlayer().getTeam() == Team.TEAM2
+        else if killingTeam == TEAM_2
             teamName = Player(TEAM_PLAYER_TEAM_2).getFullColoredName()
         else
             teamName = ""
@@ -57,14 +57,13 @@ function onDragonTurtleDeath()
 
             
 
-            for CPlayer killerHero in killingTeam
-                let hero = CPlayer.getPlayerHero(killerHero.getId(),0)
-                if hero != null
-                    killerHero.dragonTurtleBonus()
+            for p in PlayerWrapper.getHeroTeam(killingTeam)
+                for hero in PlayerWrapper.getPlayerHeroes(p)
+                    dragonTurtleBonus(p)
                     hero.addXp(150)
-                    createGoldBountyTextTag(target, TEAM_REWARD, killerHero.getPlayer())
+                    createGoldBountyTextTag(target, TEAM_REWARD, players[p])
 
-            killer.getOwner().getCPlayer().statDragonTurtlesKilled++
+            PlayerWrapper.statDragonTurtlesKilled[killerId]++
 
         doAfter(REVIVE_TIME, () -> (begin
             udg_DragonTurtle = createUnit(players[CREEP_SPECIAL_OWNER], DRAGON_TURTLE, spawnPos, facing)
@@ -83,8 +82,8 @@ function onDragonTurtleDeath()
 
         end))
 
-function CPlayer.dragonTurtleBonus()
-    this.addGoldEx( TEAM_REWARD )
+function dragonTurtleBonus(int id)
+    PlayerWrapper.addGoldEx(id, TEAM_REWARD)
 
 
 

@@ -263,7 +263,7 @@ public class TeamFight
         unit currentTarget = null
 
         for i = firstTeam ? HERO_PLAYER_TEAM_2_FIRST : HERO_PLAYER_TEAM_1_FIRST to firstTeam ? HERO_PLAYER_TEAM_2_LAST : HERO_PLAYER_TEAM_1_LAST
-            let heroes = CPlayer.getPlayerHeroes(i)
+            let heroes = PlayerWrapper.getPlayerHeroes(i)
             for Hero hero in heroes
                 let heroUnit = hero.toUnit()
                 if hero.toUnit().getPos().distanceTo(this.teamFightLoc) < TEAM_FIGHT_RANGE and hero.toUnit().isAlive() and hero.toUnit().isTargetable(firstTeam ? players[TEAM_PLAYER_TEAM_1] : players[TEAM_PLAYER_TEAM_2], false, true)
@@ -296,7 +296,7 @@ public function HeroAI.addTeam(boolean firstTeam)
 
 public class HeroAI
     
-    private CPlayer owner
+    private int ownerId
     private player owningPlayer
     private Hero hero
     private HeroType heroType
@@ -359,9 +359,6 @@ public class HeroAI
 
     function getTargetLoc() returns vec2
         return this.targetLoc
-
-    function getOwner() returns CPlayer
-        return this.owner
 
     function getOwningPlayer() returns player
         return this.owningPlayer
@@ -462,18 +459,18 @@ public class HeroAI
         end))
     
 
-    construct(CPlayer owner, aidifficulty diff)
-        this.owner = owner
-        this.owningPlayer = owner.getPlayer()
-        this.hero = CPlayer.getPlayerHero(owner.getId(), 0)
+    construct(int playerId, aidifficulty diff)
+        this.ownerId = playerId
+        this.owningPlayer = players[ownerId]
+        this.hero = PlayerWrapper.getPlayerHero(playerId, 0)
         this.heroType = hero.getHeroType()
         this.heroUnit = this.hero.toUnit()
-        this.firstTeam = owner.getId() <= HERO_PLAYER_TEAM_1_LAST
+        this.firstTeam = PlayerWrapper.getTeam(playerId) == TEAM_1
         this.addTeam(firstTeam)
 
         this.state = ATTACK
 
-        heroAIs[owner.getId()] = this
+        heroAIs[playerId] = this
         this.attackTimer.setData(this castTo int)
 
         //test:
@@ -505,7 +502,8 @@ public class HeroAI
         let wrapper = this.heroUnit.wrapper()
 
         if diff == AI_DIFFICULTY_NORMAL
-            this.owner.addGoldEx((500).round())
+            let gold = 500
+            PlayerWrapper.addGoldEx(this.ownerId, gold )
             wrapper.addStatRelativeBonus(Stat.AGI, 100)
             wrapper.addStatRelativeBonus(Stat.AR, 100)
             wrapper.addStatAbsoluteBonus(Stat.AS, 10)
@@ -520,7 +518,8 @@ public class HeroAI
             wrapper.addStatAbsoluteBonus(Stat.MR, 20)
             
         else if diff == AI_DIFFICULTY_INSANE
-            this.owner.addGoldEx((1500).round())
+            let gold = 1500
+            PlayerWrapper.addGoldEx(this.ownerId, gold )
             wrapper.addStatRelativeBonus(Stat.AGI, 200)
             wrapper.addStatRelativeBonus(Stat.AR, 200)
             wrapper.addStatAbsoluteBonus(Stat.AS, 20)
@@ -784,8 +783,8 @@ public class HeroAI
                     this.changeState(AIState.BUY_UPGRADES)
                     if(not this.noMoreUpgrades)
                         this.upgradeTimer = 4
-                        this.desiredUpgrade = HeroAI.findNextUpgrade(this.owner.getTeam())
-                        this.targetBlacksmith = HeroAI.findNextBlacksmith(this.owner.getTeam(), this.heroUnit.getPos())
+                        this.desiredUpgrade = HeroAI.findNextUpgrade(this.firstTeam)
+                        this.targetBlacksmith = HeroAI.findNextBlacksmith(this.firstTeam, this.heroUnit.getPos())
                         if this.desiredUpgrade == -1 or this.targetBlacksmith == null
                             this.noMoreUpgrades = true
                             this.wantedUpgrades = 0
@@ -809,8 +808,8 @@ public class HeroAI
                     let dist = this.heroUnit.getPos().distanceTo(smithPos)
                     if dist<300
                         if this.upgradeTimer > 0
-                            this.desiredUpgrade = HeroAI.findNextUpgrade(this.owner.getTeam())
-                            this.targetBlacksmith = HeroAI.findNextBlacksmith(this.owner.getTeam(), this.heroUnit.getPos())
+                            this.desiredUpgrade = HeroAI.findNextUpgrade(this.firstTeam)
+                            this.targetBlacksmith = HeroAI.findNextBlacksmith(this.firstTeam, this.heroUnit.getPos())
                             if this.desiredUpgrade == -1 or this.targetBlacksmith == null
                                 this.noMoreUpgrades = true
                                 this.wantedUpgrades = 0
@@ -867,13 +866,13 @@ public class HeroAI
                     g.destr()
 
                     if heroNearby
-                        let chance = determineWinChance(this.owner.getId()<=HERO_PLAYER_TEAM_1_LAST, this.heroUnit.getPos())
+                        let chance = determineWinChance(this.firstTeam, this.heroUnit.getPos())
                         //start team fight for all narby AIs
                         aiMessage("attack chance = "+chance.toString())
                         if chance > 0.6
 
 
-                            let newTeamFight = new TeamFight(this.heroUnit.getPos(), this.owner.getId()<=HERO_PLAYER_TEAM_1_LAST)
+                            let newTeamFight = new TeamFight(this.heroUnit.getPos(), this.firstTeam)
 
                             for i = 0 to MAX_HERO_COUNT-1
                                 let ai = heroAIs[i]
@@ -978,10 +977,9 @@ public class HeroAI
 
                 //print(this.heroUnit.getOwner().getColor().toColor().toColorString()+"["+this.heroUnit.getName()+"]|r "+" wants upgrades: "+I2S(this.wantedUpgrades))
 
-    static function findNextUpgrade(Team t) returns int
-        if t != Team.TEAM1 and t!= Team.TEAM2
-            error("")
-        let teamPlayer = (t==Team.TEAM1) ? players[TEAM_PLAYER_TEAM_1] : players[TEAM_PLAYER_TEAM_2]
+    static function findNextUpgrade(bool team) returns int
+
+        let teamPlayer = team ? players[TEAM_PLAYER_TEAM_1] : players[TEAM_PLAYER_TEAM_2]
         int array upgrades
         int max = 5
         int index = -1
@@ -997,10 +995,10 @@ public class HeroAI
 
         return ret
 
-    static function findNextBlacksmith(Team t, vec2 pos) returns unit
+    static function findNextBlacksmith(bool team, vec2 pos) returns unit
         unit ret = null
         real minDist = 1000000
-        if t == Team.TEAM1
+        if team
             for i=0 to 1
                 if blacksmithAliveTeam1[i]
                     let dist = pos.distanceTo(udg_GreenBlacksmith[i].getPos())

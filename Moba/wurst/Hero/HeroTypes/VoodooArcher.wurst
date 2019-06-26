@@ -298,13 +298,14 @@ function castBigBadVoodoo()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
     let fx = caster.addEffect(Abilities.voodooAura, "origin")
+    let enemyList = PlayerWrapper.getHeroTeam(PlayerWrapper.getTeam(caster.getOwner().getId()))
     doPeriodically(0.1, (cb) -> begin
         if not caster.isAlive() or caster.getCurrentOrder() != OrderId("tranquility")
             destroy cb
             fx.destr()
         else
-            for CPlayer cPlayer in CPlayer.getEnemyHeroPlayers(caster.getOwner())
-                for Hero hero in CPlayer.getPlayerHeroes(cPlayer.getId())
+            for p in enemyList
+                for Hero hero in PlayerWrapper.getPlayerHeroes(p)
                     let target = hero.toUnit()
                     if target.isTargetable(caster.getOwner(), false, true)
                         caster.dealDamage(target, 0.1 * BBV_DAMAGE[level-1].bonus(caster.getInt(), BBV_DAMAGE_BONUS), ReductionType.NONE)
@@ -411,7 +412,7 @@ function initHeroType()
 
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             if attacker.getTypeId() == SERPENT_WARD and not target.isType(UNIT_TYPE_STRUCTURE)
-                let hero = CPlayer.getPlayerHero(attacker.getOwner().getId(), 0).toUnit()
+                let hero = PlayerWrapper.getPlayerHero(attacker.getOwner().getId(), 0).toUnit()
                 let level = hero.getAbilityLevel(ABILITY_SERPENT_WARD)
                 target.addBuffReduced(hero, SERPENT_POISON_DURATION[level-1], buffSerpentPoison, level)
         end))

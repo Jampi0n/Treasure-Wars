@@ -91,7 +91,7 @@ init
             let id = GetTriggerPlayer().getId()
             if gui[id].isEnabled()
                 gui[id].closeShop()
-                let mainHero = CPlayer.getPlayerHeroes(id).getFirst().toUnit()
+                let mainHero = PlayerWrapper.getPlayerHeroes(id).getFirst().toUnit()
                 if GetLocalPlayer().getId() == id
                     ClearSelection()
                     SelectUnit(mainHero,true)
