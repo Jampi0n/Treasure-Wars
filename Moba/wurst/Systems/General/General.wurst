@@ -27,9 +27,6 @@ public enum ReductionType
     MAGIC
     NONE
 
-public function printWarning(string warning)
-    if warning != ""
-        //print(warning)
 
 /*
     Every update to any hero button unhides all buttons.
@@ -160,7 +157,7 @@ public function unit.dealDamage(unit target, real amount, ReductionType reductio
     if not target.isType(UNIT_TYPE_ANCIENT)
         this.dealDamageAlways(target, amount, reductionType)
         if not IsUnitEnemy(target, this.getOwner()) and this != target
-            print(this.getName()+" damages ally: "+target.getName())
+            Log.warn(this.getName()+" damages ally: "+target.getName())
 
 public function unit.damageMana(unit target, real amount, ReductionType reductionType)
     real newAmount

@@ -203,7 +203,6 @@ class RecipeTreeNode
         this.childrenList = new LinkedList<RecipeTreeNode>
     
         this.index = this.tree.usedButtons
-        print("create node with index = " + this.index.toString())
         this.btn = this.gui.getRecipeTreeButton(this.index)
         this.tree.usedButtons++
         if this.gui.selectedItem == this.itm
@@ -233,7 +232,6 @@ class RecipeTreeNode
 
         int i = 0
         for ItemInShop child in this.itm.getRequirements()
-            print("this.y = " + this.y.toString() + ", this.y + 1 = " + (this.y + 1).toString() )
             RecipeTreeNode childNode = new RecipeTreeNode(this.tree, getChildX(this.x, this.y, i, this.children), this.y + 1, child)
             this.childrenList.add(childNode)
             i++
@@ -795,7 +793,6 @@ public class GUI
             return
 
         this.canBuy = canBuyNew
-        //print(canBuyNew)
         this.buyButton.frame().setEnabled(canBuyNew)
             
     function getPlayer() returns player
@@ -855,14 +852,12 @@ public class GUI
     private function onClickCategoryButton()
         let fh = BlzGetTriggerFrame()
         let index = buttonToIndex.get(fh.getHandleId())
-        print("click: " + index.toString())
         fh..setEnabled(false)..setEnabled(true)
         setPage(index)
 
     private function onClickListButton()
         let fh = BlzGetTriggerFrame()
         let index = buttonToIndex.get(fh.getHandleId())
-        print("click: " + index.toString())
         fh..setEnabled(false)..setEnabled(true)
         let clickedItem = this.getItemFromList(this.currentPage, index)
         if clickedItem != null
@@ -872,7 +867,6 @@ public class GUI
     private function onClickRecipeTreeButton()
         let fh = BlzGetTriggerFrame()
         let index = buttonToIndex.get(fh.getHandleId())
-        print("click: " + index.toString())
         fh..setEnabled(false)..setEnabled(true)
         this.selectItem(this.getRecipeTreeItem(index), false)
         clickAnyButton()
@@ -880,7 +874,6 @@ public class GUI
     private function onClickBuildsInto()
         let fh = BlzGetTriggerFrame()
         let index = buttonToIndex.get(fh.getHandleId())
-        print("click: " + index.toString())
         fh..setEnabled(false)..setEnabled(true)
         this.selectRecipe(this.getBuildsIntoItem(index), false)
 

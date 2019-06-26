@@ -127,7 +127,6 @@ function createRandomHero(CPlayer cPlayer, boolean removeFromTavern)
 function removeHeroType(HeroType herotype, boolean _removeFromTavern)
     let index = heroTypeIndex.get(herotype)
 
-    //print("remove: "+herotype.getUnitId().toRawCode()+ "at index "+index.toString())
 
     heroTypeIndex.put(remainingHeroTypes[remainingHeroTypesCount-1], index)
     heroTypeIndex.remove(remainingHeroTypes[index])
@@ -135,12 +134,6 @@ function removeHeroType(HeroType herotype, boolean _removeFromTavern)
     remainingHeroTypes[index] = remainingHeroTypes[remainingHeroTypesCount-1]
     remainingHeroTypes[remainingHeroTypesCount-1]=null
     remainingHeroTypesCount--
-
-    /*if removeFromTavern
-        for i = 0 to MAX_HERO_COUNT-1
-            if(getCPlayer(i).getPlayerType()==PlayerType.HERO)
-                SetPlayerTechMaxAllowed(players[i], herotype.getUnitId(), 0)*/
-        
 
 
 function allRandom()

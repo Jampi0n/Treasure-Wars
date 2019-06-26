@@ -526,10 +526,8 @@ function initHeroType()
                 whichWrapper.defaultBonusCalcualtion(Stat.MP)
                 let hpBonus = UnitWrapper.statsTotalBonus_static[arrayOffset + hp]
                 let mpBonus = UnitWrapper.statsTotalBonus_static[arrayOffset + mp]
-                //print("hpBonus = "+hpBonus.toString()+", mpBonus = "+mpBonus.toString())
                 UnitWrapper.statsTotalBonus_static[arrayOffset + hp] = hpBonus + ((1/ANCIENT_KNOWLEDGE_HP_BONUS[lvl-1]) * (mpBonus + whichWrapper.getStatBaseValue(Stat.MP)) ).toInt()
                 UnitWrapper.statsTotalBonus_static[arrayOffset + mp] = mpBonus + ((1/ANCIENT_KNOWLEDGE_MP_BONUS[lvl-1]) * (hpBonus + whichWrapper.getStatBaseValue(Stat.HP)) ).toInt()
-                //print("newHpBonus = "+whichWrapper.statsTotalBonus[hp].toString()+", newHpBonus = "+whichWrapper.statsTotalBonus[mp].toString())
                 whichWrapper.applyTotalStatBonus(Stat.HP)
                 whichWrapper.applyTotalStatBonus(Stat.MP)
             else //else calculate default values

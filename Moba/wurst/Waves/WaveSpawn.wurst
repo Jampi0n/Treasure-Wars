@@ -164,20 +164,6 @@ function spawnWave()
 
     int i
 
-    /*unit spawnedMortar
-    PathUnit pathMortar
-
-    spawnedMortar = spawnUnit(true, MORTAR_TEAM, gg_rct_GreenSpawnTop.getCenter())
-    pathMortar = new PathUnit(spawnedMortar)
-    pathMortar.setPathFirst(GREEN_TOP)
-
-    spawnedMortar = spawnUnit(true, MORTAR_TEAM, gg_rct_GreenSpawnMid.getCenter())
-    pathMortar = new PathUnit(spawnedMortar)
-    pathMortar.setPathFirst(GREEN_MID)
-
-    spawnedMortar = spawnUnit(true, MORTAR_TEAM, gg_rct_GreenSpawnBot.getCenter())
-    pathMortar = new PathUnit(spawnedMortar)
-    pathMortar.setPathFirst(GREEN_BOT)*/
 
     let greenCountTop = getLaneUnitCount(Team.TEAM1, Lane.TOP)// + topUnitIdsSize
     let brownCountTop = getLaneUnitCount(Team.TEAM2, Lane.TOP)// + topUnitIdsSize
@@ -187,8 +173,6 @@ function spawnWave()
 
     let greenCountBot = getLaneUnitCount(Team.TEAM1, Lane.BOT)// + botUnitsIdsSize
     let brownCountBot = getLaneUnitCount(Team.TEAM2, Lane.BOT)// + botUnitsIdsSize
-
-    //print(greenCountTop.toString()+","+greenCountMid.toString()+","+greenCountBot.toString()+" vs "+brownCountTop.toString()+","+brownCountMid.toString()+","+brownCountBot.toString())
 
     income()
 

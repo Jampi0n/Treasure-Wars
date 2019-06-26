@@ -106,7 +106,6 @@ public class Hero
 
         if this.heroType.getBonusCalculation() != null
             wrapper.setBonusCalculation(this.heroType.getBonusCalculation())
-        //print("setup completed: "+this.hero.getName())
 
         if this.heroType.getUsesHeroGlow()
             this.heroGlow = createUnit(this.hero.getOwner(), 'n00H', this.hero.getPos(), angle(0))
@@ -251,14 +250,14 @@ public class Hero
         this.upgrade()
         if this.hero.getMoveSpeed() < 100
             let wrapper = this.hero.wrapper()
-            print(this.hero.getName()+" has very low movement speed after revive.")
-            print("getStatTotalValue = "+wrapper.getStatTotalValue(Stat.MS).toString())
-            print("getStatTotalBonus = "+wrapper.getStatTotalBonus(Stat.MS).toString())
-            print("getStatAbsoluteBonus = "+wrapper.getStatAbsoluteBonus(Stat.MS).toString())
-            print("getStatRelativeBonus = "+wrapper.getStatRelativeBonus(Stat.MS).toString())
-            print("getStatBaseValue = "+wrapper.getStatBaseValue(Stat.MS).toString())
-            print("actual ms = "+this.hero.getMoveSpeed().toString())
-            print("default ms = "+this.hero.getDefaultMovespeed().toString() )
+            Log.warn(this.hero.getName()+" has very low movement speed after revive.")
+            Log.warn("getStatTotalValue = "+wrapper.getStatTotalValue(Stat.MS).toString())
+            Log.warn("getStatTotalBonus = "+wrapper.getStatTotalBonus(Stat.MS).toString())
+            Log.warn("getStatAbsoluteBonus = "+wrapper.getStatAbsoluteBonus(Stat.MS).toString())
+            Log.warn("getStatRelativeBonus = "+wrapper.getStatRelativeBonus(Stat.MS).toString())
+            Log.warn("getStatBaseValue = "+wrapper.getStatBaseValue(Stat.MS).toString())
+            Log.warn("actual ms = "+this.hero.getMoveSpeed().toString())
+            Log.warn("default ms = "+this.hero.getDefaultMovespeed().toString() )
 
         if this.heroGlow != null
             this.heroGlow

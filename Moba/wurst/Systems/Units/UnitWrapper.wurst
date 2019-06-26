@@ -124,7 +124,7 @@ public class UnitWrapper
                 if this.assocUnit.getAbilityLevel('Aloc') == 0
                     if not unnkownUnitTypes.has(this.assocUnit.getTypeId())
                         unnkownUnitTypes.add(this.assocUnit.getTypeId())
-                        print("Warning unnkown unit type: "+GetUnitName(this.assocUnit))
+                        Log.warn("Warning unnkown unit type: "+GetUnitName(this.assocUnit))
 
     function updateBaseStatsUnits()
         let uType = UnitType.getUnitType(this.assocUnit.getTypeId())
@@ -138,7 +138,7 @@ public class UnitWrapper
 
     function updateBaseStatsHero()
         if not this.assocUnit.isType(UNIT_TYPE_HERO)
-            print("Base stats for non-hero units are constant and must not be updated.")
+            Log.warn("Base stats for non-hero units are constant and must not be updated.")
         statBaseValue_static[this.arrayOffset + Stat.STR.toInt()] = this.assocUnit.getStr(false)
         statBaseValue_static[this.arrayOffset + Stat.AGI.toInt()] = this.assocUnit.getAgi(false)
         statBaseValue_static[this.arrayOffset + Stat.INT.toInt()] = this.assocUnit.getInt(false)
@@ -304,7 +304,7 @@ public class UnitWrapper
 
     function printStat(Stat whichStat)
         int stat = whichStat.toInt()
-        print(whichStat.toString()+" ( "+statBaseValue_static[this.arrayOffset + stat].toString()+" + "+statsAbsoluteBonus_static[this.arrayOffset + stat].toString()+" ) * "+statsRelativeBonus_static[this.arrayOffset + stat].toString() + "->" +statsTotalBonus_static[this.arrayOffset + stat].toString() )
+        Log.debug(whichStat.toString()+" ( "+statBaseValue_static[this.arrayOffset + stat].toString()+" + "+statsAbsoluteBonus_static[this.arrayOffset + stat].toString()+" ) * "+statsRelativeBonus_static[this.arrayOffset + stat].toString() + "->" +statsTotalBonus_static[this.arrayOffset + stat].toString() )
 
     function toUnit() returns unit
         return this.assocUnit
@@ -358,39 +358,10 @@ public class UnitWrapper
 public function unit.wrapper() returns UnitWrapper
     return UnitWrapper.getWrapper(this)
 
-/*public function unit.getCurrentMovementSpeed() returns real
-    return this.wrapper().currentMovementSpeed
-
-public function unit.getDefaultMovementSpeed() returns real
-    return this.wrapper().defaultMovementSpeed
-
-public function unit.updateDefaultMovementSpeed()
-    if this.isType(UNIT_TYPE_HERO)
-        this.wrapper().defaultMovementSpeed = DEFAULT_HERO_SPEED + GetPlayerTechCount(this.getOwner(), UPG_MS, true) 
-        //print(GetUnitDefaultMoveSpeed(this) + GetPlayerTechCount(this.getOwner(), UPG_MS, true))*/
-
-/*public function unit.setMovementSpeed(real newSpeed)
-    this.wrapper().currentMovementSpeed = newSpeed
-    //print("set ms to "+newSpeed.toString())
-    this.setMoveSpeed(newSpeed)*/
-
 
 
 public function unit.getBuffList() returns BuffList
     return this.wrapper().buffList
-
-
-    /*for i = 0 to UnitWrapper.unitWrapperCount-1
-        unit u = UnitWrapper.allUnits[i]
-        
-        if u.isAlive()
-            u.healHP(u.wrapper().statsTotalBonus[Stat.HR.toInt()]/100)
-            
-            u.healMana(u.wrapper().statsTotalBonus[Stat.MR.toInt()]/100)
-
-            if(u.isType(UNIT_TYPE_HERO)) and false
-                print(u.wrapper().statsTotalBonus[Stat.HR.toInt()]/100)
-                print(u.wrapper().statsTotalBonus[Stat.MR.toInt()]/100)*/
 
 init
     UnitWrapper.classInit()
