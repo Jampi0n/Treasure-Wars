@@ -18,10 +18,10 @@ enum PathState
 
 constant DISTANCE_THRESHOLD = 360000 // squared
 
-constant TOP_X_THRESHOLD = -920.0
-constant TOP_Y_THRESHOLD = 4840.0
-constant BOT_X_THRESHOLD = 5030.0
-constant BOT_Y_THRESHOLD = -810.0
+constant TOP_X_THRESHOLD = gg_rct_CornerTopBrown.getCenterX()
+constant TOP_Y_THRESHOLD = gg_rct_CornerTopGreen.getCenterY()
+constant BOT_X_THRESHOLD = gg_rct_CornerBotGreen.getCenterX()
+constant BOT_Y_THRESHOLD = gg_rct_CornerBotBrown.getCenterY()
 
 public enum AssignedPath
     GREEN_TOP
@@ -69,20 +69,20 @@ vec2 array finalPoint
 
 function initTargetPoints()
     targetPoint[2] = gg_rct_GreenCastle.getCenter()
-    targetPoint[3] = gg_rct_CornerTopGreen.getCenter() + vec2(0, 500)
-    targetPoint[4] = gg_rct_CornerTopGreen.getCenter()
-    targetPoint[5] = gg_rct_CornerTopBrown.getCenter()
-    targetPoint[6] = gg_rct_CornerTopBrown.getCenter() + vec2(-500, 0)
+    targetPoint[3] = gg_rct_CornerTop.getCenter() + vec2(-400, 400)
+    targetPoint[4] = gg_rct_CornerTopGreen.getCenter() + vec2(-400, -400)
+    targetPoint[5] = gg_rct_CornerTopBrown.getCenter() + vec2(400, 400)
+    targetPoint[6] = gg_rct_CornerTop.getCenter() + vec2(-400, 400)
     targetPoint[7] = gg_rct_BrownCastle.getCenter()
 
     targetPoint[8] = gg_rct_GreenCastle.getCenter()
     targetPoint[9] = gg_rct_BrownCastle.getCenter()
 
     targetPoint[10] = gg_rct_GreenCastle.getCenter()
-    targetPoint[11] = gg_rct_CornerBotGreen.getCenter() + vec2(500, 0)
-    targetPoint[12] = gg_rct_CornerBotGreen.getCenter()
-    targetPoint[13] = gg_rct_CornerBotBrown.getCenter()
-    targetPoint[14] = gg_rct_CornerBotBrown.getCenter() + vec2(0, -500)
+    targetPoint[11] = gg_rct_CornerBot.getCenter() + vec2(400, -400)
+    targetPoint[12] = gg_rct_CornerBotGreen.getCenter() + vec2(-400, -400)
+    targetPoint[13] = gg_rct_CornerBotBrown.getCenter() + vec2(400, 400)
+    targetPoint[14] = gg_rct_CornerBot.getCenter() + vec2(400, -400)
     targetPoint[15] = gg_rct_BrownCastle.getCenter()
 
     finalPoint[TEAM_PLAYER_TEAM_1] = gg_rct_BrownCastle.getCenter()
