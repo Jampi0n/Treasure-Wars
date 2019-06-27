@@ -209,6 +209,37 @@ public function AbilityDefinition.setupWithHotKey(string name, string hotkey)
             ..setLevelSkipRequirement(4)
         return
 
+public function AbilityDefinition.targetFriends()
+    for i = 1 to this.getLevels()
+        this.setTargetsAllowed(i, "ground,friend,nonsapper,air,self")
+
+public function AbilityDefinition.targetAllies()
+    for i = 1 to this.getLevels()
+        this.setTargetsAllowed(i, "ground,friend,nonsapper,air")
+
+public function AbilityDefinition.targetEnemies()
+    for i = 1 to this.getLevels()
+        this.setTargetsAllowed(i, "ground,enemy,nonsapper,air,nonancient,neutral")
+
+public function AbilityDefinition.targetSelf()
+    for i = 1 to this.getLevels()
+        this.setTargetsAllowed(i, "self")
+
+public function AbilityDefinition.targetFriendlyHeroes()
+    for i = 1 to this.getLevels()
+        this.setTargetsAllowed(i, "friend,nonsapper,hero,self")
+
+public function AbilityDefinition.targetAlliedHeroes()
+    for i = 1 to this.getLevels()
+        this.setTargetsAllowed(i, "friend,nonsapper,hero")
+
+public function AbilityDefinition.targetEnemyHeroes()
+    for i = 1 to this.getLevels()
+        this.setTargetsAllowed(i, "enemy,nonsapper,nonancient,hero,self")
+
+public function AbilityDefinition.targetNone()
+    for i = 1 to this.getLevels()
+        this.setTargetsAllowed(i, "none")
 
 abstract class DynamicElement
     function evaluate(int _strength, int _intelligence, real _cooldown, bool _const) returns string

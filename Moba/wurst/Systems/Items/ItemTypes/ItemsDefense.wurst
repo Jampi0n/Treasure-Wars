@@ -145,7 +145,7 @@ function runicArmor()
 
 constant HOLY_SHIELD_BUFF_ID = compiletime(createAuraBuff("Holy Shield", "This unit is protected by Holy Shield; it is untargetable.", "BTNGoldenShieldHoly"))
 constant HOLY_SHIELD_ABILTIY_ID = compiletime(createPositiveBuffAbility(1, HOLY_SHIELD_BUFF_ID, "Abilities\\Spells\\Human\\DivineShield\\DivineShieldTarget.mdl", ""))
-constant BUFF_HOLY_SHIELD = new BuffType(true, true)
+constant BUFF_HOLY_SHIELD = new BuffType(true, DispelLevel.NONE)
     
 function holyShield()
     let dur = 2 //trigger
@@ -174,7 +174,7 @@ function holyShield()
             if GetSpellAbilityId() == 'A00G'
                 let hero = GetTriggerUnit()
                 hero.addBuff( hero, 2, BUFF_HOLY_SHIELD, 1)
-                hero.addBuff( hero, 2, UNTARGETABLE, 1)
+                hero.addBuff( hero, 2, INVULERNABLE, 1)
         end))
 
 function mageArmor()

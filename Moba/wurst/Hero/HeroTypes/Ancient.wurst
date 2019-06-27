@@ -93,7 +93,7 @@ function devourUnit(int abilityId)
                 ..setDamageperTarget(lvl, 0)
                 ..setCastRange(lvl, 150)
                 ..setDurationNormal(lvl, 0.1)
-                ..setTargetsAllowed(lvl, "air,enemies,ground,neutral,nonancient,organic,nonhero")
+                ..setTargetsAllowed(lvl, "enemies,ground,neutral,nonancient,nonsapper,organic,nonhero")
 
 
     let tooltip = new DynamicTooltip(abilityId)
@@ -113,7 +113,7 @@ constant real ENTANGLE_DURATION_BONUS = 1
 constant real array ENTANGLE_HIT_DAMAGE = [100, 150, 200, 250, 300]
 constant real ENTANGLE_HIT_DAMAGE_BONUS = 150
 
-constant BuffType BUFF_ENTAGLING_ROOTS = new BuffType(false, true)
+constant BuffType BUFF_ENTAGLING_ROOTS = new BuffType(false, DispelLevel.DISPEL)
 constant int ENTAGLING_ROOTS_BUFF_ID = compiletime(createAuraBuff("Entangling Roots", "This unit was hit by Entangling Roots; it cannot move or attack.", "BTNEntnagle"))
 constant int ENTAGLING_ROOTS_ABILITY_ID = compiletime(createNegativeBuffAbility(5, ENTAGLING_ROOTS_BUFF_ID, Abilities.entanglingRootsTarget, "origin"))
 
@@ -127,13 +127,13 @@ function entanglingRoots(int abilityId)
             ..setAnimationNames("attack,2")
             ..setupWithHotKey("Entangling Roots", "W")
             ..setMissileArt("")
+            ..targetNone()
 
         for lvl = 1 to 5
             aDef
                 ..setCooldown(lvl, COOLDOWN[lvl-1])
                 ..setManaCost(lvl, MANA[lvl-1])
                 ..setCastRange(lvl, 800)
-                ..setTargetsAllowed(lvl, "none")
 
 
     let tooltip = new DynamicTooltip(abilityId)
@@ -439,7 +439,7 @@ function castEntangle()
                     if not BuffList.hasBuffType(u, BUFF_ENTAGLING_ROOTS)
                         caster.dealDamage(u, ENTANGLE_HIT_DAMAGE[level-1].bonus(caster.getInt(), ENTANGLE_HIT_DAMAGE_BONUS), ReductionType.MAGIC)
 
-                    u.addBuffReduced(caster, dur, ENTANGLED, 1)
+                    u.addBuffReduced(caster, dur, ENTANGLED, 1).setDispelLevel(DispelLevel.DISPEL)
                     u.addBuffReduced(caster, dur, BUFF_ENTAGLING_ROOTS, level)
     
             nearby.destr()

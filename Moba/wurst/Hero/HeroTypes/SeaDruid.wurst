@@ -69,12 +69,12 @@ function tidalFury(int abilityId)
             ..setupIcon(Icons.bTNCrushingWave)
             ..setupWithHotKey("Tidal Fury", "Q")
             ..setArtCaster("")
+            ..targetNone()
 
         for lvl = 1 to 5
             aDef
                 ..setCooldown(lvl, COOLDOWN[lvl-1])
                 ..setManaCost(lvl, MANA[lvl-1])
-                ..setTargetsAllowed(lvl, "none")
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip
@@ -170,6 +170,7 @@ function manaShield(int abilityId)
             ..setIconTurnOff(Icons.bTNneutralManaShieldOff)
             ..setupWithHotKey("Mana Shield", "E")
             ..setTurnOff("Deactivate Mana Shield", "E")
+            ..targetNone()
 
         for lvl = 1 to 5
             aDef
@@ -180,7 +181,6 @@ function manaShield(int abilityId)
                 ..setDamageperInterval(lvl, 0)
                 ..setBuffs(lvl, MANA_SHIELD_BUFF_ID.toRawCode()+",BEia")
                 ..setManaDrainedperSecond(lvl, MANA_PER_SECOND[lvl-1])
-                ..setTargetsAllowed(lvl, "none")
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(0)
@@ -223,6 +223,7 @@ function ritualOfTheSeas(int abilityId)
             ..setAnimationNames("spell,channel")
             ..setupIcon("BTNGuardianofTheSea")
             ..setupWithHotKey("Ritual of the Seas", "R")
+            ..targetNone()
 
         for lvl = 1 to 5
             aDef
@@ -231,7 +232,6 @@ function ritualOfTheSeas(int abilityId)
                 ..setDurationHero(lvl, RITUAL_WAVE_COUNT[lvl-1]*2 + 0.1)
                 ..setDurationNormal(lvl, RITUAL_WAVE_COUNT[lvl-1]*2 + 0.1)
                 ..setEffects(lvl, "X000")
-                ..setTargetsAllowed(lvl, "none")
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(RITUAL_HP_DRAIN_BONUS, RITUAL_MANA_DRAIN_BONUS)
@@ -539,7 +539,7 @@ function initHeroType()
             ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
             ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
 
-        buffFish = new BuffType(false, true)
+        buffFish = new BuffType(false, DispelLevel.DISPEL)
 
         var abilityList = new LinkedList<int>
             ..add(FISH_ABILTIY_ID)
@@ -559,7 +559,7 @@ function initHeroType()
                 ..addStatRelativeBonus(Stat.MS, FISH_MOVE_SPEED[level - 1]*10)
         end))
 
-        buffManaShield = new BuffType(true, true) // the actual effect is in OnAttack
+        buffManaShield = new BuffType(true, DispelLevel.NONE) // the actual effect is in OnAttack
             ..setPeriodicTime(0.1)
         buffManaShield.addPeriodicFunction( (Buff whichBuff) -> (begin
             let caster = whichBuff.getCaster()

@@ -78,6 +78,7 @@ function venomousBeetle(int abilityId)
             ..setMissileArt("")
             ..setArtSpecial("")
             ..setLightningEffects("")
+            ..targetEnemies()
 
         for lvl = 1 to 5
             aDef
@@ -87,7 +88,6 @@ function venomousBeetle(int abilityId)
                 ..setDamageperTarget(lvl, 0)
                 ..setCastRange(lvl, 600)
                 ..setDurationNormal(lvl, 0.1)
-                ..setTargetsAllowed(lvl, "enemies,ground,neutral,nonancient,organic")
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(BITE_DAMAGEL_BONUS, BITE_SLOW_DURATION_BONUS)
@@ -121,11 +121,12 @@ function warstomp(int abilityId)
             ..setAnimationNames("spell,slam")
             ..setupWithHotKey("War Stomp", "W")
             ..setArtCaster(Abilities.warStompCaster)
+            ..targetNone()
+
         for lvl = 1 to 5
             aDef
                 ..setCooldown(lvl, COOLDOWN[lvl-1])
                 ..setManaCost(lvl, MANA[lvl-1])
-                ..setTargetsAllowed(lvl, "none")
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceStrength(WAR_STOMP_DAMAGE_BONUS, WAR_STOMP_DURATION_BONUS)
@@ -207,6 +208,7 @@ function unbreakable(int abilityId)
             ..setArtSpecial("")
             ..setLightningEffects("")
             ..setCheckDependencies(true)
+            ..targetNone()
 
 
         for lvl = 1 to 5
@@ -217,7 +219,6 @@ function unbreakable(int abilityId)
                 ..setDamageTakenIncrease(lvl, 0)
                 ..setMovementSpeedIncrease(lvl, 0)
                 ..setDurationHero(lvl, 0.01)
-                ..setTargetsAllowed(lvl, "none")
                 ..setBuffs(lvl, UNBREAKABLE_DUMMY_BUFF.toRawCode())
 
     let tooltip = new DynamicTooltip(abilityId)
@@ -253,7 +254,7 @@ function castWarStomp()
         nearby.removeUnit(target)
         if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
             caster.dealDamage(target, dmg, ReductionType.PHYSICAL)
-            target.addBuffReduced( caster, dur, STUNNED, 1)
+            target.addBuffReduced( caster, dur, STUNNED, 1).setDispelLevel(DispelLevel.DISPEL)
 
     nearby.destr()
 
@@ -447,7 +448,7 @@ function initHeroType()
             ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
             ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
 
-        buffBite = new BuffType(false, true)
+        buffBite = new BuffType(false, DispelLevel.DISPEL)
 
         var abilityList = new LinkedList<int>
         ..add(BITE_ABILITY_ID)
@@ -464,7 +465,7 @@ function initHeroType()
                 ..addStatRelativeBonus(Stat.MS, BITE_SLOW * 10)
         end))
 
-        buffUnbreakable = new BuffType(true, true)
+        buffUnbreakable = new BuffType(true, DispelLevel.NONE)
 
         abilityList = new LinkedList<int>
             ..add(UNBREAKABLE_ABILITY_ID)

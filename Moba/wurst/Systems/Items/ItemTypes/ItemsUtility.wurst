@@ -21,10 +21,10 @@ function itemLightBoots()
 
 constant int WAR_DRUM_BUFF_ID = compiletime(createAuraBuff("War Drum", "This unit has increased attack and movement speed.", "BTNTribalDrumOfWar"))
 constant int WAR_DRUM_ABILTIY_ID = compiletime(createPositiveBuffAbility(1, WAR_DRUM_BUFF_ID, Abilities.generalAuraTarget, ""))
-constant BuffType BUFF_WAR_DRUM = new BuffType( true, true)        
+constant BuffType BUFF_WAR_DRUM = new BuffType( true, DispelLevel.NONE)        
 constant int WAR_HORN_BUFF_ID = compiletime(createAuraBuff("War Horn", "This unit has increased attack damage.", "BTNHorn"))
 constant int WAR_HORN_ABILTIY_ID = compiletime(createPositiveBuffAbility(1, WAR_HORN_BUFF_ID, Abilities.generalAuraTarget, ""))
-constant BuffType BUFF_WAR_HORN = new BuffType( true, true)       
+constant BuffType BUFF_WAR_HORN = new BuffType( true, DispelLevel.NONE)       
 group auraHeroes = CreateGroup()
 
 function checkAura()
