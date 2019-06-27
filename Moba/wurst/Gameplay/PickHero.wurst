@@ -96,7 +96,7 @@ function createRandomHeroForAI(int id, boolean removeFromTavern)
         if remainingHeroTypes[random].hasAI()
             break
 
-    Hero hero = new Hero(id, remainingHeroTypes[random].getUnitId() , gg_rct_CenterMid.getCenter(), angle(0))
+    let hero = new Hero(id, remainingHeroTypes[random].getUnitId() , gg_rct_CenterMid.getCenter(), angle(0))
     setupCreatedHero(hero)
 
 
@@ -112,7 +112,7 @@ function createRandomHeroForAI(int id, boolean removeFromTavern)
 function createRandomHero(int id, boolean removeFromTavern)
     var random = GetRandomInt(0, remainingHeroTypesCount-1)
 
-    Hero hero = new Hero(id, remainingHeroTypes[random].getUnitId() , gg_rct_CenterMid.getCenter(), angle(0))
+    let hero = new Hero(id, remainingHeroTypes[random].getUnitId() , gg_rct_CenterMid.getCenter(), angle(0))
     setupCreatedHero(hero)
 
 
@@ -227,7 +227,7 @@ function onPick()
     unit pickedUnit = GetTriggerUnit()
     if PlayerWrapper.getPlayerType(pickedUnit.getOwner().getId()) == PlayerType.HERO
         if HeroType.getHeroType(pickedUnit.getTypeId()) != null
-            Hero hero = new Hero(pickedUnit)
+            let hero = new Hero(pickedUnit)
             setupCreatedHero(hero)
 
             removeHeroType(hero.getHeroType(), true)

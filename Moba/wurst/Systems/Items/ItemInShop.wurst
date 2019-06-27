@@ -199,7 +199,7 @@ public class ItemInShop
                 addBuildsInto(child, itm, 0)
 
         for ItemInShop itm in allItems
-            LinkedList<ItemInShop> sortingList = new LinkedList<ItemInShop>()
+            let sortingList = new LinkedList<ItemInShop>()
             for ItemInShop b in itm.buildsIntoDirectly
                 sortingList.add(b)
                
