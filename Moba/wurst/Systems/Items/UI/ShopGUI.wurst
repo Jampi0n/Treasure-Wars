@@ -232,7 +232,7 @@ class RecipeTreeNode
 
         int i = 0
         for ItemInShop child in this.itm.getRequirements()
-            RecipeTreeNode childNode = new RecipeTreeNode(this.tree, getChildX(this.x, this.y, i, this.children), this.y + 1, child)
+            let childNode = new RecipeTreeNode(this.tree, getChildX(this.x, this.y, i, this.children), this.y + 1, child)
             this.childrenList.add(childNode)
             i++
 

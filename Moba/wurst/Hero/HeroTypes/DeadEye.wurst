@@ -219,7 +219,7 @@ function deathpact(int abilityId)
                 ..setTooltipNormal(lvl, "(R) Death Coil - [|cffffcc00Level "+lvl.toString()+"|r]")
 
 
-    DynamicTooltip tooltip = new DynamicTooltip(abilityId)
+    var tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(DEATH_COIL_DMG_BASE_BONUS, DEATH_COIL_DMG_FACTOR_BONUS)
     tooltip.setLearnString("Sacrifices all his skeletons to unlock the power of Death Coil for "+DEATH_COIL_DURATION.str()+" seconds.|nDeath Coil deals massive magic damage at the target enemy hero. Sacrificing more skeletons increases the damage of Death Coil.", (int lvl) -> (begin
         return "{0}{I0} base damage, {1}{I1} damage per sacrificed skeleton.".format(

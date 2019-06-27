@@ -297,7 +297,7 @@ public class DynamicTooltip
     **  Dynamic Tooltips are list based, because iterating through a list is a lot faster compared to replacing substrings.
     */
     private function convertToList(string tooltip) returns LinkedList<DynamicElement>
-        LinkedList<DynamicElement> list = new LinkedList<DynamicElement>()
+        let list = new LinkedList<DynamicElement>()
         int current = 0
         int i = 0
         let l = tooltip.length()

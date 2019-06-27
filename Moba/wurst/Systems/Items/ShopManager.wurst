@@ -22,7 +22,7 @@ GUI array gui
 public function getGUI(int i) returns GUI
     return gui[i]
 
-function buyFailed(unit hero, int _itemId, int cost, int gold)
+function buyFailed(unit hero, int _itemId, int _cost, int _gold)
     //let missing = cost - gold
     //printTimedToPlayer(COLOR_GOLD.toColorString()+"You are missing "+missing.toString()+" gold to buy this item!|r", 5, hero.getOwner())
     SOUND_RECIPE_TOO_EXPENSIVE.playForPlayer(hero.getOwner())

@@ -8,9 +8,6 @@ import initlater HeroControl
 import initlater PlayerControl
 import ClosureTimers
 import UnitType
-import TimerUtils
-//import initlater ItemIdGeneration
-//import initlater ItemShopSystem
 import initlater ItemIds
 import public Constants
 import Assets
@@ -212,8 +209,12 @@ public function unit.dispelPhysicallBuffs(boolean positive, boolean negative)
 
 
 public function unit.dispelBuffs(boolean positive, boolean negative)
-    this.dispelMagicalBuffs(positive, negative)
-    this.dispelPhysicallBuffs(positive, negative)
+    let buffList = this.getBuffList()
+    if buffList != null
+        for Buff currentBuff in buffList.getLinkedList()
+            let buffType =currentBuff.getBuffType()
+            if(positive and buffType.isPositive()) or (negative and not buffType.isPositive())
+                currentBuff.dispel()
 
 public function player.getFullName() returns string
     let hero = PlayerWrapper.getPlayerHero(this.getId(), 0)
