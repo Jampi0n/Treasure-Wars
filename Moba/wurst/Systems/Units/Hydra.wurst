@@ -127,7 +127,7 @@ init
         ..registerPlayerUnitEvent(players[CREEP_SPECIAL_OWNER], EVENT_PLAYER_UNIT_DEATH, null)
         ..addAction(function onHydraDeath)
 
-    buffAcidBreath = new BuffType(false, true)
+    buffAcidBreath = new BuffType(false, DispelLevel.DISPEL)
 
     var abilityList = new LinkedList<int>
     ..add(ACID_BREATH_ABILTIY_ID)

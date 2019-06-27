@@ -15,8 +15,6 @@ constant SOUND_ITEM_BUY = new SoundDefinition(Sounds.receiveGold, false, false)
 constant SOUND_ITEM_BUY_3D = new SoundDefinition(Sounds.receiveGold, false, true)
 constant SOUND_RECIPE_TOO_EXPENSIVE = new SoundDefinition(Sounds.error, false, false)
 
-rect visibleArea
-rect array shopRect
 GUI array gui
 
 public function getGUI(int i) returns GUI
@@ -61,20 +59,6 @@ function buyCondition(unit hero, bool firstTeam, bool showMessage) returns bool
     return true
 
 init
-
-
-    visibleArea = GetPlayableMapRect()
-
-    shopRect[0] = gg_rct_Shop0
-    shopRect[1] = gg_rct_Shop1
-    shopRect[2] = gg_rct_Shop2
-    shopRect[3] = gg_rct_Shop3
-    shopRect[4] = gg_rct_Shop4
-    shopRect[5] = gg_rct_Shop5
-    shopRect[6] = gg_rct_Shop6
-    shopRect[7] = gg_rct_Shop7
-    shopRect[8] = gg_rct_Shop8
-    shopRect[9] = gg_rct_Shop9
 
     itemFinalize()
     execute() ->

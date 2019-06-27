@@ -173,13 +173,13 @@ function soulburn(int abilityId)
             ..setArtTarget("")
             ..setAnimationNames("spell,one")
             ..setupChannel(TargetType.UNIT, "soulburn", 0.5)
+            ..targetEnemies()
 
         for lvl = 1 to 5
             aDef
                 ..setCooldown(lvl, COOLDOWN[lvl-1])
                 ..setManaCost(lvl, MANA[lvl-1])
                 ..setCastRange(lvl, RANGE[lvl-1])
-                ..setTargetsAllowed(lvl, "enemies,nonancient,ground,organic,air")
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(SOUL_BURN_DAMAGE_BONUS)
@@ -220,6 +220,7 @@ function rayOfDeath(int abilityId)
             ..setArtTarget("")
             ..setLightningEffects("MBUR")
             ..setAnimationNames("spell,channel")
+            ..targetEnemyHeroes()
 
         for lvl = 1 to 5
             aDef
@@ -230,7 +231,6 @@ function rayOfDeath(int abilityId)
                 ..setDurationHero(lvl, 60)
                 ..setDurationNormal(lvl, 60)
                 ..setBuffs(lvl, "Bmlc,"+BUFF_ID_RAY_OF_DEATH.toRawCode())
-                ..setTargetsAllowed(lvl, "enemies,nonancient,ground,organic,hero")
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(RAY_OF_DEATH_DAMAGE_BONUS, RAY_OF_DEATH_AFTER_DAMAGE_BONUS)
@@ -279,7 +279,7 @@ function castInfernalMeteor()
             nearby.removeUnit(target)
             if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
                 caster.dealDamage(target, dmg, ReductionType.MAGIC)
-                target.addBuffReduced(caster, METEOR_STUN_DURATION[level-1], STUNNED, 1)
+                target.addBuffReduced(caster, METEOR_STUN_DURATION[level-1], STUNNED, 1).setDispelLevel(DispelLevel.DISPEL)
         nearby.destr()
     end))
 
@@ -289,7 +289,7 @@ function castSoulBurn()
     let level = caster.getAbilityLevel(spellId)
     let target = GetSpellTargetUnit()
     target.addBuffReduced(caster, SOUL_BURN_DURATION[level-1], buffSoulBurn, level)
-    target.addBuffReduced(caster, SOUL_BURN_SILENCE[level-1], SILENCED, 1)
+    target.addBuffReduced(caster, SOUL_BURN_SILENCE[level-1], SILENCED, 1).setDispelLevel(DispelLevel.DISPEL)
 
 function castRayOfDeath()
     let spellId = GetSpellAbilityId()
@@ -369,7 +369,7 @@ function initHeroType()
             ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
             ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
 
-        buffRayOfDeath = new BuffType(false, true)
+        buffRayOfDeath = new BuffType(false, DispelLevel.BREAK)
         ..addEndFunction((Buff whichBuff) ->(begin
             whichBuff.getTarget().removeAbility(BUFF_ID_RAY_OF_DEATH)
         end))
@@ -393,7 +393,12 @@ function initHeroType()
             nearby.destr()
 
         end))
-        ..setPeriodicTime(0.1)
+        ..addDispelFunction() (Buff whichBuff) ->
+            let caster = whichBuff.getCaster()
+            if caster.getCurrentOrder() == OrderId("magicleash")
+                caster.issueImmediateOrder("stop")
+
+        buffRayOfDeath..setPeriodicTime(0.1)
         ..addPeriodicFunction((Buff whichBuff) ->(begin
             let target = whichBuff.getTarget()
             let caster = whichBuff.getCaster()
@@ -404,7 +409,7 @@ function initHeroType()
                 target.addEffect(Abilities.illidanMissile, "chest").destr()
         end))
 
-        buffSoulBurn = new BuffType(false, true)
+        buffSoulBurn = new BuffType(false, DispelLevel.DISPEL)
         var abilityList = new LinkedList<int>
         ..add(ABILITY_ID_SOUL_BURN)
         buffSoulBurn

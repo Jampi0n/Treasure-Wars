@@ -27,14 +27,14 @@ constant int MAX_CAMP_LEVEL = 20
     Instead an icon dummy owned by neutral passive shows the creep camp.*/
 constant BUFF_MAP = new HashMap<int, BuffConfiguration>
 
-constant BuffType TURTLE_BUFF = new BuffType(true, false) //return dmg
-constant BuffType JUNGLE_STALKER_BUFF = new BuffType(true, false) //hp reg bonus
-constant BuffType MURGUL_BUFF = new BuffType(true, false) //attack speed bonus
-constant BuffType SEA_GIANT_BUFF = new BuffType(true, false) //str bonus
-constant BuffType MAKRURA_BUFF = new BuffType(true, false) //armor bonus
-constant BuffType SEA_ELEMENTAL_BUFF = new BuffType(true, false) //mana reg bonus
-constant BuffType REVENANT_BUFF = new BuffType(true, true) //dealing damage slows
-public constant BuffType REVENANT_SLOW_BUFF = new BuffType(false, true) //dealing damage slows
+constant BuffType TURTLE_BUFF = new BuffType(true, DispelLevel.NONE) //return dmg
+constant BuffType JUNGLE_STALKER_BUFF = new BuffType(true, DispelLevel.NONE) //hp reg bonus
+constant BuffType MURGUL_BUFF = new BuffType(true, DispelLevel.NONE) //attack speed bonus
+constant BuffType SEA_GIANT_BUFF = new BuffType(true, DispelLevel.NONE) //str bonus
+constant BuffType MAKRURA_BUFF = new BuffType(true, DispelLevel.NONE) //armor bonus
+constant BuffType SEA_ELEMENTAL_BUFF = new BuffType(true, DispelLevel.NONE) //mana reg bonus
+constant BuffType REVENANT_BUFF = new BuffType(true, DispelLevel.NONE) //dealing damage slows
+public constant BuffType REVENANT_SLOW_BUFF = new BuffType(false, DispelLevel.NONE) //dealing damage slows
 
 constant TURTLE_RETURN_RATIO = 15
 public constant TURTLE_BUFF_ID = compiletime(createAuraBuff("Turtle Shell", "Returns "+TURTLE_RETURN_RATIO.toString()+"% of the damage the unit takes from attacks to the attacker.", Icons.bTNSeaTurtleGreen))

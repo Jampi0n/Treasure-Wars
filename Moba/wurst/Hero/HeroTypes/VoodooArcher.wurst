@@ -62,13 +62,13 @@ function abilityQ(int abilityId)
             ..setupWithHotKey("Ghost Arrows", "Q")
             ..setAnimationNames("spell")
             ..setupChannel(TargetType.UNIT, "channel", 0.5)
+            ..targetEnemies()
 
         for lvl = 1 to 5
             aDef
                 ..setCooldown(lvl, COOLDOWN[lvl-1])
                 ..setManaCost(lvl, MANA[lvl-1])
                 ..setCastRange(lvl, RANGE[lvl-1])
-                ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceStrength(GHOST_ARROWS_DAMAGE_BONUS)
@@ -108,13 +108,13 @@ function abilityW(int abilityId)
             ..setupWithHotKey("Mind Curse", "W")
             ..setAnimationNames("spell")
             ..setupChannel(TargetType.UNIT, "manaburn", 0.5)
+            ..targetEnemies()
 
         for lvl = 1 to 5
             aDef
                 ..setCooldown(lvl, COOLDOWN[lvl-1])
                 ..setManaCost(lvl, MANA[lvl-1])
                 ..setCastRange(lvl, RANGE[lvl-1])
-                ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(MIND_CURSE_MANA_DRAIN_BONUS, MIND_CURSE_DURATION_BONUS)
@@ -201,13 +201,13 @@ function abilityR(int abilityId)
             ..setupIcon(Icons.bTNBigBadVoodooSpell)
             ..setupWithHotKey("Big Bad Voodoo", "R")
             ..setAnimationNames("spell,channel")
+            ..targetNone()
 
 
         for lvl = 1 to 5
             aDef
                 ..setCooldown(lvl, COOLDOWN[lvl-1])
                 ..setManaCost(lvl, MANA[lvl-1])
-                ..setTargetsAllowed(lvl, "none")
                 ..setDurationHero(lvl, BBV_DURATION)
                 ..setDurationNormal(lvl, BBV_DURATION)
                 ..setEffects(lvl, "X000")
@@ -281,7 +281,7 @@ function castMindCurse()
     let target = GetSpellTargetUnit()
     let dur = MIND_CURSE_DURATION[level-1].bonus(caster.getInt(), MIND_CURSE_DURATION_BONUS)
     target.addBuffReduced(caster, dur, buffMindCurseTarget, level)
-    target.addBuffReduced(caster, dur, SILENCED, 1)
+    target.addBuffReduced(caster, dur, SILENCED, 1).setDispelLevel(DispelLevel.DISPEL)
 
 function castSerpentWard()
     let spellId = GetSpellAbilityId()
@@ -351,7 +351,7 @@ function initHeroType()
 
         var abilityList = new LinkedList<int>
         ..add(MIND_CURSE_ABILITY_ID)
-        buffMindCurseTarget = new BuffType(false, true)
+        buffMindCurseTarget = new BuffType(false, DispelLevel.DISPEL)
         buffMindCurseTarget.setup(abilityList, MIND_CURSE_BUFF_ID)
 
         buffMindCurseTarget.setPeriodicTime(0.25)
@@ -364,7 +364,7 @@ function initHeroType()
 
         abilityList = new LinkedList<int>
         ..add(SERPENT_POISON_ABILITY_ID)
-        buffSerpentPoison = new BuffType(false, true)
+        buffSerpentPoison = new BuffType(false, DispelLevel.DISPEL)
         buffSerpentPoison.setup(abilityList, SERPENT_POISON_BUFF_ID)
 
         /*

@@ -89,13 +89,13 @@ function abilityQ(int abilityId)
             ..setRequirements(NOT_SPINNING.toRawCode())
             ..setArtTarget("")
             ..setCheckDependencies(true)
+            ..targetEnemies()
 
         for lvl = 1 to 5
             aDef
                 ..setCooldown(lvl, COOLDOWN[lvl-1])
                 ..setManaCost(lvl, MANA[lvl-1])
                 ..setCastRange(lvl, RANGE[lvl-1])
-                ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
                 ..setDamageperTarget(lvl, 0)
                 ..setNumberofTargetsHit(lvl, 1)
 
@@ -158,12 +158,12 @@ function abilityW(int abilityId)
         let aDef = new AbilityDefinitionBeserk(abilityId)
             ..setupIcon(Icons.bTNWhirlwind)
             ..setupWithHotKey("Death Spin", "W")
+            ..targetNone()
 
         for lvl = 1 to 5
             aDef
                 ..setCooldown(lvl, COOLDOWN[lvl-1])
                 ..setManaCost(lvl, MANA[lvl-1])
-                ..setTargetsAllowed(lvl, "none")
                 ..setAttackSpeedIncrease(lvl, 0)
                 ..setDamageTakenIncrease(lvl, 0)
                 ..setMovementSpeedIncrease(lvl, 0)
@@ -210,12 +210,12 @@ function abilityE(int abilityId)
             ..setRequirements(NOT_SPINNING.toRawCode())
             ..setCheckDependencies(true)
             ..setArtCaster("")
+            ..targetNone()
 
         for lvl = 1 to 5
             aDef
                 ..setCooldown(lvl, COOLDOWN[lvl-1])
                 ..setManaCost(lvl, MANA[lvl-1])
-                ..setTargetsAllowed(lvl, "none")
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(CRIPPLING_PAIN_DAMAGE_BONUS)
@@ -264,12 +264,12 @@ function abilityR(int abilityId)
             ..setupWithHotKey("Mirror Image", "R")
             ..setCheckDependencies(true)
             ..setRequirements(NOT_SPINNING.toRawCode())
+            ..targetNone()
 
         for lvl = 1 to 5
             aDef
                 ..setCooldown(lvl, COOLDOWN[lvl-1])
                 ..setManaCost(lvl, MANA[lvl-1])
-                ..setTargetsAllowed(lvl, "none")
 
 
     let tooltip = new DynamicTooltip(abilityId)
@@ -432,7 +432,7 @@ function initHeroType()
             So dmg is 0.25 * 1/4 -> (interval) * (4 stacks)  */
         var abilityList = new LinkedList<int>
         ..add(BLEEDING_WOUND_ABILITY_ID)
-        buffBleedingWound = new BuffType(false, true)
+        buffBleedingWound = new BuffType(false, DispelLevel.DISPEL)
         buffBleedingWound.setup(abilityList, BLEEDING_WOUND_BUFF_ID)
 
         buffBleedingWound.addFirstFunction( (Buff whichBuff) -> (begin
@@ -449,7 +449,7 @@ function initHeroType()
             whichBuff.getCaster().dealDamage(whichBuff.getTarget(), 1.0/16.0 * whichBuff.getData() * BLEEDING_WOUND_DMG[level-1], ReductionType.PHYSICAL)
         end))
 
-        buffShadowStrike = new BuffType(false, true)
+        buffShadowStrike = new BuffType(false, DispelLevel.DISPEL)
 
         abilityList = new LinkedList<int>
         ..add(SHADOW_STRIKE_ABILITY_ID)
@@ -468,7 +468,7 @@ function initHeroType()
 
         abilityList = new LinkedList<int>
         ..add(DEATH_SPIN_ABILITY_ID)
-        buffDeathSpin = new BuffType(false, true)
+        buffDeathSpin = new BuffType(false, DispelLevel.NONE)
         buffDeathSpin.setup(abilityList, DEATH_SPIN_BUFF_ID)
 
         buffDeathSpin.addFirstFunction( (Buff whichBuff) -> (begin
@@ -515,7 +515,7 @@ function initHeroType()
 
         abilityList = new LinkedList<int>
         ..add(CRIPPLING_PAIN_ABILITY_ID)
-        buffCripplingPain = new BuffType(false, true)
+        buffCripplingPain = new BuffType(false, DispelLevel.DISPEL)
         buffCripplingPain.setup(abilityList, CRIPPLING_PAIN_BUFF_ID)
 
         buffCripplingPain.addEndFunction( (Buff whichBuff) -> (begin
@@ -527,7 +527,7 @@ function initHeroType()
 
         abilityList = new LinkedList<int>
         ..add(MIRROR_IMAGE_ABILITY_ID)
-        buffMirrorImage = new BuffType(false, true)
+        buffMirrorImage = new BuffType(false, DispelLevel.NONE)
         buffMirrorImage.setup(abilityList, MIRROR_IMAGE_BUFF_ID)
 
         //bleeding wound for mirror image

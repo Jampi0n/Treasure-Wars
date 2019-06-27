@@ -72,13 +72,13 @@ function abilityQ(int abilityId)
             ..setAnimationNames("spell,channel")
             ..setMissileArt("BreathOfFireMissile3.mdx")
             ..setMissileSpeed(800)
+            ..targetEnemies()
 
         for lvl = 1 to 5
             aDef
                 ..setCooldown(lvl, COOLDOWN[lvl-1])
                 ..setManaCost(lvl, MANA[lvl-1])
                 ..setCastRange(lvl, RANGE[lvl-1])
-                ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
                 ..setDamage(lvl, 0.01)
                 ..setDamagePerSecond(lvl, 0.01)
                 ..setBuffs(lvl, BUFF_ID_ON_BREATH.toRawCode())
@@ -130,6 +130,7 @@ function abilityW(int abilityId)
             ..setupWithHotKey("Immolation", "W")
             ..setTurnOff("Deactivate Immolation","W")
             ..setAnimationNames("spell")
+            ..targetEnemies()
 
         for lvl = 1 to 5
             aDef
@@ -138,7 +139,6 @@ function abilityW(int abilityId)
                 ..setAreaofEffect(lvl, AOE)
                 ..setManaDrainedperSecond(lvl, IMMOLATION_MANA_DRAIN[lvl-1])
                 ..setBuffs(lvl, IMMOLATION_BUFF_ID.toRawCode()+",BEia")
-                ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setSummary("Damages nearby enemy units and increases the Destroyer's attack speed at the cost of mana and health. Can be turned off.")
@@ -231,12 +231,12 @@ function abilityR(int abilityId)
             ..setArtSpecial("")
             ..setLightningEffects("")
             ..setCheckDependencies(true)
+            ..targetEnemies()
 
         for lvl = 1 to 5
             aDef
                 ..setCooldown(lvl, COOLDOWN[lvl-1])
                 ..setManaCost(lvl, MANA[lvl-1])
-                ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
                 ..setCastRange(lvl, RANGE)
 
 
@@ -402,7 +402,7 @@ function initHeroType()
 
         var abilityList = new LinkedList<int>
         ..add(BREATH_ABILITY_ID)
-        buffMeltingBreath = new BuffType(false, true)
+        buffMeltingBreath = new BuffType(false, DispelLevel.DISPEL)
         buffMeltingBreath.setup(abilityList, BREATH_BUFF_ID)
 
         buffMeltingBreath.addFirstFunction( (Buff whichBuff) -> (begin
@@ -415,7 +415,7 @@ function initHeroType()
 
         abilityList = new LinkedList<int>
         ..add(PREY_TARGET_ABILITY_ID)
-        buffPreyTarget = new BuffType(false, true)
+        buffPreyTarget = new BuffType(false, DispelLevel.DISPEL)
         buffPreyTarget.setup(abilityList, PREY_TARGET_BUFF_ID)
         buffPreyTarget.setPeriodicTime(0.2)
 
@@ -475,12 +475,12 @@ function initHeroType()
 
         abilityList = new LinkedList<int>
         ..add(PREY_CASTER_ABILITY_ID)
-        buffPreyCaster = new BuffType(true, true)
+        buffPreyCaster = new BuffType(true, DispelLevel.NONE)
         buffPreyCaster.setup(abilityList, PREY_CASTER_BUFF_ID)
 
         abilityList = new LinkedList<int>
         ..add(PREY_SLOW_ABILITY_ID)
-        buffPreySlow = new BuffType(true, true)
+        buffPreySlow = new BuffType(true, DispelLevel.DISPEL)
         buffPreySlow.setup(abilityList, PREY_SLOW_BUFF_ID)
 
         buffPreySlow.addFirstFunction( (Buff whichBuff) -> (begin
@@ -491,7 +491,7 @@ function initHeroType()
             whichBuff.getTarget().wrapper().addStatRelativeBonus(Stat.MS, PREY_SLOW * 10)
         end))
 
-        buffImmolation = new BuffType(true, true)
+        buffImmolation = new BuffType(true, DispelLevel.NONE)
         buffImmolation.setPeriodicTime(0.2)
 
         buffImmolation.addFirstFunction( (Buff whichBuff) -> (begin

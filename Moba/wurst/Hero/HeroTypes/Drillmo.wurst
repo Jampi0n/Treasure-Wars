@@ -59,6 +59,11 @@ constant real array PULL_DAMAGE = [50, 100, 150, 200, 250]
 constant real PULL_DAMAGE_BONUS = 80
 constant real array PULL_COOLDOWN = [18, 16, 14, 12, 10]
 
+constant int PULL_BUFF_ID = compiletime(createAuraBuff("Pull", "This unit is being pulled.", "BTNTitansGrip"))
+constant int PULL_ABILITY_ID = compiletime(createPositiveBuffAbility(5, PULL_BUFF_ID, "", ""))
+
+BuffType buffPull
+
 function pull(int abilityId)
     
     if compiletime
@@ -74,13 +79,13 @@ function pull(int abilityId)
             ..setMissileArt("")
             ..setArtTarget("")
             ..setupChannel(TargetType.POINT, "thunderbolt", 1.5)
+            ..targetNone()
 
         for lvl = 1 to 5
             aDef
                 ..setCooldown(lvl, PULL_COOLDOWN[lvl-1])
                 ..setManaCost(lvl, MANA[lvl-1])
                 ..setCastRange(lvl, RANGE)
-                ..setTargetsAllowed(lvl, "none")
 
 
     let tooltip = new DynamicTooltip(abilityId)
@@ -124,13 +129,12 @@ function spikeBall(int abilityId)
             ..setArtEffect("")
             ..setMissileArt("")
             ..setArtTarget("")
-            //..setupChannel(TargetType.INSTANT, "thunderclap", 0.8)
+            ..targetNone()
 
         for lvl = 1 to 5
             aDef
                 ..setCooldown(lvl, COOLDOWN[lvl-1])
                 ..setManaCost(lvl, MANA[lvl-1])
-                ..setTargetsAllowed(lvl, "none")
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceStrength(SPIKE_BALL_DMG_BONUS, SPIKE_BALL_DOT_DMG_BONUS)
@@ -174,16 +178,15 @@ function speedBoost(int abilityId)
             ..setArtEffect("")
             ..setMissileArt("")
             ..setArtTarget("")
+            ..targetNone()
 
         for lvl = 1 to 5
             aDef
                 ..setCooldown(lvl, COOLDOWN[lvl-1])
                 ..setManaCost(lvl, MANA[lvl-1])
-                ..setTargetsAllowed(lvl, "none")
                 ..setAttackSpeedIncrease(lvl, 0)
                 ..setDamageTakenIncrease(lvl, 0)
                 ..setMovementSpeedIncrease(lvl, 0)
-                //..setBuffs(lvl, SPEED_BOOST_BUFF_ID.toRawCode())
                 ..setDurationHero(lvl, 0.01)
 
 
@@ -222,13 +225,13 @@ function rocket(int abilityId)
             ..setMissileArc(0.15)
             ..setMissileSpeed(1500)
             ..setArtTarget("")
+            ..targetEnemies()
 
         for lvl = 1 to 5
             aDef
                 ..setCooldown(lvl, ROCKET_COOLDOWN[lvl-1])
                 ..setManaCost(lvl, MANA[lvl-1])
                 ..setCastRange(lvl, ROCKET_RANGE[lvl-1])
-                ..setTargetsAllowed(lvl, "nonancient,enemies,ground,air")
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceStrength(ROCKET_DMG_BONUS)
@@ -257,8 +260,10 @@ class Pull
     private unit pulledUnit = null
     private boolean hasPulled = false
     private effect fx
+    private Buff pullBuff
 
-    construct(unit caster, int level, vec2 target)
+    construct(unit caster, int level, vec2 target, Buff pullBuff)
+        this.pullBuff = pullBuff
         this.caster = caster
         this.level = level
         this.direction = caster.getPos().angleTo(target)
@@ -308,19 +313,19 @@ class Pull
                         this.pulledUnit = minUnit
                         hasPulled = true
                         this.caster.dealDamage(this.pulledUnit, PULL_DAMAGE[this.level-1].bonus(this.caster.getStr(), PULL_DAMAGE_BONUS), ReductionType.PHYSICAL)
-                        this.pulledUnit.addBuff(caster, 0.15, STUNNED, 1)
-                        this.pulledUnit.addBuff(caster, 0.15, UNTARGETABLE, 1)
+                        this.pulledUnit.addBuff(caster, 0.15, STUNNED, 1).setDispelLevel(DispelLevel.BREAK)
 
                 else
                     if count < 65 -25
-                        this.pulledUnit.addBuff(caster, 0.15, STUNNED, 1)
-                        this.pulledUnit.addBuff(caster, 0.15, UNTARGETABLE, 1)
+                        this.pulledUnit.addBuff(caster, 0.15, STUNNED, 1).setDispelLevel(DispelLevel.BREAK)
                         this.pulledUnit.setXY(pos)
 
     static function updateStatic()
         (GetExpiredTimer().getData() castTo Pull).update()
 
     ondestroy
+        this.pullBuff.setData(-1)
+        this.pullBuff.dispel()
         this.checkTimer.release()
         this.caster.setTimeScale(1)
         this.fx.destr()
@@ -331,7 +336,10 @@ function castPull()
     let spellId = GetSpellAbilityId()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
-    new Pull(caster, level, vec2(GetSpellTargetX(), GetSpellTargetY()))
+
+    let b = caster.addBuff(caster, 10, buffPull, level)
+    let pull = new Pull(caster, level, vec2(GetSpellTargetX(), GetSpellTargetY()), b)
+    b.setData(pull castTo int)
 
 function castSpikeBall()
     let spellId = GetSpellAbilityId()
@@ -350,7 +358,7 @@ function castSpikeBall()
                 nearby.removeUnit(target)
                 if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
                     caster.dealDamage(target, dmg, ReductionType.PHYSICAL)
-                    target.addBuffReduced( caster, SPIKE_BALL_STUN[level-1], STUNNED, 1)
+                    target.addBuffReduced( caster, SPIKE_BALL_STUN[level-1], STUNNED, 1).setDispelLevel(DispelLevel.DISPEL)
                     target.addBuffReduced( caster, SPIKE_BALL_DOT_DURATION[level-1], buffSpikeBall, level)
             nearby.destr()
     end))
@@ -460,8 +468,20 @@ function initHeroType()
     
     
 
-        buffSpikeBall = new BuffType(false, false)
+        buffPull = new BuffType(false, DispelLevel.BREAK)
         var abilityList = new LinkedList<int>
+        abilityList.add(PULL_ABILITY_ID)
+        buffPull.setup(abilityList, PULL_BUFF_ID)
+
+        buffPull.addDispelFunction() (Buff whichBuff) ->
+            let data = whichBuff.getData()
+            if data != -1
+                destroy data castTo Pull
+            
+
+
+        buffSpikeBall = new BuffType(false, DispelLevel.DISPEL)
+        abilityList = new LinkedList<int>
         abilityList.add(SPIKE_BALL_ABILTIY_ID)
         buffSpikeBall.setup(abilityList, SPIKE_BALL_BUFF_ID)
 
@@ -472,7 +492,7 @@ function initHeroType()
             caster.dealDamage(whichBuff.getTarget(), 0.25 * SPIKE_BALL_DOT_DMG[level-1].bonus(caster.getStr(), SPIKE_BALL_DOT_DMG_BONUS) / SPIKE_BALL_DOT_DURATION[level-1] , ReductionType.PHYSICAL)
         end))
 
-        buffSpeedBoost = new BuffType(true, true)
+        buffSpeedBoost = new BuffType(true, DispelLevel.NONE)
         abilityList = new LinkedList<int>
         abilityList.add(SPEED_BOOST_ABILITY_ID)
         buffSpeedBoost.setup(abilityList, SPEED_BOOST_BUFF_ID)

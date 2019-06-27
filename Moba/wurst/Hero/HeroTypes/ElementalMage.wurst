@@ -162,13 +162,13 @@ function abilityE(int abilityId)
             ..setupChannel(TargetType.UNIT, "soulburn", 1.1)
             ..setAnimationNames("spell")
             ..setupWithHotKey("Elemental Mark", "E")
+            ..targetEnemies()
 
         for lvl = 1 to 5
             aDef
                 ..setCooldown(lvl, COOLDOWN[lvl-1])
                 ..setManaCost(lvl, MANA[lvl-1])
                 ..setCastRange(lvl, 600)
-                ..setTargetsAllowed(lvl, "ground,enemy,nonancient,neutral,organic,air")
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setSummary("Reduces the target's willpower and attacks against it will deal additional magic damage. After {0} attacks the target is stunned.".format(MARK_REQUIRED_STACKS.str()))
@@ -231,6 +231,7 @@ function abilityR(int abilityId)
             ..setupWithHotKey("Frost and Flame", "R")
             ..setupChannel(TargetType.AREA, "silence", 1.1)
             ..setLightningEffects("")
+            ..targetNone()
 
 
         for lvl = 1 to 5
@@ -238,7 +239,6 @@ function abilityR(int abilityId)
                 ..setCooldown(lvl, COOLDOWN[lvl-1])
                 ..setManaCost(lvl, MANA[lvl-1])
                 ..setDurationHero(lvl, 0.01)
-                ..setTargetsAllowed(lvl, "none")
                 ..setCastRange(lvl, 3000)
                 ..setAreaofEffect(lvl, FF_AOE)
 
@@ -268,7 +268,7 @@ function onAttack(unit attacker, unit target, boolean _advanced)
         int stacks = mark.getData() + 1
         if stacks >= MARK_REQUIRED_STACKS
             stacks = 0
-            target.addBuffReduced(attacker, MARK_STUN, STUNNED, 1)
+            target.addBuffReduced(attacker, MARK_STUN, STUNNED, 1).setDispelLevel(DispelLevel.DISPEL)
         mark.setData(stacks)
         attacker.dealDamage(target, MARK_DMG[markLevel-1].bonus(attacker.getInt(), MARK_DMG_BONUS), ReductionType.MAGIC)
 
@@ -412,7 +412,7 @@ function initHeroType()
             ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
             ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
 
-        buffFFBuff = new BuffType(false, true)
+        buffFFBuff = new BuffType(false, DispelLevel.DISPEL)
 
         LinkedList<int> abilityList = new LinkedList<int>
         ..add(FF_ABILITY_ID)
@@ -440,7 +440,7 @@ function initHeroType()
                 caster.dealDamage(target, 0.25 * FF_DOT[whichBuff.getLevel()-1].bonus(caster.getInt(), FF_DOT_BONUS), ReductionType.MAGIC)
         end))
 
-        buffFrostBolt = new BuffType(false, true)
+        buffFrostBolt = new BuffType(false, DispelLevel.DISPEL)
 
         abilityList = new LinkedList<int>
         ..add(FROST_BOLT_ABILITY_ID)
@@ -462,7 +462,7 @@ function initHeroType()
                 ..decBlue()
         end))
 
-        buffFrenzy = new BuffType(true, true)
+        buffFrenzy = new BuffType(true, DispelLevel.NONE)
 
         abilityList = new LinkedList<int>
             ..add(FRENZY_ABILITY_ID)
@@ -493,7 +493,7 @@ function initHeroType()
                 ..addStatAbsoluteBonus(Stat.AS, -(stacks div 10))
         end))
 
-        buffElementalMark = new BuffType(false, true)
+        buffElementalMark = new BuffType(false, DispelLevel.DISPEL)
 
         abilityList = new LinkedList<int>
         ..add(MARK_ABILITY_ID)

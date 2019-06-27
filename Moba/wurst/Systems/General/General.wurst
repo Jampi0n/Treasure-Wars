@@ -18,6 +18,14 @@ import Execute
 
 public boolean gameOver = false
 
+/*
+    Cannot be targeted by negative spells or attacks.
+*/
+public constant INVULERNABLE = new BuffType(true, DispelLevel.NONE)
+/*
+    Cannot be targeted by any spells or attacks.
+*/
+public constant UNTARGETABLE = new BuffType(true, DispelLevel.NONE)
 
 public enum ReductionType
     PHYSICAL
@@ -50,13 +58,11 @@ public function unit.isTargetable(player source, boolean allowFriends, boolean a
         ret = false
     else if not this.isAlive()
         ret = false
-    else if this.isType(UNIT_TYPE_ANCIENT)
-        ret =  false
-    else if not allowEnemies and IsUnitEnemy(this, source) 
-        ret =  false
-    else if not allowFriends and IsUnitAlly(this, source) 
-        ret = false
-    
+    else if IsUnitEnemy(this, source) 
+        ret = allowEnemies and not IsUnitType(this, UNIT_TYPE_ANCIENT) and not IsUnitType(this, UNIT_TYPE_MAGIC_IMMUNE)
+    else if IsUnitAlly(this, source) 
+        ret = allowFriends and not IsUnitType(this, UNIT_TYPE_MAGIC_IMMUNE)
+
     return ret
 
 public function unit.isVisible(player source) returns boolean
@@ -189,31 +195,28 @@ public function unit.healMana(unit target, real amount)
 
     PlayerWrapper.statManaHealed[target.getOwner().getId()] += realAmount
 
-public function unit.dispelMagicalBuffs(boolean positive, boolean negative)
+public function unit.dispelPositiveBuffs(DispelLevel dispelLevel)
     let buffList = this.getBuffList()
     if buffList != null
         for Buff currentBuff in buffList.getLinkedList()
             let buffType =currentBuff.getBuffType()
-            if(buffType.isMagical())
-                if(positive and buffType.isPositive()) or (negative and not buffType.isPositive())
-                    currentBuff.dispel()
+            if buffType.isPositive() and currentBuff.getDispelLevel() castTo int <= dispelLevel castTo int
+                currentBuff.dispel()
 
-public function unit.dispelPhysicallBuffs(boolean positive, boolean negative)
+public function unit.dispelNegativeBuffs(DispelLevel dispelLevel)
     let buffList = this.getBuffList()
     if buffList != null
         for Buff currentBuff in buffList.getLinkedList()
             let buffType =currentBuff.getBuffType()
-            if(not buffType.isMagical())
-                if(positive and buffType.isPositive()) or (negative and not buffType.isPositive())
-                    currentBuff.dispel()
+            if not buffType.isPositive() and currentBuff.getDispelLevel() castTo int <= dispelLevel castTo int
+                currentBuff.dispel()
 
 
-public function unit.dispelBuffs(boolean positive, boolean negative)
+public function unit.dispelBuffs(DispelLevel dispelLevel)
     let buffList = this.getBuffList()
     if buffList != null
         for Buff currentBuff in buffList.getLinkedList()
-            let buffType =currentBuff.getBuffType()
-            if(positive and buffType.isPositive()) or (negative and not buffType.isPositive())
+            if currentBuff.getDispelLevel() castTo int <= dispelLevel castTo int
                 currentBuff.dispel()
 
 public function player.getFullName() returns string
@@ -370,3 +373,17 @@ init
     end))
 
     Player(PLAYER_NEUTRAL_AGGRESSIVE).setName("Creeps")
+
+    INVULERNABLE.addFirstFunction() (Buff whichBuff) ->
+        let target = whichBuff.getTarget()
+        target.dispelNegativeBuffs(DispelLevel.BREAK)
+        UnitAddType(target, UNIT_TYPE_ANCIENT)
+    INVULERNABLE.addEndFunction() (Buff whichBuff) ->
+        UnitRemoveType(whichBuff.getTarget(), UNIT_TYPE_ANCIENT)
+        
+    UNTARGETABLE.addFirstFunction() (Buff whichBuff) ->
+        let target = whichBuff.getTarget()
+        target.dispelBuffs(DispelLevel.BREAK)
+        UnitAddType(target, UNIT_TYPE_SAPPER)
+    UNTARGETABLE.addEndFunction() (Buff whichBuff) ->
+        UnitRemoveType(whichBuff.getTarget(), UNIT_TYPE_SAPPER)

@@ -616,7 +616,7 @@ function onMilitiaDespawn()
 
 constant HOME_BUFF_ID = compiletime(createAuraBuff("Protected", "This unit is protected; it is invulnerable and is being healed.", Icons.bTNInvulnerable))
 constant HOME_ABILTIY_ID = compiletime(createPositiveBuffAbility(1, HOME_BUFF_ID, "Abilities\\Spells\\Human\\DivineShield\\DivineShieldTarget.mdl", ""))
-constant BUFF_HOME = new BuffType(true, true)
+constant BUFF_HOME = new BuffType(true, DispelLevel.NONE)
 
 function homeInvulnerability()
 	group nearby = CreateGroup()
@@ -626,8 +626,8 @@ function homeInvulnerability()
 		unit target = FirstOfGroup(nearby)
 		nearby.removeUnit(target)
 		if not target.isType(UNIT_TYPE_STRUCTURE) and IsUnitAlly(target, players[TEAM_PLAYER_TEAM_1]) 
-			target.addBuff( target, 0.5, UNTARGETABLE, 1)
 			target.addBuff( target, 0.5, BUFF_HOME, 1)
+			target.addBuff( target, 0.5, INVULERNABLE, 1)
 
 	nearby.destr()
 
@@ -638,8 +638,8 @@ function homeInvulnerability()
 		unit target = FirstOfGroup(nearby)
 		nearby.removeUnit(target)
 		if not target.isType(UNIT_TYPE_STRUCTURE) and IsUnitAlly(target, players[TEAM_PLAYER_TEAM_2]) 
-			target.addBuff( target, 0.5, UNTARGETABLE, 1)
 			target.addBuff( target, 0.5, BUFF_HOME, 1)
+			target.addBuff( target, 0.5, INVULERNABLE, 1)
 
 	nearby.destr()
 
@@ -690,7 +690,7 @@ init
 
 
 
-	buffTowerFocus = new BuffType(false, true)
+	buffTowerFocus = new BuffType(false, DispelLevel.DISPEL)
 
 	abilityList = new LinkedList<int>
 	..add(TOWER_FOCUS_ABILTIY_ID)

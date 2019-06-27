@@ -22,7 +22,7 @@ constant ABILITY_BATTLE_ROAR = 'AZ2W'
 constant ABILITY_HOLY_SHIELD = 'AZ2E'
 constant ABILITY_DIVINE_PUNISHMENT = 'AZ2R'
 
-constant BUFF_HOLY_SHIELD = new BuffType(true, true)
+constant BUFF_HOLY_SHIELD = new BuffType(true, DispelLevel.NONE)
 
 constant SOUND_SHIELD_BASH = new SoundDefinition(Sounds.metalHeavyBashMetal2, false, true)
 
@@ -69,13 +69,13 @@ function shieldBash(int abilityId)
             ..setupWithHotKey("Shield Bash", "Q")
             ..setArtCaster("")
             ..setupChannel(TargetType.POINT, "thunderbolt", 0.5)
+            ..targetNone()
 
         for lvl = 1 to 5
             aDef
                 ..setCooldown(lvl, COOLDOWN[lvl-1])
                 ..setManaCost(lvl, MANA[lvl-1])
                 ..setCastRange(lvl, 99999)
-                ..setTargetsAllowed(lvl, "none")
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceStrength(SHIELD_BASH_DMG_BONUS)
@@ -100,7 +100,7 @@ constant real BATTLE_ROAR_DURATION_BONUS = 2
 constant integer BUFF_ID_BATTLE_ROAR = compiletime(createAuraBuff("Battle Roar", "This unit is under the effect of Battle Roar; it attacks and moves faster.", "BTNBattleRoar"))
 constant integer ABILITY_BATTLE_ROAR_BUFF = compiletime(createPositiveBuffAbility(5, BUFF_ID_BATTLE_ROAR, Abilities.roarTarget, "overhead"))
 
-constant BATTLE_ROAR = new BuffType(true, true)
+constant BATTLE_ROAR = new BuffType(true, DispelLevel.DISPEL)
 
 
 
@@ -114,12 +114,12 @@ function battleRoar(int abilityId)
             ..setAnimationNames("spell")
             ..setupIcon("BTNBattleRoar")
             ..setupWithHotKey("Battle Roar", "W")
+            ..targetNone()
 
         for lvl = 1 to 5
             aDef
                 ..setCooldown(lvl, COOLDOWN[lvl-1])
                 ..setManaCost(lvl, MANA[lvl-1])
-                ..setTargetsAllowed(lvl, "none")
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(BATTLE_ROAR_DURATION_BONUS)
@@ -158,6 +158,7 @@ function holyShield(int abilityId)
             ..setArtEffect("")
             ..setupIcon("BTNAngelicShield")
             ..setupWithHotKey("Holy Shield", "E")
+            ..targetAlliedHeroes()
 
         for lvl = 1 to 5
             aDef
@@ -170,7 +171,6 @@ function holyShield(int abilityId)
                 ..setFollowThroughTime(lvl, 0)
                 ..setOptions(lvl, 1)
                 ..setTargetType(lvl, 1)
-                ..setTargetsAllowed(lvl, "friend,nonancient,hero")
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(HOLY_SHIELD_DURATION_BONUS)
@@ -200,6 +200,7 @@ function divinePunishment(int abilityId)
             ..setAnimationNames("spell,channel")
             ..setupIcon("BTNHolyBan")
             ..setupWithHotKey("Divine Punishment", "R")
+            ..targetNone()
 
         for lvl = 1 to 5
             aDef
@@ -208,7 +209,6 @@ function divinePunishment(int abilityId)
                 ..setDurationHero(lvl, 2.1)
                 ..setDurationNormal(lvl, 2.1)
                 ..setEffects(lvl, "X000")
-                ..setTargetsAllowed(lvl, "none")
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(DIVINE_PUNISHMENT_DMG_BONUS)
@@ -317,7 +317,7 @@ function castShieldBash()
         nearby.removeUnit(target)
         if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
             caster.dealDamage(target, dmg, ReductionType.PHYSICAL)
-            target.addBuffReduced( caster, dur, STUNNED, 1)
+            target.addBuffReduced( caster, dur, STUNNED, 1).setDispelLevel(DispelLevel.DISPEL)
 
     nearby.destr()
 
@@ -344,8 +344,8 @@ function castHolyShield()
     let level = caster.getAbilityLevel(spellId)
     let target = GetSpellTargetUnit()
     let dur = HOLY_SHIELD_DURATION[level-1].bonus(caster.getInt(), HOLY_SHIELD_DURATION_BONUS)
-    target.addBuff( caster, dur, UNTARGETABLE, 1)
     target.addBuff( caster, dur, BUFF_HOLY_SHIELD, level)
+    target.addBuff( caster, dur, INVULERNABLE, level)
 
 function castDivinePunishment()
     let caster = GetTriggerUnit()
