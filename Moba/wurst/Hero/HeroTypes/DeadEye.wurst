@@ -105,6 +105,9 @@ real array TERROR_AOE = [600, 650, 700, 750, 800]
 
 constant BUFF_TERROR = new BuffType(false, DispelLevel.DISPEL)
 
+constant TERROR_BUFF_ID = compiletime(createAuraBuff("Terror", "This unit was hit by Terror; its attacks will miss.", Icons.bTNHowlOfTerror))
+constant TERROR_ABILITY_ID = compiletime(createNegativeBuffAbility(5, TERROR_BUFF_ID, Abilities.howlTarget, ""))
+
 function terror(int abilityId)
 
     if compiletime
@@ -459,8 +462,8 @@ function initHeroType()
         end))
 
         var abilityList = new LinkedList<int>
-        ..add('A00A')
-        BUFF_TERROR.setup(abilityList, 'B00E')
+        ..add(TERROR_ABILITY_ID)
+        BUFF_TERROR.setup(abilityList, TERROR_BUFF_ID)
 
         addOnDamageFunc( Condition (function onDamage))
     
