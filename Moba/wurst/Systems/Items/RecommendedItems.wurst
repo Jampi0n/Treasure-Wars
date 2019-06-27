@@ -36,9 +36,10 @@ public class RecommendedItems
     static function getIndex(int unitId, ItemInShop itm) returns int
         let rec = unitToRecommended.get(unitId)
         if rec != null
-            return rec.itemToIndex.get(itm)
-        else
-            return -1
+            if rec.itemToIndex.has(itm)
+                return rec.itemToIndex.get(itm)
+            
+        return -1
 
     static function getItem(int unitId, int index) returns ItemInShop
         let rec = unitToRecommended.get(unitId)
