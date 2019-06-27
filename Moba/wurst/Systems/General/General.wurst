@@ -4,7 +4,6 @@ import Buff
 import BuffTypeConfig
 import Missile
 import UnitWrapper
-import initlater HeroControl
 import initlater PlayerControl
 import ClosureTimers
 import UnitType
@@ -219,15 +218,10 @@ public function unit.dispelBuffs(DispelLevel dispelLevel)
             if currentBuff.getDispelLevel() castTo int <= dispelLevel castTo int
                 currentBuff.dispel()
 
-public function player.getFullName() returns string
-    let hero = PlayerWrapper.getPlayerHero(this.getId(), 0)
-    if(hero != null)
-        return this.getName()+ " ("+hero.toUnit().getName()+")"
-    else
-        return this.getName()
 
+@deprecated("use PlayerWrapper.getFullColoredName(int id)")
 public function player.getFullColoredName() returns string
-    return this.getColor().toColor().toColorString()+this.getFullName()+"|r"
+    return PlayerWrapper.getFullColoredName(this.getId())
 
 
 public function unit.hitBoxDistanceTo(vec2 pos) returns real

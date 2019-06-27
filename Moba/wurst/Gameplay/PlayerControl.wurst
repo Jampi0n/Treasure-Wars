@@ -357,6 +357,8 @@ public abstract class PlayerWrapper
     static int array statDragonTurtlesKilled
     static int array statBuildingsRazed
 
+    static string array fullColoredName
+
     static int array team
     static PlayerType array playerType
     static string array icon
@@ -366,6 +368,7 @@ public abstract class PlayerWrapper
         heroKills[id] = 0
         deaths[id] = 0
         assists[id] = 0
+        fullColoredName[id] = players[id].getColor().toColor().toColorString()+players[id].getName()+"|r"
 
         playerHeroes[id] = new LinkedList<Hero>
 
@@ -442,6 +445,9 @@ public abstract class PlayerWrapper
 
     static function getAssists(int id) returns int
         return assists[id]
+
+    static function getFullColoredName(int id) returns string
+        return fullColoredName[id]
 
     static function toString(int id) returns string
         return "Player = " + players[id].getName()
