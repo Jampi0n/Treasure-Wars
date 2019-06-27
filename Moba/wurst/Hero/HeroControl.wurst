@@ -15,6 +15,47 @@ constant STRENGTH_BONUS = 45
 constant int array ASSIST_BOUNTY = [0, 60, 40, 30, 24]
 constant int array KILL_BOUNTY = [240, 180, 160, 150, 144]
 
+string array assistStringListTeam1
+string array assistStringListTeam2
+
+constant int array LIST_ID_POW_2 = [1, 2, 4, 8, 16, 1, 2, 4, 8, 16]
+
+function initAssistLists()
+    for i = 0 to 30 // 31 would be all 5, which is not needed
+        assistStringListTeam1[i] = ""
+        assistStringListTeam2[i] = ""
+        let indexList = new LinkedList<int>
+        string array assistName1
+        string array assistName2
+        int size = 0
+        for j = 0 to 4
+            if i div LIST_ID_POW_2[j] mod 2 == 1
+                indexList.add(j)
+                assistName1[size] = PlayerWrapper.getFullColoredName(HERO_PLAYER_TEAM_1_FIRST + j)
+                assistName2[size] = PlayerWrapper.getFullColoredName(HERO_PLAYER_TEAM_2_FIRST + j)
+                size++
+
+        //creating the assist string with correct use of <,> and <and>
+        if size > 2
+            if size == 3
+                assistStringListTeam1[i] = assistName1[0]+", "+assistName1[1]+" and "+assistName1[2] + " get "
+                assistStringListTeam2[i] = assistName2[0]+", "+assistName2[1]+" and "+assistName2[2] + " get "
+            else // 4
+                assistStringListTeam1[i] = assistName1[0]+", "+assistName1[1]+", "+assistName1[2]+" and "+assistName1[3] + " get "
+                assistStringListTeam2[i] = assistName2[0]+", "+assistName2[1]+", "+assistName2[2]+" and "+assistName2[3] + " get "
+        else
+            if size == 1
+                assistStringListTeam1[i] = assistName1[0] + " gets "
+                assistStringListTeam2[i] = assistName2[0] + " gets "
+            else //2
+                assistStringListTeam1[i] = assistName1[0]+" and "+assistName1[1] + " get "
+                assistStringListTeam2[i] = assistName2[0]+" and "+assistName2[1] + " get "
+
+
+
+        destroy indexList
+        
+
 public function delayInit(real maxDelay, CallbackSingle cb)
     doAfter(GetRandomReal(1, maxDelay), cb)
 
@@ -30,7 +71,6 @@ public class Hero
     private static constant onDamageTrigger = CreateTrigger()
     private static constant onDeathTrigger = CreateTrigger()
     private static constant onLevelUpTrigger = CreateTrigger()
-    private static string array assistName
     //protected static Hero array heroes
     private static constant unitToHero = new HashMap<unit, Hero>
     private constant assistMap = new HashMap<int, real>
@@ -102,7 +142,7 @@ public class Hero
         ..setData(this castTo int)
         this.reviveWindow = CreateTimerDialog(this.reviveTimer)
         TimerDialogDisplay(this.reviveWindow, false)
-        TimerDialogSetTitle(this.reviveWindow, this.owner.getFullColoredName())
+        TimerDialogSetTitle(this.reviveWindow, PlayerWrapper.getFullColoredName(this.ownerId))
 
         if this.heroType.getBonusCalculation() != null
             wrapper.setBonusCalculation(this.heroType.getBonusCalculation())
@@ -299,33 +339,8 @@ public class Hero
         let gameTime = getElapsedGameTime()
         let assistList = new LinkedList<int>
 
+        int assistListId = 0
         string assistString
-
-        let enemyList = PlayerWrapper.getHeroTeam(not this.firstTeam)
-        int i = 0
-        for assistantId in enemyList
-            let time = this.assistMap.get(assistantId)
-            if(time > gameTime and assistantId != killingId)
-                if not replaceKiller or lastAssistant != assistantId
-                    assistList.add(assistantId)
-                    assistName[i] = players[assistantId].getFullColoredName()
-                    i++
-
-
-        let assistants = assistList.size()
-
-        //creating the assist string with correct use of <,> and <and>
-        if assistants > 2
-            if assistants == 3
-                assistString = assistName[0]+", "+assistName[1]+" and "+assistName[2]
-            else // 4
-                assistString = assistName[0]+", "+assistName[1]+", "+assistName[2]+" and "+assistName[3]
-        else
-            if assistants == 1
-                assistString = assistName[0]
-            else //2
-                assistString = assistName[0]+" and "+assistName[1]
-
 
         boolean unknownKiller = false
 
@@ -337,6 +352,26 @@ public class Hero
                 if killingId != TEAM_PLAYER_TEAM_1 and killingId != TEAM_PLAYER_TEAM_2 and killingId != PLAYER_NEUTRAL_AGGRESSIVE
                     unknownKiller = true
 
+        if this.firstTeam
+            for assistantId in PlayerWrapper.getHeroTeam(false)
+                let time = this.assistMap.get(assistantId)
+                if time > gameTime and assistantId != killingId
+                    assistList.add(assistantId)
+                    assistListId += LIST_ID_POW_2[assistantId]
+            assistString = assistStringListTeam2[assistListId]
+            
+        else
+            for assistantId in PlayerWrapper.getHeroTeam(true)
+                let time = this.assistMap.get(assistantId)
+                if time > gameTime and assistantId != killingId
+                    assistList.add(assistantId)
+                    assistListId += LIST_ID_POW_2[assistantId]
+            assistString = assistStringListTeam1[assistListId]
+        
+
+        let assistants = assistList.size()
+
+
         if not unknownKiller
             if killingId <= HERO_PLAYER_TEAM_2_LAST
                 int assistBounty = ASSIST_BOUNTY[assistants]
@@ -344,23 +379,11 @@ public class Hero
                 int killBounty = KILL_BOUNTY[assistants]
 
                 if assistants == 0
-                    printTimed("{0} was killed by {1} for {2} gold.".format(
-                        owner.getFullColoredName(), 
-                        killingPlayer.getFullColoredName(),
-                        "|cffffcc00"+killBounty.toString()+"|r"
-                    ), 10)
+                    printTimed(PlayerWrapper.getFullColoredName(this.ownerId) + " was killed by " + PlayerWrapper.getFullColoredName(killingId) + " for |cffffcc00"+killBounty.toString()+"|r gold.", 10)
 
                 else
-                    printTimed("{0} was killed by {1} for {3} gold. {2} get{5} {4} gold for helping.".format(
-                        owner.getFullColoredName(), 
-                        killingPlayer.getFullColoredName(),
-                        assistString,
-                        "|cffffcc00"+killBounty.toString()+"|r",
-                        "|cffffcc00"+assistBounty.toString()+"|r",
-                        assistants==1?"s":""
-                    ), 10)
-
-                        
+                    printTimed(PlayerWrapper.getFullColoredName(this.ownerId) + " was killed by " + PlayerWrapper.getFullColoredName(killingId) +
+                    " for |cffffcc00" + killBounty.toString() + "|r gold. " + assistString + "|cffffcc00" + assistBounty.toString() +"|r gold for helping.", 10)
 
 
                 doAfter(0.1) ->
@@ -376,16 +399,11 @@ public class Hero
 
                     destroy assistList
             else
-                printTimed("{0} was killed by {1}.".format(
-                    owner.getFullColoredName(), 
-                    killingPlayer.getName()
-                ), 10)
+                printTimed(PlayerWrapper.getFullColoredName(this.ownerId) + " was killed by " + killingPlayer.getName() + ".", 10)
 
                 destroy assistList
         else
-            printTimed("{0} died.".format(
-                owner.getFullColoredName()
-            ), 10)
+            printTimed(PlayerWrapper.getFullColoredName(this.ownerId) + " died.", 10)
             destroy assistList
 
         
@@ -490,4 +508,10 @@ function charToAbilitySlot(string char) returns AbilitySlot
 
 init
     Hero.classInit()
-                
+    initAssistLists()
+    doAfter(4) () ->
+        for i = 0 to 30
+            print("["+ i.toString() + "]" + assistStringListTeam1[i])
+
+        for i = 0 to 30
+            print("["+ i.toString() + "]" + assistStringListTeam2[i])

@@ -117,10 +117,10 @@ function setVictoryState(VictoryState newState)
 		int winTeam
 		string teamName
 		if newState == VictoryState.WIN_TEAM1
-			teamName = Player(TEAM_PLAYER_TEAM_1).getFullColoredName()
+			teamName = PlayerWrapper.getFullColoredName(TEAM_PLAYER_TEAM_1)
 			winTeam = TEAM_1
 		else
-			teamName = Player(TEAM_PLAYER_TEAM_2).getFullColoredName()
+			teamName = PlayerWrapper.getFullColoredName(TEAM_PLAYER_TEAM_2)
 			winTeam = TEAM_2
 
 

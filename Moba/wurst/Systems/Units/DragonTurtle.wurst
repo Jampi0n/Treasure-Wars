@@ -44,9 +44,9 @@ function onDragonTurtleDeath()
 
         string teamName
         if killingTeam == TEAM_1
-            teamName = Player(TEAM_PLAYER_TEAM_1).getFullColoredName()
+            teamName = PlayerWrapper.getFullColoredName(TEAM_PLAYER_TEAM_1)
         else if killingTeam == TEAM_2
-            teamName = Player(TEAM_PLAYER_TEAM_2).getFullColoredName()
+            teamName = PlayerWrapper.getFullColoredName(TEAM_PLAYER_TEAM_2)
         else
             teamName = ""
             killedByTeam = false
