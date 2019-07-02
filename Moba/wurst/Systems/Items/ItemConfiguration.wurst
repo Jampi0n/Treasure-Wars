@@ -46,6 +46,9 @@ public class ItemEffect
     private static trigger onItemDrop = CreateTrigger()
     protected constant onPickUp = new LinkedList<ItemPickUp>
     protected constant onDrop = new LinkedList<ItemDrop>
+    private LinkedList<trigger> attachedTriggers = null
+
+    private int useCount = 0
 
     construct(int itemId)
         this.itemId = itemId
@@ -56,6 +59,21 @@ public class ItemEffect
             return itemIdToEffect.get(itemId)
         else
             return new ItemEffect(itemId)
+
+    function attachTrigger(trigger trg) returns trigger
+        if this.attachedTriggers == null
+            this.attachedTriggers = new LinkedList<trigger>
+
+        this.attachedTriggers.add(trg)
+        return trg
+
+    function enableEffect()
+        for trg in this.attachedTriggers
+            trg.enable()
+
+    function disableEffect()
+        for trg in this.attachedTriggers
+            trg.disable()
 
     static function classInit()
         onItemPickUp = CreateTrigger()
@@ -70,6 +88,9 @@ public class ItemEffect
         triggerUnit = GetTriggerUnit()
         let itemType = itemIdToEffect.get(triggerItem.getTypeId())
         if itemType != null
+            itemType.useCount++
+            if itemType.useCount == 1
+                itemType.enableEffect()
             for c in itemType.onPickUp
                 c.onItemPickUp()
 
@@ -78,6 +99,9 @@ public class ItemEffect
         triggerUnit = GetTriggerUnit()
         let itemType = itemIdToEffect.get(triggerItem.getTypeId())
         if itemType != null
+            itemType.useCount--
+            if itemType.useCount == 0
+                itemType.disableEffect()
             for c in itemType.onDrop
                 c.onItemDrop()
 
@@ -86,6 +110,9 @@ int currentItemId
 ItemEffect currentItemEffect
 ItemDefinition currentItemDefinition
 ItemInShop currentItemInShop
+
+public function createItemEffectTrigger() returns trigger
+    return currentItemEffect.attachTrigger(CreateTrigger())
 
 public function addPickupFunction(ItemPickUp onPickUp)
     if compiletime
