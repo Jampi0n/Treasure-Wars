@@ -77,7 +77,7 @@ function helmetOfJustice()
     addStatBonusAbsolute(Stat.AR, ar)
 
     if not compiletime
-        CreateTrigger()
+        createItemEffectTrigger()
         ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
         ..addAction(() -> (begin
             let killer = GetKillingUnit()
@@ -168,7 +168,7 @@ function holyShield()
         ..add(HOLY_SHIELD_ABILTIY_ID)
         BUFF_HOLY_SHIELD.setup(abilityList, HOLY_SHIELD_BUFF_ID)
 
-        CreateTrigger()
+        createItemEffectTrigger()
         ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_SPELL_EFFECT)
         ..addAction(() ->(begin
             if GetSpellAbilityId() == 'A00G'

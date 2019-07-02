@@ -122,7 +122,7 @@ function itemCursedSword()
                 target.addEffect(Abilities.avengerMissile, "chest").destr()
         end))
 
-        CreateTrigger()
+        createItemEffectTrigger()
         ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
         ..addAction(() -> (begin
             let killer = GetKillingUnit()
@@ -204,7 +204,7 @@ function itemAxeOfDecay()
     addStatBonusAbsolute(Stat.STR, str)
 
     if not compiletime
-        CreateTrigger()
+        createItemEffectTrigger()
         ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
         ..addAction(() -> (begin
             let killer = GetKillingUnit()
@@ -255,7 +255,7 @@ function itemSacrificialDagger()
     addStatBonusAbsolute(Stat.AS, as)
 
     if not compiletime
-        CreateTrigger()
+        createItemEffectTrigger()
         ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
         ..addAction(() -> (begin
             let killer = GetKillingUnit()
@@ -279,7 +279,7 @@ function itemSkullAxe()
     addStatBonusAbsolute(Stat.STR, str)
 
     if not compiletime
-        CreateTrigger()
+        createItemEffectTrigger()
         ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
         ..addAction(() -> (begin
             let killer = GetKillingUnit()
@@ -409,7 +409,7 @@ function itemArmorBreaker()
         ..setArtCaster("")
         ..setManaCost(1, 0)
     else
-        CreateTrigger()
+        createItemEffectTrigger()
         ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_SPELL_EFFECT)
         ..addAction() -> 
             if GetSpellAbilityId() == ABILITY_ARMOR_BREAKER_SLAM

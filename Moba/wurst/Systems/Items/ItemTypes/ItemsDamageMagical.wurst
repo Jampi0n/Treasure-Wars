@@ -91,7 +91,7 @@ function itemSkull()
     setupItem(ITEM_ID_SKULL, CATEGORY, 550)
     setInfo("Skull", "Restores {0} mana points per kill.".format(mana.toString()))
     if not compiletime
-        CreateTrigger()
+        createItemEffectTrigger()
         ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
         ..addAction(() -> (begin
             let killer = GetKillingUnit()
@@ -144,7 +144,7 @@ function itemApprenticeScroll()
     setInfo("Apprentice's Scroll", "Restores {0}% of your mana, when you level up. This effect does not stack.".format(factor.toString()))
 
     if not compiletime
-        CreateTrigger()
+        createItemEffectTrigger()
         ..registerAnyUnitEvent(EVENT_PLAYER_HERO_LEVEL)
         ..addAction(() -> (begin
             let hero = GetTriggerUnit()
@@ -169,7 +169,7 @@ function itemSkullPendant()
     addStatBonusAbsolute(Stat.MP, mp)
 
     if not compiletime
-        CreateTrigger()
+        createItemEffectTrigger()
         ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
         ..addAction(() -> (begin
             let killer = GetKillingUnit()
@@ -246,7 +246,7 @@ function itemEvilBook()
     addStatBonusAbsolute(Stat.INT, intel)
 
     if not compiletime
-        CreateTrigger()
+        createItemEffectTrigger()
         ..registerAnyUnitEvent(EVENT_PLAYER_HERO_LEVEL)
         ..addAction(() -> (begin
             let hero = GetTriggerUnit()
@@ -333,7 +333,7 @@ function itemCursedMask()
     addStatBonusAbsolute(Stat.INT, intel)
 
     if not compiletime
-        CreateTrigger()
+        createItemEffectTrigger()
         ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
         ..addAction(() -> (begin
             let killer = GetKillingUnit()
@@ -360,7 +360,7 @@ function itemEmeraldPendant()
     addStatBonusAbsolute(Stat.MP, mp)
 
     if not compiletime
-        CreateTrigger()
+        createItemEffectTrigger()
         ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
         ..addAction(() -> (begin
             let killer = GetKillingUnit()
@@ -403,7 +403,7 @@ function itemRingOfDarkness()
                 target.addEffect(Abilities.avengerMissile, "chest").destr()
         end))
 
-        CreateTrigger()
+        createItemEffectTrigger()
         ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
         ..addAction(() -> (begin
             let killer = GetKillingUnit()
@@ -454,7 +454,7 @@ function itemBlessedGoblet()
     end))
 
     if not compiletime
-        CreateTrigger()
+        createItemEffectTrigger()
         ..registerTimerEvent(0.25, true)
         ..addAction(() -> (begin
             ForGroup(blessedHeroes, function blessedRegeneration)
@@ -558,7 +558,7 @@ function itemVampiricGoblet()
     addStatBonusAbsolute(Stat.MP, mp)
 
     if not compiletime
-        CreateTrigger()
+        createItemEffectTrigger()
         ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
         ..addAction(() -> (begin
             let killer = GetKillingUnit()
@@ -592,7 +592,7 @@ function itemScrollOfConjuration()
     end))
 
     if not compiletime
-        CreateTrigger()
+        createItemEffectTrigger()
         ..registerAnyUnitEvent(EVENT_PLAYER_HERO_LEVEL)
         ..addAction(() -> (begin
             let hero = GetTriggerUnit()

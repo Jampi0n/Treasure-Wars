@@ -79,7 +79,7 @@ function itemWarDrum()
             ..addStatAbsoluteBonus(Stat.AS, -asBonus)
         end))
 
-        CreateTrigger()
+        createItemEffectTrigger()
         ..registerTimerEvent(0.25, true)
         ..addAction(() -> (begin
             ForGroup(auraHeroes, function checkAura)
