@@ -68,12 +68,14 @@ public class ItemEffect
         return trg
 
     function enableEffect()
-        for trg in this.attachedTriggers
-            trg.enable()
+        if this.attachedTriggers != null
+            for trg in this.attachedTriggers
+                trg.enable()
 
     function disableEffect()
-        for trg in this.attachedTriggers
-            trg.disable()
+        if this.attachedTriggers != null
+            for trg in this.attachedTriggers
+                trg.disable()
 
     static function classInit()
         onItemPickUp = CreateTrigger()
