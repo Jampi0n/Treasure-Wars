@@ -653,20 +653,21 @@ public class GUI
 
         let buttonWithCost = this.getListButton(i)
         if itm == this.selectedRecipe
-            if GetLocalPlayer() == this.forPlayer
-                buttonWithCost.frame().show()
-                buttonWithCost.setCost(itm.getTotalCost())
-                buttonWithCost.setIcon(itm.getIcon())
-                buttonWithCost.setSelected(true)
-                buttonWithCost.setChecked(false)
-                this.selectedRecipeButton = i
+            //if GetLocalPlayer() == this.forPlayer
+            this.selectedRecipeButton = i
+            buttonWithCost.frame().show()
+            buttonWithCost.setCost(itm.getTotalCost())
+            buttonWithCost.setIcon(itm.getIcon())
+            buttonWithCost.setSelected(true)
+            buttonWithCost.setChecked(false)
+            
         else
-            if GetLocalPlayer() == this.forPlayer
-                buttonWithCost.frame().show()
-                buttonWithCost.setCost(itm.getTotalCost())
-                buttonWithCost.setIcon(itm.getIcon())
-                buttonWithCost.setSelected(false)
-                buttonWithCost.setChecked(false)
+            //if GetLocalPlayer() == this.forPlayer
+            buttonWithCost.frame().show()
+            buttonWithCost.setCost(itm.getTotalCost())
+            buttonWithCost.setIcon(itm.getIcon())
+            buttonWithCost.setSelected(false)
+            buttonWithCost.setChecked(false)
 
 
 
