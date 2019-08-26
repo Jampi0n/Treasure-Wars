@@ -47,11 +47,11 @@ function setupCreatedHero(Hero hero)
     let heroUnit = hero.toUnit()
     player owner = heroUnit.getOwner()
     let ownerId = owner.getId()
-    playerHasPicked[owner.getId()] = true
+    playerHasPicked[ownerId] = true
     owner.setGold(500)
         
     vec2 pos// = gg_rct_CenterMid.getCenter()
-    patron[owner.getId()].remove()
+    patron[ownerId].remove()
 
     if PlayerWrapper.getTeam(ownerId) == TEAM_1
         pos = gg_rct_GreenAltar.getCenter()+vec2(128,128)
@@ -82,8 +82,8 @@ function setupCreatedHero(Hero hero)
     doAfter(5) ->
         UnitModifySkillPoints(heroUnit, 1)
 
-    if GetLocalPlayer() == heroUnit.getOwner()
-        heroUnit.getOwner().resetToGameCamera(0)
+    if GetLocalPlayer() == owner
+        owner.resetToGameCamera(0)
         PanCameraTo(pos.x, pos.y)
 
 
