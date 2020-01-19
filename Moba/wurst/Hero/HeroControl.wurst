@@ -509,9 +509,9 @@ function charToAbilitySlot(string char) returns AbilitySlot
 init
     Hero.classInit()
     initAssistLists()
-    doAfter(4) () ->
+    /*doAfter(4) () ->
         for i = 0 to 30
             print("["+ i.toString() + "]" + assistStringListTeam1[i])
 
         for i = 0 to 30
-            print("["+ i.toString() + "]" + assistStringListTeam2[i])
+            print("["+ i.toString() + "]" + assistStringListTeam2[i])*/
