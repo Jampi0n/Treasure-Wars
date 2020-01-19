@@ -623,7 +623,7 @@ public class GUI
         this.mBoardMinimized = ScoreTable.isMinimized()
         if GetLocalPlayer() == this.forPlayer and not IS_REPLAY
             this.frameShopUI.show()
-            ScoreTable.minimalize(true)
+            ScoreTable.minimize()
             ClearSelection()
             EnableDragSelect(false, false)
             EnableSelect(false, false)
@@ -642,9 +642,9 @@ public class GUI
             EnableDragSelect(true, true)
             EnableSelect(true, true)
             if this.mBoardMinimized
-                ScoreTable.minimalize(true)
+                ScoreTable.minimize()
             else
-                ScoreTable.minimalize(false)
+                ScoreTable.maximize()
 
 
     @inline

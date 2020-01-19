@@ -121,7 +121,7 @@ public class StatTable
                 players[TEAM_PLAYER_TEAM_1].getColor().toColor().toColorString()+ScoreTable.team1Kills.toString()+"|r / "+
                 players[TEAM_PLAYER_TEAM_2].getColor().toColor().toColorString()+ScoreTable.team2Kills.toString()+"|r"  )
             ..display(true)
-            ..minimalize(true)
+            ..minimize()
 
         for j = 0 to mBoard.getRowCount() - 1
             for i = 1 to mBoard.getColumnCount() - 1 
@@ -174,8 +174,11 @@ public class ScoreTable
     static function isMinimized() returns bool
         return mBoard.isMinimized()
 
-    static function minimalize(bool flag)
-        mBoard.minimalize(flag)
+    static function minimize()
+        mBoard.minimize()
+
+    static function maximize()
+        mBoard.maximize()
 
     static function updateHeader(boolean firstTeam)
         let row = (firstTeam ? 0 : PlayerWrapper.team1HeroCount + 1)
@@ -318,8 +321,8 @@ public class ScoreTable
             ..setItemsStyle(true, false)
             ..setTitle("Score: "+players[TEAM_PLAYER_TEAM_1].getColor().toColor().toColorString()+"0|r / "+players[TEAM_PLAYER_TEAM_2].getColor().toColor().toColorString()+"0|r"  )
             ..display(true)
-            ..minimalize(true)
-        doAfter(0.02, () -> mBoard.minimalize(false))
+            ..minimize()
+        doAfter(0.02, () -> mBoard.maximize())
         
 
     static function addPlayer(int i)

@@ -357,9 +357,16 @@ public function addButtonToTavern(int heroId, int buttonPos, HeroType heroType, 
         nameW + "|n" + tooltipW + "|n|n" + 
         nameE + "|n" + tooltipE + "|n|n" + 
         nameR + "|n" + tooltipR
+
         BlzSetAbilityExtendedTooltip(buttonId, tooltip, 0)
-        if BlzGetAbilityExtendedTooltip(buttonId, 0) != tooltip
-            error("Tooltip for hero " + GetObjectName(heroType.getUnitId()) + " was not correctly generated.")
+        BlzSetAbilityExtendedTooltip(buttonId, tooltip, 1)
+        let compareTooltip = BlzGetAbilityExtendedTooltip(buttonId, 0)
+        doAfter(0) () ->   
+            //print("T=" + tooltip)
+            //print("C=" + compareTooltip)
+            if compareTooltip != tooltip
+                print("error")
+                error("Tooltip for hero " + GetObjectName(heroType.getUnitId()) + " was not correctly generated.")
 
 public function initBeforeHeroType()
     buttonToHeroType = new HashMap<int, HeroType>()
