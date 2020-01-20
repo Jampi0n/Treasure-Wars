@@ -32,9 +32,9 @@ public function onCast(int abilityID, OnCast onCast)
     CAST_MAP.put(abilityID, onCast)
 
 function onCastTrigger()
-    let onCast = CAST_MAP.get(GetSpellAbilityId())
-    if onCast != null
-        onCast.onCast()
+    let key = GetSpellAbilityId()
+    if CAST_MAP.has(key)
+        CAST_MAP.get(key).onCast()
 
 // Impact
 

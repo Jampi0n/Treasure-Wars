@@ -208,10 +208,8 @@ class DamageTag
 
 
     static function addDamage(unit target, real damage)
-        DamageTag damageTag = unitMap.get(target)
-        if damageTag == null
-            new DamageTag(target, damage)
-        else
+        if unitMap.has(target)
+            DamageTag damageTag = unitMap.get(target)
             if damageTag.timeout < getElapsedGameTime()
                 destroy damageTag
                 new DamageTag(target, damage)
@@ -220,6 +218,8 @@ class DamageTag
                 damageTag.damage += damage
                 damageTag.tag.setAge(0)
                 damageTag.tag.setText(damageTag.damage.round().toString(), 0.024 / 0.0023)
+        else
+            new DamageTag(target, damage)
 
     static function updateStatic()
         let t = GetExpiredTimer()

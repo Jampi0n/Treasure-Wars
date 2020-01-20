@@ -101,8 +101,9 @@ public class Hero
         CreateTrigger()
         ..addAction(() -> (begin
             let heroUnit = GetTriggerUnit()
-            let hero = unitToHero.get(heroUnit)
-            if hero != null
+            
+            if unitToHero.has(heroUnit)
+                let hero = unitToHero.get(heroUnit)
                 //for i = 0 to 3
                     //hero.defaultCooldown[i] = BlzGetAbilityCooldown(hero.skillIds[i], hero.toUnit().getAbilityLevel(hero.skillIds[i]))
                 hero.updateCooldowns()
@@ -120,6 +121,11 @@ public class Hero
         this.skillIds[2] = this.heroType.getAbilityId(AbilitySlot.E)
         this.skillIds[3] = this.heroType.getAbilityId(AbilitySlot.R)
         this.skillIds[4] = this.heroType.getAbilityId(AbilitySlot.PASSIVE)
+
+        for i = HERO_PLAYER_TEAM_1_FIRST to HERO_PLAYER_TEAM_1_LAST
+            assistMap.put(i, 0)
+        for i = HERO_PLAYER_TEAM_2_FIRST to HERO_PLAYER_TEAM_2_LAST
+            assistMap.put(i, 0)
 
         for i = 0 to 3
             this.cooldownMod[i] = 0
@@ -345,7 +351,7 @@ public class Hero
         boolean unknownKiller = false
 
         if replaceKiller
-            if assistMap.get(lastAssistant) > gameTime
+            if lastAssistant != -1 and assistMap.get(lastAssistant) > gameTime
                 killingId = lastAssistant
                 killingPlayer = players[lastAssistant]
             else
