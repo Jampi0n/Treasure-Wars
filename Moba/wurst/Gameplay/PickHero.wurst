@@ -359,7 +359,7 @@ public function addButtonToTavern(int heroId, int buttonPos, HeroType heroType, 
         nameR + "|n" + tooltipR
 
         BlzSetAbilityExtendedTooltip(buttonId, tooltip, 0)
-        BlzSetAbilityExtendedTooltip(buttonId, tooltip, 1)
+        //BlzSetAbilityExtendedTooltip(buttonId, tooltip, 1)
         let compareTooltip = BlzGetAbilityExtendedTooltip(buttonId, 0)
         doAfter(0) () ->   
             //print("T=" + tooltip)
