@@ -90,6 +90,8 @@ function initTargetPoints()
 
 function attackMoveGroup()
     let u = GetEnumUnit()
+    if not PathUnitNew.unitToPathUnit.has(u)
+        return
     let pathUnit = PathUnitNew.unitToPathUnit.get(u)
     if pathUnit == null
         return
@@ -133,6 +135,8 @@ function attackMoveGroup()
 
 function returnMoveGroup()
     let u = GetEnumUnit()
+    if not PathUnitNew.unitToPathUnit.has(u)
+        return
     let pathUnit = PathUnitNew.unitToPathUnit.get(u)
     if pathUnit == null
         return
@@ -172,6 +176,8 @@ function passiveMoveGroup()
 
 function siegeMoveGroup()
     let u = GetEnumUnit()
+    if not PathUnitNew.unitToPathUnit.has(u)
+        return
     let pathUnit = PathUnitNew.unitToPathUnit.get(u)
     if pathUnit == null
         return
@@ -196,14 +202,15 @@ function initMovement()
 
     onLeave() ->
         let u = getEnterLeaveUnit()
-        let pathUnit = PathUnitNew.unitToPathUnit.get(u)
-        if pathUnit != null
-            let index = pathUnit.index
-            attackMoveGroup[index].removeUnit(u)
-            returnMoveGroup[index].removeUnit(u)
-            passiveMoveGroup[index].removeUnit(u)
-            siegeMoveGroup[index].removeUnit(u)
-            destroy pathUnit
+        if PathUnitNew.unitToPathUnit.has(u)
+            let pathUnit = PathUnitNew.unitToPathUnit.get(u)
+            if pathUnit != null
+                let index = pathUnit.index
+                attackMoveGroup[index].removeUnit(u)
+                returnMoveGroup[index].removeUnit(u)
+                passiveMoveGroup[index].removeUnit(u)
+                siegeMoveGroup[index].removeUnit(u)
+                destroy pathUnit
 
 
 
@@ -246,6 +253,7 @@ init
 
     CreateTrigger()..registerAnyUnitEvent(EVENT_PLAYER_UNIT_ATTACKED)..addAction() ->
         let u = GetAttacker()
-        let pathUnit = PathUnitNew.unitToPathUnit.get(u)
-        if pathUnit != null
-            pathUnit.attacking = true
+        if PathUnitNew.unitToPathUnit.has(u)
+            let pathUnit = PathUnitNew.unitToPathUnit.get(u)
+            if pathUnit != null
+                pathUnit.attacking = true

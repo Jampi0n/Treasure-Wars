@@ -258,10 +258,10 @@ public class CreepCamp
         alive++
         unitToCamp.put(creepUnit, this)
         creepTypes.add(new Creep(creepUnit))
-        totalLevel += UnitType.getUnitType(creepUnit.getTypeId()).getPowerLevel()
-
-        let customBuff = BuffConfiguration.unitTypeToBuffConfig.get(creepUnit.getTypeId()).customBuff
-        if customBuff != null
+        let creepTypeId = creepUnit.getTypeId()
+        totalLevel += UnitType.getUnitType(creepTypeId).getPowerLevel()
+        if BuffConfiguration.unitTypeToBuffConfig.has(creepTypeId)
+            let customBuff = BuffConfiguration.unitTypeToBuffConfig.get(creepTypeId).customBuff
             doAfter(0.01) ->
                 creepUnit.addBuff(creepUnit, -1, customBuff, 1)
     

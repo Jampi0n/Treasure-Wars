@@ -27,15 +27,14 @@ public class RecommendedItems
             this.count++
 
     static function getCount(int unitId) returns int
-        let rec = unitToRecommended.get(unitId)
-        if rec != null
-            return rec.count
+        if unitToRecommended.has(unitId)
+            return unitToRecommended.get(unitId).count
         else
             return 0
 
     static function getIndex(int unitId, ItemInShop itm) returns int
-        let rec = unitToRecommended.get(unitId)
-        if rec != null
+        if unitToRecommended.has(unitId)
+            let rec = unitToRecommended.get(unitId)
             if rec.itemToIndex.has(itm)
                 return rec.itemToIndex.get(itm)
             

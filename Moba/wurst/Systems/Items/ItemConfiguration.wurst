@@ -87,9 +87,9 @@ public class ItemEffect
 
     static function onItemPickUp()
         triggerItem = GetManipulatedItem()
-        triggerUnit = GetTriggerUnit()
-        let itemType = itemIdToEffect.get(triggerItem.getTypeId())
-        if itemType != null
+        if itemIdToEffect.has(triggerItem.getTypeId())
+            triggerUnit = GetTriggerUnit()
+            let itemType = itemIdToEffect.get(triggerItem.getTypeId())
             itemType.useCount++
             if itemType.useCount == 1
                 itemType.enableEffect()
@@ -98,9 +98,9 @@ public class ItemEffect
 
     static function onItemDrop()
         triggerItem = GetManipulatedItem()
-        triggerUnit = GetTriggerUnit()
-        let itemType = itemIdToEffect.get(triggerItem.getTypeId())
-        if itemType != null
+        if itemIdToEffect.has(triggerItem.getTypeId())
+            triggerUnit = GetTriggerUnit()
+            let itemType = itemIdToEffect.get(triggerItem.getTypeId())
             itemType.useCount--
             if itemType.useCount == 0
                 itemType.disableEffect()
