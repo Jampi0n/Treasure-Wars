@@ -80,8 +80,8 @@ public BuffType buffBash
 function bash(int abilityId)
 
     if compiletime
-        int array MANA = [60, 60, 60, 60, 60]
-        real array COOLDOWN = [9, 9, 9, 9, 9]
+        let MANA = skillData(60, 60, 60, 60, 60)
+        let COOLDOWN = skillData(9, 9, 9, 9, 9)
 
         meleeDummy()
         let aDef = new AbilityDefinitionBeserk(abilityId)
@@ -96,11 +96,10 @@ function bash(int abilityId)
             ..setCheckDependencies(true)
             ..setRequirements(MELEE.toRawCode())
             ..targetSelf()
+            ..setSkillData(COOLDOWN, MANA, 0)
 
         for lvl = 1 to 5
             aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
                 ..setAttackSpeedIncrease(lvl, 0)
                 ..setDamageTakenIncrease(lvl, 0)
                 ..setMovementSpeedIncrease(lvl, 0)
@@ -140,19 +139,16 @@ public BuffType buffInnerFire
 function innerFire(int abilityId)
 
     if compiletime
-        int array MANA = [80, 85, 90, 95, 100]
-        real array COOLDOWN = [19, 19, 19, 19, 19]
+        let MANA = skillData(80, 85, 90, 95, 100)
+        let COOLDOWN = skillData(19, 19, 19, 19, 19)
 
-        let aDef = new AbilityDefinitionRoar(abilityId)
+        new AbilityDefinitionRoar(abilityId)
             ..setAnimationNames("spell")
             ..setupIcon(Icons.bTNInnerFire)
             ..setupWithHotKey("Inner Fire", "W")
             ..targetNone()
+            ..setSkillData(COOLDOWN, MANA, 0)
 
-        for lvl = 1 to 5
-            aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(INNER_FIRE_DMG_BONUS.toReal(), INNER_FIRE_DEF_BONUS.toReal())
@@ -194,9 +190,9 @@ BuffType buffFlameThrower
 function flameThrower(int abilityId)
 
     if compiletime
-        int array MANA = [90, 100, 110, 120, 130]
-        real array COOLDOWN = [11, 11, 11, 11, 11]
-        real array RANGE = [900, 900, 900, 900, 900]
+        let MANA = skillData(90, 100, 110, 120, 130)
+        let COOLDOWN = skillData(11, 11, 11, 11, 11)
+        let RANGE = skillData(900, 900, 900, 900, 900)
 
         let aDef = new AbilityDefinitionIllidanChannel(abilityId)
             ..setupIcon(Icons.bTNWallOfFire)
@@ -207,12 +203,10 @@ function flameThrower(int abilityId)
             ..setArtTarget("")
             ..setAnimationNames("spell,throw")
             ..setupChannel(TargetType.AREA, "shockwave", 0.5)
+            ..setSkillData(COOLDOWN, MANA, RANGE)
 
         for lvl = 1 to 5
             aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
-                ..setCastRange(lvl, RANGE[lvl-1])
                 ..setAreaofEffect(lvl, FLAME_THROWER_AOE[lvl-1])
 
     let tooltip = new DynamicTooltip(abilityId)
@@ -242,17 +236,16 @@ constant int RAPID_FIRE_BUFF_ID = compiletime(createDummyBuff("Rapid Fire"))
 function rapidFire(int abilityId)
 
     if compiletime
-        int array MANA = [150, 165, 180, 195, 210]
-        real array COOLDOWN = [120, 120, 120, 120, 120]
+        let MANA = skillData(150, 165, 180, 195, 210)
+        let COOLDOWN = skillData(120, 120, 120, 120, 120)
 
         let aDef = new AbilityDefinitionAlchemistChemicalRage(abilityId)
             ..setupIcon(Icons.bTNHumanMissileUpThree)
             ..setupWithHotKey("Rapid Fire", "R")
+            ..setSkillData(COOLDOWN, MANA, 0)
 
         for lvl = 1 to 5
             aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
                 ..setNormalFormUnit(lvl, HERO_INFERNAL_MACHINE.toRawCode())
                 ..setAlternateFormUnit(lvl, HERO_INFERNAL_MACHINE_MORPH.toRawCode())
                 ..setDurationNormal(lvl, 0)

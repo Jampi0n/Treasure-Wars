@@ -70,7 +70,8 @@ function rootDummy()
 function devourUnit(int abilityId)
     
     if compiletime
-        int array MANA = [120, 110, 100, 90, 80]
+        let MANA = skillData(120, 110, 100, 90, 80)
+        let COOLDOWN = skillData(20, 17, 14, 11, 8)
         rootDummy()
         let aDef = new AbilityDefinitionFarseerChainLightning(abilityId)
             ..setupIcon("BTNStrengthofNature")
@@ -83,12 +84,10 @@ function devourUnit(int abilityId)
             ..setLightningEffects("")
             ..setRequirements(UPROOTED.toRawCode())
             ..setCheckDependencies(true)
-
+            ..setSkillData(COOLDOWN, MANA, 0)
 
         for lvl = 1 to 5
             aDef
-                ..setCooldown(lvl, DEVOUR_COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
                 ..setNumberofTargetsHit(lvl, 1)
                 ..setDamageperTarget(lvl, 0)
                 ..setCastRange(lvl, 150)
@@ -120,21 +119,16 @@ constant int ENTAGLING_ROOTS_ABILITY_ID = compiletime(createNegativeBuffAbility(
 function entanglingRoots(int abilityId)
 
     if compiletime
-        int array MANA = [120, 130, 140, 150, 160]
-        real array COOLDOWN = [14, 13, 12, 11, 10]
-        let aDef = new AbilityDefinitionDreadlordCarrionSwarm(abilityId)
+        let MANA = skillData(120, 130, 140, 150, 160)
+        let COOLDOWN = skillData(14, 13, 12, 11, 10)
+        let RANGE = createSkillData(800)
+        new AbilityDefinitionDreadlordCarrionSwarm(abilityId)
             ..setupIcon("BTNEntnagle")
             ..setAnimationNames("attack,2")
             ..setupWithHotKey("Entangling Roots", "W")
             ..setMissileArt("")
             ..targetNone()
-
-        for lvl = 1 to 5
-            aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
-                ..setCastRange(lvl, 800)
-
+            ..setSkillData(COOLDOWN, MANA, RANGE)
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(ENTANGLE_HIT_DAMAGE_BONUS, ENTANGLE_DURATION_BONUS)
@@ -160,17 +154,16 @@ constant real ROOT_DURATION = 1.75//2.57
 function root(int abilityId)
 
     if compiletime
-        int array MANA = [25, 25, 25, 25, 25]
-        real array COOLDOWN = [3, 3, 3, 3, 3]
+        let MANA = skillData(25, 25, 25, 25, 25)
+        let COOLDOWN = skillData(3, 3, 3, 3, 3)
         let aDef = new AbilityDefinitionBearform(abilityId)
             ..setupIcon(Icons.bTNRoot)
             ..setIconTurnOff(Icons.bTNUproot)
             ..setupWithHotKey("Root", "E")
+            ..setSkillData(COOLDOWN, MANA, 0)
 
         for lvl = 1 to 5
             aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
                 ..setNormalFormUnit(lvl, HERO_TREE.toRawCode())
                 ..setAlternateFormUnit(lvl, HERO_TREE_ROOTED.toRawCode())
                 ..setDurationNormal(lvl, ROOT_DURATION)
@@ -191,7 +184,6 @@ function root(int abilityId)
 
 constant int NATURES_WRATH_DUMMY_BUFF = compiletime(createDummyBuff())
 
-constant real array NATURES_WRATH_COOLDOWN = [60, 50, 40, 30, 20]
 constant real array NATURES_WRATH_TOTAL_DAMAGE = [300, 350, 400, 450, 500]
 constant real NATURES_WRATH_TOTAL_DAMAGE_BONUS = 250
 constant real array NATURES_WRATH_DURATION = [5, 5, 5, 5, 5]
@@ -200,17 +192,16 @@ constant real NATURES_WRATH_AOE = 300
 
 function naturesWrath(int abilityId)
 
+    let COOLDOWN = skillData(60, 50, 40, 30, 20)
     if compiletime
-        int array MANA = [160, 170, 180, 190, 200]
+        let MANA = skillData(160, 170, 180, 190, 200)
         let aDef = new AbilityDefinitionBeserk(abilityId)
             ..setupIcon("BTNNaturesWrath")
             ..setupWithHotKey("Nature's Wrath", "R")
-
+            ..setSkillData(COOLDOWN, MANA, 0)
 
         for lvl = 1 to 5
             aDef
-                ..setCooldown(lvl, NATURES_WRATH_COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
                 ..setBuffs(lvl, NATURES_WRATH_DUMMY_BUFF.toRawCode())
                 ..setDamageTakenIncrease(lvl, 0)
                 ..setAttackSpeedIncrease(lvl, 0)
@@ -220,7 +211,7 @@ function naturesWrath(int abilityId)
     tooltip.setReplaceIntelligence(NATURES_WRATH_TOTAL_DAMAGE_BONUS)
     tooltip.setLearnString("Covers the ancient in a storm of sharp leaves, that deal damage to nearby enemies.", (int lvl) -> (begin
         return "{0}{I0} damage over {1} seconds, {2} seconds cooldown.".format( 
-            NATURES_WRATH_TOTAL_DAMAGE[lvl-1].str(), NATURES_WRATH_DURATION[lvl-1].str(), NATURES_WRATH_COOLDOWN[lvl-1].str()
+            NATURES_WRATH_TOTAL_DAMAGE[lvl-1].str(), NATURES_WRATH_DURATION[lvl-1].str(), COOLDOWN.data(lvl).str()
         )
     end) )
     

@@ -68,11 +68,11 @@ constant real FIREBOLT_DAMAGE_BONUS = 140
 function firebolt(int abilityId)
 
     if compiletime
-        int array MANA = [70, 75, 80, 85, 90]
-        real array COOLDOWN = [5, 5, 5, 5, 5]
-        real array RANGE = [700, 700, 700, 700, 700]
+        let MANA = skillData(70, 75, 80, 85, 90)
+        let COOLDOWN = skillData(5, 5, 5, 5, 5)
+        let RANGE = skillData(700, 700, 700, 700, 700)
 
-        let aDef = new AbilityDefinitionIllidanChannel(abilityId)
+        new AbilityDefinitionIllidanChannel(abilityId)
             ..setupIcon("BTNChaosOrb")
             ..setupWithHotKey("Fire Ball", "Q")
             ..setArtCaster("")
@@ -81,12 +81,7 @@ function firebolt(int abilityId)
             ..setArtTarget("")
             ..setAnimationNames("spell,throw")
             ..setupChannel(TargetType.POINT, "shockwave", 0.5)
-
-        for lvl = 1 to 5
-            aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
-                ..setCastRange(lvl, RANGE[lvl-1])
+            ..setSkillData(COOLDOWN, MANA, RANGE)
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(FIREBOLT_DAMAGE_BONUS)   
@@ -109,9 +104,9 @@ constant real array METEOR_STUN_DURATION = [1, 1.25, 1.5, 1.75, 2]
 function infernalMeteor(int abilityId)
 
     if compiletime
-        int array MANA = [160, 175, 190, 205, 220]
-        real array COOLDOWN = [9, 9, 9, 9, 9]
-        real array RANGE = [600, 675, 750, 825, 900]
+        let MANA = skillData(160, 175, 190, 205, 220)
+        let COOLDOWN = skillData(9, 9, 9, 9, 9)
+        let RANGE = skillData(600, 675, 750, 825, 900)
 
         let aDef = new AbilityDefinitionIllidanChannel(abilityId)
             ..setupIcon("BTNMeteor")
@@ -122,12 +117,10 @@ function infernalMeteor(int abilityId)
             ..setArtTarget("")
             ..setAnimationNames("spell,slam")
             ..setupChannel(TargetType.AREA, "inferno", 0.5)
+            ..setSkillData(COOLDOWN, MANA, RANGE)
 
         for lvl = 1 to 5
             aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
-                ..setCastRange(lvl, RANGE[lvl-1])
                 ..setAreaofEffect(lvl, METEOR_AOE[lvl-1])
 
     let tooltip = new DynamicTooltip(abilityId)
@@ -160,11 +153,11 @@ BuffType buffSoulBurn
 function soulburn(int abilityId)
 
     if compiletime
-        int array MANA = [150, 160, 170, 180, 190]
-        real array COOLDOWN = [12, 12, 12, 12, 12]
-        real array RANGE = [700, 700, 700, 700, 700]
+        let MANA = skillData(150, 160, 170, 180, 190)
+        let COOLDOWN = skillData(12, 12, 12, 12, 12)
+        let RANGE = skillData(700, 700, 700, 700, 700)
 
-        let aDef = new AbilityDefinitionIllidanChannel(abilityId)
+        new AbilityDefinitionIllidanChannel(abilityId)
             ..setupIcon("BTNSoulBurn2")
             ..setupWithHotKey("Soul Burn", "E")
             ..setArtCaster("")
@@ -174,12 +167,7 @@ function soulburn(int abilityId)
             ..setAnimationNames("spell,one")
             ..setupChannel(TargetType.UNIT, "soulburn", 0.5)
             ..targetEnemies()
-
-        for lvl = 1 to 5
-            aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
-                ..setCastRange(lvl, RANGE[lvl-1])
+            ..setSkillData(COOLDOWN, MANA, RANGE)
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(SOUL_BURN_DAMAGE_BONUS)
@@ -207,9 +195,9 @@ constant real RAY_OF_DEATH_AFTER_AOE = 250
 function rayOfDeath(int abilityId)
 
     if compiletime
-        int array MANA = [300, 325, 350, 375, 400]
-        real array COOLDOWN = [120, 120, 120, 120, 120]
-        real array RANGE = [600, 600, 600, 600, 600]
+        let MANA = skillData(300, 325, 350, 375, 400)
+        let COOLDOWN = skillData(120, 120, 120, 120, 120)
+        let RANGE = skillData(600, 600, 600, 600, 600)
 
         let aDef = new AbilityDefinitionAerialShackles(abilityId)
             ..setupIcon("BTNNetherBolt")
@@ -221,13 +209,11 @@ function rayOfDeath(int abilityId)
             ..setLightningEffects("MBUR")
             ..setAnimationNames("spell,channel")
             ..targetEnemyHeroes()
+            ..setSkillData(COOLDOWN, MANA, RANGE)
 
         for lvl = 1 to 5
             aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
                 ..setDamagePerSecond(lvl, 0)
-                ..setCastRange(lvl, RANGE[lvl-1])
                 ..setDurationHero(lvl, 60)
                 ..setDurationNormal(lvl, 60)
                 ..setBuffs(lvl, "Bmlc,"+BUFF_ID_RAY_OF_DEATH.toRawCode())

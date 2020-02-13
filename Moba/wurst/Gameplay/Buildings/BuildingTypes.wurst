@@ -623,7 +623,7 @@ function homeInvulnerability()
 	nearby.enumUnitsInRange(gg_rct_GreenAltar.getCenter(), 800)
 
 	while(not nearby.isEmpty())
-		unit target = FirstOfGroup(nearby)
+		let target = FirstOfGroup(nearby)
 		nearby.removeUnit(target)
 		if not target.isType(UNIT_TYPE_STRUCTURE) and IsUnitAlly(target, players[TEAM_PLAYER_TEAM_1]) 
 			target.addBuff( target, 0.5, BUFF_HOME, 1)
@@ -635,7 +635,7 @@ function homeInvulnerability()
 	nearby.enumUnitsInRange(gg_rct_BrownAltar.getCenter(), 800)
 
 	while(not nearby.isEmpty())
-		unit target = FirstOfGroup(nearby)
+		let target = FirstOfGroup(nearby)
 		nearby.removeUnit(target)
 		if not target.isType(UNIT_TYPE_STRUCTURE) and IsUnitAlly(target, players[TEAM_PLAYER_TEAM_2]) 
 			target.addBuff( target, 0.5, BUFF_HOME, 1)
@@ -644,8 +644,8 @@ function homeInvulnerability()
 	nearby.destr()
 
 public function income()
-	int factorTeam1 = 5
-	int factorTeam2 = 5
+	let factorTeam1 = 5
+	let factorTeam2 = 5
 
 	/*let difference = CPlayer.getTeamHeroCount(Team.TEAM1) - CPlayer.getTeamHeroCount(Team.TEAM2)
 
@@ -703,7 +703,7 @@ init
 	end))
 
 	buffTowerFocus.addStackFunction( (Buff whichBuff) -> (begin
-		var stacks = whichBuff.getData() + 1
+		let stacks = whichBuff.getData() + 1
 		if stacks <= TOWER_FOCUS_MAX_STACKS
 			whichBuff.setData(stacks)
 			whichBuff.getTarget().wrapper()

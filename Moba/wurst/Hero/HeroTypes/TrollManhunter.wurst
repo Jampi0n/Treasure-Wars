@@ -78,9 +78,9 @@ constant SHADOW_STRIKE_ABILITY_ID = compiletime(createNegativeBuffAbility(5, SHA
 function abilityQ(int abilityId)
 
     if compiletime
-        int array MANA = [80, 80, 80, 80, 80]
-        real array COOLDOWN = [8, 8, 8, 8, 8]
-        real array RANGE = [600, 650, 700, 750, 800]
+        let MANA = skillData(80, 80, 80, 80, 80)
+        let COOLDOWN = skillData(8, 8, 8, 8, 8)
+        let RANGE = skillData(600, 650, 700, 750, 800)
         let aDef = new AbilityDefinitionFarseerChainLightning(abilityId)
             ..setupIcon(Icons.bTNBerserkForTrolls)
             ..setupWithHotKey("Shadow Strike", "Q")
@@ -90,12 +90,10 @@ function abilityQ(int abilityId)
             ..setArtTarget("")
             ..setCheckDependencies(true)
             ..targetEnemies()
+            ..setSkillData(COOLDOWN, MANA, RANGE)
 
         for lvl = 1 to 5
             aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
-                ..setCastRange(lvl, RANGE[lvl-1])
                 ..setDamageperTarget(lvl, 0)
                 ..setNumberofTargetsHit(lvl, 1)
 
@@ -153,17 +151,16 @@ function abilityW(int abilityId)
         new AbilityDefinitionCargoHoldBurrow(DEATH_SPIN_DISABLE_ATTACK)
             ..setCargoCapacity(1, 0)
 
-        int array MANA = [75, 75, 75, 75, 75]
-        real array COOLDOWN = [12, 11, 10, 9, 8]
+        let MANA = skillData(75, 75, 75, 75, 75)
+        let COOLDOWN = skillData(12, 11, 10, 9, 8)
         let aDef = new AbilityDefinitionBeserk(abilityId)
             ..setupIcon(Icons.bTNWhirlwind)
             ..setupWithHotKey("Death Spin", "W")
             ..targetNone()
+            ..setSkillData(COOLDOWN, MANA, 0)
 
         for lvl = 1 to 5
             aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
                 ..setAttackSpeedIncrease(lvl, 0)
                 ..setDamageTakenIncrease(lvl, 0)
                 ..setMovementSpeedIncrease(lvl, 0)
@@ -201,9 +198,9 @@ constant real CRIPPLING_PAIN_AOE = 1500
 function abilityE(int abilityId)
 
     if compiletime
-        int array MANA = [80, 85, 90, 95, 100]
-        real array COOLDOWN = [5, 5, 5, 5, 5]
-        let aDef = new AbilityDefinitionPitLordHowlofTerror(abilityId)
+        let MANA = skillData(80, 85, 90, 95, 100)
+        let COOLDOWN = skillData(5, 5, 5, 5, 5)
+        new AbilityDefinitionPitLordHowlofTerror(abilityId)
             ..setAnimationNames("spell,slam")
             ..setupIcon("BTNTorment")
             ..setupWithHotKey("Crippling Pain", "E")
@@ -211,11 +208,7 @@ function abilityE(int abilityId)
             ..setCheckDependencies(true)
             ..setArtCaster("")
             ..targetNone()
-
-        for lvl = 1 to 5
-            aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
+            ..setSkillData(COOLDOWN, MANA, 0)
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(CRIPPLING_PAIN_DAMAGE_BONUS)
@@ -255,9 +248,9 @@ constant int MIRROR_IMAGE_ABILITY_ID = compiletime(createPositiveBuffAbility(5, 
 function abilityR(int abilityId)
 
     if compiletime
-        int array MANA = [125, 125, 125, 125, 125]
-        real array COOLDOWN = [80, 75, 70, 65, 60]
-        let aDef = new AbilityDefinitionRoar(abilityId)
+        let MANA = skillData(125, 125, 125, 125, 125)
+        let COOLDOWN = skillData(80, 75, 70, 65, 60)
+        new AbilityDefinitionRoar(abilityId)
             ..setAnimationNames("spell")
             ..setArtCaster("")
             ..setupIcon("BTNSpell_Shadow_ShadowWard")
@@ -265,12 +258,7 @@ function abilityR(int abilityId)
             ..setCheckDependencies(true)
             ..setRequirements(NOT_SPINNING.toRawCode())
             ..targetNone()
-
-        for lvl = 1 to 5
-            aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
-
+            ..setSkillData(COOLDOWN, MANA, 0)
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(0)

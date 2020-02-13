@@ -65,9 +65,9 @@ constant real FROST_BOLT_DAMAGE_BONUS = 120
 
 function abilityQ(int abilityId)
     if compiletime
-        int array MANA = [120, 125, 130, 135, 140]
-        real array COOLDOWN = [8, 8, 8, 8, 8]
-        let aDef = new AbilityDefinitionIllidanChannel(abilityId)
+        let MANA = skillData(120, 125, 130, 135, 140)
+        let COOLDOWN = skillData(8, 8, 8, 8, 8)
+        new AbilityDefinitionIllidanChannel(abilityId)
             ..setupIcon("BTNOrbOfFrost2")
             ..setupChannel(TargetType.POINT, "channel", 1.1)
             ..setAnimationNames("spell")
@@ -77,12 +77,7 @@ function abilityQ(int abilityId)
             ..setMissileArt("")
             ..setArtSpecial("")
             ..setLightningEffects("")
-
-        for lvl = 1 to 5
-            aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
-                ..setCastRange(lvl, 800)
+            ..setSkillData(COOLDOWN, MANA, 800)
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(FROST_BOLT_DAMAGE_BONUS)
@@ -108,7 +103,8 @@ constant real FIRE_BLINK_AOE = 300
 
 function abilityW(int abilityId)
     if compiletime
-        int array MANA = [140, 150, 160, 170, 180]
+        let MANA = skillData(140, 150, 160, 170, 180)
+        let COOLDOWN = createSkillData(13)
         let aDef = new AbilityDefinitionWardenBlink(abilityId)
             ..setAnimationNames("")
             ..setupIcon("BTNSupernova")
@@ -118,12 +114,11 @@ function abilityW(int abilityId)
             ..setMissileArt("")
             ..setArtSpecial("")
             ..setLightningEffects("")
+            ..setSkillData(COOLDOWN, MANA, 0)
 
         for lvl = 1 to 5
             aDef
                 ..setCastRange(lvl, FIRE_BLINK_MAX_RANGE[lvl-1])
-                ..setCooldown(lvl, FIRE_BLINK_COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
                 ..setMinimumRange(lvl, 250)
                 ..setMaximumRange(lvl, FIRE_BLINK_MAX_RANGE[lvl-1])
 
@@ -155,20 +150,15 @@ constant MARK_ABILITY_ID = compiletime(createNegativeBuffAbility(5, MARK_BUFF_ID
 
 function abilityE(int abilityId)
     if compiletime
-        int array MANA = [135, 140, 145, 150, 155]
-        real array COOLDOWN = [10, 10, 10, 10, 10]
-        let aDef = new AbilityDefinitionIllidanChannel(abilityId)
+        let MANA = skillData(135, 140, 145, 150, 155)
+        let COOLDOWN = skillData(10, 10, 10, 10, 10)
+        new AbilityDefinitionIllidanChannel(abilityId)
             ..setupIcon("BTNElementalMark")
             ..setupChannel(TargetType.UNIT, "soulburn", 1.1)
             ..setAnimationNames("spell")
             ..setupWithHotKey("Elemental Mark", "E")
             ..targetEnemies()
-
-        for lvl = 1 to 5
-            aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
-                ..setCastRange(lvl, 600)
+            ..setSkillData(COOLDOWN, MANA, 600)
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setSummary("Reduces the target's willpower and attacks against it will deal additional magic damage. After {0} attacks the target is stunned.".format(MARK_REQUIRED_STACKS.str()))
@@ -210,8 +200,8 @@ constant FF_ABILITY_ID = compiletime(ABIL_ID_GEN.next())
 
 function abilityR(int abilityId)
     if compiletime
-        int array MANA = [225, 250, 275, 300, 325]
-        real array COOLDOWN = [60, 60, 60, 60, 60]
+        let MANA = skillData(225, 250, 275, 300, 325)
+        let COOLDOWN = skillData(60, 60, 60, 60, 60)
         let buffADef = new AbilityDefinitionAuraSlow(FF_ABILITY_ID)
             ..setArtTarget(Abilities.frostDamage+","+Abilities.breathOfFireDamage)
             ..setTargetAttachmentPoint("chest")
@@ -232,14 +222,11 @@ function abilityR(int abilityId)
             ..setupChannel(TargetType.AREA, "silence", 1.1)
             ..setLightningEffects("")
             ..targetNone()
-
+            ..setSkillData(COOLDOWN, MANA, 3000)
 
         for lvl = 1 to 5
             aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
                 ..setDurationHero(lvl, 0.01)
-                ..setCastRange(lvl, 3000)
                 ..setAreaofEffect(lvl, FF_AOE)
 
     let tooltip = new DynamicTooltip(abilityId)
@@ -298,13 +285,13 @@ function castFireBlink()
     let spellId = GetSpellAbilityId()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
-    group nearby = CreateGroup()
+    let nearby = CreateGroup()
 
     nearby.enumUnitsInRange(vec2(GetSpellTargetX(),GetSpellTargetY()), FIRE_BLINK_AOE)
 
     let dmg = (FIRE_BLINK_DAMAGE[level-1]).bonus(caster.getInt(), FIRE_BLINK_DAMAGE_BONUS)
     while(not nearby.isEmpty())
-        unit target = FirstOfGroup(nearby)
+        let target = FirstOfGroup(nearby)
         nearby.removeUnit(target)
         if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
 
@@ -329,7 +316,7 @@ function castFrostAndFlame()
     ArtilleryDetection.fireArtillery(caster, FF_FROST_ARTILLERY, behindCaster.polarOffset(casterAngle - angle(bj_PI/2), 600), targetPos) (unit impact, unit caster, int data) ->
     
     ArtilleryDetection.fireArtillery(caster, FF_FLAME_ARTILLERY, behindCaster.polarOffset(casterAngle + angle(bj_PI/2), 600), targetPos) (unit impact, unit caster, int data) ->
-        group nearby = CreateGroup()
+        let nearby = CreateGroup()
         let level = caster.getAbilityLevel(ABILITY_FROST_AND_FLAME)
         nearby.enumUnitsInRange(impact.getPos(), FF_AOE)
 
@@ -350,7 +337,7 @@ function castFrostAndFlame()
         let dmg = (FF_IMPACT_DAMAGE[level-1]).bonus(caster.getInt(), FF_IMPACT_DAMAGE_BONUS)
         let dur = FF_BUFF_DURATION[level-1].bonus(caster.getInt(), FF_BUFF_DURATION_BONUS)
         while(not nearby.isEmpty())
-            unit target = FirstOfGroup(nearby)
+            let target = FirstOfGroup(nearby)
             nearby.removeUnit(target)
             if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(impact.getOwner(), false, true)
                 caster.dealDamage(target, dmg, ReductionType.MAGIC)
