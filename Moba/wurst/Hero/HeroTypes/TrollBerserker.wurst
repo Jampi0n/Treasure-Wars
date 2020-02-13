@@ -58,8 +58,8 @@ public BuffType buffCriticalStrike
 function critical(int abilityId)
 
     if compiletime
-        int array MANA = [30, 30, 30, 30, 30]
-        real array COOLDOWN = [5, 5, 5, 5, 5]
+        let MANA = skillData(30, 30, 30, 30, 30)
+        let COOLDOWN = skillData(5, 5, 5, 5, 5)
 
         let aDef = new AbilityDefinitionBeserk(abilityId)
             ..setupIcon("BTN_CR_BLOOD")
@@ -71,11 +71,10 @@ function critical(int abilityId)
             ..setArtSpecial("")
             ..setLightningEffects("")
             ..setCheckDependencies(true)
+            ..setSkillData(COOLDOWN, MANA, 0)
 
         for lvl = 1 to 5
             aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
                 ..setAttackSpeedIncrease(lvl, 0)
                 ..setDamageTakenIncrease(lvl, 0)
                 ..setMovementSpeedIncrease(lvl, 0)
@@ -98,14 +97,11 @@ function critical(int abilityId)
 
 
 constant real array BLINK_MAX_RANGE =[700, 750, 800, 850, 900]
-constant real array BLINK_COOLDOWN = [18, 16, 14, 12, 10]
-
 
 function blink(int abilityId)
-
+    let COOLDOWN = skillData(18, 16, 14, 12, 10)
     if compiletime
-        int array MANA = [50, 50, 50, 50, 50]
-
+        let MANA = skillData(50, 50, 50, 50, 50)
         let aDef = new AbilityDefinitionWardenBlink(abilityId)
             ..setAnimationNames("")
             ..setupWithHotKey("Blink", "W")
@@ -115,11 +111,10 @@ function blink(int abilityId)
             ..setArtSpecial("")
             ..setLightningEffects("")
             ..setCheckDependencies(true)
+            ..setSkillData(COOLDOWN, MANA, 0)
 
         for lvl = 1 to 5
             aDef
-                ..setCooldown(lvl, BLINK_COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
                 ..setMinimumRange(lvl, 250)
                 ..setMaximumRange(lvl, BLINK_MAX_RANGE[lvl-1])
 
@@ -128,7 +123,7 @@ function blink(int abilityId)
     tooltip.setLearnString("Teleports the Troll Berserker a short distance.", (int lvl) -> (begin
         return "{0} range, {1} seconds cooldown".format(
             BLINK_MAX_RANGE[lvl-1].str(),
-            BLINK_COOLDOWN[lvl-1].str()
+            COOLDOWN.data(lvl).str()
             )
     end) )
     
@@ -145,19 +140,18 @@ constant real SWITCH_DURATION = 1.67
 function switchWeapons(int abilityId)
 
     if compiletime
-        int array MANA = [20, 20, 20, 20, 20]
-        real array COOLDOWN = [5, 5, 5, 5, 5]
+        let MANA = skillData(20, 20, 20, 20, 20)
+        let COOLDOWN = skillData(5, 5, 5, 5, 5)
 
         let aDef = new AbilityDefinitionBearform(abilityId)
             ..setupIcon("BTNLightning_blade")
             ..setIconTurnOff("ReplaceableTextures\\CommandButtons\\BTNThrowingAxe.blp")
             ..setupWithHotKey("Switch to Melee", "E")
             ..setTurnOff("Switch to Ranged", "E")
+            ..setSkillData(COOLDOWN, MANA, 0)
 
         for lvl = 1 to 5
             aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
                 ..setNormalFormUnit(lvl, HERO_TROLL_BERSERKER.toRawCode())
                 ..setAlternateFormUnit(lvl, HERO_TROLL_BERSERKER_MELEE.toRawCode())
                 ..setDurationNormal(lvl, SWITCH_DURATION)
@@ -202,8 +196,8 @@ BuffType buffGrowthFear
 function growth(int abilityId)
 
     if compiletime
-        int array MANA = [140, 150, 160, 170, 180]
-        real array COOLDOWN = [75, 75, 75, 75, 75]
+        let MANA = skillData(140, 150, 160, 170, 180)
+        let COOLDOWN = skillData(75, 75, 75, 75, 75)
 
         let buffADef = new AbilityDefinitionUnholyAuracreep(GROWTH_ABILITY_ID)
             ..setArtTarget("Abilities\\Spells\\Orc\\Bloodlust\\BloodlustTarget.mdl,Abilities\\Spells\\Orc\\Bloodlust\\BloodlustSpecial.mdl")
@@ -220,7 +214,7 @@ function growth(int abilityId)
                 ..setBuffs(i, GROWTH_BUFF_ID.toRawCode())
 
 
-        let aDef = new AbilityDefinitionRoar(abilityId)
+        new AbilityDefinitionRoar(abilityId)
             ..setupIcon("BTNDireGrowth")
             ..setAnimationNames("")
             ..setupWithHotKey("Berserk", "R")
@@ -231,11 +225,7 @@ function growth(int abilityId)
             ..setLightningEffects("")
             ..setCheckDependencies(true)
             ..targetNone()
-
-        for lvl = 1 to 5
-            aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
+            ..setSkillData(COOLDOWN, MANA, 0)
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(GROWTH_HP_BONUS)

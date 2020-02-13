@@ -62,9 +62,9 @@ constant real PIERCING_SHOT_DAMAGE_BONUS = 110
 function piercingShot(int abilityId)
 
     if compiletime
-        int array MANA = [70, 75, 80, 85, 90]
-        real array COOLDOWN = [9, 9, 9, 9, 9]
-        real array RANGE = [800, 800, 800, 800, 800]
+        let MANA = skillData(70, 75, 80, 85, 90)
+        let COOLDOWN = skillData(9, 9, 9, 9, 9)
+        let RANGE = skillData(800, 800, 800, 800, 800)
         let aDef = new AbilityDefinitionIllidanChannel(abilityId)
             ..setupIcon("BTNBlackArrows")
             ..setupWithHotKey("Piercing Shot", "Q")
@@ -73,18 +73,16 @@ function piercingShot(int abilityId)
             ..setMissileArt("")
             ..setArtTarget("")
             ..setAnimationNames("spell,throw")
+            ..setSkillData(COOLDOWN, MANA, RANGE)
 
         for lvl = 1 to 5
             aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
                 ..setArtDuration(lvl, 0)
                 ..setOptions(lvl, 1)
                 ..setTargetType(lvl, 2)
                 ..setFollowThroughTime(lvl, 0)
                 ..setDisableOtherAbilities(lvl, false)
                 ..setBaseOrderID(lvl, "channel")
-                ..setCastRange(lvl, RANGE[lvl-1])
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceStrength(PIERCING_SHOT_DAMAGE_BONUS)
@@ -111,19 +109,14 @@ constant TERROR_ABILITY_ID = compiletime(createNegativeBuffAbility(5, TERROR_BUF
 function terror(int abilityId)
 
     if compiletime
-        int array MANA = [70, 70, 70, 70, 70]
-        real array COOLDOWN = [13, 12, 11, 10, 9]
+        let MANA = skillData(70, 70, 70, 70, 70)
+        let COOLDOWN = skillData(13, 12, 11, 10, 9)
         let aDef = new AbilityDefinitionPitLordHowlofTerror(abilityId)
             ..setAnimationNames("spell,slam")
             ..setupIcon("BTNHowlOfTerror")
             ..setupWithHotKey("Terror", "W")
             ..targetNone()
-
-
-        for lvl = 1 to 5
-            aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
+            ..setSkillData(COOLDOWN, MANA, 0)
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(TERROR_DURATION_BONUS)
@@ -137,13 +130,12 @@ function terror(int abilityId)
             TERROR_AOE[lvl-1].str(), TERROR_DURATION[lvl-1].toString()))
     addDynamicTooltipIntelligence(heroType, tooltip)
 
-real array BONE_BROTHERS_COOLDOWN = [18, 15, 12, 9, 6]
-real array BONE_BROTHERS_RANGE = [600, 750, 900, 1050, 1200]
 
 function boneBrothers(int abilityId)
-
+    let COOLDOWN = skillData(18, 15, 12, 9, 6)
+    let RANGE = skillData(600, 750, 900, 1050, 1200)
     if compiletime
-        int array MANA = [70, 65, 60, 55, 50]
+        let MANA = skillData(70, 65, 60, 55, 50)
         let aDef = new AbilityDefinitionFarseerChainLightning(abilityId)
             ..setAnimationNames("spell")
             ..setupIcon("BTNSkeletalLongevity")
@@ -151,21 +143,19 @@ function boneBrothers(int abilityId)
             ..setMissileArt("")
             ..setArtTarget("")
             ..setLightningEffects("")
+            ..setSkillData(COOLDOWN, MANA, RANGE)
 
         for lvl = 1 to 5
             aDef
                 ..setDamageperTarget(lvl, 0)
                 ..setDamageReductionperTarget(lvl, 0)
                 ..setNumberofTargetsHit(lvl, 1)
-                ..setCastRange(lvl, BONE_BROTHERS_RANGE[lvl-1])
-                ..setCooldown(lvl, BONE_BROTHERS_COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
                 ..setTargetsAllowed(lvl, "nonsapper,player")
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(TERROR_DURATION_BONUS)
     tooltip.setLearnString("Swaps position with one of his skeletons.", (lvl) -> (begin
-        return "{0} range, {1} seconds cooldown.".format( BONE_BROTHERS_RANGE[lvl-1].str(), BONE_BROTHERS_COOLDOWN[lvl-1].str())
+        return "{0} range, {1} seconds cooldown.".format( RANGE.data(lvl).str(), COOLDOWN.data(lvl).str())
     end))
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, "Swaps position with one of his skeletons.")
@@ -183,22 +173,17 @@ constant integer BUFF_ID_ON_DEATH_COIL = compiletime(createDummyBuff())
 function deathpact(int abilityId)
 
     if compiletime
-        int array MANA = [150, 160, 170, 180, 190]
-        real array COOLDOWN = [90, 90, 90, 90, 90]
-        real array RANGE = [800, 900, 1000, 1100, 1200]
-        let aDef = new AbilityDefinitionRoar(abilityId)
+        let MANA = skillData(150, 160, 170, 180, 190)
+        let COOLDOWN = skillData(90, 90, 90, 90, 90)
+        let RANGE = skillData(800, 900, 1000, 1100, 1200)
+        new AbilityDefinitionRoar(abilityId)
             ..setLevels(5)
             ..setAnimationNames("spell")
             ..setupIcon("BTNSkullSpirits")
             ..setupWithHotKey("Death Pact", "R")
             ..setArtCaster("Abilities\\Spells\\Undead\\DeathPact\\DeathPactCaster.mdl")
             ..targetNone()
-
-
-        for lvl = 1 to 5
-            aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
+            ..setSkillData(COOLDOWN, MANA, 0)
 
         let aDefDeathCoil = createTargetMissile(ABILITY_DEATH_COIL, BUFF_ID_ON_DEATH_COIL)
             ..setLevels(5)
@@ -212,13 +197,13 @@ function deathpact(int abilityId)
             ..setMissileSpeed(1100)
             ..setArtSpecial("Abilities\\Spells\\Undead\\DeathCoil\\DeathCoilSpecialArt.mdl")
             ..targetEnemyHeroes()
+            ..setSkillData(DEATH_COIL_DURATION, 0, RANGE)
+
+
         ABIL_DEF_MAP.put(aDefDeathCoil.getNewId(), aDefDeathCoil)
 
         for lvl = 1 to 5
             aDefDeathCoil
-                ..setCastRange(lvl, RANGE[lvl-1])
-                ..setManaCost(lvl, 0)
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
                 ..setTooltipNormal(lvl, "(R) Death Coil - [|cffffcc00Level "+lvl.toString()+"|r]")
 
 

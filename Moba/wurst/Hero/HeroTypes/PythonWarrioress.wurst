@@ -62,10 +62,10 @@ constant real MISTWALK_DURATION_BONUS = 3
 function mistwalk(int abilityId)
 
     if compiletime
-        int array MANA = [100, 90, 80, 70, 60]
-        real array COOLDOWN = [25, 25, 25, 25, 25]
+        let MANA = skillData(100, 90, 80, 70, 60)
+        let COOLDOWN = skillData(25, 25, 25, 25, 25)
 
-        let aDef = new AbilityDefinitionRoar(abilityId)
+        new AbilityDefinitionRoar(abilityId)
             ..setupIcon("BTNNoxiousFumes")
             ..setAnimationNames("morph,first")
             ..setupWithHotKey("Mistwalk", "Q")
@@ -75,11 +75,7 @@ function mistwalk(int abilityId)
             ..setMissileArt("")
             ..setArtTarget("")
             ..targetNone()
-
-        for lvl = 1 to 5
-            aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
+            ..setSkillData(COOLDOWN, MANA, 0)
 
 
     let tooltip = new DynamicTooltip(abilityId)
@@ -112,9 +108,9 @@ constant BUFF_POISON_SPIT = new BuffType(false, DispelLevel.DISPEL)
 function poisonSpit(int abilityId)
 
     if compiletime
-        int array MANA = [110, 120, 130, 140, 160]
-        real array COOLDOWN = [16, 16, 16, 16, 16]
-
+        let MANA = skillData(110, 120, 130, 140, 160)
+        let COOLDOWN = skillData(16, 16, 16, 16, 16)
+        let RANGE = 800.0
         let aDef = new AbilityDefinitionDarkRangerSilence(abilityId)
             ..setupIcon("BTNSlowSpellGreen")
             ..setAnimationNames("spell")
@@ -125,12 +121,11 @@ function poisonSpit(int abilityId)
             ..setMissileArt("")
             ..setArtTarget("")
             ..targetNone()
+            ..setSkillData(COOLDOWN, MANA, RANGE)
 
         for lvl = 1 to 5
             aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
                 ..setAreaofEffect(lvl, POISON_SPIT_AOE[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(POISON_SPIT_DOT_BONUS)
@@ -154,8 +149,8 @@ constant real EMPOWERED_STRIKE_DAMAGE_BONUS = 125
 function empoweredStrike(int abilityId)
 
     if compiletime
-        int array MANA = [50, 50, 50, 50, 50]
-        real array COOLDOWN = [5, 5, 5, 5, 5]
+        let MANA = skillData(50, 50, 50, 50, 50)
+        let COOLDOWN = skillData(5, 5, 5, 5, 5)
 
         let aDef = new AbilityDefinitionSeaWitchForkedLightning(abilityId)
             ..setupIcon("BTNEnchantWeaponGreen")
@@ -165,14 +160,12 @@ function empoweredStrike(int abilityId)
             ..setArtSpecial("")
             ..setLightningEffects("")
             ..targetEnemies()
+            ..setSkillData(COOLDOWN, MANA, 160)
 
         for lvl = 1 to 5
             aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
                 ..setNumberofTargetsHit(lvl, 1)
                 ..setDamageperTarget(lvl, 0)
-                ..setCastRange(lvl, 150)
                 ..setDurationNormal(lvl, 0.1)
 
     let tooltip = new DynamicTooltip(abilityId)
@@ -195,9 +188,9 @@ constant real PARALYZING_STRIKE_DURATION_BONUS = 0.25
 function paralyzingStrike(int abilityId)
 
     if compiletime
-        real array RANGE = [500, 600, 700, 800, 900]
-        int array MANA = [180, 190, 200, 210, 220]
-        real array COOLDOWN = [75, 75, 75, 75, 75]
+        let RANGE = skillData(500, 600, 700, 800, 900)
+        let MANA = skillData(180, 190, 200, 210, 220)
+        let COOLDOWN = skillData(75, 75, 75, 75, 75)
 
         let aDef = new AbilityDefinitionFarseerChainLightning(abilityId)
             ..setupIcon("BTNINV_ThrowingKnife_04")
@@ -207,16 +200,14 @@ function paralyzingStrike(int abilityId)
             ..setMissileArt("")
             ..setArtTarget("")
             ..targetEnemyHeroes()
+            ..setSkillData(COOLDOWN, MANA, RANGE)
 
         for lvl = 1 to 5
             aDef
                 ..setDamageperTarget(lvl, 0)
                 ..setDamageReductionperTarget(lvl, 0)
                 ..setNumberofTargetsHit(lvl, 0)
-                ..setCastRange(lvl, RANGE[lvl-1])
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
-
+                
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(PARALYZING_STRIKE_DAMAGE_BONUS, PARALYZING_STRIKE_DURATION_BONUS)
     tooltip.setLearnString("Deals massive magical damage to the target, stunning it and teleports the Python Warrioress behind the target.", (int lvl) -> (begin

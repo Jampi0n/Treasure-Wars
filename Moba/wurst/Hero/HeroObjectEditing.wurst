@@ -41,6 +41,25 @@ public constant CHANNELING_SPELL = "|cffffcc00Channeling Spell:|r\n"
 public constant C_STR = color(255, 187, 102)
 public constant C_INT = color(102, 187, 255)
 
+public tuple skillData(real l1, real l2, real l3, real l4, real l5)
+
+public function skillData.data(int level) returns real
+    if level < 3
+        if level == 1
+            return this.l1
+        else
+            return this.l2
+    else
+        if level < 5
+            if level == 3
+                return this.l3
+            else
+                return this.l4
+        else
+            return this.l5
+
+public function createSkillData(real data) returns skillData
+    return skillData(data, data, data, data, data)
 
 public interface LevelString
     function getString(int level) returns string
@@ -333,18 +352,18 @@ public class DynamicTooltip
         int i = 0
         let l = tooltip.length()
         while i<l
-            string substr = tooltip.charAt(i)
+            let substr = tooltip.charAt(i)
             if(substr=="{")
                 list.add(new DynamicText(tooltip.substring(current, i)))
-                string referenceType = tooltip.charAt(i+1)
+                let referenceType = tooltip.charAt(i+1)
                 if(referenceType=="I")
-                    int id = S2I(tooltip.charAt(i+2))
+                    let id = S2I(tooltip.charAt(i+2))
                     if replaceIntelligence.size() <= id
                         if compiletime
                             compileError("Replace int list missing entry: "+I2S(id)+ " for tooltip:\""+tooltip+"\"")
                     list.add(new DynamicIntelligence(replaceIntelligence.get(id)))
                 else if(referenceType=="S")
-                    int id = S2I(tooltip.charAt(i+2))
+                    let id = S2I(tooltip.charAt(i+2))
                     if replaceStrength.size() <= id
                         if compiletime
                             compileError("Replace str list missing entry: "+I2S(id)+ " for tooltip:\""+tooltip+"\"")
@@ -492,6 +511,73 @@ public class DynamicTooltip
 
     function evaluateTurnOffString(unit whichUnit, int level) returns string
         return evaluateTurnOffString(level, whichUnit.getStr(), whichUnit.getInt(), BlzGetUnitAbilityCooldown(whichUnit, this.abilityTypeId, level - 1), false)
+
+
+
+
+// Extension functions for easier use:
+
+public function AbilityDefinition.setCooldown(skillData cooldown)
+    this.setCooldown(1, cooldown.l1)
+    this.setCooldown(2, cooldown.l2)
+    this.setCooldown(3, cooldown.l3)
+    this.setCooldown(4, cooldown.l4)
+    this.setCooldown(5, cooldown.l5)
+
+public function AbilityDefinition.setManaCost(skillData manaCost)
+    this.setManaCost(1, manaCost.l1.round())
+    this.setManaCost(2, manaCost.l2.round())
+    this.setManaCost(3, manaCost.l3.round())
+    this.setManaCost(4, manaCost.l4.round())
+    this.setManaCost(5, manaCost.l5.round())
+
+public function AbilityDefinition.setCastRange(skillData castRange)
+    this.setCastRange(1, castRange.l1)
+    this.setCastRange(2, castRange.l2)
+    this.setCastRange(3, castRange.l3)
+    this.setCastRange(4, castRange.l4)
+    this.setCastRange(5, castRange.l5)
+
+public function AbilityDefinition.setSkillData(skillData cooldown, skillData manaCost, skillData castRange)
+    this.setCooldown(cooldown)
+    this.setManaCost(manaCost)
+    this.setCastRange(castRange)
+
+public function AbilityDefinition.setSkillData(real cooldown, skillData manaCost, skillData castRange)
+    this.setCooldown(createSkillData(cooldown))
+    this.setManaCost(manaCost)
+    this.setCastRange(castRange)
+
+public function AbilityDefinition.setSkillData(skillData cooldown, real manaCost, skillData castRange)
+    this.setCooldown(cooldown)
+    this.setManaCost(createSkillData(manaCost))
+    this.setCastRange(castRange)
+
+public function AbilityDefinition.setSkillData(skillData cooldown, skillData manaCost, real castRange)
+    this.setCooldown(cooldown)
+    this.setManaCost(manaCost)
+    this.setCastRange(createSkillData(castRange))
+
+public function AbilityDefinition.setSkillData(real cooldown, real manaCost, skillData castRange)
+    this.setCooldown(createSkillData(cooldown))
+    this.setManaCost(createSkillData(manaCost))
+    this.setCastRange(castRange)
+
+public function AbilityDefinition.setSkillData(skillData cooldown, real manaCost, real castRange)
+    this.setCooldown(cooldown)
+    this.setManaCost(createSkillData(manaCost))
+    this.setCastRange(createSkillData(castRange))
+
+public function AbilityDefinition.setSkillData(real cooldown, skillData manaCost, real castRange)
+    this.setCooldown(createSkillData(cooldown))
+    this.setManaCost(manaCost)
+    this.setCastRange(createSkillData(castRange))
+
+public function AbilityDefinition.setSkillData(real cooldown, real manaCost, real castRange)
+    this.setCooldown(createSkillData(cooldown))
+    this.setManaCost(createSkillData(manaCost))
+    this.setCastRange(createSkillData(castRange))
+
 
 
 

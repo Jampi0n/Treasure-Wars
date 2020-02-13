@@ -82,11 +82,11 @@ constant int NOVA_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, NOVA_BUF
 function frostNova(int abilityId)
 
     if compiletime
-        int array MANA = [130, 145, 160, 175, 190]
-        real array COOLDOWN = [10, 10, 10, 10, 10]
-        real array RANGE = [800, 800, 800, 800, 800]
+        let MANA = skillData(130, 145, 160, 175, 190)
+        let COOLDOWN = skillData(10, 10, 10, 10, 10)
+        let RANGE = skillData(800, 800, 800, 800, 800)
         
-        let aDef = new AbilityDefinitionIllidanChannel(abilityId)
+        new AbilityDefinitionIllidanChannel(abilityId)
             ..setAnimationNames("spell")
             ..setArtCaster("")
             ..setArtTarget("")
@@ -96,12 +96,8 @@ function frostNova(int abilityId)
             ..setupChannel(TargetType.UNIT, "frostnova", 1.1)
             ..setupWithHotKey("Frost Nova", "Q")
             ..targetEnemies()
-        
-        for lvl = 1 to 5
-            aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
-                ..setCastRange(lvl, RANGE[lvl-1])
+            ..setSkillData(COOLDOWN, MANA, RANGE)
+
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(NOVA_TARGET_DMG_BONUS, NOVA_AOE_DMG_BONUS, NOVA_DURATION_BONUS)
@@ -139,11 +135,11 @@ constant int ARMOR_SLOW_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, AR
 function frostArmor(int abilityId)
 
     if compiletime
-        int array MANA = [100, 100, 100, 100, 100]
-        real array COOLDOWN = [5, 5, 5, 5, 5]
-        real array RANGE = [700, 700, 700, 700, 700]
+        let MANA = skillData(100, 100, 100, 100, 100)
+        let COOLDOWN = skillData(5, 5, 5, 5, 5)
+        let RANGE = skillData(700, 700, 700, 700, 700)
 
-        let aDef = new AbilityDefinitionIllidanChannel(abilityId)
+        new AbilityDefinitionIllidanChannel(abilityId)
             ..setAnimationNames("spell")
             ..setArtCaster("")
             ..setArtTarget("")
@@ -152,12 +148,7 @@ function frostArmor(int abilityId)
             ..setupIcon("BTNSpell_Frost_ChillingArmor")
             ..setupWithHotKey("Frost Armor", "W")
             ..targetFriends()
-
-        for lvl = 1 to 5
-            aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
-                ..setCastRange(lvl, RANGE[lvl-1])
+            ..setSkillData(COOLDOWN, MANA, RANGE)
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(ARMOR_AR_BONUS.toReal(), ARMOR_SLOW_DURATION_BONUS)
@@ -195,20 +186,16 @@ constant int FROST_BREATH_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, 
 function frostWyrm(int abilityId)
 
     if compiletime
-        int array MANA = [200, 250, 300, 350, 400]
-        real array COOLDOWN = [45, 45, 45, 45, 45]
+        let MANA = skillData(200, 250, 300, 350, 400)
+        let COOLDOWN = skillData(45, 45, 45, 45, 45)
 
-        let aDef = new AbilityDefinitionRoar(abilityId)
+        new AbilityDefinitionRoar(abilityId)
             ..setAnimationNames("spell")
             ..setArtCaster("")
             ..setupIcon(Icons.bTNFrostWyrm)
             ..setupWithHotKey("Summon Frost Wyrm", "E")
             ..targetNone()
-
-        for lvl = 1 to 5
-            aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
+            ..setSkillData(COOLDOWN, MANA, 0)
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(FROST_WYRM_INT_FACTOR.toReal())  
@@ -249,8 +236,8 @@ constant int FREEZE_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, FREEZE
 function freeze(int abilityId)
 
     if compiletime
-        int array MANA = [350, 350, 350, 350, 350]
-        real array COOLDOWN = [150, 140, 130, 120, 110]
+        let MANA = skillData(350, 350, 350, 350, 350)
+        let COOLDOWN = skillData(150, 140, 130, 120, 110)
 
         generateDummyUnit()
         let aDef = new AbilityDefinitionKeeperoftheGroveTranquility(abilityId)
@@ -258,11 +245,10 @@ function freeze(int abilityId)
             ..setupIcon(Icons.bTNFreezingBreath)
             ..setupWithHotKey("Freeze", "R")
             ..targetNone()
+            ..setSkillData(COOLDOWN, MANA, 0)
 
         for lvl = 1 to 5
             aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
                 ..setDurationHero(lvl, FREEZE_DURATION[lvl-1])
                 ..setDurationNormal(lvl, FREEZE_DURATION[lvl-1])
                 ..setEffects(lvl, "X000")
@@ -367,7 +353,7 @@ function castFrostNova()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
     let target = GetSpellTargetUnit()
-    group nearby = CreateGroup()
+    let nearby = CreateGroup()
 
     nearby.enumUnitsInRange(target.getPos(), NOVA_AOE)
     addEffect(Abilities.frostNovaTarget, target.getPos()).destr()
@@ -376,7 +362,7 @@ function castFrostNova()
     let dur = NOVA_DURATION[level-1].bonus(caster.getInt(), NOVA_DURATION_BONUS)
 
     while(not nearby.isEmpty())
-        unit u = FirstOfGroup(nearby)
+        let u = FirstOfGroup(nearby)
         nearby.removeUnit(u)
         if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(caster.getOwner(), false, true)
             caster.dealDamage(u, dmg, ReductionType.MAGIC)
@@ -642,7 +628,7 @@ function initHeroType()
 
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             if attacker.getTypeId() == FROST_WYRM
-                group nearby = CreateGroup()
+                let nearby = CreateGroup()
                 nearby.enumUnitsInRange(target.getPos(), FROST_WYRM_AOE)
 
                 let dmg = attacker.wrapper().getStatTotalValue(Stat.STR) * 0.5
@@ -652,7 +638,7 @@ function initHeroType()
                     target.addBuffReduced(attacker, FROST_BREATH_DUR[level-1], buffFrostBreath, level)
 
                 while(not nearby.isEmpty())
-                    unit u = FirstOfGroup(nearby)
+                    let u = FirstOfGroup(nearby)
                     nearby.removeUnit(u)
                     if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(attacker.getOwner(), false, true) and u != target
                         u.addBuffReduced(attacker, FROST_BREATH_DUR[level-1], buffFrostBreath, level)

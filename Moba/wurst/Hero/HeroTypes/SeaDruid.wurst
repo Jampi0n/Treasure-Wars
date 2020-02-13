@@ -61,20 +61,17 @@ constant real TIDAL_FURY_AOE = 400
 function tidalFury(int abilityId)
 
     if compiletime
-        int array MANA = [100, 110, 120, 130, 140]
-        real array COOLDOWN = [8, 8, 8, 8, 8]
+        let MANA = skillData(100, 110, 120, 130, 140)
+        let COOLDOWN = skillData(8, 8, 8, 8, 8)
 
-        let aDef = new AbilityDefinitionPitLordHowlofTerror(abilityId)
+        new AbilityDefinitionPitLordHowlofTerror(abilityId)
             ..setAnimationNames("attack,slam")
             ..setupIcon(Icons.bTNCrushingWave)
             ..setupWithHotKey("Tidal Fury", "Q")
             ..setArtCaster("")
             ..targetNone()
+            ..setSkillData(COOLDOWN, MANA, 0)
 
-        for lvl = 1 to 5
-            aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip
@@ -116,9 +113,9 @@ BuffType buffFish
 function giantFish(int abilityId)
 
     if compiletime
-        int array MANA = [115, 130, 145, 160, 175]
-        real array COOLDOWN = [12, 12, 12, 12, 12]
-        real array RANGE = [1200, 1200, 1200, 1200, 1200]
+        let MANA = skillData(115, 130, 145, 160, 175)
+        let COOLDOWN = skillData(12, 12, 12, 12, 12)
+        let RANGE = skillData(1200, 1200, 1200, 1200, 1200)
 
         let aDef = new AbilityDefinitionIllidanChannel(abilityId)
             ..setupIcon("BTNDeepseaMurloc")
@@ -129,12 +126,10 @@ function giantFish(int abilityId)
             ..setArtTarget("")
             ..setAnimationNames("spell")
             ..setupChannel(TargetType.AREA, "shockwave", 0.75)
+            ..setSkillData(COOLDOWN, MANA, RANGE)
 
         for lvl = 1 to 5
             aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
-                ..setCastRange(lvl, RANGE[lvl-1])
                 ..setAreaofEffect(lvl, FISH_AOE[lvl-1])
 
     let tooltip = new DynamicTooltip(abilityId)
@@ -160,9 +155,9 @@ public BuffType buffManaShield // the actual effect is in OnAttack
 function manaShield(int abilityId)
 
     if compiletime
-        int array MANA = [50, 50, 50, 50, 50]
+        let MANA = skillData(50, 50, 50, 50, 50)
         real array MANA_PER_SECOND = [8, 11, 14, 17, 20]
-        real array COOLDOWN = [5, 5, 5, 5, 5]
+        let COOLDOWN = skillData(5, 5, 5, 5, 5)
 
         let aDef = new AbilityDefinitionDemonHunterImmolation(abilityId)
             ..setAnimationNames("")
@@ -171,11 +166,10 @@ function manaShield(int abilityId)
             ..setupWithHotKey("Mana Shield", "E")
             ..setTurnOff("Deactivate Mana Shield", "E")
             ..targetNone()
+            ..setSkillData(COOLDOWN, MANA, 0)
 
         for lvl = 1 to 5
             aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
                 ..setDurationHero(lvl, 1)
                 ..setDurationNormal(lvl, 1)
                 ..setDamageperInterval(lvl, 0)
@@ -216,19 +210,18 @@ constant int RITUAL_MANA_RATIO = 25
 function ritualOfTheSeas(int abilityId)
 
     if compiletime
-        int array MANA = [250, 300, 350, 400, 450]
-        real array COOLDOWN = [120, 120, 120, 120, 120]
+        let MANA = skillData(250, 300, 350, 400, 450)
+        let COOLDOWN = skillData(120, 120, 120, 120, 120)
 
         let aDef = new AbilityDefinitionKeeperoftheGroveTranquility(abilityId)
             ..setAnimationNames("spell,channel")
             ..setupIcon("BTNGuardianofTheSea")
             ..setupWithHotKey("Ritual of the Seas", "R")
             ..targetNone()
+            ..setSkillData(COOLDOWN, MANA, 0)
 
         for lvl = 1 to 5
             aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
                 ..setDurationHero(lvl, RITUAL_WAVE_COUNT[lvl-1]*2 + 0.1)
                 ..setDurationNormal(lvl, RITUAL_WAVE_COUNT[lvl-1]*2 + 0.1)
                 ..setEffects(lvl, "X000")

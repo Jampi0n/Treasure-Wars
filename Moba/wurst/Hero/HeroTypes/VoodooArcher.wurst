@@ -53,9 +53,9 @@ constant real GHOST_ARROWS_DAMAGE_BONUS = 115
 function abilityQ(int abilityId)
 
     if compiletime
-        int array MANA = [90, 95, 100, 105, 110]
-        real array COOLDOWN = [9, 9, 9, 9, 9]
-        real array RANGE = [700, 700, 700, 700, 700]
+        let MANA = skillData(90, 95, 100, 105, 110)
+        let COOLDOWN = skillData(9, 9, 9, 9, 9)
+        let RANGE = skillData(700, 700, 700, 700, 700)
 
         let aDef = new AbilityDefinitionIllidanChannel(abilityId)
             ..setupIcon("BTNThunderArrow")
@@ -63,12 +63,7 @@ function abilityQ(int abilityId)
             ..setAnimationNames("spell")
             ..setupChannel(TargetType.UNIT, "channel", 0.5)
             ..targetEnemies()
-
-        for lvl = 1 to 5
-            aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
-                ..setCastRange(lvl, RANGE[lvl-1])
+            ..setSkillData(COOLDOWN, MANA, RANGE)
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceStrength(GHOST_ARROWS_DAMAGE_BONUS)
@@ -99,22 +94,18 @@ constant MIND_CURSE_ABILITY_ID = compiletime(createNegativeBuffAbility(5, MIND_C
 function abilityW(int abilityId)
 
     if compiletime
-        int array MANA = [65, 65, 65, 65, 65]
-        real array COOLDOWN = [10, 10, 10, 10, 10]
-        real array RANGE = [800, 800, 800, 800, 800]
+        let MANA = skillData(65, 65, 65, 65, 65)
+        let COOLDOWN = skillData(10, 10, 10, 10, 10)
+        let RANGE = skillData(800, 800, 800, 800, 800)
         
-        let aDef = new AbilityDefinitionIllidanChannel(abilityId)
+        new AbilityDefinitionIllidanChannel(abilityId)
             ..setupIcon("BTNWitchDoctorRitual")
             ..setupWithHotKey("Mind Curse", "W")
             ..setAnimationNames("spell")
             ..setupChannel(TargetType.UNIT, "manaburn", 0.5)
             ..targetEnemies()
+            ..setSkillData(COOLDOWN, MANA, RANGE)
 
-        for lvl = 1 to 5
-            aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
-                ..setCastRange(lvl, RANGE[lvl-1])
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(MIND_CURSE_MANA_DRAIN_BONUS, MIND_CURSE_DURATION_BONUS)
@@ -149,21 +140,17 @@ constant SERPENT_POISON_ABILITY_ID = compiletime(createNegativeBuffAbility(5, SE
 function abilityE(int abilityId)
 
     if compiletime
-        int array MANA = [60, 60, 60, 60, 60]
-        real array COOLDOWN = [6, 6, 6, 6, 6]
-        real array RANGE = [500, 500, 500, 500, 500]
+        let MANA = skillData(60, 60, 60, 60, 60)
+        let COOLDOWN = skillData(6, 6, 6, 6, 6)
+        let RANGE = skillData(500, 500, 500, 500, 500)
 
-        let aDef = new AbilityDefinitionIllidanChannel(abilityId)
+        new AbilityDefinitionIllidanChannel(abilityId)
             ..setAnimationNames("spell")
             ..setupIcon(Icons.bTNSerpentWard)
             ..setupWithHotKey("Serpent Ward", "E")
             ..setupChannel(TargetType.POINT, "ward", 0.5)
+            ..setSkillData(COOLDOWN, MANA, RANGE)
 
-        for lvl = 1 to 5
-            aDef
-                ..setCastRange(lvl, RANGE[lvl-1])
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(0)
@@ -193,8 +180,8 @@ constant integer BUFF_ID_ON_DEATH_COIL = compiletime(createDummyBuff())
 function abilityR(int abilityId)
 
     if compiletime
-        int array MANA = [160, 170, 180, 190, 200]
-        real array COOLDOWN = [110, 110, 110, 110, 110]
+        let MANA = skillData(160, 170, 180, 190, 200)
+        let COOLDOWN = skillData(110, 110, 110, 110, 110)
 
         let aDef = new AbilityDefinitionKeeperoftheGroveTranquility(abilityId)
             ..setLevels(5)
@@ -202,12 +189,10 @@ function abilityR(int abilityId)
             ..setupWithHotKey("Big Bad Voodoo", "R")
             ..setAnimationNames("spell,channel")
             ..targetNone()
-
+            ..setSkillData(COOLDOWN, MANA, 0)
 
         for lvl = 1 to 5
             aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
                 ..setDurationHero(lvl, BBV_DURATION)
                 ..setDurationNormal(lvl, BBV_DURATION)
                 ..setEffects(lvl, "X000")

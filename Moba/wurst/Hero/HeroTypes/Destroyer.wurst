@@ -63,9 +63,9 @@ constant int BREATH_ABILITY_ID = compiletime(createNegativeBuffAbility(5, BREATH
 function abilityQ(int abilityId)
 
     if compiletime
-        int array MANA = [80, 80, 80, 80, 80]
-        real array COOLDOWN = [8, 8, 8, 8, 8]
-        real array RANGE = [450, 450, 450, 450, 450]
+        let MANA = skillData(80, 80, 80, 80, 80)
+        let COOLDOWN = skillData(8, 8, 8, 8, 8)
+        let RANGE = skillData(450, 450, 450, 450, 450)
         let aDef = new AbilityDefinitionBreathofFrostCreep(abilityId)
             ..setupIcon("BTNFlameBurst")
             ..setupWithHotKey("Melting Breath", "Q")
@@ -73,12 +73,10 @@ function abilityQ(int abilityId)
             ..setMissileArt("BreathOfFireMissile3.mdx")
             ..setMissileSpeed(800)
             ..targetEnemies()
+            ..setSkillData(COOLDOWN, MANA, RANGE)
 
         for lvl = 1 to 5
             aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
-                ..setCastRange(lvl, RANGE[lvl-1])
                 ..setDamage(lvl, 0.01)
                 ..setDamagePerSecond(lvl, 0.01)
                 ..setBuffs(lvl, BUFF_ID_ON_BREATH.toRawCode())
@@ -116,7 +114,7 @@ constant IMMOLATION_BUFF_ID = compiletime(BUFF_ID_GEN.next())
 function abilityW(int abilityId)
 
     if compiletime
-        int array MANA = [25, 25, 25, 25, 25]
+        let MANA = skillData(25, 25, 25, 25, 25)
         real AOE = 250
         new BuffDefinition(IMMOLATION_BUFF_ID, 'BEim')
             ..setTooltipNormalExtended(1, "This unit has Immolation; it attacks faster and nearby enemy units will take damage over time.")
@@ -131,11 +129,10 @@ function abilityW(int abilityId)
             ..setTurnOff("Deactivate Immolation","W")
             ..setAnimationNames("spell")
             ..targetEnemies()
+            ..setSkillData(0, MANA, 0)
 
         for lvl = 1 to 5
             aDef
-                ..setCooldown(lvl, 0)
-                ..setManaCost(lvl, MANA[lvl-1])
                 ..setAreaofEffect(lvl, AOE)
                 ..setManaDrainedperSecond(lvl, IMMOLATION_MANA_DRAIN[lvl-1])
                 ..setBuffs(lvl, IMMOLATION_BUFF_ID.toRawCode()+",BEia")
@@ -162,20 +159,15 @@ constant real array WALL_DURATION = [3, 3.5, 4, 4.5, 5]
 function abilityE(int abilityId)
 
     if compiletime
-        int array MANA = [70, 70, 70, 70, 70]
-        real array COOLDOWN = [17, 16, 15, 14, 13]
-        real array RANGE = [800, 850, 900, 950, 1000]
-        let aDef = new AbilityDefinitionIllidanChannel(abilityId)
+        let MANA = skillData(70, 70, 70, 70, 70)
+        let COOLDOWN = skillData(17, 16, 15, 14, 13)
+        let RANGE = skillData(800, 850, 900, 950, 1000)
+        new AbilityDefinitionIllidanChannel(abilityId)
             ..setAnimationNames("spell")
             ..setupIcon("BTNNecromancy")
             ..setupWithHotKey("Bone Wall", "E")
             ..setupChannel(TargetType.POINT, "ward", 0.5)
-
-        for lvl = 1 to 5
-            aDef
-                ..setCastRange(lvl, RANGE[lvl-1])
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
+            ..setSkillData(COOLDOWN, MANA, RANGE)
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(0)
@@ -217,10 +209,10 @@ constant int PREY_CASTER_ABILITY_ID = compiletime(createPositiveBuffAbility(5, P
 function abilityR(int abilityId)
 
     if compiletime
-        int array MANA = [140, 145, 150, 155, 160]
-        real array COOLDOWN = [75, 75, 75, 75, 75]
-        real RANGE = 900
-        let aDef = new AbilityDefinitionIllidanChannel(abilityId)
+        let MANA = skillData(140, 145, 150, 155, 160)
+        let COOLDOWN = skillData(75, 75, 75, 75, 75)
+        let RANGE = 900.0
+        new AbilityDefinitionIllidanChannel(abilityId)
             ..setAnimationNames("spell")
             ..setupChannel(TargetType.UNIT, "channel", 0.5)
             ..setupIcon(Icons.bTNUnholyFrenzy)
@@ -232,12 +224,9 @@ function abilityR(int abilityId)
             ..setLightningEffects("")
             ..setCheckDependencies(true)
             ..targetEnemies()
+            ..setSkillData(COOLDOWN, MANA, RANGE)
 
-        for lvl = 1 to 5
-            aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
-                ..setCastRange(lvl, RANGE)
+
 
 
     let tooltip = new DynamicTooltip(abilityId)

@@ -66,9 +66,9 @@ constant BITE_ABILITY_ID = compiletime(createNegativeBuffAbility(5, BITE_BUFF_ID
 function venomousBeetle(int abilityId)
 
     if compiletime
-        int array MANA = [100, 105, 110, 115, 120]
-        real array COOLDOWN = [9, 9, 9, 9, 9]
-
+        let MANA = skillData(100, 105, 110, 115, 120)
+        let COOLDOWN = skillData(9, 9, 9, 9, 9)
+        let RANGE = 600.0
         let aDef = new AbilityDefinitionFarseerChainLightning(abilityId)
             ..setupIcon(Icons.bTNCarrionScarabs)
             ..setAnimationNames("spell,slam")
@@ -79,14 +79,12 @@ function venomousBeetle(int abilityId)
             ..setArtSpecial("")
             ..setLightningEffects("")
             ..targetEnemies()
+            ..setSkillData(COOLDOWN, MANA, RANGE)
 
         for lvl = 1 to 5
             aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
                 ..setNumberofTargetsHit(lvl, 1)
                 ..setDamageperTarget(lvl, 0)
-                ..setCastRange(lvl, 600)
                 ..setDurationNormal(lvl, 0.1)
 
     let tooltip = new DynamicTooltip(abilityId)
@@ -113,20 +111,16 @@ constant real WAR_STOMP_AOE = 350
 function warstomp(int abilityId)
 
     if compiletime
-        int array MANA = [120, 130, 140, 150, 160]
-        real array COOLDOWN = [8, 8, 8, 8, 8]
+        let MANA = skillData(120, 130, 140, 150, 160)
+        let COOLDOWN = skillData(8, 8, 8, 8, 8)
 
-        let aDef = new AbilityDefinitionPitLordHowlofTerror(abilityId)
+        new AbilityDefinitionPitLordHowlofTerror(abilityId)
             ..setupIcon(Icons.bTNSeaGiantWarStomp)
             ..setAnimationNames("spell,slam")
             ..setupWithHotKey("War Stomp", "W")
             ..setArtCaster(Abilities.warStompCaster)
             ..targetNone()
-
-        for lvl = 1 to 5
-            aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
+            ..setSkillData(COOLDOWN, MANA, 0)
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceStrength(WAR_STOMP_DAMAGE_BONUS, WAR_STOMP_DURATION_BONUS)
@@ -195,8 +189,8 @@ BuffType buffUnbreakable
 function unbreakable(int abilityId)
 
     if compiletime
-        int array MANA = [175, 175, 175, 175, 175]
-        real array COOLDOWN = [100, 100, 100, 100, 100]
+        let MANA = skillData(175, 175, 175, 175, 175)
+        let COOLDOWN = skillData(100, 100, 100, 100, 100)
 
         let aDef = new AbilityDefinitionBeserk(abilityId)
             ..setupIcon(Icons.bTNAdvancedCreatureCarapace)
@@ -209,12 +203,11 @@ function unbreakable(int abilityId)
             ..setLightningEffects("")
             ..setCheckDependencies(true)
             ..targetNone()
+            ..setSkillData(COOLDOWN, MANA, 0)
 
 
         for lvl = 1 to 5
             aDef
-                ..setCooldown(lvl, COOLDOWN[lvl-1])
-                ..setManaCost(lvl, MANA[lvl-1])
                 ..setAttackSpeedIncrease(lvl, 0)
                 ..setDamageTakenIncrease(lvl, 0)
                 ..setMovementSpeedIncrease(lvl, 0)
