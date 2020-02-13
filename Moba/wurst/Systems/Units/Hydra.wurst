@@ -41,7 +41,7 @@ constant int ACID_BREATH_BUFF_ID = compiletime(createAuraBuff("Acid Breath", "Th
 constant int ACID_BREATH_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, ACID_BREATH_BUFF_ID, Abilities.bottleImpact, "chest"))
 
 function onHydraDeath()
-    unit target = GetTriggerUnit()
+    let target = GetTriggerUnit()
     if target == udg_Hydra
         hydraIcon.hide()
         DEATH_SOUND.play().snd.setVolume(150)
@@ -129,7 +129,7 @@ init
 
     buffAcidBreath = new BuffType(false, DispelLevel.DISPEL)
 
-    var abilityList = new LinkedList<int>
+    let abilityList = new LinkedList<int>
     ..add(ACID_BREATH_ABILTIY_ID)
     buffAcidBreath.setup(abilityList, ACID_BREATH_BUFF_ID)
 

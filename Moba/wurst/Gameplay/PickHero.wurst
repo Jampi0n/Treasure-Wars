@@ -45,7 +45,7 @@ boolean itemCarry = false
 
 function setupCreatedHero(Hero hero)
     let heroUnit = hero.toUnit()
-    player owner = heroUnit.getOwner()
+    let owner = heroUnit.getOwner()
     let ownerId = owner.getId()
     playerHasPicked[ownerId] = true
     owner.setGold(500)
@@ -110,7 +110,7 @@ function createRandomHeroForAI(int id, boolean removeFromTavern)
 
 //creates a random hero for a player
 function createRandomHero(int id, boolean removeFromTavern)
-    var random = GetRandomInt(0, remainingHeroTypesCount-1)
+    let random = GetRandomInt(0, remainingHeroTypesCount-1)
 
     let hero = new Hero(id, remainingHeroTypes[random].getUnitId() , gg_rct_CenterMid.getCenter(), angle(0))
     setupCreatedHero(hero)
@@ -147,7 +147,7 @@ function allRandom()
     allHeroesPicked()
     
 function allPick()
-    int pickTime = DEBUG_MODE?10:60
+    let pickTime = DEBUG_MODE?10:60
     print("|cffffcc00All Pick was chosen. You have " + pickTime.toString() + " seconds to pick a Hero!|r")
 
     tavern[0] = createUnit(players[PLAYER_NEUTRAL_PASSIVE], 'n002', gg_rct_Tavern0.getCenter(), angle(0) )
@@ -224,7 +224,7 @@ function onClick()
 
 
 function onPick()
-    unit pickedUnit = GetTriggerUnit()
+    let pickedUnit = GetTriggerUnit()
     if PlayerWrapper.getPlayerType(pickedUnit.getOwner().getId()) == PlayerType.HERO
         if HeroType.getHeroType(pickedUnit.getTypeId()) != null
             let hero = new Hero(pickedUnit)
@@ -286,7 +286,7 @@ function endPickMode()
     ..destr()
 
 function onModePick()
-    string s = GetEventPlayerChatString().toLowerCase()
+    let s = GetEventPlayerChatString().toLowerCase()
     if s == "-ap"
         pickMode = PickMode.ALLPICK
     else

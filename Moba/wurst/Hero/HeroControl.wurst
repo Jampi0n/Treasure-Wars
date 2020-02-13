@@ -219,7 +219,7 @@ public class Hero
         return this.hero
 
     function upgrade()
-        int newLvl = GetHeroLevel(this.hero)
+        let newLvl = GetHeroLevel(this.hero)
         let wrapper = this.hero.wrapper()
         SetPlayerTechResearched(this.owner, UPG_AR , this.heroType.calculateStat(Stat.AR, newLvl))
         SetPlayerTechResearched(this.owner, UPG_AS , this.heroType.calculateStat(Stat.AS, newLvl))
@@ -380,9 +380,9 @@ public class Hero
 
         if not unknownKiller
             if killingId <= HERO_PLAYER_TEAM_2_LAST
-                int assistBounty = ASSIST_BOUNTY[assistants]
+                let assistBounty = ASSIST_BOUNTY[assistants]
 
-                int killBounty = KILL_BOUNTY[assistants]
+                let killBounty = KILL_BOUNTY[assistants]
 
                 if assistants == 0
                     printTimed(PlayerWrapper.getFullColoredName(this.ownerId) + " was killed by " + PlayerWrapper.getFullColoredName(killingId) + " for |cffffcc00"+killBounty.toString()+"|r gold.", 10)
@@ -495,7 +495,7 @@ public class Hero
 
 function charToAbilitySlot(string char) returns AbilitySlot
     AbilitySlot ret = AbilitySlot.PASSIVE
-    string s = char.toUpperCase()
+    let s = char.toUpperCase()
     if s == "Q"
         ret = AbilitySlot.Q
     else if s == "W"

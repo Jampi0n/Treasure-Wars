@@ -57,7 +57,7 @@ function abilityQ(int abilityId)
         let COOLDOWN = skillData(9, 9, 9, 9, 9)
         let RANGE = skillData(700, 700, 700, 700, 700)
 
-        let aDef = new AbilityDefinitionIllidanChannel(abilityId)
+        new AbilityDefinitionIllidanChannel(abilityId)
             ..setupIcon("BTNThunderArrow")
             ..setupWithHotKey("Ghost Arrows", "Q")
             ..setAnimationNames("spell")

@@ -35,8 +35,8 @@ function itemBootsOfDarkness()
 
 
 function itemMageAmulet()
-    int mp = 100
-    int hp = 100
+    let mp = 100
+    let hp = 100
     setupItem(ITEM_ID_MAGE_AMULET, CATEGORY, 825)
     setInfo("Mage Amulet", "+ {0} mana points|n +{1} hit points".format(mp.toString(), hp.toString()))
     addStatBonusAbsolute(Stat.MP, mp)
@@ -45,17 +45,17 @@ function itemMageAmulet()
 
 
 function itemManaRing()
-    int mr = 10
+    let mr = 10
     
     setupItem(ITEM_ID_MANA_RING, CATEGORY, 500)
-    setInfo("Ring of Mana", "+ {0} mana point regeneration per 10 seconds".format(mr.toString()))
+    setInfo("Ring of Mana", "+ {0} mana polet regeneration per 10 seconds".format(mr.toString()))
 
     addStatBonusAbsolute(Stat.MR, mr)
 
 
 
 function itemWizardsHat()
-    int intel = 8
+    let intel = 8
     
     setupItem(ITEM_ID_WIZARDS_HAT, CATEGORY, 400)
     setInfo("Wizard's Hat", "+ {0} intelligence".format(intel.toString()))
@@ -64,7 +64,7 @@ function itemWizardsHat()
 
             
 function itemGemOfMana()
-    int mp = 100
+    let mp = 100
     
     setupItem(ITEM_ID_GEM_OF_MANA, CATEGORY, 500)
     setInfo("Gem of Mana", "+ {0} mana points".format(mp.toString()))
@@ -72,7 +72,7 @@ function itemGemOfMana()
     addStatBonusAbsolute(Stat.MP, mp)
             
 function itemGemOfDarkness()
-    int voidDmg = 12
+    let voidDmg = 12
     
     setupItem(ITEM_ID_GEM_OF_DARKNESS, CATEGORY, 500)
     setInfo("Gem of Darkness", "Attacks deal {0} additional void damage.".format(voidDmg.toString()))
@@ -86,7 +86,7 @@ function itemGemOfDarkness()
 
 
 function itemSkull()
-    int mana = 8 // trigger
+    let mana = 8 // trigger
     
     setupItem(ITEM_ID_SKULL, CATEGORY, 550)
     setInfo("Skull", "Restores {0} mana points per kill.".format(mana.toString()))
@@ -101,7 +101,7 @@ function itemSkull()
         end))
 
 function itemVoodooDoll()
-    int mp = 5
+    let mp = 5
     
     setupItem(ITEM_ID_VOODOO_DOLL, CATEGORY, 600)
     setInfo("Voodoo Doll", "Restores {0} mana points everytime you are attacked.".format(mp.toString()))
@@ -114,7 +114,7 @@ function itemVoodooDoll()
         end))
 
 function itemSpellBook()
-    int intel = 16
+    let intel = 16
     
     setupItem(ITEM_ID_SPELL_BOOK, CATEGORY, 800)
     setInfo("Spell Book", "+ {0} intelligence".format(intel.toString()))
@@ -122,7 +122,7 @@ function itemSpellBook()
     addStatBonusAbsolute(Stat.INT, intel)
 
 function itemMagicStaff()
-    int mana = 7
+    let mana = 7
     
     setupItem(ITEM_ID_MAGIC_STAFF, CATEGORY, 640)
     setInfo("Magic Staff", "Attacks drain {0} mana from the target.".format(mana.toString()))
@@ -138,7 +138,7 @@ function itemMagicStaff()
 
 
 function itemApprenticeScroll()
-    int factor = 35 //trigger
+    let factor = 35 //trigger
     
     setupItem(ITEM_ID_APPRENTICES_SCROLL, CATEGORY, 500)
     setInfo("Apprentice's Scroll", "Restores {0}% of your mana, when you level up. This effect does not stack.".format(factor.toString()))
@@ -155,9 +155,9 @@ function itemApprenticeScroll()
 
 
 function itemSkullPendant()
-    int hp = 125
-    int mp = 150
-    int killMana = 15 //trigger
+    let hp = 125
+    let mp = 150
+    let killMana = 15 //trigger
     setupItem(ITEM_ID_SKULL_PENDANT, CATEGORY, 2100)
     setInfo("Skull Pendant", "+ {0} mana points|n +{1} hit points|nRestores {2} mana points per kill.".format(
             mp.toString(), hp.toString(), killMana.toString()
@@ -180,10 +180,10 @@ function itemSkullPendant()
 
 
 function itemVisionWard()
-    int mp = 225
-    int hp = 225
-    int intel = 25
-    int mana = 10
+    let mp = 225
+    let hp = 225
+    let intel = 25
+    let mana = 10
     setupItem(ITEM_ID_VISION_WARD, CATEGORY, 3450)
     setInfo("Vision Ward", "+ {0} mana points|n+ {1} hit points|n+ {2} intelligence|nAttacks drain {3} mana from the target.|nActive:|nSummons an invulnerable and immovable ward that provides vision in an area.".format(
             mp.toString(), hp.toString(), intel.toString(), mana.toString()
@@ -210,8 +210,8 @@ function itemVisionWard()
 
             
 function itemVoodooMask()
-    int mp = 10
-    int voidDmg = 15
+    let mp = 10
+    let voidDmg = 15
 
     setupItem(ITEM_ID_VOODOO_MASK, CATEGORY, 1750)
     setInfo("Voodoo Mask", "Attacks deal {0} additional void damage.|nRestores {1} mana points everytime you are attacked.".format(
@@ -234,8 +234,8 @@ function itemVoodooMask()
 
 
 function itemEvilBook()
-    int intel = 30
-    int factor = 50 //trigger
+    let intel = 30
+    let factor = 50 //trigger
     
     setupItem(ITEM_ID_EVIL_BOOK, CATEGORY, 1700)
     setInfo("Evil Book", "+ {0} intelligence|nRestores {1}% of your mana, when you level up. This effect does not stack.".format(
@@ -256,11 +256,11 @@ function itemEvilBook()
         end))
             
 function itemFrostRing()
-    int mp = 200
-    int mr = 20
+    let mp = 200
+    let mr = 20
     
     setupItem(ITEM_ID_RING_OF_REGEN, CATEGORY, 1900)
-    setInfo("Ring of Regeneration", "+ {0} mana points|n+ {1} mana point regeneration per 10 seconds".format(
+    setInfo("Ring of Regeneration", "+ {0} mana points|n+ {1} mana polet regeneration per 10 seconds".format(
             mp.toString(), mr.toString()
         ))
     addRequirement(ITEM_ID_GEM_OF_MANA)
@@ -270,9 +270,9 @@ function itemFrostRing()
     addStatBonusAbsolute(Stat.MR, mr)
 
 function itemScepterOfTheTides()
-    int intel = 25
-    int voidDmg = 15
-    int manaDrain = 10
+    let intel = 25
+    let voidDmg = 15
+    let manaDrain = 10
     
     setupItem(ITEM_ID_SCEPTER_OF_THE_TIDES, CATEGORY, 2050)
     setInfo("Scepter of the Tides", "+ {0} intelligence|nDrains {1} mana and deals {2} void damage per attack.".format(
@@ -295,9 +295,9 @@ function itemScepterOfTheTides()
         end))
 
 function itemMagmaCrystal()
-    int mp = 125
-    int hp = 190
-    int magicDmg = 20
+    let mp = 125
+    let hp = 190
+    let magicDmg = 20
     
     setupItem(ITEM_ID_MAGMA_CRYSTAL, CATEGORY, 1750)
     setInfo("Magma Crystal", "+ {0} hit points|n+ {1} mana points|nAttacks deal {2} additional magic damage.".format(
@@ -319,8 +319,8 @@ function itemMagmaCrystal()
         end))
 
 function itemCursedMask()
-    int intel = 25
-    int killMana = 12 //trigger
+    let intel = 25
+    let killMana = 12 //trigger
     
     setupItem(ITEM_ID_CURSED_MASK, CATEGORY, 2000)
     setInfo("Cursed Mask", "+ {0} intelligence|nRestores {1} mana points per kill.".format(
@@ -343,9 +343,9 @@ function itemCursedMask()
         end))
 
 function itemEmeraldPendant()
-    int hp = 275
-    int mp = 275
-    int killMana = 25 //trigger
+    let hp = 275
+    let mp = 275
+    let killMana = 25 //trigger
     
     setupItem(ITEM_ID_EMERALD_PENDANT, CATEGORY, 3500)
     setInfo("Emeral Pendant", "+ {0} mana points|n +{1} hit points|nRestores {2} mana points per kill.".format(
@@ -372,16 +372,16 @@ function itemEmeraldPendant()
     
 
 function itemRingOfDarkness()
-    int intel = 25
-    int mr = 15
+    let intel = 25
+    let mr = 15
 
-    int mp = 12
-    int voidDmg = 16
+    let mp = 12
+    let voidDmg = 16
 
-    int voidExplosion = 30 //trigger
+    let voidExplosion = 30 //trigger
     
     setupItem(ITEM_ID_RING_OF_DARKNESS, CATEGORY, 3700)
-    setInfo("Ring of Darkness", "+ {0} intelligence|n+ {1} mana point regeneration per 10 seconds|nAttacks deal {2} additional void damage.|nRestores {3} mana points everytime you are attacked.|nKilling a unit creates a void explosion, dealing {4} damage to neaby enemies.".format(
+    setInfo("Ring of Darkness", "+ {0} intelligence|n+ {1} mana polet regeneration per 10 seconds|nAttacks deal {2} additional void damage.|nRestores {3} mana points everytime you are attacked.|nKilling a unit creates a void explosion, dealing {4} damage to neaby enemies.".format(
             intel.toString(), mr.toString(), voidDmg.toString(), mp.toString(), voidExplosion.toString()
         ))
 
@@ -422,14 +422,14 @@ function itemRingOfDarkness()
 group blessedHeroes = CreateGroup()
 
 function blessedRegeneration()
-    unit blessedHero = GetEnumUnit()
+    let blessedHero = GetEnumUnit()
     let missingMana = blessedHero.getMaxMana() - blessedHero.getMana()
     blessedHero.healMana(blessedHero, missingMana * 0.01 * 0.25)
 
 function itemBlessedGoblet()
-    int mp = 300
-    int hp = 150
-    int mr = 1 //trigger ^
+    let mp = 300
+    let hp = 150
+    let mr = 1 //trigger ^
     
     setupItem(ITEM_ID_BLESSED_GOBLET, CATEGORY, 4000)
     setInfo("Blessed Goblet", "+ {0} hit points|n+ {1} mana points|nRegenerates {2}% of your missing mana per second.".format(
@@ -463,13 +463,13 @@ function itemBlessedGoblet()
             
 
 function itemWandOfDeath()
-    int intel = 35
+    let intel = 35
 
-    int voidDmg = 20
-    int manaDrain = 10
+    let voidDmg = 20
+    let manaDrain = 10
 
-    int dmgFactor = 2 // -> onAttack
-    int duration = 10 // -> onAttack
+    let dmgFactor = 2 // -> onAttack
+    let duration = 10 // -> onAttack
     
     setupItem(ITEM_ID_WAND_OF_DEATH, CATEGORY, 3900)
     setInfo("Wand of Death", "+ {0} intelligence|nDrains {1} mana and deals {2} void damage per attack.|nDealing damage, reduces the target's willpower by {3}% of the damage dealt for {4} seconds.|nThis effect does not stack.".format(
@@ -496,13 +496,13 @@ function itemWandOfDeath()
             
 
 function itemWandOfBlood()
-    int intel = 30
-    int hr = 35
-    int hp = 200
-    int lifesteal = 8 // -> onAttack
+    let intel = 30
+    let hr = 35
+    let hp = 200
+    let lifesteal = 8 // -> onAttack
     
     setupItem(ITEM_ID_WAND_OF_BLOOD, CATEGORY, 3650)
-    setInfo("Wand of Blood", "+ {0} intelligence|n+ {1} hit points|n+ {2} hit point regeneration per 10 seconds|nDealing damage restores hit points equal to {3}% of the damage dealt.|nThis effect does not stack.".format(
+    setInfo("Wand of Blood", "+ {0} intelligence|n+ {1} hit points|n+ {2} hit polet regeneration per 10 seconds|nDealing damage restores hit points equal to {3}% of the damage dealt.|nThis effect does not stack.".format(
             intel.toString(), hp.toString(), hr.toString(), lifesteal.toString()
         ))
     addRequirement(ITEM_ID_MAGIC_STAFF)
@@ -515,10 +515,10 @@ function itemWandOfBlood()
 
             
 function itemArcaneBlade()
-    int as = 20
-    int mp = 300
-    int dmg = 20
-    int manaFactor = 5
+    let as = 20
+    let mp = 300
+    let dmg = 20
+    let manaFactor = 5
     
     setupItem(ITEM_ID_ARCANE_BLADE, CATEGORY, 3800)
     setInfo("Arcane Blade", "+ {0} mana points|n+ {1}% attack speed|nDeals {2} + {3}% of your current mana as magic damage.|nThis effect does not stack.".format(
@@ -538,13 +538,13 @@ function itemArcaneBlade()
         end))
 
 function itemVampiricGoblet()
-    int intel = 40
-    int hp = 150
-    int mp = 150
-    int hpFactor = 20 // -> onAttack
-    int manaFactor = 15 // -> onAttack
+    let intel = 40
+    let hp = 150
+    let mp = 150
+    let hpFactor = 20 // -> onAttack
+    let manaFactor = 15 // -> onAttack
 
-    int killMana = 30 //trigger
+    let killMana = 30 //trigger
     
     setupItem(ITEM_ID_VAMPIRIC_GOBLET, CATEGORY, 4750)
     setInfo("Vampiric Goblet", "+ {0} mana points|n +{1} hit point|n+ {2} intelligence|nRestores {3} mana points per kill.|nDealing damage against heroes restores {4}% of the damage dealt as hitpoints and {5}% as mana points.|nThis effect does not stack.".format(
@@ -569,8 +569,8 @@ function itemVampiricGoblet()
 
 
 function itemScrollOfConjuration()
-    int intel = 40
-    int intelFactor = 20
+    let intel = 40
+    let intelFactor = 20
     
     setupItem(ITEM_ID_SCROLL_OF_CONJURATION, CATEGORY, 4300)
     setInfo("Scroll of Conjuration", "+ {0} intelligence|nIncreases your intelligence by {1}%.|nThis effect does not stack.|nRestores all of your mana, when you level up.".format(
@@ -602,14 +602,14 @@ function itemScrollOfConjuration()
         end))
 
 function itemBracerOfPower()
-    int hp = 200
-    int mp = 200
-    int hr = 30
-    int mr = 30
-    int bonus = 15 //trigger -> General
+    let hp = 200
+    let mp = 200
+    let hr = 30
+    let mr = 30
+    let bonus = 15 //trigger -> General
     
     setupItem(ITEM_ID_BRACER_OF_POWER, CATEGORY, 3700)
-    setInfo("Bracer of Power", "+ {0} hit points|n+ {1} mana points|n+ {2} hit point regeneration per 10 seconds|n+ {3} mana point regeneration per 10 seconds|nIncreases all incoming effects that restore hit points or mana points by {4}%.".format(
+    setInfo("Bracer of Power", "+ {0} hit points|n+ {1} mana points|n+ {2} hit polet regeneration per 10 seconds|n+ {3} mana polet regeneration per 10 seconds|nIncreases all incoming effects that restore hit points or mana points by {4}%.".format(
             hp.toString(), mp.toString(), hr.toString(), mr.toString(), bonus.toString()
         ))
     addRequirement(ITEM_ID_RING_OF_REGEN)

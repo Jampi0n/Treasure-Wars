@@ -111,7 +111,7 @@ function terror(int abilityId)
     if compiletime
         let MANA = skillData(70, 70, 70, 70, 70)
         let COOLDOWN = skillData(13, 12, 11, 10, 9)
-        let aDef = new AbilityDefinitionPitLordHowlofTerror(abilityId)
+        new AbilityDefinitionPitLordHowlofTerror(abilityId)
             ..setAnimationNames("spell,slam")
             ..setupIcon("BTNHowlOfTerror")
             ..setupWithHotKey("Terror", "W")
@@ -301,13 +301,13 @@ function castTerror()
     let spellId = GetSpellAbilityId()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
-    group nearby = CreateGroup()
+    let nearby = CreateGroup()
     nearby.enumUnitsInRange(caster.getPos(), TERROR_AOE[level-1])
 
     let dur = TERROR_DURATION[level-1].bonus(caster.getInt(), TERROR_DURATION_BONUS)
 
     while(not nearby.isEmpty())
-        unit target = FirstOfGroup(nearby)
+        let target = FirstOfGroup(nearby)
         nearby.removeUnit(target)
         if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
             target.addBuffReduced( caster, dur, MISS, 1).setDispelLevel(DispelLevel.DISPEL)
@@ -403,7 +403,7 @@ function teamFightAI(HeroAI ai)
             return
 
         
-    unit target = ai.getTeamFightTarget()
+    let target = ai.getTeamFightTarget()
     if target.isTargetable(hero.getOwner(), false, true)
 
 
@@ -446,7 +446,7 @@ function initHeroType()
             skeletons.removeUnit(getEnterLeaveUnit())
         end))
 
-        var abilityList = new LinkedList<int>
+        let abilityList = new LinkedList<int>
         ..add(TERROR_ABILITY_ID)
         BUFF_TERROR.setup(abilityList, TERROR_BUFF_ID)
 

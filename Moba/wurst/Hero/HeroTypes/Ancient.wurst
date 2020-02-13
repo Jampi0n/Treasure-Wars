@@ -353,13 +353,13 @@ class NaturesWrath
         else
             this.model.setXY(this.caster.getPos())
             if count > 0.5 * 50
-                group nearby = CreateGroup()
+                let nearby = CreateGroup()
                 nearby.enumUnitsInRange(caster.getPos(), NATURES_WRATH_AOE)
 
                 let dmg = 0.02 * (NATURES_WRATH_TOTAL_DAMAGE[level-1].bonus(caster.getInt(), NATURES_WRATH_TOTAL_DAMAGE_BONUS))/NATURES_WRATH_DURATION[level-1]
 
                 while(not nearby.isEmpty())
-                    unit u = FirstOfGroup(nearby)
+                    let u = FirstOfGroup(nearby)
                     nearby.removeUnit(u)
                     if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(caster.getOwner(), false, true)
                         caster.dealDamage(u, dmg, ReductionType.MAGIC)
@@ -377,13 +377,13 @@ class NaturesWrath
 function onAttack(unit attacker, unit target, boolean _isActive)
     let level = attacker.getAbilityLevel(ABILITY_ROOT)
     if level != 0 and attacker.getTypeId() == HERO_TREE_ROOTED
-        group nearby = CreateGroup()
+        let nearby = CreateGroup()
         nearby.enumUnitsInRange(target.getPos(), ROOT_AOE_RANGE[level-1])
 
         let dmg = ROOT_AOE_DAMAGE[level-1].bonus(attacker.getStr(), ROOT_AOE_DAMAGE_BONUS)
 
         while(not nearby.isEmpty())
-            unit u = FirstOfGroup(nearby)
+            let u = FirstOfGroup(nearby)
             nearby.removeUnit(u)
             if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(attacker.getOwner(), false, true)
                 attacker.dealDamage(u, dmg, ReductionType.PHYSICAL)
@@ -417,13 +417,13 @@ function castEntangle()
             let thisPos = startPos.polarOffset(direction, i*125.)
             addEffect("Sylvanspear2.mdx", thisPos).destr()
 
-            group nearby = CreateGroup()
+            let nearby = CreateGroup()
             nearby.enumUnitsInRange(thisPos, 130)
     
             let dur = ENTANGLE_DURATION[level-1].bonus(caster.getInt(), ENTANGLE_DURATION_BONUS)
 
             while(not nearby.isEmpty())
-                unit u = FirstOfGroup(nearby)
+                let u = FirstOfGroup(nearby)
                 nearby.removeUnit(u)
                 if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(caster.getOwner(), false, true) and not u.isType(UNIT_TYPE_FLYING)
                     
@@ -505,7 +505,7 @@ function teamFightAI(HeroAI ai)
                 return
 
         
-    unit target = ai.getTeamFightTarget()
+    let target = ai.getTeamFightTarget()
     if target.isTargetable(hero.getOwner(), false, true)
 
         if not ai.getAttacking()
@@ -542,7 +542,7 @@ function initHeroType()
             ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
             ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
             ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
-        var abilityList = new LinkedList<int>
+        let abilityList = new LinkedList<int>
             ..add(ENTAGLING_ROOTS_ABILITY_ID)
         BUFF_ENTAGLING_ROOTS.setup(abilityList, ENTAGLING_ROOTS_BUFF_ID)
 

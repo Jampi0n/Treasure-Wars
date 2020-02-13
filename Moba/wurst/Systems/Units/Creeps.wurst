@@ -344,10 +344,10 @@ public class CreepCamp
         CreepCamp ret = null
         if not allCreeps.contains(creepUnit)
 
-            CreepCamp newCamp = camp == null ? new CreepCamp : camp
+            let newCamp = camp == null ? new CreepCamp : camp
             newCamp.addUnitInit(creepUnit)
 
-            group g = CreateGroup()
+            let g = CreateGroup()
             g.enumUnitsInRange(creepUnit.getPos(), 500)
             unit u
             

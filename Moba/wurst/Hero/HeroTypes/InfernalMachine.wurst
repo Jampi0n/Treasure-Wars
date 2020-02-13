@@ -325,11 +325,11 @@ function castInnerFire()
     let spellId = GetSpellAbilityId()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
-    group nearby = CreateGroup()
+    let nearby = CreateGroup()
     nearby.enumUnitsInRange(caster.getPos(), INNER_FIRE_AOE)
 
-    while(not nearby.isEmpty())
-        unit target = FirstOfGroup(nearby)
+    while not nearby.isEmpty()
+        let target = FirstOfGroup(nearby)
         nearby.removeUnit(target)
         if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), true, false)
             target.addBuff( caster, INNER_FIRE_DURATION, buffInnerFire, level)
@@ -339,7 +339,7 @@ function castInnerFire()
 function castFlameThrower()
     let caster = GetTriggerUnit()
     ArtilleryDetection.fireArtillery(caster, FLAME_THROWER_ARTILLERY, caster.getPos(), vec2(GetSpellTargetX(), GetSpellTargetY())) (unit impact, unit caster, int data) ->
-        group nearby = CreateGroup()
+        let nearby = CreateGroup()
         let level = caster.getAbilityLevel(ABILITY_FLAME_THROWER)
         nearby.enumUnitsInRange(impact.getPos(), FLAME_THROWER_AOE[level-1])
 
@@ -355,8 +355,8 @@ function castFlameThrower()
             
 
         let dmg = (FLAME_THROWER_DAMAGE[level-1]).bonus(caster.getInt(), FLAME_THROWER_DAMAGE_BONUS)
-        while(not nearby.isEmpty())
-            unit target = FirstOfGroup(nearby)
+        while not nearby.isEmpty()
+            let target = FirstOfGroup(nearby)
             nearby.removeUnit(target)
             if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(impact.getOwner(), false, true)
 
@@ -468,7 +468,7 @@ function attackAI(HeroAI ai)
 function teamFightAI(HeroAI ai)
     let hero = ai.getHeroUnit()
 
-    unit target = ai.getTeamFightTarget()
+    let target = ai.getTeamFightTarget()
 
 
     if target.isTargetable(hero.getOwner(), false, true)

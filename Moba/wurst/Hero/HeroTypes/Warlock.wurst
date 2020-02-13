@@ -255,13 +255,13 @@ function castInfernalMeteor()
     let pos = vec2(GetSpellTargetX(), GetSpellTargetY())
     addEffect(Units.infernalBirth, pos).destr()
     doAfter(1, () -> (begin
-        group nearby = CreateGroup()
+        let nearby = CreateGroup()
         nearby.enumUnitsInRange(pos, METEOR_AOE[level-1])
     
         let dmg = METEOR_DAMAGE[level - 1].bonus(caster.getInt(), METEOR_DAMAGE_BONUS)
 
         while(not nearby.isEmpty())
-            unit target = FirstOfGroup(nearby)
+            let target = FirstOfGroup(nearby)
             nearby.removeUnit(target)
             if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
                 caster.dealDamage(target, dmg, ReductionType.MAGIC)
@@ -311,7 +311,7 @@ function attackAI(HeroAI ai)
 function teamFightAI(HeroAI ai)
     let hero = ai.getHeroUnit()
 
-    unit target = ai.getTeamFightTarget()
+    let target = ai.getTeamFightTarget()
 
     if target.isTargetable(hero.getOwner(), false, true)
 
@@ -365,13 +365,13 @@ function initHeroType()
 
             addEffect("NoxCloudExplosion.mdx", pos).destr()
 
-            group nearby = CreateGroup()
+            let nearby = CreateGroup()
             nearby.enumUnitsInRange(pos, RAY_OF_DEATH_AFTER_AOE)
 
             let dmg = RAY_OF_DEATH_AFTER_DAMAGE[caster.getAbilityLevel(ABILITY_RAY_OF_DEATH)-1].bonus(caster.getInt(), RAY_OF_DEATH_AFTER_DAMAGE_BONUS)
 
             while(not nearby.isEmpty())
-                unit target = FirstOfGroup(nearby)
+                let target = FirstOfGroup(nearby)
                 nearby.removeUnit(target)
                 if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
                     caster.dealDamage(target, dmg, ReductionType.MAGIC)
@@ -396,7 +396,7 @@ function initHeroType()
         end))
 
         buffSoulBurn = new BuffType(false, DispelLevel.DISPEL)
-        var abilityList = new LinkedList<int>
+        let abilityList = new LinkedList<int>
         ..add(ABILITY_ID_SOUL_BURN)
         buffSoulBurn
         ..setup(abilityList, BUFF_ID_SOUL_BURN)
@@ -418,13 +418,13 @@ function initHeroType()
             let caster = whichBuff.getCaster()
             let level = whichBuff.getLevel()
 
-            group nearby = CreateGroup()
+            let nearby = CreateGroup()
             nearby.enumUnitsInRange(pos, SOUL_BURN_AOE)
 
             let dur = whichBuff.getRemaining()
 
             while(not nearby.isEmpty())
-                unit target = FirstOfGroup(nearby)
+                let target = FirstOfGroup(nearby)
                 nearby.removeUnit(target)
                 if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true) and not BuffList.hasBuffType(target, buffSoulBurn)
                     target.addBuffReduced(caster, dur, buffSoulBurn, level)

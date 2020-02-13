@@ -136,10 +136,10 @@ public class StatTable
             let id = columnToPlayer[i]
             let p = players[id]
             let color = p.getColor().toColor()
-            string icon = PlayerWrapper.getIcon(id)
+            let icon = PlayerWrapper.getIcon(id)
 
 
-            string name = p.getName().substring(0, 5)
+            let name = p.getName().substring(0, 5)
 
             mBoard.getItem(0, i)
                 ..setValueColor(color.red, color.green, color.blue, 255)
@@ -182,7 +182,7 @@ public class ScoreTable
 
     static function updateHeader(boolean firstTeam)
         let row = (firstTeam ? 0 : PlayerWrapper.team1HeroCount + 1)
-        string teamName = firstTeam ?
+        let teamName = firstTeam ?
         players[TEAM_PLAYER_TEAM_1].getColor().toColor().toColorString() + TEAM_NAME_TEAM_1 + "|r" :
         players[TEAM_PLAYER_TEAM_2].getColor().toColor().toColorString() + TEAM_NAME_TEAM_2 + "|r"
         
@@ -525,7 +525,7 @@ public abstract class PlayerWrapper
 function initPlayers()
     var admin = false
     for i = 0 to MAX_HERO_COUNT-1
-        player p = players[i]
+        let p = players[i]
         SetPlayerState(p, PLAYER_STATE_RESOURCE_FOOD_USED, 1)
         SetPlayerState(p, PLAYER_STATE_RESOURCE_FOOD_USED, 0)
         if p.getSlotState()==PLAYER_SLOT_STATE_PLAYING
