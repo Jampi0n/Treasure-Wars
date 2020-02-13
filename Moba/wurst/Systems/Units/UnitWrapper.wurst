@@ -218,7 +218,7 @@ public class UnitWrapper
         return this.bonusCalculation
 
     function defaultBonusCalcualtion(Stat whichStat)
-        int stat = whichStat.toInt()
+        let stat = whichStat.toInt()
         UnitWrapper.statsTotalBonus_static[this.arrayOffset + stat] = ((this.getStatAbsoluteBonus(whichStat)) * (1. + this.getStatRelativeBonus(whichStat)/1000 ) + (this.getStatBaseValue(whichStat) * this.getStatRelativeBonus(whichStat)/1000) ).round()
     
 
@@ -270,7 +270,7 @@ public class UnitWrapper
     Sets the absolute stat bonus and updates the total bonus.
     **/
     function setStatAbsoluteBonus(Stat whichStat, int newValue)
-        int stat = whichStat.toInt()
+        let stat = whichStat.toInt()
         statsAbsoluteBonus_static[this.arrayOffset + stat] = newValue
         updateTotalStatBonus(whichStat)
 
@@ -305,7 +305,7 @@ public class UnitWrapper
             printStat(i castTo Stat)
 
     function printStat(Stat whichStat)
-        int stat = whichStat.toInt()
+        let stat = whichStat.toInt()
         Log.debug(whichStat.toString()+" ( "+statBaseValue_static[this.arrayOffset + stat].toString()+" + "+statsAbsoluteBonus_static[this.arrayOffset + stat].toString()+" ) * "+statsRelativeBonus_static[this.arrayOffset + stat].toString() + "->" +statsTotalBonus_static[this.arrayOffset + stat].toString() )
 
     function toUnit() returns unit

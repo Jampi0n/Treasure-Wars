@@ -236,14 +236,14 @@ function castWarStomp()
     let spellId = GetSpellAbilityId()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
-    group nearby = CreateGroup()
+    let nearby = CreateGroup()
     nearby.enumUnitsInRange(caster.getPos(), WAR_STOMP_AOE)
 
     let dur = WAR_STOMP_DURATION[level-1].bonus(caster.getStr(), WAR_STOMP_DURATION_BONUS)
     let dmg = WAR_STOMP_DAMAGE[level-1].bonus(caster.getStr(), WAR_STOMP_DAMAGE_BONUS)
 
     while(not nearby.isEmpty())
-        unit target = FirstOfGroup(nearby)
+        let target = FirstOfGroup(nearby)
         nearby.removeUnit(target)
         if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
             caster.dealDamage(target, dmg, ReductionType.PHYSICAL)
@@ -402,7 +402,7 @@ function teamFightAI(HeroAI ai)
 
     
 
-    unit target = ai.getTeamFightTarget()
+    let target = ai.getTeamFightTarget()
     if target.isTargetable(hero.getOwner(), false, true)
         ai.issue("chainlightning", target)
         if not ai.getAttacking()

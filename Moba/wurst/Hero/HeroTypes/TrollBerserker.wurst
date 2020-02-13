@@ -291,13 +291,13 @@ function castGrowth()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
     caster.addBuff(caster, GROWTH_DURATION[level-1], buffGrowth, level)
-    group nearby = CreateGroup()
+    let nearby = CreateGroup()
 
     nearby.enumUnitsInRange(caster.getPos(), GROWTH_FEAR_AOE)
 
 
     while(not nearby.isEmpty())
-        unit target = FirstOfGroup(nearby)
+        let target = FirstOfGroup(nearby)
         nearby.removeUnit(target)
         if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
 
@@ -360,7 +360,7 @@ function teamFightAI(HeroAI ai)
                 return
 
         
-    unit target = ai.getTeamFightTarget()
+    let target = ai.getTeamFightTarget()
     if target.isTargetable(hero.getOwner(), false, true)
 
         hero.issueImmediateOrder("berserk")

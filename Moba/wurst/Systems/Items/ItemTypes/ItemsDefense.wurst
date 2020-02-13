@@ -164,7 +164,7 @@ function holyShield()
     addStatBonusAbsolute(Stat.HP, hp)
 
     if not compiletime
-        var abilityList = new LinkedList<int>
+        let abilityList = new LinkedList<int>
         ..add(HOLY_SHIELD_ABILTIY_ID)
         BUFF_HOLY_SHIELD.setup(abilityList, HOLY_SHIELD_BUFF_ID)
 

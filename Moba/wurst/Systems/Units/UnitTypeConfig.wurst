@@ -89,11 +89,11 @@ init
     doAfter(0, () -> (begin
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean _isActive) -> (begin
             if attacker.getTypeId() == TANK
-                group nearby = CreateGroup()
+                let nearby = CreateGroup()
                 nearby.enumUnitsInRange(target.getPos(), 250)
 
                 while(not nearby.isEmpty())
-                    unit u = FirstOfGroup(nearby)
+                    let u = FirstOfGroup(nearby)
                     nearby.removeUnit(u)
                     if u.isTargetable(attacker.getOwner(), false, true) and u!=target
                         attacker.dealDamage(u, 75, ReductionType.PHYSICAL)

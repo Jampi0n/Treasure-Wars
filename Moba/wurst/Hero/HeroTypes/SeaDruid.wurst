@@ -156,7 +156,7 @@ function manaShield(int abilityId)
 
     if compiletime
         let MANA = skillData(50, 50, 50, 50, 50)
-        real array MANA_PER_SECOND = [8, 11, 14, 17, 20]
+        let MANA_PER_SECOND = [8., 11, 14, 17, 20]
         let COOLDOWN = skillData(5, 5, 5, 5, 5)
 
         let aDef = new AbilityDefinitionDemonHunterImmolation(abilityId)
@@ -258,13 +258,13 @@ function castTidalFury()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
     let casterPos = caster.getPos()
-    group nearby = CreateGroup()
+    let nearby = CreateGroup()
     nearby.enumUnitsInRange(casterPos, TIDAL_FURY_AOE)
 
     let hitDmg = TIDAL_FURY_HIT_DMG[level-1].bonus(caster.getStr(), TIDAL_FURY_HIT_DMG_BONUS)
 
     while(not nearby.isEmpty())
-        unit target = FirstOfGroup(nearby)
+        let target = FirstOfGroup(nearby)
         nearby.removeUnit(target)
         if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
             caster.dealDamage(target, hitDmg, ReductionType.PHYSICAL)
@@ -288,14 +288,14 @@ function castTidalFury()
 function castGiantFish()
     let caster = GetTriggerUnit()
     ArtilleryDetection.fireArtillery(caster, FISH_ARTILLERY, caster.getPos(), vec2(GetSpellTargetX(), GetSpellTargetY())) (unit detectionUnit, unit caster, int data) ->
-        group nearby = CreateGroup()
+        let nearby = CreateGroup()
         let level = caster.getAbilityLevel(ABILITY_GIANT_FISH)
         nearby.enumUnitsInRange(detectionUnit.getPos(), FISH_AOE[level-1])
 
         let dmg = FISH_DAMAGE[level-1].bonus(caster.getInt(), FISH_DAMAGE_BONUS)
 
         while(not nearby.isEmpty())
-            unit target = FirstOfGroup(nearby)
+            let target = FirstOfGroup(nearby)
             nearby.removeUnit(target)
             if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(detectionUnit.getOwner(), false, true)
 
@@ -345,7 +345,7 @@ class RitualOfTheSeas
 
             this.caster.addEffect("Models\\PsyWave.mdx", "origin").destr()
 
-            group nearby = CreateGroup()
+            let nearby = CreateGroup()
             nearby.enumUnitsInRange(this.caster.getPos(), RITUAL_AOE[level-1])
 
 
@@ -353,7 +353,7 @@ class RitualOfTheSeas
             let hpDrain = RITUAL_HP_DRAIN[level-1].bonus(caster.getInt(), RITUAL_HP_DRAIN_BONUS)
 
             while(not nearby.isEmpty())
-                unit target = FirstOfGroup(nearby)
+                let target = FirstOfGroup(nearby)
                 nearby.removeUnit(target)
                 if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(this.caster.getOwner(), false, true) and target.isVisible(this.caster.getOwner())
                     doAfter(target.getPos().distanceTo(caster.getPos())/1000 , () -> (begin
@@ -476,7 +476,7 @@ function teamFightAI(HeroAI ai)
             return
 
         
-    unit target = ai.getTeamFightTarget()
+    let target = ai.getTeamFightTarget()
     if target.isTargetable(hero.getOwner(), false, true)
         ai.issue("shockwave", target.getPos())
         if not ai.getAttacking()
@@ -534,7 +534,7 @@ function initHeroType()
 
         buffFish = new BuffType(false, DispelLevel.DISPEL)
 
-        var abilityList = new LinkedList<int>
+        let abilityList = new LinkedList<int>
             ..add(FISH_ABILTIY_ID)
         buffFish.setup(abilityList, FISH_BUFF_ID)
 

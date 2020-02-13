@@ -107,7 +107,7 @@ class HeroInventory
 
     construct(unit hero)
         for i = 0 to 5
-            int itemTypeId = hero.itemInSlot(i).getTypeId()
+            let itemTypeId = hero.itemInSlot(i).getTypeId()
             if itemTypeId != 0
                 hTable.saveInt(this castTo int, itemTypeId, 1 + hTable.loadInt(this castTo int, itemTypeId))
 

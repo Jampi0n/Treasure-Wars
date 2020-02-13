@@ -256,12 +256,11 @@ function castPoisonSpit()
             doAfter(POISON_SPIT_DURATION[level-1], () -> e.destr())
 
         doPeriodicallyTimed(0.25, POISON_SPIT_DURATION[level-1]) (CallbackCounted cb) ->
-
-            group nearby = CreateGroup()
+            let nearby = CreateGroup()
             nearby.enumUnitsInRange(targetPos, POISON_SPIT_AOE[level-1])
         
             while(not nearby.isEmpty())
-                unit target = FirstOfGroup(nearby)
+                let target = FirstOfGroup(nearby)
                 nearby.removeUnit(target)
                 if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
                     target.addBuff( caster, 0.5, BUFF_POISON_SPIT, level)
@@ -284,9 +283,9 @@ function castParalyzingStrike()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
     let target = GetSpellTargetUnit()
-    var targetPos = target.getPos()
-    var casterPos = caster.getPos()
-    var portPos = targetPos.polarOffset(casterPos.angleTo(targetPos), 100)
+    let targetPos = target.getPos()
+    let casterPos = caster.getPos()
+    let portPos = targetPos.polarOffset(casterPos.angleTo(targetPos), 100)
     SOUND_PARALYZING_STRIKE.playOnPoint(targetPos.toVec3())
     doAfter(0, () -> caster.setPos(portPos))
     target.addBuffReduced( caster, (PARALYZING_STRIKE_DURATION[level-1]).bonus(caster.getInt(), PARALYZING_STRIKE_DURATION_BONUS) , STUNNED, 1).setDispelLevel(DispelLevel.DISPEL)
@@ -326,7 +325,7 @@ function attackAI(HeroAI ai)
 function teamFightAI(HeroAI ai)
     let hero = ai.getHeroUnit()
 
-    unit target = ai.getTeamFightTarget()
+    let target = ai.getTeamFightTarget()
 
     if target.isTargetable(hero.getOwner(), false, true)
 

@@ -31,7 +31,7 @@ constant int array ATTACK_SPEED = [0, 5, 10, 15, 20, 25]
 
 
 function onDragonTurtleDeath()
-    unit target = GetTriggerUnit()
+    let target = GetTriggerUnit()
 
     if target == udg_DragonTurtle
         DEATH_SOUND.play().snd.setVolume(150)

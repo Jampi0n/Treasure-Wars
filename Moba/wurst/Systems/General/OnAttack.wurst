@@ -305,7 +305,7 @@ public class OnAttack
             localAttacked = true
 
 
-        var finalDmg = handleDamageAmount(localAttacker, localTarget, localAttacked, localActive, advanced)
+        let finalDmg = handleDamageAmount(localAttacker, localTarget, localAttacked, localActive, advanced)
 
         //use a list with arguments, as a onAttack function could trigger an onAttack event and overwrite the variables
         if localAttacked and not localTarget.isType(UNIT_TYPE_ANCIENT) //untargetable
@@ -339,7 +339,7 @@ public class OnAttack
         onAttackFunctionListAdvanced.add(onAttack)
 
     protected static function onAttackAbilities(unit attacker, unit target, boolean isActive, boolean advanced)
-        HeroType heroType = HeroType.getHeroType(attacker.getTypeId())
+        let heroType = HeroType.getHeroType(attacker.getTypeId())
         if(heroType!=null)
             heroType.onAttack(attacker, target, isActive, advanced)
 

@@ -6,14 +6,14 @@ constant CATEGORY = 3
 
 
 function itemHammerOfStrength()
-    int str = 8
+    let str = 8
     setupItem(ITEM_ID_HAMMER_OF_STRENGTH, CATEGORY, 400)
     setInfo("Hammer of Strength", "+ {0} strength".format(str.toString()))
     addStatBonusAbsolute(Stat.STR, str)
 
 
 function itemGlovesOfHaste()
-    int as = 12
+    let as = 12
     
     setupItem(ITEM_ID_GLOVES_OF_HASTE, CATEGORY, 400)
     setInfo("Gloves of Haste", "+ {0}% attack speed".format(as.toString()))
@@ -21,7 +21,7 @@ function itemGlovesOfHaste()
 
 
 function itemWarAxe()
-    int str = 16
+    let str = 16
     
     setupItem(ITEM_ID_WAR_AXE, CATEGORY, 800)
     setInfo("War Axe", "+ {0} strength".format(str.toString()))
@@ -29,8 +29,8 @@ function itemWarAxe()
 
 
 function itemDagger()
-    int str = 10
-    int as = 8
+    let str = 10
+    let as = 8
     
     setupItem(ITEM_ID_DAGGER, CATEGORY, 800)
     setInfo("Dagger", "+ {0} strength\n+ {1}% attack speed".format(str.toString(), as.toString()))
@@ -38,8 +38,8 @@ function itemDagger()
     addStatBonusAbsolute(Stat.AS, as)
 
 function itemBow()
-    int str = 12
-    int unitDmg = 25
+    let str = 12
+    let unitDmg = 25
     
     setupItem(ITEM_ID_BOW, CATEGORY, 750)
     setInfo("Bow", "+ {0} strength|nDeals {1} additional damage to units.".format(str.toString(), unitDmg.toString() ))
@@ -54,14 +54,14 @@ function itemBow()
 
 
 
-constant int BLOOD_SWORD_BUFF_ID = compiletime(createAuraBuff("Blood Sword", "This unit has reduced armor and takes damage over time.", "BTNBarbarianBrutalSlasher"))
-constant int BLOOD_SWORD_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, BLOOD_SWORD_BUFF_ID, "", ""))
+constant BLOOD_SWORD_BUFF_ID = compiletime(createAuraBuff("Blood Sword", "This unit has reduced armor and takes damage over time.", "BTNBarbarianBrutalSlasher"))
+constant BLOOD_SWORD_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, BLOOD_SWORD_BUFF_ID, "", ""))
 
 function itemBloodSword()
-    int buffDur = 4
-    int armorDmg = 25
-    int drainDmg = 40
-    int str = 50
+    let buffDur = 4
+    let armorDmg = 25
+    let drainDmg = 40
+    let str = 50
     
     setupItem(ITEM_ID_BLOOD_SWORD, CATEGORY, 4400)
     setInfo("Blood Sword", "+ {0} strength|nAttacks reduce the targets armor by {1}% and drain {2} hit points over {3} seconds.|nThis effect does not stack.".format(
@@ -73,7 +73,7 @@ function itemBloodSword()
 
     if not compiletime
         let bloodSwordBuff = new BuffType(false, DispelLevel.DISPEL)
-        var abilityList = new LinkedList<int>
+        let abilityList = new LinkedList<int>
         ..add(BLOOD_SWORD_ABILTIY_ID)
         bloodSwordBuff.setup(abilityList, BLOOD_SWORD_BUFF_ID)
         bloodSwordBuff.setPeriodicTime(1)
@@ -100,11 +100,11 @@ function itemBloodSword()
 
 
 function itemCursedSword()
-    int mana = 10 // trigger
-    int hp = 20 // trigger
-    int str = 35
-    real voidDmg = 1.5
-    int as = 20
+    let mana = 10 // trigger
+    let hp = 20 // trigger
+    let str = 35
+    let voidDmg = 1.5
+    let as = 20
     
     setupItem(ITEM_ID_CURSED_SWORD, CATEGORY, 4300)
     setInfo("Cursed Sword", "+ {0} strength\n+ {1}% attack speed|nDeals {2}% of the target's maximum health as void damage.|nThis effect does not stack.|nRestores {3} hit points and {4} mana points per kill.".format(
@@ -136,10 +136,10 @@ function itemCursedSword()
 
 
 function itemInfernalBow()
-    int magicDmg = 35
-    int str = 30
-    int mp = 150
-    int hp = 200
+    let magicDmg = 35
+    let str = 30
+    let mp = 150
+    let hp = 200
     
     setupItem(ITEM_ID_INFERNAL_BOW, CATEGORY, 3800)
     setInfo("Infernal Bow", "+ {0} strength\n+ {1} hit points\n+ {2} mana points|nDeals {3} additional magic damage.".format(
@@ -160,10 +160,10 @@ function itemInfernalBow()
 
 
 function itemEnchantedBlade()
-    int as = 15
-    int str = 30
-    int wp = 20
-    int mBurn = 10
+    let as = 15
+    let str = 30
+    let wp = 20
+    let mBurn = 10
     
     setupItem(ITEM_ID_ENCHANTED_BLADE, CATEGORY, 3600)
     setInfo("Enchanted Blade", "+ {0} strength\n+ {1}% attack speed\n+ {2} willpower|nAttacks burn {3} mana, dealing damage equal to the mana burned.|nThis effect does not stack.".format(
@@ -185,16 +185,16 @@ function itemEnchantedBlade()
                 target.addEffect(Abilities.spellBreakerAttack, "chest").destr()
         end))
 
-constant int AXE_BUFF_ID = compiletime(createAuraBuff("Axe of Decay", "This unit'smovement speed is reduced.", "BTNINV_Axe_15"))
-constant int AXE_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, AXE_BUFF_ID, Abilities.crippleTarget, ""))
+constant AXE_BUFF_ID = compiletime(createAuraBuff("Axe of Decay", "This unit'smovement speed is reduced.", "BTNINV_Axe_15"))
+constant AXE_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, AXE_BUFF_ID, Abilities.crippleTarget, ""))
                     
 
 function itemAxeOfDecay()
-    int mana = 12 // trigger
-    int hp = 16 // trigger
-    int str = 38
-    int slow = 25
-    int slowDur = 2
+    let mana = 12 // trigger
+    let hp = 16 // trigger
+    let str = 38
+    let slow = 25
+    let slowDur = 2
     
     setupItem(ITEM_ID_AXE_OF_DECAY, CATEGORY, 3600)
     setInfo("Axe of Decay", "+ {0} strength|nRestores {1} hit points and {2} mana points per kill.|nAttacks slow the target's movement speed by {3}% for {4} seconds.|nThis effect does not stack.".format(
@@ -217,7 +217,7 @@ function itemAxeOfDecay()
         end))
 
         let axeBuff = new BuffType(false, DispelLevel.DISPEL)
-        var abilityList = new LinkedList<int>
+        let abilityList = new LinkedList<int>
             ..add(AXE_ABILTIY_ID)
         axeBuff.setup(abilityList, AXE_BUFF_ID)
         axeBuff.addFirstFunction((Buff thisBuff) -> (begin
@@ -235,14 +235,14 @@ function itemAxeOfDecay()
         
 
 function itemSacrificialDagger()
-    int str = 25
-    int as = 15
-    int lifesteal = 12 // onAttack
-    int mana = 8 // trigger
-    int hr = 30
+    let str = 25
+    let as = 15
+    let lifesteal = 12 // onAttack
+    let mana = 8 // trigger
+    let hr = 30
     
     setupItem(ITEM_ID_SACRIFICIAL_DAGGER, CATEGORY, 3450)
-    setInfo("Sacrificial Dagger", ("+ {0} strength\n+ {1}% attack speed\n+ {2} hit point regeneration per 10 seconds|nRestores {3} mana points per kill. "+
+    setInfo("Sacrificial Dagger", ("+ {0} strength\n+ {1}% attack speed\n+ {2} hit polet regeneration per 10 seconds|nRestores {3} mana points per kill. "+
         "Attacks restore {4}% of the damage dealt.").format(
             str.toString(), as.toString(), hr.toString(), mana.toString(), lifesteal.toString()
         ))
@@ -266,9 +266,9 @@ function itemSacrificialDagger()
 
 
 function itemSkullAxe()
-    int mana = 10 // trigger
-    int hp = 16 // trigger
-    int str = 18
+    let mana = 10 // trigger
+    let hp = 16 // trigger
+    let str = 18
     
     setupItem(ITEM_ID_SKULL_AXE, CATEGORY, 1900)
     setInfo("Skull Axe", "+ {0} strength|nRestores {1} hit points and {2} mana points per kill.".format(
@@ -292,13 +292,13 @@ function itemSkullAxe()
         end))
 
 
-constant int MACE_BUFF_ID = compiletime(createAuraBuff("Bleeding", "This unit is bleeding; it takes damage over time.", "BTNMaceStrikeGlowless"))
-constant int MACE_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, MACE_BUFF_ID, "", ""))
+constant MACE_BUFF_ID = compiletime(createAuraBuff("Bleeding", "This unit is bleeding; it takes damage over time.", "BTNMaceStrikeGlowless"))
+constant MACE_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, MACE_BUFF_ID, "", ""))
 
 function itemMace()
-    int str = 25
-    int bleedDmg = 30
-    int bleedDuration = 3
+    let str = 25
+    let bleedDmg = 30
+    let bleedDuration = 3
     
 
     setupItem(ITEM_ID_MACE, CATEGORY, 1900)
@@ -311,7 +311,7 @@ function itemMace()
 
     if not compiletime
         let maceBuff = new BuffType(false, DispelLevel.DISPEL)
-        var abilityList = new LinkedList<int>
+        let abilityList = new LinkedList<int>
         ..add(MACE_ABILTIY_ID)
         maceBuff.setup(abilityList, MACE_BUFF_ID)
         maceBuff.setPeriodicTime(1)
@@ -326,13 +326,13 @@ function itemMace()
                 target.addEffect(Abilities.hydraliskImpact, "chest").destr()
         end))
 
-constant int HAMMER_BUFF_ID = compiletime(createAuraBuff("Break Armor", "This unit's armor is broken; it has reduced armor.", "BTNINV_Hammer_10"))
-constant int HAMMER_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, HAMMER_BUFF_ID, "", ""))
+constant HAMMER_BUFF_ID = compiletime(createAuraBuff("Break Armor", "This unit's armor is broken; it has reduced armor.", "BTNINV_Hammer_10"))
+constant HAMMER_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, HAMMER_BUFF_ID, "", ""))
            
 function itemHammerOfMight()
-    int str = 25
-    int armorDmg = 25
-    int armorDuration = 6
+    let str = 25
+    let armorDmg = 25
+    let armorDuration = 6
     
     setupItem(ITEM_ID_HAMMER_OF_MIGHT, CATEGORY, 1900)
     setInfo("Hammer of Might", "+ {0} strength|nAttacks reduce the target's armor by {1}% for {2} seconds.".format(
@@ -344,7 +344,7 @@ function itemHammerOfMight()
 
     if not compiletime
         let hammerBuff = new BuffType(false, DispelLevel.DISPEL)
-        var abilityList = new LinkedList<int>
+        let abilityList = new LinkedList<int>
         ..add(HAMMER_ABILTIY_ID)
         hammerBuff.setup(abilityList, HAMMER_BUFF_ID)
         hammerBuff.addFirstFunction((Buff thisBuff) -> (begin
@@ -365,9 +365,9 @@ function itemHammerOfMight()
 
 
 function itemRavenSword()
-    int voidDmg = 16
-    int as = 15
-    int str = 15
+    let voidDmg = 16
+    let as = 15
+    let str = 15
     
     setupItem(ITEM_ID_RAVEN_SWORD, CATEGORY, 1900)
     setInfo("Raven Sword", "+ {0} strength\n+ {1}% attack speed|nDeals {2} additional void damage.".format(
@@ -430,7 +430,7 @@ function itemArmorBreaker()
 
     if not compiletime
         let hammerBuff = new BuffType(false, DispelLevel.DISPEL)
-        var abilityList = new LinkedList<int>
+        let abilityList = new LinkedList<int>
         ..add(ARMOR_BREAKER_ABILITY_ID)
         hammerBuff.setup(abilityList, ARMOR_BREAKER_BUFF_ID)
         hammerBuff.addFirstFunction((Buff thisBuff) -> (begin
@@ -465,7 +465,7 @@ function itemChillingBlade()
 
     if not compiletime
         let slowBuff = new BuffType(false, DispelLevel.DISPEL)
-        var abilityList = new LinkedList<int>
+        let abilityList = new LinkedList<int>
         ..add(CHILLING_BLADE_ABILITY_ID)
         slowBuff.setup(abilityList, CHILLING_BLADE_BUFF_ID)
         slowBuff.addFirstFunction((Buff thisBuff) -> (begin

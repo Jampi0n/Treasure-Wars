@@ -239,13 +239,13 @@ class DivinePunishment
         this.count++
         if this.count == 20
             this.succesful = true
-            group nearby = CreateGroup()
+            let nearby = CreateGroup()
             nearby.enumUnitsInRange(this.caster.getPos(), DIVINE_PUNISHMENT_AOE)
 
             let dmg = DIVINE_PUNISHMENT_DMG[level-1].bonus(this.caster.getInt(), DIVINE_PUNISHMENT_DMG_BONUS)
 
             while(not nearby.isEmpty())
-                unit target = FirstOfGroup(nearby)
+                let target = FirstOfGroup(nearby)
                 nearby.removeUnit(target)
                 if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(this.caster.getOwner(), false, true) and target.isVisible(this.caster.getOwner())
                     
@@ -294,14 +294,14 @@ function castShieldBash()
     let casterPos = caster.getPos()
     let casterAngle = casterPos.angleTo(vec2(GetSpellTargetX(), GetSpellTargetY()))
     SOUND_SHIELD_BASH.playOnPoint(casterPos.toVec3()).snd.setVolume(150)
-    group nearby = CreateGroup()
+    let nearby = CreateGroup()
     nearby.enumUnitsInRange(casterPos.polarOffset(casterAngle, 120), 220)
 
     let dmg = SHIELD_BASH_DMG[level-1].bonus(caster.getStr(), SHIELD_BASH_DMG_BONUS)
     let dur = SHIELD_BASH_DURATION[level-1]
 
     while(not nearby.isEmpty())
-        unit target = FirstOfGroup(nearby)
+        let target = FirstOfGroup(nearby)
         nearby.removeUnit(target)
         if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
             caster.dealDamage(target, dmg, ReductionType.PHYSICAL)
@@ -313,13 +313,13 @@ function castRoar()
     let spellId = GetSpellAbilityId()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
-    group nearby = CreateGroup()
+    let nearby = CreateGroup()
     nearby.enumUnitsInRange(caster.getPos(), BATTLE_ROAR_AOE[level-1])
 
     let dur = BATTLE_ROAR_DURATION[level-1].bonus(caster.getInt(), BATTLE_ROAR_DURATION_BONUS)
 
     while(not nearby.isEmpty())
-        unit target = FirstOfGroup(nearby)
+        let target = FirstOfGroup(nearby)
         nearby.removeUnit(target)
         if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), true, false)
             target.addBuff( caster, dur, BATTLE_ROAR, level)

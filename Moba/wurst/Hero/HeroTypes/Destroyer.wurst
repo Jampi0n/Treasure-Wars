@@ -115,7 +115,7 @@ function abilityW(int abilityId)
 
     if compiletime
         let MANA = skillData(25, 25, 25, 25, 25)
-        real AOE = 250
+        let AOE = 250.0
         new BuffDefinition(IMMOLATION_BUFF_ID, 'BEim')
             ..setTooltipNormalExtended(1, "This unit has Immolation; it attacks faster and nearby enemy units will take damage over time.")
             ..setArtSpecial(1, Abilities.immolationRedDamage)
@@ -502,7 +502,7 @@ function initHeroType()
                 let dmg = IMMOLATION_DAMAGE[level-1].bonus(caster.getInt(), IMMOLATION_DAMAGE_BONUS) * 0.2
                 //use hp to not trigger damage event
                 caster.addHP(-(0.5 * dmg.reduceMagic(caster.getWp())))
-                group g = CreateGroup()
+                let g = CreateGroup()
                 g.enumUnitsInRange(caster.getPos(), 250)
                 while true
                     let u = FirstOfGroup(g)
