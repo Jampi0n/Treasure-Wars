@@ -27,6 +27,8 @@ public constant int CREEP_ICON_OWNER = PLAYER_NEUTRAL_PASSIVE
 
 public constant MAX_HIT_BOX = 200.
 
+public constant XP_RANGE = 1200.0
+
 public constant IS_REPLAY = getIsReplay()
 
 function getIsReplay() returns bool

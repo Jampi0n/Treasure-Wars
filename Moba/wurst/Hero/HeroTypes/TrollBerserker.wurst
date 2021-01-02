@@ -111,7 +111,7 @@ function blink(int abilityId)
             ..setArtSpecial("")
             ..setLightningEffects("")
             ..setCheckDependencies(true)
-            ..setSkillData(COOLDOWN, MANA, 0)
+            ..setSkillData(COOLDOWN, MANA, 99999)
 
         for lvl = 1 to 5
             aDef

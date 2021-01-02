@@ -48,7 +48,7 @@ function itemManaRing()
     let mr = 10
     
     setupItem(ITEM_ID_MANA_RING, CATEGORY, 500)
-    setInfo("Ring of Mana", "+ {0} mana polet regeneration per 10 seconds".format(mr.toString()))
+    setInfo("Ring of Mana", "+ {0} mana point regeneration per 10 seconds".format(mr.toString()))
 
     addStatBonusAbsolute(Stat.MR, mr)
 
@@ -260,7 +260,7 @@ function itemFrostRing()
     let mr = 20
     
     setupItem(ITEM_ID_RING_OF_REGEN, CATEGORY, 1900)
-    setInfo("Ring of Regeneration", "+ {0} mana points|n+ {1} mana polet regeneration per 10 seconds".format(
+    setInfo("Ring of Regeneration", "+ {0} mana points|n+ {1} mana point regeneration per 10 seconds".format(
             mp.toString(), mr.toString()
         ))
     addRequirement(ITEM_ID_GEM_OF_MANA)
@@ -381,7 +381,7 @@ function itemRingOfDarkness()
     let voidExplosion = 30 //trigger
     
     setupItem(ITEM_ID_RING_OF_DARKNESS, CATEGORY, 3700)
-    setInfo("Ring of Darkness", "+ {0} intelligence|n+ {1} mana polet regeneration per 10 seconds|nAttacks deal {2} additional void damage.|nRestores {3} mana points everytime you are attacked.|nKilling a unit creates a void explosion, dealing {4} damage to neaby enemies.".format(
+    setInfo("Ring of Darkness", "+ {0} intelligence|n+ {1} mana point regeneration per 10 seconds|nAttacks deal {2} additional void damage.|nRestores {3} mana points everytime you are attacked.|nKilling a unit creates a void explosion, dealing {4} damage to neaby enemies.".format(
             intel.toString(), mr.toString(), voidDmg.toString(), mp.toString(), voidExplosion.toString()
         ))
 
@@ -502,7 +502,7 @@ function itemWandOfBlood()
     let lifesteal = 8 // -> onAttack
     
     setupItem(ITEM_ID_WAND_OF_BLOOD, CATEGORY, 3650)
-    setInfo("Wand of Blood", "+ {0} intelligence|n+ {1} hit points|n+ {2} hit polet regeneration per 10 seconds|nDealing damage restores hit points equal to {3}% of the damage dealt.|nThis effect does not stack.".format(
+    setInfo("Wand of Blood", "+ {0} intelligence|n+ {1} hit points|n+ {2} hit point regeneration per 10 seconds|nDealing damage restores hit points equal to {3}% of the damage dealt.|nThis effect does not stack.".format(
             intel.toString(), hp.toString(), hr.toString(), lifesteal.toString()
         ))
     addRequirement(ITEM_ID_MAGIC_STAFF)
@@ -609,7 +609,7 @@ function itemBracerOfPower()
     let bonus = 15 //trigger -> General
     
     setupItem(ITEM_ID_BRACER_OF_POWER, CATEGORY, 3700)
-    setInfo("Bracer of Power", "+ {0} hit points|n+ {1} mana points|n+ {2} hit polet regeneration per 10 seconds|n+ {3} mana polet regeneration per 10 seconds|nIncreases all incoming effects that restore hit points or mana points by {4}%.".format(
+    setInfo("Bracer of Power", "+ {0} hit points|n+ {1} mana points|n+ {2} hit point regeneration per 10 seconds|n+ {3} mana point regeneration per 10 seconds|nIncreases all incoming effects that restore hit points or mana points by {4}%.".format(
             hp.toString(), mp.toString(), hr.toString(), mr.toString(), bonus.toString()
         ))
     addRequirement(ITEM_ID_RING_OF_REGEN)

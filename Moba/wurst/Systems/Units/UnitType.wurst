@@ -1,5 +1,6 @@
 package UnitType
 
+import LinkedList
 import HashMap
 import StandardTextTags
 import initlater HeroControl
@@ -115,18 +116,12 @@ function onUnitDeath()
         let killingId = killingUnit.getOwner().getId()
         let dyingId = dyingUnit.getOwner().getId()
         let dyingTeam = PlayerWrapper.getTeam(dyingId)
+        let pos = dyingUnit.getPos()
 
         // army unit dies
         if dyingTeam == TEAM_1 or dyingTeam == TEAM_2
             let bounty = dyingType.getBounty()
-            let xp = dyingType.getPowerLevel()*10
-            let xpAllyFactor = 0.5
-            let bountyAllyFactor = 0.25
-            /*
-                The killer (if exists) gets full gold / xp.
-                The killing team gets bountyAllyFactor/xpAllyFactor of the full gold / xp evenly shared amongst all players except the killer.
-            */
-
+            real xp = dyingType.getPowerLevel() * 15.0
 
             let killerIsEnemy = killingUnit != null and PlayerWrapper.getTeam(killingId) == invertTeam(dyingTeam)
             int killerIsHero = 0
@@ -134,38 +129,30 @@ function onUnitDeath()
             if killerIsEnemy and killingId < MAX_HERO_COUNT 
                 killerIsHero = 1
 
-            // killer reward
+            // gold
             if killerIsEnemy and killerIsHero == 1
                 PlayerWrapper.addGoldEx(killingId, bounty)
                 PlayerWrapper.addUnitKill(killingId)
-                let pos = dyingUnit.getPos()
-                addEffect(UI.goldCredit ,pos).destr()
+                
+                addEffect(UI.goldCredit, pos).destr()
 
                 createGoldBountyTextTag(dyingUnit, bounty, players[killingId])
-                //xp
 
-                let killingHero = PlayerWrapper.getPlayerHero(killingId, 0)
-                if killingHero != null
-                    killingHero.toUnit().addXp(xp, true)
-
-            // killer team reward
-
-            // enemy team of dying unit
+            //xp
             let killingAllies = PlayerWrapper.getHeroTeam(invertTeam(dyingTeam))
-            // size of enemy team without killing player and without the army player
-            let killingAlliesSize = PlayerWrapper.getTeamHeroCount(invertTeam(dyingTeam)) - killerIsHero
-            
-            let teamBounty = bounty * bountyAllyFactor / killingAlliesSize
-            let teamXp = xp * xpAllyFactor / killingAlliesSize
 
+            let xpHeroes = new LinkedList<Hero>()
             if killingAllies != null
-            for p in killingAllies
-                if p != killingId
+                for p in killingAllies
                     let hero = PlayerWrapper.getPlayerHero(p, 0)
                     if hero != null
-                        hero.addXp( teamXp)
-
-                    PlayerWrapper.addGoldEx(p, teamBounty)
+                        let distance = hero.toUnit().getPos().distanceTo(pos)
+                        if distance < XP_RANGE
+                            xpHeroes.add(hero)
+                        
+            xp /= xpHeroes.size()
+            for hero in xpHeroes
+                hero.addXp( xp )
         
     
     
