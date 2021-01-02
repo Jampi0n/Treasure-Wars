@@ -411,7 +411,9 @@ function castEntangle()
     let level = caster.getAbilityLevel(spellId)
     let startPos = caster.getPos()
     let direction = startPos.angleTo(vec2(GetSpellTargetX(), GetSpellTargetY()))
-
+    let intelligence = caster.getInt()
+    let dur = ENTANGLE_DURATION[level-1].bonus(intelligence, ENTANGLE_DURATION_BONUS)
+    let damage = ENTANGLE_HIT_DAMAGE[level-1].bonus(intelligence, ENTANGLE_HIT_DAMAGE_BONUS)
     for i = 0 to 8
         doAfter(0.1 * i, () -> (begin
             let thisPos = startPos.polarOffset(direction, i*125.)
@@ -420,18 +422,15 @@ function castEntangle()
             let nearby = CreateGroup()
             nearby.enumUnitsInRange(thisPos, 130)
     
-            let dur = ENTANGLE_DURATION[level-1].bonus(caster.getInt(), ENTANGLE_DURATION_BONUS)
-
             while(not nearby.isEmpty())
                 let u = FirstOfGroup(nearby)
                 nearby.removeUnit(u)
                 if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(caster.getOwner(), false, true) and not u.isType(UNIT_TYPE_FLYING)
-                    
                     if not BuffList.hasBuffType(u, BUFF_ENTAGLING_ROOTS)
-                        caster.dealDamage(u, ENTANGLE_HIT_DAMAGE[level-1].bonus(caster.getInt(), ENTANGLE_HIT_DAMAGE_BONUS), ReductionType.MAGIC)
+                        caster.dealDamage(u, damage, ReductionType.MAGIC)
 
                     u.addBuffReduced(caster, dur, ENTANGLED, 1).setDispelLevel(DispelLevel.DISPEL)
-                    u.addBuffReduced(caster, dur, BUFF_ENTAGLING_ROOTS, level)
+                    u.addBuffReduced(caster, dur, BUFF_ENTAGLING_ROOTS, level).setDispelLevel(DispelLevel.DISPEL)
     
             nearby.destr()
         end))

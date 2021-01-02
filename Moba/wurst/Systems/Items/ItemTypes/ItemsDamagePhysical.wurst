@@ -185,7 +185,7 @@ function itemEnchantedBlade()
                 target.addEffect(Abilities.spellBreakerAttack, "chest").destr()
         end))
 
-constant AXE_BUFF_ID = compiletime(createAuraBuff("Axe of Decay", "This unit'smovement speed is reduced.", "BTNINV_Axe_15"))
+constant AXE_BUFF_ID = compiletime(createAuraBuff("Axe of Decay", "This unit's movement speed is reduced.", "BTNINV_Axe_15"))
 constant AXE_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, AXE_BUFF_ID, Abilities.crippleTarget, ""))
                     
 
@@ -242,7 +242,7 @@ function itemSacrificialDagger()
     let hr = 30
     
     setupItem(ITEM_ID_SACRIFICIAL_DAGGER, CATEGORY, 3450)
-    setInfo("Sacrificial Dagger", ("+ {0} strength\n+ {1}% attack speed\n+ {2} hit polet regeneration per 10 seconds|nRestores {3} mana points per kill. "+
+    setInfo("Sacrificial Dagger", ("+ {0} strength\n+ {1}% attack speed\n+ {2} hit point regeneration per 10 seconds|nRestores {3} mana points per kill. "+
         "Attacks restore {4}% of the damage dealt.").format(
             str.toString(), as.toString(), hr.toString(), mana.toString(), lifesteal.toString()
         ))

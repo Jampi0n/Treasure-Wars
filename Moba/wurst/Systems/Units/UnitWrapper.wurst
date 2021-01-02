@@ -10,6 +10,7 @@ import initlater HeroControl
 import PlayerControl
 import ErrorHandling
 import LinkedList
+import ObjectIds
 
 import public BonusMod
 
@@ -52,7 +53,7 @@ public class UnitWrapper
     static int array statsTotalBonus_static //default = 0
     // total = (base + absolute) * (1 + relative/1000)
 
-    private static constant unnkownUnitTypes = new LinkedList<int>()
+    private static constant unknownUnitTypes = new LinkedList<int>()
 
     protected BuffList buffList
 
@@ -79,54 +80,56 @@ public class UnitWrapper
 
     construct(unit assocUnit)
         objectCount++
-
-        this.ownerId = assocUnit.getOwner().getId()
-        this.assocUnit = assocUnit
-        this.team = PlayerWrapper.getTeam(this.ownerId)
-        this.arrayOffset = (this castTo int) * STAT_COUNT
-
-        allUnits[unitWrapperCount] = this.assocUnit
-        this.index = unitWrapperCount
-        unitWrapperCount++
-
-
-        unitMap.put(assocUnit, this)
-
-        this.buffList = null // new BuffList  create BuffList only when needed
-
-        for int i = 0 to STAT_COUNT-1
-            statsAbsoluteBonus_static[this.arrayOffset + i] = 0
-            statsAbsoluteBonusReal_static[this.arrayOffset + i] = 0
-            statsRelativeBonus_static[this.arrayOffset + i] = 0
-            statsTotalBonus_static[this.arrayOffset + i] = 0
-
-        // Init base values
-        statBaseValue_static[this.arrayOffset + Stat.MS.toInt()] = GetUnitDefaultMoveSpeed(this.assocUnit).toInt()
-        statBaseValue_static[this.arrayOffset + Stat.STR.toInt()] = this.assocUnit.getStr(false)
-        statBaseValue_static[this.arrayOffset + Stat.AGI.toInt()] = this.assocUnit.getAgi(false)
-        statBaseValue_static[this.arrayOffset + Stat.INT.toInt()] = this.assocUnit.getInt(false)
-        statBaseValue_static[this.arrayOffset + Stat.AR.toInt()] = this.assocUnit.getArmor().toInt()
-        statBaseValue_static[this.arrayOffset + Stat.AD.toInt()] = 0 // strength
-        statBaseValue_static[this.arrayOffset + Stat.AS.toInt()] = 0 //not needed as only absolute bonus will be used
-        statBaseValue_static[this.arrayOffset + Stat.HR.toInt()] = 0
-        statBaseValue_static[this.arrayOffset + Stat.MR.toInt()] = 0
-        statBaseValue_static[this.arrayOffset + Stat.HP.toInt()] = this.assocUnit.getMaxHP().toInt()
-        statBaseValue_static[this.arrayOffset + Stat.MP.toInt()] = this.assocUnit.getMaxMana().toInt()
-        statBaseValue_static[this.arrayOffset + Stat.CD.toInt()] = 0
-
-        let uType = UnitType.getUnitType(this.assocUnit.getTypeId())
-
-        if uType != null
-            updateBaseStatsUnits()
-        else if this.assocUnit.isType(UNIT_TYPE_HERO)
-            statBaseValue_static[this.arrayOffset + Stat.AD.toInt()] = statBaseValue_static[this.arrayOffset + Stat.STR.toInt()]
-            statBaseValue_static[this.arrayOffset + Stat.AR.toInt()] = 0
+        if(assocUnit == null)
+            destroy this
         else
-            if not this.assocUnit.isType(UNIT_TYPE_STRUCTURE)
-                if this.assocUnit.getAbilityLevel('Aloc') == 0
-                    if not unnkownUnitTypes.has(this.assocUnit.getTypeId())
-                        unnkownUnitTypes.add(this.assocUnit.getTypeId())
-                        Log.warn("Warning unnkown unit type: "+GetUnitName(this.assocUnit))
+            this.ownerId = assocUnit.getOwner().getId()
+            this.assocUnit = assocUnit
+            this.team = PlayerWrapper.getTeam(this.ownerId)
+            this.arrayOffset = (this castTo int) * STAT_COUNT
+
+            allUnits[unitWrapperCount] = this.assocUnit
+            this.index = unitWrapperCount
+            unitWrapperCount++
+
+
+            unitMap.put(assocUnit, this)
+
+            this.buffList = null // new BuffList  create BuffList only when needed
+
+            for int i = 0 to STAT_COUNT-1
+                statsAbsoluteBonus_static[this.arrayOffset + i] = 0
+                statsAbsoluteBonusReal_static[this.arrayOffset + i] = 0
+                statsRelativeBonus_static[this.arrayOffset + i] = 0
+                statsTotalBonus_static[this.arrayOffset + i] = 0
+
+            // Init base values
+            statBaseValue_static[this.arrayOffset + Stat.MS.toInt()] = GetUnitDefaultMoveSpeed(this.assocUnit).toInt()
+            statBaseValue_static[this.arrayOffset + Stat.STR.toInt()] = this.assocUnit.getStr(false)
+            statBaseValue_static[this.arrayOffset + Stat.AGI.toInt()] = this.assocUnit.getAgi(false)
+            statBaseValue_static[this.arrayOffset + Stat.INT.toInt()] = this.assocUnit.getInt(false)
+            statBaseValue_static[this.arrayOffset + Stat.AR.toInt()] = this.assocUnit.getArmor().toInt()
+            statBaseValue_static[this.arrayOffset + Stat.AD.toInt()] = 0 // strength
+            statBaseValue_static[this.arrayOffset + Stat.AS.toInt()] = 0 //not needed as only absolute bonus will be used
+            statBaseValue_static[this.arrayOffset + Stat.HR.toInt()] = 0
+            statBaseValue_static[this.arrayOffset + Stat.MR.toInt()] = 0
+            statBaseValue_static[this.arrayOffset + Stat.HP.toInt()] = this.assocUnit.getMaxHP().toInt()
+            statBaseValue_static[this.arrayOffset + Stat.MP.toInt()] = this.assocUnit.getMaxMana().toInt()
+            statBaseValue_static[this.arrayOffset + Stat.CD.toInt()] = 0
+
+            let uType = UnitType.getUnitType(this.assocUnit.getTypeId())
+
+            if uType != null
+                updateBaseStatsUnits()
+            else if this.assocUnit.isType(UNIT_TYPE_HERO)
+                statBaseValue_static[this.arrayOffset + Stat.AD.toInt()] = statBaseValue_static[this.arrayOffset + Stat.STR.toInt()]
+                statBaseValue_static[this.arrayOffset + Stat.AR.toInt()] = 0
+            else
+                if not this.assocUnit.isType(UNIT_TYPE_STRUCTURE)
+                    if this.assocUnit.getAbilityLevel('Aloc') == 0
+                        if not unknownUnitTypes.has(this.assocUnit.getTypeId())
+                            unknownUnitTypes.add(this.assocUnit.getTypeId())
+                            Log.warn("Warning unknown unit type: ("+GetUnitName(this.assocUnit) + ")_" + this.assocUnit.getTypeId().toRawCode() + "_" + this.assocUnit.getTypeId().toString())
 
     function updateBaseStatsUnits()
         let uType = UnitType.getUnitType(this.assocUnit.getTypeId())

@@ -203,9 +203,17 @@ constant real array RITUAL_AOE = [900, 900, 900, 900, 900]
 
 constant int array RITUAL_WAVE_COUNT = [6, 7, 8, 9, 10]
 
+constant int array RITUAL_MOVEMENT_SLOW = [55, 60, 65, 70, 75]
+
 constant int RITUAL_HP_RATIO = 50
 constant int RITUAL_MANA_RATIO = 25
 
+constant RITUAL_SLOW_BUFF_ID = compiletime(createAuraBuff("Ritual of the Sea", "This unit's movement speed is reduced.", "BTNGuardianofTheSea"))
+constant RITUAL_SLOW_ABILITY_ID = compiletime(createNegativeBuffAbility(1, RITUAL_SLOW_BUFF_ID, "", ""))
+
+constant real RITUAL_SLOW_DURATION = 2.5
+
+BuffType ritualBuff
 
 function ritualOfTheSeas(int abilityId)
 
@@ -228,20 +236,19 @@ function ritualOfTheSeas(int abilityId)
 
     let tooltip = new DynamicTooltip(abilityId)
     tooltip.setReplaceIntelligence(RITUAL_HP_DRAIN_BONUS, RITUAL_MANA_DRAIN_BONUS)
-    tooltip.setLearnString(CHANNELING_SPELL + "Sends out magical energy, that drains hit points and mana from nearby enemies.|nThe Sea Druid gets {0}% of the hit points and {1}% of the mana drained from enemy heroes.".format(
+    tooltip.setLearnString(CHANNELING_SPELL + "Sends out magical energy, that drains hit points and mana from nearby enemies and slows their movement speed.|nThe Sea Druid gets {0}% of the hit points and {1}% of the mana drained from enemy heroes.".format(
         RITUAL_HP_RATIO.str(), RITUAL_MANA_RATIO.str()), (int lvl) -> (begin
-        return "{0}{I0} damage, {1}{I1} mana, lasts for {2} waves.".format(
-            RITUAL_HP_DRAIN[lvl-1].str(), RITUAL_MANA_DRAIN[lvl-1].str(), RITUAL_WAVE_COUNT[lvl-1].str())
+        return "{0}{I0} damage, {1}{I1} mana, {2}% slow, lasts for {3} waves.".format(
+            RITUAL_HP_DRAIN[lvl-1].str(), RITUAL_MANA_DRAIN[lvl-1].str(), RITUAL_MOVEMENT_SLOW[lvl-1].str(), RITUAL_WAVE_COUNT[lvl-1].str())
     end) )
     
     for lvl = 1 to 5
-        tooltip.setNormalString(true, lvl, CHANNELING_SPELL + "Sends out magical energy, that drain {0}{I0} hit points and {1}{I1} mana from nearby enemies.|nLasts for {2} waves.|nThe Sea Druid gets {3}% of the hit points and {4}% of the mana drained from enemy heroes.".format(
-            RITUAL_HP_DRAIN[lvl-1].str(), RITUAL_MANA_DRAIN[lvl-1].str(), RITUAL_WAVE_COUNT[lvl-1].str(), RITUAL_HP_RATIO.str(), RITUAL_MANA_RATIO.str()))
+        tooltip.setNormalString(true, lvl, CHANNELING_SPELL + "Sends out magical energy, that drain {0}{I0} hit points and {1}{I1} mana from nearby enemies and slows their movement speed by {2}%.|nLasts for {3} waves.|nThe Sea Druid gets {4}% of the hit points and {4}% of the mana drained from enemy heroes.".format(
+            RITUAL_HP_DRAIN[lvl-1].str(), RITUAL_MANA_DRAIN[lvl-1].str(), RITUAL_WAVE_COUNT[lvl-1].str(), RITUAL_MOVEMENT_SLOW[lvl-1].str(),RITUAL_HP_RATIO.str(), RITUAL_MANA_RATIO.str()))
     addDynamicTooltipIntelligence(heroType, tooltip)
 
 function setupStats()
     heroType
-        
         ..setStat(Stat.AR, 32, 51)
         ..setStat(Stat.AS, 23, 32)
         ..setStat(Stat.HP, 14, 61)
@@ -339,10 +346,7 @@ class RitualOfTheSeas
             ..startPeriodic(0.1, function updateStatic)
 
     function update()
-        this.count++
-        if this.count == 20
-            this.count = 0
-
+        if this.count mod 20 == 0
             this.caster.addEffect("Models\\PsyWave.mdx", "origin").destr()
 
             let nearby = CreateGroup()
@@ -359,23 +363,27 @@ class RitualOfTheSeas
                     doAfter(target.getPos().distanceTo(caster.getPos())/1000 , () -> (begin
 
                         if target.isAlive() and target.wrapper() != null
-                            let manaDrained = min( target.getMana(), manaDrain.reduceMagic(target.getWp()))
-                            let hpDrained = min( target.getHP(), hpDrain.reduceMagic(target.getWp()))
+                            if this.count > 0
+                                let manaDrained = min( target.getMana(), manaDrain.reduceMagic(target.getWp()))
+                                let hpDrained = min( target.getHP(), hpDrain.reduceMagic(target.getWp()))
 
-                            if target.isType(UNIT_TYPE_HERO)
-                                caster.healMana(caster, manaDrained * RITUAL_MANA_RATIO/100 )
-                                caster.healHP(caster, hpDrained * RITUAL_HP_RATIO/100 )
+                                if target.isType(UNIT_TYPE_HERO)
+                                    caster.healMana(caster, manaDrained * RITUAL_MANA_RATIO/100 )
+                                    caster.healHP(caster, hpDrained * RITUAL_HP_RATIO/100 )
 
-                            caster.damageMana(target, manaDrain.reduceMagic(target.getWp()), ReductionType.NONE)
-                            caster.dealDamage(target, hpDrain, ReductionType.MAGIC)
+                                caster.damageMana(target, manaDrain.reduceMagic(target.getWp()), ReductionType.NONE)
+                                caster.dealDamage(target, hpDrain, ReductionType.MAGIC)
+
+                            target.addBuffReduced( caster, RITUAL_SLOW_DURATION, ritualBuff, level)
 
 
                     end))
                     
             nearby.destr()
-
+            this.count++
             return
 
+        this.count++
         if this.caster.getCurrentOrder()!= OrderId("tranquility")
             destroy this
             return
@@ -534,7 +542,7 @@ function initHeroType()
 
         buffFish = new BuffType(false, DispelLevel.DISPEL)
 
-        let abilityList = new LinkedList<int>
+        var abilityList = new LinkedList<int>
             ..add(FISH_ABILTIY_ID)
         buffFish.setup(abilityList, FISH_BUFF_ID)
 
@@ -558,6 +566,18 @@ function initHeroType()
             let caster = whichBuff.getCaster()
             if not caster.hasAbility(MANA_SHIELD_BUFF_ID)
                 whichBuff.dispel()
+        end))
+
+        ritualBuff = new BuffType(false, DispelLevel.DISPEL)
+        abilityList = new LinkedList<int>
+            ..add(RITUAL_SLOW_ABILITY_ID)
+        ritualBuff.setup(abilityList, RITUAL_SLOW_BUFF_ID)
+        ritualBuff.addFirstFunction((Buff thisBuff) -> (begin
+            thisBuff.getTarget().wrapper().addStatRelativeBonus(Stat.MS, -RITUAL_MOVEMENT_SLOW[thisBuff.getLevel()-1]*10)
+        end))
+
+        ritualBuff.addEndFunction((Buff thisBuff) -> (begin
+            thisBuff.getTarget().wrapper().addStatRelativeBonus(Stat.MS, RITUAL_MOVEMENT_SLOW[thisBuff.getLevel()-1]*10)
         end))
 
 function createHeroType(Hero hero)

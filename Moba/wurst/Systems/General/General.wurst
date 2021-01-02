@@ -125,6 +125,8 @@ public function real.reduce(int stat, real reduction) returns real
 
 public function unit.addBuff(unit caster, real duration, BuffType buffType, int level) returns Buff
     Buff ret = null
+    if (duration <= 0 and duration > -0.5) or duration > 600
+        Log.warn("addBuff add buff with unusual duration: " + duration.toString())
     if this.isAlive()
         execute() () ->
             new Buff(this, caster, duration, buffType, level)
@@ -137,6 +139,8 @@ public function unit.addBuffReduced(unit caster, real duration, BuffType buffTyp
     if this.hasItemById(ITEM_ID_ARCANE_SHIELD)
         realDuration = realDuration * 0.85
     Buff ret = null
+    if (realDuration <= 0 and realDuration > -0.5) or realDuration > 600
+        Log.warn("addBuffReduced add buff with unusual duration: " + realDuration.toString())
     if this.isAlive()
         execute() () ->
             new Buff(this, caster, realDuration, buffType, level)

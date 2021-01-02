@@ -16,7 +16,7 @@ constant team2AIs = new LinkedList<HeroAI>
 
 public constant real TEAM_FIGHT_RANGE = 1200
 constant real HALF_DISTANCE = 11200
-constant real UPDATE_INTERVAL = 0.25
+constant real UPDATE_INTERVAL = 0.4
 
 public enum AbilityTargetType
     INSTANT
@@ -710,11 +710,11 @@ public class HeroAI
     static function updateStatic()
         int i = 0
         for HeroAI ai in team1AIs
-            doAfter(i * 0.03, -> ai.update())
+            doAfter(i * 0.06, -> ai.update())
             i++
         i = 0
         for HeroAI ai in team2AIs
-            doAfter(i * 0.03, -> ai.update())
+            doAfter(i * 0.06 + 0.03, -> ai.update())
             i++
 
     function startTeamFight(TeamFight teamFight)
