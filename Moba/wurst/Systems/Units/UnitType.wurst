@@ -121,7 +121,7 @@ function onUnitDeath()
         // army unit dies
         if dyingTeam == TEAM_1 or dyingTeam == TEAM_2
             let bounty = dyingType.getBounty()
-            real xp = dyingType.getPowerLevel() * 15.0
+            real xp = dyingType.getPowerLevel() * 8.0
 
             let killerIsEnemy = killingUnit != null and PlayerWrapper.getTeam(killingId) == invertTeam(dyingTeam)
             int killerIsHero = 0
