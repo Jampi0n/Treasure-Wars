@@ -240,7 +240,7 @@ public class TeamFight
                 let allAIs = heroAIs.copy()
 
                 for HeroAI ai in allAIs
-                    ai.retreatTemporarily(25, true)
+                    ai.retreatTemporarily(12, true)
                     ai.endTeamFight()
             
                 destroy allAIs
@@ -251,7 +251,7 @@ public class TeamFight
                     if chance > 0.6
                         ai.changeState(AIState.ATTACK)
                     else
-                        ai.retreatTemporarily(25, true)
+                        ai.retreatTemporarily(12, true)
                     ai.endTeamFight()
             
                 destroy allAIs
@@ -432,9 +432,9 @@ public class HeroAI
 
             g.destr()
             if count < 5
-                this.retreatTemporarily(50, false)
+                this.retreatTemporarily(25, false)
             else
-                this.retreatTemporarily(15, false)
+                this.retreatTemporarily(7, false)
 
     static function classInit()
 
@@ -455,7 +455,7 @@ public class HeroAI
             if ai != null
                 let attacker = GetAttacker()
                 if (ai.state == AIState.ATTACK or ai.state == AIState.RETREAT_TEMP or ai.state == AIState.RETREAT_TEMP_AI or ai.state == AIState.TEAM_FIGHT)  and attacker.getTypeId() == HERO_TOWER
-                    ai.retreatTemporarily(50, false)
+                    ai.retreatTemporarily(25, false)
         end))
     
 
@@ -844,7 +844,7 @@ public class HeroAI
 
                 if this.damageSum > this.heroUnit.getMaxHP()*0.15
                     aiMessage("taking too much damage, retreat: "+damageSum.toString())
-                    this.retreatTemporarily(10, false)
+                    this.retreatTemporarily(5, false)
                 else
                     updateTargetLoc()  
 
@@ -886,7 +886,7 @@ public class HeroAI
                                                     ai.startTeamFight(newTeamFight)
                             return
                         if chance < 0.4
-                            this.retreatTemporarily(20, true)
+                            this.retreatTemporarily(10, true)
                             return
 
                     if not casting
