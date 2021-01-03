@@ -13,7 +13,7 @@ timer chooseModeTimer
 timer pickTimer
 timerdialog timerWindow
 trigger chooseModeTrigger
-trigger onPickTrigger
+trigger onPickTrigger = null
 trigger onClickButtonTrigger
 int clickedButtonId
 int array playerGoldArray
@@ -64,8 +64,6 @@ function setupCreatedHero(Hero hero)
             ai.togglePause()
             doAfter(GetRandomReal(48, 52), () -> (begin
                 ai.togglePause()
-                ai.buyItems()
-                ai.selectSkills()
             end))
         end))
 
@@ -77,6 +75,8 @@ function setupCreatedHero(Hero hero)
         ClearTextMessages()
     printTimedToPlayer("You can now open/close the shop by pressing escape.", 25, owner)
     //prevent using skills for first 5 seconds, as skills will be initialized
+    if(GetHeroSkillPoints(heroUnit) != 1)
+        error("hero has unexpexted number of skill points at setup: " + GetHeroSkillPoints(heroUnit).toString())
     UnitModifySkillPoints(heroUnit, -1)
     
     doAfter(5) ->
@@ -263,6 +263,7 @@ function allPickEnd()
     onPickTrigger
     ..clearActions()
     ..destr()   
+    onPickTrigger = null
 
     allHeroesPicked()
 
@@ -389,60 +390,34 @@ init
         CreateTrigger()
         ..registerPlayerChatEvent(players[0], "hero ", false)
         ..addAction() ->
-            let i = GetEventPlayerChatString().substring(5).toInt()
+            if onPickTrigger == null
+                let i = GetEventPlayerChatString().substring(5).toInt()
 
-            if i >= 0 and i<=MAX_HERO_COUNT-1 and not playerHasPicked[i]
+                if i >= 0 and i<=MAX_HERO_COUNT-1 and not playerHasPicked[i]
 
-                
-                PlayerWrapper.createPlayerWrapper(i, PlayerType.HERO)
-                createRandomHero(i, false)
+                    
+                    PlayerWrapper.createPlayerWrapper(i, PlayerType.HERO)
+                    createRandomHero(i, false)
 
 
-                if not itemCarry
-                    itemCarry = true
-                    let carry = createUnit(players[0], 'Hmkg', gg_rct_BrownAltar.getLeftBot(), angle(0))
-                    UnitAddType(carry, UNIT_TYPE_ANCIENT)
-                    carry.addBuff(carry, -1, DISARMED, 1)
+                    if not itemCarry
+                        itemCarry = true
+                        let carry = createUnit(players[0], 'Hmkg', gg_rct_BrownAltar.getLeftBot(), angle(0))
+                        UnitAddType(carry, UNIT_TYPE_ANCIENT)
+                        carry.addBuff(carry, -1, DISARMED, 1)
 
-                SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_VISION, true)
-                SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_CONTROL, true)
-                SetPlayerAlliance(players[0], players[i], ALLIANCE_SHARED_CONTROL, true)
-                SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_ADVANCED_CONTROL, true)
+                    SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_VISION, true)
+                    SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_CONTROL, true)
+                    SetPlayerAlliance(players[0], players[i], ALLIANCE_SHARED_CONTROL, true)
+                    SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_ADVANCED_CONTROL, true)
 
 
         CreateTrigger()
         ..registerPlayerChatEvent(players[0], "ai ", false)
         ..addAction() ->
-            let i = GetEventPlayerChatString().substring(3).toInt()
+            if onPickTrigger == null
+                let i = GetEventPlayerChatString().substring(3).toInt()
 
-            if i >= 0 and i<=MAX_HERO_COUNT-1 and not playerHasPicked[i]
-
-                
-
-                if i!= 0
-                    PlayerWrapper.createPlayerWrapper(i, PlayerType.HERO)
-
-                //Hero hero = new Hero(createUnit(players[i], 'H00H', gg_rct_CenterMid.getCenter(), angle(0)))
-                createRandomHeroForAI(i, false)
-                //setupCreatedHero(hero)
-
-                //removeHeroType(hero.getHeroType())
-
-                let ai = new HeroAI(i, AI_DIFFICULTY_NEWBIE)
-
-                doAfter(6) ->
-                    ai.buyItems()
-                    ai.selectSkills()
-
-                SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_VISION, true)
-                SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_CONTROL, true)
-                SetPlayerAlliance(players[0], players[i], ALLIANCE_SHARED_CONTROL, true)
-                SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_ADVANCED_CONTROL, true)
-
-        CreateTrigger()
-        ..registerPlayerChatEvent(players[0], "full2", false)
-        ..addAction() ->
-            for i = HERO_PLAYER_TEAM_2_FIRST to HERO_PLAYER_TEAM_2_LAST
                 if i >= 0 and i<=MAX_HERO_COUNT-1 and not playerHasPicked[i]
 
                     
@@ -450,26 +425,43 @@ init
                     if i!= 0
                         PlayerWrapper.createPlayerWrapper(i, PlayerType.HERO)
 
-                    //Hero hero = new Hero(createUnit(players[i], 'H00H', gg_rct_CenterMid.getCenter(), angle(0)))
                     createRandomHeroForAI(i, false)
-                    //setupCreatedHero(hero)
 
-                    //removeHeroType(hero.getHeroType())
-
-                    let ai = new HeroAI(i, AI_DIFFICULTY_INSANE)
-
-                    for Hero hero in PlayerWrapper.getPlayerHeroes(i)
-                        hero.toUnit().setLevel(25, false)
-
-                    doAfter(6) ->
-                        players[i].addGold(100000)
-                        ai.buyItems()
-                        ai.selectSkills()
+                    new HeroAI(i, AI_DIFFICULTY_NEWBIE)
 
                     SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_VISION, true)
                     SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_CONTROL, true)
                     SetPlayerAlliance(players[0], players[i], ALLIANCE_SHARED_CONTROL, true)
                     SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_ADVANCED_CONTROL, true)
+
+        CreateTrigger()
+        ..registerPlayerChatEvent(players[0], "full2", false)
+        ..addAction() ->
+            if onPickTrigger == null
+                for i = HERO_PLAYER_TEAM_2_FIRST to HERO_PLAYER_TEAM_2_LAST
+                    if i >= 0 and i<=MAX_HERO_COUNT-1 and not playerHasPicked[i]
+
+                        
+
+                        if i!= 0
+                            PlayerWrapper.createPlayerWrapper(i, PlayerType.HERO)
+
+                        createRandomHeroForAI(i, false)
+
+
+                        let ai = new HeroAI(i, AI_DIFFICULTY_INSANE)
+
+                        for Hero hero in PlayerWrapper.getPlayerHeroes(i)
+                            hero.toUnit().setLevel(25, false)
+
+                        doAfter(6) ->
+                            players[i].addGold(100000)
+                            ai.buyItems()
+
+                        SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_VISION, true)
+                        SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_CONTROL, true)
+                        SetPlayerAlliance(players[0], players[i], ALLIANCE_SHARED_CONTROL, true)
+                        SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_ADVANCED_CONTROL, true)
 
 
         CreateTrigger()
