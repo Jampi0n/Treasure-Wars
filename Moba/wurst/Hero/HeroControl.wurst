@@ -199,7 +199,7 @@ public class Hero
         this.tooltipUpdateTimer = getTimer()..setData(this castTo int)
 
 
-    construct(int playerId, int unitId, vec2 pos, angle facing )
+    construct(int playerId, int unitId, vec2 pos, angle facing)
         objectCount++
         this.owner = players[playerId]
         this.ownerId = playerId
@@ -274,10 +274,10 @@ public class Hero
         let damageSourceId = damageSource.getId()
         if damageSource != null
             if firstTeam
-                if PlayerWrapper.getTeam(damageSourceId) == TEAM_2
+                if HERO_PLAYER_TEAM_2_FIRST <= damageSourceId and damageSourceId <= HERO_PLAYER_TEAM_2_LAST
                     this.addAssistDuration(damageSource.getId())
             else
-                if PlayerWrapper.getTeam(damageSourceId) == TEAM_1
+                if HERO_PLAYER_TEAM_1_FIRST <= damageSourceId and damageSourceId <= HERO_PLAYER_TEAM_1_LAST
                     this.addAssistDuration(damageSource.getId())
 
     static function onDamageStatic()
@@ -365,7 +365,6 @@ public class Hero
                     assistList.add(assistantId)
                     assistListId += LIST_ID_POW_2[assistantId]
             assistString = assistStringListTeam2[assistListId]
-            
         else
             for assistantId in PlayerWrapper.getHeroTeam(true)
                 let time = this.assistMap.get(assistantId)
@@ -386,7 +385,6 @@ public class Hero
 
                 if assistants == 0
                     printTimed(PlayerWrapper.getFullColoredName(this.ownerId) + " was killed by " + PlayerWrapper.getFullColoredName(killingId) + " for |cffffcc00"+killBounty.toString()+"|r gold.", 10)
-
                 else
                     printTimed(PlayerWrapper.getFullColoredName(this.ownerId) + " was killed by " + PlayerWrapper.getFullColoredName(killingId) +
                     " for |cffffcc00" + killBounty.toString() + "|r gold. " + assistString + "|cffffcc00" + assistBounty.toString() +"|r gold for helping.", 10)
