@@ -198,6 +198,10 @@ public class Hero
 
         this.tooltipUpdateTimer = getTimer()..setData(this castTo int)
 
+        if PlayerWrapper.revealIcons
+            PlayerWrapper.revealIcon(this.ownerId)
+
+
 
     construct(int playerId, int unitId, vec2 pos, angle facing)
         objectCount++
