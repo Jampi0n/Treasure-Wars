@@ -73,9 +73,7 @@ function itemBloodSword()
 
     if not compiletime
         let bloodSwordBuff = new BuffType(false, DispelLevel.DISPEL)
-        let abilityList = new LinkedList<int>
-        ..add(BLOOD_SWORD_ABILTIY_ID)
-        bloodSwordBuff.setup(abilityList, BLOOD_SWORD_BUFF_ID)
+        bloodSwordBuff.setupBuffWithIcon(BLOOD_SWORD_BUFF_ID, BLOOD_SWORD_ABILTIY_ID)
         bloodSwordBuff.setPeriodicTime(1)
         bloodSwordBuff.addPeriodicFunction((Buff thisBuff)-> (begin
             let caster = thisBuff.getCaster()
@@ -217,9 +215,7 @@ function itemAxeOfDecay()
         end))
 
         let axeBuff = new BuffType(false, DispelLevel.DISPEL)
-        let abilityList = new LinkedList<int>
-            ..add(AXE_ABILTIY_ID)
-        axeBuff.setup(abilityList, AXE_BUFF_ID)
+        axeBuff.setupBuffWithIcon(AXE_BUFF_ID, AXE_ABILTIY_ID)
         axeBuff.addFirstFunction((Buff thisBuff) -> (begin
             thisBuff.getTarget().wrapper().addStatRelativeBonus(Stat.MS, -slow*10)
         end))
@@ -311,9 +307,7 @@ function itemMace()
 
     if not compiletime
         let maceBuff = new BuffType(false, DispelLevel.DISPEL)
-        let abilityList = new LinkedList<int>
-        ..add(MACE_ABILTIY_ID)
-        maceBuff.setup(abilityList, MACE_BUFF_ID)
+        maceBuff.setupBuffWithIcon(MACE_BUFF_ID, MACE_ABILTIY_ID)
         maceBuff.setPeriodicTime(1)
         maceBuff.addPeriodicFunction((Buff thisBuff)-> (begin
             thisBuff.getCaster().dealDamage(thisBuff.getTarget(), bleedDmg/bleedDuration, ReductionType.PHYSICAL)
@@ -344,9 +338,7 @@ function itemHammerOfMight()
 
     if not compiletime
         let hammerBuff = new BuffType(false, DispelLevel.DISPEL)
-        let abilityList = new LinkedList<int>
-        ..add(HAMMER_ABILTIY_ID)
-        hammerBuff.setup(abilityList, HAMMER_BUFF_ID)
+        hammerBuff.setupBuffWithIcon(HAMMER_BUFF_ID, HAMMER_ABILTIY_ID)
         hammerBuff.addFirstFunction((Buff thisBuff) -> (begin
             thisBuff.getTarget().wrapper().addStatRelativeBonus(Stat.AR, -armorDmg*10)
         end))
@@ -430,9 +422,7 @@ function itemArmorBreaker()
 
     if not compiletime
         let hammerBuff = new BuffType(false, DispelLevel.DISPEL)
-        let abilityList = new LinkedList<int>
-        ..add(ARMOR_BREAKER_ABILITY_ID)
-        hammerBuff.setup(abilityList, ARMOR_BREAKER_BUFF_ID)
+        hammerBuff.setupBuffWithIcon(ARMOR_BREAKER_BUFF_ID, ARMOR_BREAKER_ABILITY_ID)
         hammerBuff.addFirstFunction((Buff thisBuff) -> (begin
             thisBuff.getTarget().wrapper().addStatRelativeBonus(Stat.AR, -armorDmg*10)
         end))
@@ -465,9 +455,7 @@ function itemChillingBlade()
 
     if not compiletime
         let slowBuff = new BuffType(false, DispelLevel.DISPEL)
-        let abilityList = new LinkedList<int>
-        ..add(CHILLING_BLADE_ABILITY_ID)
-        slowBuff.setup(abilityList, CHILLING_BLADE_BUFF_ID)
+        slowBuff.setupBuffWithIcon(CHILLING_BLADE_BUFF_ID, CHILLING_BLADE_ABILITY_ID)
         slowBuff.addFirstFunction((Buff thisBuff) -> (begin
             let wrapper = thisBuff.getTarget().wrapper()
             wrapper.addStatRelativeBonus(Stat.MS, -slowAmount*10)

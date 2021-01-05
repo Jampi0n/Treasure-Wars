@@ -64,9 +64,7 @@ function itemWarDrum()
             auraHeroes.removeUnit(getTriggerUnit())
     end))
     if not compiletime
-        let abilityList = new LinkedList<int>
-        ..add(WAR_DRUM_ABILTIY_ID)
-        BUFF_WAR_DRUM.setup(abilityList, WAR_DRUM_BUFF_ID)
+        BUFF_WAR_DRUM.setupBuffWithIcon(WAR_DRUM_BUFF_ID, WAR_DRUM_ABILTIY_ID)
         BUFF_WAR_DRUM.addFirstFunction((Buff thisBuff) -> (begin
             thisBuff.getTarget().wrapper()
             ..addStatAbsoluteBonus(Stat.MS, msBonus)
@@ -109,9 +107,7 @@ function itemWarHorn()
     end))
 
     if not compiletime
-        let abilityList = new LinkedList<int>
-        ..add(WAR_HORN_ABILTIY_ID)
-        BUFF_WAR_HORN.setup(abilityList, WAR_HORN_BUFF_ID)
+        BUFF_WAR_HORN.setupBuffWithIcon(WAR_HORN_BUFF_ID, WAR_HORN_ABILTIY_ID)
         BUFF_WAR_HORN.addFirstFunction((Buff thisBuff) -> (begin
             let target = thisBuff.getTarget()
             target.wrapper().addStatRelativeBonus(Stat.STR, adBonus*10)

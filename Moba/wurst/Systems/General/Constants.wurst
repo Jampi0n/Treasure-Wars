@@ -22,7 +22,6 @@ public constant TEAM_NAME_TEAM_1 = "Green"
 public constant TEAM_NAME_TEAM_2 = "Brown"
 
 public constant int CREEP_NORMAL_OWNER = PLAYER_NEUTRAL_AGGRESSIVE
-public constant int CREEP_SPECIAL_OWNER = 23
 public constant int CREEP_ICON_OWNER = PLAYER_NEUTRAL_PASSIVE
 
 public constant MAX_HIT_BOX = 200.
@@ -51,9 +50,9 @@ public enum Lane
     BOT
 
 init
-    SetCreepCampFilterState( true )
+    SetCreepCampFilterState( false )
     SetAllyColorFilterState( 0 )
-    EnableMinimapFilterButtons( true, true )
+    EnableMinimapFilterButtons( true, false )
 
     if IS_REPLAY
         print("Enjoy watching your replay of Treasure Wars!")

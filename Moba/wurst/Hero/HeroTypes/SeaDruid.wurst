@@ -541,18 +541,13 @@ function initHeroType()
             ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
 
         buffFish = new BuffType(false, DispelLevel.DISPEL)
-
-        var abilityList = new LinkedList<int>
-            ..add(FISH_ABILTIY_ID)
-        buffFish.setup(abilityList, FISH_BUFF_ID)
-
+        buffFish.setupBuffWithIcon(FISH_BUFF_ID, FISH_ABILTIY_ID)
         buffFish.addFirstFunction( (Buff whichBuff) -> (begin
             let level = whichBuff.getLevel()
             whichBuff.getTarget().wrapper()
                 ..addStatAbsoluteBonus(Stat.AS, -FISH_ATTACK_SPEED[level - 1])
                 ..addStatRelativeBonus(Stat.MS, -FISH_MOVE_SPEED[level - 1]*10)
         end))
-
         buffFish.addEndFunction( (Buff whichBuff) -> (begin
             let level = whichBuff.getLevel()
             whichBuff.getTarget().wrapper()
@@ -569,9 +564,7 @@ function initHeroType()
         end))
 
         ritualBuff = new BuffType(false, DispelLevel.DISPEL)
-        abilityList = new LinkedList<int>
-            ..add(RITUAL_SLOW_ABILITY_ID)
-        ritualBuff.setup(abilityList, RITUAL_SLOW_BUFF_ID)
+        ritualBuff.setupBuffWithIcon(RITUAL_SLOW_BUFF_ID, RITUAL_SLOW_ABILITY_ID)
         ritualBuff.addFirstFunction((Buff thisBuff) -> (begin
             thisBuff.getTarget().wrapper().addStatRelativeBonus(Stat.MS, -RITUAL_MOVEMENT_SLOW[thisBuff.getLevel()-1]*10)
         end))

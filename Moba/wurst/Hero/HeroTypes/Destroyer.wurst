@@ -389,10 +389,8 @@ function initHeroType()
             ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
 
 
-        var abilityList = new LinkedList<int>
-        ..add(BREATH_ABILITY_ID)
         buffMeltingBreath = new BuffType(false, DispelLevel.DISPEL)
-        buffMeltingBreath.setup(abilityList, BREATH_BUFF_ID)
+        buffMeltingBreath.setupBuffWithIcon(BREATH_BUFF_ID, BREATH_ABILITY_ID)
 
         buffMeltingBreath.addFirstFunction( (Buff whichBuff) -> (begin
             whichBuff.getTarget().wrapper().addStatRelativeBonus(Stat.AR, -BREATH_ARMOR_REDUCTION[whichBuff.getLevel()-1] * 10)
@@ -402,10 +400,8 @@ function initHeroType()
             whichBuff.getTarget().wrapper().addStatRelativeBonus(Stat.AR, BREATH_ARMOR_REDUCTION[whichBuff.getLevel()-1] * 10)
         end))
 
-        abilityList = new LinkedList<int>
-        ..add(PREY_TARGET_ABILITY_ID)
         buffPreyTarget = new BuffType(false, DispelLevel.DISPEL)
-        buffPreyTarget.setup(abilityList, PREY_TARGET_BUFF_ID)
+        buffPreyTarget.setupBuffWithIcon(PREY_TARGET_BUFF_ID, PREY_TARGET_ABILITY_ID)
         buffPreyTarget.setPeriodicTime(0.2)
 
         buffPreyTarget.addPeriodicFunction( (Buff whichBuff) -> (begin
@@ -462,15 +458,11 @@ function initHeroType()
                 casterBuff.dispel()
         end))
 
-        abilityList = new LinkedList<int>
-        ..add(PREY_CASTER_ABILITY_ID)
         buffPreyCaster = new BuffType(true, DispelLevel.NONE)
-        buffPreyCaster.setup(abilityList, PREY_CASTER_BUFF_ID)
+        buffPreyCaster.setupBuffWithIcon(PREY_CASTER_BUFF_ID, PREY_CASTER_ABILITY_ID)
 
-        abilityList = new LinkedList<int>
-        ..add(PREY_SLOW_ABILITY_ID)
         buffPreySlow = new BuffType(true, DispelLevel.DISPEL)
-        buffPreySlow.setup(abilityList, PREY_SLOW_BUFF_ID)
+        buffPreySlow.setupBuffWithIcon(PREY_SLOW_BUFF_ID, PREY_SLOW_ABILITY_ID)
 
         buffPreySlow.addFirstFunction( (Buff whichBuff) -> (begin
             whichBuff.getTarget().wrapper().addStatRelativeBonus(Stat.MS, -PREY_SLOW * 10)

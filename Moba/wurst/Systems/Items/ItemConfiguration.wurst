@@ -182,6 +182,7 @@ public function setAbilities(vararg int ids)
         currentItemDefinition.setAbilities(result)
         setCooldownGroup(result.substring(0, 4))
         currentItemDefinition.setActivelyUsed(true)
+        destroy list
 
 public function setCooldownGroup(int id)
     if compiletime

@@ -69,37 +69,14 @@ constant REVENANT_SLOW_ABILITY_ID = compiletime(createPositiveBuffAbility(1, REV
 
 
 function initCreepBuffs()
-    var abilityList = new LinkedList<int>
-    abilityList.add(TURTLE_ABILITY_ID)
-    TURTLE_BUFF.setup(abilityList, TURTLE_BUFF_ID)
-
-    abilityList = new LinkedList<int>
-    abilityList.add(JUNGLE_STALKER_ABILITY_ID)
-    JUNGLE_STALKER_BUFF.setup(abilityList, JUNGLE_STALKER_BUFF_ID)
-
-    abilityList = new LinkedList<int>
-    abilityList.add(MURGUL_ABILITY_ID)
-    MURGUL_BUFF.setup(abilityList, MURGUL_BUFF_ID)
-
-    abilityList = new LinkedList<int>
-    abilityList.add(SEA_GIANT_ABILITY_ID)
-    SEA_GIANT_BUFF.setup(abilityList, SEA_GIANT_BUFF_ID)
-
-    abilityList = new LinkedList<int>
-    abilityList.add(MAKRURA_ABILITY_ID)
-    MAKRURA_BUFF.setup(abilityList, MAKRURA_BUFF_ID)
-
-    abilityList = new LinkedList<int>
-    abilityList.add(SEA_ELEMENTAL_ABILITY_ID)
-    SEA_ELEMENTAL_BUFF.setup(abilityList, SEA_ELEMENTAL_BUFF_ID)
-
-    abilityList = new LinkedList<int>
-    abilityList.add(REVENANT_ABILITY_ID)
-    REVENANT_BUFF.setup(abilityList, REVENANT_BUFF_ID)
-
-    abilityList = new LinkedList<int>
-    abilityList.add(REVENANT_SLOW_ABILITY_ID)
-    REVENANT_SLOW_BUFF.setup(abilityList, REVENANT_SLOW_BUFF_ID)
+    TURTLE_BUFF.setupBuffWithIcon(TURTLE_BUFF_ID, TURTLE_ABILITY_ID)
+    JUNGLE_STALKER_BUFF.setupBuffWithIcon(JUNGLE_STALKER_BUFF_ID, JUNGLE_STALKER_ABILITY_ID)
+    MURGUL_BUFF.setupBuffWithIcon(MURGUL_BUFF_ID, MURGUL_ABILITY_ID)
+    SEA_GIANT_BUFF.setupBuffWithIcon(SEA_GIANT_BUFF_ID, SEA_GIANT_ABILITY_ID)
+    MAKRURA_BUFF.setupBuffWithIcon(MAKRURA_BUFF_ID, MAKRURA_ABILITY_ID)
+    SEA_ELEMENTAL_BUFF.setupBuffWithIcon(SEA_ELEMENTAL_BUFF_ID, SEA_ELEMENTAL_ABILITY_ID)
+    REVENANT_BUFF.setupBuffWithIcon(REVENANT_BUFF_ID, REVENANT_ABILITY_ID)
+    REVENANT_SLOW_BUFF.setupBuffWithIcon(REVENANT_SLOW_BUFF_ID, REVENANT_SLOW_ABILITY_ID)
 
     JUNGLE_STALKER_BUFF.setPeriodicTime(0.25)
     JUNGLE_STALKER_BUFF.addPeriodicFunction((Buff whichBuff) -> begin
@@ -224,7 +201,8 @@ public class CreepCamp
     private int totalLevel
     private real respawnDuration = 10
     private int campLevel = 0
-    private boolean usesIcon = false
+    private boolean revenant = false
+    private boolean boss = false
     private unit iconUnit = null
     private vec2 campPosition //this is the center of the creep camp
 
@@ -238,15 +216,20 @@ public class CreepCamp
         var pos = vec2(0,0)
         for c in creepTypes
             if c.unitTypeId == REVENANT_BOSS
-                usesIcon = true
+                revenant = true
         for c in creepTypes
             pos+=c.spawnPos
+        if creepTypes.size() == 1
+            boss = true
 
 
         campPosition = pos * (1.0/creepTypes.size())
-
-        if usesIcon
-            iconUnit = CreateUnit(players[CREEP_ICON_OWNER], REVENANT_ICON, campPosition.x, campPosition.y, 0)
+        
+        if not boss
+            if revenant
+                iconUnit = CreateUnit(players[CREEP_ICON_OWNER], REVENANT_ICON, campPosition.x, campPosition.y, 0)
+            else
+                iconUnit = CreateUnit(players[CREEP_ICON_OWNER], STANDARD_ICON, campPosition.x, campPosition.y, 0)
             
     function getCampPosition() returns vec2
         return this.campPosition
@@ -277,8 +260,8 @@ public class CreepCamp
         if campLevel < MAX_CAMP_LEVEL
             campLevel++
 
-        let owner = usesIcon ? players[CREEP_SPECIAL_OWNER] : players[CREEP_NORMAL_OWNER]
-
+        //let owner = usesIcon ? players[CREEP_SPECIAL_OWNER] : players[CREEP_NORMAL_OWNER]
+        let owner = players[CREEP_NORMAL_OWNER]
         for c in creepTypes
             let creepUnit = createUnit(owner, c.unitTypeId, c.spawnPos, c.facing)
             addUnitRespawn(creepUnit)
@@ -287,7 +270,7 @@ public class CreepCamp
             if buffConfig != null and buffConfig.customBuff != null
                 creepUnit.addBuff(creepUnit, -1, buffConfig.customBuff, 1)
 
-        if usesIcon
+        if iconUnit != null
             iconUnit.show()
 
 
@@ -310,7 +293,9 @@ public class CreepCamp
         killer.healHP(killer, killer.getMaxHP()*0.05)
         killer.healMana(killer, killer.getMaxMana()*0.05)
 
-        Hero.getHero(killer).addXp(u.getLevel()*4.)
+        let uType = UnitType.getUnitType(u.getTypeId())
+        if uType != null
+            Hero.getHero(killer).addXp(uType.getPowerLevel()*8.)
     
 
     private static function onDeath()
@@ -322,7 +307,7 @@ public class CreepCamp
                 allCreeps.removeUnit(u)
                 camp.alive--
                 if camp.alive == 0
-                    if camp.usesIcon
+                    if camp.iconUnit != null
                         camp.iconUnit.hide()
                     doAfter(camp.respawnDuration, -> camp.respawn())
 
@@ -373,16 +358,6 @@ public class CreepCamp
             if u == null
                 break
             ENUM_GROUP.removeUnit(u)
-            let initializedCamp = initCreep(u, null)
-            if initializedCamp != null
-                initializedCamp.initCampPosition()
-
-        GroupEnumUnitsOfPlayer(ENUM_GROUP, players[CREEP_SPECIAL_OWNER], null)
-        while true
-            u = FirstOfGroup(ENUM_GROUP)
-            if u == null
-                break
-            ENUM_GROUP.removeUnit(u)
             if u.getTypeId() != HYDRA and u.getTypeId() != DRAGON_TURTLE
                 let initializedCamp = initCreep(u, null)
                 if initializedCamp != null
@@ -390,7 +365,6 @@ public class CreepCamp
 
         CreateTrigger()
         ..registerPlayerUnitEvent(players[CREEP_NORMAL_OWNER], EVENT_PLAYER_UNIT_DEATH, null)
-        ..registerPlayerUnitEvent(players[CREEP_SPECIAL_OWNER], EVENT_PLAYER_UNIT_DEATH, null)
         ..addAction(function onDeath)
 
         addOnDamageFunc(Condition(function onDamage))

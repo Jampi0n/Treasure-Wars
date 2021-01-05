@@ -462,13 +462,9 @@ function initHeroType()
             ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
 
 
-        var abilityList = new LinkedList<int>
-            ..add(ABILITY_HOLY_SHIELD_BUFF)
-        BUFF_HOLY_SHIELD.setup(abilityList, BUFF_ID_HOLY_SHIELD)
+        BUFF_HOLY_SHIELD.setupBuffWithIcon(BUFF_ID_HOLY_SHIELD, ABILITY_HOLY_SHIELD_BUFF)
         
-        abilityList = new LinkedList<int>
-            ..add(ABILITY_BATTLE_ROAR_BUFF)
-        BATTLE_ROAR.setup(abilityList, BUFF_ID_BATTLE_ROAR)
+        BATTLE_ROAR.setupBuffWithIcon(BUFF_ID_BATTLE_ROAR, ABILITY_BATTLE_ROAR_BUFF)
         BATTLE_ROAR.addFirstFunction( (Buff thisBuff) -> (begin
             thisBuff.getTarget().wrapper()
                 ..addStatRelativeBonus( Stat.MS, BATTLE_ROAR_MS[thisBuff.getLevel()-1]*10 )

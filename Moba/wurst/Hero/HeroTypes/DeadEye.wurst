@@ -446,9 +446,7 @@ function initHeroType()
             skeletons.removeUnit(getEnterLeaveUnit())
         end))
 
-        let abilityList = new LinkedList<int>
-        ..add(TERROR_ABILITY_ID)
-        BUFF_TERROR.setup(abilityList, TERROR_BUFF_ID)
+        BUFF_TERROR.setupBuffWithIcon(TERROR_BUFF_ID, TERROR_ABILITY_ID)
 
         addOnDamageFunc( Condition (function onDamage))
     

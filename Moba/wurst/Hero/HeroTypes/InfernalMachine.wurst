@@ -518,9 +518,7 @@ function initHeroType()
 
         buffBash = new BuffType(true, DispelLevel.DISPEL)
 
-        var abilityList = new LinkedList<int>
-            ..add(BASH_ABILITY_ID)
-        buffBash.setup(abilityList, BASH_BUFF_ID)
+        buffBash.setupBuffWithIcon(BASH_BUFF_ID, BASH_ABILITY_ID)
         buffBash.addFirstFunction((Buff whichBuff) -> (begin
             whichBuff.getTarget().wrapper().addStatAbsoluteBonus(Stat.MS, BASH_MOVEMENT_SPEED[whichBuff.getLevel()-1])
         end))
@@ -528,17 +526,13 @@ function initHeroType()
             whichBuff.getTarget().wrapper().addStatAbsoluteBonus(Stat.MS, -BASH_MOVEMENT_SPEED[whichBuff.getLevel()-1])
         end))
 
-
         buffInnerFire = new BuffType(true, DispelLevel.DISPEL)
-        abilityList = new LinkedList<int>
-            ..add(INNER_FIRE_ABILITY_ID)
-        buffInnerFire.setup(abilityList, INNER_FIRE_BUFF_ID)
+        buffInnerFire.setupBuffWithIcon(INNER_FIRE_BUFF_ID, INNER_FIRE_ABILITY_ID)
         buffInnerFire.addFirstFunction((Buff whichBuff) -> (begin
             let level = whichBuff.getLevel()
             let wrapper = whichBuff.getTarget().wrapper()
             let intel = whichBuff.getCaster().getInt()
             whichBuff.setData(intel)
-
             wrapper.addStatRelativeBonus(Stat.STR, 10 * INNER_FIRE_DMG[level-1].bonus(intel, INNER_FIRE_DMG_BONUS).toInt() )
             wrapper.addStatAbsoluteBonus(Stat.AR, INNER_FIRE_DEF[level-1].bonus(intel, INNER_FIRE_DEF_BONUS).toInt() )
             wrapper.addStatAbsoluteBonus(Stat.AGI, INNER_FIRE_DEF[level-1].bonus(intel, INNER_FIRE_DEF_BONUS).toInt() )
@@ -547,7 +541,6 @@ function initHeroType()
             let level = whichBuff.getLevel()
             let wrapper = whichBuff.getTarget().wrapper()
             let intel = whichBuff.getData()
-
             wrapper.addStatRelativeBonus(Stat.STR, -10 * INNER_FIRE_DMG[level-1].bonus(intel, INNER_FIRE_DMG_BONUS).toInt() )
             wrapper.addStatAbsoluteBonus(Stat.AR, -INNER_FIRE_DEF[level-1].bonus(intel, INNER_FIRE_DEF_BONUS).toInt() )
             wrapper.addStatAbsoluteBonus(Stat.AGI, -INNER_FIRE_DEF[level-1].bonus(intel, INNER_FIRE_DEF_BONUS).toInt() )
@@ -555,11 +548,7 @@ function initHeroType()
 
 
         buffFlameThrower = new BuffType(false, DispelLevel.DISPEL)
-
-        abilityList = new LinkedList<int>
-            ..add(FLAME_THROWER_ABILTIY_ID)
-        buffFlameThrower.setup(abilityList, FLAME_THROWER_BUFF_ID)
-
+        buffFlameThrower.setupBuffWithIcon(FLAME_THROWER_BUFF_ID, FLAME_THROWER_ABILTIY_ID)
         buffFlameThrower.setPeriodicTime(0.25)
         buffFlameThrower.addPeriodicFunction((Buff whichBuff) -> (begin
             let caster = whichBuff.getCaster()
