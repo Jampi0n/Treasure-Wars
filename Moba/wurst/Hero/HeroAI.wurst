@@ -550,87 +550,6 @@ public class HeroAI
                 this.heroUnit.issueImmediateOrder("stop")
                 casting = false
                 attacking = false
-            //this.casting = false
-            //this.attacking = false
-
-
-    /*function buySpecificItem(Item whichItem) returns boolean
-        //print("---buy specific item "+GetObjectName(whichItem.getTypeId()))
-        boolean ret = false
-        let recipe = whichItem.getRecipe()
-        let owningPlayer = this.getOwningPlayer()
-
-        if owningPlayer.getGold() >= 400
-
-            var missingGold = 0
-            var hasOne = false
-            if recipe != null
-                let requiredRequirements = new LinkedList<Item>
-                for int req in recipe.getRequiredItems()
-                    let required = Item.getItem(req)
-                    if not this.heroUnit.hasItemById(required.getTypeId())
-                        missingGold += required.getGoldCost()
-                        //if the required item is an recipe itself, there could already be items from its requirements
-                        let requiredRecipe = required.getRecipe()
-                        if requiredRecipe != null
-                            for int req2 in requiredRecipe.getRequiredItems()
-                                let required2 = Item.getItem(req2)
-
-                                //some items require one item several times
-                                if this.heroUnit.hasItemById(required2.getTypeId())
-
-                                    if requiredRequirements.has(required2) or recipe.getRequiredItems().has(required2.getId()) //already in list
-                                        if this.heroUnit.countItemsOfType(required2.getTypeId()) > 1
-                                            missingGold -= required2.getGoldCost()
-                                            requiredRequirements.add(required2)
-                                            hasOne = true
-                                    else
-                                        missingGold -= required2.getGoldCost()
-                                        requiredRequirements.add(required2)
-                                        hasOne = true
-
-                    else
-                        hasOne = true
-                    
-
-                //buy directly
-                //print("missing: "+missingGold.toString())
-                if owningPlayer.getGold() >= recipe.getGoldCost() + missingGold
-                    //print("try buying recipe directly")
-                    if hasOne or not this.heroUnit.isInventoryFull()
-                        for int req in recipe.getRequiredItems()
-                            let required = Item.getItem(req)
-                            GetItemOfTypeFromUnitBJ(this.heroUnit, required.getTypeId()).remove()
-
-                        for itm in requiredRequirements
-                            GetItemOfTypeFromUnitBJ(this.heroUnit, itm.getTypeId()).remove()
-
-
-                        owningPlayer.addGold(- recipe.getGoldCost() - missingGold)
-                        this.heroUnit.addItemById(recipe.getResultItem().getTypeId())
-                        ret = true
-                else
-                    //print("try buying requirements")
-                    int i = 0
-                    for int req in recipe.getRequiredItems()
-                        let required = Item.getItem(req)
-                        if not this.heroUnit.hasItemById(required.getTypeId())
-                            doAfter(i * 0.05) ->
-                                this.buySpecificItem(required)
-                            
-                            i++
-
-                destroy requiredRequirements
-            else
-                //buy directly
-                if owningPlayer.getGold() >= whichItem.getGoldCost()
-                    //print("try buying basic item directly")
-                    if not this.heroUnit.isInventoryFull()
-                        owningPlayer.addGold(- whichItem.getGoldCost())
-                        this.heroUnit.addItemById(whichItem.getTypeId())
-                        ret = true
-
-        return ret*/
 
     function buyItems()
         if hasAllItems
@@ -647,21 +566,6 @@ public class HeroAI
                     if i == RecommendedItems.getCount(unitTypeId) - 1
                         hasAllItems = true
         
-
-        /*int numberOfFinishedItems = 0
-        for i = 0 to 5
-            Item itm = itemBuild.get(i).getItem()
-            if not this.heroUnit.hasItemById(itm.getTypeId())
-                if this.getOwningPlayer().getGold() >= 400
-                    if not buySpecificItem(itm)
-                        break
-            else
-                numberOfFinishedItems++
-
-        if numberOfFinishedItems == 6 //buy all upgrades, once all items have been bought
-            this.hasAllItems = true
-            if not this.noMoreUpgrades
-                this.wantedUpgrades = 100*/
 
 
 
@@ -687,7 +591,10 @@ public class HeroAI
         while true
             skillPoints = GetHeroSkillPoints(this.heroUnit)
             if skillPoints <= 0
-                return
+                if this.heroUnit.getLevel() == HERO_MAX_LEVEL
+                    return
+                else
+                    break
 
             selectSingleSkill(this.skillBuild.charAt(0))
 
@@ -697,7 +604,10 @@ public class HeroAI
             else
                 //hero could not learn skill
                 error("Unable to learn skill "+this.skillBuild.charAt(0)+" for hero "+this.heroUnit.getName())
-                return
+                break
+        doAfter(GetRandomReal(30, 40)) -> 
+            this.selectSkills()
+            
             
 
             
