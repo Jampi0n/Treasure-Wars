@@ -51,12 +51,12 @@ function passive(int abilityId)
 constant int BEETLE_BITE = 'A00N'
 constant int VENOMOUS_BEETLE = 'u002'
 
-constant real array BITE_DAMAGE = [100, 140, 180, 220, 260]
+constant real array BITE_DAMAGE = [110, 150, 190, 230, 270]
 constant real BITE_DAMAGEL_BONUS = 150
 
 constant int BITE_SLOW = 200
-constant real array BITE_SLOW_DURATION = [1, 1.4, 1.8, 2.2, 2.6]
-constant real BITE_SLOW_DURATION_BONUS = 0.8
+constant real array BITE_SLOW_DURATION = [1.4, 1.8, 2.2, 2.6, 3.0]
+constant real BITE_SLOW_DURATION_BONUS = 0.9
 
 BuffType buffBite
 constant BITE_BUFF_ID = compiletime(createAuraBuff("Venomous Beetle", "This unit was bitten by a Venomous Beetle; it is slowed.", Icons.bTNCarrionScarabs))

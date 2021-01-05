@@ -56,7 +56,7 @@ function passive(int abilityId)
     addDynamicTooltipStrength(heroType, tooltip)
 
 constant real array PULL_DAMAGE = [50, 100, 150, 200, 250]
-constant real PULL_DAMAGE_BONUS = 80
+constant real PULL_DAMAGE_BONUS = 90
 
 constant int PULL_BUFF_ID = compiletime(createAuraBuff("Pull", "This unit is being pulled.", "BTNTitansGrip"))
 constant int PULL_ABILITY_ID = compiletime(createPositiveBuffAbility(5, PULL_BUFF_ID, "", ""))
@@ -98,11 +98,11 @@ function pull(int abilityId)
     setAnimationSpeed(abilityId, 1.33)
 
 constant real array SPIKE_BALL_DMG = [60, 100, 140, 180, 220]
-constant real SPIKE_BALL_DMG_BONUS = 120
+constant real SPIKE_BALL_DMG_BONUS = 90
 constant real array SPIKE_BALL_STUN = [1.4, 1.8, 2.2, 2.6, 3]
 constant real array SPIKE_BALL_DOT_DURATION = [4, 4, 4, 4, 4]
 constant real array SPIKE_BALL_DOT_DMG = [40, 70, 100, 130, 160]
-constant real SPIKE_BALL_DOT_DMG_BONUS = 90
+constant real SPIKE_BALL_DOT_DMG_BONUS = 60
 
 BuffType buffSpikeBall
 
@@ -197,7 +197,7 @@ function speedBoost(int abilityId)
 
 constant int ROCKET_BUFF_ID = compiletime(createDummyBuff())
 constant real array ROCKET_DMG = [180, 240, 300, 360, 420]
-constant real ROCKET_DMG_BONUS = 125
+constant real ROCKET_DMG_BONUS = 110
 constant ROCKET_RANGE = [2000., 3000., 4000., 5000., 6000.]
 
 function rocket(int abilityId)

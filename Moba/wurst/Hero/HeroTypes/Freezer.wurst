@@ -634,7 +634,10 @@ function initHeroType()
         ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
         ..addAction() ->
             if GetTriggerUnit().getTypeId() == FROST_WYRM
-                SUMMON_MAP.remove(GetTriggerUnit())
+                let u = GetTriggerUnit()
+                let caster = SUMMON_MAP.get(u)
+                SUMMON_MAP.remove(caster)
+                SUMMON_MAP.remove(u)
 
    
 

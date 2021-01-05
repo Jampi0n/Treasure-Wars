@@ -131,8 +131,8 @@ function blink(int abilityId)
         tooltip.setNormalString(true, lvl, "Teleports the Troll Berserker a short distance.")
     addDynamicTooltipStrength(heroType, tooltip)
 
-constant int array SWITCH_DMG = [5, 10, 15, 20, 25]
-constant int array SWITCH_MOVE_SPEED = [10, 15, 20, 25, 30]
+constant int array SWITCH_DMG = [12, 16, 22, 30, 40]
+constant int array SWITCH_MOVE_SPEED = [20, 25, 30, 35, 40]
 
 constant real SWITCH_DURATION = 1.67
 
@@ -174,7 +174,7 @@ function switchWeapons(int abilityId)
 
 constant real array GROWTH_HP =[300, 350, 400, 450, 500]
 constant real GROWTH_HP_BONUS = 400
-constant int array GROWTH_HP_REGEN = [8, 12, 16, 20, 24]
+constant int array GROWTH_HP_REGEN = [16, 22, 28, 34, 40]
 
 constant real array GROWTH_DURATION = [15, 15, 15, 15, 15]
 
