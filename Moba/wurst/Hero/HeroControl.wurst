@@ -402,10 +402,9 @@ public class Hero
                     PlayerWrapper.addHeroKill(killingId, killingId <= HERO_PLAYER_TEAM_2_LAST)
                 
                     let xp = (this.level + 5) * 10.
-                    for p in PlayerWrapper.getHeroTeam(not this.firstTeam)
-                        PlayerWrapper.addXp(p, xp)
-
+                    PlayerWrapper.rewardXp(not this.firstTeam, this.hero.getPos(), xp)
                     destroy assistList
+                    
             else
                 printTimed(PlayerWrapper.getFullColoredName(this.ownerId) + " was killed by " + killingPlayer.getName() + ".", 10)
 
