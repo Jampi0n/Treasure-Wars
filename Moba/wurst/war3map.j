@@ -529,9 +529,8 @@ function Trig_Init_Actions takes nothing returns nothing
     call CreateFogModifierRectBJ(true, Player(11), FOG_OF_WAR_VISIBLE, gg_rct_BrownBaseVision1)
     call CreateFogModifierRectBJ(true, Player(11), FOG_OF_WAR_VISIBLE, gg_rct_BrownBaseVision2)
     call SetPlayerFlagBJ(PLAYER_STATE_GIVES_BOUNTY, false, Player(PLAYER_NEUTRAL_AGGRESSIVE))
-    call SetPlayerColorBJ(Player(10), PLAYER_COLOR_EMERALD, true)
+    call SetPlayerColorBJ(Player(10), PLAYER_COLOR_AQUA, true)
     call SetPlayerColorBJ(Player(11), PLAYER_COLOR_BROWN, true)
-    call SetPlayerColorBJ(Player(23), ConvertPlayerColor(24), true)
 endfunction
 
 //===========================================================================
@@ -875,8 +874,9 @@ endfunction
 
 //===========================================================================
 function main takes nothing returns nothing
-    call SetCameraBounds(- 7808.0 + GetCameraMargin(CAMERA_MARGIN_LEFT), - 7808.0 + GetCameraMargin(CAMERA_MARGIN_BOTTOM), 11904.0 - GetCameraMargin(CAMERA_MARGIN_RIGHT), 11904.0 - GetCameraMargin(CAMERA_MARGIN_TOP), - 7808.0 + GetCameraMargin(CAMERA_MARGIN_LEFT), 11904.0 - GetCameraMargin(CAMERA_MARGIN_TOP), 11904.0 - GetCameraMargin(CAMERA_MARGIN_RIGHT), - 7808.0 + GetCameraMargin(CAMERA_MARGIN_BOTTOM))
+    call SetCameraBounds(- 6144.0 + GetCameraMargin(CAMERA_MARGIN_LEFT), - 6144.0 + GetCameraMargin(CAMERA_MARGIN_BOTTOM), 10240.0 - GetCameraMargin(CAMERA_MARGIN_RIGHT), 10240.0 - GetCameraMargin(CAMERA_MARGIN_TOP), - 6144.0 + GetCameraMargin(CAMERA_MARGIN_LEFT), 10240.0 - GetCameraMargin(CAMERA_MARGIN_TOP), 10240.0 - GetCameraMargin(CAMERA_MARGIN_RIGHT), - 6144.0 + GetCameraMargin(CAMERA_MARGIN_BOTTOM))
     call SetDayNightModels("Environment\\DNC\\DNCLordaeron\\DNCLordaeronTerrain\\DNCLordaeronTerrain.mdl", "Environment\\DNC\\DNCLordaeron\\DNCLordaeronUnit\\DNCLordaeronUnit.mdl")
+    call SetTerrainFogEx(0, 3000.0, 8000.0, 0.500, 0.588, 0.686, 0.078)
     call NewSoundEnvironment("Default")
     call SetAmbientDaySound("SunkenRuinsDay")
     call SetAmbientNightSound("SunkenRuinsNight")

@@ -36,31 +36,31 @@ constant BuffType SEA_ELEMENTAL_BUFF = new BuffType(true, DispelLevel.NONE) //ma
 constant BuffType REVENANT_BUFF = new BuffType(true, DispelLevel.NONE) //dealing damage slows
 public constant BuffType REVENANT_SLOW_BUFF = new BuffType(false, DispelLevel.NONE) //dealing damage slows
 
-constant TURTLE_RETURN_RATIO = 15
+constant TURTLE_RETURN_RATIO = 25
 public constant TURTLE_BUFF_ID = compiletime(createAuraBuff("Turtle Shell", "Returns "+TURTLE_RETURN_RATIO.toString()+"% of the damage the unit takes from attacks to the attacker.", Icons.bTNSeaTurtleGreen))
 constant TURTLE_ABILITY_ID = compiletime(createPositiveBuffAbility(1, TURTLE_BUFF_ID, "", ""))
 
-constant JUNGLE_STALKER_HP_REG = 10
+constant JUNGLE_STALKER_HP_REG = 20
 constant JUNGLE_STALKER_BUFF_ID = compiletime(createAuraBuff("Jungle Blood", "Heals "+JUNGLE_STALKER_HP_REG.toString()+" hit points per second.", Icons.bTNJungleBeast))
 constant JUNGLE_STALKER_ABILITY_ID = compiletime(createPositiveBuffAbility(1, JUNGLE_STALKER_BUFF_ID, "", ""))
 
-constant MURGUL_AS = 20
+constant MURGUL_AS = 30
 constant MURGUL_BUFF_ID = compiletime(createAuraBuff("Mur'gul Frenzy", "Increases attack speed by "+MURGUL_AS.toString()+"%.", Icons.bTNMurgulShadowCaster))
 constant MURGUL_ABILITY_ID = compiletime(createPositiveBuffAbility(1, MURGUL_BUFF_ID, "", ""))
 
-constant SEA_GIANT_STR = 10
+constant SEA_GIANT_STR = 20
 constant SEA_GIANT_BUFF_ID = compiletime(createAuraBuff("Giant Strength", "Increases strength by "+SEA_GIANT_STR.toString()+"%.", Icons.bTNSeaGiantGreen))
 constant SEA_GIANT_ABILITY_ID = compiletime(createPositiveBuffAbility(1, SEA_GIANT_BUFF_ID, "", ""))
 
-constant MAKRURA_AR = 25
+constant MAKRURA_AR = 40
 constant MAKRURA_BUFF_ID = compiletime(createAuraBuff("Makrura Carapace", "Increases armor by "+MAKRURA_AR.toString()+".", Icons.bTNLobstrokkGreen))
 constant MAKRURA_ABILITY_ID = compiletime(createPositiveBuffAbility(1, MAKRURA_BUFF_ID, "", ""))
 
-constant SEA_ELEMENTAL_MP_REG = 2
+constant SEA_ELEMENTAL_MP_REG = 3
 constant SEA_ELEMENTAL_BUFF_ID = compiletime(createAuraBuff("Liquid Energy", "Restores "+SEA_ELEMENTAL_MP_REG.toString()+" mana points per second.", Icons.bTNSeaElemental))
 constant SEA_ELEMENTAL_ABILITY_ID = compiletime(createPositiveBuffAbility(1, SEA_ELEMENTAL_BUFF_ID, "", ""))
 
-constant REVENANT_SLOW = 25
+constant REVENANT_SLOW = 30
 public constant REVENANT_BUFF_ID = compiletime(createAuraBuff("Death Curse", "Slows movement speed of all targets damaged by this unit by "+REVENANT_SLOW.toString()+"%.", Icons.bTNDeepLordRevenant))
 constant REVENANT_ABILITY_ID = compiletime(createPositiveBuffAbility(1, REVENANT_BUFF_ID, Abilities.unholyAura, "origin"))
 
@@ -119,33 +119,33 @@ function initCreepBuffs()
     end)
 
 
-    new BuffConfiguration(MURGUL_BUFF, 40)
+    new BuffConfiguration(MURGUL_BUFF, 90)
     ..addToUnitType(MURGUL_MAGE)
     new BuffConfiguration(MURGUL_BUFF, -1)
     ..addToUnitType(MURGUL_MELEE)
 
-    new BuffConfiguration(MAKRURA_BUFF, 40)
+    new BuffConfiguration(MAKRURA_BUFF, 90)
     ..addToUnitType(MAKRURA_LORD)
     new BuffConfiguration(MAKRURA_BUFF, -1)
     ..addToUnitType(MAKRURA_SNAPPER)
 
-    new BuffConfiguration(SEA_GIANT_BUFF, 40)
+    new BuffConfiguration(SEA_GIANT_BUFF, 90)
     ..addToUnitType(SEA_GIANT)
 
-    new BuffConfiguration(SEA_ELEMENTAL_BUFF, 40)
+    new BuffConfiguration(SEA_ELEMENTAL_BUFF, 90)
     ..addToUnitType(SEA_ELEMENTAL)
 
-    new BuffConfiguration(JUNGLE_STALKER_BUFF, 40)
+    new BuffConfiguration(JUNGLE_STALKER_BUFF, 90)
     ..addToUnitType(JUNGLE_BEAST_ELDER)
     new BuffConfiguration(JUNGLE_STALKER_BUFF, -1)
     ..addToUnitType(JUNGLE_BEAST)
 
-    new BuffConfiguration(REVENANT_BUFF, 70)
+    new BuffConfiguration(REVENANT_BUFF, 180)
     ..addToUnitType(REVENANT_BOSS)
     new BuffConfiguration(REVENANT_BUFF, -1)
     ..addToUnitType(REVENANT)
 
-    new BuffConfiguration(TURTLE_BUFF, 40)
+    new BuffConfiguration(TURTLE_BUFF, 90)
     ..addToUnitType(TURTLE_GARGANTUAN)
     new BuffConfiguration(TURTLE_BUFF, -1)
     ..addToUnitType(TURTLE_GIANT)
