@@ -139,20 +139,30 @@ function onUnitDeath()
                 createGoldBountyTextTag(dyingUnit, bounty, players[killingId])
 
             //xp
-            let killingAllies = PlayerWrapper.getHeroTeam(invertTeam(dyingTeam))
+            if killerIsHero == 1 or not killingUnit.isType(UNIT_TYPE_STRUCTURE)
+                let killingAllies = PlayerWrapper.getHeroTeam(invertTeam(dyingTeam))
 
-            let xpHeroes = new LinkedList<Hero>()
-            if killingAllies != null
-                for p in killingAllies
-                    let hero = PlayerWrapper.getPlayerHero(p, 0)
-                    if hero != null
-                        let distance = hero.toUnit().getPos().distanceTo(pos)
-                        if distance < XP_RANGE
-                            xpHeroes.add(hero)
-                        
-            xp /= xpHeroes.size()
-            for hero in xpHeroes
-                hero.addXp( xp )
+                if killingAllies != null
+                    let xpHeroes = new LinkedList<Hero>()
+                    let allHeroes = new LinkedList<Hero>()
+                    for p in killingAllies
+                        let hero = PlayerWrapper.getPlayerHero(p, 0)
+                        if hero != null
+                            let distance = hero.toUnit().getPos().distanceTo(pos)
+                            allHeroes.add(hero)
+                            if distance < XP_RANGE
+                                xpHeroes.add(hero)
+                    let nearbyHeroes = xpHeroes.size()
+                    if nearbyHeroes > 0
+                        xp /= nearbyHeroes
+                        for hero in xpHeroes
+                            hero.addXp( xp )
+                    else
+                        xp /= allHeroes.size()
+                        for hero in allHeroes
+                            hero.addXp( xp )
+                    destroy xpHeroes
+                    destroy allHeroes
         
     
     

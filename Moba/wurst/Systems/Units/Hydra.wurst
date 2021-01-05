@@ -72,7 +72,7 @@ function onHydraDeath()
             PlayerWrapper.statHydrasKilled[killerId]++
 
         doAfter(REVIVE_TIME, () -> (begin
-            udg_Hydra = createUnit(players[CREEP_SPECIAL_OWNER], HYDRA, spawnPos, facing)
+            udg_Hydra = createUnit(players[CREEP_NORMAL_OWNER], HYDRA, spawnPos, facing)
             hydraIcon.show()
             SetUnitAcquireRange(udg_Hydra, 200)
             if creepLevel < MAX_LEVEL
@@ -105,7 +105,7 @@ function unit.hydraBonus()
 
 init
  
-    spawnPos = udg_Hydra.getPos()
+    spawnPos = udg_Hydra.getPos() + vec2(-1,1) * 800
     hydraIcon = createUnit(players[CREEP_ICON_OWNER], HYDRA_ICON, spawnPos, angle(0))
     SetAltMinimapIcon("UI\\Minimap\\minimap-hydra.blp")
     UnitSetUsesAltIcon(hydraIcon, true)
@@ -124,14 +124,12 @@ init
             ..addStatAbsoluteBonus(Stat.AS, ATTACK_SPEED[lvl])
 
     CreateTrigger()
-        ..registerPlayerUnitEvent(players[CREEP_SPECIAL_OWNER], EVENT_PLAYER_UNIT_DEATH, null)
+        ..registerPlayerUnitEvent(players[CREEP_NORMAL_OWNER], EVENT_PLAYER_UNIT_DEATH, null)
         ..addAction(function onHydraDeath)
 
     buffAcidBreath = new BuffType(false, DispelLevel.DISPEL)
 
-    let abilityList = new LinkedList<int>
-    ..add(ACID_BREATH_ABILTIY_ID)
-    buffAcidBreath.setup(abilityList, ACID_BREATH_BUFF_ID)
+    buffAcidBreath.setupBuffWithIcon(ACID_BREATH_BUFF_ID, ACID_BREATH_ABILTIY_ID)
 
     buffAcidBreath.addFirstFunction( (Buff whichBuff) -> (begin
         whichBuff.getTarget().wrapper()

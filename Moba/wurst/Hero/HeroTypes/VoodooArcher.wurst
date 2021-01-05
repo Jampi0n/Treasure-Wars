@@ -357,10 +357,8 @@ function initHeroType()
             ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
             ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
 
-        var abilityList = new LinkedList<int>
-        ..add(MIND_CURSE_ABILITY_ID)
         buffMindCurseTarget = new BuffType(false, DispelLevel.DISPEL)
-        buffMindCurseTarget.setup(abilityList, MIND_CURSE_BUFF_ID)
+        buffMindCurseTarget.setupBuffWithIcon(MIND_CURSE_BUFF_ID, MIND_CURSE_ABILITY_ID)
 
         buffMindCurseTarget.setPeriodicTime(0.25)
         buffMindCurseTarget.addPeriodicFunction((whichBuff) -> begin
@@ -370,10 +368,8 @@ function initHeroType()
             caster.damageMana(target, 0.25 * MIND_CURSE_MANA_DRAIN[level-1].bonus(caster.getInt(), MIND_CURSE_MANA_DRAIN_BONUS), ReductionType.MAGIC)
         end)
 
-        abilityList = new LinkedList<int>
-        ..add(SERPENT_POISON_ABILITY_ID)
         buffSerpentPoison = new BuffType(false, DispelLevel.DISPEL)
-        buffSerpentPoison.setup(abilityList, SERPENT_POISON_BUFF_ID)
+        buffSerpentPoison.setupBuffWithIcon(SERPENT_POISON_BUFF_ID, SERPENT_POISON_ABILITY_ID)
 
         /*
             About stacks:

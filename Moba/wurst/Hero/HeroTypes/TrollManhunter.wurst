@@ -418,10 +418,8 @@ function initHeroType()
     
         /*  bleeding wound: every attack increases actual stacks by 4, so bladestorm can increase by 1 every 0.25 seconds
             So dmg is 0.25 * 1/4 -> (interval) * (4 stacks)  */
-        var abilityList = new LinkedList<int>
-        ..add(BLEEDING_WOUND_ABILITY_ID)
         buffBleedingWound = new BuffType(false, DispelLevel.DISPEL)
-        buffBleedingWound.setup(abilityList, BLEEDING_WOUND_BUFF_ID)
+        buffBleedingWound.setupBuffWithIcon(BLEEDING_WOUND_BUFF_ID, BLEEDING_WOUND_ABILITY_ID)
 
         buffBleedingWound.addFirstFunction( (Buff whichBuff) -> (begin
             whichBuff.setData(1)
@@ -439,9 +437,7 @@ function initHeroType()
 
         buffShadowStrike = new BuffType(false, DispelLevel.DISPEL)
 
-        abilityList = new LinkedList<int>
-        ..add(SHADOW_STRIKE_ABILITY_ID)
-        buffShadowStrike.setup(abilityList, SHADOW_STRIKE_BUFF_ID)
+        buffShadowStrike.setupBuffWithIcon(SHADOW_STRIKE_BUFF_ID, SHADOW_STRIKE_ABILITY_ID)
 
         buffShadowStrike.addFirstFunction( (Buff whichBuff) -> (begin
             whichBuff.getTarget().wrapper()
@@ -454,10 +450,8 @@ function initHeroType()
                 ..addStatRelativeBonus(Stat.MS, SHADOW_STRIKE_SLOW * 10)
         end))
 
-        abilityList = new LinkedList<int>
-        ..add(DEATH_SPIN_ABILITY_ID)
         buffDeathSpin = new BuffType(false, DispelLevel.NONE)
-        buffDeathSpin.setup(abilityList, DEATH_SPIN_BUFF_ID)
+        buffDeathSpin.setupBuffWithIcon(DEATH_SPIN_BUFF_ID, DEATH_SPIN_ABILITY_ID)
 
         buffDeathSpin.addFirstFunction( (Buff whichBuff) -> (begin
             notSpinning.setOwner(players[PLAYER_NEUTRAL_PASSIVE], false)
@@ -501,10 +495,8 @@ function initHeroType()
                 ..addStatAbsoluteBonus(Stat.AGI, -DEATH_SPIN_DEFENSE[level-1])
         end))
 
-        abilityList = new LinkedList<int>
-        ..add(CRIPPLING_PAIN_ABILITY_ID)
         buffCripplingPain = new BuffType(false, DispelLevel.DISPEL)
-        buffCripplingPain.setup(abilityList, CRIPPLING_PAIN_BUFF_ID)
+        buffCripplingPain.setupBuffWithIcon(CRIPPLING_PAIN_BUFF_ID, CRIPPLING_PAIN_ABILITY_ID)
 
         buffCripplingPain.addEndFunction( (Buff whichBuff) -> (begin
             let stacks = whichBuff.getData()
@@ -513,10 +505,8 @@ function initHeroType()
         end))
 
 
-        abilityList = new LinkedList<int>
-        ..add(MIRROR_IMAGE_ABILITY_ID)
         buffMirrorImage = new BuffType(false, DispelLevel.NONE)
-        buffMirrorImage.setup(abilityList, MIRROR_IMAGE_BUFF_ID)
+        buffMirrorImage.setupBuffWithIcon(MIRROR_IMAGE_BUFF_ID, MIRROR_IMAGE_ABILITY_ID)
 
         //bleeding wound for mirror image
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin

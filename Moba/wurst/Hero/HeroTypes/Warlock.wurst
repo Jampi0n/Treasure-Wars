@@ -396,10 +396,8 @@ function initHeroType()
         end))
 
         buffSoulBurn = new BuffType(false, DispelLevel.DISPEL)
-        let abilityList = new LinkedList<int>
-        ..add(ABILITY_ID_SOUL_BURN)
         buffSoulBurn
-        ..setup(abilityList, BUFF_ID_SOUL_BURN)
+        ..setupBuffWithIcon(BUFF_ID_SOUL_BURN, ABILITY_ID_SOUL_BURN)
         ..setPeriodicTime(0.5)
         ..addPeriodicFunction((Buff whichBuff) ->(begin
             let target = whichBuff.getTarget()

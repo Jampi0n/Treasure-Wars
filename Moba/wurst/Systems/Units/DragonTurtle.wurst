@@ -66,7 +66,7 @@ function onDragonTurtleDeath()
             PlayerWrapper.statDragonTurtlesKilled[killerId]++
 
         doAfter(REVIVE_TIME, () -> (begin
-            udg_DragonTurtle = createUnit(players[CREEP_SPECIAL_OWNER], DRAGON_TURTLE, spawnPos, facing)
+            udg_DragonTurtle = createUnit(players[CREEP_NORMAL_OWNER], DRAGON_TURTLE, spawnPos, facing)
             turtleIcon.show()
             SetUnitAcquireRange(udg_DragonTurtle, 200)
             if creepLevel < MAX_LEVEL
@@ -89,7 +89,7 @@ function dragonTurtleBonus(int id)
 
 init
  
-    spawnPos = udg_DragonTurtle.getPos()
+    spawnPos = udg_DragonTurtle.getPos() + vec2(1,-1) * 800
     turtleIcon = createUnit(players[CREEP_ICON_OWNER], DRAGON_TURTLE_ICON, spawnPos, angle(0))
     facing = udg_DragonTurtle.getFacingAngle()
     creepLevel = 0
@@ -104,5 +104,5 @@ init
             ..addStatAbsoluteBonus(Stat.AS, ATTACK_SPEED[lvl])
 
     CreateTrigger()
-        ..registerPlayerUnitEvent(players[CREEP_SPECIAL_OWNER], EVENT_PLAYER_UNIT_DEATH, null)
+        ..registerPlayerUnitEvent(players[CREEP_NORMAL_OWNER], EVENT_PLAYER_UNIT_DEATH, null)
         ..addAction(function onDragonTurtleDeath)

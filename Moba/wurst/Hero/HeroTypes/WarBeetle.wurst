@@ -443,9 +443,7 @@ function initHeroType()
 
         buffBite = new BuffType(false, DispelLevel.DISPEL)
 
-        var abilityList = new LinkedList<int>
-        ..add(BITE_ABILITY_ID)
-        buffBite.setup(abilityList, BITE_BUFF_ID)
+        buffBite.setupBuffWithIcon(BITE_BUFF_ID, BITE_ABILITY_ID)
 
         buffBite.addFirstFunction( (Buff whichBuff) -> (begin
             whichBuff.getTarget().wrapper()
@@ -460,9 +458,7 @@ function initHeroType()
 
         buffUnbreakable = new BuffType(true, DispelLevel.NONE)
 
-        abilityList = new LinkedList<int>
-            ..add(UNBREAKABLE_ABILITY_ID)
-        buffUnbreakable.setup(abilityList, UNBREAKABLE_BUFF_ID)
+        buffUnbreakable.setupBuffWithIcon(UNBREAKABLE_BUFF_ID, UNBREAKABLE_ABILITY_ID)
         buffUnbreakable.addFirstFunction((Buff whichBuff) -> (begin
             let level = whichBuff.getLevel()
             let target = whichBuff.getTarget()

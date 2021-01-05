@@ -404,22 +404,16 @@ function initHeroType()
 
         buffCriticalStrike = new BuffType(true, DispelLevel.NONE)
 
-        var abilityList = new LinkedList<int>
-            ..add(CRITICAL_ABILITY_ID)
-        buffCriticalStrike.setup(abilityList, CRITICAL_BUFF_ID)
+        buffCriticalStrike.setupBuffWithIcon(CRITICAL_BUFF_ID, CRITICAL_ABILITY_ID)
         buffCriticalStrike.addFirstFunction((Buff whichBuff) -> (begin
             OnAttack.useAdvanced( whichBuff.getTarget(), true)
         end))
-
         buffCriticalStrike.addEndFunction((Buff whichBuff) -> (begin
             OnAttack.useAdvanced( whichBuff.getTarget(), false)
         end))
 
         buffGrowth = new BuffType(true, DispelLevel.NONE)
-
-        abilityList = new LinkedList<int>
-            ..add(GROWTH_ABILITY_ID)
-        buffGrowth.setup(abilityList, GROWTH_BUFF_ID)
+        buffGrowth.setupBuffWithIcon(GROWTH_BUFF_ID, GROWTH_ABILITY_ID)
         buffGrowth.addFirstFunction((Buff whichBuff) -> (begin
             let level = whichBuff.getLevel()
             let caster = whichBuff.getCaster()
@@ -445,9 +439,7 @@ function initHeroType()
         end))
 
         buffGrowthFear = new BuffType(false, DispelLevel.DISPEL)
-        abilityList = new LinkedList<int>
-            ..add(GROWTH_FEAR_ABILTIY_ID)
-        buffGrowthFear.setup(abilityList, GROWTH_FEAR_BUFF_ID)
+        buffGrowthFear.setupBuffWithIcon(GROWTH_FEAR_BUFF_ID, GROWTH_FEAR_ABILTIY_ID)
 
 function createHeroType(Hero hero)
     let heroUnit = hero.toUnit()

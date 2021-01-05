@@ -543,7 +543,6 @@ function initPlayers()
     PlayerWrapper.createPlayerWrapper(TEAM_PLAYER_TEAM_2, PlayerType.ARMY)
 
     PlayerWrapper.createPlayerWrapper(PLAYER_NEUTRAL_AGGRESSIVE, PlayerType.NEUTRAL)
-    PlayerWrapper.createPlayerWrapper(CREEP_SPECIAL_OWNER, PlayerType.NEUTRAL)
 
 
     for i=PLAYER_NEUTRAL_AGGRESSIVE+1 to PLAYER_NEUTRAL_PASSIVE
@@ -563,11 +562,6 @@ function initPlayers()
     SetPlayerAlliance(players[TEAM_PLAYER_TEAM_2], players[PLAYER_NEUTRAL_AGGRESSIVE], ALLIANCE_PASSIVE, true)
     SetPlayerAlliance(players[PLAYER_NEUTRAL_AGGRESSIVE], players[TEAM_PLAYER_TEAM_1], ALLIANCE_PASSIVE, true)
     SetPlayerAlliance(players[PLAYER_NEUTRAL_AGGRESSIVE], players[TEAM_PLAYER_TEAM_2], ALLIANCE_PASSIVE, true)
-
-    SetPlayerAlliance(players[TEAM_PLAYER_TEAM_1], players[CREEP_SPECIAL_OWNER], ALLIANCE_PASSIVE, true)
-    SetPlayerAlliance(players[TEAM_PLAYER_TEAM_2], players[CREEP_SPECIAL_OWNER], ALLIANCE_PASSIVE, true)
-    SetPlayerAlliance(players[CREEP_SPECIAL_OWNER], players[TEAM_PLAYER_TEAM_1], ALLIANCE_PASSIVE, true)
-    SetPlayerAlliance(players[CREEP_SPECIAL_OWNER], players[TEAM_PLAYER_TEAM_2], ALLIANCE_PASSIVE, true)
 
 init
     initPlayers()

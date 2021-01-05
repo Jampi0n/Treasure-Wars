@@ -500,11 +500,7 @@ function initHeroType()
             ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
 
         buffFrostNova = new BuffType(false, DispelLevel.DISPEL)
-
-        var abilityList = new LinkedList<int>
-        ..add(NOVA_ABILTIY_ID)
-        buffFrostNova.setup(abilityList, NOVA_BUFF_ID)
-
+        buffFrostNova.setupBuffWithIcon(NOVA_BUFF_ID, NOVA_ABILTIY_ID)
         buffFrostNova.addFirstFunction( (Buff whichBuff) -> (begin
             let level = whichBuff.getLevel()
             whichBuff.getTarget().wrapper()
@@ -512,7 +508,6 @@ function initHeroType()
                 ..addStatRelativeBonus(Stat.MS, -NOVA_MS[level - 1]*10)
                 ..incBlue()
         end))
-
         buffFrostNova.addEndFunction( (Buff whichBuff) -> (begin
             let level = whichBuff.getLevel()
             whichBuff.getTarget().wrapper()
@@ -523,11 +518,7 @@ function initHeroType()
 
 
         buffFrostArmor = new BuffType(true, DispelLevel.DISPEL)
-
-        abilityList = new LinkedList<int>
-        ..add(ARMOR_ABILTIY_ID)
-        buffFrostArmor.setup(abilityList, ARMOR_BUFF_ID)
-
+        buffFrostArmor.setupBuffWithIcon(ARMOR_BUFF_ID, ARMOR_ABILTIY_ID)
         buffFrostArmor.addFirstFunction( (Buff whichBuff) -> (begin
             let level = whichBuff.getLevel()
             let intel = whichBuff.getCaster().getInt()
@@ -535,7 +526,6 @@ function initHeroType()
             whichBuff.getTarget().wrapper()
                 ..addStatAbsoluteBonus(Stat.AR, ARMOR_AR[level - 1].bonus(intel, ARMOR_AR_BONUS).round())
         end))
-
         buffFrostArmor.addEndFunction( (Buff whichBuff) -> (begin
             let intel = whichBuff.getData()
             let level = whichBuff.getLevel()
@@ -545,11 +535,7 @@ function initHeroType()
 
 
         buffFrostArmorSlow = new BuffType(false, DispelLevel.DISPEL)
-
-        abilityList = new LinkedList<int>
-        ..add(ARMOR_SLOW_ABILTIY_ID)
-        buffFrostArmorSlow.setup(abilityList, ARMOR_SLOW_BUFF_ID)
-
+        buffFrostArmorSlow.setupBuffWithIcon(ARMOR_SLOW_BUFF_ID, ARMOR_SLOW_ABILTIY_ID)
         buffFrostArmorSlow.addFirstFunction( (Buff whichBuff) -> (begin
             let level = whichBuff.getLevel()
             whichBuff.getTarget().wrapper()
@@ -557,7 +543,6 @@ function initHeroType()
                 ..addStatRelativeBonus(Stat.MS, -ARMOR_SLOW[level - 1]*10)
                 ..incBlue()
         end))
-
         buffFrostArmorSlow.addEndFunction( (Buff whichBuff) -> (begin
             let level = whichBuff.getLevel()
             whichBuff.getTarget().wrapper()
@@ -568,18 +553,13 @@ function initHeroType()
 
 
         buffFrostBreath = new BuffType(false, DispelLevel.DISPEL)
-
-        abilityList = new LinkedList<int>
-        ..add(FROST_BREATH_ABILTIY_ID)
-        buffFrostBreath.setup(abilityList, FROST_BREATH_BUFF_ID)
-
+        buffFrostBreath.setupBuffWithIcon(FROST_BREATH_BUFF_ID, FROST_BREATH_ABILTIY_ID)
         buffFrostBreath.addFirstFunction( (Buff whichBuff) -> (begin
             let level = whichBuff.getLevel()
             whichBuff.getTarget().wrapper()
                 ..addStatRelativeBonus(Stat.MS, -FROST_BREATH_SLOW[level - 1]*10)
                 ..incBlue()
         end))
-
         buffFrostBreath.addEndFunction( (Buff whichBuff) -> (begin
             let level = whichBuff.getLevel()
             whichBuff.getTarget().wrapper()
@@ -590,11 +570,7 @@ function initHeroType()
 
 
         buffFreeze= new BuffType(false, DispelLevel.BREAK)
-
-        abilityList = new LinkedList<int>
-        ..add(FREEZE_ABILTIY_ID)
-        buffFreeze.setup(abilityList, FREEZE_BUFF_ID)
-
+        buffFreeze.setupBuffWithIcon(FREEZE_BUFF_ID, FREEZE_ABILTIY_ID)
         buffFreeze.addFirstFunction( (Buff whichBuff) -> (begin
             whichBuff.getTarget().addBuff(whichBuff.getCaster(), 0.1, STUNNED, 1).setDispelLevel(DispelLevel.BREAK)
             let fx = createUnit(Player(PLAYER_NEUTRAL_PASSIVE), FREEZE_EFFECT, whichBuff.getTarget().getPos(), angle(GetRandomReal(0, 2 * bj_PI)))
@@ -617,7 +593,6 @@ function initHeroType()
             else
                 whichBuff.dispel()
         end))
-
         buffFreeze.addEndFunction( (Buff whichBuff) -> (begin
             let fx = Freeze.effectMap.get(whichBuff.getData())
             fx.remove()

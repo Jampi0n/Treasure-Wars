@@ -453,13 +453,8 @@ function initHeroType()
             ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
             ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
     
-    
-
         buffPull = new BuffType(false, DispelLevel.BREAK)
-        var abilityList = new LinkedList<int>
-        abilityList.add(PULL_ABILITY_ID)
-        buffPull.setup(abilityList, PULL_BUFF_ID)
-
+        buffPull.setupBuffWithIcon(PULL_BUFF_ID, PULL_ABILITY_ID)
         buffPull.addDispelFunction() (Buff whichBuff) ->
             let data = whichBuff.getData()
             if data != -1
@@ -468,10 +463,7 @@ function initHeroType()
 
 
         buffSpikeBall = new BuffType(false, DispelLevel.DISPEL)
-        abilityList = new LinkedList<int>
-        abilityList.add(SPIKE_BALL_ABILTIY_ID)
-        buffSpikeBall.setup(abilityList, SPIKE_BALL_BUFF_ID)
-
+        buffSpikeBall.setupBuffWithIcon(SPIKE_BALL_BUFF_ID, SPIKE_BALL_ABILTIY_ID)
         buffSpikeBall.setPeriodicTime(0.25)
         buffSpikeBall.addPeriodicFunction((Buff whichBuff) -> (begin
             let caster = whichBuff.getCaster()
@@ -480,9 +472,7 @@ function initHeroType()
         end))
 
         buffSpeedBoost = new BuffType(true, DispelLevel.NONE)
-        abilityList = new LinkedList<int>
-        abilityList.add(SPEED_BOOST_ABILITY_ID)
-        buffSpeedBoost.setup(abilityList, SPEED_BOOST_BUFF_ID)
+        buffSpeedBoost.setupBuffWithIcon(SPEED_BOOST_BUFF_ID, SPEED_BOOST_ABILITY_ID)
         buffSpeedBoost.addFirstFunction((Buff whichBuff) -> (begin
             let target = whichBuff.getTarget()
             target.wrapper().addStatRelativeBonus(Stat.MS, ((SPEED_BOOST[whichBuff.getLevel()-1].bonus(target.getInt(), SPEED_BOOST_BONUS)) * 10).toInt() )

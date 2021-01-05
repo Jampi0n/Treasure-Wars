@@ -16,7 +16,10 @@ constant ARMOR_LIGHT = 'R003'
     Scale to 0 (Node Manager)
 */
 
-
+public constant TAVERN0 = createUnitType('n002')
+public constant TAVERN1 = createUnitType('n003')
+public constant TAVERN2 = createUnitType('n004')
+public constant TAVERN3 = createUnitType('n005')
 public constant PATRON = createUnitType('n006')
 
 public constant FOOTMAN = createUnitType(350, 'h00C', 15, 15, 3, ATTACK_MELEE, 25, 10, ARMOR_HEAVY, 32, Units.footman1, 1)
@@ -51,6 +54,9 @@ public constant SERPENT_WARD = createUnitType(200, 'o003', 25, 15, 0, 32, Units.
 public constant WALL = createUnitType(200, 'o001', 0, 0, 0, 32, "", 0)
 
 public constant MIRROR_IMAGE_UNIT_ID = createUnitType(400, 'h01M', 100, 40, 10, 64, "Models\\TrollManhunter.mdx", 10)
+
+
+public constant STANDARD_ICON = createUnitType('ncop')
 
 public constant HYDRA = createUnitType(3500, 'n00I', 0, 300, 100, 160, Units.hydra, 50)
 

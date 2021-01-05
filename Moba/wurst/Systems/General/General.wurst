@@ -129,7 +129,7 @@ public function unit.addBuff(unit caster, real duration, BuffType buffType, int 
         error("addBuff add buff with unusual duration: " + duration.toString())
     if this.isAlive()
         execute() () ->
-            new Buff(this, caster, duration, buffType, level)
+            Buff.applyBuff(this, caster, duration, buffType, level)
         ret = BuffList.getBuffOfType(this, buffType)
     return ret
 
@@ -143,7 +143,7 @@ public function unit.addBuffReduced(unit caster, real duration, BuffType buffTyp
         error("addBuffReduced add buff with unusual duration: " + realDuration.toString() + " " + (buffType castTo int).toString())
     if this.isAlive()
         execute() () ->
-            new Buff(this, caster, realDuration, buffType, level)
+            Buff.applyBuff(this, caster, realDuration, buffType, level)
         ret = BuffList.getBuffOfType(this, buffType)
     return ret
 

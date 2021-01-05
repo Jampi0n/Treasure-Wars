@@ -541,9 +541,8 @@ function initHeroType()
             ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
             ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
             ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
-        let abilityList = new LinkedList<int>
-            ..add(ENTAGLING_ROOTS_ABILITY_ID)
-        BUFF_ENTAGLING_ROOTS.setup(abilityList, ENTAGLING_ROOTS_BUFF_ID)
+
+        BUFF_ENTAGLING_ROOTS.setupBuffWithIcon(ENTAGLING_ROOTS_BUFF_ID, ENTAGLING_ROOTS_ABILITY_ID)
 
 
 

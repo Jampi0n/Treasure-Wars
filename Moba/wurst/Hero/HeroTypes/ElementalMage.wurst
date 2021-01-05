@@ -400,25 +400,19 @@ function initHeroType()
             ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
 
         buffFFBuff = new BuffType(false, DispelLevel.DISPEL)
-
-        LinkedList<int> abilityList = new LinkedList<int>
-        ..add(FF_ABILITY_ID)
-        buffFFBuff.setup(abilityList, FF_BUFF_ID)
-
+        buffFFBuff.setupBuffWithIcon(FF_BUFF_ID, FF_ABILITY_ID)
         buffFFBuff.addFirstFunction( (Buff whichBuff) -> (begin
             let level = whichBuff.getLevel()
             whichBuff.getTarget().wrapper()
                 ..addStatRelativeBonus(Stat.MS, -FF_SLOW[level - 1]*10)
                 ..incBlue()
         end))
-
         buffFFBuff.addEndFunction( (Buff whichBuff) -> (begin
             let level = whichBuff.getLevel()
             whichBuff.getTarget().wrapper()
                 ..addStatRelativeBonus(Stat.MS, FF_SLOW[level - 1]*10)
                 ..decBlue()
         end))
-
         buffFFBuff.setPeriodicTime(0.25)
         buffFFBuff.addPeriodicFunction((Buff whichBuff) -> (begin
             let caster = whichBuff.getCaster()
@@ -428,11 +422,7 @@ function initHeroType()
         end))
 
         buffFrostBolt = new BuffType(false, DispelLevel.DISPEL)
-
-        abilityList = new LinkedList<int>
-        ..add(FROST_BOLT_ABILITY_ID)
-        buffFrostBolt.setup(abilityList, FROST_BOLT_BUFF_ID)
-
+        buffFrostBolt.setupBuffWithIcon(FROST_BOLT_BUFF_ID, FROST_BOLT_ABILITY_ID)
         buffFrostBolt.addFirstFunction( (Buff whichBuff) -> (begin
             let level = whichBuff.getLevel()
             whichBuff.getTarget().wrapper()
@@ -440,7 +430,6 @@ function initHeroType()
                 ..addStatAbsoluteBonus(Stat.AS, -FROST_BOLT_SLOW[level - 1])
                 ..incBlue()
         end))
-
         buffFrostBolt.addEndFunction( (Buff whichBuff) -> (begin
             let level = whichBuff.getLevel()
             whichBuff.getTarget().wrapper()
@@ -450,11 +439,7 @@ function initHeroType()
         end))
 
         buffFrenzy = new BuffType(true, DispelLevel.NONE)
-
-        abilityList = new LinkedList<int>
-            ..add(FRENZY_ABILITY_ID)
-        buffFrenzy.setup(abilityList, FRENZY_BUFF_ID)
-        
+        buffFrenzy.setupBuffWithIcon(FRENZY_BUFF_ID, FRENZY_ABILITY_ID)
         buffFrenzy.addFirstFunction( (Buff whichBuff) -> (begin
             let level = whichBuff.getLevel() - 1
             let stacks = (FRENZY_BONUS[level]*10).toInt()
@@ -462,7 +447,6 @@ function initHeroType()
                 ..addStatAbsoluteBonus(Stat.AS, stacks div 10 )
             whichBuff.setData(stacks)
         end))
-
         buffFrenzy.addStackFunction( (Buff whichBuff) -> (begin
             let level = whichBuff.getLevel() - 1
             let oldStacks = whichBuff.getData()
@@ -472,8 +456,6 @@ function initHeroType()
             whichBuff.getTarget().wrapper()
                 ..addStatAbsoluteBonus(Stat.AS, (newStacks div 10) - (oldStacks div 10))
         end))
-
-
         buffFrenzy.addEndFunction( (Buff whichBuff) -> (begin
             let stacks = whichBuff.getData()
             whichBuff.getTarget().wrapper()
@@ -481,17 +463,12 @@ function initHeroType()
         end))
 
         buffElementalMark = new BuffType(false, DispelLevel.DISPEL)
-
-        abilityList = new LinkedList<int>
-        ..add(MARK_ABILITY_ID)
-        buffElementalMark.setup(abilityList, MARK_BUFF_ID)
-
+        buffElementalMark.setupBuffWithIcon(MARK_BUFF_ID, MARK_ABILITY_ID)
         buffElementalMark.addFirstFunction( (Buff whichBuff) -> (begin
             let level = whichBuff.getLevel()
             whichBuff.getTarget().wrapper()
                 ..addStatAbsoluteBonus(Stat.AGI, -MARK_WP_REDUCTION[level - 1])
         end))
-
         buffElementalMark.addEndFunction( (Buff whichBuff) -> (begin
             let level = whichBuff.getLevel()
             whichBuff.getTarget().wrapper()

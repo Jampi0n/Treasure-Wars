@@ -680,21 +680,15 @@ init
 		ForGroup(militiaTeam1, function onMilitiaDespawn)
 		ForGroup(militiaTeam2, function onMilitiaDespawn)
 
-	var abilityList = new LinkedList<int>
-	..add(HOME_ABILTIY_ID)
-	BUFF_HOME.setup(abilityList, HOME_BUFF_ID)
+	BUFF_HOME.setupBuffWithIcon(HOME_BUFF_ID, HOME_ABILTIY_ID)
 
 	CreateTrigger()
 	..registerTimerEvent(0.2, true)
 	..addAction(function homeInvulnerability)
 
 
-
 	buffTowerFocus = new BuffType(false, DispelLevel.DISPEL)
-
-	abilityList = new LinkedList<int>
-	..add(TOWER_FOCUS_ABILTIY_ID)
-	buffTowerFocus.setup(abilityList, TOWER_FOCUS_BUFF_ID)
+	buffTowerFocus.setupBuffWithIcon(TOWER_FOCUS_BUFF_ID, TOWER_FOCUS_ABILTIY_ID)
 
 	buffTowerFocus.addFirstFunction( (Buff whichBuff) -> (begin
 		whichBuff.getTarget().wrapper()
