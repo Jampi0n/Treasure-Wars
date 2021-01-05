@@ -5,6 +5,7 @@ import PlayerControl
 import Constants
 
 public function allHeroesPicked()
+    PlayerWrapper.revealIcons()
     startSpawning()
 
     for i = 0 to MAX_HERO_COUNT - 1

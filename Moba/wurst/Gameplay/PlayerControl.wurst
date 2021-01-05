@@ -366,6 +366,8 @@ public abstract class PlayerWrapper
     static PlayerType array playerType
     static string array icon
 
+    static boolean revealIcons = false
+
     static function createPlayerWrapper(int id, PlayerType pType)
         unitKills[id] = 0
         heroKills[id] = 0
@@ -463,6 +465,16 @@ public abstract class PlayerWrapper
 
     static function getIcon(int id) returns string
         return icon[id]
+
+    static function revealIcon(int id)
+        icon[id] = getPlayerHero(id, 0).getHeroType().getIcon()
+
+    static function revealIcons()
+        revealIcons = true
+        for p in getHeroTeam(TEAM_1)
+            revealIcon(p)
+        for p in getHeroTeam(TEAM_2)
+            revealIcon(p)
 
     static function addHero(int id, Hero whichHero)
         playerHeroes[id].add(whichHero)
