@@ -8,6 +8,8 @@ import ObjectIdGenerator
 import ItemObjEditing
 import ObjectIds
 
+public constant SHOP_NUM_CATEGORIES = 7
+
 public constant MAX_ITEMS_IN_LIST = 30
 constant ITEM_DEFINITIONS = new HashMap<int, ItemDefinition>
 
@@ -76,12 +78,8 @@ public class ItemInShop
     private static constant itemIdToItemInShop = new HashMap<int,ItemInShop>
 
     static function classInit()
-        itemsInCategory[0] = new LinkedList<ItemInShop>()
-        itemsInCategory[1] = new LinkedList<ItemInShop>()
-        itemsInCategory[2] = new LinkedList<ItemInShop>()
-        itemsInCategory[3] = new LinkedList<ItemInShop>()
-        itemsInCategory[4] = new LinkedList<ItemInShop>()
-        itemsInCategory[5] = new LinkedList<ItemInShop>()
+        for i=0 to SHOP_NUM_CATEGORIES-1
+            itemsInCategory[i] = new LinkedList<ItemInShop>()
 
     /*
         Retrieves the object to this item id. It never returns null.
@@ -116,32 +114,6 @@ public class ItemInShop
         let itm = createItem(itemId, vec2(0,0))
         this.icon = itm.getIconPath()
         itm.remove()
-
-
-    /*construct(int itemId, int category, int iconId, int totalCost)
-        itemIdToItemInShop.put(itemId, this)
-        this.itemId = itemId
-        this.category = category
-        this.iconId = iconId
-        this.totalCost = totalCost
-        this.singleCost = totalCost
-        this.requirements = new LinkedList<ItemInShop>
-        this.buildsInto = new HashList<ItemInShop>
-        allItems.add(this)
-        itemsInCategory[this.category].add(this)*/
-
-        /*let itm = createItem(itemId, vec2(0,0))
-
-        this.name = new ImageStringType(600, Origin.MIDDLE_CENTER, itm.getName(), 1)
-        this.nameTopLeft = new ImageStringType(600, Origin.TOP_LEFT, itm.getName() + "|n||gold| " + COLOR_GOLD.toColorString() + (this.totalCost).toString() +"|r", 0.9)
-        this.description = new ImageStringType(900, Origin.TOP_LEFT, itm.getExtendedTooltip(), 0.8)
-        
-
-        /*this.name = new ImageStringType(400, Origin.MIDDLE_CENTER, "name", 1)
-        this.nameTopLeft = new ImageStringType(500, Origin.TOP_LEFT, "name", 1)
-        this.description = new ImageStringType(540, Origin.TOP_LEFT, "desc", 0.8)*/
-
-        /*itm.remove()*/
 
     function setupStrings(string name, string desc)
         this.name = name
@@ -218,10 +190,10 @@ public class ItemInShop
             destroy sortingList
 
 
-        for i = 0 to 5
+        for i = 0 to SHOP_NUM_CATEGORIES-1
             itemsInCategory[i].sortWith((a,b) -> ( a.getTotalCost() - b.getTotalCost() ) )
 
-        for i = 0 to 5
+        for i = 0 to SHOP_NUM_CATEGORIES-1
             itemsPerCategory[i] = itemsInCategory[i].size()
             int j = 0
             for ItemInShop itm in itemsInCategory[i]
