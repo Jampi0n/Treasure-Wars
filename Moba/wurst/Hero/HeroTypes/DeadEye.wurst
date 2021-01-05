@@ -57,7 +57,7 @@ function blackArrow(int abilityId)
 
 
 constant real array PIERCING_SHOT_DAMAGE = [80, 115, 150, 185, 210]
-constant real PIERCING_SHOT_DAMAGE_BONUS = 110
+constant real PIERCING_SHOT_DAMAGE_BONUS = 120
 
 function piercingShot(int abilityId)
 
@@ -99,7 +99,7 @@ function piercingShot(int abilityId)
 
 constant real array TERROR_DURATION = [2, 2.6, 3.2, 3.8, 4.4]
 constant real TERROR_DURATION_BONUS = 2
-real array TERROR_AOE = [600, 650, 700, 750, 800]
+real array TERROR_AOE = [700, 750, 800, 850, 900]
 
 constant BUFF_TERROR = new BuffType(false, DispelLevel.DISPEL)
 
@@ -387,7 +387,7 @@ function teamFightAI(HeroAI ai)
     let g = CreateGroup()
     unit u
     int count = 0
-    g.enumUnitsInRange(hero.getPos(), TERROR_AOE[hero.getAbilityLevel(ABILITY_TERROR)])
+    g.enumUnitsInRange(hero.getPos(), TERROR_AOE[hero.getAbilityLevel(ABILITY_TERROR)] - 150)
     while(true)
         u = FirstOfGroup(g)
         if u == null

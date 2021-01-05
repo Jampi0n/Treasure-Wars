@@ -120,13 +120,13 @@ function bash(int abilityId)
     addDynamicTooltipIntelligence(heroType, tooltip)
 
 
-constant int array INNER_FIRE_DMG = [5, 10, 15, 20, 25]
+constant int array INNER_FIRE_DMG = [10, 15, 20, 25, 30]
 constant int INNER_FIRE_DMG_BONUS = 10
 
 constant int array INNER_FIRE_DEF = [10, 15, 20, 25, 30]
 constant int INNER_FIRE_DEF_BONUS = 20
 
-constant real INNER_FIRE_DURATION = 10
+constant real INNER_FIRE_DURATION = 12
 
 constant int INNER_FIRE_BUFF_ID = compiletime(createAuraBuff("Inner Fire", "This unit's strength and armor and willpower are increased.", Icons.bTNInnerFire))
 constant int INNER_FIRE_ABILITY_ID = compiletime(createPositiveBuffAbility(5, INNER_FIRE_BUFF_ID, Abilities.innerFireTarget, "overhead"))
