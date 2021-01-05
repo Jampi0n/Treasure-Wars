@@ -1,9 +1,7 @@
 package UnitType
 
-import LinkedList
 import HashMap
 import StandardTextTags
-import initlater HeroControl
 import PlayerControl
 import Constants
 import Assets
@@ -121,7 +119,7 @@ function onUnitDeath()
         // army unit dies
         if dyingTeam == TEAM_1 or dyingTeam == TEAM_2
             let bounty = dyingType.getBounty()
-            real xp = dyingType.getPowerLevel() * 8.0
+            let xp = dyingType.getPowerLevel() * 8.0
 
             let killerIsEnemy = killingUnit != null and PlayerWrapper.getTeam(killingId) == invertTeam(dyingTeam)
             int killerIsHero = 0
@@ -140,29 +138,7 @@ function onUnitDeath()
 
             //xp
             if killerIsHero == 1 or not killingUnit.isType(UNIT_TYPE_STRUCTURE)
-                let killingAllies = PlayerWrapper.getHeroTeam(invertTeam(dyingTeam))
-
-                if killingAllies != null
-                    let xpHeroes = new LinkedList<Hero>()
-                    let allHeroes = new LinkedList<Hero>()
-                    for p in killingAllies
-                        let hero = PlayerWrapper.getPlayerHero(p, 0)
-                        if hero != null
-                            let distance = hero.toUnit().getPos().distanceTo(pos)
-                            allHeroes.add(hero)
-                            if distance < XP_RANGE
-                                xpHeroes.add(hero)
-                    let nearbyHeroes = xpHeroes.size()
-                    if nearbyHeroes > 0
-                        xp /= nearbyHeroes
-                        for hero in xpHeroes
-                            hero.addXp( xp )
-                    else
-                        xp /= allHeroes.size()
-                        for hero in allHeroes
-                            hero.addXp( xp )
-                    destroy xpHeroes
-                    destroy allHeroes
+                PlayerWrapper.rewardXp(invertTeam(dyingTeam) == TEAM_1, pos, xp)
         
     
     
