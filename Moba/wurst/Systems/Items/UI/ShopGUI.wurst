@@ -411,6 +411,7 @@ public class GUI
         CATEGORY_NAMES[3] = "Physical Damage"
         CATEGORY_NAMES[4] = "Magic Damage"
         CATEGORY_NAMES[5] = "Defense"
+        CATEGORY_NAMES[6] = "Tomes"
 
         CATEGORY_ICONS[0] = Icons.bTNSelectHeroOff
         CATEGORY_ICONS[1] = Icons.bTNPotionBlue
@@ -418,6 +419,7 @@ public class GUI
         CATEGORY_ICONS[3] = Icons.bTNSteelMelee
         CATEGORY_ICONS[4] = Icons.bTNBrilliance
         CATEGORY_ICONS[5] = Icons.bTNInvulnerable
+        CATEGORY_ICONS[6] = Icons.bTNTome
 
     @noinline
     function createUiElements()
@@ -478,10 +480,10 @@ public class GUI
 
         // categories
 
-        for i = 0 to 5
+        for i = 0 to SHOP_NUM_CATEGORIES - 1
             let fw = setCategoryButton(i, this.frameCategories.addTextButton(CATEGORY_NAMES[i]))
             let fh = fw.frame()
-            fh.setPoint(FRAMEPOINT_TOP, this.frameCategories, FRAMEPOINT_TOP, 0, -0.05 - 0.05 * i)
+            fh.setPoint(FRAMEPOINT_TOP, this.frameCategories, FRAMEPOINT_TOP, 0, -0.03 - 0.035 * i)
             buttonToIndex.put(fh.getHandleId(), i)
             onClickCategoryButton.registerFrameEvent(fh, FRAMEEVENT_CONTROL_CLICK)
 
@@ -555,11 +557,11 @@ public class GUI
 
     @inline
     function getCategoryButton(int index) returns FrameTextButton
-        return categoryButton[(this castTo int) * 6 + index]
+        return categoryButton[(this castTo int) * SHOP_NUM_CATEGORIES + index]
     
     @inline        
     function setCategoryButton(int index, FrameTextButton fw) returns FrameTextButton
-        categoryButton[(this castTo int) * 6 + index] = fw
+        categoryButton[(this castTo int) * SHOP_NUM_CATEGORIES + index] = fw
         return fw
 
     @inline
