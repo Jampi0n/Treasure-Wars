@@ -78,9 +78,9 @@ public function startSpawning()
 public function stopSpawning()
     spawnStopped = true
 
-public function spawnUnit( boolean firstTeam, int unitId, vec2 startPos) returns unit
-    let p = players[firstTeam ? Teams.army1() : Teams.army2()]
-    let spawnedUnit = createUnit(p, unitId, firstTeam ? gg_rct_BrownCastle.getRightTop() : gg_rct_GreenCastle.getLeftBot() , angle(45. + (firstTeam ? 0 : 180) ))
+public function spawnUnit( int team, int unitId, vec2 startPos) returns unit
+    let p = players[Teams.army(team)]
+    let spawnedUnit = createUnit(p, unitId, (team == TEAM_1) ? gg_rct_BrownCastle.getRightTop() : gg_rct_GreenCastle.getLeftBot() , angle(45. + ((team == TEAM_1) ? 0 : 180) ))
         ..setPos(startPos)
     return spawnedUnit
 
@@ -153,7 +153,7 @@ function spawnWave()
             if not spawnStopped
                 unit spawnedUnit
                 if barracksAliveTeam1[0]
-                    spawnedUnit = spawnUnit(true, unitId, gg_rct_GreenSpawnTop.getCenter())
+                    spawnedUnit = spawnUnit(TEAM_1, unitId, gg_rct_GreenSpawnTop.getCenter())
                     new PathUnitNew(spawnedUnit, AssignedPath.GREEN_TOP)
 
         end))
@@ -165,7 +165,7 @@ function spawnWave()
             if not spawnStopped
                 unit spawnedUnit
                 if barracksAliveTeam2[0]
-                    spawnedUnit = spawnUnit(false, unitId, gg_rct_BrownSpawnTop.getCenter())
+                    spawnedUnit = spawnUnit(TEAM_2, unitId, gg_rct_BrownSpawnTop.getCenter())
                     new PathUnitNew(spawnedUnit, AssignedPath.BROWN_TOP)
 
         end))
@@ -181,7 +181,7 @@ function spawnWave()
             if not spawnStopped
                 unit spawnedUnit
                 if barracksAliveTeam1[1]
-                    spawnedUnit = spawnUnit(true, unitId, gg_rct_GreenSpawnMid.getCenter())
+                    spawnedUnit = spawnUnit(TEAM_1, unitId, gg_rct_GreenSpawnMid.getCenter())
                     new PathUnitNew(spawnedUnit, AssignedPath.GREEN_MID)
 
         end))
@@ -193,7 +193,7 @@ function spawnWave()
             if not spawnStopped
                 unit spawnedUnit
                 if barracksAliveTeam2[1]
-                    spawnedUnit = spawnUnit(false, unitId, gg_rct_BrownSpawnMid.getCenter())
+                    spawnedUnit = spawnUnit(TEAM_2, unitId, gg_rct_BrownSpawnMid.getCenter())
                     new PathUnitNew(spawnedUnit, AssignedPath.BROWN_MID)
 
         end))
@@ -209,7 +209,7 @@ function spawnWave()
             if not spawnStopped
                 unit spawnedUnit
                 if barracksAliveTeam1[2]
-                    spawnedUnit = spawnUnit(true, unitId, gg_rct_GreenSpawnBot.getCenter())
+                    spawnedUnit = spawnUnit(TEAM_1, unitId, gg_rct_GreenSpawnBot.getCenter())
                     new PathUnitNew(spawnedUnit, AssignedPath.GREEN_BOT)
 
         end))
@@ -221,7 +221,7 @@ function spawnWave()
             if not spawnStopped
                 unit spawnedUnit
                 if barracksAliveTeam2[2]
-                    spawnedUnit = spawnUnit(false, unitId, gg_rct_BrownSpawnBot.getCenter())
+                    spawnedUnit = spawnUnit(TEAM_2, unitId, gg_rct_BrownSpawnBot.getCenter())
                     new PathUnitNew(spawnedUnit, AssignedPath.BROWN_BOT)
 
         end))
@@ -234,19 +234,19 @@ function spawnWave()
         if not spawnStopped
             unit spawnedUnit
             if workshopAliveTeam1[0]
-                spawnedUnit = spawnUnit(true, MORTAR_TEAM, gg_rct_GreenWorkShopTop.getCenter())
+                spawnedUnit = spawnUnit(TEAM_1, MORTAR_TEAM, gg_rct_GreenWorkShopTop.getCenter())
                 new PathUnitNew(spawnedUnit, AssignedPath.GREEN_TOP)
 
             if workshopAliveTeam1[1]
-                spawnedUnit = spawnUnit(true, MORTAR_TEAM, gg_rct_GreenWorkShopBot.getCenter())
+                spawnedUnit = spawnUnit(TEAM_1, MORTAR_TEAM, gg_rct_GreenWorkShopBot.getCenter())
                 new PathUnitNew(spawnedUnit, AssignedPath.GREEN_BOT)
 
             if workshopAliveTeam2[0]
-                spawnedUnit = spawnUnit(false, MORTAR_TEAM_2, gg_rct_BrownWorkShopTop.getCenter())
+                spawnedUnit = spawnUnit(TEAM_2, MORTAR_TEAM_2, gg_rct_BrownWorkShopTop.getCenter())
                 new PathUnitNew(spawnedUnit, AssignedPath.BROWN_TOP)
 
             if workshopAliveTeam2[1]
-                spawnedUnit = spawnUnit(false, MORTAR_TEAM_2, gg_rct_BrownWorkShopBot.getCenter())
+                spawnedUnit = spawnUnit(TEAM_2, MORTAR_TEAM_2, gg_rct_BrownWorkShopBot.getCenter())
                 new PathUnitNew(spawnedUnit, AssignedPath.BROWN_BOT)
     end))
     

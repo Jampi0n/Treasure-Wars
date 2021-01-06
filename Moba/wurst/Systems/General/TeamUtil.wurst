@@ -7,17 +7,15 @@ import LinkedList
 Optimized package to deal with teams.
 */
 
-
-public constant TEAM_NULL = 0
-public constant TEAM_1 = 1
-public constant TEAM_2 = 2
-public constant TEAM_NEUTRAL = 3
+public constant TEAM_1 = 0
+public constant TEAM_2 = 1
+public constant TEAM_NEUTRAL = 2
 
 public abstract class Teams
     // basic types use inline functions with compiletime evaluation
-    protected static constant ARMY = [-1, 10, 11, -1]
-    protected static constant FROM = [-1, 0, 5, -1]
-    protected static constant TO = [-1, 4, 9, -1]
+    protected static constant ARMY = [10, 11, -1]
+    protected static constant FROM = [0, 5, -1]
+    protected static constant TO = [4, 9, -1]
     protected static constant FROM_1 = FROM[TEAM_1]
     protected static constant TO_1 = TO[TEAM_1]
     protected static constant FROM_2 = FROM[TEAM_2]
@@ -25,9 +23,8 @@ public abstract class Teams
     protected static constant ARMY_1 = ARMY[TEAM_1]
     protected static constant ARMY_2 = ARMY[TEAM_2]
     // advanced types are accessed directly
-    static constant NAME = ["","Green","Brown","Neutral"]
+    static constant NAME = ["Green","Brown","Neutral"]
     static constant COLOR = [
-        compiletime(color(150, 50, 150).toColorString()),
         compiletime(PLAYER_COLORS[ARMY_1].toColorString()),
         compiletime(PLAYER_COLORS[ARMY_2].toColorString()),
         compiletime(color(25, 25, 25).toColorString())
@@ -35,18 +32,17 @@ public abstract class Teams
     static constant COLORED_NAME = [
         compiletime(COLOR[0] + NAME[0] + "|r"),
         compiletime(COLOR[1] + NAME[1] + "|r"),
-        compiletime(COLOR[2] + NAME[2] + "|r"),
-        compiletime(COLOR[3] + NAME[3] + "|r")
+        compiletime(COLOR[2] + NAME[2] + "|r")
     ]
-    static constant HEROES = [new LinkedList<Hero>(), new LinkedList<Hero>(), new LinkedList<Hero>(), new LinkedList<Hero>()]
+    static constant HEROES = [new LinkedList<Hero>(), new LinkedList<Hero>(), new LinkedList<Hero>()]
     static constant HEROES_1 = HEROES[TEAM_1]
     static constant HEROES_2 = HEROES[TEAM_2]
-    static constant HERO_COUNT = [0,0,0,0]
+    static constant HERO_COUNT = [0,0,0]
 
-    static constant HERO_PLAYERS = [new LinkedList<int>(), new LinkedList<int>(), new LinkedList<int>(), new LinkedList<int>()]
-    static constant HERO_PLAYER_COUNT = [0,0,0,0]
+    static constant HERO_PLAYERS = [new LinkedList<int>(), new LinkedList<int>(), new LinkedList<int>()]
+    static constant HERO_PLAYER_COUNT = [0,0,0]
 
-    static constant HERO_KILLS = [0,0,0,0]
+    static constant HERO_KILLS = [0,0,0]
 
     static function addHeroPlayer(int team, int p)
         Teams.HERO_PLAYERS[team].add(p)
@@ -111,7 +107,7 @@ public abstract class Teams
 
 
 public abstract class Players
-    protected static constant TEAM = [1,1,1,1,1,2,2,2,2,2,1,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3]
+    protected static constant TEAM = [0,0,0,0,0,1,1,1,1,1,0,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]
     protected static string array NAME
     protected static string array COLOR
     protected static string array COLORED_NAME

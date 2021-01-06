@@ -13,8 +13,7 @@ import ShopGUI
 import HashMap
 import TeamUtil
 
-constant team1AIs = new LinkedList<HeroAI>
-constant team2AIs = new LinkedList<HeroAI>
+constant teamAIs = [new LinkedList<HeroAI>,new LinkedList<HeroAI>,new LinkedList<HeroAI>,new LinkedList<HeroAI>]
 
 public constant real TEAM_FIGHT_RANGE = 1200
 constant real HALF_DISTANCE = 11200
@@ -178,16 +177,16 @@ public class TeamFight
     private LinkedList<HeroAI> heroAIs
     private vec2 teamFightLoc
     private unit target
-    private boolean firstTeam
+    private int team
 
     private static constant updateTimer = getTimer()
     private static constant  activeTeamFights = new LinkedList<TeamFight>
 
     //private Fx center
 
-    construct(vec2 pos, boolean firstTeam)
+    construct(vec2 pos, int team)
         this.teamFightLoc = pos
-        this.firstTeam = firstTeam
+        this.team = team
         this.target = null
 
         this.heroAIs = new LinkedList<HeroAI>
@@ -235,7 +234,7 @@ public class TeamFight
 
             determineTarget()
 
-            let chance = determineWinChance(firstTeam, this.teamFightLoc)
+            let chance = determineWinChance(team, this.teamFightLoc)
 
 
             if chance < 0.4
@@ -264,10 +263,10 @@ public class TeamFight
         real currentValue = -1
         unit currentTarget = null
 
-        for hero in Teams.HEROES[Teams.team(not this.firstTeam)]
+        for hero in Teams.HEROES[Teams.invert(team)]
             let heroUnit = hero.toUnit()
-            if hero.toUnit().getPos().distanceTo(this.teamFightLoc) < TEAM_FIGHT_RANGE and hero.toUnit().isAlive() and hero.toUnit().isTargetable(firstTeam ? players[Teams.army1()] : players[Teams.army2()], false, true)
-                if hero.toUnit().isVisible(firstTeam ? players[Teams.army1()] : players[Teams.army2()])
+            if hero.toUnit().getPos().distanceTo(this.teamFightLoc) < TEAM_FIGHT_RANGE and hero.toUnit().isAlive() and hero.toUnit().isTargetable(players[Teams.army(team)], false, true)
+                if hero.toUnit().isVisible(players[Teams.army(team)])
                     let nextValue = determineHeroOffensiveStrength(heroUnit)/determineHeroDefensiveStrength(heroUnit)
                     if nextValue > currentValue
                         currentTarget = heroUnit
@@ -291,11 +290,8 @@ public function getAiList(int id) returns LinkedList<HeroAI>
     return HeroAI.heroAIs[id]
 
 
-public function HeroAI.addTeam(boolean firstTeam)
-    if firstTeam
-        team1AIs.add(this)
-    else
-        team2AIs.add(this)
+public function HeroAI.addTeam(int team)
+    teamAIs[team].add(this)
 
 
 public class HeroAI
@@ -308,7 +304,7 @@ public class HeroAI
     protected AIState state
     private vec2 homeLoc
     private vec2 targetLoc
-    private boolean firstTeam
+    private int team
     private boolean casting = false
     private string castOrder = ""
     protected boolean attacking = false
@@ -471,8 +467,8 @@ public class HeroAI
         this.hero = hero
         this.heroType = hero.getHeroType()
         this.heroUnit = this.hero.toUnit()
-        this.firstTeam = Players.team(this.ownerId) == TEAM_1
-        this.addTeam(firstTeam)
+        this.team = Players.team(this.ownerId)
+        this.addTeam(team)
 
         this.state = ATTACK
 
@@ -483,7 +479,7 @@ public class HeroAI
         itemBuild = this.heroType.getItemBuild()
         skillBuild = this.heroType.getSkillBuild()
 
-        if firstTeam
+        if team == TEAM_1
             this.homeLoc = gg_rct_GreenAltar.getCenter()
             this.targetLoc = gg_rct_BrownAltar.getCenter()
         else
@@ -614,24 +610,14 @@ public class HeroAI
         doAfter(GetRandomReal(30, 40)) -> 
             this.selectSkills()
             
-            
-
-            
-
     function levelUp()
         this.selectSkills()
 
-
-
     static function updateStatic()
-        int i = 0
-        for HeroAI ai in team1AIs
-            doAfter(i * 0.06, -> ai.update())
-            i++
-        i = 0
-        for HeroAI ai in team2AIs
-            doAfter(i * 0.06 + 0.03, -> ai.update())
-            i++
+        for int i = TEAM_1 to TEAM_2
+            for HeroAI ai in teamAIs[i]
+                doAfter(i * 0.03, -> ai.update())
+                i++
 
     function startTeamFight(TeamFight teamFight)
 
@@ -699,8 +685,8 @@ public class HeroAI
                     this.changeState(AIState.BUY_UPGRADES)
                     if(not this.noMoreUpgrades)
                         this.upgradeTimer = 4
-                        this.desiredUpgrade = HeroAI.findNextUpgrade(this.firstTeam)
-                        this.targetBlacksmith = HeroAI.findNextBlacksmith(this.firstTeam, this.heroUnit.getPos())
+                        this.desiredUpgrade = HeroAI.findNextUpgrade(this.team)
+                        this.targetBlacksmith = HeroAI.findNextBlacksmith(this.team, this.heroUnit.getPos())
                         if this.desiredUpgrade == -1 or this.targetBlacksmith == null
                             this.noMoreUpgrades = true
                             this.wantedUpgrades = 0
@@ -724,8 +710,8 @@ public class HeroAI
                     let dist = this.heroUnit.getPos().distanceTo(smithPos)
                     if dist<300
                         if this.upgradeTimer > 0
-                            this.desiredUpgrade = HeroAI.findNextUpgrade(this.firstTeam)
-                            this.targetBlacksmith = HeroAI.findNextBlacksmith(this.firstTeam, this.heroUnit.getPos())
+                            this.desiredUpgrade = HeroAI.findNextUpgrade(this.team)
+                            this.targetBlacksmith = HeroAI.findNextBlacksmith(this.team, this.heroUnit.getPos())
                             if this.desiredUpgrade == -1 or this.targetBlacksmith == null
                                 this.noMoreUpgrades = true
                                 this.wantedUpgrades = 0
@@ -782,18 +768,18 @@ public class HeroAI
                     g.destr()
 
                     if heroNearby
-                        let chance = determineWinChance(this.firstTeam, this.heroUnit.getPos())
+                        let chance = determineWinChance(this.team, this.heroUnit.getPos())
                         //start team fight for all narby AIs
                         aiMessage("attack chance = "+chance.toString())
                         if chance > 0.6
 
 
-                            let newTeamFight = new TeamFight(this.heroUnit.getPos(), this.firstTeam)
+                            let newTeamFight = new TeamFight(this.heroUnit.getPos(), this.team)
 
                             for i = 0 to MAX_HERO_COUNT-1
                                 let aiList = heroAIs[i]
                                 for ai in aiList
-                                    if ai.firstTeam == firstTeam and ai.heroUnit.getPos().distanceTo(this.heroUnit.getPos()) < TEAM_FIGHT_RANGE
+                                    if ai.team == team and ai.heroUnit.getPos().distanceTo(this.heroUnit.getPos()) < TEAM_FIGHT_RANGE
                                         if ai.state == AIState.ATTACK or ai.state == AIState.TEAM_FIGHT
                                             if ai.state == AIState.ATTACK
                                                 ai.startTeamFight(newTeamFight)
@@ -893,9 +879,9 @@ public class HeroAI
 
                 //print(this.heroUnit.getOwner().getColor().toColor().toColorString()+"["+this.heroUnit.getName()+"]|r "+" wants upgrades: "+I2S(this.wantedUpgrades))
 
-    static function findNextUpgrade(bool team) returns int
+    static function findNextUpgrade(int team) returns int
 
-        let teamPlayer = team ? players[Teams.army1()] : players[Teams.army2()]
+        let teamPlayer = players[Teams.army(team)]
         int array upgrades
         int max = 5
         int index = -1
@@ -911,10 +897,10 @@ public class HeroAI
 
         return ret
 
-    static function findNextBlacksmith(bool team, vec2 pos) returns unit
+    static function findNextBlacksmith(int team, vec2 pos) returns unit
         unit ret = null
         real minDist = 1000000
-        if team
+        if team == TEAM_1
             for i=0 to 1
                 if blacksmithAliveTeam1[i]
                     let dist = pos.distanceTo(udg_GreenBlacksmith[i].getPos())
@@ -942,7 +928,7 @@ public class HeroAI
     Towers and units are more relevant for the defending team, as the offensive team usually won't benefit from tower support.
 
 */
-function determineWinChance(boolean firstTeam, vec2 pos) returns real
+function determineWinChance(int team, vec2 pos) returns real
 
     real strengthTeam1
     real strengthTeam2
@@ -958,9 +944,9 @@ function determineWinChance(boolean firstTeam, vec2 pos) returns real
 
     //don't fight inside the hero tower
     if gg_rct_GreenHeroTower.contains(pos)
-        return firstTeam ? 1 : 0
+        return team == TEAM_1 ? 1 : 0
     else if gg_rct_BrownHeroTower.contains(pos)
-        return firstTeam ? 0 : 1
+        return team == TEAM_1 ? 0 : 1
 
     let g = CreateGroup()
     g.enumUnitsInRange(pos, TEAM_FIGHT_RANGE)
@@ -986,23 +972,23 @@ function determineWinChance(boolean firstTeam, vec2 pos) returns real
                     if u.isType(UNIT_TYPE_ATTACKS_GROUND) // tower
                         if u.getTypeId() == OUTER_TOWER
                             if uTeam1
-                                if firstTeam
+                                if team == TEAM_1
                                     towerStrength1 += 100
                                 else
                                     towerStrength1 += 600
                             else if uTeam2
-                                if firstTeam
+                                if team == TEAM_1
                                     towerStrength2 += 600
                                 else
                                     towerStrength2 += 100
                         else if u.getTypeId() == GATE_TOWER or u.getTypeId() == BASE_TOWER
                             if uTeam1
-                                if firstTeam
+                                if team == TEAM_1
                                     towerStrength1 += 150
                                 else
                                     towerStrength1 += 900
                             else if uTeam2
-                                if firstTeam
+                                if team == TEAM_1
                                     towerStrength2 += 900
                                 else
                                     towerStrength2 += 150
@@ -1014,12 +1000,12 @@ function determineWinChance(boolean firstTeam, vec2 pos) returns real
                     heroStrength2 += determineHeroStrength(u)
             else
                 if uTeam1
-                    if firstTeam
+                    if team == TEAM_1
                         unitStrength1 += 15
                     else
                         unitStrength1 += 25
                 else if uTeam2
-                    if firstTeam
+                    if team == TEAM_1
                         unitStrength2 += 25
                     else
                         unitStrength2 += 15
@@ -1035,7 +1021,7 @@ function determineWinChance(boolean firstTeam, vec2 pos) returns real
     let chance1 = strengthTeam1/(strengthTeam1 + strengthTeam2)
 
     real ret
-    if firstTeam
+    if team == TEAM_1
         ret = chance1
     else
         ret = 1-chance1

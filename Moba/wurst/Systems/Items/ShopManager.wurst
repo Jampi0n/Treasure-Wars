@@ -14,6 +14,8 @@ constant SOUND_ITEM_BUY = new SoundDefinition(Sounds.receiveGold, false, false)
 constant SOUND_ITEM_BUY_3D = new SoundDefinition(Sounds.receiveGold, false, true)
 constant SOUND_RECIPE_TOO_EXPENSIVE = new SoundDefinition(Sounds.error, false, false)
 
+constant SHOP_POSITION = [gg_rct_GreenAltar.getCenter(), gg_rct_BrownAltar.getCenter()]
+
 GUI array gui
 
 public function getGUI(int i) returns GUI
@@ -39,7 +41,7 @@ function buySuccess(unit hero, item itm, int totalCost)
         hero.getOwner().addGold(totalCost)
 
 
-function buyCondition(unit hero, bool firstTeam, bool showMessage) returns bool
+function buyCondition(unit hero, int team, bool showMessage) returns bool
 
     if not hero.isAlive()
         if showMessage
@@ -48,7 +50,7 @@ function buyCondition(unit hero, bool firstTeam, bool showMessage) returns bool
 
 
     if hero.isAlive()
-        let shopCenter = firstTeam ? gg_rct_GreenAltar.getCenter() : gg_rct_BrownAltar.getCenter()
+        let shopCenter = SHOP_POSITION[team]
         let dist = hero.getPos().distanceTo(shopCenter)
         if dist > BUY_RANGE
             if showMessage
@@ -63,7 +65,7 @@ init
     execute() ->
         for i = Teams.first1() to Teams.last2()
             gui[i] = new GUI(players[i], null)
-            ..setBuyCondition( (unit hero, bool showMessage) -> buyCondition(hero, i <= Teams.last1(), showMessage))
+            ..setBuyCondition( (unit hero, bool showMessage) -> buyCondition(hero, Players.team(i), showMessage))
             ..setBuySuccess( (unit hero, item itm, int totalCost) -> buySuccess(hero, itm, totalCost))
             ..setBuyFailed( (unit hero, int itemId, int cost, int gold) -> buyFailed(hero, itemId, cost, gold))
 
