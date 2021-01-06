@@ -32,11 +32,6 @@ function getIsReplay() returns bool
 
 public int objectCount = 0
 
-public enum Lane
-    TOP
-    MID
-    BOT
-
 init
     SetCreepCampFilterState( false )
     SetAllyColorFilterState( 0 )

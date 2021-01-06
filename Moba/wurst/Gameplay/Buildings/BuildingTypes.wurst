@@ -5,7 +5,6 @@ import PlayerControl
 import ClosureTimers
 import initlater WaveSpawn
 import initlater UnitTypeConfig
-import PathUnit
 import General
 import BuffTypeConfig
 import UnitWrapper
@@ -34,20 +33,17 @@ public constant int HERO_TOWER = 'n000'
 public constant int WORKSHOP = 'h00A'
 public constant int WORKSHOP_REBUILD = 'h01A'
 
-public boolean array barracksAliveTeam1 = [true, true, true]
-public boolean array barracksAliveTeam2 = [true, true, true]
-
-public boolean array workshopAliveTeam1 = [true, true]
-public boolean array workshopAliveTeam2 = [true, true]
-
-public boolean array blacksmithAliveTeam1 = [true, true]
-public boolean array blacksmithAliveTeam2 = [true, true]
+public unit array barracks = [udg_GreenBarracks[0], udg_GreenBarracks[1], udg_GreenBarracks[2], udg_BrownBarracks[0], udg_BrownBarracks[1], udg_BrownBarracks[2]]
+public boolean array barracksAlive = [true, true, true, true, true, true]
+public unit array workshop = [udg_GreenWorkShop[0], udg_GreenWorkShop[1], udg_BrownWorkShop[0], udg_BrownWorkShop[1]]
+public boolean array workshopAlive = [true, true, true, true]
+public unit array blacksmith = [udg_GreenBlacksmith[0], udg_GreenBlacksmith[1], udg_BrownBlacksmith[0], udg_BrownBlacksmith[1]]
+public boolean array blacksmithAlive = [true, true, true, true]
 
 public int array UPGRADES = ['R000', 'R001', 'R002', 'R003']
 public int array UPGRADE_ITEMS = ['I002', 'I003', 'I004', 'I005']
 
-int farmsTeam1 = 26
-int farmsTeam2 = farmsTeam1
+int array numberOfFarms = [26, 26]
 
 constant real BARRACKS_REBUILD_TIME = -1 //300 // -1 means the building cannot be rebuilt
 constant real WORKSHOP_REBUILD_TIME = -1 //60 // -1 means the building cannot be rebuilt
@@ -84,10 +80,10 @@ VictoryState victoryState
 
 
 int birth = 0
-group militiaTeam1 = CreateGroup()
-group militiaTeam2 = CreateGroup()
-boolean removeMilitaTeam1 = true
-boolean removeMilitaTeam2 = true
+vec2 array militaSpawn = [gg_rct_GreenCastle.getCenter(), gg_rct_BrownCastle.getCenter()]
+LinkedList<unit> array militia = [new LinkedList<unit>(), new LinkedList<unit>()]
+boolean array removeMilita = [true, true]
+rect array militiaDespawn = [gg_rct_GreenMilitiaDespawn, gg_rct_BrownMilitiaDespawn]
 
 
 function setVictoryState(VictoryState newState)
@@ -163,10 +159,7 @@ function onBuildingDeath()
 		if unitId == FARM
 			bounty = 50
 			globalBounty = 50
-			if buildingOwnerId == Teams.army1()
-				farmsTeam1--
-			else
-				farmsTeam2--
+			numberOfFarms[Players.team(buildingOwnerId)]--
 
 		else if unitId == OUTER_TOWER
 			bounty = 75
@@ -192,44 +185,32 @@ function onBuildingDeath()
 				UnitAddType(newBuilding, UNIT_TYPE_ANCIENT)
 				
 
-				for i=0 to 2
+				for i=0 to 5
 					
 					let count = (BARRACKS_REBUILD_TIME / 0.1 +0.5).toInt()
 
-					if(building==udg_GreenBarracks[i])
-						udg_GreenBarracks[i] = newBuilding
-						barracksAliveTeam1[i] = false
+					if(building==barracks[i])
+						barracks[i] = newBuilding
+						barracksAlive[i] = false
+						barracksSpawner[i].disable()
 						doPeriodicallyCounted(0.1, count, (CallbackCounted cb) -> (begin
 							if cb.isLast()
 								let owner = newBuilding.getOwner()
 								let pos = newBuilding.getPos()
 								newBuilding.remove()
-								udg_GreenBarracks[i] = createUnit(owner, BARRACKS, pos, (270).fromDeg())
-								barracksAliveTeam1[i] = true
-							else
-								newBuilding.setHP(max(0.5, (1-cb.getCount()/count) * newBuilding.getMaxHP() ) )
-						end))
-					else if(building==udg_BrownBarracks[i])
-						udg_BrownBarracks[i] = newBuilding
-						barracksAliveTeam2[i] = false
-						doPeriodicallyCounted(0.1, count, (CallbackCounted cb) -> (begin
-							if cb.isLast()
-								let owner = newBuilding.getOwner()
-								let pos = newBuilding.getPos()
-								newBuilding.remove()
-								udg_BrownBarracks[i] = createUnit(owner, BARRACKS, pos, (270).fromDeg())
-								barracksAliveTeam2[i] = true
+								barracks[i] = createUnit(owner, BARRACKS, pos, (270).fromDeg())
+								barracksAlive[i] = true
+								barracksSpawner[i].enable()
 							else
 								newBuilding.setHP(max(0.5, (1-cb.getCount()/count) * newBuilding.getMaxHP() ) )
 						end))
 			else
-				for i=0 to 2
-					if(building==udg_GreenBarracks[i])
-						udg_GreenBarracks[i] = null
-						barracksAliveTeam1[i] = false
-					else if(building==udg_BrownBarracks[i])
-						udg_BrownBarracks[i] = null
-						barracksAliveTeam2[i] = false
+				for i=0 to 5
+					if(building==barracks[i])
+						barracks[i] = null
+						barracksAlive[i] = false
+						barracksSpawner[i].disable()
+
 
 		else if unitId == WORKSHOP
 			bounty = 150
@@ -242,26 +223,18 @@ function onBuildingDeath()
 				..setHP(0.5)
 				UnitAddType(newBuilding, UNIT_TYPE_ANCIENT)
 
-				for i=0 to 1
-					if(building==udg_GreenWorkShop[i])
-						udg_GreenWorkShop[i] = newBuilding
-						workshopAliveTeam1[i] = false
-
-					else if(building==udg_BrownWorkShop[i])
-						workshopAliveTeam2[i] = false
-						udg_BrownWorkShop[i] = newBuilding
+				for i=0 to 3
+					if(building==workshop[i])
+						workshop[i] = newBuilding
+						workshopAlive[i] = false
+						workshopSpawner[i].disable()
 			else
-				for i=0 to 1
-					if(building==udg_GreenWorkShop[i])
-						udg_GreenWorkShop[i] = null
-						workshopAliveTeam1[i] = false
-
-					else if(building==udg_BrownWorkShop[i])
-						workshopAliveTeam2[i] = false
-						udg_BrownWorkShop[i] = null
+				for i=0 to 3
+					if(building==workshop[i])
+						workshop[i] = null
+						workshopAlive[i] = false
+						workshopSpawner[i].disable()
 					
-
-
 		else if unitId == ARCANE_VAULT
 			bounty = 100
 			globalBounty = 100
@@ -270,12 +243,9 @@ function onBuildingDeath()
 			bounty = 150
 			globalBounty = 150
 
-			for i=0 to 1
-				if(building==udg_GreenBlacksmith[i])
-					blacksmithAliveTeam1[i] = false
-
-				else if(building==udg_BrownBlacksmith[i])
-					blacksmithAliveTeam2[i] = false
+			for i=0 to 3
+				if building==blacksmith[i]
+					blacksmithAlive[i] = false
 
 
 		else if unitId == CASTLE
@@ -310,6 +280,7 @@ function onBuildingAbility()
 	let building = GetTriggerUnit()
 	let hero = GetBuyingUnit()
 	let heroPos = hero.getPos3Zero()
+	let team = Players.team(building.getOwner().getId())
 	bool buildingAbilityUsed = true
 	if itemTypeId == 'I000' //Rebuild Workshop
 		doPeriodicallyCounted(1, 5, (CallbackCounted cb) -> begin
@@ -331,53 +302,30 @@ function onBuildingAbility()
 		doPeriodicallyCounted(0.1, count, (CallbackCounted cb) -> (begin
 			if cb.isLast()
 				UnitRemoveType(building, UNIT_TYPE_ANCIENT)
-				for i = 0 to 1
-					if building == udg_BrownWorkShop[i]
-						workshopAliveTeam2[i] = true
+				for i = 0 to 3
+					if building == workshop[i]
+						workshopAlive[i] = true
 						let owner = building.getOwner()
 						let pos = building.getPos()
 						building.remove()
-						udg_BrownWorkShop[i] = createUnit(owner, WORKSHOP, pos, (270).fromDeg())
-						break
-					if building == udg_GreenWorkShop[i]
-						workshopAliveTeam1[i] = true
-						let owner = building.getOwner()
-						let pos = building.getPos()
-						building.remove()
-						udg_GreenWorkShop[i] = createUnit(owner, WORKSHOP, pos, (270).fromDeg())
+						workshop[i] = createUnit(owner, WORKSHOP, pos, (270).fromDeg())
 						break
 			else
 				building.setHP(max(0.5, (1-cb.getCount()/count) * building.getMaxHP() ) )
 		end))
 	else if itemTypeId == 'I001' //Siege Engine
 		SOUND_SIEGE_ENGINE.playOnPoint(heroPos).snd.setVolume(150)
-		if building == udg_GreenWorkShop[0]
-			let spawnedUnit = spawnUnit(TEAM_1, TANK, gg_rct_GreenWorkShopTop.getCenter())
-			new PathUnitNew(spawnedUnit, AssignedPath.GREEN_TOP)
-		else if building == udg_GreenWorkShop[1]
-			let spawnedUnit = spawnUnit(TEAM_1, TANK, gg_rct_GreenWorkShopBot.getCenter())
-			new PathUnitNew(spawnedUnit, AssignedPath.GREEN_BOT)
-		else if building == udg_BrownWorkShop[0]
-			let spawnedUnit = spawnUnit(TEAM_2, TANK, gg_rct_BrownWorkShopTop.getCenter())
-			new PathUnitNew(spawnedUnit, AssignedPath.BROWN_TOP)
-		else if building == udg_BrownWorkShop[1]
-			let spawnedUnit = spawnUnit(TEAM_2, TANK, gg_rct_BrownWorkShopBot.getCenter())
-			new PathUnitNew(spawnedUnit, AssignedPath.BROWN_BOT)
+		for i = 0 to 3
+			if building == workshop[i]
+				workshopSpawner[i].spawn(TANK)
+				break
 
 	else if itemTypeId == 'I007' //Mortar Team
 		SOUND_MORTAR_TEAM.playOnPoint(heroPos).snd.setVolume(150)
-		if building == udg_GreenWorkShop[0]
-			let spawnedUnit = spawnUnit(TEAM_1, MORTAR_TEAM, gg_rct_GreenWorkShopTop.getCenter())
-			new PathUnitNew(spawnedUnit, AssignedPath.GREEN_TOP)
-		else if building == udg_GreenWorkShop[1]
-			let spawnedUnit = spawnUnit(TEAM_1, MORTAR_TEAM, gg_rct_GreenWorkShopBot.getCenter())
-			new PathUnitNew(spawnedUnit, AssignedPath.GREEN_BOT)
-		else if building == udg_BrownWorkShop[0]
-			let spawnedUnit = spawnUnit(TEAM_2, MORTAR_TEAM, gg_rct_BrownWorkShopTop.getCenter())
-			new PathUnitNew(spawnedUnit, AssignedPath.BROWN_TOP)
-		else if building == udg_BrownWorkShop[1]
-			let spawnedUnit = spawnUnit(TEAM_2, MORTAR_TEAM, gg_rct_BrownWorkShopBot.getCenter())
-			new PathUnitNew(spawnedUnit, AssignedPath.BROWN_BOT)
+		for i = 0 to 3
+			if building == workshop[i]
+				workshopSpawner[i].spawn(team == TEAM_1 ? MORTAR_TEAM : MORTAR_TEAM_2)
+				break
 		
 
 	else if itemTypeId == 'I002' //Melee Attack
@@ -458,75 +406,34 @@ function onBuildingAbility()
 
 	else if itemTypeId == 'I006' //Call to Arms
 		SOUND_CALL_TO_ARMS.playOnPoint(heroPos).snd.setVolume(350)
-		if Players.team(building.getOwner().getId()) == TEAM_1
-			removeMilitaTeam1 = false
-			for i = 0 to 15
-				let spawnedUnit = spawnUnit(TEAM_1, MILITIA_DEFEND, gg_rct_GreenCastle.getCenter())
-				militiaTeam1.addUnit(spawnedUnit)
-			doAfter(45, () -> (begin
-				removeMilitaTeam1 = true
-				ForGroup(militiaTeam1, () -> (begin
-					let u = GetEnumUnit()
-					u.addBuff(u, -1, DISARMED, 1)
-					u.issuePointOrder("move", gg_rct_GreenCastle.getCenter())
-					if gg_rct_GreenMilitiaDespawn.contains(u.getPos())
-						militiaTeam1.removeUnit(u)
-						u.remove()
-				end))
-			end))
-			doAfter(50, () -> (begin
-				removeMilitaTeam1 = true
-				ForGroup(militiaTeam1, () -> (begin
-					let u = GetEnumUnit()
-					u.addBuff(u, -1, DISARMED, 1)
-					u.issuePointOrder("move", gg_rct_GreenCastle.getCenter())
-					if gg_rct_GreenMilitiaDespawn.contains(u.getPos())
-						militiaTeam1.removeUnit(u)
-						u.remove()
-				end))
-			end))
-			doAfter(89, () -> (begin
-				ForGroup(militiaTeam1, () -> (begin
-					let u = GetEnumUnit()
-					militiaTeam1.removeUnit(u)
+		removeMilita[team] = false
+		for i = 0 to 15
+			let spawnedUnit = spawnUnit(TEAM_1, MILITIA_DEFEND, militaSpawn[team])
+			militia[team].add(spawnedUnit)
+		doAfter(45, () -> (begin
+			removeMilita[team] = true
+			for u in militia[team]
+				u.addBuff(u, -1, DISARMED, 1)
+				u.issuePointOrder("move", militaSpawn[team])
+				if militiaDespawn[team].contains(u.getPos())
+					militia[team].remove(u)
 					u.remove()
-				end))
-			end))
+		end))
+		doAfter(50, () -> (begin
+			removeMilita[team] = true
+			for u in militia[team]
+				u.addBuff(u, -1, DISARMED, 1)
+				u.issuePointOrder("move", militaSpawn[team])
+				if militiaDespawn[team].contains(u.getPos())
+					militia[team].remove(u)
+					u.remove()
+		end))
+		doAfter(89, () -> (begin
+			for u in militia[team]
+				militia[team].remove(u)
+				u.remove()
+		end))
 
-		else
-			removeMilitaTeam2 = false
-			for i = 0 to 15
-				let spawnedUnit = spawnUnit(TEAM_2, MILITIA_DEFEND, gg_rct_BrownCastle.getCenter())
-				militiaTeam2.addUnit(spawnedUnit)
-			doAfter(45, () -> (begin
-				removeMilitaTeam2 = true
-				ForGroup(militiaTeam2, () -> (begin
-					let u = GetEnumUnit()
-					u.addBuff(u, -1, DISARMED, 1)
-					u.issuePointOrder("move", gg_rct_BrownCastle.getCenter())
-					if gg_rct_BrownMilitiaDespawn.contains(u.getPos())
-						militiaTeam2.removeUnit(u)
-						u.remove()
-				end))
-			end))
-			doAfter(50, () -> (begin
-				removeMilitaTeam2 = true
-				ForGroup(militiaTeam2, () -> (begin
-					let u = GetEnumUnit()
-					u.addBuff(u, -1, DISARMED, 1)
-					u.issuePointOrder("move", gg_rct_BrownCastle.getCenter())
-					if gg_rct_BrownMilitiaDespawn.contains(u.getPos())
-						militiaTeam2.removeUnit(u)
-						u.remove()
-				end))
-			end))
-			doAfter(89, () -> (begin
-				ForGroup(militiaTeam2, () -> (begin
-					let u = GetEnumUnit()
-					militiaTeam2.removeUnit(u)
-					u.remove()
-				end))
-			end))
 
 
 	else if itemTypeId == 'I008' //Teleport Top
@@ -603,16 +510,11 @@ function onBuildingAbility()
 
 
 
-function onMilitiaDespawn()
-	let u = GetEnumUnit()
-	if u.getTypeId() == MILITIA_DEFEND
-		if removeMilitaTeam1
-			if Players.team(u.getOwner().getId()) == TEAM_1 and gg_rct_GreenMilitiaDespawn.contains(u.getPos())
-				militiaTeam1.removeUnit(u)
-				u.remove()
-		if removeMilitaTeam2
-			if Players.team(u.getOwner().getId()) == TEAM_2 and gg_rct_BrownMilitiaDespawn.contains(u.getPos())
-				militiaTeam2.removeUnit(u)
+function onMilitiaDespawn(int team)
+	if removeMilita[team]
+		for u in militia[team]
+			if Players.team(u.getOwner().getId()) == team and militiaDespawn[team].contains(u.getPos())
+				militia[team].remove(u)
 				u.remove()
 
 constant HOME_BUFF_ID = compiletime(createAuraBuff("Protected", "This unit is protected; it is invulnerable and is being healed.", Icons.bTNInvulnerable))
@@ -645,23 +547,12 @@ function homeInvulnerability()
 	nearby.destr()
 
 public function income()
-	let factorTeam1 = 5
-	let factorTeam2 = 5
-
-	/*let difference = CPlayer.getTeamHeroCount(Team.TEAM1) - CPlayer.getTeamHeroCount(Team.TEAM2)
-
-	if difference > 0
-		factorTeam1 -= max(1, difference)
-	else if difference < 0
-		factorTeam2 -= max(1, -difference)*/
+	let goldFactor = 5
 
 	for i = 0 to MAX_HERO_COUNT-1
-		let farms = Players.isTeam1(i) ? farmsTeam1 : farmsTeam2
-		let factor = Players.isTeam1(i) ? factorTeam1 : factorTeam2
-
-
-		let gold = factor * farms
-		printTimedToPlayer("You get |cffffcc00"+gold.toString()+"|r gold (|cffffcc00+"+factor.toString()+"|r for every Farm).", 8, players[i])
+		let farms = numberOfFarms[Players.team(i)]
+		let gold = goldFactor * farms
+		printTimedToPlayer("You get |cffffcc00"+gold.toString()+"|r gold (|cffffcc00+"+goldFactor.toString()+"|r for every Farm).", 8, players[i])
 		PlayerWrapper.addGoldEx(i, gold)
 	
 
@@ -678,8 +569,8 @@ init
 	CreateTrigger()
 	..registerTimerEvent(0.1, true)
 	..addAction()->
-		ForGroup(militiaTeam1, function onMilitiaDespawn)
-		ForGroup(militiaTeam2, function onMilitiaDespawn)
+		onMilitiaDespawn(TEAM_1)
+		onMilitiaDespawn(TEAM_2)
 
 	BUFF_HOME.setupBuffWithIcon(HOME_BUFF_ID, HOME_ABILTIY_ID)
 

@@ -17,7 +17,12 @@ constant teamAIs = [new LinkedList<HeroAI>,new LinkedList<HeroAI>,new LinkedList
 
 public constant real TEAM_FIGHT_RANGE = 1200
 constant real HALF_DISTANCE = 11200
-constant real UPDATE_INTERVAL = 0.4
+constant real UPDATE_INTERVAL = 0.35
+
+public enum Lane
+    TOP
+    MID
+    BOT
 
 public enum AbilityTargetType
     INSTANT
@@ -217,7 +222,6 @@ public class TeamFight
             
 
     function update()
-
         real x = 0
         real y = 0
         int count = 0
@@ -274,9 +278,6 @@ public class TeamFight
 
         this.target = currentTarget
 
-
-
-
     function getTeamFightLoc() returns vec2
         return this.teamFightLoc
 
@@ -328,7 +329,7 @@ public class HeroAI
 
     private int retreatCounter = 0
 
-    private static trigger attackedByTower
+    private static trigger attackedByHeroTower
     private static constant updateTimer = getTimer()
     
 
@@ -351,9 +352,7 @@ public class HeroAI
     private int upgradeGold = 0
 
     function aiMessage(string _msg)
-        
         //print(fromPlayer(this.heroUnit.getOwner()).toColorString()+"["+this.heroUnit.getName()+"]|r "+msg)
-
 
     function getHomeLoc() returns vec2
         return this.homeLoc
@@ -450,7 +449,7 @@ public class HeroAI
                 ai.levelUp()
         end))
 
-        attackedByTower = CreateTrigger()
+        attackedByHeroTower = CreateTrigger()
             ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_ATTACKED)
             ..addAction(() ->(begin
             let ai = getAI(GetTriggerUnit())
@@ -473,6 +472,7 @@ public class HeroAI
         this.state = ATTACK
 
         heroAIs[this.ownerId].add(this)
+        heroAiMap.put(this.heroUnit, this)
         this.attackTimer.setData(this castTo int)
 
         //test:
@@ -485,11 +485,6 @@ public class HeroAI
         else
             this.homeLoc = gg_rct_BrownAltar.getCenter()
             this.targetLoc = gg_rct_GreenAltar.getCenter()
-
-
-
-        
-        
 
         let rand = GetRandomInt(1, 3)
         if rand == 1
@@ -567,10 +562,6 @@ public class HeroAI
                 else
                     if i == RecommendedItems.getCount(unitTypeId) - 1
                         hasAllItems = true
-        
-
-
-
 
     function selectSingleSkill(string char)
         int abilcode = -1
@@ -586,7 +577,6 @@ public class HeroAI
             abilcode = this.heroType.getAbilityId(AbilitySlot.PASSIVE)
 
         SelectHeroSkill(this.heroUnit, abilcode)
-
 
     function selectSkills()
         int skillPoints
@@ -614,8 +604,9 @@ public class HeroAI
         this.selectSkills()
 
     static function updateStatic()
-        for int i = TEAM_1 to TEAM_2
-            for HeroAI ai in teamAIs[i]
+        int i = 0
+        for int t = TEAM_1 to TEAM_2
+            for HeroAI ai in teamAIs[t]
                 doAfter(i * 0.03, -> ai.update())
                 i++
 
@@ -637,12 +628,14 @@ public class HeroAI
         this.damageCurrent += damage
 
     function retreatTemporarily(int counter, boolean useAI)
+        if casting or attacking
+            this.heroUnit.issueImmediateOrder("stop")
+            casting = false
+            attacking = false
+            updateRetreatLoc()
+            this.heroUnit.issuePointOrder("move", this.currentRetreatLoc)
         if useAI
             this.changeState(AIState.RETREAT_TEMP_AI)
-            if casting or attacking
-                this.heroUnit.issueImmediateOrder("stop")
-                casting = false
-                attacking = false
         else
             this.changeState(AIState.RETREAT_TEMP)
         this.retreatCounter = counter
@@ -902,18 +895,18 @@ public class HeroAI
         real minDist = 1000000
         if team == TEAM_1
             for i=0 to 1
-                if blacksmithAliveTeam1[i]
-                    let dist = pos.distanceTo(udg_GreenBlacksmith[i].getPos())
+                if blacksmithAlive[i]
+                    let dist = pos.distanceTo(blacksmith[i].getPos())
                     if dist < minDist 
                         minDist = dist
-                        ret = udg_GreenBlacksmith[i]
+                        ret = blacksmith[i]
         else
-            for i=0 to 1
-                if blacksmithAliveTeam2[i]
-                    let dist = pos.distanceTo(udg_BrownBlacksmith[i].getPos())
+            for i=2 to 3
+                if blacksmithAlive[i]
+                    let dist = pos.distanceTo(blacksmith[i].getPos())
                     if dist < minDist 
                         minDist = dist
-                        ret = udg_BrownBlacksmith[i]
+                        ret = blacksmith[i]
         return ret
 
 
@@ -958,19 +951,20 @@ function determineWinChance(int team, vec2 pos) returns real
         g.removeUnit(u)
 
         if u.isAlive()
-
-            let uTeam1 = u.getOwner().isAllyOf(players[Teams.army1()])
-            let uTeam2 = u.getOwner().isAllyOf(players[Teams.army2()])
+            let p = u.getOwner().getId()
+            let uTeam1 = Players.team(p) == TEAM_1
+            let uTeam2 = Players.team(p) == TEAM_2
+            let uType = u.getTypeId()
 
             if u.isType(UNIT_TYPE_STRUCTURE)
-                if u.getTypeId() == HERO_TOWER
+                if uType == HERO_TOWER
                     if uTeam1
                         towerStrength1 += 100000
                     else
                         towerStrength2 += 100000
                 else
                     if u.isType(UNIT_TYPE_ATTACKS_GROUND) // tower
-                        if u.getTypeId() == OUTER_TOWER
+                        if uType == OUTER_TOWER
                             if uTeam1
                                 if team == TEAM_1
                                     towerStrength1 += 100
@@ -981,7 +975,7 @@ function determineWinChance(int team, vec2 pos) returns real
                                     towerStrength2 += 600
                                 else
                                     towerStrength2 += 100
-                        else if u.getTypeId() == GATE_TOWER or u.getTypeId() == BASE_TOWER
+                        else if uType == GATE_TOWER or uType == BASE_TOWER
                             if uTeam1
                                 if team == TEAM_1
                                     towerStrength1 += 150
