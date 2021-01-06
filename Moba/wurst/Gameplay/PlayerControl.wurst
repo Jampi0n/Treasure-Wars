@@ -164,9 +164,9 @@ public class ScoreTable
     static function maximize()
         mBoard.maximize()
 
-    static function updateHeader(boolean firstTeam)
-        let row = (firstTeam ? 0 : Teams.HERO_PLAYER_COUNT[TEAM_1] + 1)
-        let teamName = Teams.COLORED_NAME[Teams.team(firstTeam)]
+    static function updateHeader(int team)
+        let row = (team == TEAM_1 ? 0 : Teams.HERO_PLAYER_COUNT[TEAM_1] + 1)
+        let teamName = Teams.COLORED_NAME[team]
         
         mBoard.getItem(row, 0)
             ..setStyle(true, false)
@@ -207,8 +207,8 @@ public class ScoreTable
         int index = 0
         mBoard.display(true)
 
-        updateHeader(true)
-        updateHeader(false)
+        updateHeader(TEAM_1)
+        updateHeader(TEAM_2)
 
         for int i in playerList
             let p = players[i]
@@ -436,26 +436,8 @@ public abstract class PlayerWrapper
         for p in Teams.HERO_PLAYERS[TEAM_2]
             revealIcon(p)
 
-    @deprecated("Use Player.addHeros instead.") static function addHero(int id, Hero whichHero)
-        Players.addHero(id, whichHero)
-
-    @deprecated("Use Players instead.") static function getPlayerHeroes(int id) returns LinkedList<Hero>
-        return Players.heroList(id)
-
     @deprecated("Do not use specific player heroes.") static function getPlayerHero(int id, int heroIndex) returns Hero
         return Players.heroList(id).get(heroIndex)
-
-    @deprecated("Use Teams instead.") static function getHeroTeam(int team) returns LinkedList<int>
-        return Teams.HERO_PLAYERS[team]
-
-    @deprecated("Use Teams instead.") static function getHeroTeam(bool firstTeam) returns LinkedList<int>
-        return Teams.HERO_PLAYERS[Teams.team(firstTeam)]
-
-    @deprecated("Use Teams instead.") static function getTeamHeroCount(int team) returns int
-        return Teams.HERO_PLAYER_COUNT[team]
-
-    @deprecated("Use Teams instead.") static function getTeamHeroCount(bool firstTeam) returns int
-        return Teams.HERO_PLAYER_COUNT[Teams.team(firstTeam)]
 
     static function addGoldEx(int id, real gold)
         realGold[id] += gold

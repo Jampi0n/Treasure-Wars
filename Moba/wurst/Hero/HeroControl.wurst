@@ -78,7 +78,7 @@ public class Hero
     private int lastAssistant = -1
     private timer reviveTimer
     private timerdialog reviveWindow
-    private boolean firstTeam
+    private int team
 
     private int array [5] skillIds
 
@@ -114,7 +114,7 @@ public class Hero
 
 
     function setup()
-        this.firstTeam = Players.team(this.ownerId) == TEAM_1
+        this.team = Players.team(this.ownerId)
         this.heroType = HeroType.getHeroType(this.hero.getTypeId())
 
         this.skillIds[0] = this.heroType.getAbilityId(AbilitySlot.Q)
@@ -278,7 +278,7 @@ public class Hero
         let damageSource = GetEventDamageSource().getOwner()
         let damageSourceId = damageSource.getId()
         if damageSource != null
-            if firstTeam
+            if team == TEAM_1
                 if Teams.first2() <= damageSourceId and damageSourceId <= Teams.last2()
                     this.addAssistDuration(damageSource.getId())
             else
@@ -291,7 +291,7 @@ public class Hero
     function revive()
         TimerDialogDisplay(this.reviveWindow, false)
         vec2 pos
-        if this.firstTeam
+        if this.team == TEAM_1
             pos = gg_rct_GreenAltar.getCenter()+vec2(128,128)
         else
             pos = gg_rct_BrownAltar.getCenter()-vec2(128,128)
@@ -337,7 +337,7 @@ public class Hero
         boolean replaceKiller = false
 
         //team 1 hero dies
-        if firstTeam
+        if this.team == TEAM_1
             //killer not in team 2
             if killingId < Teams.first2() or killingId > Teams.last2()
                 replaceKiller = true
@@ -363,7 +363,7 @@ public class Hero
                 if killingId != Teams.army1() and killingId != Teams.army2() and killingId != PLAYER_NEUTRAL_AGGRESSIVE
                     unknownKiller = true
 
-        if this.firstTeam
+        if this.team == TEAM_1
             for assistantId in Teams.HERO_PLAYERS[Teams.team(false)]
                 let time = this.assistMap.get(assistantId)
                 if time > gameTime and assistantId != killingId
@@ -403,7 +403,7 @@ public class Hero
                     PlayerWrapper.addHeroKill(killingId, killingId <= Teams.last2())
                 
                     let xp = (this.level + 5) * 10.
-                    Teams.rewardXp(Teams.team(not this.firstTeam), this.hero.getPos(), xp)
+                    Teams.rewardXp(Teams.invert(this.team), this.hero.getPos(), xp)
                     destroy assistList
                     
             else

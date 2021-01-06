@@ -352,31 +352,31 @@ function onBuildingAbility()
 	else if itemTypeId == 'I001' //Siege Engine
 		SOUND_SIEGE_ENGINE.playOnPoint(heroPos).snd.setVolume(150)
 		if building == udg_GreenWorkShop[0]
-			let spawnedUnit = spawnUnit(true, TANK, gg_rct_GreenWorkShopTop.getCenter())
+			let spawnedUnit = spawnUnit(TEAM_1, TANK, gg_rct_GreenWorkShopTop.getCenter())
 			new PathUnitNew(spawnedUnit, AssignedPath.GREEN_TOP)
 		else if building == udg_GreenWorkShop[1]
-			let spawnedUnit = spawnUnit(true, TANK, gg_rct_GreenWorkShopBot.getCenter())
+			let spawnedUnit = spawnUnit(TEAM_1, TANK, gg_rct_GreenWorkShopBot.getCenter())
 			new PathUnitNew(spawnedUnit, AssignedPath.GREEN_BOT)
 		else if building == udg_BrownWorkShop[0]
-			let spawnedUnit = spawnUnit(false, TANK, gg_rct_BrownWorkShopTop.getCenter())
+			let spawnedUnit = spawnUnit(TEAM_2, TANK, gg_rct_BrownWorkShopTop.getCenter())
 			new PathUnitNew(spawnedUnit, AssignedPath.BROWN_TOP)
 		else if building == udg_BrownWorkShop[1]
-			let spawnedUnit = spawnUnit(false, TANK, gg_rct_BrownWorkShopBot.getCenter())
+			let spawnedUnit = spawnUnit(TEAM_2, TANK, gg_rct_BrownWorkShopBot.getCenter())
 			new PathUnitNew(spawnedUnit, AssignedPath.BROWN_BOT)
 
 	else if itemTypeId == 'I007' //Mortar Team
 		SOUND_MORTAR_TEAM.playOnPoint(heroPos).snd.setVolume(150)
 		if building == udg_GreenWorkShop[0]
-			let spawnedUnit = spawnUnit(true, MORTAR_TEAM, gg_rct_GreenWorkShopTop.getCenter())
+			let spawnedUnit = spawnUnit(TEAM_1, MORTAR_TEAM, gg_rct_GreenWorkShopTop.getCenter())
 			new PathUnitNew(spawnedUnit, AssignedPath.GREEN_TOP)
 		else if building == udg_GreenWorkShop[1]
-			let spawnedUnit = spawnUnit(true, MORTAR_TEAM, gg_rct_GreenWorkShopBot.getCenter())
+			let spawnedUnit = spawnUnit(TEAM_1, MORTAR_TEAM, gg_rct_GreenWorkShopBot.getCenter())
 			new PathUnitNew(spawnedUnit, AssignedPath.GREEN_BOT)
 		else if building == udg_BrownWorkShop[0]
-			let spawnedUnit = spawnUnit(false, MORTAR_TEAM, gg_rct_BrownWorkShopTop.getCenter())
+			let spawnedUnit = spawnUnit(TEAM_2, MORTAR_TEAM, gg_rct_BrownWorkShopTop.getCenter())
 			new PathUnitNew(spawnedUnit, AssignedPath.BROWN_TOP)
 		else if building == udg_BrownWorkShop[1]
-			let spawnedUnit = spawnUnit(false, MORTAR_TEAM, gg_rct_BrownWorkShopBot.getCenter())
+			let spawnedUnit = spawnUnit(TEAM_2, MORTAR_TEAM, gg_rct_BrownWorkShopBot.getCenter())
 			new PathUnitNew(spawnedUnit, AssignedPath.BROWN_BOT)
 		
 
@@ -461,7 +461,7 @@ function onBuildingAbility()
 		if Players.team(building.getOwner().getId()) == TEAM_1
 			removeMilitaTeam1 = false
 			for i = 0 to 15
-				let spawnedUnit = spawnUnit(true, MILITIA_DEFEND, gg_rct_GreenCastle.getCenter())
+				let spawnedUnit = spawnUnit(TEAM_1, MILITIA_DEFEND, gg_rct_GreenCastle.getCenter())
 				militiaTeam1.addUnit(spawnedUnit)
 			doAfter(45, () -> (begin
 				removeMilitaTeam1 = true
@@ -496,7 +496,7 @@ function onBuildingAbility()
 		else
 			removeMilitaTeam2 = false
 			for i = 0 to 15
-				let spawnedUnit = spawnUnit(false, MILITIA_DEFEND, gg_rct_BrownCastle.getCenter())
+				let spawnedUnit = spawnUnit(TEAM_2, MILITIA_DEFEND, gg_rct_BrownCastle.getCenter())
 				militiaTeam2.addUnit(spawnedUnit)
 			doAfter(45, () -> (begin
 				removeMilitaTeam2 = true
