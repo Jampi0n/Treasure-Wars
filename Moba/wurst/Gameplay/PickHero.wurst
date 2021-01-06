@@ -7,6 +7,7 @@ import HashMap
 import ShopGUI
 import ShopManager
 import ErrorHandling
+import TeamUtil
 
 public PickMode pickMode
 timer chooseModeTimer
@@ -53,7 +54,7 @@ function setupCreatedHero(Hero hero)
     vec2 pos// = gg_rct_CenterMid.getCenter()
     patron[ownerId].remove()
 
-    if getTeam(ownerId) == TEAM_1
+    if Players.team(ownerId) == TEAM_1
         pos = gg_rct_GreenAltar.getCenter()+vec2(128,128)
     else
         pos = gg_rct_BrownAltar.getCenter()-vec2(128,128)

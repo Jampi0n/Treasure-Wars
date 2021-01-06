@@ -8,6 +8,7 @@ import UnitTypeConfig
 import OnAttack
 import Fx
 import HashMap
+import TeamUtil
 
 public constant HERO_VOODOO_ARCHER = 'H012'
 constant THIS_HERO = HERO_VOODOO_ARCHER
@@ -310,7 +311,7 @@ function castBigBadVoodoo()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
     let fx = caster.addEffect(Abilities.voodooAura, "origin")
-    let enemyList = PlayerWrapper.getHeroTeam(invertTeam(getTeam(caster.getOwner().getId())))
+    let enemyList = PlayerWrapper.getHeroTeam(Teams.invert(Players.team(caster.getOwner().getId())))
     doPeriodically(0.1, (cb) -> begin
         if not caster.isAlive() or caster.getCurrentOrder() != OrderId("tranquility")
             destroy cb

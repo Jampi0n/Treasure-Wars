@@ -9,6 +9,7 @@ import ErrorHandling
 import General
 import HashSet
 import SoundUtils
+import TeamUtil
 
 constant SOUND_FIRST_SPAWN = new SoundDefinition(Sounds.clanInvitation, false, false)
 
@@ -78,7 +79,7 @@ public function stopSpawning()
     spawnStopped = true
 
 public function spawnUnit( boolean firstTeam, int unitId, vec2 startPos) returns unit
-    let p = players[firstTeam ? getArmyPlayerTeam1() : getArmyPlayerTeam2()]
+    let p = players[firstTeam ? Teams.army1() : Teams.army2()]
     let spawnedUnit = createUnit(p, unitId, firstTeam ? gg_rct_BrownCastle.getRightTop() : gg_rct_GreenCastle.getLeftBot() , angle(45. + (firstTeam ? 0 : 180) ))
         ..setPos(startPos)
     return spawnedUnit

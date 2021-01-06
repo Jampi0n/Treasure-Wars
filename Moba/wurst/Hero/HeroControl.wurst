@@ -8,6 +8,7 @@ import TimerUtils
 import ClosureTimers
 import Execute
 import ErrorHandling
+import TeamUtil
 
 constant HP_PER_LEVEL = 15
 constant STRENGTH_BONUS = 45
@@ -113,7 +114,7 @@ public class Hero
 
 
     function setup()
-        this.firstTeam = getTeam(this.ownerId) == TEAM_1
+        this.firstTeam = Players.team(this.ownerId) == TEAM_1
         this.heroType = HeroType.getHeroType(this.hero.getTypeId())
 
         this.skillIds[0] = this.heroType.getAbilityId(AbilitySlot.Q)
@@ -359,7 +360,7 @@ public class Hero
                 killingId = lastAssistant
                 killingPlayer = players[lastAssistant]
             else
-                if killingId != getArmyPlayerTeam1() and killingId != getArmyPlayerTeam2() and killingId != PLAYER_NEUTRAL_AGGRESSIVE
+                if killingId != Teams.army1() and killingId != Teams.army2() and killingId != PLAYER_NEUTRAL_AGGRESSIVE
                     unknownKiller = true
 
         if this.firstTeam

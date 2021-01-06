@@ -11,6 +11,7 @@ import ErrorHandling
 import RecommendedItems
 import ShopGUI
 import HashMap
+import TeamUtil
 
 constant team1AIs = new LinkedList<HeroAI>
 constant team2AIs = new LinkedList<HeroAI>
@@ -267,8 +268,8 @@ public class TeamFight
             let heroes = PlayerWrapper.getPlayerHeroes(i)
             for Hero hero in heroes
                 let heroUnit = hero.toUnit()
-                if hero.toUnit().getPos().distanceTo(this.teamFightLoc) < TEAM_FIGHT_RANGE and hero.toUnit().isAlive() and hero.toUnit().isTargetable(firstTeam ? players[getArmyPlayerTeam1()] : players[getArmyPlayerTeam2()], false, true)
-                    if hero.toUnit().isVisible(firstTeam ? players[getArmyPlayerTeam1()] : players[getArmyPlayerTeam2()])
+                if hero.toUnit().getPos().distanceTo(this.teamFightLoc) < TEAM_FIGHT_RANGE and hero.toUnit().isAlive() and hero.toUnit().isTargetable(firstTeam ? players[Teams.army1()] : players[Teams.army2()], false, true)
+                    if hero.toUnit().isVisible(firstTeam ? players[Teams.army1()] : players[Teams.army2()])
                         let nextValue = determineHeroOffensiveStrength(heroUnit)/determineHeroDefensiveStrength(heroUnit)
                         if nextValue > currentValue
                             currentTarget = heroUnit
@@ -472,7 +473,7 @@ public class HeroAI
         this.hero = hero
         this.heroType = hero.getHeroType()
         this.heroUnit = this.hero.toUnit()
-        this.firstTeam = getTeam(this.ownerId) == TEAM_1
+        this.firstTeam = Players.team(this.ownerId) == TEAM_1
         this.addTeam(firstTeam)
 
         this.state = ATTACK
@@ -896,7 +897,7 @@ public class HeroAI
 
     static function findNextUpgrade(bool team) returns int
 
-        let teamPlayer = team ? players[getArmyPlayerTeam1()] : players[getArmyPlayerTeam2()]
+        let teamPlayer = team ? players[Teams.army1()] : players[Teams.army2()]
         int array upgrades
         int max = 5
         int index = -1
@@ -974,8 +975,8 @@ function determineWinChance(boolean firstTeam, vec2 pos) returns real
 
         if u.isAlive()
 
-            let uTeam1 = u.getOwner().isAllyOf(players[getArmyPlayerTeam1()])
-            let uTeam2 = u.getOwner().isAllyOf(players[getArmyPlayerTeam2()])
+            let uTeam1 = u.getOwner().isAllyOf(players[Teams.army1()])
+            let uTeam2 = u.getOwner().isAllyOf(players[Teams.army2()])
 
             if u.isType(UNIT_TYPE_STRUCTURE)
                 if u.getTypeId() == HERO_TOWER

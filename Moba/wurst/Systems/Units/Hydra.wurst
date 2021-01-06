@@ -12,6 +12,7 @@ import ObjectEditingPreset
 import LinkedList
 import OnAttack
 import General
+import TeamUtil
 
 constant REVIVE_TIME = 300.
 constant MAX_LEVEL = 5
@@ -47,15 +48,15 @@ function onHydraDeath()
         DEATH_SOUND.play().snd.setVolume(150)
 
         let killerId = GetKillingUnit().getOwner().getId()
-        let killingTeam = getTeam(killerId)
+        let killingTeam = Players.team(killerId)
         boolean killedByTeam = true
 
 
         string teamName
         if killingTeam == TEAM_1
-            teamName = PlayerWrapper.getFullColoredName(getArmyPlayerTeam1())
+            teamName = PlayerWrapper.getFullColoredName(Teams.army1())
         else if killingTeam == TEAM_2
-            teamName = PlayerWrapper.getFullColoredName(getArmyPlayerTeam2())
+            teamName = PlayerWrapper.getFullColoredName(Teams.army2())
         else
             teamName = ""
             killedByTeam = false
