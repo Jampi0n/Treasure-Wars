@@ -2,7 +2,6 @@ package PlayerControl
 
 import UtilityFunctions
 import LinkedList
-import ErrorHandling
 import ClosureTimers
 import Assets
 import Constants
@@ -21,22 +20,6 @@ public enum PlayerType
     NONE
     ARMY
     NEUTRAL
-
-public constant TEAM_1 = 1
-public constant TEAM_2 = 2
-public constant TEAM_NEUTRAL = 3
-
-@inline
-public function invertTeam(int team) returns int
-    int ret
-    if team == TEAM_1
-        ret = TEAM_2
-    else if team == TEAM_2
-        ret = TEAM_1
-    else
-        ret = team
-        error("cannot invert team: " + team.toString())
-    return ret
 
 constant EMPTY_INT_LIST = new LinkedList<int>
 
@@ -100,17 +83,17 @@ public class StatTable
 
     static function create()
         int count = 2
-        columnToPlayer[1] = TEAM_PLAYER_TEAM_1
-        playerToColumn[TEAM_PLAYER_TEAM_1] = 1
+        columnToPlayer[1] = getArmyPlayerTeam1()
+        playerToColumn[getArmyPlayerTeam1()] = 1
         for i = 0 to MAX_HERO_COUNT-1
             if PlayerWrapper.getPlayerHeroes(i).size() != 0
                 columnToPlayer[count] = i
                 playerToColumn[i] = count
                 count++
 
-            if i == HERO_PLAYER_TEAM_1_LAST
-                columnToPlayer[count] = TEAM_PLAYER_TEAM_2
-                playerToColumn[TEAM_PLAYER_TEAM_2] = count
+            if i == Teams.last1()
+                columnToPlayer[count] = getArmyPlayerTeam2()
+                playerToColumn[getArmyPlayerTeam2()] = count
                 count++
 
         mBoard = CreateMultiboard()
@@ -118,8 +101,8 @@ public class StatTable
             ..setRowCount(13)
             ..setItemsStyle(true, false)
             ..setTitle("Stats: "+
-                players[TEAM_PLAYER_TEAM_1].getColor().toColor().toColorString()+ScoreTable.team1Kills.toString()+"|r / "+
-                players[TEAM_PLAYER_TEAM_2].getColor().toColor().toColorString()+ScoreTable.team2Kills.toString()+"|r"  )
+                players[getArmyPlayerTeam1()].getColor().toColor().toColorString()+ScoreTable.team1Kills.toString()+"|r / "+
+                players[getArmyPlayerTeam2()].getColor().toColor().toColorString()+ScoreTable.team2Kills.toString()+"|r"  )
             ..display(true)
             ..minimize()
 
@@ -181,10 +164,8 @@ public class ScoreTable
         mBoard.maximize()
 
     static function updateHeader(boolean firstTeam)
-        let row = (firstTeam ? 0 : PlayerWrapper.team1HeroCount + 1)
-        let teamName = firstTeam ?
-        players[TEAM_PLAYER_TEAM_1].getColor().toColor().toColorString() + TEAM_NAME_TEAM_1 + "|r" :
-        players[TEAM_PLAYER_TEAM_2].getColor().toColor().toColorString() + TEAM_NAME_TEAM_2 + "|r"
+        let row = (firstTeam ? 0 : Teams.HERO_PLAYER_COUNT[TEAM_1] + 1)
+        let teamName = Teams.COLORED_NAME[getTeam(firstTeam)]
         
         mBoard.getItem(row, 0)
             ..setStyle(true, false)
@@ -275,8 +256,8 @@ public class ScoreTable
             ..release() 
 
         mBoard.setTitle("Score: "+
-        players[TEAM_PLAYER_TEAM_1].getColor().toColor().toColorString()+team1Kills.toString()+"|r / "+
-        players[TEAM_PLAYER_TEAM_2].getColor().toColor().toColorString()+team2Kills.toString()+"|r"  )
+        players[getArmyPlayerTeam1()].getColor().toColor().toColorString()+team1Kills.toString()+"|r / "+
+        players[getArmyPlayerTeam2()].getColor().toColor().toColorString()+team2Kills.toString()+"|r"  )
 
     static function updatePlayerDeaths(int i)
         let row = playerToRow[i]
@@ -319,7 +300,7 @@ public class ScoreTable
             ..setColumnCount(5)
             ..setRowCount(2)
             ..setItemsStyle(true, false)
-            ..setTitle("Score: "+players[TEAM_PLAYER_TEAM_1].getColor().toColor().toColorString()+"0|r / "+players[TEAM_PLAYER_TEAM_2].getColor().toColor().toColorString()+"0|r"  )
+            ..setTitle("Score: "+players[getArmyPlayerTeam1()].getColor().toColor().toColorString()+"0|r / "+players[getArmyPlayerTeam2()].getColor().toColor().toColorString()+"0|r"  )
             ..display(true)
             ..minimize()
         doAfter(0.02, () -> mBoard.maximize())
@@ -334,11 +315,11 @@ public class ScoreTable
 
 
 public abstract class PlayerWrapper  
-    static constant team1HeroPlayers = new LinkedList<int>
+    /*static constant team1HeroPlayers = new LinkedList<int>
     static constant team2HeroPlayers = new LinkedList<int>
 
     static int team1HeroCount = 0
-    static int team2HeroCount = 0
+    static int team2HeroCount = 0*/
 
     static int array unitKills
     static int array heroKills
@@ -392,16 +373,12 @@ public abstract class PlayerWrapper
 
         icon[id] = "ReplaceableTextures\\CommandButtons\\BTNSelectHeroOn.blp"
 
-        PlayerWrapper.team[id] = 0
-        if id >= 0 and id <= HERO_PLAYER_TEAM_1_LAST
+        PlayerWrapper.team[id] = TEAM_NEUTRAL
+        if isTeam1(id)
             PlayerWrapper.team[id] = 1
-        else if id >= HERO_PLAYER_TEAM_2_FIRST and id <= HERO_PLAYER_TEAM_2_LAST
+        else if isTeam2(id)
             PlayerWrapper.team[id] = 2
-        else if id == TEAM_PLAYER_TEAM_1
-            PlayerWrapper.team[id] = 1
-        else if id == TEAM_PLAYER_TEAM_2
-            PlayerWrapper.team[id] = 2
-        else if id >= PLAYER_NEUTRAL_PASSIVE and id <= PLAYER_NEUTRAL_AGGRESSIVE
+        else if isNeutral(id)
             PlayerWrapper.team[id] = 3
 
 
@@ -409,12 +386,9 @@ public abstract class PlayerWrapper
         playerType[id] = pType
         if pType == PlayerType.HERO
             ScoreTable.addPlayer(id)
-            if PlayerWrapper.team[id] == 1
-                team1HeroPlayers.add(id)
-                team1HeroCount++
-            else if PlayerWrapper.team[id] == 2
-                team2HeroPlayers.add(id)
-                team2HeroCount++
+            let team = PlayerWrapper.team[id]
+            Teams.addHeroPlayer(team, id)
+
 
     static function addUnitKill(int id)
         unitKills[id]++
@@ -457,8 +431,8 @@ public abstract class PlayerWrapper
     static function toString(int id) returns string
         return "Player = " + players[id].getName()
 
-    static function getTeam(int id) returns int
-        return team[id]
+    /*@deprecated("Use Players.TEAM instead") static function getTeam(int id) returns int
+        return team[id]*/
 
     static function getPlayerType(int id) returns PlayerType
         return playerType[id]
@@ -476,41 +450,26 @@ public abstract class PlayerWrapper
         for p in getHeroTeam(TEAM_2)
             revealIcon(p)
 
-    static function addHero(int id, Hero whichHero)
-        playerHeroes[id].add(whichHero)
+    @deprecated("Use Player.addHeros instead.") static function addHero(int id, Hero whichHero)
+        Players.addHero(id, whichHero)
 
-    static function getPlayerHeroes(int id) returns LinkedList<Hero>
-        return playerHeroes[id]
+    @deprecated("Use Players instead.") static function getPlayerHeroes(int id) returns LinkedList<Hero>
+        return Players.HEROES[id]
 
-    static function getPlayerHero(int id, int heroIndex) returns Hero
-        return getPlayerHeroes(id).get(heroIndex)
+    @deprecated("Do not use specific player heroes.") static function getPlayerHero(int id, int heroIndex) returns Hero
+        return Players.HEROES[id].get(heroIndex)
 
-    static function getHeroTeam(int team) returns LinkedList<int>
-        if team == TEAM_1
-            return team1HeroPlayers
-        else if team == TEAM_2
-            return team2HeroPlayers
-        return EMPTY_INT_LIST
+    @deprecated("Use Teams instead.") static function getHeroTeam(int team) returns LinkedList<int>
+        return Teams.HERO_PLAYERS[team]
 
-    static function getHeroTeam(bool firstTeam) returns LinkedList<int>
-        if firstTeam
-            return team1HeroPlayers
-        else
-            return team2HeroPlayers
+    @deprecated("Use Teams instead.") static function getHeroTeam(bool firstTeam) returns LinkedList<int>
+        return Teams.HERO_PLAYERS[getTeam(firstTeam)]
 
-    static function getTeamHeroCount(int team) returns int
-        if team == TEAM_1
-            return team1HeroCount
-        else if team == TEAM_2
-            return team2HeroCount
-        else
-            return 0
+    @deprecated("Use Teams instead.") static function getTeamHeroCount(int team) returns int
+        return Teams.HERO_PLAYER_COUNT[team]
 
-    static function getTeamHeroCount(bool firstTeam) returns int
-        if firstTeam
-            return team1HeroCount
-        else
-            return team2HeroCount
+    @deprecated("Use Teams instead.") static function getTeamHeroCount(bool firstTeam) returns int
+        return Teams.HERO_PLAYER_COUNT[getTeam(firstTeam)]
 
     static function addGoldEx(int id, real gold)
         realGold[id] += gold
@@ -521,8 +480,7 @@ public abstract class PlayerWrapper
     static function addGoldEx(int id, int gold)
         players[id].addGold(gold)
         statGoldGained[id] += gold
-        let ai = getAI(id)
-        if ai != null
+        for ai in getAiList(id)
             ai.addGold(gold)
 
     static function addXp(int id, real xp)
@@ -538,25 +496,21 @@ public abstract class PlayerWrapper
         real tmpXp = xp
         if allies != null
             let xpHeroes = new LinkedList<Hero>()
-            let allHeroes = new LinkedList<Hero>()
-            for p in allies
-                let hero = PlayerWrapper.getPlayerHero(p, 0)
-                if hero != null
-                    let distance = hero.toUnit().getPos().distanceTo(pos)
-                    allHeroes.add(hero)
-                    if distance < XP_RANGE
-                        xpHeroes.add(hero)
+            let alliedHeroes = Teams.HEROES[getTeam(firstTeam)]
+            for hero in alliedHeroes
+                let distance = hero.toUnit().getPos().distanceTo(pos)
+                if distance < XP_RANGE
+                    xpHeroes.add(hero)
             let nearbyHeroes = xpHeroes.size()
             if nearbyHeroes > 0
                 tmpXp /= nearbyHeroes
                 for hero in xpHeroes
                     hero.addXp(tmpXp)
             else
-                tmpXp /= allHeroes.size()
-                for hero in allHeroes
+                tmpXp /= Teams.HERO_COUNT[getTeam(firstTeam)]
+                for hero in alliedHeroes
                     hero.addXp(tmpXp)
             destroy xpHeroes
-            destroy allHeroes
 
 
 function initPlayers()
@@ -576,8 +530,8 @@ function initPlayers()
             PlayerWrapper.createPlayerWrapper(i, PlayerType.NONE)
 
 
-    PlayerWrapper.createPlayerWrapper(TEAM_PLAYER_TEAM_1, PlayerType.ARMY)
-    PlayerWrapper.createPlayerWrapper(TEAM_PLAYER_TEAM_2, PlayerType.ARMY)
+    PlayerWrapper.createPlayerWrapper(getArmyPlayerTeam1(), PlayerType.ARMY)
+    PlayerWrapper.createPlayerWrapper(getArmyPlayerTeam2(), PlayerType.ARMY)
 
     PlayerWrapper.createPlayerWrapper(PLAYER_NEUTRAL_AGGRESSIVE, PlayerType.NEUTRAL)
 
@@ -585,20 +539,20 @@ function initPlayers()
     for i=PLAYER_NEUTRAL_AGGRESSIVE+1 to PLAYER_NEUTRAL_PASSIVE
         PlayerWrapper.createPlayerWrapper(i, PlayerType.NEUTRAL)
 
-    for i=0 to TEAM_PLAYER_TEAM_2
-        for j=0 to TEAM_PLAYER_TEAM_2
+    for i=0 to getArmyPlayerTeam2()
+        for j=0 to getArmyPlayerTeam2()
 
-            if i < MAX_HERO_COUNT or i == TEAM_PLAYER_TEAM_1 or i == TEAM_PLAYER_TEAM_2
-                if j < MAX_HERO_COUNT or j == TEAM_PLAYER_TEAM_1 or j == TEAM_PLAYER_TEAM_2
+            if i < MAX_HERO_COUNT or i == getArmyPlayerTeam1() or i == getArmyPlayerTeam2()
+                if j < MAX_HERO_COUNT or j == getArmyPlayerTeam1() or j == getArmyPlayerTeam2()
 
-                    if i!=j and PlayerWrapper.getTeam(i) == PlayerWrapper.getTeam(j)
+                    if i!=j and getTeam(i) == getTeam(j)
                         SetPlayerAllianceStateBJ(players[i],players[j], bj_ALLIANCE_ALLIED_VISION)
                 
     //armies do not fight vs creeps
-    SetPlayerAlliance(players[TEAM_PLAYER_TEAM_1], players[PLAYER_NEUTRAL_AGGRESSIVE], ALLIANCE_PASSIVE, true)
-    SetPlayerAlliance(players[TEAM_PLAYER_TEAM_2], players[PLAYER_NEUTRAL_AGGRESSIVE], ALLIANCE_PASSIVE, true)
-    SetPlayerAlliance(players[PLAYER_NEUTRAL_AGGRESSIVE], players[TEAM_PLAYER_TEAM_1], ALLIANCE_PASSIVE, true)
-    SetPlayerAlliance(players[PLAYER_NEUTRAL_AGGRESSIVE], players[TEAM_PLAYER_TEAM_2], ALLIANCE_PASSIVE, true)
+    SetPlayerAlliance(players[getArmyPlayerTeam1()], players[PLAYER_NEUTRAL_AGGRESSIVE], ALLIANCE_PASSIVE, true)
+    SetPlayerAlliance(players[getArmyPlayerTeam2()], players[PLAYER_NEUTRAL_AGGRESSIVE], ALLIANCE_PASSIVE, true)
+    SetPlayerAlliance(players[PLAYER_NEUTRAL_AGGRESSIVE], players[getArmyPlayerTeam1()], ALLIANCE_PASSIVE, true)
+    SetPlayerAlliance(players[PLAYER_NEUTRAL_AGGRESSIVE], players[getArmyPlayerTeam2()], ALLIANCE_PASSIVE, true)
 
 init
     initPlayers()

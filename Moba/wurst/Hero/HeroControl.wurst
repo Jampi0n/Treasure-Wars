@@ -31,8 +31,8 @@ function initAssistLists()
         for j = 0 to 4
             if i div LIST_ID_POW_2[j] mod 2 == 1
                 indexList.add(j)
-                assistName1[size] = PlayerWrapper.getFullColoredName(HERO_PLAYER_TEAM_1_FIRST + j)
-                assistName2[size] = PlayerWrapper.getFullColoredName(HERO_PLAYER_TEAM_2_FIRST + j)
+                assistName1[size] = PlayerWrapper.getFullColoredName(Teams.first1() + j)
+                assistName2[size] = PlayerWrapper.getFullColoredName(Teams.first2() + j)
                 size++
 
         //creating the assist string with correct use of <,> and <and>
@@ -113,7 +113,7 @@ public class Hero
 
 
     function setup()
-        this.firstTeam = PlayerWrapper.getTeam(this.ownerId) == TEAM_1
+        this.firstTeam = getTeam(this.ownerId) == TEAM_1
         this.heroType = HeroType.getHeroType(this.hero.getTypeId())
 
         this.skillIds[0] = this.heroType.getAbilityId(AbilitySlot.Q)
@@ -122,9 +122,9 @@ public class Hero
         this.skillIds[3] = this.heroType.getAbilityId(AbilitySlot.R)
         this.skillIds[4] = this.heroType.getAbilityId(AbilitySlot.PASSIVE)
 
-        for i = HERO_PLAYER_TEAM_1_FIRST to HERO_PLAYER_TEAM_1_LAST
+        for i = Teams.first1() to Teams.last1()
             assistMap.put(i, 0)
-        for i = HERO_PLAYER_TEAM_2_FIRST to HERO_PLAYER_TEAM_2_LAST
+        for i = Teams.first2() to Teams.last2()
             assistMap.put(i, 0)
 
         for i = 0 to 3
@@ -278,10 +278,10 @@ public class Hero
         let damageSourceId = damageSource.getId()
         if damageSource != null
             if firstTeam
-                if HERO_PLAYER_TEAM_2_FIRST <= damageSourceId and damageSourceId <= HERO_PLAYER_TEAM_2_LAST
+                if Teams.first2() <= damageSourceId and damageSourceId <= Teams.last2()
                     this.addAssistDuration(damageSource.getId())
             else
-                if HERO_PLAYER_TEAM_1_FIRST <= damageSourceId and damageSourceId <= HERO_PLAYER_TEAM_1_LAST
+                if Teams.first1() <= damageSourceId and damageSourceId <= Teams.last1()
                     this.addAssistDuration(damageSource.getId())
 
     static function onDamageStatic()
@@ -338,12 +338,12 @@ public class Hero
         //team 1 hero dies
         if firstTeam
             //killer not in team 2
-            if killingId < HERO_PLAYER_TEAM_2_FIRST or killingId > HERO_PLAYER_TEAM_2_LAST
+            if killingId < Teams.first2() or killingId > Teams.last2()
                 replaceKiller = true
         //team 2 hero dies
         else
             //killer not in team 1
-            if killingId < HERO_PLAYER_TEAM_1_FIRST or killingId > HERO_PLAYER_TEAM_1_LAST
+            if killingId < Teams.first1() or killingId > Teams.last1()
                 replaceKiller = true
 
         let gameTime = getElapsedGameTime()
@@ -359,7 +359,7 @@ public class Hero
                 killingId = lastAssistant
                 killingPlayer = players[lastAssistant]
             else
-                if killingId != TEAM_PLAYER_TEAM_1 and killingId != TEAM_PLAYER_TEAM_2 and killingId != PLAYER_NEUTRAL_AGGRESSIVE
+                if killingId != getArmyPlayerTeam1() and killingId != getArmyPlayerTeam2() and killingId != PLAYER_NEUTRAL_AGGRESSIVE
                     unknownKiller = true
 
         if this.firstTeam
@@ -382,7 +382,7 @@ public class Hero
 
 
         if not unknownKiller
-            if killingId <= HERO_PLAYER_TEAM_2_LAST
+            if killingId <= Teams.last2()
                 let assistBounty = ASSIST_BOUNTY[assistants]
 
                 let killBounty = KILL_BOUNTY[assistants]
@@ -399,7 +399,7 @@ public class Hero
                         PlayerWrapper.addGoldEx(p, assistBounty)
                         PlayerWrapper.addAssist(p)
                     PlayerWrapper.addGoldEx(killingId, killBounty)
-                    PlayerWrapper.addHeroKill(killingId, killingId <= HERO_PLAYER_TEAM_2_LAST)
+                    PlayerWrapper.addHeroKill(killingId, killingId <= Teams.last2())
                 
                     let xp = (this.level + 5) * 10.
                     PlayerWrapper.rewardXp(not this.firstTeam, this.hero.getPos(), xp)

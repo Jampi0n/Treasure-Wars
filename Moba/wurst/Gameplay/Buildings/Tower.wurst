@@ -7,6 +7,7 @@ import HashMap
 import DamageDetection
 import Constants
 import HeroAI
+import HeroControl
 
 class TowerPos
     real x
@@ -57,7 +58,7 @@ public class Tower
         let g = CreateGroup()
         unit u
 
-        GroupEnumUnitsOfPlayer(g, players[TEAM_PLAYER_TEAM_1], null)
+        GroupEnumUnitsOfPlayer(g, players[getArmyPlayerTeam1()], null)
 
         while true
             u = FirstOfGroup(g)
@@ -69,7 +70,7 @@ public class Tower
             if id == BASE_TOWER or id == GATE_TOWER or id == OUTER_TOWER
                 new Tower(u)
 
-        GroupEnumUnitsOfPlayer(g, players[TEAM_PLAYER_TEAM_2], null)
+        GroupEnumUnitsOfPlayer(g, players[getArmyPlayerTeam2()], null)
 
         while true
             u = FirstOfGroup(g)
@@ -91,7 +92,7 @@ public class Tower
 
         this.pos = new TowerPos(tower.getX(), tower.getY(), this)
 
-        if tower.getOwner().getId() == TEAM_PLAYER_TEAM_1
+        if tower.getOwner().getId() == getArmyPlayerTeam1()
             towerPos1.add(this.pos)
         else
             towerPos2.add(this.pos)
@@ -100,7 +101,7 @@ public class Tower
         towerGroup.removeUnit(this.tower)
         towerList.remove(this)
         towerMap.remove(this.tower)
-        if tower.getOwner().getId() == TEAM_PLAYER_TEAM_1
+        if tower.getOwner().getId() == getArmyPlayerTeam1()
             towerPos1.remove(this.pos)
         else
             towerPos2.remove(this.pos)
@@ -110,11 +111,11 @@ public class Tower
         let target = GetTriggerUnit()
 
         if target.isType(UNIT_TYPE_HERO) and attacker.isType(UNIT_TYPE_HERO) and GetEventDamage() > 0.1
-            if IsUnitAlly(attacker, players[TEAM_PLAYER_TEAM_1]) and IsUnitAlly(target, players[TEAM_PLAYER_TEAM_2])
+            if IsUnitAlly(attacker, players[getArmyPlayerTeam1()]) and IsUnitAlly(target, players[getArmyPlayerTeam2()])
                 for TowerPos pos in towerPos2
                     if pos.inRange(attacker, 800)
                         pos.tower.attackHero(attacker)
-            else if IsUnitAlly(attacker, players[TEAM_PLAYER_TEAM_2]) and IsUnitAlly(target, players[TEAM_PLAYER_TEAM_1])
+            else if IsUnitAlly(attacker, players[getArmyPlayerTeam2()]) and IsUnitAlly(target, players[getArmyPlayerTeam1()])
                 for TowerPos pos in towerPos1
                     if pos.inRange(attacker, 800)
                         pos.tower.attackHero(attacker)
@@ -136,7 +137,7 @@ public class Tower
                     currentTarget = attacked
 
                 if currentTarget.isType(UNIT_TYPE_HERO)
-                    let ai = getAI(currentTarget.getOwner().getId())
+                    let ai = getAI(GetTriggerUnit())
                     if ai != null
                         ai.attackedByTower()
 

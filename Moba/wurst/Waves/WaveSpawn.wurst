@@ -57,7 +57,7 @@ public function startSpawning()
             SOUND_FIRST_SPAWN.play()
             print("|cffffcc00The battle begins!|r")
 
-            if GetLocalPlayer().getId() <= HERO_PLAYER_TEAM_1_LAST
+            if GetLocalPlayer().getId() <= Teams.last1()
                 PingMinimap(udg_GreenBarracks[0].getX(), udg_GreenBarracks[0].getY(), 5)
                 PingMinimap(udg_GreenBarracks[1].getX(), udg_GreenBarracks[1].getY(), 5)
                 PingMinimap(udg_GreenBarracks[2].getX(), udg_GreenBarracks[2].getY(), 5)
@@ -78,7 +78,7 @@ public function stopSpawning()
     spawnStopped = true
 
 public function spawnUnit( boolean firstTeam, int unitId, vec2 startPos) returns unit
-    let p = players[firstTeam ? TEAM_PLAYER_TEAM_1 : TEAM_PLAYER_TEAM_2]
+    let p = players[firstTeam ? getArmyPlayerTeam1() : getArmyPlayerTeam2()]
     let spawnedUnit = createUnit(p, unitId, firstTeam ? gg_rct_BrownCastle.getRightTop() : gg_rct_GreenCastle.getLeftBot() , angle(45. + (firstTeam ? 0 : 180) ))
         ..setPos(startPos)
     return spawnedUnit

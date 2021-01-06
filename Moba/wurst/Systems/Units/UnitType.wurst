@@ -113,7 +113,7 @@ function onUnitDeath()
         let killingUnit = GetKillingUnit()
         let killingId = killingUnit.getOwner().getId()
         let dyingId = dyingUnit.getOwner().getId()
-        let dyingTeam = PlayerWrapper.getTeam(dyingId)
+        let dyingTeam = getTeam(dyingId)
         let pos = dyingUnit.getPos()
 
         // army unit dies
@@ -121,7 +121,7 @@ function onUnitDeath()
             let bounty = dyingType.getBounty()
             let xp = dyingType.getPowerLevel() * 8.0
 
-            let killerIsEnemy = killingUnit != null and PlayerWrapper.getTeam(killingId) == invertTeam(dyingTeam)
+            let killerIsEnemy = killingUnit != null and getTeam(killingId) == invertTeam(dyingTeam)
             int killerIsHero = 0
             //the killing player belongs to the enemy team
             if killerIsEnemy and killingId < MAX_HERO_COUNT 
