@@ -7,6 +7,7 @@ import ClosureTimers
 import UnitTypeConfig
 import OnAttack
 import Fx
+import HashMap
 
 public constant HERO_VOODOO_ARCHER = 'H012'
 constant THIS_HERO = HERO_VOODOO_ARCHER
@@ -23,6 +24,8 @@ constant ABILITY_BIG_BAD_VOODOO = 'AY2R'
 
 
 constant real array VOODOO_ARROW_DAMAGE = [5, 10, 15, 20, 25]
+
+constant SUMMON_MAP = new HashMap<unit,unit>
 
 
 function passive(int abilityId)
@@ -298,6 +301,7 @@ function castSerpentWard()
     let ward = createUnit(caster.getOwner(), SERPENT_WARD, vec2(GetSpellTargetX(), GetSpellTargetY()), angle(0))
     let wrapper = ward.wrapper()
     ward.setTimedLife(SERPENT_WARD_DURATION)
+    SUMMON_MAP.put(ward, caster)
 
     wrapper.addStatAbsoluteBonus(Stat.HP, SERPEND_WARD_HP[level-1] )
 
@@ -306,7 +310,7 @@ function castBigBadVoodoo()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
     let fx = caster.addEffect(Abilities.voodooAura, "origin")
-    let enemyList = PlayerWrapper.getHeroTeam(invertTeam(PlayerWrapper.getTeam(caster.getOwner().getId())))
+    let enemyList = PlayerWrapper.getHeroTeam(invertTeam(getTeam(caster.getOwner().getId())))
     doPeriodically(0.1, (cb) -> begin
         if not caster.isAlive() or caster.getCurrentOrder() != OrderId("tranquility")
             destroy cb
@@ -416,10 +420,16 @@ function initHeroType()
 
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             if attacker.getTypeId() == SERPENT_WARD and not target.isType(UNIT_TYPE_STRUCTURE)
-                let hero = PlayerWrapper.getPlayerHero(attacker.getOwner().getId(), 0).toUnit()
+                let hero = SUMMON_MAP.get(attacker)
                 let level = hero.getAbilityLevel(ABILITY_SERPENT_WARD)
                 target.addBuffReduced(hero, SERPENT_POISON_DURATION[level-1], buffSerpentPoison, level)
         end))
+
+        CreateTrigger()
+        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
+        ..addAction() ->
+            if GetTriggerUnit().getTypeId() == SERPENT_WARD
+                SUMMON_MAP.remove(GetTriggerUnit())
     
 init
     

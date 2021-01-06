@@ -47,15 +47,15 @@ function onHydraDeath()
         DEATH_SOUND.play().snd.setVolume(150)
 
         let killerId = GetKillingUnit().getOwner().getId()
-        let killingTeam = PlayerWrapper.getTeam(killerId)
+        let killingTeam = getTeam(killerId)
         boolean killedByTeam = true
 
 
         string teamName
         if killingTeam == TEAM_1
-            teamName = PlayerWrapper.getFullColoredName(TEAM_PLAYER_TEAM_1)
+            teamName = PlayerWrapper.getFullColoredName(getArmyPlayerTeam1())
         else if killingTeam == TEAM_2
-            teamName = PlayerWrapper.getFullColoredName(TEAM_PLAYER_TEAM_2)
+            teamName = PlayerWrapper.getFullColoredName(getArmyPlayerTeam2())
         else
             teamName = ""
             killedByTeam = false

@@ -62,13 +62,13 @@ init
 
     itemFinalize()
     execute() ->
-        for i = HERO_PLAYER_TEAM_1_FIRST to HERO_PLAYER_TEAM_2_LAST
+        for i = Teams.first1() to Teams.last2()
             gui[i] = new GUI(players[i], null)
-            ..setBuyCondition( (unit hero, bool showMessage) -> buyCondition(hero, i <= HERO_PLAYER_TEAM_1_LAST, showMessage))
+            ..setBuyCondition( (unit hero, bool showMessage) -> buyCondition(hero, i <= Teams.last1(), showMessage))
             ..setBuySuccess( (unit hero, item itm, int totalCost) -> buySuccess(hero, itm, totalCost))
             ..setBuyFailed( (unit hero, int itemId, int cost, int gold) -> buyFailed(hero, itemId, cost, gold))
 
-    for i = HERO_PLAYER_TEAM_1_FIRST to HERO_PLAYER_TEAM_2_LAST
+    for i = Teams.first1() to Teams.last2()
         CreateTrigger()
         ..registerPlayerKeyPress(players[i], OSKEY_ESCAPE, OSKEY_META.NONE, true)
         ..addAction() ->

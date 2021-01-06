@@ -10,6 +10,7 @@ import BuildingTypes
 import ErrorHandling
 import RecommendedItems
 import ShopGUI
+import HashMap
 
 constant team1AIs = new LinkedList<HeroAI>
 constant team2AIs = new LinkedList<HeroAI>
@@ -262,12 +263,12 @@ public class TeamFight
         real currentValue = -1
         unit currentTarget = null
 
-        for i = firstTeam ? HERO_PLAYER_TEAM_2_FIRST : HERO_PLAYER_TEAM_1_FIRST to firstTeam ? HERO_PLAYER_TEAM_2_LAST : HERO_PLAYER_TEAM_1_LAST
+        for i = firstTeam ? Teams.first2() : Teams.first1() to firstTeam ? Teams.last2() : Teams.last1()
             let heroes = PlayerWrapper.getPlayerHeroes(i)
             for Hero hero in heroes
                 let heroUnit = hero.toUnit()
-                if hero.toUnit().getPos().distanceTo(this.teamFightLoc) < TEAM_FIGHT_RANGE and hero.toUnit().isAlive() and hero.toUnit().isTargetable(firstTeam ? players[TEAM_PLAYER_TEAM_1] : players[TEAM_PLAYER_TEAM_2], false, true)
-                    if hero.toUnit().isVisible(firstTeam ? players[TEAM_PLAYER_TEAM_1] : players[TEAM_PLAYER_TEAM_2])
+                if hero.toUnit().getPos().distanceTo(this.teamFightLoc) < TEAM_FIGHT_RANGE and hero.toUnit().isAlive() and hero.toUnit().isTargetable(firstTeam ? players[getArmyPlayerTeam1()] : players[getArmyPlayerTeam2()], false, true)
+                    if hero.toUnit().isVisible(firstTeam ? players[getArmyPlayerTeam1()] : players[getArmyPlayerTeam2()])
                         let nextValue = determineHeroOffensiveStrength(heroUnit)/determineHeroDefensiveStrength(heroUnit)
                         if nextValue > currentValue
                             currentTarget = heroUnit
@@ -284,8 +285,12 @@ public class TeamFight
     function getTarget() returns unit
         return this.target
 
-public function getAI(int index) returns HeroAI
-    return HeroAI.heroAIs[index]
+public function getAI(unit hero) returns HeroAI
+    return HeroAI.heroAiMap.get(hero)
+
+public function getAiList(int id) returns LinkedList<HeroAI>
+    return HeroAI.heroAIs[id]
+
 
 public function HeroAI.addTeam(boolean firstTeam)
     if firstTeam
@@ -336,7 +341,8 @@ public class HeroAI
     private LinkedList<int> itemBuild
     private string skillBuild
 
-    protected static HeroAI array heroAIs
+    protected static LinkedList<HeroAI> array heroAIs
+    protected static constant heroAiMap = new HashMap<unit,HeroAI>()
 
     private boolean paused = false
 
@@ -437,13 +443,14 @@ public class HeroAI
                 this.retreatTemporarily(7, false)
 
     static function classInit()
+        for i = 0 to bj_MAX_PLAYER_SLOTS
+            heroAIs[i] = new LinkedList<HeroAI>()
 
         updateTimer.startPeriodic(UPDATE_INTERVAL, function updateStatic)
         CreateTrigger()
             ..registerAnyUnitEvent(EVENT_PLAYER_HERO_LEVEL)
             ..addAction(() ->(begin
-
-            let ai = heroAIs[GetTriggerUnit().getOwner().getId()]
+            let ai = getAI(GetTriggerUnit())
             if ai != null
                 ai.levelUp()
         end))
@@ -451,7 +458,7 @@ public class HeroAI
         attackedByTower = CreateTrigger()
             ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_ATTACKED)
             ..addAction(() ->(begin
-            let ai = heroAIs[GetTriggerUnit().getOwner().getId()]
+            let ai = getAI(GetTriggerUnit())
             if ai != null
                 let attacker = GetAttacker()
                 if (ai.state == AIState.ATTACK or ai.state == AIState.RETREAT_TEMP or ai.state == AIState.RETREAT_TEMP_AI or ai.state == AIState.TEAM_FIGHT)  and attacker.getTypeId() == HERO_TOWER
@@ -459,18 +466,18 @@ public class HeroAI
         end))
     
 
-    construct(int playerId, aidifficulty diff)
-        this.ownerId = playerId
-        this.owningPlayer = players[ownerId]
-        this.hero = PlayerWrapper.getPlayerHero(playerId, 0)
+    construct(Hero hero, aidifficulty diff)
+        this.owningPlayer =  hero.toUnit().getOwner()
+        this.ownerId = this.owningPlayer.getId()
+        this.hero = hero
         this.heroType = hero.getHeroType()
         this.heroUnit = this.hero.toUnit()
-        this.firstTeam = PlayerWrapper.getTeam(playerId) == TEAM_1
+        this.firstTeam = getTeam(this.ownerId) == TEAM_1
         this.addTeam(firstTeam)
 
         this.state = ATTACK
 
-        heroAIs[playerId] = this
+        heroAIs[this.ownerId].add(this)
         this.attackTimer.setData(this castTo int)
 
         //test:
@@ -785,8 +792,8 @@ public class HeroAI
                             let newTeamFight = new TeamFight(this.heroUnit.getPos(), this.firstTeam)
 
                             for i = 0 to MAX_HERO_COUNT-1
-                                let ai = heroAIs[i]
-                                if ai != null
+                                let aiList = heroAIs[i]
+                                for ai in aiList
                                     if ai.firstTeam == firstTeam and ai.heroUnit.getPos().distanceTo(this.heroUnit.getPos()) < TEAM_FIGHT_RANGE
                                         if ai.state == AIState.ATTACK or ai.state == AIState.TEAM_FIGHT
                                             if ai.state == AIState.ATTACK
@@ -889,7 +896,7 @@ public class HeroAI
 
     static function findNextUpgrade(bool team) returns int
 
-        let teamPlayer = team ? players[TEAM_PLAYER_TEAM_1] : players[TEAM_PLAYER_TEAM_2]
+        let teamPlayer = team ? players[getArmyPlayerTeam1()] : players[getArmyPlayerTeam2()]
         int array upgrades
         int max = 5
         int index = -1
@@ -967,8 +974,8 @@ function determineWinChance(boolean firstTeam, vec2 pos) returns real
 
         if u.isAlive()
 
-            let uTeam1 = u.getOwner().isAllyOf(players[TEAM_PLAYER_TEAM_1])
-            let uTeam2 = u.getOwner().isAllyOf(players[TEAM_PLAYER_TEAM_2])
+            let uTeam1 = u.getOwner().isAllyOf(players[getArmyPlayerTeam1()])
+            let uTeam2 = u.getOwner().isAllyOf(players[getArmyPlayerTeam2()])
 
             if u.isType(UNIT_TYPE_STRUCTURE)
                 if u.getTypeId() == HERO_TOWER
@@ -1059,7 +1066,7 @@ function determineHeroDefensiveStrength(unit hero) returns real
     let armor = hero.getArmor()
     let wp = hero.getWp()
     bool inBase
-    if hero.getOwner().getId() <= HERO_PLAYER_TEAM_1_LAST
+    if hero.getOwner().getId() <= Teams.last1()
         inBase = gg_rct_GreenHeroTower.contains(hero.getPos())
     else
         inBase = gg_rct_BrownHeroTower.contains(hero.getPos())
@@ -1078,7 +1085,7 @@ function determineHeroStrength(unit hero) returns real
     int itemValue = 0
 
     bool inBase
-    if hero.getOwner().getId() <= HERO_PLAYER_TEAM_1_LAST
+    if hero.getOwner().getId() <= Teams.last1()
         inBase = gg_rct_GreenHeroTower.contains(hero.getPos())
     else
         inBase = gg_rct_BrownHeroTower.contains(hero.getPos())
@@ -1090,7 +1097,7 @@ function determineHeroStrength(unit hero) returns real
 
     let result = (0.25 + 0.25 * mana + 0.25 + 1.25 * hp)/2 * (5 + lvl)/30 * (0.2 + 0.8 * hp)
 
-    let ai = HeroAI.heroAIs[hero.getOwner().getId()]
+    let ai = getAI(hero)
     real ret = (result * ( 20000 + itemValue) )/16
     if inBase
         ret += 2500
@@ -1107,24 +1114,9 @@ init
     TeamFight.classInit()
 
     CreateTrigger()
-        ..registerPlayerChatEvent(players[0], "buy", false)
-        ..addAction(() -> (begin
-        let ai = HeroAI.heroAIs[0]
-        if ai != null
-            ai.buyItems()
-    end))
-
-    /*OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-        if attacker.isType(UNIT_TYPE_HERO)
-            let ai = HeroAI.heroAIs[attacker.getOwner().getId()]
-            if ai != null
-                ai.attacking = false
-    end))*/
-
-    CreateTrigger()
         ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_ATTACKED)
         ..addAction(() -> (begin
-        let ai = HeroAI.heroAIs[GetAttacker().getOwner().getId()]
+        let ai = getAI(GetTriggerUnit())
         if ai != null
             ai.attackFor(2)
     end))

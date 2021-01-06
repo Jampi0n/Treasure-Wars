@@ -1,0 +1,182 @@
+package TeamUtil
+
+import initlater HeroControl
+import LinkedList
+/*
+Optimized package to deal with teams.
+*/
+
+
+public constant TEAM_NULL = 0
+public constant TEAM_1 = 1
+public constant TEAM_2 = 2
+public constant TEAM_NEUTRAL = 3
+
+public abstract class Teams
+    // basic types use inline functions with compiletime evaluation
+    protected static constant ARMY = [-1, 10, 11, -1]
+    protected static constant FROM = [-1, 0, 5, -1]
+    protected static constant TO = [-1, 4, 9, -1]
+    protected static constant FROM_1 = FROM[TEAM_1]
+    protected static constant TO_1 = TO[TEAM_1]
+    protected static constant FROM_2 = FROM[TEAM_2]
+    protected static constant TO_2 = TO[TEAM_2]
+    protected static constant ARMY_1 = ARMY[TEAM_1]
+    protected static constant ARMY_2 = ARMY[TEAM_2]
+    // advanced types are accessed directly
+    static constant PLAYING_HEROES = [new LinkedList<int>, new LinkedList<int>, new LinkedList<int>, new LinkedList<int>]
+    static constant PLAYING_HEROES_1 = PLAYING_HEROES[TEAM_1]
+    static constant PLAYING_HEROES_2 = PLAYING_HEROES[TEAM_2]
+    static constant NAME = ["","Green","Brown","Neutral"]
+    static constant COLOR = [
+        compiletime(color(150, 50, 150).toColorString()),
+        compiletime(PLAYER_COLORS[ARMY_1].toColorString()),
+        compiletime(PLAYER_COLORS[ARMY_2].toColorString()),
+        compiletime(color(25, 25, 25).toColorString())
+    ]
+    static constant COLORED_NAME = [
+        compiletime(COLOR[0] + NAME[0] + "|r"),
+        compiletime(COLOR[1] + NAME[1] + "|r"),
+        compiletime(COLOR[2] + NAME[2] + "|r"),
+        compiletime(COLOR[3] + NAME[3] + "|r")
+    ]
+    static constant HEROES = [new LinkedList<Hero>(), new LinkedList<Hero>(), new LinkedList<Hero>(), new LinkedList<Hero>()]
+    static constant HEROES_1 = HEROES[TEAM_1]
+    static constant HEROES_2 = HEROES[TEAM_2]
+    static constant HERO_COUNT = [0,0,0,0]
+
+    static constant HERO_PLAYERS = [new LinkedList<int>(), new LinkedList<int>(), new LinkedList<int>(), new LinkedList<int>()]
+    static constant HERO_PLAYER_COUNT = [0,0,0,0]
+
+    static function addHeroPlayer(int team, int p)
+        Teams.HERO_PLAYERS[team].add(p)
+        Teams.HERO_PLAYER_COUNT[team]++
+
+    @inline static function first(int team) returns int
+        return FROM[team]
+
+    @inline static function last(int team) returns int
+        return TO[team]
+
+    @inline static function first1() returns int
+        return compiletime(FROM_1)
+
+    @inline static function first2() returns int
+        return compiletime(FROM_2)
+
+    @inline static function last1() returns int
+        return compiletime(TO_1)
+
+    @inline static function last2() returns int
+        return compiletime(TO_2)
+
+
+public abstract class Players
+    protected static constant TEAM = [1,1,1,1,1,2,2,2,2,2,1,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3]
+    static LinkedList<Hero> array HEROES
+
+    protected static function initPlayers()
+        for i = 0 to bj_MAX_PLAYER_SLOTS
+            HEROES[i] = new LinkedList<Hero>
+
+    static function addHero(int p, Hero hero)
+        let team = getTeam(p)
+        HEROES[p].add(hero)
+        Teams.HEROES[team].add(hero)
+        Teams.HERO_COUNT[team]++
+
+/** Returns the team id for player id. */
+@inline public function getTeam(int p) returns int
+    return Players.TEAM[p]
+
+/** Returns the team id for player id. */
+@inline public function getArmyTeam(int p) returns int
+    return armyFromTeam(Players.TEAM[p])
+
+/** Returns the team id for an army team/hero team. */
+@inline public function getTeam(bool first) returns int
+    int team
+    if first
+        team = compiletime(TEAM_1)
+    else
+        team = compiletime(TEAM_2)
+    return team
+
+/** Returns the army player for a team id. */
+@inline public function armyFromTeam(int team) returns int
+    return team + 9
+
+/** Returns the player id of the first hero player for a team id. */
+@inline public function firstHeroFromTeam(int team) returns int
+    return team * 5 - 5
+
+/** Returns the player id of the last hero player for a team id. */
+@inline public function lastHeroFromTeam(int team) returns int
+    return team * 5 - 1
+
+/** Returns the opposite team id for an army/hero team. */
+@inline public function invertTeam(int team) returns int
+    return 3 - team
+
+/** Returns true, if the player id belongs to a hero player of team 1. */
+@inline public function isHeroPlayerTeam1(int p) returns boolean
+    return p >= compiletime(Teams.first1()) and p <= compiletime(Teams.last1())
+
+/** Returns true, if the player id belongs to a hero player of team 2. */
+@inline public function isHeroPlayerTeam2(int p) returns boolean
+    return p >= compiletime(Teams.first2()) and p <= compiletime(Teams.last2())
+
+/** Returns true, if the player id belongs to a hero player of the team. */
+@inline public function isHeroPlayerTeam(int p, int team) returns boolean
+    return p >= Teams.FROM[team] and p <= Teams.TO[team]
+
+/** Returns true, if the player id belongs to a hero player. */    
+@inline public function isHeroPlayer(int p) returns boolean
+    return p >= compiletime(Teams.first1()) and p <= compiletime(Teams.last2())
+
+/** Returns true, if the player id belongs to the army player of team 1. */
+@inline public function isArmyPlayerTeam1(int p) returns boolean
+    return p == compiletime(Teams.ARMY_1)
+
+/** Returns true, if the player id belongs to the army player of team 2. */
+@inline public function isArmyPlayerTeam2(int p) returns boolean
+    return p == compiletime(Teams.ARMY_2)
+
+/** Returns true, if the player id belongs to the army player of the team. */
+@inline public function isArmyPlayerTeam(int p, int team) returns boolean
+    return p == Teams.ARMY[team]
+
+/** Returns true, if the player id belongs to an army player. */
+@inline public function isArmyPlayer(int p) returns boolean
+    return isArmyPlayerTeam1(p) or isArmyPlayerTeam2(p)
+
+/** Returns the army player of team 1. */
+@inline public function getArmyPlayerTeam1() returns int
+    return compiletime(Teams.ARMY_1)
+
+/** Returns the army player of team 2. */
+@inline public function getArmyPlayerTeam2() returns int
+    return compiletime(Teams.ARMY_2)
+
+/** Returns the army player of the team. */
+@inline public function getArmyPlayerTeam(int team) returns int
+    return Teams.ARMY[team]
+
+/** Returns the player id belongs to team 1. */
+@inline public function isTeam1(int p) returns bool
+    return Players.TEAM[p] == 1
+
+/** Returns the player id belongs to team 2. */
+@inline public function isTeam2(int p) returns bool
+    return Players.TEAM[p] == 2
+
+/** Returns the player id belongs to team neutral. */
+@inline public function isNeutral(int p) returns bool
+    return Players.TEAM[p] == 3
+
+/** Returns the player id belongs to the team. */
+@inline public function isTeam(int p, int team) returns bool
+    return Players.TEAM[p] == team
+
+init
+    Players.initPlayers()

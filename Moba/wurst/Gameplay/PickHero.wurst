@@ -53,14 +53,14 @@ function setupCreatedHero(Hero hero)
     vec2 pos// = gg_rct_CenterMid.getCenter()
     patron[ownerId].remove()
 
-    if PlayerWrapper.getTeam(ownerId) == TEAM_1
+    if getTeam(ownerId) == TEAM_1
         pos = gg_rct_GreenAltar.getCenter()+vec2(128,128)
     else
         pos = gg_rct_BrownAltar.getCenter()-vec2(128,128)
 
     if owner.getController() == MAP_CONTROL_COMPUTER and owner.getSlotState() == PLAYER_SLOT_STATE_PLAYING
         doAfter(GetRandomReal(1, 3), () -> ( begin
-            let ai = new HeroAI(ownerId, GetAIDifficulty(owner))
+            let ai = new HeroAI(hero, GetAIDifficulty(owner))
             ai.togglePause()
             doAfter(GetRandomReal(48, 52), () -> (begin
                 ai.togglePause()
@@ -87,7 +87,7 @@ function setupCreatedHero(Hero hero)
         PanCameraTo(pos.x, pos.y)
 
 
-function createRandomHeroForAI(int id, boolean removeFromTavern)
+function createRandomHeroForAI(int id, boolean removeFromTavern) returns Hero
     int random
 
 
@@ -106,6 +106,7 @@ function createRandomHeroForAI(int id, boolean removeFromTavern)
 
 
     removeHeroType(remainingHeroTypes[random], removeFromTavern)
+    return hero
 
 
 //creates a random hero for a player
@@ -205,12 +206,12 @@ function onClick()
     locked = true
     clickedButtonId = GetSpellAbilityId()
     let triggerTavern = GetTriggerUnit()
-    for i = HERO_PLAYER_TEAM_1_FIRST to HERO_PLAYER_TEAM_2_LAST
+    for i = Teams.first1() to Teams.last2()
         playerGoldArray[i] = players[i].getGold()
 
     doAfter(0) ->
         player triggerPlayer = null
-        for i = HERO_PLAYER_TEAM_1_FIRST to HERO_PLAYER_TEAM_2_LAST
+        for i = Teams.first1() to Teams.last2()
             if playerGoldArray[i] - players[i].getGold() == HERO_GOLD_COST
                 triggerPlayer = players[i]
                 break
@@ -425,9 +426,9 @@ init
                     if i!= 0
                         PlayerWrapper.createPlayerWrapper(i, PlayerType.HERO)
 
-                    createRandomHeroForAI(i, false)
+                    let hero = createRandomHeroForAI(i, false)
 
-                    new HeroAI(i, AI_DIFFICULTY_NEWBIE)
+                    new HeroAI(hero, AI_DIFFICULTY_NEWBIE)
 
                     SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_VISION, true)
                     SetPlayerAlliance(players[i], players[0], ALLIANCE_SHARED_CONTROL, true)
@@ -438,21 +439,18 @@ init
         ..registerPlayerChatEvent(players[0], "full2", false)
         ..addAction() ->
             if onPickTrigger == null
-                for i = HERO_PLAYER_TEAM_2_FIRST to HERO_PLAYER_TEAM_2_LAST
+                for i = Teams.first2() to Teams.last2()
                     if i >= 0 and i<=MAX_HERO_COUNT-1 and not playerHasPicked[i]
-
-                        
-
                         if i!= 0
                             PlayerWrapper.createPlayerWrapper(i, PlayerType.HERO)
 
-                        createRandomHeroForAI(i, false)
+                        let hero = createRandomHeroForAI(i, false)
 
 
-                        let ai = new HeroAI(i, AI_DIFFICULTY_INSANE)
+                        let ai = new HeroAI(hero, AI_DIFFICULTY_INSANE)
 
-                        for Hero hero in PlayerWrapper.getPlayerHeroes(i)
-                            hero.toUnit().setLevel(25, false)
+                        for Hero h in PlayerWrapper.getPlayerHeroes(i)
+                            h.toUnit().setLevel(25, false)
 
                         doAfter(6) ->
                             players[i].addGold(100000)
@@ -468,8 +466,9 @@ init
         ..registerPlayerChatEvent(players[0], "pause ", false)
         ..addAction() ->
             let i = GetEventPlayerChatString().substring(6).toInt()
-            if i >= 0 and i<=MAX_HERO_COUNT-1 and getAI(i)!=null
-                getAI(i).togglePause()
+            if i >= 0 and i<=MAX_HERO_COUNT-1 and getAiList(i)!=null
+                for ai in getAiList(i)
+                    ai.togglePause()
 
         // teleport heroes mid
         CreateTrigger()
