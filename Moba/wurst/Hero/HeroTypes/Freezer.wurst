@@ -229,6 +229,8 @@ constant int FREEZE_DEF = 100
 
 BuffType buffFreeze
 
+int lastFrostBreathLevel = 1
+
 constant int FREEZE_BUFF_ID = compiletime(createAuraBuff("Freeze", "This unit is under the effect of freeze; it is stunned; but has increased armor and willpower.", Icons.bTNFreezingBreath))
 constant int FREEZE_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, FREEZE_BUFF_ID, "", ""))
 
@@ -608,7 +610,11 @@ function initHeroType()
                 nearby.enumUnitsInRange(target.getPos(), FROST_WYRM_AOE)
 
                 let dmg = attacker.wrapper().getStatTotalValue(Stat.STR) * 0.5
-                let level = SUMMON_MAP.get(attacker).getAbilityLevel(ABILITY_FROST_WYRM)
+               
+                var level = lastFrostBreathLevel
+                if SUMMON_MAP.has(attacker)
+                    level = SUMMON_MAP.get(attacker).getAbilityLevel(ABILITY_FROST_WYRM)
+                    lastFrostBreathLevel = level
 
                 if not target.isType(UNIT_TYPE_STRUCTURE)
                     target.addBuffReduced(attacker, FROST_BREATH_DUR[level-1], buffFrostBreath, level)
@@ -636,8 +642,8 @@ function initHeroType()
             if GetTriggerUnit().getTypeId() == FROST_WYRM
                 let u = GetTriggerUnit()
                 let caster = SUMMON_MAP.get(u)
-                SUMMON_MAP.remove(caster)
                 SUMMON_MAP.remove(u)
+                SUMMON_MAP.remove(caster)
 
    
 

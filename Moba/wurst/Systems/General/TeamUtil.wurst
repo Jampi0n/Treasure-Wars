@@ -76,7 +76,7 @@ public abstract class Teams
         return compiletime(ARMY_2)
 
     @inline static function invert(int team) returns int
-        return 3 - team
+        return 1 - team
 
     @inline static function team(bool first) returns int
         int team

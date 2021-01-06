@@ -136,7 +136,7 @@ public class Tower
                     currentTarget = attacked
 
                 if currentTarget.isType(UNIT_TYPE_HERO)
-                    let ai = getAI(GetTriggerUnit())
+                    let ai = getAI(attacked)
                     if ai != null
                         ai.attackedByTower()
 

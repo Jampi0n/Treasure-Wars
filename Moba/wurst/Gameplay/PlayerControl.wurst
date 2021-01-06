@@ -102,8 +102,8 @@ public class StatTable
             ..setRowCount(13)
             ..setItemsStyle(true, false)
             ..setTitle("Stats: "+
-                players[Teams.army1()].getColor().toColor().toColorString()+ScoreTable.team1Kills.toString()+"|r / "+
-                players[Teams.army2()].getColor().toColor().toColorString()+ScoreTable.team2Kills.toString()+"|r"  )
+                Teams.COLOR[TEAM_1]+Teams.HERO_KILLS[TEAM_1].toString()+"|r / "+
+                Teams.COLOR[TEAM_2]+Teams.HERO_KILLS[TEAM_2].toString()+"|r"  )
             ..display(true)
             ..minimize()
 
@@ -144,9 +144,6 @@ public class StatTable
 public class ScoreTable
 
     static protected multiboard mBoard
-
-    protected static int team1Kills = 0
-    protected static int team2Kills = 0
 
     static int array rowToPlayer
     static int array playerToRow
@@ -257,8 +254,8 @@ public class ScoreTable
             ..release() 
 
         mBoard.setTitle("Score: "+
-        players[Teams.army1()].getColor().toColor().toColorString()+team1Kills.toString()+"|r / "+
-        players[Teams.army2()].getColor().toColor().toColorString()+team2Kills.toString()+"|r"  )
+            Teams.COLOR[TEAM_1]+Teams.HERO_KILLS[TEAM_1].toString()+"|r / "+
+            Teams.COLOR[TEAM_2]+Teams.HERO_KILLS[TEAM_2].toString()+"|r"  )
 
     static function updatePlayerDeaths(int i)
         let row = playerToRow[i]
