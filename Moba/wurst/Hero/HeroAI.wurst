@@ -264,16 +264,14 @@ public class TeamFight
         real currentValue = -1
         unit currentTarget = null
 
-        for i = firstTeam ? Teams.first2() : Teams.first1() to firstTeam ? Teams.last2() : Teams.last1()
-            let heroes = PlayerWrapper.getPlayerHeroes(i)
-            for Hero hero in heroes
-                let heroUnit = hero.toUnit()
-                if hero.toUnit().getPos().distanceTo(this.teamFightLoc) < TEAM_FIGHT_RANGE and hero.toUnit().isAlive() and hero.toUnit().isTargetable(firstTeam ? players[Teams.army1()] : players[Teams.army2()], false, true)
-                    if hero.toUnit().isVisible(firstTeam ? players[Teams.army1()] : players[Teams.army2()])
-                        let nextValue = determineHeroOffensiveStrength(heroUnit)/determineHeroDefensiveStrength(heroUnit)
-                        if nextValue > currentValue
-                            currentTarget = heroUnit
-                            currentValue = nextValue
+        for hero in Teams.HEROES[Teams.team(not this.firstTeam)]
+            let heroUnit = hero.toUnit()
+            if hero.toUnit().getPos().distanceTo(this.teamFightLoc) < TEAM_FIGHT_RANGE and hero.toUnit().isAlive() and hero.toUnit().isTargetable(firstTeam ? players[Teams.army1()] : players[Teams.army2()], false, true)
+                if hero.toUnit().isVisible(firstTeam ? players[Teams.army1()] : players[Teams.army2()])
+                    let nextValue = determineHeroOffensiveStrength(heroUnit)/determineHeroDefensiveStrength(heroUnit)
+                    if nextValue > currentValue
+                        currentTarget = heroUnit
+                        currentValue = nextValue
 
         this.target = currentTarget
 

@@ -49,24 +49,15 @@ function onHydraDeath()
 
         let killerId = GetKillingUnit().getOwner().getId()
         let killingTeam = Players.team(killerId)
-        boolean killedByTeam = true
+        
+        let teamName = Players.coloredName(killingTeam)
 
-
-        string teamName
-        if killingTeam == TEAM_1
-            teamName = PlayerWrapper.getFullColoredName(Teams.army1())
-        else if killingTeam == TEAM_2
-            teamName = PlayerWrapper.getFullColoredName(Teams.army2())
-        else
-            teamName = ""
-            killedByTeam = false
-
-        if killedByTeam
+        if not Players.isTeamNeutral(killerId)
             printTimed("Team "+teamName+" has killed a Hydra. Their heroes gain 3 stat upgrades for every stat. The Hydra will respawn in "+REVIVE_TIME.toInt().toString()+" seconds.", 10)
             PingMinimap(target.getX(), target.getY(), 3)
 
-            for p in PlayerWrapper.getHeroTeam(killingTeam)
-                for hero in PlayerWrapper.getPlayerHeroes(p)
+            for p in Teams.HERO_PLAYERS[killingTeam]
+                for hero in Players.heroList(p)
                     hero.toUnit().hydraBonus()
                     hero.addXp(250)
 

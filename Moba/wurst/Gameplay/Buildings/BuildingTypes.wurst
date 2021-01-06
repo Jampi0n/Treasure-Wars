@@ -98,7 +98,7 @@ function setVictoryState(VictoryState newState)
 
 		//stops heroes from reviving
 		for i = 0 to MAX_HERO_COUNT-1
-			for Hero hero in PlayerWrapper.getPlayerHeroes(i)
+			for Hero hero in Players.heroList(i)
 				hero.destroyTimer()
 
 
@@ -118,10 +118,10 @@ function setVictoryState(VictoryState newState)
 		int winTeam
 		string teamName
 		if newState == VictoryState.WIN_TEAM1
-			teamName = PlayerWrapper.getFullColoredName(Teams.army1())
+			teamName = Teams.COLORED_NAME[TEAM_1]
 			winTeam = TEAM_1
 		else
-			teamName = PlayerWrapper.getFullColoredName(Teams.army2())
+			teamName = Teams.COLORED_NAME[TEAM_2]
 			winTeam = TEAM_2
 
 
@@ -135,8 +135,8 @@ function setVictoryState(VictoryState newState)
 
 		if false
 			doAfter(5) ->
-				let winList = PlayerWrapper.getHeroTeam(winTeam)
-				let defeatList = PlayerWrapper.getHeroTeam(Teams.invert(winTeam))
+				let winList = Teams.HEROES[winTeam]
+				let defeatList = Teams.HEROES[Teams.invert(winTeam)]
 
 				for int id in winList
 					CustomVictoryBJ( players[id] , false, true )
@@ -297,7 +297,7 @@ function onBuildingDeath()
 				createGoldBountyTextTag(building, bounty + globalBounty, killer)
 
 			
-			for int id in PlayerWrapper.getHeroTeam(team)
+			for int id in Players.heroList(team)
 				let p = players[id]
 				if p != killer
 					PlayerWrapper.addGoldEx(id, globalBounty)

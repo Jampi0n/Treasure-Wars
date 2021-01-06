@@ -450,7 +450,7 @@ init
 
                         let ai = new HeroAI(hero, AI_DIFFICULTY_INSANE)
 
-                        for Hero h in PlayerWrapper.getPlayerHeroes(i)
+                        for Hero h in Players.heroList(i)
                             h.toUnit().setLevel(25, false)
 
                         doAfter(6) ->
@@ -476,13 +476,13 @@ init
         ..registerPlayerChatEvent(players[0], "mid ", false)
         ..addAction() ->
             let i = GetEventPlayerChatString().substring(4).toInt()
-            for Hero hero in PlayerWrapper.getPlayerHeroes(i)
+            for Hero hero in Players.heroList(i)
                 hero.toUnit().setXY(gg_rct_CenterMid.getCenter())
 
         CreateTrigger()
         ..registerPlayerChatEvent(players[0], "mid", true)
         ..addAction() ->
-            for Hero hero in PlayerWrapper.getPlayerHeroes(0)
+            for Hero hero in Players.heroList(0)
                 hero.toUnit().setXY(gg_rct_CenterMid.getCenter())
 
         CreateTrigger()
@@ -493,7 +493,7 @@ init
         CreateTrigger()
         ..registerPlayerChatEvent(players[0], "castle", true)
         ..addAction() ->
-            for Hero hero in PlayerWrapper.getPlayerHeroes(0)
+            for Hero hero in Players.heroList(0)
                 hero.toUnit().setXY(gg_rct_BrownCastle.getCenter())
                 hero.toUnit().wrapper().addStatAbsoluteBonus(Stat.STR, 10000)
                 hero.toUnit().wrapper().addStatAbsoluteBonus(Stat.AS, 200)
@@ -503,13 +503,13 @@ init
         ..registerPlayerChatEvent(players[0], "lvl ", false)
         ..addAction() ->
             let i = GetEventPlayerChatString().substring(4).toInt()
-            for Hero hero in PlayerWrapper.getPlayerHeroes(i)
+            for Hero hero in Players.heroList(i)
                 hero.toUnit().setLevel(25, false)
 
         CreateTrigger()
         ..registerPlayerChatEvent(players[0], "lvl", true)
         ..addAction() ->
-            for Hero hero in PlayerWrapper.getPlayerHeroes(0)
+            for Hero hero in Players.heroList(0)
                 hero.toUnit().setLevel(25, false)
 
      //SetHeroLevel(hero.toUnit(), 25, true)

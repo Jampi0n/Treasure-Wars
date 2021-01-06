@@ -139,7 +139,7 @@ function onUnitDeath()
 
             //xp
             if killerIsHero == 1 or not killingUnit.isType(UNIT_TYPE_STRUCTURE)
-                PlayerWrapper.rewardXp(Teams.invert(dyingTeam) == TEAM_1, pos, xp)
+                Teams.rewardXp(Teams.invert(dyingTeam), pos, xp)
         
     
     

@@ -223,11 +223,6 @@ public function unit.dispelBuffs(DispelLevel dispelLevel)
                 currentBuff.dispel()
 
 
-@deprecated("use PlayerWrapper.getFullColoredName(int id)")
-public function player.getFullColoredName() returns string
-    return PlayerWrapper.getFullColoredName(this.getId())
-
-
 public function unit.hitBoxDistanceTo(vec2 pos) returns real
     return max(0, this.getPos().distanceTo(pos) - this.getHitBox())
 
