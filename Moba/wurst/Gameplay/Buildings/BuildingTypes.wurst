@@ -17,6 +17,7 @@ import SoundUtils
 import Assets
 import LinkedList
 import OnAttack
+import TeamUtil
 
 public constant int ALTAR = 'h002'
 public constant int ARCANE_SANCTUM = 'h008'
@@ -117,10 +118,10 @@ function setVictoryState(VictoryState newState)
 		int winTeam
 		string teamName
 		if newState == VictoryState.WIN_TEAM1
-			teamName = PlayerWrapper.getFullColoredName(getArmyPlayerTeam1())
+			teamName = PlayerWrapper.getFullColoredName(Teams.army1())
 			winTeam = TEAM_1
 		else
-			teamName = PlayerWrapper.getFullColoredName(getArmyPlayerTeam2())
+			teamName = PlayerWrapper.getFullColoredName(Teams.army2())
 			winTeam = TEAM_2
 
 
@@ -135,7 +136,7 @@ function setVictoryState(VictoryState newState)
 		if false
 			doAfter(5) ->
 				let winList = PlayerWrapper.getHeroTeam(winTeam)
-				let defeatList = PlayerWrapper.getHeroTeam(invertTeam(winTeam))
+				let defeatList = PlayerWrapper.getHeroTeam(Teams.invert(winTeam))
 
 				for int id in winList
 					CustomVictoryBJ( players[id] , false, true )
@@ -162,7 +163,7 @@ function onBuildingDeath()
 		if unitId == FARM
 			bounty = 50
 			globalBounty = 50
-			if buildingOwnerId == getArmyPlayerTeam1()
+			if buildingOwnerId == Teams.army1()
 				farmsTeam1--
 			else
 				farmsTeam2--
@@ -280,17 +281,17 @@ function onBuildingDeath()
 		else if unitId == CASTLE
 
 			if victoryState == VictoryState.UNDECIDED
-				if building.getOwner() == players[getArmyPlayerTeam1()]
+				if building.getOwner() == players[Teams.army1()]
 					setVictoryState(VictoryState.WIN_TEAM2)
-				else if building.getOwner() == players[getArmyPlayerTeam2()]
+				else if building.getOwner() == players[Teams.army2()]
 					setVictoryState(VictoryState.WIN_TEAM1)
 				else
 					error("Castle killed for player "+building.getOwner().getId().toString())
 			
 		if bounty + globalBounty > 0
-			let team = getTeam(buildingOwnerId)
+			let team = Players.team(buildingOwnerId)
 
-			if getTeam(killerId) != team
+			if Players.team(killerId) != team
 				PlayerWrapper.addGoldEx(killerId, bounty + globalBounty)
 				PlayerWrapper.statBuildingsRazed[killerId]++
 				createGoldBountyTextTag(building, bounty + globalBounty, killer)
@@ -457,7 +458,7 @@ function onBuildingAbility()
 
 	else if itemTypeId == 'I006' //Call to Arms
 		SOUND_CALL_TO_ARMS.playOnPoint(heroPos).snd.setVolume(350)
-		if getTeam(building.getOwner().getId()) == TEAM_1
+		if Players.team(building.getOwner().getId()) == TEAM_1
 			removeMilitaTeam1 = false
 			for i = 0 to 15
 				let spawnedUnit = spawnUnit(true, MILITIA_DEFEND, gg_rct_GreenCastle.getCenter())
@@ -530,7 +531,7 @@ function onBuildingAbility()
 
 	else if itemTypeId == 'I008' //Teleport Top
 		vec2 targetPos
-		if getTeam(building.getOwner().getId()) == TEAM_1
+		if Players.team(building.getOwner().getId()) == TEAM_1
 			targetPos = gg_rct_GreenPortTop.getCenter()
 		else
 			targetPos = gg_rct_BrownPortTop.getCenter()
@@ -539,7 +540,7 @@ function onBuildingAbility()
 
 	else if itemTypeId == 'I009' //Teleport Middle
 		vec2 targetPos
-		if getTeam(building.getOwner().getId()) == TEAM_1
+		if Players.team(building.getOwner().getId()) == TEAM_1
 			targetPos = gg_rct_GreenPortMid.getCenter()
 		else
 			targetPos = gg_rct_BrownPortMid.getCenter()
@@ -548,7 +549,7 @@ function onBuildingAbility()
 
 	else if itemTypeId == 'I00A' //Teleport Bottom
 		vec2 targetPos
-		if getTeam(building.getOwner().getId()) == TEAM_1
+		if Players.team(building.getOwner().getId()) == TEAM_1
 			targetPos = gg_rct_GreenPortBot.getCenter()
 		else
 			targetPos = gg_rct_BrownPortBot.getCenter()
@@ -606,11 +607,11 @@ function onMilitiaDespawn()
 	let u = GetEnumUnit()
 	if u.getTypeId() == MILITIA_DEFEND
 		if removeMilitaTeam1
-			if getTeam(u.getOwner().getId()) == TEAM_1 and gg_rct_GreenMilitiaDespawn.contains(u.getPos())
+			if Players.team(u.getOwner().getId()) == TEAM_1 and gg_rct_GreenMilitiaDespawn.contains(u.getPos())
 				militiaTeam1.removeUnit(u)
 				u.remove()
 		if removeMilitaTeam2
-			if getTeam(u.getOwner().getId()) == TEAM_2 and gg_rct_BrownMilitiaDespawn.contains(u.getPos())
+			if Players.team(u.getOwner().getId()) == TEAM_2 and gg_rct_BrownMilitiaDespawn.contains(u.getPos())
 				militiaTeam2.removeUnit(u)
 				u.remove()
 
@@ -625,7 +626,7 @@ function homeInvulnerability()
 	while(not nearby.isEmpty())
 		let target = FirstOfGroup(nearby)
 		nearby.removeUnit(target)
-		if not target.isType(UNIT_TYPE_STRUCTURE) and IsUnitAlly(target, players[getArmyPlayerTeam1()]) 
+		if not target.isType(UNIT_TYPE_STRUCTURE) and IsUnitAlly(target, players[Teams.army1()]) 
 			target.addBuff( target, 0.5, BUFF_HOME, 1)
 			target.addBuff( target, 0.5, INVULERNABLE, 1)
 
@@ -637,7 +638,7 @@ function homeInvulnerability()
 	while(not nearby.isEmpty())
 		let target = FirstOfGroup(nearby)
 		nearby.removeUnit(target)
-		if not target.isType(UNIT_TYPE_STRUCTURE) and IsUnitAlly(target, players[getArmyPlayerTeam2()]) 
+		if not target.isType(UNIT_TYPE_STRUCTURE) and IsUnitAlly(target, players[Teams.army2()]) 
 			target.addBuff( target, 0.5, BUFF_HOME, 1)
 			target.addBuff( target, 0.5, INVULERNABLE, 1)
 
@@ -655,8 +656,8 @@ public function income()
 		factorTeam2 -= max(1, -difference)*/
 
 	for i = 0 to MAX_HERO_COUNT-1
-		let farms = isHeroPlayerTeam1(i) ? farmsTeam1 : farmsTeam2
-		let factor = isHeroPlayerTeam1(i) ? factorTeam1 : factorTeam2
+		let farms = Players.isTeam1(i) ? farmsTeam1 : farmsTeam2
+		let factor = Players.isTeam1(i) ? factorTeam1 : factorTeam2
 
 
 		let gold = factor * farms

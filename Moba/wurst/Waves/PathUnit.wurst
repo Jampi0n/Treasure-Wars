@@ -2,7 +2,7 @@ package PathUnit
 
 import HashMap
 import ClosureTimers
-import Constants
+import TeamUtil
 import OnUnitEnterLeave
 import ErrorHandling
 
@@ -85,8 +85,8 @@ function initTargetPoints()
     targetPoint[14] = gg_rct_CornerBot.getCenter() + vec2(400, -400)
     targetPoint[15] = gg_rct_BrownCastle.getCenter()
 
-    finalPoint[getArmyPlayerTeam1()] = gg_rct_BrownCastle.getCenter()
-    finalPoint[getArmyPlayerTeam2()] = gg_rct_GreenCastle.getCenter()
+    finalPoint[Teams.army1()] = gg_rct_BrownCastle.getCenter()
+    finalPoint[Teams.army2()] = gg_rct_GreenCastle.getCenter()
 
 function attackMoveGroup()
     let u = GetEnumUnit()

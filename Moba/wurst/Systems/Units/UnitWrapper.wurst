@@ -11,6 +11,7 @@ import PlayerControl
 import ErrorHandling
 import LinkedList
 import ObjectIds
+import TeamUtil
 
 import public BonusMod
 
@@ -85,7 +86,7 @@ public class UnitWrapper
         else
             this.ownerId = assocUnit.getOwner().getId()
             this.assocUnit = assocUnit
-            this.team = getTeam(this.ownerId)
+            this.team = Players.team(this.ownerId)
             this.arrayOffset = (this castTo int) * STAT_COUNT
 
             allUnits[unitWrapperCount] = this.assocUnit
@@ -348,17 +349,17 @@ public class UnitWrapper
         revealCount++
         if revealCount == 1
             if this.team == TEAM_1
-                UnitShareVision(this.toUnit(), players[getArmyPlayerTeam2()], true)
+                UnitShareVision(this.toUnit(), players[Teams.army2()], true)
             else if this.team == TEAM_2
-                UnitShareVision(this.toUnit(), players[getArmyPlayerTeam1()], true)
+                UnitShareVision(this.toUnit(), players[Teams.army1()], true)
 
     function decReveal()
         revealCount--
         if revealCount == 0
             if this.team == TEAM_1
-                UnitShareVision(this.toUnit(), players[getArmyPlayerTeam2()], false)
+                UnitShareVision(this.toUnit(), players[Teams.army2()], false)
             else if this.team == TEAM_2
-                UnitShareVision(this.toUnit(), players[getArmyPlayerTeam1()], false)
+                UnitShareVision(this.toUnit(), players[Teams.army1()], false)
 
 public function unit.wrapper() returns UnitWrapper
     return UnitWrapper.getWrapper(this)

@@ -9,6 +9,7 @@ import SoundUtils
 import LinkedList
 import General
 import StandardTextTags
+import TeamUtil
 
 constant REVIVE_TIME = 150.
 constant MAX_LEVEL = 5
@@ -38,15 +39,15 @@ function onDragonTurtleDeath()
         turtleIcon.hide()
 
         let killerId = GetKillingUnit().getOwner().getId()
-        let killingTeam = getTeam(killerId)
+        let killingTeam = Players.team(killerId)
         boolean killedByTeam = true
 
 
         string teamName
         if killingTeam == TEAM_1
-            teamName = PlayerWrapper.getFullColoredName(getArmyPlayerTeam1())
+            teamName = PlayerWrapper.getFullColoredName(Teams.army1())
         else if killingTeam == TEAM_2
-            teamName = PlayerWrapper.getFullColoredName(getArmyPlayerTeam2())
+            teamName = PlayerWrapper.getFullColoredName(Teams.army2())
         else
             teamName = ""
             killedByTeam = false

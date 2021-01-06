@@ -8,6 +8,7 @@ import DamageDetection
 import Constants
 import HeroAI
 import HeroControl
+import TeamUtil
 
 class TowerPos
     real x
@@ -58,7 +59,7 @@ public class Tower
         let g = CreateGroup()
         unit u
 
-        GroupEnumUnitsOfPlayer(g, players[getArmyPlayerTeam1()], null)
+        GroupEnumUnitsOfPlayer(g, players[Teams.army1()], null)
 
         while true
             u = FirstOfGroup(g)
@@ -70,7 +71,7 @@ public class Tower
             if id == BASE_TOWER or id == GATE_TOWER or id == OUTER_TOWER
                 new Tower(u)
 
-        GroupEnumUnitsOfPlayer(g, players[getArmyPlayerTeam2()], null)
+        GroupEnumUnitsOfPlayer(g, players[Teams.army2()], null)
 
         while true
             u = FirstOfGroup(g)
@@ -92,7 +93,7 @@ public class Tower
 
         this.pos = new TowerPos(tower.getX(), tower.getY(), this)
 
-        if tower.getOwner().getId() == getArmyPlayerTeam1()
+        if tower.getOwner().getId() == Teams.army1()
             towerPos1.add(this.pos)
         else
             towerPos2.add(this.pos)
@@ -101,7 +102,7 @@ public class Tower
         towerGroup.removeUnit(this.tower)
         towerList.remove(this)
         towerMap.remove(this.tower)
-        if tower.getOwner().getId() == getArmyPlayerTeam1()
+        if tower.getOwner().getId() == Teams.army1()
             towerPos1.remove(this.pos)
         else
             towerPos2.remove(this.pos)
@@ -111,11 +112,11 @@ public class Tower
         let target = GetTriggerUnit()
 
         if target.isType(UNIT_TYPE_HERO) and attacker.isType(UNIT_TYPE_HERO) and GetEventDamage() > 0.1
-            if IsUnitAlly(attacker, players[getArmyPlayerTeam1()]) and IsUnitAlly(target, players[getArmyPlayerTeam2()])
+            if IsUnitAlly(attacker, players[Teams.army1()]) and IsUnitAlly(target, players[Teams.army2()])
                 for TowerPos pos in towerPos2
                     if pos.inRange(attacker, 800)
                         pos.tower.attackHero(attacker)
-            else if IsUnitAlly(attacker, players[getArmyPlayerTeam2()]) and IsUnitAlly(target, players[getArmyPlayerTeam1()])
+            else if IsUnitAlly(attacker, players[Teams.army2()]) and IsUnitAlly(target, players[Teams.army1()])
                 for TowerPos pos in towerPos1
                     if pos.inRange(attacker, 800)
                         pos.tower.attackHero(attacker)

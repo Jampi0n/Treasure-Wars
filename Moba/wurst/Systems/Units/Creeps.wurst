@@ -15,6 +15,7 @@ import PlayerControl
 import UnitType
 import StandardTextTags
 import Buff
+import TeamUtil
 
 constant int DUMMY_CASTER = compiletime(UNIT_ID_GEN.next())
 constant int HEAL_BUFF_ID = compiletime(createDummyBuff())

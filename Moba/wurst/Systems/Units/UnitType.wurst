@@ -5,6 +5,7 @@ import StandardTextTags
 import PlayerControl
 import Constants
 import Assets
+import TeamUtil
 
 public function createUnitType(int baseHp, int unitId, int bounty, int baseAttack, int upgradeAttack, int attackUpgradeId, int baseArmor, int upgradeArmor, int armorUpgradeId, int hitBox, string modelPath, int powerLevel) returns int
     new UnitType(baseHp, unitId, bounty, baseAttack, upgradeAttack, attackUpgradeId, baseArmor, upgradeArmor, armorUpgradeId, hitBox, modelPath, powerLevel)
@@ -113,7 +114,7 @@ function onUnitDeath()
         let killingUnit = GetKillingUnit()
         let killingId = killingUnit.getOwner().getId()
         let dyingId = dyingUnit.getOwner().getId()
-        let dyingTeam = getTeam(dyingId)
+        let dyingTeam = Players.team(dyingId)
         let pos = dyingUnit.getPos()
 
         // army unit dies
@@ -121,7 +122,7 @@ function onUnitDeath()
             let bounty = dyingType.getBounty()
             let xp = dyingType.getPowerLevel() * 8.0
 
-            let killerIsEnemy = killingUnit != null and getTeam(killingId) == invertTeam(dyingTeam)
+            let killerIsEnemy = killingUnit != null and Players.team(killingId) == Teams.invert(dyingTeam)
             int killerIsHero = 0
             //the killing player belongs to the enemy team
             if killerIsEnemy and killingId < MAX_HERO_COUNT 
@@ -138,7 +139,7 @@ function onUnitDeath()
 
             //xp
             if killerIsHero == 1 or not killingUnit.isType(UNIT_TYPE_STRUCTURE)
-                PlayerWrapper.rewardXp(invertTeam(dyingTeam) == TEAM_1, pos, xp)
+                PlayerWrapper.rewardXp(Teams.invert(dyingTeam) == TEAM_1, pos, xp)
         
     
     
