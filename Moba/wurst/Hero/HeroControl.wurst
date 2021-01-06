@@ -32,8 +32,8 @@ function initAssistLists()
         for j = 0 to 4
             if i div LIST_ID_POW_2[j] mod 2 == 1
                 indexList.add(j)
-                assistName1[size] = PlayerWrapper.getFullColoredName(Teams.first1() + j)
-                assistName2[size] = PlayerWrapper.getFullColoredName(Teams.first2() + j)
+                assistName1[size] = Players.coloredName(Teams.first1() + j)
+                assistName2[size] = Players.coloredName(Teams.first2() + j)
                 size++
 
         //creating the assist string with correct use of <,> and <and>
@@ -137,7 +137,7 @@ public class Hero
         
         unitToHero.put(this.hero, this)
         //heroes[this.owner.getId()] = this
-        PlayerWrapper.addHero(this.ownerId, this)
+        Players.addHero(this.ownerId, this)
 
         onDamageTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DAMAGED)
         onDeathTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DEATH)
@@ -149,7 +149,7 @@ public class Hero
         ..setData(this castTo int)
         this.reviveWindow = CreateTimerDialog(this.reviveTimer)
         TimerDialogDisplay(this.reviveWindow, false)
-        TimerDialogSetTitle(this.reviveWindow, PlayerWrapper.getFullColoredName(this.ownerId))
+        TimerDialogSetTitle(this.reviveWindow, Players.coloredName(this.ownerId))
 
         if this.heroType.getBonusCalculation() != null
             wrapper.setBonusCalculation(this.heroType.getBonusCalculation())
@@ -364,14 +364,14 @@ public class Hero
                     unknownKiller = true
 
         if this.firstTeam
-            for assistantId in PlayerWrapper.getHeroTeam(false)
+            for assistantId in Teams.HERO_PLAYERS[Teams.team(false)]
                 let time = this.assistMap.get(assistantId)
                 if time > gameTime and assistantId != killingId
                     assistList.add(assistantId)
                     assistListId += LIST_ID_POW_2[assistantId]
             assistString = assistStringListTeam2[assistListId]
         else
-            for assistantId in PlayerWrapper.getHeroTeam(true)
+            for assistantId in Teams.HERO_PLAYERS[Teams.team(true)]
                 let time = this.assistMap.get(assistantId)
                 if time > gameTime and assistantId != killingId
                     assistList.add(assistantId)
@@ -389,9 +389,9 @@ public class Hero
                 let killBounty = KILL_BOUNTY[assistants]
 
                 if assistants == 0
-                    printTimed(PlayerWrapper.getFullColoredName(this.ownerId) + " was killed by " + PlayerWrapper.getFullColoredName(killingId) + " for |cffffcc00"+killBounty.toString()+"|r gold.", 10)
+                    printTimed(Players.coloredName(this.ownerId) + " was killed by " + Players.coloredName(killingId) + " for |cffffcc00"+killBounty.toString()+"|r gold.", 10)
                 else
-                    printTimed(PlayerWrapper.getFullColoredName(this.ownerId) + " was killed by " + PlayerWrapper.getFullColoredName(killingId) +
+                    printTimed(Players.coloredName(this.ownerId) + " was killed by " + Players.coloredName(killingId) +
                     " for |cffffcc00" + killBounty.toString() + "|r gold. " + assistString + "|cffffcc00" + assistBounty.toString() +"|r gold for helping.", 10)
 
 
@@ -403,15 +403,15 @@ public class Hero
                     PlayerWrapper.addHeroKill(killingId, killingId <= Teams.last2())
                 
                     let xp = (this.level + 5) * 10.
-                    PlayerWrapper.rewardXp(not this.firstTeam, this.hero.getPos(), xp)
+                    Teams.rewardXp(Teams.team(not this.firstTeam), this.hero.getPos(), xp)
                     destroy assistList
                     
             else
-                printTimed(PlayerWrapper.getFullColoredName(this.ownerId) + " was killed by " + killingPlayer.getName() + ".", 10)
+                printTimed(Players.coloredName(this.ownerId) + " was killed by " + killingPlayer.getName() + ".", 10)
 
                 destroy assistList
         else
-            printTimed(PlayerWrapper.getFullColoredName(this.ownerId) + " died.", 10)
+            printTimed(Players.coloredName(this.ownerId) + " died.", 10)
             destroy assistList
 
         

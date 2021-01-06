@@ -87,7 +87,7 @@ public class StatTable
         columnToPlayer[1] = Teams.army1()
         playerToColumn[Teams.army1()] = 1
         for i = 0 to MAX_HERO_COUNT-1
-            if PlayerWrapper.getPlayerHeroes(i).size() != 0
+            if Players.heroList(i).size() != 0
                 columnToPlayer[count] = i
                 playerToColumn[i] = count
                 count++
@@ -431,19 +431,19 @@ public abstract class PlayerWrapper
 
     static function revealIcons()
         revealIcons = true
-        for p in getHeroTeam(TEAM_1)
+        for p in Teams.HERO_PLAYERS[TEAM_1]
             revealIcon(p)
-        for p in getHeroTeam(TEAM_2)
+        for p in Teams.HERO_PLAYERS[TEAM_2]
             revealIcon(p)
 
     @deprecated("Use Player.addHeros instead.") static function addHero(int id, Hero whichHero)
         Players.addHero(id, whichHero)
 
     @deprecated("Use Players instead.") static function getPlayerHeroes(int id) returns LinkedList<Hero>
-        return Players.HEROES[id]
+        return Players.heroList(id)
 
     @deprecated("Do not use specific player heroes.") static function getPlayerHero(int id, int heroIndex) returns Hero
-        return Players.HEROES[id].get(heroIndex)
+        return Players.heroList(id).get(heroIndex)
 
     @deprecated("Use Teams instead.") static function getHeroTeam(int team) returns LinkedList<int>
         return Teams.HERO_PLAYERS[team]
@@ -468,35 +468,6 @@ public abstract class PlayerWrapper
         statGoldGained[id] += gold
         for ai in getAiList(id)
             ai.addGold(gold)
-
-    static function addXp(int id, real xp)
-        realXp[id] += xp
-        let intXp = realXp[id].toInt()
-        let heroes = getPlayerHeroes(id)
-        for Hero hero in heroes
-            hero.toUnit().addXp(intXp, true)
-        realXp[id] -= intXp
-
-    static function rewardXp(bool firstTeam, vec2 pos, real xp)
-        let allies = PlayerWrapper.getHeroTeam(firstTeam)
-        real tmpXp = xp
-        if allies != null
-            let xpHeroes = new LinkedList<Hero>()
-            let alliedHeroes = Teams.HEROES[Teams.team(firstTeam)]
-            for hero in alliedHeroes
-                let distance = hero.toUnit().getPos().distanceTo(pos)
-                if distance < XP_RANGE
-                    xpHeroes.add(hero)
-            let nearbyHeroes = xpHeroes.size()
-            if nearbyHeroes > 0
-                tmpXp /= nearbyHeroes
-                for hero in xpHeroes
-                    hero.addXp(tmpXp)
-            else
-                tmpXp /= Teams.HERO_COUNT[Teams.team(firstTeam)]
-                for hero in alliedHeroes
-                    hero.addXp(tmpXp)
-            destroy xpHeroes
 
 
 function initPlayers()

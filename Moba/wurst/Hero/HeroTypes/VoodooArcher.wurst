@@ -311,14 +311,14 @@ function castBigBadVoodoo()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
     let fx = caster.addEffect(Abilities.voodooAura, "origin")
-    let enemyList = PlayerWrapper.getHeroTeam(Teams.invert(Players.team(caster.getOwner().getId())))
+    let enemyList = Teams.HERO_PLAYERS[Teams.invert(Players.team(caster.getOwner().getId()))]
     doPeriodically(0.1, (cb) -> begin
         if not caster.isAlive() or caster.getCurrentOrder() != OrderId("tranquility")
             destroy cb
             fx.destr()
         else
             for p in enemyList
-                for Hero hero in PlayerWrapper.getPlayerHeroes(p)
+                for Hero hero in Players.heroList(p)
                     let target = hero.toUnit()
                     if target.isTargetable(caster.getOwner(), false, true)
                         caster.dealDamage(target, 0.1 * BBV_DAMAGE[level-1].bonus(caster.getInt(), BBV_DAMAGE_BONUS), ReductionType.NONE)

@@ -25,9 +25,6 @@ public abstract class Teams
     protected static constant ARMY_1 = ARMY[TEAM_1]
     protected static constant ARMY_2 = ARMY[TEAM_2]
     // advanced types are accessed directly
-    static constant PLAYING_HEROES = [new LinkedList<int>, new LinkedList<int>, new LinkedList<int>, new LinkedList<int>]
-    static constant PLAYING_HEROES_1 = PLAYING_HEROES[TEAM_1]
-    static constant PLAYING_HEROES_2 = PLAYING_HEROES[TEAM_2]
     static constant NAME = ["","Green","Brown","Neutral"]
     static constant COLOR = [
         compiletime(color(150, 50, 150).toColorString()),
@@ -115,11 +112,11 @@ public abstract class Teams
 
 public abstract class Players
     protected static constant TEAM = [1,1,1,1,1,2,2,2,2,2,1,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3]
-    static string array NAME
-    static string array COLOR
-    static string array COLORED_NAME
+    protected static string array NAME
+    protected static string array COLOR
+    protected static string array COLORED_NAME
 
-    static LinkedList<Hero> array HEROES
+    protected static LinkedList<Hero> array HEROES
 
     protected static function initPlayers()
         for i = 0 to bj_MAX_PLAYER_SLOTS

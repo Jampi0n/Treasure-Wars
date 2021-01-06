@@ -181,7 +181,7 @@ public class UnitWrapper
 
     static function regenerate()
         for i = 0 to MAX_HERO_COUNT-1
-            let heroes = PlayerWrapper.getPlayerHeroes(i)
+            let heroes = Players.heroList(i)
             if heroes != null
                 for hero in heroes
                     let heroUnit = hero.toUnit()
