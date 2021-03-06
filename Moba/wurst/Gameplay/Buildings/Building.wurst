@@ -1,0 +1,67 @@
+package Building
+
+/*
+	The building class is the abstract base class for all building types.
+	Its children are singletons and refer to entire building types rather than instances.
+*/
+
+import HashMap
+import TeamUtil
+import PlayerControl
+import StandardTextTags
+
+public abstract class Building
+	protected int unitTypeId = 0
+	protected int bounty = 0
+	protected int teamBounty = 0
+	private static trigger onDeathTrigger = CreateTrigger()
+	private static trigger onAbilityTrigger = CreateTrigger()
+	private static HashMap<int,Building> unitTypeToBuilding = new HashMap<int,Building>()
+
+	static function classInit()
+		onDeathTrigger.registerPlayerUnitEvent(players[Teams.army1()], EVENT_PLAYER_UNIT_DEATH, null)
+		onDeathTrigger.registerPlayerUnitEvent(players[Teams.army2()], EVENT_PLAYER_UNIT_DEATH, null)
+		onDeathTrigger.addAction() ->
+			let building = GetTriggerUnit()
+			if building.isType(UNIT_TYPE_STRUCTURE)
+				let killer = GetKillingUnit()
+				let buildingInstance = unitTypeToBuilding.get(building.getTypeId())
+				buildingInstance.rewardBounty(building, killer)
+				buildingInstance.onDeath(building,killer)
+		onAbilityTrigger.registerPlayerUnitEvent(players[Teams.army1()], EVENT_PLAYER_UNIT_SELL_ITEM, null)
+		onAbilityTrigger.registerPlayerUnitEvent(players[Teams.army2()], EVENT_PLAYER_UNIT_SELL_ITEM, null)
+		onAbilityTrigger.addAction() ->
+			let building = GetTriggerUnit()
+			if building.isType(UNIT_TYPE_STRUCTURE)
+				let soldItem = GetSoldItem()
+				let soldItemId = soldItem.getTypeId()
+				let hero = GetBuyingUnit()
+				unitTypeToBuilding.get(building.getTypeId()).onCast(building,soldItemId, hero)
+				standardTextTag(hero.getPos(), GetObjectName(soldItemId)).setColor(255, 220, 0, 255)
+				soldItem.remove()
+
+	construct(int unitTypeId, int bounty, int teamBounty)
+		unitTypeToBuilding.put(unitTypeId, this)
+		this.unitTypeId = unitTypeId
+		this.bounty = bounty
+		this.teamBounty = teamBounty
+
+	function rewardBounty(unit building, unit killer)
+		let killerId = killer.getOwner().getId()
+		if bounty + teamBounty > 0
+			let team = Players.team(killerId)
+			PlayerWrapper.addGoldEx(killerId, bounty + teamBounty)
+			PlayerWrapper.statBuildingsRazed[killerId]++
+			createGoldBountyTextTag(building, bounty + teamBounty, players[killerId])
+			for int id in Players.heroList(team)
+				let p = players[id]
+				if id != killerId
+					PlayerWrapper.addGoldEx(id, teamBounty)
+					createGoldBountyTextTag(building, teamBounty, p)
+
+	function onDeath(unit _building, unit _killer)
+	function onCast(unit _building, int _itemId, unit _hero)
+
+
+init
+	Building.classInit()

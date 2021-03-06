@@ -1,0 +1,9 @@
+package HeroTower
+
+import Building
+
+public constant HERO_TOWER = 'n000'
+
+public class HeroTower extends Building
+    construct()
+        super(HERO_TOWER, 0, 0)

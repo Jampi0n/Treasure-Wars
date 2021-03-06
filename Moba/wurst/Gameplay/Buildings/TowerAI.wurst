@@ -1,19 +1,25 @@
-package Tower
+package TowerAI
 
-import BuildingTypes
+/*
+    Towers prioritize units over heroes. This behavior is inverted once the hero damages another hero.
+    The tower will then focus the aggressor.
+*/
 
 import LinkedList
 import HashMap
 import DamageDetection
 import HeroAI
 import TeamUtil
+import GateTower
+import BaseTower
+import OuterTower
 
 class TowerPos
     real x
     real y
-    Tower tower
+    TowerAI tower
 
-    construct(real x, real y, Tower tower)
+    construct(real x, real y, TowerAI tower)
         this.x = x
         this.y = y
         this.tower = tower
@@ -25,16 +31,16 @@ class TowerPos
         return dist < range * range
 
 
-public class Tower
+public class TowerAI
 
     private unit tower
     private unit currentTarget = null
     private boolean heroFocus = false
     private TowerPos pos
 
-    private static constant towerList = new LinkedList<Tower>
+    private static constant towerList = new LinkedList<TowerAI>
     private static constant towerGroup = CreateGroup()
-    private static constant towerMap = new HashMap<unit,Tower>
+    private static constant towerMap = new HashMap<unit,TowerAI>
     private static constant towerPos1 = new LinkedList<TowerPos>
     private static constant towerPos2 = new LinkedList<TowerPos>
 
@@ -67,7 +73,7 @@ public class Tower
             let id = u.getTypeId()
             
             if id == BASE_TOWER or id == GATE_TOWER or id == OUTER_TOWER
-                new Tower(u)
+                new TowerAI(u)
 
         GroupEnumUnitsOfPlayer(g, players[Teams.army2()], null)
 
@@ -79,7 +85,7 @@ public class Tower
             let id = u.getTypeId()
             
             if id == BASE_TOWER or id == GATE_TOWER or id == OUTER_TOWER
-                new Tower(u)
+                new TowerAI(u)
 
         g.destr()
 
@@ -147,5 +153,5 @@ public class Tower
             this.heroFocus = true
 
 init
-    Tower.classInit()
+    TowerAI.classInit()
     
