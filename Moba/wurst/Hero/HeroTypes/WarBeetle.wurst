@@ -309,11 +309,13 @@ class VenoumosBeetle
             target.addBuffReduced(this.owner, BITE_SLOW_DURATION[level-1].bonus(ownerIntelligence, BITE_SLOW_DURATION_BONUS), buffBite, level)
         else
             error("Bitten target is wrong!")
-            
+
     static function onBiteStatic()
         let beetle = unitToBeetle.get(GetTriggerUnit())
         if beetle != null
             beetle.onBite(GetSpellTargetUnit())
+        else
+            Log.warn("Beetle object could not be resolved")
 
     ondestroy
         unitToBeetle.remove(this.dummy)

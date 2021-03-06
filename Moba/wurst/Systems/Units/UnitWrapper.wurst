@@ -81,7 +81,7 @@ public class UnitWrapper
 
     construct(unit assocUnit)
         objectCount++
-        if(assocUnit == null)
+        if assocUnit == null or assocUnit.getTypeId() == 0
             destroy this
         else
             this.ownerId = assocUnit.getOwner().getId()

@@ -3,9 +3,28 @@ package TeamUtil
 import initlater HeroControl
 import Constants
 import LinkedList
+import ErrorHandling
+
 /*
 Optimized package to deal with teams.
 */
+
+// debug
+function isValidTeamIndex(int i)
+    if i < 0 or i > 2
+        error("not a valid team index: " + i.toString())
+
+function isValidArmyTeamIndex(int i)
+    if i < 0 or i > 1
+        error("not a valid army team index: " + i.toString())
+
+function isValidPlayerIndex(int i)
+    if i < 0 or i >= bj_MAX_PLAYER_SLOTS
+        error("not a valid player index: " + i.toString())
+
+function isValidHeroPlayerIndex(int i)
+    if i < 0 or i >= 10
+        error("not a valid hero player index: " + i.toString())
 
 public constant TEAM_1 = 0
 public constant TEAM_2 = 1
@@ -49,9 +68,11 @@ public abstract class Teams
         Teams.HERO_PLAYER_COUNT[team]++
 
     @inline static function first(int team) returns int
+        isValidArmyTeamIndex(team)
         return FROM[team]
 
     @inline static function last(int team) returns int
+        isValidArmyTeamIndex(team)
         return TO[team]
 
     @inline static function first1() returns int
@@ -67,6 +88,7 @@ public abstract class Teams
         return compiletime(TO_2)
 
     @inline static function army(int team) returns int
+        isValidArmyTeamIndex(team)
         return ARMY[team]
 
     @inline static function army1() returns int
@@ -76,6 +98,7 @@ public abstract class Teams
         return compiletime(ARMY_2)
 
     @inline static function invert(int team) returns int
+        isValidArmyTeamIndex(team)
         return 1 - team
 
     @inline static function team(bool first) returns int
@@ -87,6 +110,7 @@ public abstract class Teams
         return team
 
     static function rewardXp(int team, vec2 pos, real xp)
+        isValidArmyTeamIndex(team)
         let xpHeroes = new LinkedList<Hero>()
         let allies = HEROES[team]
         real tmpXp = xp
@@ -122,68 +146,90 @@ public abstract class Players
             COLORED_NAME[i] = COLOR[i] + NAME[i] + "|r"
 
     @inline static function heroList(int p) returns LinkedList<Hero>
+        isValidHeroPlayerIndex(p)
         return HEROES[p]
 
     @inline static function name(int p) returns string
+        isValidPlayerIndex(p)
         return NAME[p]
 
     @inline static function color(int p) returns string
+        isValidPlayerIndex(p)
         return COLOR[p]
 
     @inline static function coloredName(int p) returns string
+        isValidPlayerIndex(p)
         return COLORED_NAME[p]
 
     @inline static function team(int p) returns int
+        isValidPlayerIndex(p)
         return TEAM[p]
 
     @inline static function army(int p) returns int
+        isValidPlayerIndex(p)
         return Teams.army(team(p))
 
     @inline static function isTeam1(int p) returns boolean
+        isValidPlayerIndex(p)
         return team(p) == compiletime(TEAM_1)
 
     @inline static function isTeam2(int p) returns boolean
+        isValidPlayerIndex(p)
         return team(p) == compiletime(TEAM_2)
 
     @inline static function isTeamNeutral(int p) returns boolean
+        isValidPlayerIndex(p)
         return team(p) == compiletime(TEAM_NEUTRAL)
 
     @inline static function isTeam(int p, int team) returns boolean
+        isValidPlayerIndex(p)
+        isValidTeamIndex(team)
         return team(p) == team
 
     /** Returns true, if the player id belongs to a hero player of team 1. */
     @inline static function isHero1(int p) returns boolean
+        isValidPlayerIndex(p)
         return p >= compiletime(Teams.first1()) and p <= compiletime(Teams.last1())
 
     /** Returns true, if the player id belongs to a hero player of team 2. */
     @inline static function isHero2(int p) returns boolean
+        isValidPlayerIndex(p)
         return p >= compiletime(Teams.first2()) and p <= compiletime(Teams.last2())
 
     /** Returns true, if the player id belongs to a hero player of the team. */
     @inline static function isHeroX(int p, int team) returns boolean
+        isValidPlayerIndex(p)
+        isValidTeamIndex(team)
         return p >= Teams.FROM[team] and p <= Teams.TO[team]
 
     /** Returns true, if the player id belongs to a hero player. */    
     @inline static function isHero(int p) returns boolean
+        isValidPlayerIndex(p)
         return p >= compiletime(Teams.first1()) and p <= compiletime(Teams.last2())
 
     /** Returns true, if the player id belongs to the army player of team 1. */
     @inline static function isArmy1(int p) returns boolean
+        isValidPlayerIndex(p)
         return p == compiletime(Teams.ARMY_1)
 
     /** Returns true, if the player id belongs to the army player of team 2. */
     @inline static function isArmy2(int p) returns boolean
+        isValidPlayerIndex(p)
         return p == compiletime(Teams.ARMY_2)
 
     /** Returns true, if the player id belongs to the army player of the team. */
     @inline static function isArmyX(int p, int team) returns boolean
+        isValidPlayerIndex(p)
+        isValidTeamIndex(team)
         return p == Teams.ARMY[team]
 
     /** Returns true, if the player id belongs to an army player. */
     @inline static function isArmy(int p) returns boolean
+        isValidPlayerIndex(p)
         return isArmy1(p) or isArmy2(p)
 
     static function addHero(int p, Hero hero)
+        isValidHeroPlayerIndex(p)
         let team = Players.team(p)
         HEROES[p].add(hero)
         Teams.HEROES[team].add(hero)
