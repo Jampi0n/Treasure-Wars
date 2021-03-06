@@ -1,0 +1,9 @@
+package BaseTower
+
+import Building
+
+public constant BASE_TOWER = 'h009'
+
+public class BaseTower extends Building
+    construct()
+        super(BASE_TOWER, 50, 50)

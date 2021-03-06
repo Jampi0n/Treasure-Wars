@@ -1,0 +1,74 @@
+package Rebuildable
+
+/*
+	A rebuildable building cannot be fully destroyed and instead becomes rebuildable when it is destroyed.
+	The rebuild process can be started immediately or be delayed.
+	If the rebuild time is set to -1, the rebuild behavior is disabled.
+*/
+
+import Building
+import ClosureTimers
+import SoundUtils
+
+constant SOUND_UPGRADE = new SoundDefinition(Sounds.blacksmithWhat1, false, true)
+constant SOUND_REPAIR_1 = new SoundDefinition(Sounds.peonRepair1, false, true)
+constant SOUND_REPAIR_2 = new SoundDefinition(Sounds.peonRepair2, false, true)
+constant SOUND_REPAIR_3 = new SoundDefinition(Sounds.peonRepair3, false, true)
+
+public abstract class Rebuildable extends Building
+	private int rebuildTime
+	private int rebuildType
+	private bool autoRebuild = false
+
+	construct(int unitTypeId, int bounty, int teamBounty, int rebuildTime, int rebuildType)
+		super(unitTypeId, bounty, teamBounty)
+		this.rebuildTime = rebuildTime
+		this.rebuildType = rebuildType
+
+	function setAutoRebuild(bool flag)
+		this.autoRebuild = flag
+
+	override function onDeath(unit building, unit killer)
+		if rebuildTime != -1
+			let newBuilding = createUnit(building.getOwner(), rebuildType, building.getPos(), (270).fromDeg())
+			..setAnimation("birth")
+			..setTimeScale(60/rebuildTime)
+			..setHP(0.5)
+			this.onDestroy(building, killer, newBuilding)
+			UnitAddType(newBuilding, UNIT_TYPE_ANCIENT)
+			if this.autoRebuild
+				this.rebuild(newBuilding)
+		else
+			this.onDestroy(building, killer, null)
+
+	function rebuild(unit building)
+		let repairSoundPos = building.getPos3Zero()
+		doPeriodicallyCounted(1, 5, (CallbackCounted cb) -> begin
+			let r = GetRandomInt(1, 3)
+			if r == 1
+				SOUND_REPAIR_1.playOnPoint(repairSoundPos).snd.setVolume(350)
+			else if r == 2
+				SOUND_REPAIR_2.playOnPoint(repairSoundPos).snd.setVolume(350)
+			else
+				SOUND_REPAIR_3.playOnPoint(repairSoundPos).snd.setVolume(350)
+		end)
+		
+		this.onRebuildStart(building)
+
+		let count = (this.rebuildTime / 0.1 +0.5).toInt()
+
+		building.setTimeScale(60/this.rebuildTime)
+
+		doPeriodicallyCounted(0.1, count, (CallbackCounted cb) -> (begin
+			if cb.isLast()
+				let owner = building.getOwner()
+				let pos = building.getPos()
+				building.remove()
+				this.onRebuildFinish(createUnit(owner, this.unitTypeId, pos, (270).fromDeg()))
+			else
+				building.setHP(max(0.5, (1-cb.getCount()/count) * building.getMaxHP() ) )
+		end))
+
+	function onRebuildStart(unit _building)
+	function onRebuildFinish(unit _building)
+	function onDestroy(unit _building, unit _killer, unit _newBuilding)

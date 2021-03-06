@@ -1,0 +1,144 @@
+package Castle
+
+import Building
+import General
+import HeroControl
+import TeamUtil
+import WaveSpawn
+import PlayerControl
+import ClosureTimers
+import ErrorHandling
+import SoundUtils
+import UnitTypeConfig
+import LinkedList
+import Buff
+import BuffTypeConfig
+
+constant SOUND_CALL_TO_ARMS = new SoundDefinition(Sounds.humanCallToArmsWhat1, false, true)
+
+
+vec2 array militaSpawn = [gg_rct_GreenCastle.getCenter(), gg_rct_BrownCastle.getCenter()]
+LinkedList<unit> array militia = [new LinkedList<unit>(), new LinkedList<unit>()]
+boolean array removeMilita = [true, true]
+rect array militiaDespawn = [gg_rct_GreenMilitiaDespawn, gg_rct_BrownMilitiaDespawn]
+
+function onMilitiaDespawn(int team)
+	if removeMilita[team]
+		for u in militia[team]
+			if Players.team(u.getOwner().getId()) == team and militiaDespawn[team].contains(u.getPos())
+				militia[team].remove(u)
+				u.remove()
+
+enum VictoryState
+	UNDECIDED
+	WIN_TEAM1
+	WIN_TEAM2
+
+VictoryState victoryState
+
+function setVictoryState(VictoryState newState)
+	victoryState = newState
+
+	if newState != VictoryState.UNDECIDED
+		gameOver = true
+
+		//stops heroes from reviving
+		for i = 0 to MAX_HERO_COUNT-1
+			for Hero hero in Players.heroList(i)
+				hero.destroyTimer()
+
+
+		let g = CreateGroup()
+		for i = 0 to bj_MAX_PLAYER_SLOTS-1
+			GroupEnumUnitsOfPlayer(g, players[i], null)
+			unit u
+			while true
+				u = FirstOfGroup(g)
+				if u == null
+					break
+				g.removeUnit(u)
+				u.pause()
+
+		g.destr()
+				 
+		int winTeam
+		string teamName
+		if newState == VictoryState.WIN_TEAM1
+			teamName = Teams.COLORED_NAME[TEAM_1]
+			winTeam = TEAM_1
+		else
+			teamName = Teams.COLORED_NAME[TEAM_2]
+			winTeam = TEAM_2
+
+
+		printTimed("Team "+teamName+" has destroyed the enemy castle and wins the game!", 60)
+
+		//ScoreTable.extendToStatTable()
+		stopSpawning()
+		StatTable.create()
+
+		printTimed("You can now view player stats on the Stats-Multiboard.", 60)
+
+		if false
+			doAfter(5) ->
+				let winList = Teams.HEROES[winTeam]
+				let defeatList = Teams.HEROES[Teams.invert(winTeam)]
+
+				for int id in winList
+					CustomVictoryBJ( players[id] , false, true )
+
+				for int id in defeatList
+					CustomDefeatBJ( players[id], "Your team's castle has been destroyed." )
+
+public class Castle extends Building
+	construct()
+		super('h001', 0, 0)
+
+	override function onDeath(unit building, unit killer)
+		if victoryState == VictoryState.UNDECIDED
+			if building.getOwner() == players[Teams.army1()]
+				setVictoryState(VictoryState.WIN_TEAM2)
+			else if building.getOwner() == players[Teams.army2()]
+				setVictoryState(VictoryState.WIN_TEAM1)
+			else
+				error("Castle killed for player "+building.getOwner().getId().toString())
+
+	override function onCast(unit building, int itemId, unit hero)
+		let heroPos = hero.getPos3Zero()
+		let team = Players.team(building.getOwner().getId())
+		if itemId == 'I006' //Call to Arms
+			SOUND_CALL_TO_ARMS.playOnPoint(heroPos).snd.setVolume(350)
+			removeMilita[team] = false
+			for i = 0 to 15
+				let spawnedUnit = spawnUnit(TEAM_1, MILITIA_DEFEND, militaSpawn[team])
+				militia[team].add(spawnedUnit)
+			doAfter(45, () -> (begin
+				removeMilita[team] = true
+				for u in militia[team]
+					u.addBuff(u, -1, DISARMED, 1)
+					u.issuePointOrder("move", militaSpawn[team])
+					if militiaDespawn[team].contains(u.getPos())
+						militia[team].remove(u)
+						u.remove()
+			end))
+			doAfter(50, () -> (begin
+				removeMilita[team] = true
+				for u in militia[team]
+					u.addBuff(u, -1, DISARMED, 1)
+					u.issuePointOrder("move", militaSpawn[team])
+					if militiaDespawn[team].contains(u.getPos())
+						militia[team].remove(u)
+						u.remove()
+			end))
+			doAfter(89, () -> (begin
+				for u in militia[team]
+					militia[team].remove(u)
+					u.remove()
+			end))
+
+init
+	CreateTrigger()
+	..registerTimerEvent(0.1, true)
+	..addAction()->
+		onMilitiaDespawn(TEAM_1)
+		onMilitiaDespawn(TEAM_2)
