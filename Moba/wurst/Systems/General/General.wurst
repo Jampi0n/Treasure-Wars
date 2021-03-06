@@ -32,25 +32,6 @@ public enum ReductionType
     NONE
 
 
-/*
-    Every update to any hero button unhides all buttons.
-    Possible updates:
-        main hero dies
-        main hero revives
-        main hero levels up
-        main hero learns skill
-        secondary hero levels up
-*/
-framehandle array heroButtons
-
-function initHeroButtonArray()
-    for j = 0 to 6
-        heroButtons[4*j] = getOriginFrame(ORIGIN_FRAME_HERO_BUTTON, j)
-        heroButtons[4*j+1] = getOriginFrame(ORIGIN_FRAME_HERO_HP_BAR, j)
-        heroButtons[4*j+2] = getOriginFrame(ORIGIN_FRAME_HERO_MANA_BAR, j)
-        heroButtons[4*j+3] = getOriginFrame(ORIGIN_FRAME_HERO_BUTTON_INDICATOR, j)
-
-
 public function unit.isTargetable(player source, boolean allowFriends, boolean allowEnemies) returns boolean
     boolean ret = true
     if this == null
@@ -314,7 +295,6 @@ public class ChannelTeleport
 
 
 init
-    initHeroButtonArray()
     setHitBoxFunction( (unit u) -> (begin
         real ret = 32
         if u.isType(UNIT_TYPE_HERO)
