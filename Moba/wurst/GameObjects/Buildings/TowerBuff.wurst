@@ -1,0 +1,51 @@
+package TowerBuff
+
+/*
+	Tower attacks reduce the armor of heros in order to punish long tower dives and prevent towers from dealing almost no damage against very tanky heros.
+*/
+
+import ObjectEditingPreset
+import Assets
+import GameAPI
+
+
+constant int TOWER_FOCUS_MAX_STACKS = 5
+constant int TOWER_FOCUS_ARMOR = 20
+constant real TOWER_FOCUS_DUR = 5
+constant int TOWER_FOCUS_ABILITY_ID = 'A00O'
+
+BuffType buffTowerFocus
+
+constant int TOWER_FOCUS_BUFF_ID = compiletime(createAuraBuff("Tower Focus", "This unit was hit by a Tower; it has reduced armor.", Icons.bTNHumanWatchTower))
+constant int TOWER_FOCUS_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, TOWER_FOCUS_BUFF_ID, "", "chest"))
+
+
+init
+	buffTowerFocus = new BuffType(false, DispelLevel.DISPEL)
+	buffTowerFocus.setupBuffWithIcon(TOWER_FOCUS_BUFF_ID, TOWER_FOCUS_ABILTIY_ID)
+
+	buffTowerFocus.addFirstFunction( (Buff whichBuff) -> (begin
+		whichBuff.getTarget().wrapper()
+		..addStatRelativeBonus(Stat.AR, -TOWER_FOCUS_ARMOR * 10)
+		whichBuff.setData(1)
+	end))
+
+	buffTowerFocus.addStackFunction( (Buff whichBuff) -> (begin
+		let stacks = whichBuff.getData() + 1
+		if stacks <= TOWER_FOCUS_MAX_STACKS
+			whichBuff.setData(stacks)
+			whichBuff.getTarget().wrapper()
+			..addStatRelativeBonus(Stat.AR, -TOWER_FOCUS_ARMOR * 10)
+	end))
+
+
+	buffTowerFocus.addEndFunction( (Buff whichBuff) -> (begin
+		let stacks = whichBuff.getData()
+		whichBuff.getTarget().wrapper()
+		..addStatRelativeBonus(Stat.AR, TOWER_FOCUS_ARMOR * stacks * 10)
+	end))
+
+	OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+		if attacker.getAbilityLevel(TOWER_FOCUS_ABILITY_ID)>0 and target.isType(UNIT_TYPE_HERO)
+			target.addBuffReduced(attacker, TOWER_FOCUS_DUR, buffTowerFocus, 1)
+	end))

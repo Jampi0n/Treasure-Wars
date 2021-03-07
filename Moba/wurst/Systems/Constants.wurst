@@ -1,0 +1,42 @@
+package Constants
+
+public constant MAGIC_REDUCTION = 0.01
+public constant ARMOR_REDUCTION = 0.01
+public constant DEBUG_MODE = true
+
+public constant STAT_COUNT = 12
+
+//the first MAX_HERO_COUNT are hero players
+public constant MAX_HERO_COUNT = 10
+
+public constant int CREEP_NORMAL_OWNER = PLAYER_NEUTRAL_AGGRESSIVE
+public constant int CREEP_ICON_OWNER = PLAYER_NEUTRAL_PASSIVE
+
+public constant MAX_HIT_BOX = 200.
+
+public constant XP_RANGE = 1200.0
+
+public constant IS_REPLAY = getIsReplay()
+
+function getIsReplay() returns bool
+    var firstPlayer = players[0]
+    while firstPlayer.getController() != MAP_CONTROL_USER or firstPlayer.getSlotState() != PLAYER_SLOT_STATE_PLAYING
+        firstPlayer = players[firstPlayer.getId() + 1]
+
+    let u = createUnit(firstPlayer, 'hfoo', vec2(0,0), angle(0))
+    SelectUnit(u, true)
+    let selected = IsUnitSelected(u, firstPlayer)
+    u.remove()
+
+    return selected and not ReloadGameCachesFromDisk()
+
+public int objectCount = 0
+
+
+init
+    SetCreepCampFilterState( false )
+    SetAllyColorFilterState( 0 )
+    EnableMinimapFilterButtons( true, false )
+
+    if IS_REPLAY
+        print("Enjoy watching your replay of Treasure Wars!")

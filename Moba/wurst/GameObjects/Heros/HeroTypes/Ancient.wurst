@@ -1,0 +1,604 @@
+package Ancient
+
+//4
+
+import HeroInclude
+
+
+
+public constant HERO_TREE = 'H014'
+public constant HERO_TREE_ROOTED = 'H015'
+constant THIS_HERO = HERO_TREE
+constant THIS_ID = 4
+constant THIS_BUTTON_POS = 4 //button pos from 0 to 11
+constant THIS_ICON = Icons.bTNTreant
+
+HeroType heroType = null
+
+constant UPROOTED = compiletime(UNIT_ID_GEN.next())
+unit array uprooted_dummy
+
+constant ABILITY_REGENERATION = 'AZ4P'
+constant ABILITY_EAT_UNIT = 'AZ4Q'
+constant ABILITY_IMPALE = 'AZ4W'
+constant ABILITY_ROOT = 'AZ4E'
+constant ABILITY_NATURES_WRATH = 'AZ4R'
+
+constant int array REGENERATION_HIT_POINT_REGEN = [30, 45, 60, 75, 90]
+
+function passive(int abilityId)
+    if compiletime
+        createNoEffectAbiltiy(abilityId)
+            ..setupWithHotKey("Recovery", "D")
+            ..setupIcon("PASSpell_Nature_ResistNature")
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceIntelligence(0)
+    tooltip.setLearnString("Increases the Ancient's hit point regeneration.", (int lvl) -> (begin
+        return "{0}% increased regeneration".format(
+            REGENERATION_HIT_POINT_REGEN[lvl-1].str())
+    end) )
+    for lvl = 1 to 5
+        tooltip.setNormalString(false, lvl, "Increases the Ancient's hit point regeneration by {0}%.".format(
+            REGENERATION_HIT_POINT_REGEN[lvl-1].str())
+        )
+    addDynamicTooltipIntelligence(heroType, tooltip)
+
+constant real array DEVOUR_HEAL = [150, 225, 300, 375, 400]
+constant real DEVOUR_HEAL_BONUS = 200
+
+constant real array DEVOUR_COOLDOWN = [20, 17, 14, 11, 8]
+
+function rootDummy()
+    new UnitDefinition(UPROOTED, 'hfoo')
+        ..setNormalAbilities("Aloc")
+        ..setModelFile("")
+        ..setShadowImageUnit("")
+        ..setAttacksEnabled(0)
+        ..setMovementType(MovementType.Fly)
+        ..setCollisionSize(0)
+        ..setFoodCost(0)
+        ..setSightRadiusDay(0)
+        ..setSightRadiusNight(0)
+        ..setUpgradesUsed("")
+        ..setUnitSoundSet("")
+        ..setName("Uprooted")
+
+function devourUnit(int abilityId)
+    
+    if compiletime
+        let MANA = skillData(120, 110, 100, 90, 80)
+        let COOLDOWN = skillData(20, 17, 14, 11, 8)
+        rootDummy()
+        let aDef = new AbilityDefinitionFarseerChainLightning(abilityId)
+            ..setupIcon("BTNStrengthofNature")
+            ..setAnimationNames("spell")
+            ..setupWithHotKey("Eat Unit", "Q")
+            ..setLightningEffects("")
+            ..setArtTarget("")
+            ..setMissileArt("")
+            ..setArtSpecial("")
+            ..setLightningEffects("")
+            ..setRequirements(UPROOTED.toRawCode())
+            ..setCheckDependencies(true)
+            ..setSkillData(COOLDOWN, MANA, 0)
+
+        for lvl = 1 to 5
+            aDef
+                ..setNumberofTargetsHit(lvl, 1)
+                ..setDamageperTarget(lvl, 0)
+                ..setCastRange(lvl, 150)
+                ..setDurationNormal(lvl, 0.1)
+                ..setTargetsAllowed(lvl, "enemies,ground,neutral,nonancient,nonsapper,organic,nonhero")
+
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceIntelligence(DEVOUR_HEAL_BONUS)
+    tooltip.setLearnString(CHANNELING_SPELL + "Grabs the target enemy unit to devour it, healing the hero.", (int lvl) -> (begin
+        return "{0}{I0} hit points healed, {1} seconds cooldown.".format( DEVOUR_HEAL[lvl-1].str(), DEVOUR_COOLDOWN[lvl-1].str())
+    end) )
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, CHANNELING_SPELL + "Grabs the target enemy unit to devour it, healing the hero for {0}{I0} hit points.".format(
+            DEVOUR_HEAL[lvl-1].str()
+        ))
+    addDynamicTooltipIntelligence(heroType, tooltip)
+
+
+constant real array ENTANGLE_DURATION = [2, 2.4, 2.8, 3.2, 3.6]
+constant real ENTANGLE_DURATION_BONUS = 1
+constant real array ENTANGLE_HIT_DAMAGE = [100, 150, 200, 250, 300]
+constant real ENTANGLE_HIT_DAMAGE_BONUS = 150
+
+constant BuffType BUFF_ENTAGLING_ROOTS = new BuffType(false, DispelLevel.DISPEL)
+constant int ENTAGLING_ROOTS_BUFF_ID = compiletime(createAuraBuff("Entangling Roots", "This unit was hit by Entangling Roots; it cannot move or attack.", "BTNEntnagle"))
+constant int ENTAGLING_ROOTS_ABILITY_ID = compiletime(createNegativeBuffAbility(5, ENTAGLING_ROOTS_BUFF_ID, Abilities.entanglingRootsTarget, "origin"))
+
+function entanglingRoots(int abilityId)
+
+    if compiletime
+        let MANA = skillData(120, 130, 140, 150, 160)
+        let COOLDOWN = skillData(14, 13, 12, 11, 10)
+        let RANGE = createSkillData(800)
+        new AbilityDefinitionDreadlordCarrionSwarm(abilityId)
+            ..setupIcon("BTNEntnagle")
+            ..setAnimationNames("attack,2")
+            ..setupWithHotKey("Entangling Roots", "W")
+            ..setMissileArt("")
+            ..targetNone()
+            ..setSkillData(COOLDOWN, MANA, RANGE)
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceIntelligence(ENTANGLE_HIT_DAMAGE_BONUS, ENTANGLE_DURATION_BONUS)
+    tooltip.setLearnString("Releases thorns in a line, damaging and entangling every enemy unit they pass through.", (int lvl) -> (begin
+        return "{0}{I0} damage, {1}{I1} second.".format( ENTANGLE_HIT_DAMAGE[lvl-1].str(), ENTANGLE_DURATION[lvl-1].toExactString() )
+    end) )
+
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, "Releases thorns in a line, dealing {0}{I0} damage and entangling every enemy unit they pass through for {1}{I1} seconds.".format(
+            ENTANGLE_HIT_DAMAGE[lvl-1].str(), ENTANGLE_DURATION[lvl-1].toExactString()
+        ))
+    addDynamicTooltipIntelligence(heroType, tooltip)
+
+
+
+constant int array ROOT_RESISTANCE = [10, 20, 30, 40, 50]
+constant real array ROOT_AOE_DAMAGE = [20, 30, 40, 50, 60]
+constant real ROOT_AOE_DAMAGE_BONUS = 40
+constant real array ROOT_AOE_RANGE = [150, 175, 200, 225, 250]
+
+constant real ROOT_DURATION = 1.75//2.57
+
+function root(int abilityId)
+
+    if compiletime
+        let MANA = skillData(25, 25, 25, 25, 25)
+        let COOLDOWN = skillData(3, 3, 3, 3, 3)
+        let aDef = new AbilityDefinitionBearform(abilityId)
+            ..setupIcon(Icons.bTNRoot)
+            ..setIconTurnOff(Icons.bTNUproot)
+            ..setupWithHotKey("Root", "E")
+            ..setSkillData(COOLDOWN, MANA, 0)
+
+        for lvl = 1 to 5
+            aDef
+                ..setNormalFormUnit(lvl, HERO_TREE.toRawCode())
+                ..setAlternateFormUnit(lvl, HERO_TREE_ROOTED.toRawCode())
+                ..setDurationNormal(lvl, ROOT_DURATION)
+                ..setTooltipTurnOff(lvl, "(E) Uproot - [|cffffcc00Level "+lvl.toString()+"|r]")
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceStrength(ROOT_AOE_DAMAGE_BONUS)    
+    tooltip.setLearnString("Burrows the Ancient's roots into the ground, rendering it immobile, but allowing it to hurl enormous rocks dealing area of effect damage. The Ancient's armor and willpower are increased while rooted.", (int lvl) -> (begin
+        return "{0}{S0} area of effect damage, {1} bonus armor and willpower.".format( ROOT_AOE_DAMAGE[lvl-1].str(), ROOT_RESISTANCE[lvl-1].str())
+    end) )
+    
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, "Burrows the Ancient's roots into the ground, rendering it immobile, but allowing it to hurl enormous rocks dealing {0}{S0} area of effect damage. The Ancient's armor and willpower are increased by {1} while rooted.".format(
+            ROOT_AOE_DAMAGE[lvl-1].str(), ROOT_RESISTANCE[lvl-1].str()
+        ))
+        tooltip.setTurnOffString(false, lvl, "Allows the Ancient to pull itself up out of the ground so that it can move and engage units in melee combat.")    
+    addDynamicTooltipStrength(heroType, tooltip)
+
+constant int NATURES_WRATH_DUMMY_BUFF = compiletime(createDummyBuff())
+
+constant real array NATURES_WRATH_TOTAL_DAMAGE = [300, 350, 400, 450, 500]
+constant real NATURES_WRATH_TOTAL_DAMAGE_BONUS = 250
+constant real array NATURES_WRATH_DURATION = [5, 5, 5, 5, 5]
+
+constant real NATURES_WRATH_AOE = 300
+
+function naturesWrath(int abilityId)
+
+    let COOLDOWN = skillData(60, 50, 40, 30, 20)
+    if compiletime
+        let MANA = skillData(160, 170, 180, 190, 200)
+        let aDef = new AbilityDefinitionBeserk(abilityId)
+            ..setupIcon("BTNNaturesWrath")
+            ..setupWithHotKey("Nature's Wrath", "R")
+            ..setSkillData(COOLDOWN, MANA, 0)
+
+        for lvl = 1 to 5
+            aDef
+                ..setBuffs(lvl, NATURES_WRATH_DUMMY_BUFF.toRawCode())
+                ..setDamageTakenIncrease(lvl, 0)
+                ..setAttackSpeedIncrease(lvl, 0)
+                ..setMovementSpeedIncrease(lvl, 0)
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceIntelligence(NATURES_WRATH_TOTAL_DAMAGE_BONUS)
+    tooltip.setLearnString("Covers the ancient in a storm of sharp leaves, that deal damage to nearby enemies.", (int lvl) -> (begin
+        return "{0}{I0} damage over {1} seconds, {2} seconds cooldown.".format( 
+            NATURES_WRATH_TOTAL_DAMAGE[lvl-1].str(), NATURES_WRATH_DURATION[lvl-1].str(), COOLDOWN.data(lvl).str()
+        )
+    end) )
+    
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, "Covers the ancient in a storm of sharp leaves, that deal {0}{I0} damage to nearby enemies over {1} seconds.".format(
+            NATURES_WRATH_TOTAL_DAMAGE[lvl-1].str(), NATURES_WRATH_DURATION[lvl-1].str()
+        ))
+    addDynamicTooltipIntelligence(heroType, tooltip)
+
+class EatTreeAnimation
+
+
+    private real xFactor
+    private vec2 startPos
+    private angle direction
+
+    private unit caster
+    private unit target
+    private int level
+    private timer checkTimer
+    private int count
+
+    private boolean kill = false
+    private effect model
+
+
+    construct(unit caster, unit target)
+        this.count = 0
+        this.caster = caster
+        this.target = target
+        
+        this.level = caster.getAbilityLevel(ABILITY_EAT_UNIT)
+        this.startPos = target.getPos()
+        this.direction = startPos.angleTo(caster.getPos())
+
+        string modelPath = ""
+        let uType = UnitType.getUnitType(target.getTypeId())
+        if uType != null
+            modelPath = uType.getModel()
+
+
+
+            modelPath = modelPath.substring(modelPath.findLastCharacter("\\")+1, modelPath.length()-4)+"NoDeath"+".mdx"
+
+            doAfter( 0, () -> caster.setColor(target.getOwner().getColor()))
+
+
+        this.model = caster.addEffect(modelPath, "sprite, eattree")
+
+        xFactor = caster.getPos().distanceTo(this.startPos)
+
+        target.hide()
+        target.pause()
+
+        this.checkTimer = getTimer()
+            ..setData(this castTo int)
+            ..startPeriodic(0.02, function updateStatic)
+
+    function update()
+        this.count++
+
+        this.model.setColorByPlayer(target.getOwner())
+
+        if count >= 75
+            kill = true
+
+        if this.caster.getCurrentOrder()!= OrderId("chainlightning")
+            destroy this
+    
+    static function updateStatic()
+        (GetExpiredTimer().getData() castTo EatTreeAnimation).update()
+
+    ondestroy
+
+        this.model.destr()
+
+        target.show()
+        target.unpause()
+        
+        if kill
+            target.setXY(caster.getPos())
+            target.setHP(1)
+            caster.dealDamage(target, 10, ReductionType.NONE)
+            target.remove()
+            caster.healHP(caster, DEVOUR_HEAL[level-1].bonus(caster.getInt(), DEVOUR_HEAL_BONUS))
+
+        this.checkTimer.release()
+
+function onRootStats(unit caster, int level) // add bonus
+    caster.wrapper().addStatAbsoluteBonus(Stat.AR, ROOT_RESISTANCE[level-1])
+    caster.wrapper().addStatAbsoluteBonus(Stat.AGI, ROOT_RESISTANCE[level-1])
+    caster.wrapper().addStatAbsoluteBonus(Stat.MS, 0)
+    doAfter(0, () -> caster.wrapper().addStatAbsoluteBonus(Stat.MS, 0) )
+
+function onRoot(unit caster, int level) // add bonus
+    doAfter(0, () -> caster.setPropWindow(angle(0)))
+    onRootStats(caster, level)
+    caster.setTimeScale(1)
+    uprooted_dummy[caster.getOwner().getId()].setOwner(Player(PLAYER_NEUTRAL_PASSIVE), false)
+
+function onUprootStats(unit caster, int level) // remove bonus
+    caster.wrapper().addStatAbsoluteBonus(Stat.AR, -ROOT_RESISTANCE[level-1])
+    caster.wrapper().addStatAbsoluteBonus(Stat.AGI, -ROOT_RESISTANCE[level-1])
+    caster.wrapper().addStatAbsoluteBonus(Stat.MS, 0)
+    doAfter(0, () -> caster.wrapper().addStatAbsoluteBonus(Stat.MS, 0) )
+    
+
+function onUproot(unit caster, int level) // remove bonus
+    caster.setPropWindow(caster.getDefaultPropWindow())
+    onUprootStats(caster, level)
+    caster.setTimeScale(1)
+    let pId = caster.getOwner().getId()
+    uprooted_dummy[pId].setOwner(Player(pId), false)
+
+class NaturesWrath
+
+    unit caster
+    Fx model
+    int count
+    timer checkTimer
+    int level
+
+    construct(unit caster, int level)
+        this.caster = caster
+        this.model = new Fx(caster.getPos(), "Models\\EarthTornado2NoSound.mdx")
+        this.count = 0
+        this.level = level
+
+        this.checkTimer = getTimer()
+        ..setData(this castTo int)
+        ..startPeriodic(0.02, function updateStatic)
+
+    function update()
+        this.count++
+
+
+        if not this.caster.isAlive() or count >= 5 * 50
+            destroy this
+        else
+            this.model.setXY(this.caster.getPos())
+            if count > 0.5 * 50
+                let nearby = CreateGroup()
+                nearby.enumUnitsInRange(caster.getPos(), NATURES_WRATH_AOE)
+
+                let dmg = 0.02 * (NATURES_WRATH_TOTAL_DAMAGE[level-1].bonus(caster.getInt(), NATURES_WRATH_TOTAL_DAMAGE_BONUS))/NATURES_WRATH_DURATION[level-1]
+
+                while(not nearby.isEmpty())
+                    let u = FirstOfGroup(nearby)
+                    nearby.removeUnit(u)
+                    if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(caster.getOwner(), false, true)
+                        caster.dealDamage(u, dmg, ReductionType.MAGIC)
+
+                nearby.destr()
+
+    static function updateStatic()
+        (GetExpiredTimer().getData() castTo NaturesWrath).update()
+
+    ondestroy
+        this.checkTimer.release()
+        destroy this.model
+
+
+function onAttack(unit attacker, unit target, boolean _isActive)
+    let level = attacker.getAbilityLevel(ABILITY_ROOT)
+    if level != 0 and attacker.getTypeId() == HERO_TREE_ROOTED
+        let nearby = CreateGroup()
+        nearby.enumUnitsInRange(target.getPos(), ROOT_AOE_RANGE[level-1])
+
+        let dmg = ROOT_AOE_DAMAGE[level-1].bonus(attacker.getStr(), ROOT_AOE_DAMAGE_BONUS)
+
+        while(not nearby.isEmpty())
+            let u = FirstOfGroup(nearby)
+            nearby.removeUnit(u)
+            if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(attacker.getOwner(), false, true)
+                attacker.dealDamage(u, dmg, ReductionType.PHYSICAL)
+
+        nearby.destr()
+
+function castEatUnit()
+    let caster = GetTriggerUnit()
+    new EatTreeAnimation(caster, GetSpellTargetUnit())
+
+function castRootMorph()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+    if caster.getTypeId() == 'H014'
+        caster.setTimeScale(2.57/ROOT_DURATION)
+        doAfter( ROOT_DURATION, () -> onRoot(caster, level))
+    else
+        caster.setTimeScale(2.57/ROOT_DURATION)
+        doAfter( ROOT_DURATION, () -> onUproot(caster, level))
+
+function castEntangle()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+    let startPos = caster.getPos()
+    let direction = startPos.angleTo(vec2(GetSpellTargetX(), GetSpellTargetY()))
+    let intelligence = caster.getInt()
+    let dur = ENTANGLE_DURATION[level-1].bonus(intelligence, ENTANGLE_DURATION_BONUS)
+    let damage = ENTANGLE_HIT_DAMAGE[level-1].bonus(intelligence, ENTANGLE_HIT_DAMAGE_BONUS)
+    for i = 0 to 8
+        doAfter(0.1 * i, () -> (begin
+            let thisPos = startPos.polarOffset(direction, i*125.)
+            addEffect("Sylvanspear2.mdx", thisPos).destr()
+
+            let nearby = CreateGroup()
+            nearby.enumUnitsInRange(thisPos, 130)
+    
+            while(not nearby.isEmpty())
+                let u = FirstOfGroup(nearby)
+                nearby.removeUnit(u)
+                if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(caster.getOwner(), false, true) and not u.isType(UNIT_TYPE_FLYING)
+                    if not BuffList.hasBuffType(u, BUFF_ENTAGLING_ROOTS)
+                        caster.dealDamage(u, damage, ReductionType.MAGIC)
+
+                    u.addBuffReduced(caster, dur, ENTANGLED, 1).setDispelLevel(DispelLevel.DISPEL)
+                    u.addBuffReduced(caster, dur, BUFF_ENTAGLING_ROOTS, level).setDispelLevel(DispelLevel.DISPEL)
+    
+            nearby.destr()
+        end))
+
+function castNaturesWrath()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+    doAfter(0, () -> caster.removeAbility(NATURES_WRATH_DUMMY_BUFF))
+    new NaturesWrath(caster, level)
+
+
+function setupStats()
+    heroType
+        ..setStat(Stat.AR, 28, 59)
+        ..setStat(Stat.AS, 0, 8)
+        ..setStat(Stat.HP, 13, 79)
+        ..setStat(Stat.HR, 18, 44)
+        ..setStat(Stat.MP, 16, 47)
+        ..setStat(Stat.MR, 18, 58)
+        ..setStat(Stat.MS, 0, 6)
+        ..setStat(Stat.STR, 22, 51)
+        ..setStat(Stat.AGI, 27, 56)
+        ..setStat(Stat.INT, 12, 31)
+
+function retreatAI(HeroAI _ai)
+
+function attackAI(HeroAI ai)
+    let hero = ai.getHeroUnit()
+
+    unit target
+    if hero.getMana()/hero.getMaxMana() > 0.5
+        target = hero.findTarget(600, AbilityTargetFocus.ENEMY, AbilityTargetPriority.HIGH_VALUE, null)
+        if target.isTargetable(hero.getOwner(), false, true)
+            ai.issue("chainlightning", target)
+
+    target = hero.findTarget(250, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_HEALTH, null)
+    if target.isTargetable(hero.getOwner(), false, true)
+        ai.attack(target)
+
+    target = hero.findTarget(500, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_DISTANCE, null)
+    if target.isTargetable(hero.getOwner(), false, true)
+        ai.attack(target)
+
+function teamFightAI(HeroAI ai)
+
+    let hero = ai.getHeroUnit()
+
+    if ai.getTeamFightTarget().getPos().distanceTo(hero.getPos()) < 500
+        ai.issue("carrionswarm", ai.getTeamFightTarget().getPos())
+
+    let ulti = ai.getHero().getHeroType().getAbilityId(AbilitySlot.R)
+    
+    if hero.getAbilityLevel(ulti) > 0 and hero.getAbilityCooldownRemaining(ulti) <= 0
+        let g = CreateGroup()
+        unit u
+        int count = 0
+        g.enumUnitsInRange(hero.getPos(), NATURES_WRATH_AOE)
+        while(true)
+            u = FirstOfGroup(g)
+            if u == null
+                break
+            g.removeUnit(u)
+            if u.isTargetable(hero.getOwner(), false, true)
+                if u.isType(UNIT_TYPE_HERO)
+                    count++
+
+        g.destr()
+        if count != 0
+            if ai.issue("berserk")
+                return
+
+        
+    let target = ai.getTeamFightTarget()
+    if target.isTargetable(hero.getOwner(), false, true)
+
+        if not ai.getAttacking()
+            ai.attack(target)
+
+@compiletime
+function setupTooltips()
+    passive(ABILITY_REGENERATION)
+    devourUnit(ABILITY_EAT_UNIT)
+    entanglingRoots(ABILITY_IMPALE)
+    root(ABILITY_ROOT)
+    naturesWrath(ABILITY_NATURES_WRATH)
+    createHeroButton(THIS_ID, THIS_BUTTON_POS, THIS_ICON)
+
+function initHeroType()
+    setupStats()
+    onCast(ABILITY_EAT_UNIT, () -> castEatUnit())
+    onCast(ABILITY_ROOT, () -> castRootMorph())
+    onCast(ABILITY_IMPALE, () -> castEntangle())
+    onCast(ABILITY_NATURES_WRATH, () -> castNaturesWrath())
+
+    heroType..setSkillBuild("QWQWQWQWQWEEEEE")
+    ..addItem(ITEM_ID_HEAVY_BOOTS)
+    ..addItem(ITEM_ID_RUNIC_ARMOR)
+    ..addItem(ITEM_ID_FIREHAND_GAUNTLETS)
+    ..addItem(ITEM_ID_BLESSED_GOBLET)
+    ..addItem(ITEM_ID_ARCANE_SHIELD)
+    ..addItem(ITEM_ID_WAR_DRUM)
+    ..useHeroGlow()
+    ..addMorph(HERO_TREE_ROOTED)
+    delayInit(5) ->
+        heroType
+            ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
+            ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
+            ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
+            ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+
+        BUFF_ENTAGLING_ROOTS.setupBuffWithIcon(ENTAGLING_ROOTS_BUFF_ID, ENTAGLING_ROOTS_ABILITY_ID)
+
+
+
+
+
+
+
+    for i = 0 to bj_MAX_PLAYERS-1
+        uprooted_dummy[i] = null 
+
+
+
+function createHeroType(Hero hero)
+    let heroUnit = hero.toUnit()
+    uprooted_dummy[hero.toUnit().getOwner().getId()] = createUnit(hero.toUnit().getOwner(), UPROOTED, hero.toUnit().getPos(), angle(0))
+    CreateTrigger()
+    ..registerUnitEvent(hero.toUnit(), EVENT_UNIT_ISSUED_POINT_ORDER)
+    ..addAction(() ->(begin
+        let u = GetTriggerUnit()
+        if GetIssuedOrderId() == OrderId("smart") and u.getTypeId() == HERO_TREE_ROOTED
+            let pos = vec2( GetOrderPointX(), GetOrderPointY() )
+            doAfter(0, () -> u.issuePointOrder("attack", pos))
+    end))
+
+    CreateTrigger()
+    ..registerUnitEvent(heroUnit, EVENT_UNIT_HERO_SKILL)
+    ..addAction(() -> (begin
+        let u = GetTriggerUnit()
+        if GetLearnedSkill() == ABILITY_REGENERATION
+            let newLevel = u.getAbilityLevel(ABILITY_REGENERATION)
+            if newLevel!= 1
+                u.wrapper().addStatRelativeBonus(Stat.HR, -REGENERATION_HIT_POINT_REGEN[newLevel-2]*10)
+
+            u.wrapper().addStatRelativeBonus(Stat.HR, REGENERATION_HIT_POINT_REGEN[newLevel-1]*10)
+
+            
+
+        else if GetLearnedSkill() == ABILITY_ROOT and u.getTypeId() == HERO_TREE_ROOTED
+            let newLevel = u.getAbilityLevel(ABILITY_ROOT)
+            onUprootStats(u, newLevel - 1)
+            onRootStats(u, newLevel)
+    end))
+
+    CreateTrigger()
+    ..registerUnitEvent(heroUnit, EVENT_UNIT_DEATH)
+    ..addAction(() -> (begin
+        if GetTriggerUnit().getTypeId() == HERO_TREE_ROOTED
+            let u = GetTriggerUnit()
+            onUproot(u, u.getAbilityLevel(ABILITY_ROOT))
+    end))
+
+init
+    heroType = new HeroType(THIS_HERO, THIS_ICON, 4, true)
+    ..setOnInitFunction(() -> initHeroType())
+    ..setOnCreateFunction((Hero hero) -> createHeroType(hero))
+
+    setupTooltips()
+    addButtonToTavern(THIS_ID, THIS_BUTTON_POS, heroType, 0)
+
+   
+
+

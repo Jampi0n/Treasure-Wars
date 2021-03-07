@@ -1,0 +1,13 @@
+package OnAttack
+
+import DamageDetection
+import GameAPI
+import OnAttackInternal
+
+
+public function unit.dealDamageNoEvent(unit target, real amount, ReductionType reductionType)
+    disableDamageDetect()
+    this.dealDamage(target, amount, reductionType)
+    enableDamageDetect()
+
+public class OnAttack extends OnAttackInternal

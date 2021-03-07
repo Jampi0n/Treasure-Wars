@@ -1,0 +1,214 @@
+package ItemConfiguration
+
+import public LinkedList
+import public ItemInShop
+import public Icons
+import ItemObjEditing
+import HashMap
+import public Execute
+import public ItemIds
+import public General
+import public Assets
+import public ObjectEditingPreset
+import public ClosureTimers
+import public AbilityObjEditing
+import public HeroObjectEditing
+import public GameAPI
+
+
+interface ItemPickUp
+    function onItemPickUp()
+
+interface ItemDrop
+    function onItemDrop()
+
+public function getTriggerItem() returns item
+    return ItemEffect.triggerItem
+
+public function getTriggerItemType() returns int
+    return ItemEffect.triggerItem.getTypeId()
+
+public function getTriggerUnit() returns unit
+    return ItemEffect.triggerUnit
+
+public class ItemEffect
+
+    private int itemId
+
+    protected static item triggerItem
+    protected static unit triggerUnit
+
+    private static constant itemIdToEffect = new HashMap<int, ItemEffect>
+    private static trigger onItemPickUp = CreateTrigger()
+    private static trigger onItemDrop = CreateTrigger()
+    protected constant onPickUp = new LinkedList<ItemPickUp>
+    protected constant onDrop = new LinkedList<ItemDrop>
+    private LinkedList<trigger> attachedTriggers = null
+
+    private int useCount = 0
+
+    construct(int itemId)
+        this.itemId = itemId
+        itemIdToEffect.put(itemId, this)
+
+    static function retrieveItemEffect(int itemId) returns ItemEffect
+        if itemIdToEffect.has(itemId)
+            return itemIdToEffect.get(itemId)
+        else
+            return new ItemEffect(itemId)
+
+    function attachTrigger(trigger trg) returns trigger
+        if this.attachedTriggers == null
+            this.attachedTriggers = new LinkedList<trigger>
+
+        this.attachedTriggers.add(trg)
+        return trg
+
+    function enableEffect()
+        if this.attachedTriggers != null
+            for trg in this.attachedTriggers
+                trg.enable()
+
+    function disableEffect()
+        if this.attachedTriggers != null
+            for trg in this.attachedTriggers
+                trg.disable()
+
+    static function classInit()
+        onItemPickUp = CreateTrigger()
+            ..addAction(function onItemPickUp)
+            ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_PICKUP_ITEM)
+        onItemDrop = CreateTrigger()
+            ..addAction(function onItemDrop)
+            ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DROP_ITEM)
+
+    static function onItemPickUp()
+        triggerItem = GetManipulatedItem()
+        if itemIdToEffect.has(triggerItem.getTypeId())
+            triggerUnit = GetTriggerUnit()
+            let itemType = itemIdToEffect.get(triggerItem.getTypeId())
+            itemType.useCount++
+            if itemType.useCount == 1
+                itemType.enableEffect()
+            for c in itemType.onPickUp
+                c.onItemPickUp()
+
+    static function onItemDrop()
+        triggerItem = GetManipulatedItem()
+        if itemIdToEffect.has(triggerItem.getTypeId())
+            triggerUnit = GetTriggerUnit()
+            let itemType = itemIdToEffect.get(triggerItem.getTypeId())
+            itemType.useCount--
+            if itemType.useCount == 0
+                itemType.disableEffect()
+            for c in itemType.onDrop
+                c.onItemDrop()
+
+
+int currentItemId
+ItemEffect currentItemEffect
+ItemDefinition currentItemDefinition
+ItemInShop currentItemInShop
+
+public function createItemEffectTrigger() returns trigger
+    return currentItemEffect.attachTrigger(CreateTrigger())
+
+public function addPickupFunction(ItemPickUp onPickUp)
+    if compiletime
+        return
+        
+    currentItemEffect.onPickUp.add(onPickUp)
+
+public function addDropFunction(ItemDrop onDrop)
+    if compiletime
+        return
+
+    currentItemEffect.onDrop.add(onDrop)
+
+public function addStatBonusAbsolute(Stat whichStat, int bonus)
+    if compiletime
+        return
+
+    addPickupFunction( ()-> (begin
+        ItemEffect.triggerUnit.wrapper().addStatAbsoluteBonus(whichStat, bonus)
+    end))
+
+    addDropFunction( ()-> (begin
+        ItemEffect.triggerUnit.wrapper().addStatAbsoluteBonus(whichStat, -bonus)
+    end))
+
+public function addStatBonusRelative(Stat whichStat, int bonus)
+    if compiletime
+        return
+
+    addPickupFunction( ()-> (begin
+        ItemEffect.triggerUnit.wrapper().addStatRelativeBonus(whichStat, bonus)
+    end))
+
+    addDropFunction( ()-> (begin
+        ItemEffect.triggerUnit.wrapper().addStatRelativeBonus(whichStat, -bonus)
+    end))
+
+
+public function setupItem(int itemId, int category, int goldCost)
+    if compiletime
+        let iDef = getItemDefintion(itemId)
+        iDef.setGoldCost(goldCost)
+        currentItemDefinition = iDef
+    else
+        currentItemId = itemId
+        currentItemInShop = ItemInShop.retrieveItemFromId(itemId)
+        currentItemInShop.setupItem(category, iconFromItem(itemId), goldCost)
+        currentItemEffect = ItemEffect.retrieveItemEffect(itemId)
+
+public function setInfo(string name, string desc)
+    if compiletime
+        currentItemDefinition.setName(name)
+        currentItemDefinition.setTooltipBasic(name)
+        currentItemDefinition.setDescription(desc)
+        currentItemDefinition.setTooltipExtended(desc)
+    else
+        currentItemInShop.setupStrings(name, desc)
+
+public function setAbilities(vararg int ids)
+    if compiletime
+        let list = new LinkedList<int>
+        for id in ids
+            list.add(id)
+        let result = list.joinBy((int i) -> i.toRawCode(), ",")
+        currentItemDefinition.setAbilities(result)
+        setCooldownGroup(result.substring(0, 4))
+        currentItemDefinition.setActivelyUsed(true)
+        destroy list
+
+public function setCooldownGroup(int id)
+    if compiletime
+        currentItemDefinition.setCooldownGroup(id.toRawCode())
+
+public function setCooldownGroup(string str)
+    if compiletime
+        currentItemDefinition.setCooldownGroup(str)
+
+public function consumable(int charges)
+    if compiletime
+        currentItemDefinition.setPerishable(true)
+        currentItemDefinition.setNumberofCharges(charges)
+
+public function consumable()
+    consumable(1)
+
+public function addRequirement(int itemId)
+    if not compiletime
+        let child = ItemInShop.retrieveItemFromId(itemId)
+        currentItemInShop.addRequirement(child)
+
+//returns if the picked up item is the first of its type and if the dropped item is the last of its type
+public function isUnique() returns boolean
+    return getTriggerUnit().countItemsOfType(getTriggerItem().getTypeId()) == 1
+
+//returns if the the hero has not this item
+public function hasNot(int itemTypeId) returns boolean
+    return getTriggerUnit().countItemsOfType(itemTypeId) == 0
+
+init
+    ItemEffect.classInit()

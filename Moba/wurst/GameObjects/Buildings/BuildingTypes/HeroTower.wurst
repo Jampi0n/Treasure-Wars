@@ -1,0 +1,7 @@
+package HeroTower
+
+import BuildingsInclude
+
+public class HeroTower extends Building
+    construct()
+        super(HERO_TOWER, 0, 0)

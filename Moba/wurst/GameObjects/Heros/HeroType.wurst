@@ -1,0 +1,339 @@
+package HeroType
+
+import HashMap
+import OnAttackInclude
+import Constants
+import UnitWrapper
+import DynamicTooltips
+import AbilityObjEditing
+import LinkedList
+import initlater HeroAI
+import initlater HeroControl
+import initlater PickHero
+import RecommendedItems
+import Preloader
+
+int array SLOT_ID
+string array BUTTON_ORDER_STRING
+
+public constant HERO_GOLD_COST = 100
+
+public enum AbilitySlot
+    Q
+    W
+    E
+    R
+    PASSIVE
+
+public interface AIBehaviour
+    function run(HeroAI ai)
+
+public interface OnCreateFunction
+    function onCreate(Hero hero)
+
+public interface OnInitFunction
+    function onInit()
+
+public constant HERO_MAX_LEVEL = 25
+
+public class HeroType
+
+    int array[STAT_COUNT] statsBase
+    int array[STAT_COUNT] statsMax
+
+    private static constant unitIdToHeroType = new HashMap<integer, HeroType>
+    private static constant heroIdToHeroType = new HashMap<integer, HeroType>
+    private int unitId
+    private int heroId
+    OnAttackFunctionHero onAttack = null
+    private CalculateTotalBonus bonusCalculation = null
+
+    private OnCreateFunction onCreateFunction = null
+    private OnInitFunction onInitFunction = null
+
+    private boolean hasAI = false
+
+    private AIBehaviour attackAI = null
+    private AIBehaviour retreatAI = null
+    private AIBehaviour teamFightAI = null
+
+    private boolean useHeroGlow = false
+
+    static HeroType array heroTypes 
+    static int heroTypeCount = 0
+
+    private LinkedList<int> itemBuild = new LinkedList<int>
+    private RecommendedItems recommendedItems
+    private string skillBuild = ""
+
+    private string icon = "ReplaceableTextures\\CommandButtons\\BTNSelectHeroOn.blp"
+
+    protected constant dynamicIntelligence = new LinkedList<DynamicTooltip>
+    protected constant dynamicStrength = new LinkedList<DynamicTooltip>
+
+    construct(int unitId, string icon, int heroId, boolean hasAI)
+        objectCount++
+        unitIdToHeroType.put(unitId, this)
+        heroIdToHeroType.put(heroId, this)
+        this.unitId = unitId
+        this.heroId = heroId
+        for i = 0 to STAT_COUNT-1
+            statsBase[i]=0
+            statsMax[i]=0
+
+        string realIcon = icon
+        if icon.length() < 20 or not icon.startsWith("ReplaceableTextures")
+            realIcon = "ReplaceableTextures\\CommandButtons\\" + realIcon
+        if not icon.endsWith(".blp")
+            realIcon += ".blp"
+
+        this.icon = realIcon
+        this.hasAI = hasAI
+
+
+        preloadAbility(this.getAbilityId(AbilitySlot.Q))
+        preloadAbility(this.getAbilityId(AbilitySlot.W))
+        preloadAbility(this.getAbilityId(AbilitySlot.E))
+        preloadAbility(this.getAbilityId(AbilitySlot.R))
+        preloadAbility(this.getAbilityId(AbilitySlot.PASSIVE))
+        preloadUnit(this.getUnitId())
+
+        this.recommendedItems = new RecommendedItems(unitId)
+
+        heroTypes[heroTypeCount] = this
+        heroTypeCount++
+
+    //only initialize every herotype once
+    function initialize()
+        if getOnInitFunction() != null
+            getOnInitFunction().onInit()
+            destroy getOnInitFunction()
+            setOnInitFunction(null)
+
+    function addMorph(int id)
+        unitIdToHeroType.put(id, this)
+
+    function setBase(Stat stat, integer value)
+        this.statsBase[stat.toInt()] = value
+
+    function getBase(Stat stat) returns integer
+        return this.statsBase[stat.toInt()]
+
+    function setMax(Stat stat, integer value)
+        this.statsMax[stat.toInt()] = value
+
+    function getMax(Stat stat) returns integer
+        return this.statsMax[stat.toInt()]
+
+    function setStat(Stat stat, integer min, integer max)
+        this.statsBase[stat.toInt()] = min
+        this.statsMax[stat.toInt()] = max
+
+    function getUnitId() returns integer
+        return this.unitId
+
+    function onAttack(unit attacker, unit target, boolean isActive, boolean advanced)
+        if this.onAttack != null
+            this.onAttack.onAttack(attacker, target, isActive, advanced)
+
+    function setOnAttackFunc(OnAttackFunctionHero onAttack)
+        this.onAttack = onAttack
+
+    /** Calulates the stat of the hero type for a given level */
+    function calculateStat(Stat stat, integer level) returns integer
+        int result = 0
+        if level != 0
+            result = getBase(stat) + ( ( this.getMax(stat) - getBase(stat) ) *( (level - 1 )/(HERO_MAX_LEVEL - 1) ) ).toInt()
+
+        return result
+    
+    function setBonusCalculation(CalculateTotalBonus bonusCalculation)
+        this.bonusCalculation = bonusCalculation
+
+    function getBonusCalculation() returns CalculateTotalBonus
+        return this.bonusCalculation
+
+    static function getHeroType(integer unitId) returns HeroType
+        return unitIdToHeroType.get(unitId)
+
+    static function getHeroTypeFromHeroId(integer heroId) returns HeroType
+        return heroIdToHeroType.get(heroId)
+
+    function useHeroGlow()
+        this.useHeroGlow = true
+
+    function getUsesHeroGlow() returns boolean
+        return this.useHeroGlow
+
+    /**
+        HeroType and Hero are created. Now certain hero specific code can be run.
+    **/
+    function setOnCreateFunction(OnCreateFunction onCreate)
+        this.onCreateFunction = onCreate
+
+    function getOnCreateFunction() returns OnCreateFunction
+        return this.onCreateFunction
+
+    /**
+        Initializes the HeroType object. Used to setup all triggers and the stats. If the herotype is unused this is not run and saves a lot of memory.
+    **/
+    function setOnInitFunction(OnInitFunction onInit)
+        this.onInitFunction = onInit
+
+    function getOnInitFunction() returns OnInitFunction
+        return this.onInitFunction
+
+    function getIcon() returns string
+        return this.icon
+
+    function getHeroId() returns int
+        return this.heroId
+
+    function hasAI() returns boolean
+        return this.hasAI
+
+    function setRetreatAI(AIBehaviour ai)
+        this.retreatAI = ai
+
+    function setAttackAI(AIBehaviour ai)
+        this.attackAI = ai
+
+    function setTeamFightAI(AIBehaviour ai)
+        this.teamFightAI = ai
+
+    function retreatAI(HeroAI ai)
+        if this.retreatAI != null
+            this.retreatAI.run(ai)
+
+    function attackAI(HeroAI ai)
+        if this.attackAI != null
+            this.attackAI.run(ai)
+
+    function teamFightAI(HeroAI ai)
+        if this.teamFightAI != null
+            this.teamFightAI.run(ai)
+
+    function getItemBuild() returns LinkedList<int>
+        return this.itemBuild
+
+    function getSkillBuild() returns string
+        return this.skillBuild
+
+    function addItem(int itemId)
+        this.recommendedItems.addItem(itemId)
+        //this.itemBuild.add(itemId)
+
+    function setSkillBuild(string skillBuild)
+        if skillBuild.length() != 25
+            if skillBuild.length() == 15
+                //only QWE are set, R and P have priority, P starting at 4
+                // XXXPP RXXRP XRXPR XXRPX XXXXX
+                this.skillBuild = skillBuild.substring(0, 3) + "PPR" + skillBuild.substring(3, 5) + "RP" + skillBuild.substring(5, 6) + "R" + skillBuild.substring(6, 7) + "PR" + skillBuild.substring(7, 9) + "RP" +skillBuild.substring(9)
+            else
+                Log.error("SkillBuild must contain 25 or 15 skills: "+this.getHeroId().toString())
+        else
+            this.skillBuild = skillBuild
+            
+
+    function updateTooltipsStr(unit whichUnit)
+        if DYNAMIC_TOOLTIPS
+            for dynamicTooltip in dynamicStrength
+                let abilityTypeId = dynamicTooltip.getAbilityTypeId()
+                let lvl = whichUnit.getAbilityLevel(abilityTypeId)-1
+                BlzSetAbilityExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateNormalString(whichUnit), lvl)
+                BlzSetAbilityResearchExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateLearnString(whichUnit), 0)
+                if dynamicTooltip.getUseTurnOff()
+                    BlzSetAbilityActivatedExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateTurnOffString(whichUnit), lvl)
+
+    function updateTooltipsInt(unit whichUnit)
+        if DYNAMIC_TOOLTIPS
+            for dynamicTooltip in dynamicIntelligence
+                let abilityTypeId = dynamicTooltip.getAbilityTypeId()
+                let lvl = whichUnit.getAbilityLevel(abilityTypeId)-1
+                BlzSetAbilityExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateNormalString(whichUnit), lvl)
+                BlzSetAbilityResearchExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateLearnString(whichUnit), 0)
+                if dynamicTooltip.getUseTurnOff()
+                    BlzSetAbilityActivatedExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateTurnOffString(whichUnit), lvl)
+
+    @deprecated("use global function instead")
+    function addDynamicTooltipStrength(DynamicTooltip tooltip)
+        if(this!=null)
+            this.dynamicStrength.add(tooltip)
+
+    @deprecated("use global function instead")
+    function addDynamicTooltipIntelligence(DynamicTooltip tooltip)
+        if(this!=null)
+            this.dynamicIntelligence.add(tooltip)
+
+    function getAbilityId(AbilitySlot slot) returns int
+        return getAbilityOffset(this.heroId) + SLOT_ID[slot castTo int]
+
+
+public function addDynamicTooltipStrength(HeroType herotype, DynamicTooltip tooltip)
+    if(herotype!=null)
+        herotype.dynamicStrength.add(tooltip)
+    if compiletime
+        tooltip.writeData()
+            
+public function addDynamicTooltipIntelligence(HeroType herotype, DynamicTooltip tooltip)
+    if(herotype!=null)
+        herotype.dynamicIntelligence.add(tooltip)
+    if compiletime
+        tooltip.writeData()
+
+public function addDynamicTooltipBoth(HeroType herotype, DynamicTooltip tooltip)
+    if(herotype!=null)
+        herotype.dynamicIntelligence.add(tooltip)
+        herotype.dynamicStrength.add(tooltip)
+    if compiletime
+        tooltip.writeData()
+
+public function getAbilityOffset(int heroId) returns int
+    var id = 1090519040 //A
+    let second = (heroId div 10)
+    id += 65536 * (90-second) //Z,Y
+
+    id += 256 * (48 + heroId - 10*second)
+
+    return id
+
+
+public function createHeroButton(int heroId, int buttonPos, string icon)
+    if compiletime
+        let buttonId = getAbilityOffset(heroId) + 66 //B
+        new AbilityDefinitionNeutralSpell(buttonId)
+        ..setBaseOrderID(1, BUTTON_ORDER_STRING[buttonPos])
+        ..presetIcon(icon)
+        ..setChargeOwningPlayer(1, false)
+        ..setGoldCost(1, HERO_GOLD_COST)
+        ..setLumberCost(1, 0)
+        ..setArtEffect("")
+        ..setArtCaster("")
+        ..setArtTarget("")
+        ..setLevels(1)
+        ..setHeroAbility(false)
+        ..setButtonPositionNormalX(buttonPos mod 4)
+        ..setButtonPositionNormalY(buttonPos div 4)
+
+@compiletime
+function initOrderStrings()
+    BUTTON_ORDER_STRING[0] = "acidbomb"
+    BUTTON_ORDER_STRING[1] = "animatedead"
+    BUTTON_ORDER_STRING[2] = "blink"
+    BUTTON_ORDER_STRING[3] = "blizzard"
+    BUTTON_ORDER_STRING[4] = "bloodlust"
+    BUTTON_ORDER_STRING[5] = "breathoffire"
+    BUTTON_ORDER_STRING[6] = "breathoffrost"
+    BUTTON_ORDER_STRING[7] = "cannibalize"
+    BUTTON_ORDER_STRING[8] = "carrionswarm"
+    BUTTON_ORDER_STRING[9] = "chainlightning"
+    BUTTON_ORDER_STRING[10] = "charm"
+    BUTTON_ORDER_STRING[11] = "clusterrockets"
+
+init
+    initBeforeHeroType()
+    SLOT_ID[AbilitySlot.Q castTo int] = 81
+    SLOT_ID[AbilitySlot.W castTo int] = 87
+    SLOT_ID[AbilitySlot.E castTo int] = 69
+    SLOT_ID[AbilitySlot.R castTo int] = 82
+    SLOT_ID[AbilitySlot.PASSIVE castTo int] = 80

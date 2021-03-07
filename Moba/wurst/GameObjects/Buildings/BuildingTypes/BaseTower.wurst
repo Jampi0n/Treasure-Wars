@@ -1,0 +1,7 @@
+package BaseTower
+
+import BuildingsInclude
+
+public class BaseTower extends Building
+    construct()
+        super(BASE_TOWER, 50, 50)
