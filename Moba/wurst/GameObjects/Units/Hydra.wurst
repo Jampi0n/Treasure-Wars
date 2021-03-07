@@ -4,8 +4,13 @@ import ClosureTimers
 import Assets
 import SoundUtils
 import ObjectEditingPreset
-import LinkedList
-import GameAPI
+import PlayerControl
+import Constants
+import UnitTypeConfig
+import UnitWrapper
+import TeamUtil
+import Buff
+import OnAttack
 
 constant REVIVE_TIME = 300.
 constant MAX_LEVEL = 5
