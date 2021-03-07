@@ -1,0 +1,29 @@
+package StandardBuffs
+
+import Buff
+import UnitWrapper
+
+/*
+    Cannot be targeted by negative spells or attacks.
+*/
+public constant INVULERNABLE = new BuffType(true, DispelLevel.NONE)
+/*
+    Cannot be targeted by any spells or attacks.
+*/
+public constant UNTARGETABLE = new BuffType(true, DispelLevel.NONE)
+
+init
+    dispelBuffsOnDeath()
+    INVULERNABLE.addFirstFunction() (Buff whichBuff) ->
+        let target = whichBuff.getTarget()
+        target.dispelNegativeBuffs(DispelLevel.BREAK)
+        UnitAddType(target, UNIT_TYPE_ANCIENT)
+    INVULERNABLE.addEndFunction() (Buff whichBuff) ->
+        UnitRemoveType(whichBuff.getTarget(), UNIT_TYPE_ANCIENT)
+
+    UNTARGETABLE.addFirstFunction() (Buff whichBuff) ->
+        let target = whichBuff.getTarget()
+        target.dispelBuffs(DispelLevel.BREAK)
+        UnitAddType(target, UNIT_TYPE_SAPPER)
+    UNTARGETABLE.addEndFunction() (Buff whichBuff) ->
+        UnitRemoveType(whichBuff.getTarget(), UNIT_TYPE_SAPPER)

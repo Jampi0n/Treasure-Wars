@@ -8,7 +8,13 @@ import AbilityObjEditing
 import ObjectEditingPreset
 import DamageDetection
 import StandardTextTags
-import GameAPI
+import Buff
+import UnitWrapper
+import UnitTypeConfig
+import Constants
+import PlayerControl
+import TeamUtil
+import HeroControl
 
 constant int DUMMY_CASTER = compiletime(UNIT_ID_GEN.next())
 constant int HEAL_BUFF_ID = compiletime(createDummyBuff())

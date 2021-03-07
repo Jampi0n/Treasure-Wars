@@ -8,7 +8,10 @@ import TimerUtils
 import ClosureTimers
 import Execute
 import ErrorHandling
-import GameAPI
+import TeamUtil
+import UnitWrapper
+import PlayerControl
+import Constants
 import LinkedList
 
 constant HP_PER_LEVEL = 15
@@ -529,6 +532,9 @@ function charToAbilitySlot(string char) returns AbilitySlot
 init
     Hero.classInit()
     initAssistLists()
+    CreateTrigger()
+        ..addAction(function Hero.regenerate)
+        ..registerTimerEvent(0.1, true)
     /*doAfter(4) () ->
         for i = 0 to 30
             print("["+ i.toString() + "]" + assistStringListTeam1[i])

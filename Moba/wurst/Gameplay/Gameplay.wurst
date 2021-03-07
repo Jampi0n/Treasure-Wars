@@ -4,6 +4,8 @@ import WaveSpawn
 import PlayerControl
 import Constants
 
+public boolean gameOver = false
+
 public function allHeroesPicked()
     PlayerWrapper.revealIcons()
     startSpawning()

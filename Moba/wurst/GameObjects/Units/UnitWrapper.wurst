@@ -665,9 +665,29 @@ public function unit.countItemsOfType(int itemTypeId) returns int
 
     return count
 
+public function enumUnitsInHitBoxRange(vec2 pos, real range) returns group
+    let g = CreateGroup()
+    g.enumUnitsInRange(pos, range + MAX_HIT_BOX)
+    let returnGroup = CreateGroup()
+    while(true)
+        let u = FirstOfGroup(g)
+        if u == null
+            break
+        g.removeUnit(u)
+        if u.hitBoxDistanceTo(pos) <= range
+            returnGroup.addUnit(u)
+    
+    g.destr()
+    return returnGroup
+
 init
     onUnitIndex(() -> UnitWrapper.create(getIndexingUnit()))
     onUnitDeindex(() -> getIndexingUnit().wrapper().destr() )
+
+    
+    CreateTrigger()
+    ..addAction(function onUnitDeath)
+    ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
 
     setGetBuffListFunction( (unit u) -> (begin
         return u.getBuffList()
@@ -682,11 +702,20 @@ init
             u.wrapper().createBuffList()
     end))
 
+    setHitBoxFunction( (unit u) -> (begin
+        real ret = 32
+        if u.isType(UNIT_TYPE_HERO)
+            ret = 64
+        else
+            let unitType = UnitType.getUnitType(u.getTypeId())
+            if unitType!=null
+                ret = unitType.getHitBox().toReal()
+        return ret
+    end))
+
     CreateTrigger()
     ..registerPlayerChatEvent(players[0], "-s", true)
     ..addAction() ->
         PlayerWrapper.getPlayerHero(0, 0).toUnit().wrapper().printStats()
 
-    CreateTrigger()
-    ..addAction(function onUnitDeath)
-    ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
+    

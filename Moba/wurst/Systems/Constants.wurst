@@ -37,6 +37,7 @@ init
     SetCreepCampFilterState( false )
     SetAllyColorFilterState( 0 )
     EnableMinimapFilterButtons( true, false )
+    Player(PLAYER_NEUTRAL_AGGRESSIVE).setName("Creeps")
 
     if IS_REPLAY
         print("Enjoy watching your replay of Treasure Wars!")
