@@ -1,0 +1,42 @@
+package Blacksmith
+
+import BuildingsInclude
+
+public int array UPGRADES = ['R000', 'R001', 'R002', 'R003']
+public int array UPGRADE_ITEMS = ['I002', 'I003', 'I004', 'I005']
+
+public unit array blacksmith = [udg_GreenBlacksmith[0], udg_GreenBlacksmith[1], udg_BrownBlacksmith[0], udg_BrownBlacksmith[1]]
+public boolean array blacksmithAlive = [true, true, true, true]
+
+constant SOUND_UPGRADE = new SoundDefinition(Sounds.blacksmithWhat1, false, true)
+
+public class Blacksmith extends Building
+    construct()
+        super(BLACKSMITH, 50, 50)
+
+    override function onDeath(unit building, unit killer)
+        for i = 0 to 3
+            if building == blacksmith[i]
+                blacksmithAlive[i] = false
+
+    override function onCast(unit building, int itemId, unit hero)
+        let heroPos = hero.getPos3Zero()
+        for i = 0 to 3
+            if itemId == UPGRADE_ITEMS[i]
+                SOUND_UPGRADE.playOnPoint(heroPos).snd.setVolume(150)
+                let current = GetPlayerTechCount(building.getOwner(), UPGRADES[i], true)
+                if current == 4
+                    SetPlayerTechMaxAllowed(building.getOwner(), itemId, 0)
+                SetPlayerTechResearched(building.getOwner(), UPGRADES[i], current + 1)
+
+                let g = CreateGroup()
+                GroupEnumUnitsOfPlayer(g, building.getOwner(), null)
+                unit u
+                while(true)
+                    u = FirstOfGroup(g)
+                    if u == null
+                        break
+                    g.removeUnit(u)
+                    if not u.isType(UNIT_TYPE_STRUCTURE)
+                        u.wrapper().updateBaseStatsUnits()
+                g.destr()

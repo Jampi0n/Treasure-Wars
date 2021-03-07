@@ -1,0 +1,16 @@
+package OnAttackInclude
+
+public interface OnAttackFunction
+    function onAttack(unit attacker, unit target, boolean isActive)
+
+public interface OnAttackFunctionAdvanced
+    function onAttack(unit attacker, unit target, boolean isActive, boolean advanced)
+
+/*
+    onAttackAbilities is part of OnAttackFunctionAdvanced.
+    So in the dispatch function of OnAttackFunctionAdvanced this function is called, so
+    onAttack is called. To prevent a cyclic function, which creates some overhead a new interface is used
+    specifically for hero type related on attack functions.
+*/
+public interface OnAttackFunctionHero
+    function onAttack(unit attacker, unit target, boolean isActive, boolean advanced)

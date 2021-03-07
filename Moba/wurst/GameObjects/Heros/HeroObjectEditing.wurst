@@ -1,0 +1,321 @@
+package HeroObjectEditing
+
+import public initlater DynamicTooltips
+import AbilityObjEditing
+import HashMap
+import ObjectIds
+
+/*
+You cannot add learnable abilities to hero with code, it must be done with object data.
+Hero skills will have specific abilityIds:
+
+A+SpecialCharacter+Hero+Hotkey
+
+SpecialCharacter: Z,Y,..
+Anything that is not normally used in ability ids
+
+Hero: Different for every hero: 0-9, a-z, A-Z
+Means 62 heroes per special character.
+
+PQWER
+
+
+*/
+
+
+
+
+public constant ABIL_DEF_MAP = new HashMap<int,AbilityDefinition>
+
+
+public constant CHANNELING_SPELL = "|cffffcc00Channeling Spell:|r\n"
+
+
+public tuple skillData(real l1, real l2, real l3, real l4, real l5)
+
+public function skillData.data(int level) returns real
+    if level < 3
+        if level == 1
+            return this.l1
+        else
+            return this.l2
+    else
+        if level < 5
+            if level == 3
+                return this.l3
+            else
+                return this.l4
+        else
+            return this.l5
+
+public function createSkillData(real data) returns skillData
+    return skillData(data, data, data, data, data)
+
+public interface LevelString
+    function getString(int level) returns string
+
+public function real.str() returns string
+    return this.toInt().toString()
+
+public function int.str() returns string
+    return this.toString()
+
+public function AbilityDefinition.setLearnString(string intro, LevelString levelString)
+    string learnString = intro+"\n"
+    for i = 1 to 5
+        learnString += getLevelString(i) + levelString.getString(i)
+
+    this.setTooltipLearnExtended(learnString +"\n ")
+
+    destroy levelString
+
+
+public function AbilityDefinition.setDescriptionString(boolean showCooldown, int lvl, string description)
+    if showCooldown
+        this.setTooltipNormalExtended(lvl, description+ "\n" + "Cooldown: " + "<" + this.getNewId().toRawCode() + ",Cool"+lvl.toString()+">" + "\n ")
+    else
+        this.setTooltipNormalExtended(lvl, description+ "\n ")
+
+public function getLevelString(int level) returns string
+    return " \n|cffffcc00Level "+level.toString()+"|r - "
+
+public function int.getBonusString() returns string
+    if(this==0)
+        return " "
+    return " (+"+this.toString()+") "
+
+public function real.getBonusString() returns string
+    if(this==0)
+        return " "
+    return " (+"+this.toInt().toString()+") "
+
+public function int.getBonusString(color c) returns string
+    if(this==0)
+        return " "
+    return c.toColorString()+" (+"+this.toString()+")|r "
+
+public function real.getBonusString(color c) returns string
+    if(this==0)
+        return " "
+    return c.toColorString()+" (+"+this.toInt().toString()+")|r "
+
+public enum TargetType
+    INSTANT
+    UNIT
+    POINT
+    UNIT_OR_POINT
+    AREA
+
+public function AbilityDefinitionIllidanChannel.setupChannel(TargetType targetType, string orderId, real castBackSwing)
+    this
+        ..setArtCaster("")
+        ..setArtEffect("")
+        ..setArtTarget("")
+        ..setArtSpecial("")
+    for lvl = 1 to 5
+        this
+            ..setOptions(lvl, 1)
+            ..setFollowThroughTime(lvl, castBackSwing)
+            ..setDisableOtherAbilities(lvl, false)
+            ..setBaseOrderID(lvl, orderId)
+            ..setArtDuration(lvl, 0)
+
+        if targetType == TargetType.INSTANT
+            this.setTargetType(lvl, 0)
+        else if targetType == TargetType.UNIT
+            this.setTargetType(lvl, 1)
+        else if targetType == TargetType.POINT
+            this.setTargetType(lvl, 2)
+        else if targetType == TargetType.UNIT_OR_POINT
+            this.setTargetType(lvl, 3)
+        else if targetType == TargetType.AREA
+            this.setTargetType(lvl, 2)
+            this.setOptions(lvl, 3)
+
+public function AbilityDefinition.setupIcon(string name)
+    string sNormal = name
+    string sLearn
+
+    if name.length() < 20 or not name.startsWith("ReplaceableTextures")
+        sNormal = "ReplaceableTextures\\CommandButtons\\" + sNormal
+    if not name.endsWith(".blp")
+        sNormal += ".blp"
+
+        
+    if name.startsWith("PAS")
+        sLearn = "ReplaceableTextures\\CommandButtons\\BTN" + name.substring(3) + ".blp"
+    else
+        sLearn = sNormal
+
+
+
+
+    this.setIconResearch(sLearn)
+    this.setIconNormal(sNormal)
+
+public function AbilityDefinition.setTurnOff(string name, string hotkey)
+    for i = 1 to 5
+        this.setTooltipTurnOff(i, "("+hotkey+") "+name+" - [|cffffcc00Level "+i.toString()+"|r]")
+        this.setTooltipTurnOffExtended(i, "Description missing.")
+
+public function AbilityDefinition.setupWithHotKey(string name, string hotkey)
+    if not compiletime
+        return
+    ABIL_DEF_MAP.put(this.getNewId(), this)
+    this.presetHotkey(hotkey)
+    this.setButtonPositionNormalY(2)
+    this.setButtonPositionTurnOffY(2)
+    this.setButtonPositionResearchY(0)
+    this.setHeroAbility(true)
+    this.setLevels(5)
+    this.setRequiredLevel(1)
+    this.setName(name)
+    this.setRequirements("")
+    this.setCheckDependencies(false)
+    this.setTooltipLearn("("+hotkey+")"+" Learn "+name+" - [|cffffcc00Level %d|r]")
+    this.setTooltipLearnExtended("Description missing. Use \"-"+ hotkey +"\" to get the tooltip.")
+    for i = 1 to 5
+        this.setTooltipNormalExtended(i, "description missing")
+        this.setTooltipTurnOffExtended(i, "description missing")
+        this.setTooltipNormal(i, "("+hotkey+") "+name+" - [|cffffcc00Level "+i.toString()+"|r]")
+        this.setTooltipTurnOff(i, "("+hotkey+") "+name+" - [|cffffcc00Level "+i.toString()+"|r]")
+        
+    if(hotkey=="Q")
+        this..presetHotkey("Q")
+            ..setButtonPositionNormalX(0)
+            ..setButtonPositionResearchX(0)
+            ..setButtonPositionTurnOffX(0)
+
+    if(hotkey=="W")
+        this..presetHotkey("W")
+            ..setButtonPositionNormalX(1)
+            ..setButtonPositionResearchX(1)
+            ..setButtonPositionTurnOffX(1)
+        return
+
+    if(hotkey=="E")
+        this..presetHotkey("E")
+            ..setButtonPositionNormalX(2)
+            ..setButtonPositionResearchX(2)
+            ..setButtonPositionTurnOffX(2)
+        return
+
+    if(hotkey=="R")
+        this..presetHotkey("R")
+            ..setButtonPositionNormalX(3)
+            ..setButtonPositionResearchX(3)
+            ..setButtonPositionTurnOffX(3)
+            ..setRequiredLevel(6)
+            ..setLevelSkipRequirement(3)
+        return
+
+    if(hotkey=="D")
+        this..presetHotkey("D")
+            ..setButtonPositionNormalX(2)
+            ..setButtonPositionResearchX(2)
+            ..setButtonPositionNormalY(1)
+            ..setButtonPositionResearchY(1)
+            ..setLevelSkipRequirement(4)
+        return
+
+public function AbilityDefinition.targetFriends()
+    for i = 1 to this.getLevels()
+        this.setTargetsAllowed(i, "ground,friend,nonsapper,air,self")
+
+public function AbilityDefinition.targetAllies()
+    for i = 1 to this.getLevels()
+        this.setTargetsAllowed(i, "ground,friend,nonsapper,air")
+
+public function AbilityDefinition.targetEnemies()
+    for i = 1 to this.getLevels()
+        this.setTargetsAllowed(i, "ground,enemy,nonsapper,air,nonancient,neutral")
+
+public function AbilityDefinition.targetSelf()
+    for i = 1 to this.getLevels()
+        this.setTargetsAllowed(i, "self")
+
+public function AbilityDefinition.targetFriendlyHeroes()
+    for i = 1 to this.getLevels()
+        this.setTargetsAllowed(i, "friend,nonsapper,hero,self")
+
+public function AbilityDefinition.targetAlliedHeroes()
+    for i = 1 to this.getLevels()
+        this.setTargetsAllowed(i, "friend,nonsapper,hero")
+
+public function AbilityDefinition.targetEnemyHeroes()
+    for i = 1 to this.getLevels()
+        this.setTargetsAllowed(i, "enemy,nonsapper,nonancient,hero,self")
+
+public function AbilityDefinition.targetNone()
+    for i = 1 to this.getLevels()
+        this.setTargetsAllowed(i, "none")
+
+
+
+// Extension functions for easier use:
+
+public function AbilityDefinition.setCooldown(skillData cooldown)
+    this.setCooldown(1, cooldown.l1)
+    this.setCooldown(2, cooldown.l2)
+    this.setCooldown(3, cooldown.l3)
+    this.setCooldown(4, cooldown.l4)
+    this.setCooldown(5, cooldown.l5)
+
+public function AbilityDefinition.setManaCost(skillData manaCost)
+    this.setManaCost(1, manaCost.l1.round())
+    this.setManaCost(2, manaCost.l2.round())
+    this.setManaCost(3, manaCost.l3.round())
+    this.setManaCost(4, manaCost.l4.round())
+    this.setManaCost(5, manaCost.l5.round())
+
+public function AbilityDefinition.setCastRange(skillData castRange)
+    this.setCastRange(1, castRange.l1)
+    this.setCastRange(2, castRange.l2)
+    this.setCastRange(3, castRange.l3)
+    this.setCastRange(4, castRange.l4)
+    this.setCastRange(5, castRange.l5)
+
+public function AbilityDefinition.setSkillData(skillData cooldown, skillData manaCost, skillData castRange)
+    this.setCooldown(cooldown)
+    this.setManaCost(manaCost)
+    this.setCastRange(castRange)
+
+public function AbilityDefinition.setSkillData(real cooldown, skillData manaCost, skillData castRange)
+    this.setCooldown(createSkillData(cooldown))
+    this.setManaCost(manaCost)
+    this.setCastRange(castRange)
+
+public function AbilityDefinition.setSkillData(skillData cooldown, real manaCost, skillData castRange)
+    this.setCooldown(cooldown)
+    this.setManaCost(createSkillData(manaCost))
+    this.setCastRange(castRange)
+
+public function AbilityDefinition.setSkillData(skillData cooldown, skillData manaCost, real castRange)
+    this.setCooldown(cooldown)
+    this.setManaCost(manaCost)
+    this.setCastRange(createSkillData(castRange))
+
+public function AbilityDefinition.setSkillData(real cooldown, real manaCost, skillData castRange)
+    this.setCooldown(createSkillData(cooldown))
+    this.setManaCost(createSkillData(manaCost))
+    this.setCastRange(castRange)
+
+public function AbilityDefinition.setSkillData(skillData cooldown, real manaCost, real castRange)
+    this.setCooldown(cooldown)
+    this.setManaCost(createSkillData(manaCost))
+    this.setCastRange(createSkillData(castRange))
+
+public function AbilityDefinition.setSkillData(real cooldown, skillData manaCost, real castRange)
+    this.setCooldown(createSkillData(cooldown))
+    this.setManaCost(manaCost)
+    this.setCastRange(createSkillData(castRange))
+
+public function AbilityDefinition.setSkillData(real cooldown, real manaCost, real castRange)
+    this.setCooldown(createSkillData(cooldown))
+    this.setManaCost(createSkillData(manaCost))
+    this.setCastRange(createSkillData(castRange))
+
+
+
+
+

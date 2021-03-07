@@ -1,0 +1,290 @@
+package OnAttackInternal
+
+import DamageDetection
+import initlater HeroType
+import ClosureTimers
+import initlater SeaDruid
+import initlater TrollBerserker
+import initlater Paladin
+import initlater Destroyer
+import StandardTextTags
+import initlater Creeps
+import OnAttackInclude
+import General
+import GameAPI
+import ItemIds
+import initlater HeroAI
+import LinkedList
+
+//import initlater ItemShopSystem
+
+public constant ADVANCED_ONHIT =  'A00I'
+public constant DEFAULT_ONHIT = 'A008'
+
+public constant LAST_HIT_THRESHOLD = 50.0
+
+
+/*
+    ADVANCED_ONHIT can temporarily replace the default on hit abiltiy to get a temporary special attack, that depends
+    on the time when the attack is fired and not when it is hit (so only relevant for ranged attacks)
+    ADVANCED_ONHIT will trigger all effects DEFAULT_ONHIT triggers, but can be used to trigger additional effects
+    Every hero should only have one ability utilizing ADVANCED_ONHIT (more abilities would be repetitive anyways)
+*/
+
+
+/*
+**
+**  This function handles ALL damage event funtions, where the damage amount matters.
+**  By having all in this function, the order the functions run can be set the easiest.
+**
+*/
+function handleDamageAmount(unit source, unit target, boolean isAttack, boolean _isActive, boolean advanced) returns real
+    let originalDamage = GetEventDamage()
+    real currentDamage = originalDamage
+
+    if originalDamage.abs() >= 0.000001 //damage very small, just ignore
+        /*
+            untargetable -> damage = 0 and no further damage handling
+            only for attacks, because every other damage will be dealt in code and there I can decide individually, if I want to deal damage
+        */
+
+        if (target.isType(UNIT_TYPE_ANCIENT) and isAttack) or gameOver
+            currentDamage = 0
+        else
+
+            //example:
+            //currentDamage = currentDamage/2
+
+            //===============================================================================
+
+            // the following effects are independant from damage dealt
+
+            // revenant buff
+            if source.hasAbility(REVENANT_BUFF_ID) and not target.isType(UNIT_TYPE_STRUCTURE)
+                target.addBuffReduced(source, 2, REVENANT_SLOW_BUFF, 1)
+
+            // the following effects manage the damage dealt (attacker based)
+
+            // critical strike - TROLL BERSERKER
+            if advanced and source.isType(UNIT_TYPE_HERO) and BuffList.hasBuffType(source, buffCriticalStrike) and not target.isType(UNIT_TYPE_STRUCTURE)
+                let critical = BuffList.getBuffOfType(source, buffCriticalStrike)
+                currentDamage = currentDamage * (100 + CRITICAL_DAMAGE_MULT[critical.getLevel()-1])/100
+                createCriticalStrikeTextTag(target, currentDamage.toInt())
+                critical.dispel()
+
+            // death frenzy - DESTROYER
+            let deathFrenzyLevel = source.getAbilityLevel(ABILITY_DEATH_FRENZY)
+            if deathFrenzyLevel != 0
+                currentDamage *= 1 + DEATH_FRENZY_BONUS[deathFrenzyLevel-1]/100 * (1-source.getLife()/GetUnitState(source, UNIT_STATE_MAX_LIFE))
+
+            // ignore armor - ITEM
+            // ignores 30% of the target's armor
+            if isAttack and source.countItemsOfType(42) > 0
+                let armorFactor = 0.7
+                let currentArmor = target.getArmor()
+                if currentArmor > 0
+                    // currentDamage = damageWithoutArmor / (1 + ARMOR_REDUCTION * armor)
+                    // damageWithoutArmor = currentDamage * (1 + ARMOR_REDUCTION * armor)
+                    // wantedDamage = damageWithoutArmor / (1 + ARMOR_REDUCTION * armor * armorFactor) 
+                    // wantedDamage = currentDamage * (1 + ARMOR_REDUCTION * armor) / (1 + ARMOR_REDUCTION * armor * armorFactor) 
+                    let damageWithoutArmor = currentDamage * (1 + ARMOR_REDUCTION * currentArmor)
+                    currentDamage = damageWithoutArmor / (1 + ARMOR_REDUCTION * currentArmor * armorFactor) 
+                    
+
+            // the following effects manage damage taken (target based)
+
+            //heavy armored
+            if isAttack and target.getAbilityLevel(ABILITY_HEAVY_ARMORED) > 0
+                currentDamage -= HEAVY_ARMOED_REDUCTION[target.getAbilityLevel(ABILITY_HEAVY_ARMORED) - 1]
+
+            // shield - ITEM
+            if isAttack and target.isType(UNIT_TYPE_HERO)
+                currentDamage = currentDamage - 15 * target.countItemsOfType(ITEM_ID_SHIELD)
+
+            if isAttack and target.isType(UNIT_TYPE_HERO)
+                currentDamage = currentDamage - 20 * target.countItemsOfType(ITEM_ID_HOLY_SHIELD)
+
+
+            //the following effects make use of the final damage
+
+            // turtle buff
+            if isAttack and target.hasAbility(TURTLE_BUFF_ID)
+                doAfter(0) ->
+                    target.dealDamage(source, currentDamage * 0.1, ReductionType.PHYSICAL)
+
+            // mana shield - SEA DRUID
+            if target.isType(UNIT_TYPE_HERO) and BuffList.hasBuffType(target, buffManaShield)
+                
+                let manaShield = BuffList.getBuffOfType(target, buffManaShield)
+                let level = manaShield.getLevel()
+
+                
+                manaShield.getTarget().damageMana(manaShield.getTarget(), MANA_SHIELD_REDUCTION[level-1] * MANA_PER_DAMAGE[level-1] * currentDamage, ReductionType.NONE)
+                currentDamage = currentDamage * (1.-MANA_SHIELD_REDUCTION[level-1])
+        
+            // vampiric goblet - ITEM
+            if source.isType(UNIT_TYPE_HERO) and source.hasItemById(ITEM_ID_VAMPIRIC_GOBLET) and target.isType(UNIT_TYPE_HERO)
+                source.healHP(source, currentDamage * 0.2)
+                source.healMana(source, currentDamage * 0.15)
+
+            // wand of blood - ITEM
+            if source.isType(UNIT_TYPE_HERO) and source.hasItemById(ITEM_ID_WAND_OF_BLOOD) and not target.isType(UNIT_TYPE_STRUCTURE)
+                source.healHP(source, currentDamage * 0.08)
+        
+            // sacrifical dagger - ITEM
+            if isAttack and source.isType(UNIT_TYPE_HERO) and source.hasItemById(ITEM_ID_SACRIFICIAL_DAGGER) and not target.isType(UNIT_TYPE_STRUCTURE)
+                source.healHP(source, currentDamage * 0.12)
+
+            // void armor - ITEM
+            if target.isType(UNIT_TYPE_HERO) and target.hasItemById(ITEM_ID_VOID_ARMOR)
+                target.healMana(target, currentDamage * 0.1)
+                currentDamage *= 0.9
+
+            // wand of death - ITEM
+            if source.isType(UNIT_TYPE_HERO) and source.hasItemById(ITEM_ID_WAND_OF_DEATH)
+                let wp = currentDamage * 0.02
+                let wrapper = target.wrapper()
+                wrapper.addStatAbsoluteBonusReal(Stat.AGI, (-wp*1000).toInt())
+                doAfter(10, () -> (begin
+                    if target.isAlive() or target.isType(UNIT_TYPE_HERO)
+                        wrapper.addStatAbsoluteBonusReal(Stat.AGI, (wp*1000).toInt() )
+                end))
+
+
+            //===============================================================================
+
+        currentDamage = max(0, currentDamage)
+
+        let effectiveDamage = min(currentDamage, target.getHP())
+        PlayerWrapper.statDamageDealt[source.getOwner().getId()] += effectiveDamage
+        PlayerWrapper.statDamageTaken[target.getOwner().getId()] += effectiveDamage
+
+        let ai = getAI(target)
+        if ai != null and target.isType(UNIT_TYPE_HERO)
+            ai.onDamage(currentDamage)
+
+        //if target.isType(UNIT_TYPE_HERO) and source.getOwner().getId() < MAX_HERO_COUNT
+            /*let factor = currentDamage.pow(0.3)*4
+            CreateTextTag()..setText(currentDamage.round().toString(), factor/2+4)
+                                ..setColor(200, 50, 25, 255)
+                                ..setPos(target.getX(), target.getY(), 0)
+                                ..setFadepoint(0)
+                                ..setLifespan(factor/20+0.4)
+                                ..setPermanent(false)
+                                ..setVisibility(true)
+                                ..setVelocity(GetRandomReal(-0.02, 0.02), 0.04)*/
+
+            //DamageTag.addDamage(target, currentDamage)
+
+        BlzSetEventDamage(currentDamage)
+
+    return currentDamage
+
+
+public class OnAttackInternal
+
+    private static constant onAttackFunctionList = new LinkedList<OnAttackFunction>()
+    private static constant onAttackFunctionListAdvanced = new LinkedList<OnAttackFunctionAdvanced>()
+
+    protected static int countEvents = 0
+
+    protected static function onDamage()
+        //use local variables to avoid overwriting
+        //set global variables right before calling other functions
+        let localTarget = GetTriggerUnit()
+        let localAttacker = GetEventDamageSource()
+        var localActive = false
+        var localAttacked = false
+        var advanced = false
+
+        countEvents++
+        if countEvents > 1000
+            Log.warn("Warning. Very high number of damage events per second: "+countEvents.toString())
+
+        if(localTarget.hasAbility('B005')) or localAttacker.getTypeId() == MORTAR_TEAM //passive
+            localTarget.removeAbility('B005')
+            localAttacked = true
+        if(localTarget.hasAbility('B00G')) //advanced
+            localTarget.removeAbility('B00G')
+            localAttacked = true
+            advanced = true
+
+        else if(localTarget.hasAbility('B006')) //arrow
+            localTarget.removeAbility('B006')
+            localActive = true
+            localAttacked = true
+
+
+        let finalDmg = handleDamageAmount(localAttacker, localTarget, localAttacked, localActive, advanced)
+
+        //use a list with arguments, as a onAttack function could trigger an onAttack event and overwrite the variables
+        if localAttacked and not localTarget.isType(UNIT_TYPE_ANCIENT) //untargetable
+            for OnAttackFunction onAttack in onAttackFunctionList
+                onAttack.onAttack(localAttacker, localTarget, localActive)
+
+            for OnAttackFunctionAdvanced onAttack in onAttackFunctionListAdvanced
+                onAttack.onAttack(localAttacker, localTarget, localActive, advanced)
+
+        // last hit helper
+        if localAttacked and localAttacker.isType(UNIT_TYPE_HERO) and not localTarget.isType(UNIT_TYPE_HERO) and not localTarget.isType(UNIT_TYPE_STRUCTURE)
+            if localTarget.getLife() - finalDmg <= LAST_HIT_THRESHOLD
+                localAttacker.dealDamageAlways(localTarget, LAST_HIT_THRESHOLD, ReductionType.NONE)
+
+        
+
+
+    /*static function getAttacker() returns unit
+        return attacker
+
+    static function getTarget() returns unit
+        return target   
+
+    static function isActive() returns boolean
+        return active*/
+
+    static function addOnAttackFunc(OnAttackFunction onAttack)
+        onAttackFunctionList.add(onAttack)
+
+    static function addOnAttackFuncAdvanced(OnAttackFunctionAdvanced onAttack)
+        onAttackFunctionListAdvanced.add(onAttack)
+
+    protected static function onAttackAbilities(unit attacker, unit target, boolean isActive, boolean advanced)
+        let heroType = HeroType.getHeroType(attacker.getTypeId())
+        if(heroType!=null)
+            heroType.onAttack(attacker, target, isActive, advanced)
+
+    static function useAdvanced(unit whichUnit, boolean advanced)
+        if advanced
+            whichUnit
+                ..removeAbility(DEFAULT_ONHIT)
+                ..addAbility(ADVANCED_ONHIT)
+        else
+            whichUnit
+                ..removeAbility(ADVANCED_ONHIT)
+                ..addAbility(DEFAULT_ONHIT)
+
+    /**
+    Uses a custom onhit function to be able to change the missile art for it.
+    **/
+    static function useAdvanced(unit whichUnit, boolean advanced, int abilityId)
+        if advanced
+            whichUnit
+                ..removeAbility(DEFAULT_ONHIT)
+                ..addAbility(abilityId)
+        else
+            whichUnit
+                ..removeAbility(ADVANCED_ONHIT)
+                ..addAbility(abilityId)
+
+
+init
+    addOnDamageFunc(Condition(function OnAttackInternal.onDamage))
+
+    //use hashmap, so onAttack is more efficient
+    //if there are a lot of heroes, if-then-else to find the correct
+    //actions to execute is inefficient
+    OnAttackInternal.addOnAttackFuncAdvanced((unit attacker, unit target, boolean isActive, boolean advanced) -> OnAttackInternal.onAttackAbilities(attacker, target, isActive, advanced))
+
+    doPeriodically(0.1, (CallbackPeriodic _cb) -> (begin
+        OnAttackInternal.countEvents = 0
+    end))

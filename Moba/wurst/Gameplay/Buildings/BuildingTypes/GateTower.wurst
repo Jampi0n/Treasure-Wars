@@ -1,9 +1,0 @@
-package GateTower
-
-import Building
-
-public constant GATE_TOWER = 'h006'
-
-public class GateTower extends Building
-    construct()
-        super('h006', 100, 100)

@@ -1,0 +1,7 @@
+package GateTower
+
+import BuildingsInclude
+
+public class GateTower extends Building
+    construct()
+        super(GATE_TOWER, 100, 100)

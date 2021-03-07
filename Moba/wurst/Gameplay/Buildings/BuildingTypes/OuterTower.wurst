@@ -1,9 +1,0 @@
-package OuterTower
-
-import Building
-
-public constant OUTER_TOWER = 'h016'
-
-public class OuterTower extends Building
-    construct()
-        super(OUTER_TOWER, 75, 75)

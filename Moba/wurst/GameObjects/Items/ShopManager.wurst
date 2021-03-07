@@ -1,0 +1,93 @@
+package ShopManager
+
+import Execute
+import ShopGUI
+import ItemFinalize
+import SoundUtils
+import StandardTextTags
+import GameAPI
+
+constant BUY_RANGE = 900
+
+constant SOUND_ITEM_BUY = new SoundDefinition(Sounds.receiveGold, false, false)
+constant SOUND_ITEM_BUY_3D = new SoundDefinition(Sounds.receiveGold, false, true)
+constant SOUND_RECIPE_TOO_EXPENSIVE = new SoundDefinition(Sounds.error, false, false)
+
+constant SHOP_POSITION = [gg_rct_GreenAltar.getCenter(), gg_rct_BrownAltar.getCenter()]
+
+GUI array gui
+
+public function getGUI(int i) returns GUI
+    return gui[i]
+
+function buyFailed(unit hero, int _itemId, int _cost, int _gold)
+    //let missing = cost - gold
+    //printTimedToPlayer(COLOR_GOLD.toColorString()+"You are missing "+missing.toString()+" gold to buy this item!|r", 5, hero.getOwner())
+    SOUND_RECIPE_TOO_EXPENSIVE.playForPlayer(hero.getOwner())
+
+function buySuccess(unit hero, item itm, int totalCost)
+    if hero.hasItem(itm) // success
+        SOUND_ITEM_BUY_3D.playOnPoint(hero.getPos3Zero())
+        SOUND_ITEM_BUY.playForPlayer(hero.getOwner())
+        standardTextTag(hero.getPos(), itm.getName())
+            ..setColor(255, 220, 0, 255)
+    else // not enough space
+        // refund total cost
+        // no item was used as recipe, otherwise there would be space
+        SOUND_RECIPE_TOO_EXPENSIVE.playForPlayer(hero.getOwner())
+        //printTimedToPlayer(COLOR_GOLD.toColorString()+"Your inventory is full!|r", 5, hero.getOwner())
+        itm.remove()
+        hero.getOwner().addGold(totalCost)
+
+
+function buyCondition(unit hero, int team, bool showMessage) returns bool
+
+    if not hero.isAlive()
+        if showMessage
+            //printTimedToPlayer(COLOR_GOLD.toColorString()+"You cannot buy items, while your hero is dead!|r", 5, hero.getOwner())
+        return false
+
+
+    if hero.isAlive()
+        let shopCenter = SHOP_POSITION[team]
+        let dist = hero.getPos().distanceTo(shopCenter)
+        if dist > BUY_RANGE
+            if showMessage
+                //printTimedToPlayer(COLOR_GOLD.toColorString()+"You are too far away from the shop to buy items!|r", 5, hero.getOwner())
+            return false
+
+    return true
+
+init
+
+    itemFinalize()
+    execute() ->
+        for i = Teams.first1() to Teams.last2()
+            gui[i] = new GUI(players[i], null)
+            ..setBuyCondition( (unit hero, bool showMessage) -> buyCondition(hero, Players.team(i), showMessage))
+            ..setBuySuccess( (unit hero, item itm, int totalCost) -> buySuccess(hero, itm, totalCost))
+            ..setBuyFailed( (unit hero, int itemId, int cost, int gold) -> buyFailed(hero, itemId, cost, gold))
+
+    for i = Teams.first1() to Teams.last2()
+        CreateTrigger()
+        ..registerPlayerKeyPress(players[i], OSKEY_ESCAPE, OSKEY_META.NONE, true)
+        ..addAction() ->
+            let id = GetTriggerPlayer().getId()
+            if gui[id].isEnabled()
+                gui[id].closeShop()
+                let mainHero = Players.heroList(id).getFirst().toUnit()
+                if GetLocalPlayer().getId() == id
+                    ClearSelection()
+                    SelectUnit(mainHero,true)
+
+            else
+                gui[id].openShop()
+    
+
+
+/*
+    Removed items are dropped
+    cannot buy items while dead
+    test if desync
+
+*/

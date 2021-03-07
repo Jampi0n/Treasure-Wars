@@ -1,0 +1,43 @@
+package Altar
+
+import BuildingsInclude
+
+constant HOME_BUFF_ID = compiletime(createAuraBuff("Protected", "This unit is protected; it is invulnerable and is being healed.", Icons.bTNInvulnerable))
+constant HOME_ABILTIY_ID = compiletime(createPositiveBuffAbility(1, HOME_BUFF_ID, "Abilities\\Spells\\Human\\DivineShield\\DivineShieldTarget.mdl", ""))
+constant BUFF_HOME = new BuffType(true, DispelLevel.NONE)
+
+function homeInvulnerability()
+	group nearby = CreateGroup()
+	nearby.enumUnitsInRange(gg_rct_GreenAltar.getCenter(), 800)
+
+	while(not nearby.isEmpty())
+		let target = FirstOfGroup(nearby)
+		nearby.removeUnit(target)
+		if not target.isType(UNIT_TYPE_STRUCTURE) and IsUnitAlly(target, players[Teams.army1()]) 
+			target.addBuff( target, 0.5, BUFF_HOME, 1)
+			target.addBuff( target, 0.5, INVULERNABLE, 1)
+
+	nearby.destr()
+
+	nearby = CreateGroup()
+	nearby.enumUnitsInRange(gg_rct_BrownAltar.getCenter(), 800)
+
+	while(not nearby.isEmpty())
+		let target = FirstOfGroup(nearby)
+		nearby.removeUnit(target)
+		if not target.isType(UNIT_TYPE_STRUCTURE) and IsUnitAlly(target, players[Teams.army2()]) 
+			target.addBuff( target, 0.5, BUFF_HOME, 1)
+			target.addBuff( target, 0.5, INVULERNABLE, 1)
+
+	nearby.destr()
+
+public class Altar extends Building
+	construct()
+		super(ALTAR, 0, 0)
+
+init
+	BUFF_HOME.setupBuffWithIcon(HOME_BUFF_ID, HOME_ABILTIY_ID)
+
+	CreateTrigger()
+	..registerTimerEvent(0.2, true)
+	..addAction(function homeInvulnerability)

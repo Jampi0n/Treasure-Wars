@@ -1,0 +1,182 @@
+package UnitUtil
+
+import BuffTypeConfig
+import UnitWrapper
+import Buff
+import ErrorHandling
+import ItemIds
+import Execute
+import Missile
+import AbilityScaling
+import PlayerControl
+
+public enum ReductionType
+    PHYSICAL
+    MAGIC
+    NONE
+
+
+public function unit.isTargetable(player source, boolean allowFriends, boolean allowEnemies) returns boolean
+    boolean ret = true
+    if this == null
+        ret = false
+    else if not this.isAlive()
+        ret = false
+    else if IsUnitEnemy(this, source) 
+        ret = allowEnemies and not IsUnitType(this, UNIT_TYPE_ANCIENT) and not IsUnitType(this, UNIT_TYPE_MAGIC_IMMUNE)
+    else if IsUnitAlly(this, source) 
+        ret = allowFriends and not IsUnitType(this, UNIT_TYPE_MAGIC_IMMUNE)
+
+    return ret
+
+public function unit.isVisible(player source) returns boolean
+    return IsUnitVisible(this, source)
+
+public function unit.isMovable() returns boolean
+    if GetUnitPropWindow(this) < 0.00001
+        return false
+    if BuffList.hasBuffType(this, ENSNARED)
+        return false
+    if BuffList.hasBuffType(this, ENTANGLED)
+        return false
+    if this.getDefaultMovespeed() == 0
+        return false
+    return true
+
+public function unit.getStr() returns int
+    int ret
+    if this.isType(UNIT_TYPE_HERO)
+        ret = GetHeroStr(this, true)
+    else
+        ret = this.wrapper().getStatTotalValue(Stat.STR)
+    return ret
+
+public function unit.getWp() returns int
+    int ret
+    if this.isType(UNIT_TYPE_HERO)
+        ret = GetHeroAgi(this, true)
+    else
+        ret = this.wrapper().getStatTotalValue(Stat.AGI)
+    return ret
+
+public function unit.getInt() returns int
+    int ret
+    if this.isType(UNIT_TYPE_HERO)
+        ret = GetHeroInt(this, true)
+    else
+        ret = this.wrapper().getStatTotalValue(Stat.INT)
+    return ret
+
+public function unit.addBuff(unit caster, real duration, BuffType buffType, int level) returns Buff
+    Buff ret = null
+    if (duration <= 0 and duration > -0.5) or duration > 600
+        error("addBuff add buff with unusual duration: " + duration.toString())
+    if this.isAlive()
+        execute() () ->
+            Buff.applyBuff(this, caster, duration, buffType, level)
+        ret = BuffList.getBuffOfType(this, buffType)
+    return ret
+
+public function unit.addBuffReduced(unit caster, real duration, BuffType buffType, int level) returns Buff
+    //buff reduction only uses 1/4 of the wp, so it reduces duration not as much as it reduces damage
+    real realDuration =  duration.reduce( (this.getWp()/4).toInt() , 0.01 )
+    if this.hasItemById(ITEM_ID_ARCANE_SHIELD)
+        realDuration = realDuration * 0.85
+    Buff ret = null
+    if (realDuration <= 0 and realDuration > -0.5) or realDuration > 600
+        error("addBuffReduced add buff with unusual duration: " + realDuration.toString() + " " + (buffType castTo int).toString())
+    if this.isAlive()
+        execute() () ->
+            Buff.applyBuff(this, caster, realDuration, buffType, level)
+        ret = BuffList.getBuffOfType(this, buffType)
+    return ret
+
+
+public function unit.dealDamageAlways(unit target, real amount, ReductionType reductionType)
+    let damageType = reductionType == ReductionType.PHYSICAL ? DAMAGE_TYPE_NORMAL : DAMAGE_TYPE_UNIVERSAL
+    real newAmount
+    if reductionType == ReductionType.MAGIC
+        let wp = target.getWp()
+        newAmount = amount.reduceMagic(wp)
+    else
+        newAmount = amount
+
+    UnitDamageTarget(this, target, newAmount, false, true, ATTACK_TYPE_NORMAL, damageType, WEAPON_TYPE_WHOKNOWS)
+
+public function unit.dealDamage(unit target, real amount, ReductionType reductionType)
+    if not target.isType(UNIT_TYPE_ANCIENT)
+        this.dealDamageAlways(target, amount, reductionType)
+        if not IsUnitEnemy(target, this.getOwner()) and this != target
+            Log.warn(this.getName()+" damages ally: "+target.getName())
+
+public function unit.damageMana(unit target, real amount, ReductionType reductionType)
+    real newAmount
+    if reductionType == ReductionType.MAGIC
+        let wp = target.getWp()
+        newAmount = amount.reduceMagic(wp)
+    else if reductionType == ReductionType.PHYSICAL
+        let ar = target.getArmor().round()
+        newAmount = amount.reduceMagic(ar)
+    else
+        newAmount = amount
+    target.addMana(-newAmount)
+
+public function unit.healHP(unit target, real amount)
+    real realAmount = amount
+    if this.hasItemById(ITEM_ID_BRACER_OF_POWER)
+        realAmount *= 1.15
+
+    realAmount = min(realAmount, target.getMaxHP()-target.getHP())
+    target.setHP(target.getHP() + realAmount)
+
+    PlayerWrapper.statHealingReceived[target.getOwner().getId()] += realAmount
+    PlayerWrapper.statHealingDone[this.getOwner().getId()] += realAmount
+
+public function unit.healMana(unit target, real amount)
+    real realAmount = amount
+    if this.hasItemById(ITEM_ID_BRACER_OF_POWER)
+        realAmount *= 1.15
+
+    realAmount = min(realAmount, target.getMaxMana()-target.getMana())
+    target.setMana(target.getMana() + realAmount)
+
+    PlayerWrapper.statManaHealed[target.getOwner().getId()] += realAmount
+
+public function unit.dispelPositiveBuffs(DispelLevel dispelLevel)
+    let buffList = this.getBuffList()
+    if buffList != null
+        for Buff currentBuff in buffList.getLinkedList()
+            let buffType =currentBuff.getBuffType()
+            if buffType.isPositive() and currentBuff.getDispelLevel() castTo int <= dispelLevel castTo int
+                currentBuff.dispel()
+
+public function unit.dispelNegativeBuffs(DispelLevel dispelLevel)
+    let buffList = this.getBuffList()
+    if buffList != null
+        for Buff currentBuff in buffList.getLinkedList()
+            let buffType =currentBuff.getBuffType()
+            if not buffType.isPositive() and currentBuff.getDispelLevel() castTo int <= dispelLevel castTo int
+                currentBuff.dispel()
+
+
+public function unit.dispelBuffs(DispelLevel dispelLevel)
+    let buffList = this.getBuffList()
+    if buffList != null
+        for Buff currentBuff in buffList.getLinkedList()
+            if currentBuff.getDispelLevel() castTo int <= dispelLevel castTo int
+                currentBuff.dispel()
+
+
+public function unit.hitBoxDistanceTo(vec2 pos) returns real
+    return max(0, this.getPos().distanceTo(pos) - this.getHitBox())
+
+public function unit.countItemsOfType(int itemTypeId) returns int
+    item indexItem
+    int count = 0
+
+    for i = 0 to bj_MAX_INVENTORY-1
+        indexItem = UnitItemInSlot(this, i)
+        if (indexItem != null) and (indexItem.getTypeId() == itemTypeId)
+            count++
+
+    return count

@@ -1,0 +1,514 @@
+package WarBeetle
+
+//10
+
+import HeroInclude
+
+
+
+public constant HERO_WAR_BEETLE = 'H00S'
+constant THIS_HERO = HERO_WAR_BEETLE
+constant THIS_ID = 10
+constant THIS_BUTTON_POS = 10 //button pos from 0 to 11
+constant THIS_ICON = "BTNWarBeetle.blp"
+HeroType heroType = null
+
+constant UPROOTED = compiletime(UNIT_ID_GEN.next())
+
+constant ABILITY_HARD_SHELL = 'AY0P'
+constant ABILITY_VENOMOUS_BEETLE = 'AY0Q'
+constant ABILITY_WAR_STOMP = 'AY0W'
+constant ABILITY_JUMP = 'AY0E'
+constant ABILITY_UNBREAKABLE = 'AY0R'
+
+constant int array HARD_SHELL_ARMOR = [12, 18, 24, 30, 36]
+
+
+function passive(int abilityId)
+
+    if compiletime
+        createNoEffectAbiltiy(abilityId)
+            ..setupWithHotKey("Hard Shell", "D")
+            ..setupIcon("PASNagaArmorUp1")
+
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceIntelligence(0)
+    tooltip.setLearnString("Increases the War Beetle's armor.", (int lvl) -> (begin
+        return "{0} extra armor".format(
+            HARD_SHELL_ARMOR[lvl-1].str())
+    end) )
+    for lvl = 1 to 5
+        tooltip.setNormalString(false, lvl, "Increases the War Beetle's armor by {0}.".format(
+            HARD_SHELL_ARMOR[lvl-1].str())
+        )
+    addDynamicTooltipIntelligence(heroType, tooltip)
+
+constant int BEETLE_BITE = 'A00N'
+constant int VENOMOUS_BEETLE = 'u002'
+
+constant real array BITE_DAMAGE = [110, 150, 190, 230, 270]
+constant real BITE_DAMAGEL_BONUS = 150
+
+constant int BITE_SLOW = 200
+constant real array BITE_SLOW_DURATION = [1.4, 1.8, 2.2, 2.6, 3.0]
+constant real BITE_SLOW_DURATION_BONUS = 0.9
+
+BuffType buffBite
+constant BITE_BUFF_ID = compiletime(createAuraBuff("Venomous Beetle", "This unit was bitten by a Venomous Beetle; it is slowed.", Icons.bTNCarrionScarabs))
+constant BITE_ABILITY_ID = compiletime(createNegativeBuffAbility(5, BITE_BUFF_ID, Abilities.poisonStingTarget, "chest"))
+
+
+function venomousBeetle(int abilityId)
+
+    if compiletime
+        let MANA = skillData(100, 105, 110, 115, 120)
+        let COOLDOWN = skillData(9, 9, 9, 9, 9)
+        let RANGE = 600.0
+        let aDef = new AbilityDefinitionFarseerChainLightning(abilityId)
+            ..setupIcon(Icons.bTNCarrionScarabs)
+            ..setAnimationNames("spell,slam")
+            ..setupWithHotKey("Venomous Beetle", "Q")
+            ..setLightningEffects("")
+            ..setArtTarget("")
+            ..setMissileArt("")
+            ..setArtSpecial("")
+            ..setLightningEffects("")
+            ..targetEnemies()
+            ..setSkillData(COOLDOWN, MANA, RANGE)
+
+        for lvl = 1 to 5
+            aDef
+                ..setNumberofTargetsHit(lvl, 1)
+                ..setDamageperTarget(lvl, 0)
+                ..setDurationNormal(lvl, 0.1)
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceIntelligence(BITE_DAMAGEL_BONUS, BITE_SLOW_DURATION_BONUS)
+    tooltip.setLearnString("Sends out a venomous beetle to bite the target enemy unit, dealing damage and slowing it.", (int lvl) -> (begin
+        return "{0}{I0} damage, lasts {1}{I1} seconds.".format(
+            BITE_DAMAGE[lvl-1].str(),
+            BITE_SLOW_DURATION[lvl-1].toExactString())
+    end) )
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, "Sends out a venomous beetle to bite the target enemy unit, dealing {0}{I0} damage and slowing it for {1}{I1} seconds.".format(
+            BITE_DAMAGE[lvl-1].str(),
+            BITE_SLOW_DURATION[lvl-1].toExactString()
+        ))
+    addDynamicTooltipIntelligence(heroType, tooltip)
+
+constant real array WAR_STOMP_DURATION = [1.4, 1.6, 1.8, 2, 2.2]
+constant real WAR_STOMP_DURATION_BONUS = 0.7
+constant real array WAR_STOMP_DAMAGE = [60, 100, 140, 180, 220]
+constant real WAR_STOMP_DAMAGE_BONUS = 120
+constant real WAR_STOMP_AOE = 350
+
+
+function warstomp(int abilityId)
+
+    if compiletime
+        let MANA = skillData(120, 130, 140, 150, 160)
+        let COOLDOWN = skillData(8, 8, 8, 8, 8)
+
+        new AbilityDefinitionPitLordHowlofTerror(abilityId)
+            ..setupIcon(Icons.bTNSeaGiantWarStomp)
+            ..setAnimationNames("spell,slam")
+            ..setupWithHotKey("War Stomp", "W")
+            ..setArtCaster(Abilities.warStompCaster)
+            ..targetNone()
+            ..setSkillData(COOLDOWN, MANA, 0)
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceStrength(WAR_STOMP_DAMAGE_BONUS, WAR_STOMP_DURATION_BONUS)
+    tooltip.setLearnString("Slams the ground, stunning and damaging nearby enemy land units.", (int lvl) -> (begin
+        return "{0}{S0} damage, {1}{S1} second.".format( WAR_STOMP_DAMAGE[lvl-1].str(), WAR_STOMP_DURATION[lvl-1].toExactString() )
+    end) )
+
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, "Slams the ground, dealing {0}{S0} damage to nearby enemy land units and stunning them for {1}{S1} seconds.".format(
+            WAR_STOMP_DAMAGE[lvl-1].str(), WAR_STOMP_DURATION[lvl-1].toExactString()
+        ))
+    addDynamicTooltipStrength(heroType, tooltip)
+
+
+constant real array JUMP_RANGE = [800, 1000, 1200, 1400, 1600]
+constant real array JUMP_COOLDOWN = [17, 16, 15, 14, 13]
+constant int array JUMP_MANA = [120, 110, 100, 90, 80]
+
+
+function jump(int abilityId)
+
+    if compiletime
+        let aDef = new AbilityDefinitionIllidanChannel(abilityId)
+            ..setupIcon(Icons.bTNReplenishMana)
+            ..setupChannel(TargetType.POINT, "channel", 0.51)
+            ..setupWithHotKey("Dash", "E")
+            ..setArtCaster("")
+            ..setArtEffect("")
+            ..setArtSpecial("")
+            ..setArtTarget("")
+
+        for lvl = 1 to 5
+            aDef
+                ..setCooldown(lvl, JUMP_COOLDOWN[lvl-1])
+                ..setManaCost(lvl, JUMP_MANA[lvl-1])
+                ..setCastRange(lvl, JUMP_RANGE[lvl-1])
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceIntelligence(0)
+    tooltip.setLearnString("Dashes towards the target point.", (int lvl) -> (begin
+        return "{0} range, {1} mana, {2} seconds cooldown".format( 
+            JUMP_RANGE[lvl-1].str(), JUMP_MANA[lvl-1].str(), JUMP_COOLDOWN[lvl-1].toExactString()
+        )
+    end) )
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, "Dashes towards the target point.")
+    addDynamicTooltipIntelligence(heroType, tooltip)
+
+constant int array UNBREAKABLE_HP =[400, 550, 700, 850, 1000]
+constant int array UNBREAKABLE_DEF =[15, 20, 25, 30, 35]
+constant int array UNBREAKABLE_STR =[30, 35, 40, 45, 50]
+
+constant real UNBREAKABLE_DURATION = 20
+
+
+constant int UNBREAKABLE_BUFF_ID = compiletime(createAuraBuff("Unbreakable", "This unit's maximum hit points; armor; willpower and strength are increased.", Icons.bTNAdvancedCreatureCarapace))
+constant int UNBREAKABLE_ABILITY_ID = compiletime(createPositiveBuffAbility(5, UNBREAKABLE_BUFF_ID, "", "chest"))
+
+constant real UNBREAKABLE_SCALE = 1.25
+
+constant int UNBREAKABLE_DUMMY_BUFF = compiletime(createDummyBuff())
+
+BuffType buffUnbreakable
+
+
+function unbreakable(int abilityId)
+
+    if compiletime
+        let MANA = skillData(175, 175, 175, 175, 175)
+        let COOLDOWN = skillData(100, 100, 100, 100, 100)
+
+        let aDef = new AbilityDefinitionBeserk(abilityId)
+            ..setupIcon(Icons.bTNAdvancedCreatureCarapace)
+            ..setAnimationNames("")
+            ..setupWithHotKey("Unbreakable", "R")
+            ..setLightningEffects("")
+            ..setArtTarget("")
+            ..setMissileArt("")
+            ..setArtSpecial("")
+            ..setLightningEffects("")
+            ..setCheckDependencies(true)
+            ..targetNone()
+            ..setSkillData(COOLDOWN, MANA, 0)
+
+
+        for lvl = 1 to 5
+            aDef
+                ..setAttackSpeedIncrease(lvl, 0)
+                ..setDamageTakenIncrease(lvl, 0)
+                ..setMovementSpeedIncrease(lvl, 0)
+                ..setDurationHero(lvl, 0.01)
+                ..setBuffs(lvl, UNBREAKABLE_DUMMY_BUFF.toRawCode())
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setReplaceIntelligence(0)
+    tooltip.setLearnString("Increases the War Beetle's strength, armor, willpower and hit points for {0} seconds.".format(UNBREAKABLE_DURATION.str()), (int lvl) -> (begin
+        return "{0} strength, {1} armor and willpower, {2} hit points".format( 
+            UNBREAKABLE_STR[lvl-1].str(), UNBREAKABLE_DEF[lvl-1].str(), UNBREAKABLE_HP[lvl-1].str()
+        )
+    end) )
+    for lvl = 1 to 5
+        tooltip.setNormalString(true, lvl, "Increases the War Beetle's strength by {0}, armor and willpower by {1} and hit points by {2} for {3} seconds.".format(
+            UNBREAKABLE_STR[lvl-1].str(), UNBREAKABLE_DEF[lvl-1].str(), UNBREAKABLE_HP[lvl-1].str(), UNBREAKABLE_DURATION.str()
+        ))
+    addDynamicTooltipIntelligence(heroType, tooltip)
+
+
+function castVenomousBeetle()
+    let caster = GetTriggerUnit()
+    new VenoumosBeetle(caster, GetSpellTargetUnit())
+
+function castWarStomp()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+    let nearby = CreateGroup()
+    nearby.enumUnitsInRange(caster.getPos(), WAR_STOMP_AOE)
+
+    let dur = WAR_STOMP_DURATION[level-1].bonus(caster.getStr(), WAR_STOMP_DURATION_BONUS)
+    let dmg = WAR_STOMP_DAMAGE[level-1].bonus(caster.getStr(), WAR_STOMP_DAMAGE_BONUS)
+
+    while(not nearby.isEmpty())
+        let target = FirstOfGroup(nearby)
+        nearby.removeUnit(target)
+        if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
+            caster.dealDamage(target, dmg, ReductionType.PHYSICAL)
+            target.addBuffReduced( caster, dur, STUNNED, 1).setDispelLevel(DispelLevel.DISPEL)
+
+    nearby.destr()
+
+function castJump()
+    let caster = GetTriggerUnit()
+    if caster.isMovable()
+        Knockback2d.knockback(caster, vec2(GetSpellTargetX(),GetSpellTargetY()), 1200)
+
+function castUnbreakable()
+    let spellId = GetSpellAbilityId()
+    let caster = GetTriggerUnit()
+    let level = caster.getAbilityLevel(spellId)
+    caster.removeAbility(UNBREAKABLE_DUMMY_BUFF)
+    caster.addBuff(caster, UNBREAKABLE_DURATION, buffUnbreakable, level)
+    caster.addEffect(Units.wispExplode, "chest").destr()
+
+class VenoumosBeetle
+    private unit owner
+    private int ownerIntelligence
+    private int level
+    private timer checkTimer
+    private unit dummy
+    private unit target
+    private trigger onBite
+    private static constant unitToBeetle = new HashMap<unit, VenoumosBeetle>
+
+    construct(unit caster, unit target)
+
+        this.owner = caster
+        this.ownerIntelligence = owner.getInt()
+        this.target = target
+        this.level = caster.getAbilityLevel(ABILITY_VENOMOUS_BEETLE)
+        this.dummy = createUnit(DUMMY_PLAYER, VENOMOUS_BEETLE, owner.getPos(), owner.getPos().angleTo(target.getPos()))
+        this.dummy.setXY(owner.getPos())
+        this.dummy.setPathing(false)
+        this.dummy.issueTargetOrder("chainlightning", target)
+        this.dummy.setColor(PLAYER_COLOR_TURQUOISE)
+        unitToBeetle.put(this.dummy, this)
+
+        this.checkTimer = getTimer()
+            ..setData(this castTo int)
+            ..startPeriodic(0.1, function updateStatic)
+
+        this.onBite = CreateTrigger()
+            ..registerUnitEvent(this.dummy, EVENT_UNIT_SPELL_EFFECT)
+            ..addAction(function onBiteStatic)
+
+    function update()
+        if this.dummy.getCurrentOrder()!= OrderId("chainlightning")
+            destroy this
+            return
+    
+    static function updateStatic()
+        (GetExpiredTimer().getData() castTo VenoumosBeetle).update()
+
+    function onBite(unit biteTarget)
+        if biteTarget == this.target
+            owner.dealDamage(target, BITE_DAMAGE[level-1].bonus(ownerIntelligence, BITE_DAMAGEL_BONUS), ReductionType.MAGIC)
+            target.addBuffReduced(this.owner, BITE_SLOW_DURATION[level-1].bonus(ownerIntelligence, BITE_SLOW_DURATION_BONUS), buffBite, level)
+        else
+            error("Bitten target is wrong!")
+
+    static function onBiteStatic()
+        let beetle = unitToBeetle.get(GetTriggerUnit())
+        if beetle != null
+            beetle.onBite(GetSpellTargetUnit())
+        else
+            Log.warn("Beetle object could not be resolved")
+
+    ondestroy
+        unitToBeetle.remove(this.dummy)
+        this.dummy.kill()
+        this.checkTimer.release()
+        this.onBite.destr()
+
+
+
+function setupStats()
+    heroType
+        
+        ..setStat(Stat.AR, 37, 51)
+        ..setStat(Stat.AS, 11, 42)
+        ..setStat(Stat.HP, 14, 59)
+        ..setStat(Stat.HR, 12, 31)
+        ..setStat(Stat.MP, 14, 38)
+        ..setStat(Stat.MR, 12, 35)
+        ..setStat(Stat.MS, 4, 32)
+        ..setStat(Stat.STR, 21, 64)
+        ..setStat(Stat.AGI, 34, 56)
+        ..setStat(Stat.INT, 11, 37)
+
+function retreatAI(HeroAI ai)
+    let heroPos = ai.getHeroUnit().getPos()
+    ai.issue("channel", heroPos.polarOffset(heroPos.angleTo(ai.getHomeLoc()), JUMP_RANGE[ai.getHeroUnit().getAbilityLevel(ABILITY_JUMP)-1]) )
+
+function attackAI(HeroAI ai)
+    let hero = ai.getHeroUnit()
+
+
+    unit target
+    if hero.getMana()/hero.getMaxMana() > 0.5
+        target = hero.findTarget(600, AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
+        if target.isTargetable(hero.getOwner(), false, true)
+            ai.issue("chainlightning", target)
+
+        let g = CreateGroup()
+        unit u
+        int count = 0
+        g.enumUnitsInRange(hero.getPos(), WAR_STOMP_AOE)
+        while(true)
+            u = FirstOfGroup(g)
+            if u == null
+                break
+            g.removeUnit(u)
+            if u.isTargetable(hero.getOwner(), false, true) and not u.isType(UNIT_TYPE_STRUCTURE)
+                if u.isType(UNIT_TYPE_HERO)
+                    count += 3
+                else
+                    count ++
+        g.destr()
+
+        if count >= 4
+            if ai.issue("howlofterror")
+                return
+
+    target = hero.findTarget(250, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_HEALTH, null)
+    if target.isTargetable(hero.getOwner(), false, true)
+        ai.attack(target)
+
+    target = hero.findTarget(500, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_DISTANCE, null)
+    if target.isTargetable(hero.getOwner(), false, true)
+        ai.attack(target)
+
+
+
+function teamFightAI(HeroAI ai)
+    let hero = ai.getHeroUnit()
+
+    ai.issue("berserk")
+
+    let g = CreateGroup()
+    unit u
+    int count = 0
+    g.enumUnitsInRange(hero.getPos(), WAR_STOMP_AOE)
+    while(true)
+        u = FirstOfGroup(g)
+        if u == null
+            break
+        g.removeUnit(u)
+        if u.isTargetable(hero.getOwner(), false, true)
+            if u.isType(UNIT_TYPE_HERO)
+                count++
+    g.destr()
+
+    if count != 0
+        if ai.issue("howlofterror")
+            return
+
+    
+
+    let target = ai.getTeamFightTarget()
+    if target.isTargetable(hero.getOwner(), false, true)
+        ai.issue("chainlightning", target)
+        if not ai.getAttacking()
+            ai.attack(target)
+
+
+
+
+@compiletime
+function setupTooltips()
+    passive(ABILITY_HARD_SHELL)
+    venomousBeetle(ABILITY_VENOMOUS_BEETLE)
+    warstomp(ABILITY_WAR_STOMP)
+    jump(ABILITY_JUMP)
+    unbreakable(ABILITY_UNBREAKABLE)
+    createHeroButton(THIS_ID, THIS_BUTTON_POS, THIS_ICON)
+
+function initHeroType()
+    setupStats()
+    onCast(ABILITY_VENOMOUS_BEETLE, () -> castVenomousBeetle())
+    onCast(ABILITY_WAR_STOMP, () -> castWarStomp())
+    onCast(ABILITY_JUMP, () -> castJump())
+    onCast(ABILITY_UNBREAKABLE, () -> castUnbreakable())
+    heroType..setSkillBuild("QWEQWQWQWQWEEEE")
+    ..addItem(ITEM_ID_HEAVY_BOOTS)
+    ..addItem(ITEM_ID_RUNIC_ARMOR)
+    ..addItem(ITEM_ID_AXE_OF_DECAY)
+    ..addItem(ITEM_ID_BLESSED_GOBLET)
+    ..addItem(ITEM_ID_ARCANE_SHIELD)
+    ..addItem(ITEM_ID_WAR_DRUM)
+    ..useHeroGlow()
+    delayInit(5) ->
+        heroType
+            ..useHeroGlow()
+            ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
+            ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
+            ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+
+        buffBite = new BuffType(false, DispelLevel.DISPEL)
+
+        buffBite.setupBuffWithIcon(BITE_BUFF_ID, BITE_ABILITY_ID)
+
+        buffBite.addFirstFunction( (Buff whichBuff) -> (begin
+            whichBuff.getTarget().wrapper()
+                ..addStatRelativeBonus(Stat.MS, -BITE_SLOW * 10)
+
+        end))
+
+        buffBite.addEndFunction( (Buff whichBuff) -> (begin
+            whichBuff.getTarget().wrapper()
+                ..addStatRelativeBonus(Stat.MS, BITE_SLOW * 10)
+        end))
+
+        buffUnbreakable = new BuffType(true, DispelLevel.NONE)
+
+        buffUnbreakable.setupBuffWithIcon(UNBREAKABLE_BUFF_ID, UNBREAKABLE_ABILITY_ID)
+        buffUnbreakable.addFirstFunction((Buff whichBuff) -> (begin
+            let level = whichBuff.getLevel()
+            let target = whichBuff.getTarget()
+            target.wrapper()
+                ..addStatAbsoluteBonus(Stat.HP, UNBREAKABLE_HP[level-1])
+                ..addStatAbsoluteBonus(Stat.STR, UNBREAKABLE_STR[level-1])
+                ..addStatAbsoluteBonus(Stat.AR, UNBREAKABLE_DEF[level-1])
+                ..addStatAbsoluteBonus(Stat.AGI, UNBREAKABLE_DEF[level-1])
+
+            target.setScale(UNBREAKABLE_SCALE)
+        end))
+
+        buffUnbreakable.addEndFunction((Buff whichBuff) -> (begin
+            let level = whichBuff.getLevel()
+            let target = whichBuff.getTarget()
+            target.wrapper()
+                ..addStatAbsoluteBonus(Stat.HP, -UNBREAKABLE_HP[level-1])
+                ..addStatAbsoluteBonus(Stat.STR, -UNBREAKABLE_STR[level-1])
+                ..addStatAbsoluteBonus(Stat.AR, -UNBREAKABLE_DEF[level-1])
+                ..addStatAbsoluteBonus(Stat.AGI, -UNBREAKABLE_DEF[level-1])
+
+            target.setScale(0.9)
+        end))
+
+function createHeroType(Hero hero)
+    let heroUnit = hero.toUnit()
+    CreateTrigger()
+    ..registerUnitEvent(heroUnit, EVENT_UNIT_HERO_SKILL)
+    ..addAction(() -> (begin
+        let u = GetTriggerUnit()
+        if GetLearnedSkill() == ABILITY_HARD_SHELL
+            let newLevel = u.getAbilityLevel(ABILITY_HARD_SHELL)
+            if newLevel!= 1
+                u.wrapper().addStatAbsoluteBonus(Stat.AR, -HARD_SHELL_ARMOR[newLevel-2])
+
+            u.wrapper().addStatAbsoluteBonus(Stat.AR, HARD_SHELL_ARMOR[newLevel-1])
+    end))
+
+
+
+init
+    heroType = new HeroType(THIS_HERO, THIS_ICON, THIS_ID, true)
+    ..setOnInitFunction(() -> initHeroType())
+    ..setOnCreateFunction((Hero hero) -> createHeroType(hero))
+
+    setupTooltips()
+    addButtonToTavern(THIS_ID, THIS_BUTTON_POS, heroType, 0)
+
+   
+
+
