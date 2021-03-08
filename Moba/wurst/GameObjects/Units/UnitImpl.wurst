@@ -339,12 +339,6 @@ public class UnitImpl implements IUnit
             else if this.team == TEAM_2
                 UnitShareVision(this.toUnit(), players[Teams.army1()], false)
 
-public class UnitStaticImpl extends IUnitStatic
-    override function get(unit u) returns IUnit
-        return UnitImpl.getWrapper(u)
-    override function buffList(unit u) returns BuffList
-        return UnitImpl.getBuffList(u)
-
 init
     onUnitIndex(() -> UnitImpl.create(getIndexingUnit()))
     onUnitDeindex(() -> UnitImpl.getWrapper(getIndexingUnit()).destr() )

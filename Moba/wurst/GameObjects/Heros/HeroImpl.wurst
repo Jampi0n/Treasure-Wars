@@ -437,14 +437,6 @@ public class HeroImpl implements IHero
             heroType.updateTooltipsStr(heroUnit)
             heroType.updateTooltipsInt(heroUnit)
 
-public class HeroStaticImpl extends IHeroStatic
-    override function get(unit u) returns IHero
-        return HeroImpl.getHero(u)
-    override function create(int playerId, int unitId, vec2 pos, angle facing) returns IHero
-        return new HeroImpl(playerId, unitId, pos, facing)
-    override function setup(unit u) returns IHero
-        return new HeroImpl(u)
-
 init
     HeroImpl.classInit()
     initAssistLists()

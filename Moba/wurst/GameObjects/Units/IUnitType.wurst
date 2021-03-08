@@ -22,9 +22,6 @@ public abstract class IUnitTypeStatic
 
 public abstract class UnitType
     static function get(int unitTypeId) returns IUnitType
-        return IUnitTypeStatic.singleton.get(unitTypeId)
+        return UnitTypeImpl.getUnitType(unitTypeId)
     static function create(int baseHp, int unitId, int bounty, int baseAttack, int upgradeAttack, int attackUpgradeId, int  baseArmor, int upgradeArmor, int armorUpgradeId, int hitBox, string modelPath, int powerLevel) returns IUnitType
-        return IUnitTypeStatic.singleton.create(baseHp, unitId, bounty, baseAttack, upgradeAttack, attackUpgradeId, baseArmor, upgradeArmor, armorUpgradeId, hitBox, modelPath, powerLevel)
-
-init
-    IUnitTypeStatic.singleton = new UnitTypeStaticImpl()
+        return new UnitTypeImpl(baseHp, unitId, bounty, baseAttack, upgradeAttack, attackUpgradeId, baseArmor, upgradeArmor, armorUpgradeId, hitBox, modelPath, powerLevel)
