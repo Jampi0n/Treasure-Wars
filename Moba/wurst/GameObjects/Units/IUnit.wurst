@@ -35,15 +35,8 @@ public interface IUnit
     function incReveal()
     function decReveal()
 
-public abstract class IUnitStatic
-    protected static IUnitStatic singleton
-    abstract function get(unit u) returns IUnit
-    abstract function buffList(unit u) returns BuffList
-
 public function unit.wrapper() returns IUnit
-    return IUnitStatic.singleton.get(this)
+    return UnitImpl.getWrapper(this)
 public function unit.getBuffList() returns BuffList
-    return IUnitStatic.singleton.buffList(this)
+    return UnitImpl.getBuffList(this)
 
-init
-    IUnitStatic.singleton = new UnitStaticImpl()

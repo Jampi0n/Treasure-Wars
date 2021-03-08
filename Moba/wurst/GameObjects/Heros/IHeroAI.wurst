@@ -173,22 +173,10 @@ public interface IHeroAI
     function togglePause()
     function addGold(int gold)
 
-public abstract class IHeroAIStatic
-    protected static IHeroAIStatic singleton
-    abstract function get(unit u) returns IHeroAI
-    abstract function getList(int index) returns LinkedList<IHeroAI>
-    abstract function create(IHero hero, aidifficulty diff) returns IHeroAI
-
-
-
 public function unit.toHeroAI() returns IHeroAI
-    return IHeroAIStatic.singleton.get(this)
-
+    return HeroAIImpl.getAI(this)
 public abstract class HeroAI
     static function getAiList(int i) returns LinkedList<IHeroAI>
-        return  IHeroAIStatic.singleton.getList(i)
+        return HeroAIImpl.getAiList(i)
     static function create(IHero hero, aidifficulty diff) returns IHeroAI
-        return  IHeroAIStatic.singleton.create(hero, diff)
-
-init
-    IHeroAIStatic.singleton = new HeroAIStaticImpl()
+        return new HeroAIImpl(hero, diff)

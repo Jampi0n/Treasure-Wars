@@ -945,14 +945,6 @@ function determineHeroStrength(unit hero) returns real
 
     return ret
 
-public class HeroAIStaticImpl extends IHeroAIStatic
-    override function get(unit u) returns IHeroAI
-        return HeroAIImpl.getAI(u)
-    override function getList(int index) returns LinkedList<IHeroAI>
-        return HeroAIImpl.getAiList(index)
-    override function create(IHero hero, aidifficulty diff) returns IHeroAI
-        return new HeroAIImpl(hero, diff)
-
 init
     HeroAIImpl.classInit()
     TeamFight.classInit()

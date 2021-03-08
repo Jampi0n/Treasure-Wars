@@ -130,12 +130,6 @@ function onUnitDeath()
             if killerIsHero == 1 or not killingUnit.isType(UNIT_TYPE_STRUCTURE)
                 Teams.rewardXp(Teams.invert(dyingTeam), pos, xp)
 
-public class UnitTypeStaticImpl extends IUnitTypeStatic
-    override function get(int unitTypeId) returns IUnitType
-        return UnitTypeImpl.getUnitType(unitTypeId)
-    override function create(int baseHp, int unitId, int bounty, int baseAttack, int upgradeAttack, int attackUpgradeId, int baseArmor, int upgradeArmor, int armorUpgradeId, int hitBox, string modelPath, int powerLevel) returns IUnitType
-        return new UnitTypeImpl(baseHp, unitId, bounty, baseAttack, upgradeAttack, attackUpgradeId, baseArmor, upgradeArmor, armorUpgradeId, hitBox, modelPath, powerLevel)
-
 init
     CreateTrigger()
     ..addAction(function onUnitDeath)

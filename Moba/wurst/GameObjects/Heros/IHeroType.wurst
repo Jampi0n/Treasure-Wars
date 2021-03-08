@@ -61,26 +61,16 @@ public interface IHeroType
     function useHeroGlow()
     function getUsesHeroGlow() returns boolean
 
-public abstract class IHeroTypeStatic
-    protected static IHeroTypeStatic singleton
-    abstract function get(int unitTypeId) returns IHeroType
-    abstract function create(int unitTypeId, string icon, int heroId, bool hasAI) returns IHeroType
-    abstract function getNumberOfTypes() returns int
-    abstract function getNthType(int i) returns IHeroType
-    abstract function getAbilityOffset(int heroId) returns int
-
 
 public class HeroType
     static function get(int unitTypeId) returns IHeroType
-        return IHeroTypeStatic.singleton.get(unitTypeId)
+        return HeroTypeImpl.getHeroType(unitTypeId)
     static function create(int unitTypeId, string icon, int heroId, bool hasAI) returns IHeroType
-        return IHeroTypeStatic.singleton.create(unitTypeId, icon, heroId, hasAI)
+        return new HeroTypeImpl(unitTypeId, icon, heroId, hasAI)
     static function getNumberOfTypes() returns int
-        return IHeroTypeStatic.singleton.getNumberOfTypes()
+        return HeroTypeImpl.getHeroTypeCount()
     static function getNthType(int i) returns IHeroType
-        return IHeroTypeStatic.singleton.getNthType(i)
+        return HeroTypeImpl.getNthHeroType(i)
     static function getAbilityOffset(int heroId) returns int
-        return IHeroTypeStatic.singleton.getAbilityOffset(heroId)
+        return HeroTypeImpl.getAbilityOffset(heroId)
 
-init
-    IHeroTypeStatic.singleton = new HeroTypeStaticImpl()

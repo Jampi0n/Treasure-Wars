@@ -12,21 +12,16 @@ public interface IHero
     function updateCooldowns()
     function toUnit() returns unit
 
-public abstract class IHeroStatic
-    protected static IHeroStatic singleton
-    abstract function get(unit u) returns IHero
-    abstract function create(int playerId, int unitId, vec2 pos, angle facing) returns IHero
-    abstract function setup(unit u) returns IHero
 
 public function unit.toHero() returns IHero
-    return IHeroStatic.singleton.get(this)
+    return HeroImpl.getHero(this)
 
 public abstract class Hero
     static function create(int playerId, int unitId, vec2 pos, angle facing) returns IHero
-        return IHeroStatic.singleton.create(playerId, unitId, pos, facing)
+        return new HeroImpl(playerId, unitId, pos, facing)
 
     static function setup(unit u) returns IHero
-        return IHeroStatic.singleton.setup(u)
+        return new HeroImpl(u)
 
     static function copyInventory(unit copyFrom, unit copyTo)
         for i = 0 to 5
@@ -36,5 +31,3 @@ public abstract class Hero
                 itm.remove()
                 copyTo.addItemToSlot(itmId, i)
 
-init
-    IHeroStatic.singleton = new HeroStaticImpl()

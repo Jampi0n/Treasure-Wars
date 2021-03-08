@@ -294,19 +294,6 @@ public class HeroTypeImpl implements IHeroType
     static function getNthHeroType(int index) returns IHeroType
         return heroTypes[index]
 
-public class HeroTypeStaticImpl extends IHeroTypeStatic
-    override function get(int unitTypeId) returns IHeroType
-        return HeroTypeImpl.getHeroType(unitTypeId)
-    override function create(int unitTypeId, string icon, int heroId, bool hasAI) returns IHeroType
-        return new HeroTypeImpl(unitTypeId, icon, heroId, hasAI)
-    override function getNumberOfTypes() returns int
-        return HeroTypeImpl.getHeroTypeCount()
-    override function getNthType(int i) returns IHeroType
-        return HeroTypeImpl.getNthHeroType(i)
-    override function getAbilityOffset(int heroId) returns int
-        return HeroTypeImpl.getAbilityOffset(heroId)
-
-
 @compiletime
 function initOrderStrings()
     BUTTON_ORDER_STRING[0] = "acidbomb"
