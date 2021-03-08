@@ -392,11 +392,11 @@ class RitualOfTheSeas
 
 
     
-function retreatAI(HeroAI ai)
+function retreatAI(IHeroAI ai)
     ai.issue("immolation")
 
 
-function attackAI(HeroAI ai)
+function attackAI(IHeroAI ai)
     let hero = ai.getHeroUnit()
 
     ai.issue("unimmolation")
@@ -435,7 +435,7 @@ function attackAI(HeroAI ai)
     if target.isTargetable(hero.getOwner(), false, true)
         ai.attack(target)
 
-function teamFightAI(HeroAI ai)
+function teamFightAI(IHeroAI ai)
 
     let hero = ai.getHeroUnit()
 
@@ -530,9 +530,9 @@ function initHeroType()
     end))
     delayInit(5) ->
         heroType
-            ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
-            ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
-            ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+            ..setRetreatAI((IHeroAI ai) -> (retreatAI(ai)))
+            ..setAttackAI((IHeroAI ai) -> (attackAI(ai)))
+            ..setTeamFightAI((IHeroAI ai) -> (teamFightAI(ai)))
 
         buffFish = new BuffType(false, DispelLevel.DISPEL)
         buffFish.setupBuffWithIcon(FISH_BUFF_ID, FISH_ABILTIY_ID)
@@ -579,7 +579,7 @@ function createHeroType(IHero hero)
 
 
 init
-    heroType = Hero.createType(THIS_HERO, THIS_ICON, THIS_ID, true)
+    heroType = HeroType.create(THIS_HERO, THIS_ICON, THIS_ID, true)
     ..setOnInitFunction(() -> initHeroType())
     ..setOnCreateFunction((IHero hero) -> createHeroType(hero))
 

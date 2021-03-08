@@ -6,15 +6,14 @@ import Upgrades
 import TimerUtils
 import ClosureTimers
 import Execute
-import IHero
-import IHeroType
-import TeamUtil
-import UnitLib
-import PlayerControl
 import Constants
 import LinkedList
-import HeroTypeImpl
 import Stats
+import initlater IHero
+import initlater IHeroType
+import initlater TeamUtil
+import initlater UnitLib
+import initlater PlayerControl
 
 constant HP_PER_LEVEL = 15
 constant STRENGTH_BONUS = 45
@@ -116,7 +115,7 @@ public class HeroImpl implements IHero
 
     private function setup()
         this.team = Players.team(this.ownerId)
-        this.heroType = HeroTypeImpl.getHeroType(this.hero.getTypeId())
+        this.heroType = HeroType.get(this.hero.getTypeId())
 
         this.skillIds[0] = this.heroType.getAbilityId(AbilitySlot.Q)
         this.skillIds[1] = this.heroType.getAbilityId(AbilitySlot.W)
@@ -438,8 +437,15 @@ public class HeroImpl implements IHero
             heroType.updateTooltipsStr(heroUnit)
             heroType.updateTooltipsInt(heroUnit)
 
+public class HeroStaticImpl extends IHeroStatic
+    override function get(unit u) returns IHero
+        return HeroImpl.getHero(u)
+    override function create(int playerId, int unitId, vec2 pos, angle facing) returns IHero
+        return new HeroImpl(playerId, unitId, pos, facing)
+    override function setup(unit u) returns IHero
+        return new HeroImpl(u)
+
 init
-    setGetHeroFunction((unit u) -> HeroImpl.getHero(u))
     HeroImpl.classInit()
     initAssistLists()
     CreateTrigger()

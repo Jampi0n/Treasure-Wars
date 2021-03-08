@@ -1,11 +1,12 @@
 package IHeroType
 
 import initlater IHero
-import initlater HeroAI
+import initlater IHeroAI
 import LinkedList
 import IUnit
 import IOnAttack
 import Stats
+import HeroTypeImpl
 
 public enum AbilitySlot
     Q
@@ -15,7 +16,7 @@ public enum AbilitySlot
     PASSIVE
 
 public interface AIBehaviour
-    function run(HeroAI ai)
+    function run(IHeroAI ai)
 
 public interface OnCreateFunction
     function onCreate(IHero hero)
@@ -47,9 +48,9 @@ public interface IHeroType
     function setRetreatAI(AIBehaviour ai)
     function setAttackAI(AIBehaviour ai)
     function setTeamFightAI(AIBehaviour ai)
-    function retreatAI(HeroAI ai)
-    function attackAI(HeroAI ai)
-    function teamFightAI(HeroAI ai)
+    function retreatAI(IHeroAI ai)
+    function attackAI(IHeroAI ai)
+    function teamFightAI(IHeroAI ai)
     function getItemBuild() returns LinkedList<int>
     function getSkillBuild() returns string
     function addItem(int itemId)
@@ -60,13 +61,26 @@ public interface IHeroType
     function useHeroGlow()
     function getUsesHeroGlow() returns boolean
 
-interface GetterFunction
-    function get(int unitTypeId) returns IHeroType
-GetterFunction getterFunction = null
+public abstract class IHeroTypeStatic
+    protected static IHeroTypeStatic singleton
+    abstract function get(int unitTypeId) returns IHeroType
+    abstract function create(int unitTypeId, string icon, int heroId, bool hasAI) returns IHeroType
+    abstract function getNumberOfTypes() returns int
+    abstract function getNthType(int i) returns IHeroType
+    abstract function getAbilityOffset(int heroId) returns int
 
-public function setGetHeroTypeFunction(GetterFunction func)
-    getterFunction = func
 
-public function getHeroType(int unitTypeId) returns IHeroType
-    return getterFunction.get(unitTypeId)
-        
+public class HeroType
+    static function get(int unitTypeId) returns IHeroType
+        return IHeroTypeStatic.singleton.get(unitTypeId)
+    static function create(int unitTypeId, string icon, int heroId, bool hasAI) returns IHeroType
+        return IHeroTypeStatic.singleton.create(unitTypeId, icon, heroId, hasAI)
+    static function getNumberOfTypes() returns int
+        return IHeroTypeStatic.singleton.getNumberOfTypes()
+    static function getNthType(int i) returns IHeroType
+        return IHeroTypeStatic.singleton.getNthType(i)
+    static function getAbilityOffset(int heroId) returns int
+        return IHeroTypeStatic.singleton.getAbilityOffset(heroId)
+
+init
+    IHeroTypeStatic.singleton = new HeroTypeStaticImpl()

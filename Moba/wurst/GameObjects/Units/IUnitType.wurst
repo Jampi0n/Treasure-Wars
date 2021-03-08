@@ -1,5 +1,7 @@
 package IUnitType
 
+import UnitTypeImpl
+
 public interface IUnitType
     function getUnitId() returns int
     function getBounty() returns int
@@ -13,12 +15,16 @@ public interface IUnitType
     function getHitBox() returns int
     function getModel() returns string
 
-interface GetterFunction
-    function get(int unitTypeId) returns IUnitType
-GetterFunction getterFunction = null
+public abstract class IUnitTypeStatic
+    protected static IUnitTypeStatic singleton
+    abstract function get(int unitTypeId) returns IUnitType
+    abstract function create(int baseHp, int unitId, int bounty, int baseAttack, int upgradeAttack, int attackUpgradeId, int baseArmor, int upgradeArmor, int armorUpgradeId, int hitBox, string modelPath, int powerLevel) returns IUnitType
 
-public function setGetUnitTypeFunction(GetterFunction func)
-    getterFunction = func
+public abstract class UnitType
+    static function get(int unitTypeId) returns IUnitType
+        return IUnitTypeStatic.singleton.get(unitTypeId)
+    static function create(int baseHp, int unitId, int bounty, int baseAttack, int upgradeAttack, int attackUpgradeId, int  baseArmor, int upgradeArmor, int armorUpgradeId, int hitBox, string modelPath, int powerLevel) returns IUnitType
+        return IUnitTypeStatic.singleton.create(baseHp, unitId, bounty, baseAttack, upgradeAttack, attackUpgradeId, baseArmor, upgradeArmor, armorUpgradeId, hitBox, modelPath, powerLevel)
 
-public function getUnitType(int unitTypeId) returns IUnitType
-    return getterFunction.get(unitTypeId)
+init
+    IUnitTypeStatic.singleton = new UnitTypeStaticImpl()

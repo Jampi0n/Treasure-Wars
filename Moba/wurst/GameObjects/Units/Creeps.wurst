@@ -243,7 +243,7 @@ public class CreepCamp
         unitToCamp.put(creepUnit, this)
         creepTypes.add(new Creep(creepUnit))
         let creepTypeId = creepUnit.getTypeId()
-        totalLevel += getUnitType(creepTypeId).getPowerLevel()
+        totalLevel += UnitType.get(creepTypeId).getPowerLevel()
         if BuffConfiguration.unitTypeToBuffConfig.has(creepTypeId)
             let customBuff = BuffConfiguration.unitTypeToBuffConfig.get(creepTypeId).customBuff
             doAfter(0.01) ->
@@ -285,7 +285,7 @@ public class CreepCamp
         if buffConfig != null and buffConfig.bountyBuff != null
             killer.addBuff(killer, buffConfig.bountyDuration, buffConfig.bountyBuff, 1)
 
-        let bounty = getUnitType(u.getTypeId()).getBounty()
+        let bounty = UnitType.get(u.getTypeId()).getBounty()
         createGoldBountyTextTag(u, bounty, killer.getOwner())
         let killerId = killer.getOwner().getId()
         PlayerWrapper.addUnitKill(killerId)
@@ -294,7 +294,7 @@ public class CreepCamp
         killer.healHP(killer, killer.getMaxHP()*0.05)
         killer.healMana(killer, killer.getMaxMana()*0.05)
 
-        let uType = getUnitType(u.getTypeId())
+        let uType = UnitType.get(u.getTypeId())
         if uType != null
             killer.toHero().addXp(uType.getPowerLevel()*8.)
     

@@ -351,9 +351,9 @@ function castDeathPact()
     end))
 
 
-function retreatAI(HeroAI _ai)
+function retreatAI(IHeroAI _ai)
 
-function attackAI(HeroAI ai)
+function attackAI(IHeroAI ai)
     let hero = ai.getHeroUnit()
 
     unit target
@@ -368,7 +368,7 @@ function attackAI(HeroAI ai)
         if not ai.getAttacking()
             ai.attack(target)
 
-function teamFightAI(HeroAI ai)
+function teamFightAI(IHeroAI ai)
     let ulti = heroType.getAbilityId(AbilitySlot.R)
     let hero = ai.getHeroUnit()
 
@@ -433,9 +433,9 @@ function initHeroType()
     delayInit(5) ->
         heroType
             ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
-            ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
-            ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
-            ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+            ..setRetreatAI((IHeroAI ai) -> (retreatAI(ai)))
+            ..setAttackAI((IHeroAI ai) -> (attackAI(ai)))
+            ..setTeamFightAI((IHeroAI ai) -> (teamFightAI(ai)))
 
         onLeave(() -> (begin
             skeletons.removeUnit(getEnterLeaveUnit())
@@ -447,7 +447,7 @@ function initHeroType()
     
 init
     
-    heroType = Hero.createType(THIS_HERO, THIS_ICON, THIS_ID, true)
+    heroType = HeroType.create(THIS_HERO, THIS_ICON, THIS_ID, true)
     ..setOnInitFunction(() -> initHeroType())
 
     setupTooltips()

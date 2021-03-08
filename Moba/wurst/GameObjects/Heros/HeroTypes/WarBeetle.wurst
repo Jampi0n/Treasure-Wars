@@ -335,11 +335,11 @@ function setupStats()
         ..setStat(Stat.AGI, 34, 56)
         ..setStat(Stat.INT, 11, 37)
 
-function retreatAI(HeroAI ai)
+function retreatAI(IHeroAI ai)
     let heroPos = ai.getHeroUnit().getPos()
     ai.issue("channel", heroPos.polarOffset(heroPos.angleTo(ai.getHomeLoc()), JUMP_RANGE[ai.getHeroUnit().getAbilityLevel(ABILITY_JUMP)-1]) )
 
-function attackAI(HeroAI ai)
+function attackAI(IHeroAI ai)
     let hero = ai.getHeroUnit()
 
 
@@ -379,7 +379,7 @@ function attackAI(HeroAI ai)
 
 
 
-function teamFightAI(HeroAI ai)
+function teamFightAI(IHeroAI ai)
     let hero = ai.getHeroUnit()
 
     ai.issue("berserk")
@@ -439,9 +439,9 @@ function initHeroType()
     delayInit(5) ->
         heroType
             ..useHeroGlow()
-            ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
-            ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
-            ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+            ..setRetreatAI((IHeroAI ai) -> (retreatAI(ai)))
+            ..setAttackAI((IHeroAI ai) -> (attackAI(ai)))
+            ..setTeamFightAI((IHeroAI ai) -> (teamFightAI(ai)))
 
         buffBite = new BuffType(false, DispelLevel.DISPEL)
 
@@ -502,7 +502,7 @@ function createHeroType(IHero hero)
 
 
 init
-    heroType = Hero.createType(THIS_HERO, THIS_ICON, THIS_ID, true)
+    heroType = HeroType.create(THIS_HERO, THIS_ICON, THIS_ID, true)
     ..setOnInitFunction(() -> initHeroType())
     ..setOnCreateFunction((IHero hero) -> createHeroType(hero))
 

@@ -356,11 +356,11 @@ function setupStats()
         ..setStat(Stat.AGI, 29, 47)
         ..setStat(Stat.INT, 18, 57)
 
-function retreatAI(HeroAI _ai)
+function retreatAI(IHeroAI _ai)
 
-function attackAI(HeroAI _ai)
+function attackAI(IHeroAI _ai)
 
-function teamFightAI(HeroAI _ai)
+function teamFightAI(IHeroAI _ai)
 
 
 
@@ -391,9 +391,9 @@ function initHeroType()
     delayInit(5) ->
         heroType
             ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, advanced))
-            ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
-            ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
-            ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+            ..setRetreatAI((IHeroAI ai) -> (retreatAI(ai)))
+            ..setAttackAI((IHeroAI ai) -> (attackAI(ai)))
+            ..setTeamFightAI((IHeroAI ai) -> (teamFightAI(ai)))
 
         buffFFBuff = new BuffType(false, DispelLevel.DISPEL)
         buffFFBuff.setupBuffWithIcon(FF_BUFF_ID, FF_ABILITY_ID)
@@ -473,7 +473,7 @@ function initHeroType()
 
 
 init
-    heroType = Hero.createType(THIS_HERO, THIS_ICON, THIS_ID, false)
+    heroType = HeroType.create(THIS_HERO, THIS_ICON, THIS_ID, false)
     ..setOnInitFunction(() -> initHeroType())
 
     setupTooltips()

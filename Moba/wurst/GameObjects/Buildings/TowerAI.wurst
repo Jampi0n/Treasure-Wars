@@ -8,7 +8,7 @@ package TowerAI
 import LinkedList
 import HashMap
 import DamageDetection
-import HeroAI
+import IHeroAI
 import TeamUtil
 import BuildingIds
 
@@ -140,7 +140,7 @@ public class TowerAI
                     currentTarget = attacked
 
                 if currentTarget.isType(UNIT_TYPE_HERO)
-                    let ai = getAI(attacked)
+                    let ai = attacked.toHeroAI()
                     if ai != null
                         ai.attackedByTower()
 

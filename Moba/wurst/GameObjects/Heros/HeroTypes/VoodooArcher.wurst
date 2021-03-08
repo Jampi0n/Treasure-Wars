@@ -320,11 +320,11 @@ function castBigBadVoodoo()
                 
     end)
 
-function retreatAI(HeroAI _ai)
+function retreatAI(IHeroAI _ai)
 
-function attackAI(HeroAI _ai)
+function attackAI(IHeroAI _ai)
 
-function teamFightAI(HeroAI _ai)
+function teamFightAI(IHeroAI _ai)
             
 
 @compiletime
@@ -352,9 +352,9 @@ function initHeroType()
     delayInit(5) ->
         heroType
             ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
-            ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
-            ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
-            ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+            ..setRetreatAI((IHeroAI ai) -> (retreatAI(ai)))
+            ..setAttackAI((IHeroAI ai) -> (attackAI(ai)))
+            ..setTeamFightAI((IHeroAI ai) -> (teamFightAI(ai)))
 
         buffMindCurseTarget = new BuffType(false, DispelLevel.DISPEL)
         buffMindCurseTarget.setupBuffWithIcon(MIND_CURSE_BUFF_ID, MIND_CURSE_ABILITY_ID)
@@ -428,7 +428,7 @@ function initHeroType()
     
 init
     
-    heroType = Hero.createType(THIS_HERO, THIS_ICON, THIS_ID, false)
+    heroType = HeroType.create(THIS_HERO, THIS_ICON, THIS_ID, false)
     ..setOnInitFunction(() -> initHeroType())
 
     setupTooltips()
