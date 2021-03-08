@@ -1,6 +1,7 @@
 package IHero
 
 import IHeroType
+import HeroImpl
 
 public interface IHero
     function toString() returns string
@@ -11,12 +12,29 @@ public interface IHero
     function updateCooldowns()
     function toUnit() returns unit
 
-interface GetterFunction
-    function get(unit u) returns IHero
-GetterFunction getterFunction = null
-
-public function setGetHeroFunction(GetterFunction func)
-    getterFunction = func
+public abstract class IHeroStatic
+    protected static IHeroStatic singleton
+    abstract function get(unit u) returns IHero
+    abstract function create(int playerId, int unitId, vec2 pos, angle facing) returns IHero
+    abstract function setup(unit u) returns IHero
 
 public function unit.toHero() returns IHero
-    return getterFunction.get(this)
+    return IHeroStatic.singleton.get(this)
+
+public abstract class Hero
+    static function create(int playerId, int unitId, vec2 pos, angle facing) returns IHero
+        return IHeroStatic.singleton.create(playerId, unitId, pos, facing)
+
+    static function setup(unit u) returns IHero
+        return IHeroStatic.singleton.setup(u)
+
+    static function copyInventory(unit copyFrom, unit copyTo)
+        for i = 0 to 5
+            let itm = copyTo.itemInSlot(i)
+            let itmId = copyFrom.itemInSlot(i).getTypeId()
+            if itm.getTypeId() != itmId
+                itm.remove()
+                copyTo.addItemToSlot(itmId, i)
+
+init
+    IHeroStatic.singleton = new HeroStaticImpl()

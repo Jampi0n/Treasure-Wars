@@ -10,7 +10,7 @@ import StandardTextTags
 import initlater Creeps
 import IOnAttack
 import ItemIds
-import initlater HeroAI
+import initlater IHeroAI
 import LinkedList
 import Gameplay
 import UnitLib
@@ -164,7 +164,7 @@ function handleDamageAmount(unit source, unit target, boolean isAttack, boolean 
         PlayerWrapper.statDamageDealt[source.getOwner().getId()] += effectiveDamage
         PlayerWrapper.statDamageTaken[target.getOwner().getId()] += effectiveDamage
 
-        let ai = getAI(target)
+        let ai = target.toHeroAI()
         if ai != null and target.isType(UNIT_TYPE_HERO)
             ai.onDamage(currentDamage)
 
@@ -254,7 +254,7 @@ public class OnAttackInternal
         onAttackFunctionListAdvanced.add(onAttack)
 
     protected static function onAttackAbilities(unit attacker, unit target, boolean isActive, boolean advanced)
-        let heroType = getHeroType(attacker.getTypeId())
+        let heroType = HeroType.get(attacker.getTypeId())
         if(heroType!=null)
             heroType.onAttack(attacker, target, isActive, advanced)
 

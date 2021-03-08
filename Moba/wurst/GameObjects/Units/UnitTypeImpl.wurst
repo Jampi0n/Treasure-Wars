@@ -1,12 +1,12 @@
 package UnitTypeImpl
 
 import HashMap
-import IUnitType
 import Constants
-import TeamUtil
 import StandardTextTags
 import Assets
-import PlayerControl
+import initlater PlayerControl
+import initlater TeamUtil
+import initlater IUnitType
 
 public class UnitTypeImpl implements IUnitType
 
@@ -130,8 +130,13 @@ function onUnitDeath()
             if killerIsHero == 1 or not killingUnit.isType(UNIT_TYPE_STRUCTURE)
                 Teams.rewardXp(Teams.invert(dyingTeam), pos, xp)
 
+public class UnitTypeStaticImpl extends IUnitTypeStatic
+    override function get(int unitTypeId) returns IUnitType
+        return UnitTypeImpl.getUnitType(unitTypeId)
+    override function create(int baseHp, int unitId, int bounty, int baseAttack, int upgradeAttack, int attackUpgradeId, int baseArmor, int upgradeArmor, int armorUpgradeId, int hitBox, string modelPath, int powerLevel) returns IUnitType
+        return new UnitTypeImpl(baseHp, unitId, bounty, baseAttack, upgradeAttack, attackUpgradeId, baseArmor, upgradeArmor, armorUpgradeId, hitBox, modelPath, powerLevel)
+
 init
-    setGetUnitTypeFunction((int unitTypeId) -> UnitTypeImpl.getUnitType(unitTypeId))
     CreateTrigger()
     ..addAction(function onUnitDeath)
     ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)

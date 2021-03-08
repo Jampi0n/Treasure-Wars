@@ -336,11 +336,11 @@ function castDivinePunishment()
     new DivinePunishment(caster)
 
 
-function retreatAI(HeroAI ai)
+function retreatAI(IHeroAI ai)
     ai.issue("roar")
 
 
-function attackAI(HeroAI ai)
+function attackAI(IHeroAI ai)
     let hero = ai.getHeroUnit()
 
     if hero.getMana()/hero.getMaxMana() > 0.5
@@ -374,7 +374,7 @@ function attackAI(HeroAI ai)
     if target.isTargetable(hero.getOwner(), false, true)
         ai.attack(target)
 
-function teamFightAI(HeroAI ai)
+function teamFightAI(IHeroAI ai)
 
     let hero = ai.getHeroUnit()
 
@@ -453,9 +453,9 @@ function initHeroType()
     ..addItem(ITEM_ID_WAR_DRUM)
     delayInit(5) ->
         heroType
-            ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
-            ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
-            ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+            ..setRetreatAI((IHeroAI ai) -> (retreatAI(ai)))
+            ..setAttackAI((IHeroAI ai) -> (attackAI(ai)))
+            ..setTeamFightAI((IHeroAI ai) -> (teamFightAI(ai)))
 
 
         BUFF_HOLY_SHIELD.setupBuffWithIcon(BUFF_ID_HOLY_SHIELD, ABILITY_HOLY_SHIELD_BUFF)
@@ -475,7 +475,7 @@ function initHeroType()
 
 
 init
-    heroType = Hero.createType(THIS_HERO, THIS_ICON, THIS_ID, true)
+    heroType = HeroType.create(THIS_HERO, THIS_ICON, THIS_ID, true)
     ..setOnInitFunction(() -> initHeroType())
 
     setupTooltips()

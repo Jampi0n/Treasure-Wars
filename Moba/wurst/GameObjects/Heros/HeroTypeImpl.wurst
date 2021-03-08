@@ -3,16 +3,17 @@ package HeroTypeImpl
 import HashMap
 import IOnAttack
 import Constants
-import DynamicTooltips
+
 import AbilityObjEditing
 import LinkedList
-import initlater HeroAI
-import initlater PickHero
 import RecommendedItems
 import Preloader
-import UnitLib
-import IHeroType
 import Stats
+import initlater UnitLib
+import initlater DynamicTooltips
+import initlater IHeroAI
+import initlater PickHero
+import initlater IHeroType
 
 int array SLOT_ID
 string array BUTTON_ORDER_STRING
@@ -183,15 +184,15 @@ public class HeroTypeImpl implements IHeroType
     override function setTeamFightAI(AIBehaviour ai)
         this.teamFightAI = ai
 
-    override function retreatAI(HeroAI ai)
+    override function retreatAI(IHeroAI ai)
         if this.retreatAI != null
             this.retreatAI.run(ai)
 
-    override function attackAI(HeroAI ai)
+    override function attackAI(IHeroAI ai)
         if this.attackAI != null
             this.attackAI.run(ai)
 
-    override function teamFightAI(HeroAI ai)
+    override function teamFightAI(IHeroAI ai)
         if this.teamFightAI != null
             this.teamFightAI.run(ai)
 
@@ -293,6 +294,19 @@ public class HeroTypeImpl implements IHeroType
     static function getNthHeroType(int index) returns IHeroType
         return heroTypes[index]
 
+public class HeroTypeStaticImpl extends IHeroTypeStatic
+    override function get(int unitTypeId) returns IHeroType
+        return HeroTypeImpl.getHeroType(unitTypeId)
+    override function create(int unitTypeId, string icon, int heroId, bool hasAI) returns IHeroType
+        return new HeroTypeImpl(unitTypeId, icon, heroId, hasAI)
+    override function getNumberOfTypes() returns int
+        return HeroTypeImpl.getHeroTypeCount()
+    override function getNthType(int i) returns IHeroType
+        return HeroTypeImpl.getNthHeroType(i)
+    override function getAbilityOffset(int heroId) returns int
+        return HeroTypeImpl.getAbilityOffset(heroId)
+
+
 @compiletime
 function initOrderStrings()
     BUTTON_ORDER_STRING[0] = "acidbomb"
@@ -309,7 +323,6 @@ function initOrderStrings()
     BUTTON_ORDER_STRING[11] = "clusterrockets"
 
 init
-    setGetHeroTypeFunction((int unitTypeId) -> HeroTypeImpl.getHeroType(unitTypeId))
     initBeforeHeroType()
     SLOT_ID[AbilitySlot.Q castTo int] = 81
     SLOT_ID[AbilitySlot.W castTo int] = 87

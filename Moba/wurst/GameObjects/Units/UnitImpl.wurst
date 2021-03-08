@@ -1,22 +1,22 @@
 package UnitImpl
 
-import IUnit
+
 import HashMap
 import LinkedList
 import Constants
 import Buff
-import TeamUtil
-import IUnitType
-import UnitTypeImpl
 import Upgrades
 import BonusMod
-import IHeroType
-import IHero
 import ErrorHandling
 import ObjectIds
 import UnitIndexer
 import Missile
-import PlayerControl
+import initlater PlayerControl
+import initlater IHeroType
+import initlater IHero
+import initlater TeamUtil
+import initlater IUnitType
+import initlater IUnit
 
 public class UnitImpl implements IUnit
 
@@ -106,7 +106,7 @@ public class UnitImpl implements IUnit
             statBaseValue_static[this.arrayOffset + Stat.MP.toInt()] = this.assocUnit.getMaxMana().toInt()
             statBaseValue_static[this.arrayOffset + Stat.CD.toInt()] = 0
 
-            let uType = UnitTypeImpl.getUnitType(this.assocUnit.getTypeId())
+            let uType = UnitType.get(this.assocUnit.getTypeId())
 
             if uType != null
                 updateBaseStatsUnits()
@@ -121,7 +121,7 @@ public class UnitImpl implements IUnit
                             Log.warn("Warning unknown unit type: ("+GetUnitName(this.assocUnit) + ")_" + this.assocUnit.getTypeId().toRawCode() + "_" + this.assocUnit.getTypeId().toString())
 
     override function updateBaseStatsUnits()
-        let uType = UnitTypeImpl.getUnitType(this.assocUnit.getTypeId())
+        let uType = UnitType.get(this.assocUnit.getTypeId())
         if uType != null
             statBaseValue_static[this.arrayOffset + Stat.STR.toInt()] = uType.getBaseAttack() + uType.getUpgradeAttack(this.assocUnit.getOwner())
             statBaseValue_static[this.arrayOffset + Stat.AR.toInt()] = uType.getBaseArmor() + uType.getUpgradeArmor(this.assocUnit.getOwner())
@@ -339,18 +339,19 @@ public class UnitImpl implements IUnit
             else if this.team == TEAM_2
                 UnitShareVision(this.toUnit(), players[Teams.army1()], false)
 
-
+public class UnitStaticImpl extends IUnitStatic
+    override function get(unit u) returns IUnit
+        return UnitImpl.getWrapper(u)
+    override function buffList(unit u) returns BuffList
+        return UnitImpl.getBuffList(u)
 
 init
-    setGetWrapperFunction((unit u) -> UnitImpl.getWrapper(u))
     onUnitIndex(() -> UnitImpl.create(getIndexingUnit()))
     onUnitDeindex(() -> UnitImpl.getWrapper(getIndexingUnit()).destr() )
 
-    setGetBuffListFunction( (unit u) -> (begin
-        return UnitImpl.getBuffList(u)
-    end))
+    BuffConfiguration.setGetBuffListFunction( (unit u) -> UnitImpl.getBuffList(u))
 
-    setCreateBuffListFunction( (unit u) -> (begin
+    BuffConfiguration.setCreateBuffListFunction( (unit u) -> (begin
         let w = UnitImpl.getWrapper(u)
         if w != null
             w.createBuffList()
@@ -365,7 +366,7 @@ init
         if u.isType(UNIT_TYPE_HERO)
             ret = 64
         else
-            let unitType = UnitTypeImpl.getUnitType(u.getTypeId())
+            let unitType = UnitType.get(u.getTypeId())
             if unitType!=null
                 ret = unitType.getHitBox().toReal()
         return ret

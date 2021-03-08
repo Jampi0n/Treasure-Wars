@@ -374,11 +374,11 @@ function onAttack(unit attacker, unit target, boolean _isActive)
         let b = target.addBuffReduced( attacker, BLEEDING_WOUND_DURATION, buffBleedingWound, level)
         b.setData(b.getData()+3)
 
-function retreatAI(HeroAI _ai)
+function retreatAI(IHeroAI _ai)
 
-function attackAI(HeroAI _ai)
+function attackAI(IHeroAI _ai)
 
-function teamFightAI(HeroAI _ai)
+function teamFightAI(IHeroAI _ai)
             
 @compiletime
 function setupTooltips()
@@ -407,9 +407,9 @@ function initHeroType()
     delayInit(5) ->
         heroType
             ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
-            ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
-            ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
-            ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+            ..setRetreatAI((IHeroAI ai) -> (retreatAI(ai)))
+            ..setAttackAI((IHeroAI ai) -> (attackAI(ai)))
+            ..setTeamFightAI((IHeroAI ai) -> (teamFightAI(ai)))
 
     
         /*  bleeding wound: every attack increases actual stacks by 4, so bladestorm can increase by 1 every 0.25 seconds
@@ -523,7 +523,7 @@ function createHeroType(IHero hero)
 
 init
     
-    heroType = Hero.createType(THIS_HERO, THIS_ICON, THIS_ID, false)
+    heroType = HeroType.create(THIS_HERO, THIS_ICON, THIS_ID, false)
     ..setOnInitFunction(() -> initHeroType())
     ..setOnCreateFunction((IHero hero) -> createHeroType(hero))
 

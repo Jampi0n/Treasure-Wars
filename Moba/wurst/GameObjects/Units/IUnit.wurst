@@ -1,6 +1,8 @@
 package IUnit
 
 import Stats
+import Buff
+import UnitImpl
 
 public interface CalculateTotalBonus
     function calculate(IUnit u, Stat whichStat)
@@ -33,12 +35,15 @@ public interface IUnit
     function incReveal()
     function decReveal()
 
-interface GetterFunction
-    function get(unit u) returns IUnit
-GetterFunction getterFunction = null
-
-public function setGetWrapperFunction(GetterFunction func)
-    getterFunction = func
+public abstract class IUnitStatic
+    protected static IUnitStatic singleton
+    abstract function get(unit u) returns IUnit
+    abstract function buffList(unit u) returns BuffList
 
 public function unit.wrapper() returns IUnit
-    return getterFunction.get(this)
+    return IUnitStatic.singleton.get(this)
+public function unit.getBuffList() returns BuffList
+    return IUnitStatic.singleton.buffList(this)
+
+init
+    IUnitStatic.singleton = new UnitStaticImpl()

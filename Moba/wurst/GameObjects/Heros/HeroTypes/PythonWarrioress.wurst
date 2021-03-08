@@ -296,10 +296,10 @@ function onAttack(unit attacker, unit target, boolean _isActive)
 
 
 
-function retreatAI(HeroAI ai)
+function retreatAI(IHeroAI ai)
     ai.issue("roar")
 
-function attackAI(HeroAI ai)
+function attackAI(IHeroAI ai)
     let hero = ai.getHeroUnit()
 
     unit target
@@ -320,7 +320,7 @@ function attackAI(HeroAI ai)
     if target.isTargetable(hero.getOwner(), false, true)
         ai.attack(target)
 
-function teamFightAI(HeroAI ai)
+function teamFightAI(IHeroAI ai)
     let hero = ai.getHeroUnit()
 
     let target = ai.getTeamFightTarget()
@@ -361,9 +361,9 @@ function initHeroType()
     delayInit(5) ->
         heroType
             ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
-            ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
-            ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
-            ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+            ..setRetreatAI((IHeroAI ai) -> (retreatAI(ai)))
+            ..setAttackAI((IHeroAI ai) -> (attackAI(ai)))
+            ..setTeamFightAI((IHeroAI ai) -> (teamFightAI(ai)))
 
         BUFF_ENVENOMED_BLADES.setupBuffWithIcon(ENVENOMED_BLADES_BUFF_ID, ENVENOMED_BLADES_ABILITY_ID)
         BUFF_ENVENOMED_BLADES.setPeriodicTime(1)
@@ -396,7 +396,7 @@ function initHeroType()
         end) )
 
 init
-    heroType = Hero.createType(THIS_HERO, THIS_ICON, THIS_ID, true)
+    heroType = HeroType.create(THIS_HERO, THIS_ICON, THIS_ID, true)
     ..setOnInitFunction(() -> initHeroType())
 
     setupTooltips()

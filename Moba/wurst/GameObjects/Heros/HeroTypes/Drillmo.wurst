@@ -374,7 +374,7 @@ function onDamage()
         nearby.destr()
 
         
-function retreatAI(HeroAI ai)
+function retreatAI(IHeroAI ai)
     let hero = ai.getHeroUnit()
     let target = hero.findTarget(ROCKET_RANGE[hero.getAbilityLevel(ABILITY_ROCKET)-1], AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
     let rocketLvl = hero.getAbilityLevel(ABILITY_ROCKET)-1
@@ -383,7 +383,7 @@ function retreatAI(HeroAI ai)
 
     ai.issue("berserk")
 
-function attackAI(HeroAI ai)
+function attackAI(IHeroAI ai)
     let hero = ai.getHeroUnit()
 
     unit target
@@ -401,7 +401,7 @@ function attackAI(HeroAI ai)
     if target.isTargetable(hero.getOwner(), false, true)
         ai.attack(target)
 
-function teamFightAI(HeroAI ai)
+function teamFightAI(IHeroAI ai)
     let ulti = heroType.getAbilityId(AbilitySlot.R)
     let hero = ai.getHeroUnit()
 
@@ -446,9 +446,9 @@ function initHeroType()
     ..addItem(ITEM_ID_CURSED_SWORD)
     delayInit(5) ->
         heroType
-            ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
-            ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
-            ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+            ..setRetreatAI((IHeroAI ai) -> (retreatAI(ai)))
+            ..setAttackAI((IHeroAI ai) -> (attackAI(ai)))
+            ..setTeamFightAI((IHeroAI ai) -> (teamFightAI(ai)))
     
         buffPull = new BuffType(false, DispelLevel.BREAK)
         buffPull.setupBuffWithIcon(PULL_BUFF_ID, PULL_ABILITY_ID)
@@ -499,7 +499,7 @@ function createHeroType(IHero hero)
     end))
 
 init
-    heroType = Hero.createType(THIS_HERO, THIS_ICON, THIS_ID, true)
+    heroType = HeroType.create(THIS_HERO, THIS_ICON, THIS_ID, true)
     ..setOnInitFunction(() -> initHeroType())
     ..setOnCreateFunction((IHero hero) -> createHeroType(hero))
 

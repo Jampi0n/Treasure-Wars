@@ -282,9 +282,9 @@ function castRayOfDeath()
     target.addBuffReduced(caster, RAY_OF_DEATH_DURATION[level-1], buffRayOfDeath, level)
 
 
-function retreatAI(HeroAI _ai)
+function retreatAI(IHeroAI _ai)
 
-function attackAI(HeroAI ai)
+function attackAI(IHeroAI ai)
     let hero = ai.getHeroUnit()
 
     unit target
@@ -305,7 +305,7 @@ function attackAI(HeroAI ai)
     if target.isTargetable(hero.getOwner(), false, true)
         ai.attack(target)
 
-function teamFightAI(HeroAI ai)
+function teamFightAI(IHeroAI ai)
     let hero = ai.getHeroUnit()
 
     let target = ai.getTeamFightTarget()
@@ -348,9 +348,9 @@ function initHeroType()
     delayInit(5) ->
 
         heroType
-            ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
-            ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
-            ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+            ..setRetreatAI((IHeroAI ai) -> (retreatAI(ai)))
+            ..setAttackAI((IHeroAI ai) -> (attackAI(ai)))
+            ..setTeamFightAI((IHeroAI ai) -> (teamFightAI(ai)))
 
         buffRayOfDeath = new BuffType(false, DispelLevel.BREAK)
         ..addEndFunction((Buff whichBuff) ->(begin
@@ -444,7 +444,7 @@ function createHeroType(IHero hero)
     
         
 init
-    heroType = Hero.createType(THIS_HERO, THIS_ICON, THIS_ID, true)
+    heroType = HeroType.create(THIS_HERO, THIS_ICON, THIS_ID, true)
     ..setOnInitFunction(() -> initHeroType())
     ..setOnCreateFunction((IHero hero) -> createHeroType(hero))
 

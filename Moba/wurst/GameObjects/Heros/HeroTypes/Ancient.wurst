@@ -245,7 +245,7 @@ class EatTreeAnimation
         this.direction = startPos.angleTo(caster.getPos())
 
         string modelPath = ""
-        let uType = getUnitType(target.getTypeId())
+        let uType = UnitType.get(target.getTypeId())
         if uType != null
             modelPath = uType.getModel()
 
@@ -453,9 +453,9 @@ function setupStats()
         ..setStat(Stat.AGI, 27, 56)
         ..setStat(Stat.INT, 12, 31)
 
-function retreatAI(HeroAI _ai)
+function retreatAI(IHeroAI _ai)
 
-function attackAI(HeroAI ai)
+function attackAI(IHeroAI ai)
     let hero = ai.getHeroUnit()
 
     unit target
@@ -472,7 +472,7 @@ function attackAI(HeroAI ai)
     if target.isTargetable(hero.getOwner(), false, true)
         ai.attack(target)
 
-function teamFightAI(HeroAI ai)
+function teamFightAI(IHeroAI ai)
 
     let hero = ai.getHeroUnit()
 
@@ -535,9 +535,9 @@ function initHeroType()
     delayInit(5) ->
         heroType
             ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
-            ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
-            ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
-            ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+            ..setRetreatAI((IHeroAI ai) -> (retreatAI(ai)))
+            ..setAttackAI((IHeroAI ai) -> (attackAI(ai)))
+            ..setTeamFightAI((IHeroAI ai) -> (teamFightAI(ai)))
 
         BUFF_ENTAGLING_ROOTS.setupBuffWithIcon(ENTAGLING_ROOTS_BUFF_ID, ENTAGLING_ROOTS_ABILITY_ID)
 
@@ -592,7 +592,7 @@ function createHeroType(IHero hero)
     end))
 
 init
-    heroType = Hero.createType(THIS_HERO, THIS_ICON, 4, true)
+    heroType = HeroType.create(THIS_HERO, THIS_ICON, 4, true)
     ..setOnInitFunction(() -> initHeroType())
     ..setOnCreateFunction((IHero hero) -> createHeroType(hero))
 

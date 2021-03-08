@@ -1,4 +1,4 @@
-package HeroAI
+package HeroAIImpl
 
 import TimerUtils
 import ClosureTimers
@@ -9,49 +9,15 @@ import ErrorHandling
 import RecommendedItems
 import ShopGUI
 import HashMap
-import TeamUtil
-import LinkedList
-import HeroLib
-import PlayerControl
-import UnitLib
 import Constants
 import Stats
+import LinkedList
+import initlater HeroLib
+import initlater PlayerControl
+import initlater UnitLib
+import initlater TeamUtil
+import initlater IHeroAI
 
-constant teamAIs = [new LinkedList<HeroAI>,new LinkedList<HeroAI>,new LinkedList<HeroAI>,new LinkedList<HeroAI>]
-
-public constant real TEAM_FIGHT_RANGE = 1200
-constant real HALF_DISTANCE = 11200
-constant real UPDATE_INTERVAL = 0.35
-
-public enum Lane
-    TOP
-    MID
-    BOT
-
-public enum AbilityTargetType
-    INSTANT
-    UNIT
-    AREA
-    LINE
-
-public enum AbilityTargetFocus
-    SELF
-    ALLY_HERO
-    ALLY_UNIT
-    ALLY
-    FRIEND_HERO
-    FRIEND_UNIT
-    FRIEND
-    ENEMY_HERO
-    ENEMY_UNIT
-    ENEMY
-
-public enum AbilityTargetPriority
-    LOW_HEALTH
-    LOW_DISTANCE
-    HIGH_VALUE
-    HIGH_HEALTH
-    
 enum AIState
     ATTACK //attack moves towards the enemy base, focus is on pushing/killing minions
     RETREAT //retreats fully to heal up
@@ -61,129 +27,16 @@ enum AIState
     TEAM_FIGHT //engages against nearby enemies, should be initiated, if a favoured fight is assumed
     BUY_UPGRADES //goes to a blacksmith and buys upgrades, if hero doesn't want or can't buy items, state goes to Attack
 
-public interface Filter
-    function filter(unit u) returns boolean
+constant teamAIs = [new LinkedList<IHeroAI>,new LinkedList<IHeroAI>,new LinkedList<IHeroAI>,new LinkedList<IHeroAI>]
+
+constant real TEAM_FIGHT_RANGE = 1200
+constant real HALF_DISTANCE = 11200
+constant real UPDATE_INTERVAL = 0.35
 
 
-public tuple targetPoint(vec2 pos, int value)
+class TeamFight
 
-public function targetPoint.getValue() returns int
-    return this.value
-
-public function targetPoint.getPos() returns vec2
-    return this.pos
-    
-/**
-**/
-public function unit.findAreaTarget(real range, real aoe, int heroValue) returns targetPoint
-    int currentValue = 0
-
-    let g = CreateGroup()
-    let nearby = CreateGroup()
-    let pos = this.getPos()
-
-    let owner = this.getOwner()
-    unit u
-    g.enumUnitsInRange(pos, range)
-    let targetUnit = g.getRandomUnit()
-    let unitPos = targetUnit.getPos()
-    if targetUnit != null
-        if not targetUnit.isType(UNIT_TYPE_STRUCTURE) and targetUnit.isAlive() and targetUnit.isVisible(owner) and IsUnitEnemy(targetUnit, owner)
-            nearby.enumUnitsInRange(unitPos, aoe)
-            while(true)
-                
-                u = FirstOfGroup(nearby)
-                if u == null
-                    break
-                nearby.removeUnit(u)
-            
-                if not u.isType(UNIT_TYPE_STRUCTURE) and u.isAlive() and u.isVisible(owner) and IsUnitEnemy(u, owner)
-                    if u.isType(UNIT_TYPE_HERO)
-                        currentValue += heroValue
-                    else
-                        currentValue++
-
-    nearby.destr()
-    g.destr()
-
-    return targetPoint(unitPos, currentValue)
-
-
-
-public function unit.findTarget(real range, AbilityTargetFocus focus, AbilityTargetPriority priority, Filter filter) returns unit
-    let g = CreateGroup()
-    let pos = this.getPos()
-
-    real currentPrio = 0
-    unit currentTarget = null
-    real newPrio
-    boolean valid
-
-    unit u
-    g.enumUnitsInRange(pos, range)
-    while(true)
-        u = FirstOfGroup(g)
-        if u == null
-            break
-        g.removeUnit(u)
-        newPrio = 0
-        valid = false
-        if not u.isType(UNIT_TYPE_STRUCTURE) and u.isAlive() and u.isVisible(this.getOwner())
-            if focus == AbilityTargetFocus.ALLY_HERO and u.isType(UNIT_TYPE_HERO) and u.getOwner().isAllyOf(this.getOwner()) and u!=this
-                valid = true
-            else if focus == AbilityTargetFocus.ALLY_UNIT and not u.isType(UNIT_TYPE_HERO) and u.getOwner().isAllyOf(this.getOwner()) and u.getOwner() != this.getOwner()
-                valid = true
-            else if focus == AbilityTargetFocus.ALLY and u.getOwner().isAllyOf(this.getOwner()) and u.getOwner() != this.getOwner()
-                valid = true
-            else if focus == AbilityTargetFocus.FRIEND_HERO and u.isType(UNIT_TYPE_HERO) and (u.getOwner().isAllyOf(this.getOwner()) or u.getOwner() == this.getOwner())
-                valid = true
-            else if focus == AbilityTargetFocus.FRIEND_UNIT and not u.isType(UNIT_TYPE_HERO) and (u.getOwner().isAllyOf(this.getOwner()) or u.getOwner() == this.getOwner())
-                valid = true
-            else if focus == AbilityTargetFocus.FRIEND and (u.getOwner().isAllyOf(this.getOwner()) or u.getOwner() == this.getOwner())
-                valid = true
-            else if focus == AbilityTargetFocus.ENEMY_HERO and u.isType(UNIT_TYPE_HERO) and u.getOwner().isEnemyOf(this.getOwner()) and not u.isType(UNIT_TYPE_ANCIENT)
-                valid = true            
-            else if focus == AbilityTargetFocus.ENEMY_UNIT and not u.isType(UNIT_TYPE_HERO) and u.getOwner().isEnemyOf(this.getOwner()) and not u.isType(UNIT_TYPE_ANCIENT)
-                valid = true
-            else if focus == AbilityTargetFocus.ENEMY and u.getOwner().isEnemyOf(this.getOwner()) and not u.isType(UNIT_TYPE_ANCIENT)
-                valid = true
-
-        if filter != null
-            valid = valid and filter.filter(u)
-
-        if valid
-            if priority == AbilityTargetPriority.LOW_HEALTH
-                newPrio = 1/u.getHP()
-            else if priority == AbilityTargetPriority.LOW_DISTANCE
-                newPrio = 1/u.getPos().distanceTo(pos)
-            else if priority == AbilityTargetPriority.HIGH_VALUE
-                let uType = getUnitType(u.getTypeId())
-                if uType != null
-                    newPrio = uType.getBounty().toReal()
-                else
-                    newPrio = 0
-            else if priority == AbilityTargetPriority.HIGH_HEALTH
-                newPrio = u.getHP()
-
-
-        if newPrio > currentPrio
-            currentTarget = u
-            currentPrio = newPrio
-
-
-
-        
-    if filter != null
-        destroy filter
-
-
-    g.destr()
-    return currentTarget
-
-
-public class TeamFight
-
-    private LinkedList<HeroAI> heroAIs
+    private LinkedList<HeroAIImpl> heroAIs
     private vec2 teamFightLoc
     private unit target
     private int team
@@ -198,7 +51,7 @@ public class TeamFight
         this.team = team
         this.target = null
 
-        this.heroAIs = new LinkedList<HeroAI>
+        this.heroAIs = new LinkedList<HeroAIImpl>
         activeTeamFights.add(this)
         //print("teamfights: "+activeTeamFights.size().toString())
 
@@ -208,10 +61,10 @@ public class TeamFight
     static function classInit()
         updateTimer.startPeriodic(0.1, function updateStatic)
 
-    function addAI(HeroAI ai)
+    function addAI(HeroAIImpl ai)
         this.heroAIs.add(ai)
 
-    function removeAI(HeroAI ai)
+    function removeAI(HeroAIImpl ai)
         this.heroAIs.remove(ai)
 
     ondestroy
@@ -232,7 +85,7 @@ public class TeamFight
         if heroAIs.isEmpty()
             destroy this
         else
-            for HeroAI ai in heroAIs
+            for HeroAIImpl ai in heroAIs
                 count++
                 x+=ai.getHeroUnit().getPos().x
                 y+=ai.getHeroUnit().getPos().y
@@ -248,7 +101,7 @@ public class TeamFight
             if chance < 0.4
                 let allAIs = heroAIs.copy()
 
-                for HeroAI ai in allAIs
+                for HeroAIImpl ai in allAIs
                     ai.retreatTemporarily(12, true)
                     ai.endTeamFight()
             
@@ -256,7 +109,7 @@ public class TeamFight
             else if this.target == null
                 let allAIs = heroAIs.copy()
 
-                for HeroAI ai in allAIs
+                for HeroAIImpl ai in allAIs
                     if chance > 0.6
                         ai.changeState(AIState.ATTACK)
                     else
@@ -288,18 +141,12 @@ public class TeamFight
     function getTarget() returns unit
         return this.target
 
-public function getAI(unit hero) returns HeroAI
-    return HeroAI.heroAiMap.get(hero)
 
-public function getAiList(int id) returns LinkedList<HeroAI>
-    return HeroAI.heroAIs[id]
-
-
-public function HeroAI.addTeam(int team)
+public function HeroAIImpl.addTeam(int team)
     teamAIs[team].add(this)
 
 
-public class HeroAI
+public class HeroAIImpl implements IHeroAI
     
     private int ownerId
     private player owningPlayer
@@ -341,8 +188,8 @@ public class HeroAI
     private LinkedList<int> itemBuild
     private string skillBuild
 
-    protected static LinkedList<HeroAI> array heroAIs
-    protected static constant heroAiMap = new HashMap<unit,HeroAI>()
+    protected static LinkedList<IHeroAI> array heroAIs
+    protected static constant heroAiMap = new HashMap<unit,HeroAIImpl>()
 
     private boolean paused = false
 
@@ -355,44 +202,50 @@ public class HeroAI
     private real upgradeTimer = 0
     private int upgradeGold = 0
 
-    function aiMessage(string _msg)
+    override function aiMessage(string _msg)
         //print(fromPlayer(this.heroUnit.getOwner()).toColorString()+"["+this.heroUnit.getName()+"]|r "+msg)
 
-    function getHomeLoc() returns vec2
+    override function getHomeLoc() returns vec2
         return this.homeLoc
 
-    function getTargetLoc() returns vec2
+    override function getTargetLoc() returns vec2
         return this.targetLoc
 
-    function getOwningPlayer() returns player
+    override function getOwningPlayer() returns player
         return this.owningPlayer
     
-    function getHero() returns IHero
+    override function getHero() returns IHero
         return this.hero
 
-    function getHeroUnit() returns unit
+    override function getHeroUnit() returns unit
         return this.heroUnit
 
-    function getCasting() returns boolean
+    override function getCasting() returns boolean
         return this.casting
 
-    function getAttacking() returns boolean
+    override function getAttacking() returns boolean
         return this.attacking
 
-    function getTeamFightLoc() returns vec2
+    override function getTeamFightLoc() returns vec2
         return this.teamFight.getTeamFightLoc()
 
-    function getTeamFightTarget() returns unit
+    override function getTeamFightTarget() returns unit
         return this.teamFight.getTarget()
 
-    static function onAttackTimer()
-        (GetExpiredTimer().getData() castTo HeroAI).attacking = false
+    static function getAI(unit hero) returns HeroAIImpl
+        return heroAiMap.get(hero)
 
-    function attackFor(real time)
+    static function getAiList(int id) returns LinkedList<IHeroAI>
+        return heroAIs[id]
+
+    private static function onAttackTimer()
+        (GetExpiredTimer().getData() castTo HeroAIImpl).attacking = false
+
+    protected function attackFor(real time)
         attacking = true
         attackTimer.start(time, function onAttackTimer)
 
-    function updateTargetLoc()
+    private function updateTargetLoc()
         if lane == Lane.TOP
             //print(this.heroUnit.getPos().distanceTo(this.targetLoc))
             currentTargetLoc = gg_rct_CornerTop.getCenter()
@@ -406,7 +259,7 @@ public class HeroAI
         else
             currentTargetLoc = targetLoc
 
-    function updateRetreatLoc()
+    private function updateRetreatLoc()
         if lane == Lane.TOP
             currentRetreatLoc = gg_rct_CornerTop.getCenter()
             if this.heroUnit.getPos().distanceTo(this.homeLoc) < HALF_DISTANCE
@@ -418,7 +271,7 @@ public class HeroAI
         else
             currentRetreatLoc = this.homeLoc
 
-    function attackedByTower()
+    override function attackedByTower()
         if (this.state == AIState.ATTACK or this.state == AIState.RETREAT_TEMP)
             let g = CreateGroup()
             unit u
@@ -440,9 +293,9 @@ public class HeroAI
             else
                 this.retreatTemporarily(7, false)
 
-    static function classInit()
+    protected static function classInit()
         for i = 0 to bj_MAX_PLAYER_SLOTS
-            heroAIs[i] = new LinkedList<HeroAI>()
+            heroAIs[i] = new LinkedList<IHeroAI>()
 
         updateTimer.startPeriodic(UPDATE_INTERVAL, function updateStatic)
         CreateTrigger()
@@ -542,7 +395,7 @@ public class HeroAI
                 this.selectSkills()
         end))
         
-    function changeState(AIState newState)
+    protected function changeState(AIState newState)
         if this.state != newState
             this.state = newState
 
@@ -552,7 +405,7 @@ public class HeroAI
                 casting = false
                 attacking = false
 
-    function buyItems()
+    override function buyItems()
         if hasAllItems
             return
 
@@ -567,7 +420,7 @@ public class HeroAI
                     if i == RecommendedItems.getCount(unitTypeId) - 1
                         hasAllItems = true
 
-    function selectSingleSkill(string char)
+    private function selectSingleSkill(string char)
         int abilcode = -1
         if char == "Q"
             abilcode = this.heroType.getAbilityId(AbilitySlot.Q)
@@ -582,7 +435,7 @@ public class HeroAI
 
         SelectHeroSkill(this.heroUnit, abilcode)
 
-    function selectSkills()
+    private function selectSkills()
         int skillPoints
         while true
             skillPoints = GetHeroSkillPoints(this.heroUnit)
@@ -604,17 +457,17 @@ public class HeroAI
         doAfter(GetRandomReal(30, 40)) -> 
             this.selectSkills()
             
-    function levelUp()
+    private function levelUp()
         this.selectSkills()
 
-    static function updateStatic()
+    private static function updateStatic()
         int i = 0
         for int t = TEAM_1 to TEAM_2
-            for HeroAI ai in teamAIs[t]
+            for HeroAIImpl ai in teamAIs[t]
                 doAfter(i * 0.03, -> ai.update())
                 i++
 
-    function startTeamFight(TeamFight teamFight)
+    protected function startTeamFight(TeamFight teamFight)
 
         this.endTeamFight()
 
@@ -623,15 +476,15 @@ public class HeroAI
         this.teamFight.addAI(this)
         aiMessage("teamfight")
 
-    function endTeamFight()
+    protected function endTeamFight()
         if this.teamFight != null
             this.teamFight.removeAI(this)
             this.teamFight = null
 
-    function onDamage(real damage)
+    override function onDamage(real damage)
         this.damageCurrent += damage
 
-    function retreatTemporarily(int counter, boolean useAI)
+    protected function retreatTemporarily(int counter, boolean useAI)
         if casting or attacking
             this.heroUnit.issueImmediateOrder("stop")
             casting = false
@@ -645,7 +498,7 @@ public class HeroAI
         this.retreatCounter = counter
 
 
-    function update()
+    private function update()
 
         damageIndex++
         if damageIndex >= damageMax
@@ -682,8 +535,8 @@ public class HeroAI
                     this.changeState(AIState.BUY_UPGRADES)
                     if(not this.noMoreUpgrades)
                         this.upgradeTimer = 4
-                        this.desiredUpgrade = HeroAI.findNextUpgrade(this.team)
-                        this.targetBlacksmith = HeroAI.findNextBlacksmith(this.team, this.heroUnit.getPos())
+                        this.desiredUpgrade = HeroAIImpl.findNextUpgrade(this.team)
+                        this.targetBlacksmith = HeroAIImpl.findNextBlacksmith(this.team, this.heroUnit.getPos())
                         if this.desiredUpgrade == -1 or this.targetBlacksmith == null
                             this.noMoreUpgrades = true
                             this.wantedUpgrades = 0
@@ -707,8 +560,8 @@ public class HeroAI
                     let dist = this.heroUnit.getPos().distanceTo(smithPos)
                     if dist<300
                         if this.upgradeTimer > 0
-                            this.desiredUpgrade = HeroAI.findNextUpgrade(this.team)
-                            this.targetBlacksmith = HeroAI.findNextBlacksmith(this.team, this.heroUnit.getPos())
+                            this.desiredUpgrade = HeroAIImpl.findNextUpgrade(this.team)
+                            this.targetBlacksmith = HeroAIImpl.findNextBlacksmith(this.team, this.heroUnit.getPos())
                             if this.desiredUpgrade == -1 or this.targetBlacksmith == null
                                 this.noMoreUpgrades = true
                                 this.wantedUpgrades = 0
@@ -775,7 +628,8 @@ public class HeroAI
 
                             for i = 0 to MAX_HERO_COUNT-1
                                 let aiList = heroAIs[i]
-                                for ai in aiList
+                                for iai in aiList
+                                    let ai = iai castTo HeroAIImpl
                                     if ai.team == team and ai.heroUnit.getPos().distanceTo(this.heroUnit.getPos()) < TEAM_FIGHT_RANGE
                                         if ai.state == AIState.ATTACK or ai.state == AIState.TEAM_FIGHT
                                             if ai.state == AIState.ATTACK
@@ -829,7 +683,7 @@ public class HeroAI
 
 
 
-    function issue(string order) returns boolean
+    override function issue(string order) returns boolean
         boolean ret = false
         if not casting
             casting = this.heroUnit.issueImmediateOrder(order)
@@ -837,7 +691,7 @@ public class HeroAI
             ret = casting
         return ret
 
-    function issue(string order, vec2 target) returns boolean
+    override function issue(string order, vec2 target) returns boolean
         boolean ret = false
         if not casting
             casting = this.heroUnit.issuePointOrder(order, target)
@@ -845,7 +699,7 @@ public class HeroAI
             ret = casting
         return ret
 
-    function issue(string order, widget targetWidget) returns boolean
+    override function issue(string order, widget targetWidget) returns boolean
         boolean ret = false
         if not casting
             casting = this.heroUnit.issueTargetOrder(order, targetWidget)
@@ -853,7 +707,7 @@ public class HeroAI
             ret = casting
         return ret
 
-    function attack(widget targetWidget) returns boolean
+    override function attack(widget targetWidget) returns boolean
         boolean ret = false
         if not casting and not attacking
             ret = this.heroUnit.issueTargetOrder("attack", targetWidget)
@@ -863,11 +717,11 @@ public class HeroAI
                 
 
 
-    function togglePause()
+    override function togglePause()
         this.paused = not this.paused
 
     // for every 5000 gold the AI gets, it buys one upgrade
-    function addGold(int gold)
+    override function addGold(int gold)
         if not this.noMoreUpgrades
             this.upgradeGold += gold
             if this.upgradeGold > 5000
@@ -876,7 +730,7 @@ public class HeroAI
 
                 //print(this.heroUnit.getOwner().getColor().toColor().toColorString()+"["+this.heroUnit.getName()+"]|r "+" wants upgrades: "+I2S(this.wantedUpgrades))
 
-    static function findNextUpgrade(int team) returns int
+    private static function findNextUpgrade(int team) returns int
 
         let teamPlayer = players[Teams.army(team)]
         int array upgrades
@@ -894,7 +748,7 @@ public class HeroAI
 
         return ret
 
-    static function findNextBlacksmith(int team, vec2 pos) returns unit
+    private static function findNextBlacksmith(int team, vec2 pos) returns unit
         unit ret = null
         real minDist = 1000000
         if team == TEAM_1
@@ -1080,7 +934,7 @@ function determineHeroStrength(unit hero) returns real
 
     let result = (0.25 + 0.25 * mana + 0.25 + 1.25 * hp)/2 * (5 + lvl)/30 * (0.2 + 0.8 * hp)
 
-    let ai = getAI(hero)
+    let ai = HeroAIImpl.getAI(hero)
     real ret = (result * ( 20000 + itemValue) )/16
     if inBase
         ret += 2500
@@ -1091,15 +945,22 @@ function determineHeroStrength(unit hero) returns real
 
     return ret
 
+public class HeroAIStaticImpl extends IHeroAIStatic
+    override function get(unit u) returns IHeroAI
+        return HeroAIImpl.getAI(u)
+    override function getList(int index) returns LinkedList<IHeroAI>
+        return HeroAIImpl.getAiList(index)
+    override function create(IHero hero, aidifficulty diff) returns IHeroAI
+        return new HeroAIImpl(hero, diff)
 
 init
-    HeroAI.classInit()
+    HeroAIImpl.classInit()
     TeamFight.classInit()
 
     CreateTrigger()
         ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_ATTACKED)
         ..addAction(() -> (begin
-        let ai = getAI(GetTriggerUnit())
+        let ai = HeroAIImpl.getAI(GetTriggerUnit())
         if ai != null
             ai.attackFor(2)
     end))

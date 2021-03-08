@@ -11,23 +11,18 @@ import Missile
 import Constants
 import public IUnitType
 import public IUnit
-import UnitTypeImpl
-import UnitImpl
 import Stats
 
-public function unit.getBuffList() returns BuffList
-    return UnitImpl.getBuffList(this)
-
-public function createUnitType(int baseHp, int unitId, int bounty, int baseAttack, int upgradeAttack, int attackUpgradeId, int baseArmor, int upgradeArmor, int armorUpgradeId, int hitBox, string modelPath, int powerLevel) returns int
-    new UnitTypeImpl(baseHp, unitId, bounty, baseAttack, upgradeAttack, attackUpgradeId, baseArmor, upgradeArmor, armorUpgradeId, hitBox, modelPath, powerLevel)
+public function createUnitTypeAndReturnId(int baseHp, int unitId, int bounty, int baseAttack, int upgradeAttack, int attackUpgradeId, int baseArmor, int upgradeArmor, int armorUpgradeId, int hitBox, string modelPath, int powerLevel) returns int
+    UnitType.create(baseHp, unitId, bounty, baseAttack, upgradeAttack, attackUpgradeId, baseArmor, upgradeArmor, armorUpgradeId, hitBox, modelPath, powerLevel)
     return unitId
 
-public function createUnitType(int baseHp, int unitId, int bounty, int baseAttack, int baseArmor, int hitBox, string modelPath, int powerLevel) returns int
-    new UnitTypeImpl(baseHp, unitId, bounty, baseAttack, 0, 0, baseArmor, 0, 0, hitBox, modelPath, powerLevel)
+public function createUnitTypeAndReturnId(int baseHp, int unitId, int bounty, int baseAttack, int baseArmor, int hitBox, string modelPath, int powerLevel) returns int
+    UnitType.create(baseHp, unitId, bounty, baseAttack, 0, 0, baseArmor, 0, 0, hitBox, modelPath, powerLevel)
     return unitId
 
-public function createUnitType(int unitId) returns int
-    new UnitTypeImpl(100, unitId, 0, 0, 0, 0, 0, 0, 0, 32, "", 0)
+public function createUnitTypeAndReturnId(int unitId) returns int
+    UnitType.create(100, unitId, 0, 0, 0, 0, 0, 0, 0, 32, "", 0)
     return unitId
 
 

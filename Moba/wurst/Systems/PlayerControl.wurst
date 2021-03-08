@@ -6,7 +6,7 @@ import TeamUtil
 import Constants
 
 import initlater HeroLib
-import initlater HeroAI
+import initlater IHeroAI
 
 /*
 * This package handles players
@@ -160,7 +160,7 @@ public abstract class PlayerWrapper
     static function addGoldEx(int id, int gold)
         players[id].addGold(gold)
         statGoldGained[id] += gold
-        for ai in getAiList(id)
+        for ai in HeroAI.getAiList(id)
             ai.addGold(gold)
 
 

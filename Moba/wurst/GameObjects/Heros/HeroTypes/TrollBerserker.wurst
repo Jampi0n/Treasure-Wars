@@ -320,10 +320,10 @@ function setupStats()
         ..setStat(Stat.AGI, 27, 39)
         ..setStat(Stat.INT, 4, 11)
 
-function retreatAI(HeroAI ai)
+function retreatAI(IHeroAI ai)
     ai.issue("blink", ai.getHomeLoc())
 
-function attackAI(HeroAI ai)
+function attackAI(IHeroAI ai)
     let hero = ai.getHeroUnit()
 
     unit target = hero.findTarget(700, AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
@@ -335,7 +335,7 @@ function attackAI(HeroAI ai)
         if not ai.getAttacking()
             ai.attack(target)
 
-function teamFightAI(HeroAI ai)
+function teamFightAI(IHeroAI ai)
     let ulti = heroType.getAbilityId(AbilitySlot.R)
     let hero = ai.getHeroUnit()
     if hero.getAbilityLevel(ulti) > 0 and hero.getAbilityCooldownRemaining(ulti) <= 0
@@ -396,9 +396,9 @@ function initHeroType()
 
         heroType
             ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
-            ..setRetreatAI((HeroAI ai) -> (retreatAI(ai)))
-            ..setAttackAI((HeroAI ai) -> (attackAI(ai)))
-            ..setTeamFightAI((HeroAI ai) -> (teamFightAI(ai)))
+            ..setRetreatAI((IHeroAI ai) -> (retreatAI(ai)))
+            ..setAttackAI((IHeroAI ai) -> (attackAI(ai)))
+            ..setTeamFightAI((IHeroAI ai) -> (teamFightAI(ai)))
 
         buffCriticalStrike = new BuffType(true, DispelLevel.NONE)
 
@@ -462,7 +462,7 @@ function createHeroType(IHero hero)
     end))
 
 init
-    heroType = Hero.createType(THIS_HERO, THIS_ICON, THIS_ID, true)
+    heroType = HeroType.create(THIS_HERO, THIS_ICON, THIS_ID, true)
     ..setOnInitFunction(() -> initHeroType())
     ..setOnCreateFunction((IHero hero) -> createHeroType(hero))
 

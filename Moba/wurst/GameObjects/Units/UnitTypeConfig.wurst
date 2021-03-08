@@ -15,80 +15,80 @@ constant ARMOR_LIGHT = 'R003'
     Scale to 0 (Node Manager)
 */
 
-public constant TAVERN0 = createUnitType('n002')
-public constant TAVERN1 = createUnitType('n003')
-public constant TAVERN2 = createUnitType('n004')
-public constant TAVERN3 = createUnitType('n005')
-public constant PATRON = createUnitType('n006')
+public constant TAVERN0 = createUnitTypeAndReturnId('n002')
+public constant TAVERN1 = createUnitTypeAndReturnId('n003')
+public constant TAVERN2 = createUnitTypeAndReturnId('n004')
+public constant TAVERN3 = createUnitTypeAndReturnId('n005')
+public constant PATRON = createUnitTypeAndReturnId('n006')
 
-public constant FOOTMAN = createUnitType(350, 'h00C', 15, 15, 3, ATTACK_MELEE, 25, 10, ARMOR_HEAVY, 32, Units.footman1, 1)
-public constant RIFLEMAN = createUnitType(425, 'h00B', 25, 25, 5, ATTACK_RANGED, 15, 10, ARMOR_LIGHT, 48, Units.rifleman1, 2)
-public constant KNIGHT = createUnitType(700, 'h00D', 50, 45, 6, ATTACK_MELEE, 35, 10, ARMOR_HEAVY, 64, Units.knight1, 5)
-public constant MORTAR_TEAM = createUnitType(325, 'h00E', 40, 45, 7, ATTACK_RANGED, 10, 10, ARMOR_LIGHT, 48, Units.mortarTeam1, 4)
-public constant MILITIA = createUnitType(275, 'h00F', 10, 20, 3, ATTACK_MELEE, 15, 10, ARMOR_HEAVY, 32, Units.militia, 1)
-public constant MILITIA_DEFEND = createUnitType(275, 'h01B', 10, 20, 3, ATTACK_MELEE, 15, 10, ARMOR_HEAVY, 16, Units.militia, 1)
+public constant FOOTMAN = createUnitTypeAndReturnId(350, 'h00C', 15, 15, 3, ATTACK_MELEE, 25, 10, ARMOR_HEAVY, 32, Units.footman1, 1)
+public constant RIFLEMAN = createUnitTypeAndReturnId(425, 'h00B', 25, 25, 5, ATTACK_RANGED, 15, 10, ARMOR_LIGHT, 48, Units.rifleman1, 2)
+public constant KNIGHT = createUnitTypeAndReturnId(700, 'h00D', 50, 45, 6, ATTACK_MELEE, 35, 10, ARMOR_HEAVY, 64, Units.knight1, 5)
+public constant MORTAR_TEAM = createUnitTypeAndReturnId(325, 'h00E', 40, 45, 7, ATTACK_RANGED, 10, 10, ARMOR_LIGHT, 48, Units.mortarTeam1, 4)
+public constant MILITIA = createUnitTypeAndReturnId(275, 'h00F', 10, 20, 3, ATTACK_MELEE, 15, 10, ARMOR_HEAVY, 32, Units.militia, 1)
+public constant MILITIA_DEFEND = createUnitTypeAndReturnId(275, 'h01B', 10, 20, 3, ATTACK_MELEE, 15, 10, ARMOR_HEAVY, 16, Units.militia, 1)
 
-public constant FOOTMAN_2 = createUnitType(350, 'h01F', 15, 15, 3, ATTACK_MELEE, 25, 10, ARMOR_HEAVY, 32, Units.bandit1, 1)
-public constant RIFLEMAN_2 = createUnitType(425, 'h01K', 25, 25, 5, ATTACK_RANGED, 15, 10, ARMOR_LIGHT, 48, "Models\\BanditRifleman.mdl", 2)
-public constant KNIGHT_2 = createUnitType(700, 'h01G', 50, 45, 6, ATTACK_MELEE, 35, 10, ARMOR_HEAVY, 64, Units.banditLord1, 5)
-public constant MORTAR_TEAM_2 = createUnitType(325, 'h01J', 40, 45, 7, ATTACK_RANGED, 10, 10, ARMOR_LIGHT, 48, "Models\\BanditMortarTeam.mdl", 4)
-public constant MILITIA_2 = createUnitType(275, 'h01H', 10, 20, 3, ATTACK_MELEE, 15, 10, ARMOR_HEAVY, 32, "Models\\BanditMilitia.mdl", 1)
-public constant MILITIA_DEFEND_2 = createUnitType(275, 'h01I', 10, 20, 3, ATTACK_MELEE, 15, 10, ARMOR_HEAVY, 16, "Models\\BanditMilitia.mdl", 1)
-
-
-public constant TANK = createUnitType(2000, 'h019', 250, 150, 20, ATTACK_RANGED, 90, 15, ARMOR_HEAVY, 48, Units.warWagon, 10)
-
-public constant VISION_WARD = createUnitType(45, 'o000', 0, 0, 0, 0, Units.serpentWard, 1)
-
-public constant DARK_MINION_1 = createUnitType(400, 'n00C', 10, 25, 20, 32, Units.skeleton1, 1)
-public constant DARK_MINION_2 = createUnitType(500, 'n00D', 10, 30, 25, 32, Units.skeleton1, 1)
-public constant DARK_MINION_3 = createUnitType(600, 'n00E', 10, 35, 30, 32, Units.skeleton1, 1)
-public constant DARK_MINION_4 = createUnitType(700, 'n00F', 10, 40, 35, 32, Units.skeleton1, 1)
-public constant DARK_MINION_5 = createUnitType(800, 'n00G', 10, 45, 40, 32, Units.skeleton1, 1)
-
-public constant FROST_WYRM = createUnitType(400, 'u001', 100, 50, 20, 64, Units.frostWyrm1, 10)
-
-public constant SERPENT_WARD = createUnitType(200, 'o003', 25, 15, 0, 32, Units.serpentWard, 1)
-
-public constant WALL = createUnitType(200, 'o001', 0, 0, 0, 32, "", 0)
-
-public constant MIRROR_IMAGE_UNIT_ID = createUnitType(400, 'h01M', 100, 40, 10, 64, "Models\\TrollManhunter.mdx", 10)
+public constant FOOTMAN_2 = createUnitTypeAndReturnId(350, 'h01F', 15, 15, 3, ATTACK_MELEE, 25, 10, ARMOR_HEAVY, 32, Units.bandit1, 1)
+public constant RIFLEMAN_2 = createUnitTypeAndReturnId(425, 'h01K', 25, 25, 5, ATTACK_RANGED, 15, 10, ARMOR_LIGHT, 48, "Models\\BanditRifleman.mdl", 2)
+public constant KNIGHT_2 = createUnitTypeAndReturnId(700, 'h01G', 50, 45, 6, ATTACK_MELEE, 35, 10, ARMOR_HEAVY, 64, Units.banditLord1, 5)
+public constant MORTAR_TEAM_2 = createUnitTypeAndReturnId(325, 'h01J', 40, 45, 7, ATTACK_RANGED, 10, 10, ARMOR_LIGHT, 48, "Models\\BanditMortarTeam.mdl", 4)
+public constant MILITIA_2 = createUnitTypeAndReturnId(275, 'h01H', 10, 20, 3, ATTACK_MELEE, 15, 10, ARMOR_HEAVY, 32, "Models\\BanditMilitia.mdl", 1)
+public constant MILITIA_DEFEND_2 = createUnitTypeAndReturnId(275, 'h01I', 10, 20, 3, ATTACK_MELEE, 15, 10, ARMOR_HEAVY, 16, "Models\\BanditMilitia.mdl", 1)
 
 
-public constant STANDARD_ICON = createUnitType('ncop')
+public constant TANK = createUnitTypeAndReturnId(2000, 'h019', 250, 150, 20, ATTACK_RANGED, 90, 15, ARMOR_HEAVY, 48, Units.warWagon, 10)
 
-public constant HYDRA = createUnitType(3500, 'n00I', 0, 300, 100, 160, Units.hydra, 50)
+public constant VISION_WARD = createUnitTypeAndReturnId(45, 'o000', 0, 0, 0, 0, Units.serpentWard, 1)
 
-public constant HYDRA_ICON = createUnitType('n010')
+public constant DARK_MINION_1 = createUnitTypeAndReturnId(400, 'n00C', 10, 25, 20, 32, Units.skeleton1, 1)
+public constant DARK_MINION_2 = createUnitTypeAndReturnId(500, 'n00D', 10, 30, 25, 32, Units.skeleton1, 1)
+public constant DARK_MINION_3 = createUnitTypeAndReturnId(600, 'n00E', 10, 35, 30, 32, Units.skeleton1, 1)
+public constant DARK_MINION_4 = createUnitTypeAndReturnId(700, 'n00F', 10, 40, 35, 32, Units.skeleton1, 1)
+public constant DARK_MINION_5 = createUnitTypeAndReturnId(800, 'n00G', 10, 45, 40, 32, Units.skeleton1, 1)
 
-public constant DRAGON_TURTLE = createUnitType(2000, 'n00K', 0, 300, 100, 160, Units.dragonSeaTurtleRange, 30)
+public constant FROST_WYRM = createUnitTypeAndReturnId(400, 'u001', 100, 50, 20, 64, Units.frostWyrm1, 10)
 
-public constant DRAGON_TURTLE_ICON = createUnitType('n00N')
+public constant SERPENT_WARD = createUnitTypeAndReturnId(200, 'o003', 25, 15, 0, 32, Units.serpentWard, 1)
+
+public constant WALL = createUnitTypeAndReturnId(200, 'o001', 0, 0, 0, 32, "", 0)
+
+public constant MIRROR_IMAGE_UNIT_ID = createUnitTypeAndReturnId(400, 'h01M', 100, 40, 10, 64, "Models\\TrollManhunter.mdx", 10)
 
 
-public constant JUNGLE_BEAST = createUnitType(300, 'n00L', 20, 20, 15, 32, Units.jungleBeast1, 4)
-public constant JUNGLE_BEAST_ELDER = createUnitType(700, 'n00V', 40, 51, 30, 48, Units.jungleBeast1, 8)
+public constant STANDARD_ICON = createUnitTypeAndReturnId('ncop')
 
-public constant TURTLE_GIANT = createUnitType(500, 'n00Z', 30, 25, 40, 48, Units.giantSeaTurtle1, 6)
-public constant TURTLE_GARGANTUAN = createUnitType(600, 'n00Y', 40, 43, 55, 48, Units.seaTurtle1, 8)
+public constant HYDRA = createUnitTypeAndReturnId(3500, 'n00I', 0, 300, 100, 160, Units.hydra, 50)
 
-public constant MAKRURA_LORD = createUnitType(600, 'n00R', 40, 46, 75, 48, Units.lobstrokkgreen, 8)
-public constant MAKRURA_SNAPPER = createUnitType(200, 'n00P', 20, 22, 60, 32, Units.lobstrokkred, 4)
+public constant HYDRA_ICON = createUnitTypeAndReturnId('n010')
 
-public constant MURGUL_MAGE = createUnitType(400, 'n00Q', 25, 28, 15, 16, Units.murgulShadowcaster1, 5)
-public constant MURGUL_MELEE = createUnitType(300, 'n00S', 20, 17, 20, 16, Units.murgulTidewarrior1, 4)
+public constant DRAGON_TURTLE = createUnitTypeAndReturnId(2000, 'n00K', 0, 300, 100, 160, Units.dragonSeaTurtleRange, 30)
 
-public constant REVENANT = createUnitType(600, 'n00J', 35, 30, 40, 32, Units.revenantOfTheWaves1, 7)
-public constant REVENANT_BOSS = createUnitType(1100, 'n00T', 75, 80, 55, 32, Units.revenantOfTheWaves1, 15)
+public constant DRAGON_TURTLE_ICON = createUnitTypeAndReturnId('n00N')
 
-public constant REVENANT_ICON = createUnitType('n00O')
 
-public constant SEA_ELEMENTAL = createUnitType(600, 'n00M', 35, 48, 0, 32, Units.seaElemental, 7)
+public constant JUNGLE_BEAST = createUnitTypeAndReturnId(300, 'n00L', 20, 20, 15, 32, Units.jungleBeast1, 4)
+public constant JUNGLE_BEAST_ELDER = createUnitTypeAndReturnId(700, 'n00V', 40, 51, 30, 48, Units.jungleBeast1, 8)
 
-public constant SEA_GIANT = createUnitType(700, 'n00W', 40, 52, 25, 48, Units.seaGiantGreen1, 8)
-public constant STORMREAVER = createUnitType(200, 'n00X', 15, 15, 30, 16, Units.orcWarlock1, 3)
+public constant TURTLE_GIANT = createUnitTypeAndReturnId(500, 'n00Z', 30, 25, 40, 48, Units.giantSeaTurtle1, 6)
+public constant TURTLE_GARGANTUAN = createUnitTypeAndReturnId(600, 'n00Y', 40, 43, 55, 48, Units.seaTurtle1, 8)
 
-public constant SKELETAL_ORC = createUnitType(200, 'n00U', 15, 24, 10, 16, Units.skeletonOrc1, 3)
+public constant MAKRURA_LORD = createUnitTypeAndReturnId(600, 'n00R', 40, 46, 75, 48, Units.lobstrokkgreen, 8)
+public constant MAKRURA_SNAPPER = createUnitTypeAndReturnId(200, 'n00P', 20, 22, 60, 32, Units.lobstrokkred, 4)
+
+public constant MURGUL_MAGE = createUnitTypeAndReturnId(400, 'n00Q', 25, 28, 15, 16, Units.murgulShadowcaster1, 5)
+public constant MURGUL_MELEE = createUnitTypeAndReturnId(300, 'n00S', 20, 17, 20, 16, Units.murgulTidewarrior1, 4)
+
+public constant REVENANT = createUnitTypeAndReturnId(600, 'n00J', 35, 30, 40, 32, Units.revenantOfTheWaves1, 7)
+public constant REVENANT_BOSS = createUnitTypeAndReturnId(1100, 'n00T', 75, 80, 55, 32, Units.revenantOfTheWaves1, 15)
+
+public constant REVENANT_ICON = createUnitTypeAndReturnId('n00O')
+
+public constant SEA_ELEMENTAL = createUnitTypeAndReturnId(600, 'n00M', 35, 48, 0, 32, Units.seaElemental, 7)
+
+public constant SEA_GIANT = createUnitTypeAndReturnId(700, 'n00W', 40, 52, 25, 48, Units.seaGiantGreen1, 8)
+public constant STORMREAVER = createUnitTypeAndReturnId(200, 'n00X', 15, 15, 30, 16, Units.orcWarlock1, 3)
+
+public constant SKELETAL_ORC = createUnitTypeAndReturnId(200, 'n00U', 15, 24, 10, 16, Units.skeletonOrc1, 3)
 
 init
     doAfter(0, () -> (begin
