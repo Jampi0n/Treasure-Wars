@@ -364,7 +364,8 @@ public class GUI
     BuySuccess buySuccess = null
     BuyFailed buyFailed = null
     private bool canBuy = true
-
+    private timer updateTimer = null
+    private int currentCost = 0
 
     //
     private bool mBoardMinimized
@@ -373,7 +374,7 @@ public class GUI
         this.createUiElements()
         this.frameShopUI.hide()
 
-        this.inventoryUnit = inventoryUnit
+        this.setInventoryUnit(inventoryUnit)
         this.inventoryUnitTypeId = this.inventoryUnit.getTypeId()
         //start with seconds page, because first depends on hero
         this.selectedItem = this.getItemFromList(1,0)
@@ -389,7 +390,7 @@ public class GUI
         playerUIs[this.playerIndex] = this
         //this.buttonMap = new HashMap<int,Button>()
 
-        getTimer()..setData(this.playerIndex)..startPeriodic(0.1, () -> playerUIs[GetExpiredTimer().getData()].updateBuyButton(true) )
+        this.updateTimer = getTimer()..setData(this.playerIndex)
 
         setPage(1)
         this.selectRecipe(this.selectedItem, true)
@@ -621,6 +622,9 @@ public class GUI
 
         this.enabled = true
         this.refreshRecipeTree()
+        this.updateItemCost()
+        this.updateBuyButton(true)
+        this.updateTimer.startPeriodic(0.1, () -> playerUIs[GetExpiredTimer().getData()].updateBuyButton(false) )
 
         this.mBoardMinimized = ScoreTable.isMinimized()
         if GetLocalPlayer() == this.forPlayer and not IS_REPLAY
@@ -638,6 +642,7 @@ public class GUI
             return
 
         this.enabled = false
+        this.updateTimer.pause()
 
         if GetLocalPlayer() == this.forPlayer and not IS_REPLAY
             this.frameShopUI.hide()
@@ -737,9 +742,9 @@ public class GUI
         this.itemTitle.setText(newItem.getName())
         this.itemDescription.setText(newItem.getDescription())
         
+        this.updateItemCost()
         this.updateBuyButton(true)
         
-           
         for i = 0 to this.itemsInRecipe - 1
             this.getRecipeTreeButton(i).setSelected(this.getRecipeTreeItem(i) == this.selectedItem)
 
@@ -776,11 +781,11 @@ public class GUI
 
         this.itemsOnPage = size
 
+    private function updateItemCost()
+        this.currentCost = getItemCostForHero(this.inventoryUnit, this.selectedItem)
+        this.buyButton.setName("Buy for: " + this.currentCost.toString())
+
     private function updateBuyButton(bool forceUpdate)
-
-        let cost = getItemCostForHero(this.inventoryUnit, this.selectedItem)
-        this.buyButton.setName("Buy for: " + cost.toString())
-
         bool canBuyNew
         if this.inventoryUnit == null
             canBuyNew = false
@@ -790,7 +795,7 @@ public class GUI
             else
                 canBuyNew = this.buyCondition.condition(this.inventoryUnit, false)
 
-        canBuyNew = canBuyNew and cost <= this.forPlayer.getGold()
+        canBuyNew = canBuyNew and this.currentCost <= this.forPlayer.getGold()
 
         if canBuyNew == this.canBuy and not forceUpdate
             return
@@ -806,6 +811,7 @@ public class GUI
 
     function setInventoryUnit(unit inventoryUnit)
         this.inventoryUnit = inventoryUnit
+        if inventoryUnit != null
 
     function getItemFromList(int category, int index) returns ItemInShop
         if category == 0
@@ -885,6 +891,7 @@ public class GUI
         if this.enabled
             doAfter(0) ->
                 this.refreshRecipeTree()
+                this.updateItemCost()
 
     private static function onItemGetStatic()
         let u = GetTriggerUnit()
@@ -896,6 +903,7 @@ public class GUI
         if this.enabled
             doAfter(0) ->
                 this.refreshRecipeTree()
+                this.updateItemCost()
 
     private static function onItemDropStatic()
         let u = GetTriggerUnit()
