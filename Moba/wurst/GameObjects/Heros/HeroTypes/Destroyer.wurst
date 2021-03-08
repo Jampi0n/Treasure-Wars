@@ -9,7 +9,7 @@ constant THIS_HERO = HERO_DESTROYER
 constant THIS_ID = 13
 constant THIS_BUTTON_POS = 1 //button pos from 0 to 11
 constant THIS_ICON = "BTNEligor"
-HeroType heroType = null
+IHeroType heroType = null
 
 public constant ABILITY_DEATH_FRENZY = 'AY3P'
 constant ABILITY_BREATH = 'AY3Q'
@@ -511,7 +511,7 @@ function initHeroType()
     
 init
     
-    heroType = new HeroType(THIS_HERO, THIS_ICON, THIS_ID, false)
+    heroType = Hero.createType(THIS_HERO, THIS_ICON, THIS_ID, false)
     ..setOnInitFunction(() -> initHeroType())
 
     setupTooltips()

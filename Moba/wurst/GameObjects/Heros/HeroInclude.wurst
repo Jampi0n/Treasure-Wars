@@ -13,7 +13,6 @@ import public initlater HeroAI
 import public ItemIds
 import public initlater PickHero
 import public GeneralEvents
-import public HeroType
 import public Missile
 import public SoundUtils
 import public DamageDetection
@@ -26,10 +25,10 @@ import public DummyRecycler
 import public ErrorHandling
 import public Buff
 import public StandardBuffs
-import public UnitWrapper
+import public UnitLib
 import public AbilityScaling
 import public BuffTypeConfig
-import public HeroControl
+import public HeroLib
 import public UnitTypeConfig
 import public Constants
 import public OnAttack
@@ -37,3 +36,6 @@ import public TeamUtil
 import public ObjectEditingPreset
 import public ObjectIds
 import public ObjectIdGenerator
+
+public function delayInit(real maxDelay, CallbackSingle cb)
+    doAfter(GetRandomReal(1, maxDelay), cb)

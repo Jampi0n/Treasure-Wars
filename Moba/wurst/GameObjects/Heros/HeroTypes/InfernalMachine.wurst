@@ -10,7 +10,7 @@ constant THIS_HERO = HERO_INFERNAL_MACHINE
 constant THIS_ID = 8
 constant THIS_BUTTON_POS = 8 //button pos from 0 to 11
 constant THIS_ICON = Icons.bTNInfernalCannon
-HeroType heroType = null
+IHeroType heroType = null
 
 
 constant ABILITY_FIERY_HANDS = 'AZ8P'
@@ -571,7 +571,7 @@ function initHeroType()
 
         
 
-function createHeroType(Hero hero)
+function createHeroType(IHero hero)
     let heroUnit = hero.toUnit()
     melee_dummy[heroUnit.getOwner().getId()] = createUnit(heroUnit.getOwner(), MELEE, heroUnit.getPos(), angle(0))
     new AttackOrderTrack(hero.toUnit())
@@ -597,9 +597,9 @@ function createHeroType(Hero hero)
     end))
 
 init
-    heroType = new HeroType(THIS_HERO, THIS_ICON, THIS_ID, true)
+    heroType = Hero.createType(THIS_HERO, THIS_ICON, THIS_ID, true)
     ..setOnInitFunction(() -> initHeroType())
-    ..setOnCreateFunction((Hero hero) -> createHeroType(hero))
+    ..setOnCreateFunction((IHero hero) -> createHeroType(hero))
 
     setupTooltips()
     addButtonToTavern(THIS_ID, THIS_BUTTON_POS, heroType, 0)

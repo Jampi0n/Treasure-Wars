@@ -9,7 +9,7 @@ constant THIS_HERO = HERO_TROLL_MANHUNTER
 constant THIS_ID = 14
 constant THIS_BUTTON_POS = 2 //button pos from 0 to 11
 constant THIS_ICON = "BTNHeroTrollManhunter"
-HeroType heroType = null
+IHeroType heroType = null
 
 public constant ABILITY_BLEEDING_WOUND = 'AY4P'
 constant ABILITY_SHADOW_STRIKE = 'AY4Q'
@@ -514,7 +514,7 @@ function initHeroType()
         end))
 
     
-function createHeroType(Hero hero)
+function createHeroType(IHero hero)
     trollManhunter = hero.toUnit()
     heroOwner = trollManhunter.getOwner()
     notSpinning = createUnit(heroOwner, NOT_SPINNING, trollManhunter.getPos(), angle(0))
@@ -523,9 +523,9 @@ function createHeroType(Hero hero)
 
 init
     
-    heroType = new HeroType(THIS_HERO, THIS_ICON, THIS_ID, false)
+    heroType = Hero.createType(THIS_HERO, THIS_ICON, THIS_ID, false)
     ..setOnInitFunction(() -> initHeroType())
-    ..setOnCreateFunction((Hero hero) -> createHeroType(hero))
+    ..setOnCreateFunction((IHero hero) -> createHeroType(hero))
 
     setupTooltips()
     addButtonToTavern(THIS_ID, THIS_BUTTON_POS, heroType, 1)

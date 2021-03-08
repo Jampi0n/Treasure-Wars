@@ -1,6 +1,5 @@
 package PickHero
 import TimerUtils
-import HeroType
 import ClosureTimers
 import Gameplay
 import HashMap
@@ -9,12 +8,13 @@ import ShopManager
 import ErrorHandling
 import HeroAI
 import DynamicTooltips
-import HeroControl
+import HeroLib
 import TeamUtil
 import Constants
 import PlayerControl
-import UnitWrapper
+import UnitLib
 import BuffTypeConfig
+import Stats
 
 public PickMode pickMode
 timer chooseModeTimer
@@ -33,11 +33,11 @@ unit array patron
 fogmodifier array tavernVision
 bool array playerHasPicked
 int array tavernButtons
-HashMap<int, HeroType> buttonToHeroType
+HashMap<int, IHeroType> buttonToHeroType
 
-HeroType array remainingHeroTypes
+IHeroType array remainingHeroTypes
 int remainingHeroTypesCount
-constant heroTypeIndex = new HashMap<HeroType, int>()
+constant heroTypeIndex = new HashMap<IHeroType, int>()
 
 enum PickMode
     UNDECIDED
@@ -51,7 +51,7 @@ ban, reverse pick, same heroes
 //debug
 boolean itemCarry = false
 
-function setupCreatedHero(Hero hero)
+function setupCreatedHero(IHero hero)
     let heroUnit = hero.toUnit()
     let owner = heroUnit.getOwner()
     let ownerId = owner.getId()
@@ -95,7 +95,7 @@ function setupCreatedHero(Hero hero)
         PanCameraTo(pos.x, pos.y)
 
 
-function createRandomHeroForAI(int id, boolean removeFromTavern) returns Hero
+function createRandomHeroForAI(int id, boolean removeFromTavern) returns IHero
     int random
 
 
@@ -104,7 +104,7 @@ function createRandomHeroForAI(int id, boolean removeFromTavern) returns Hero
         if remainingHeroTypes[random].hasAI()
             break
 
-    let hero = new Hero(id, remainingHeroTypes[random].getUnitId() , gg_rct_CenterMid.getCenter(), angle(0))
+    let hero = Hero.create(id, remainingHeroTypes[random].getUnitId() , gg_rct_CenterMid.getCenter(), angle(0))
     setupCreatedHero(hero)
 
 
@@ -121,7 +121,7 @@ function createRandomHeroForAI(int id, boolean removeFromTavern) returns Hero
 function createRandomHero(int id, boolean removeFromTavern)
     let random = GetRandomInt(0, remainingHeroTypesCount-1)
 
-    let hero = new Hero(id, remainingHeroTypes[random].getUnitId() , gg_rct_CenterMid.getCenter(), angle(0))
+    let hero = Hero.create(id, remainingHeroTypes[random].getUnitId() , gg_rct_CenterMid.getCenter(), angle(0))
     setupCreatedHero(hero)
 
 
@@ -133,7 +133,7 @@ function createRandomHero(int id, boolean removeFromTavern)
     removeHeroType(remainingHeroTypes[random], removeFromTavern)
 
 
-function removeHeroType(HeroType herotype, boolean _removeFromTavern)
+function removeHeroType(IHeroType herotype, boolean _removeFromTavern)
     let index = heroTypeIndex.get(herotype)
 
 
@@ -235,8 +235,8 @@ function onClick()
 function onPick()
     let pickedUnit = GetTriggerUnit()
     if PlayerWrapper.getPlayerType(pickedUnit.getOwner().getId()) == PlayerType.HERO
-        if HeroType.getHeroType(pickedUnit.getTypeId()) != null
-            let hero = new Hero(pickedUnit)
+        if getHeroType(pickedUnit.getTypeId()) != null
+            let hero = Hero.setup(pickedUnit)
             setupCreatedHero(hero)
 
             removeHeroType(hero.getHeroType(), true)
@@ -310,11 +310,11 @@ function startPickMode()
         playerHasPicked[i] = false
 
     //copies the array of hero types
-    remainingHeroTypesCount = HeroType.heroTypeCount
+    remainingHeroTypesCount = Hero.getHeroTypeCount()
 
     for i = 0 to remainingHeroTypesCount-1
-        remainingHeroTypes[i] = HeroType.heroTypes[i]
-        heroTypeIndex.put(HeroType.heroTypes[i], i)
+        remainingHeroTypes[i] = Hero.getNthHeroType(i)
+        heroTypeIndex.put(Hero.getNthHeroType(i), i)
 
     PanCameraToTimed(gg_rct_CenterMid.getCenterX(), gg_rct_CenterMid.getCenterY(), 0)
     
@@ -339,8 +339,8 @@ function startPickMode()
     print("|cffffcc00Available modes are all random (-ar) and all pick (-ap).|r")
 
 
-public function addButtonToTavern(int heroId, int buttonPos, HeroType heroType, int tavernId)
-    let buttonId = getAbilityOffset(heroId) + 66 //B
+public function addButtonToTavern(int heroId, int buttonPos, IHeroType heroType, int tavernId)
+    let buttonId = Hero.getAbilityOffset(heroId) + 66 //B
     let q = heroType.getAbilityId(AbilitySlot.Q)
     let w = heroType.getAbilityId(AbilitySlot.W)
     let e = heroType.getAbilityId(AbilitySlot.E)
@@ -360,7 +360,7 @@ public function addButtonToTavern(int heroId, int buttonPos, HeroType heroType, 
         error("tavernButtons["+(12 * tavernId + buttonPos).toString()+"] = " + tavernButtons[12 * tavernId + buttonPos].toString())
     else
         tavernButtons[12 * tavernId + buttonPos] = buttonId
-        buttonToHeroType.put(getAbilityOffset(heroId) + 66, heroType)
+        buttonToHeroType.put(Hero.getAbilityOffset(heroId) + 66, heroType)
         BlzSetAbilityTooltip(buttonId, GetObjectName(heroType.getUnitId()), 0)
         let tooltip = namePassive + "|n" + tooltipPassive + "|n|n" + 
         nameQ + "|n" + tooltipQ + "|n|n" + 
@@ -379,7 +379,7 @@ public function addButtonToTavern(int heroId, int buttonPos, HeroType heroType, 
                 error("Tooltip for hero " + GetObjectName(heroType.getUnitId()) + " was not correctly generated.")
 
 public function initBeforeHeroType()
-    buttonToHeroType = new HashMap<int, HeroType>()
+    buttonToHeroType = new HashMap<int, IHeroType>()
     for i = 0 to 47
         tavernButtons[i] = -1
 
@@ -457,7 +457,7 @@ init
 
                         let ai = new HeroAI(hero, AI_DIFFICULTY_INSANE)
 
-                        for Hero h in Players.heroList(i)
+                        for IHero h in Players.heroList(i)
                             h.toUnit().setLevel(25, false)
 
                         doAfter(6) ->
@@ -483,13 +483,13 @@ init
         ..registerPlayerChatEvent(players[0], "mid ", false)
         ..addAction() ->
             let i = GetEventPlayerChatString().substring(4).toInt()
-            for Hero hero in Players.heroList(i)
+            for IHero hero in Players.heroList(i)
                 hero.toUnit().setXY(gg_rct_CenterMid.getCenter())
 
         CreateTrigger()
         ..registerPlayerChatEvent(players[0], "mid", true)
         ..addAction() ->
-            for Hero hero in Players.heroList(0)
+            for IHero hero in Players.heroList(0)
                 hero.toUnit().setXY(gg_rct_CenterMid.getCenter())
 
         CreateTrigger()
@@ -500,7 +500,7 @@ init
         CreateTrigger()
         ..registerPlayerChatEvent(players[0], "castle", true)
         ..addAction() ->
-            for Hero hero in Players.heroList(0)
+            for IHero hero in Players.heroList(0)
                 hero.toUnit().setXY(gg_rct_BrownCastle.getCenter())
                 hero.toUnit().wrapper().addStatAbsoluteBonus(Stat.STR, 10000)
                 hero.toUnit().wrapper().addStatAbsoluteBonus(Stat.AS, 200)
@@ -510,13 +510,13 @@ init
         ..registerPlayerChatEvent(players[0], "lvl ", false)
         ..addAction() ->
             let i = GetEventPlayerChatString().substring(4).toInt()
-            for Hero hero in Players.heroList(i)
+            for IHero hero in Players.heroList(i)
                 hero.toUnit().setLevel(25, false)
 
         CreateTrigger()
         ..registerPlayerChatEvent(players[0], "lvl", true)
         ..addAction() ->
-            for Hero hero in Players.heroList(0)
+            for IHero hero in Players.heroList(0)
                 hero.toUnit().setLevel(25, false)
 
      //SetHeroLevel(hero.toUnit(), 25, true)

@@ -9,7 +9,7 @@ constant THIS_HERO = HERO_DRILLMO
 constant THIS_ID = 6
 constant THIS_BUTTON_POS = 6 //button pos from 0 to 11
 constant THIS_ICON = Icons.bTNFlyingMachine
-HeroType heroType = null
+IHeroType heroType = null
 
 constant ABILITY_OVERCHARGE = 'AZ6P'
 constant ABILITY_PULL = 'AZ6Q'
@@ -485,7 +485,7 @@ function initHeroType()
 
         addOnDamageFunc( Condition( function onDamage ) )
 
-function createHeroType(Hero hero)
+function createHeroType(IHero hero)
     CreateTrigger()
     ..registerUnitEvent(hero.toUnit(), EVENT_UNIT_HERO_SKILL)
     ..addAction(() -> (begin
@@ -499,9 +499,9 @@ function createHeroType(Hero hero)
     end))
 
 init
-    heroType = new HeroType(THIS_HERO, THIS_ICON, THIS_ID, true)
+    heroType = Hero.createType(THIS_HERO, THIS_ICON, THIS_ID, true)
     ..setOnInitFunction(() -> initHeroType())
-    ..setOnCreateFunction((Hero hero) -> createHeroType(hero))
+    ..setOnCreateFunction((IHero hero) -> createHeroType(hero))
 
     setupTooltips()
     addButtonToTavern(THIS_ID, THIS_BUTTON_POS, heroType, 0)

@@ -1,0 +1,72 @@
+package IHeroType
+
+import initlater IHero
+import initlater HeroAI
+import LinkedList
+import IUnit
+import IOnAttack
+import Stats
+
+public enum AbilitySlot
+    Q
+    W
+    E
+    R
+    PASSIVE
+
+public interface AIBehaviour
+    function run(HeroAI ai)
+
+public interface OnCreateFunction
+    function onCreate(IHero hero)
+
+public interface OnInitFunction
+    function onInit()
+
+public interface IHeroType
+    function initialize()
+    function addMorph(int id)
+    function setBase(Stat stat, integer value)
+    function getBase(Stat stat) returns integer
+    function setMax(Stat stat, integer value)
+    function getMax(Stat stat) returns integer
+    function setStat(Stat stat, integer min, integer max)
+    function getUnitId() returns integer
+    function onAttack(unit attacker, unit target, boolean isActive, boolean advanced)
+    function setOnAttackFunc(OnAttackFunctionHero onAttack)
+    function calculateStat(Stat stat, integer level) returns integer
+    function setBonusCalculation(CalculateTotalBonus bonusCalculation)
+    function getBonusCalculation() returns CalculateTotalBonus
+    function setOnCreateFunction(OnCreateFunction onCreate)
+    function getOnCreateFunction() returns OnCreateFunction
+    function setOnInitFunction(OnInitFunction onInit)
+    function getOnInitFunction() returns OnInitFunction
+    function getIcon() returns string
+    function getHeroId() returns int
+    function hasAI() returns boolean
+    function setRetreatAI(AIBehaviour ai)
+    function setAttackAI(AIBehaviour ai)
+    function setTeamFightAI(AIBehaviour ai)
+    function retreatAI(HeroAI ai)
+    function attackAI(HeroAI ai)
+    function teamFightAI(HeroAI ai)
+    function getItemBuild() returns LinkedList<int>
+    function getSkillBuild() returns string
+    function addItem(int itemId)
+    function setSkillBuild(string skillBuild)
+    function updateTooltipsStr(unit whichUnit)
+    function updateTooltipsInt(unit whichUnit)
+    function getAbilityId(AbilitySlot slot) returns int
+    function useHeroGlow()
+    function getUsesHeroGlow() returns boolean
+
+interface GetterFunction
+    function get(int unitTypeId) returns IHeroType
+GetterFunction getterFunction = null
+
+public function setGetHeroTypeFunction(GetterFunction func)
+    getterFunction = func
+
+public function getHeroType(int unitTypeId) returns IHeroType
+    return getterFunction.get(unitTypeId)
+        

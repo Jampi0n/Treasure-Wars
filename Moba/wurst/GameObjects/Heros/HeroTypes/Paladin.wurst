@@ -10,7 +10,7 @@ constant THIS_HERO = HERO_PALADIN
 constant THIS_ID = 2
 constant THIS_BUTTON_POS = 2 //button pos from 0 to 11
 constant THIS_ICON = Icons.bTNHeroPaladin
-HeroType heroType = null
+IHeroType heroType = null
 
 public constant ABILITY_HEAVY_ARMORED = 'AZ2P'
 constant ABILITY_SHIELD_BASH = 'AZ2Q'
@@ -475,7 +475,7 @@ function initHeroType()
 
 
 init
-    heroType = new HeroType(THIS_HERO, THIS_ICON, THIS_ID, true)
+    heroType = Hero.createType(THIS_HERO, THIS_ICON, THIS_ID, true)
     ..setOnInitFunction(() -> initHeroType())
 
     setupTooltips()

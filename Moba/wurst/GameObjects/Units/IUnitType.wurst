@@ -1,0 +1,24 @@
+package IUnitType
+
+public interface IUnitType
+    function getUnitId() returns int
+    function getBounty() returns int
+    function getBaseAttack() returns int
+    function getBaseArmor() returns int
+    function getBaseHp() returns int
+    function getPowerLevel() returns int
+    function getUpgradeAttack(player owner) returns int
+    function getUpgradeArmorCount(player owner) returns int
+    function getUpgradeArmor(player owner) returns int
+    function getHitBox() returns int
+    function getModel() returns string
+
+interface GetterFunction
+    function get(int unitTypeId) returns IUnitType
+GetterFunction getterFunction = null
+
+public function setGetUnitTypeFunction(GetterFunction func)
+    getterFunction = func
+
+public function getUnitType(int unitTypeId) returns IUnitType
+    return getterFunction.get(unitTypeId)

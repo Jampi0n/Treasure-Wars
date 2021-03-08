@@ -9,7 +9,7 @@ constant THIS_HERO = HERO_ELEMENTAL_MAGE
 constant THIS_ID = 11
 constant THIS_BUTTON_POS = 11 //button pos from 0 to 11
 constant THIS_ICON = "BTNCloakOfResistance"
-HeroType heroType = null
+IHeroType heroType = null
 
 
 constant ABILITY_FRENZY = 'AY1P'
@@ -473,7 +473,7 @@ function initHeroType()
 
 
 init
-    heroType = new HeroType(THIS_HERO, THIS_ICON, THIS_ID, false)
+    heroType = Hero.createType(THIS_HERO, THIS_ICON, THIS_ID, false)
     ..setOnInitFunction(() -> initHeroType())
 
     setupTooltips()
