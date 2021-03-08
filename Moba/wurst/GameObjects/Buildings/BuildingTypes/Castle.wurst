@@ -1,21 +1,22 @@
 package Castle
 
 import BuildingsInclude
+import TimerUtils
 
 constant SOUND_CALL_TO_ARMS = new SoundDefinition(Sounds.humanCallToArmsWhat1, false, true)
 
 
 vec2 array militaSpawn = [gg_rct_GreenCastle.getCenter(), gg_rct_BrownCastle.getCenter()]
 LinkedList<unit> array militia = [new LinkedList<unit>(), new LinkedList<unit>()]
-boolean array removeMilita = [true, true]
+timer array removeMilitaTimer = [getTimer()..setData(0), getTimer()..setData(1)]
 rect array militiaDespawn = [gg_rct_GreenMilitiaDespawn, gg_rct_BrownMilitiaDespawn]
 
-function onMilitiaDespawn(int team)
-	if removeMilita[team]
-		for u in militia[team]
-			if Players.team(u.getOwner().getId()) == team and militiaDespawn[team].contains(u.getPos())
-				militia[team].remove(u)
-				u.remove()
+function onMilitiaDespawn()
+	let team = GetExpiredTimer().getData()
+	for u in militia[team]
+		if Players.team(u.getOwner().getId()) == team and militiaDespawn[team].contains(u.getPos())
+			militia[team].remove(u)
+			u.remove()
 
 enum VictoryState
 	UNDECIDED
@@ -96,12 +97,11 @@ public class Castle extends Building
 		let team = Players.team(building.getOwner().getId())
 		if itemId == 'I006' //Call to Arms
 			SOUND_CALL_TO_ARMS.playOnPoint(heroPos).snd.setVolume(350)
-			removeMilita[team] = false
 			for i = 0 to 15
 				let spawnedUnit = spawnUnit(TEAM_1, MILITIA_DEFEND, militaSpawn[team])
 				militia[team].add(spawnedUnit)
 			doAfter(45, () -> (begin
-				removeMilita[team] = true
+				removeMilitaTimer[team].startPeriodic(0.1, ()->onMilitiaDespawn())
 				for u in militia[team]
 					u.addBuff(u, -1, DISARMED, 1)
 					u.issuePointOrder("move", militaSpawn[team])
@@ -110,7 +110,6 @@ public class Castle extends Building
 						u.remove()
 			end))
 			doAfter(50, () -> (begin
-				removeMilita[team] = true
 				for u in militia[team]
 					u.addBuff(u, -1, DISARMED, 1)
 					u.issuePointOrder("move", militaSpawn[team])
@@ -119,14 +118,9 @@ public class Castle extends Building
 						u.remove()
 			end))
 			doAfter(89, () -> (begin
+				removeMilitaTimer[team].pause()
 				for u in militia[team]
 					militia[team].remove(u)
 					u.remove()
 			end))
 
-init
-	CreateTrigger()
-	..registerTimerEvent(0.1, true)
-	..addAction()->
-		onMilitiaDespawn(TEAM_1)
-		onMilitiaDespawn(TEAM_2)
