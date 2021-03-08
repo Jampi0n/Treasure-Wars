@@ -1,0 +1,44 @@
+package IUnit
+
+import Stats
+
+public interface CalculateTotalBonus
+    function calculate(IUnit u, Stat whichStat)
+
+public interface IUnit
+    function updateBaseStatsUnits()
+    function updateBaseStatsHero()
+    function createBuffList()
+    function setBonusCalculation(CalculateTotalBonus bonusCalculation)
+    function getBonusCalculation() returns CalculateTotalBonus
+    function defaultBonusCalcualtion(Stat whichStat)
+    function updateTotalStatBonus(Stat whichStat)
+    function applyTotalStatBonus(Stat whichStat)
+    function setStatAbsoluteBonus(Stat whichStat, int newValue)
+    function addStatAbsoluteBonusReal(Stat whichStat, int plusValue)
+    function setStatRelativeBonus(Stat whichStat, int newValue)
+    function addStatAbsoluteBonus(Stat whichStat, int plusValue)
+    function addStatRelativeBonus(Stat whichStat, int plusValue)
+    function printStats()
+    function printStat(Stat whichStat)
+    function toUnit() returns unit
+    function getStatAbsoluteBonus(Stat whichStat) returns int
+    function getStatRelativeBonus(Stat whichStat) returns int
+    function getStatBaseValue(Stat whichStat) returns int
+    function getStatTotalBonus(Stat whichStat) returns int
+    function getStatTotalValue(Stat whichStat) returns int
+    function copyBaseStatsFrom(IUnit wrapper)
+    function incBlue()
+    function decBlue()
+    function incReveal()
+    function decReveal()
+
+interface GetterFunction
+    function get(unit u) returns IUnit
+GetterFunction getterFunction = null
+
+public function setGetWrapperFunction(GetterFunction func)
+    getterFunction = func
+
+public function unit.wrapper() returns IUnit
+    return getterFunction.get(this)

@@ -1,6 +1,5 @@
 package HeroAI
 
-import HeroType
 import TimerUtils
 import ClosureTimers
 import ItemInShop
@@ -12,10 +11,11 @@ import ShopGUI
 import HashMap
 import TeamUtil
 import LinkedList
-import HeroControl
+import HeroLib
 import PlayerControl
-import UnitWrapper
+import UnitLib
 import Constants
+import Stats
 
 constant teamAIs = [new LinkedList<HeroAI>,new LinkedList<HeroAI>,new LinkedList<HeroAI>,new LinkedList<HeroAI>]
 
@@ -157,7 +157,7 @@ public function unit.findTarget(real range, AbilityTargetFocus focus, AbilityTar
             else if priority == AbilityTargetPriority.LOW_DISTANCE
                 newPrio = 1/u.getPos().distanceTo(pos)
             else if priority == AbilityTargetPriority.HIGH_VALUE
-                let uType = UnitType.getUnitType(u.getTypeId())
+                let uType = getUnitType(u.getTypeId())
                 if uType != null
                     newPrio = uType.getBounty().toReal()
                 else
@@ -303,8 +303,8 @@ public class HeroAI
     
     private int ownerId
     private player owningPlayer
-    private Hero hero
-    private HeroType heroType
+    private IHero hero
+    private IHeroType heroType
     private unit heroUnit
     protected AIState state
     private vec2 homeLoc
@@ -367,7 +367,7 @@ public class HeroAI
     function getOwningPlayer() returns player
         return this.owningPlayer
     
-    function getHero() returns Hero
+    function getHero() returns IHero
         return this.hero
 
     function getHeroUnit() returns unit
@@ -464,7 +464,7 @@ public class HeroAI
         end))
     
 
-    construct(Hero hero, aidifficulty diff)
+    construct(IHero hero, aidifficulty diff)
         this.owningPlayer =  hero.toUnit().getOwner()
         this.ownerId = this.owningPlayer.getId()
         this.hero = hero

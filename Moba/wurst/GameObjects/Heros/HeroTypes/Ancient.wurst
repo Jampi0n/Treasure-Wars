@@ -13,7 +13,7 @@ constant THIS_ID = 4
 constant THIS_BUTTON_POS = 4 //button pos from 0 to 11
 constant THIS_ICON = Icons.bTNTreant
 
-HeroType heroType = null
+IHeroType heroType = null
 
 constant UPROOTED = compiletime(UNIT_ID_GEN.next())
 unit array uprooted_dummy
@@ -245,7 +245,7 @@ class EatTreeAnimation
         this.direction = startPos.angleTo(caster.getPos())
 
         string modelPath = ""
-        let uType = UnitType.getUnitType(target.getTypeId())
+        let uType = getUnitType(target.getTypeId())
         if uType != null
             modelPath = uType.getModel()
 
@@ -552,7 +552,7 @@ function initHeroType()
 
 
 
-function createHeroType(Hero hero)
+function createHeroType(IHero hero)
     let heroUnit = hero.toUnit()
     uprooted_dummy[hero.toUnit().getOwner().getId()] = createUnit(hero.toUnit().getOwner(), UPROOTED, hero.toUnit().getPos(), angle(0))
     CreateTrigger()
@@ -592,9 +592,9 @@ function createHeroType(Hero hero)
     end))
 
 init
-    heroType = new HeroType(THIS_HERO, THIS_ICON, 4, true)
+    heroType = Hero.createType(THIS_HERO, THIS_ICON, 4, true)
     ..setOnInitFunction(() -> initHeroType())
-    ..setOnCreateFunction((Hero hero) -> createHeroType(hero))
+    ..setOnCreateFunction((IHero hero) -> createHeroType(hero))
 
     setupTooltips()
     addButtonToTavern(THIS_ID, THIS_BUTTON_POS, heroType, 0)

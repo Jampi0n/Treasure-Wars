@@ -9,7 +9,7 @@ constant THIS_HERO = HERO_SEA_DRUID
 constant THIS_ID = 3
 constant THIS_BUTTON_POS = 3 //button pos from 0 to 11
 constant THIS_ICON = "BTNSeaDruid"
-HeroType heroType = null
+IHeroType heroType = null
 
 constant ABILITY_ANCIENT_KNOWLEDGE = 'AZ3P'
 constant ABILITY_TIDAL_FURY = 'AZ3Q'
@@ -508,13 +508,13 @@ function initHeroType()
     ..addItem(ITEM_ID_SPIKED_ARMOR)
     ..addItem(ITEM_ID_ARCANE_BLADE)
     ..addItem(ITEM_ID_ARCANE_SHIELD)
-    ..setBonusCalculation((UnitWrapper whichWrapper, Stat whichStat) -> (begin
+    ..setBonusCalculation((IUnit whichWrapper, Stat whichStat) -> (begin
         let lvl = whichWrapper.toUnit().getAbilityLevel(ABILITY_ANCIENT_KNOWLEDGE)
         if lvl == 0
             whichWrapper.defaultBonusCalcualtion(whichStat)
         else
             if whichStat == Stat.HP or whichStat == Stat.MP //if hp or mana was changed, calculate special values.
-                let hp = Stat.HP.toInt()
+                /*let hp = Stat.HP.toInt()
                 let mp = Stat.MP.toInt()
                 let arrayOffset = whichWrapper.arrayOffset
                 whichWrapper.defaultBonusCalcualtion(Stat.HP)
@@ -524,7 +524,7 @@ function initHeroType()
                 UnitWrapper.statsTotalBonus_static[arrayOffset + hp] = hpBonus + ((1/ANCIENT_KNOWLEDGE_HP_BONUS[lvl-1]) * (mpBonus + whichWrapper.getStatBaseValue(Stat.MP)) ).toInt()
                 UnitWrapper.statsTotalBonus_static[arrayOffset + mp] = mpBonus + ((1/ANCIENT_KNOWLEDGE_MP_BONUS[lvl-1]) * (hpBonus + whichWrapper.getStatBaseValue(Stat.HP)) ).toInt()
                 whichWrapper.applyTotalStatBonus(Stat.HP)
-                whichWrapper.applyTotalStatBonus(Stat.MP)
+                whichWrapper.applyTotalStatBonus(Stat.MP)*/
             else //else calculate default values
                 whichWrapper.defaultBonusCalcualtion(whichStat)
     end))
@@ -567,7 +567,7 @@ function initHeroType()
             thisBuff.getTarget().wrapper().addStatRelativeBonus(Stat.MS, RITUAL_MOVEMENT_SLOW[thisBuff.getLevel()-1]*10)
         end))
 
-function createHeroType(Hero hero)
+function createHeroType(IHero hero)
     CreateTrigger()
     ..registerUnitEvent(hero.toUnit(), EVENT_UNIT_HERO_SKILL)
     ..addAction() ->
@@ -579,9 +579,9 @@ function createHeroType(Hero hero)
 
 
 init
-    heroType = new HeroType(THIS_HERO, THIS_ICON, THIS_ID, true)
+    heroType = Hero.createType(THIS_HERO, THIS_ICON, THIS_ID, true)
     ..setOnInitFunction(() -> initHeroType())
-    ..setOnCreateFunction((Hero hero) -> createHeroType(hero))
+    ..setOnCreateFunction((IHero hero) -> createHeroType(hero))
 
     setupTooltips()
     addButtonToTavern(THIS_ID, THIS_BUTTON_POS, heroType, 0)

@@ -32,7 +32,7 @@ function setVictoryState(VictoryState newState)
 
 		//stops heroes from reviving
 		for i = 0 to MAX_HERO_COUNT-1
-			for Hero hero in Players.heroList(i)
+			for IHero hero in Players.heroList(i)
 				hero.destroyTimer()
 
 

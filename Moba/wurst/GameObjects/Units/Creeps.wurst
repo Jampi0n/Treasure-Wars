@@ -9,12 +9,13 @@ import ObjectEditingPreset
 import DamageDetection
 import StandardTextTags
 import Buff
-import UnitWrapper
+import UnitLib
 import UnitTypeConfig
 import Constants
 import PlayerControl
 import TeamUtil
-import HeroControl
+import HeroLib
+import Stats
 
 constant int DUMMY_CASTER = compiletime(UNIT_ID_GEN.next())
 constant int HEAL_BUFF_ID = compiletime(createDummyBuff())
@@ -242,7 +243,7 @@ public class CreepCamp
         unitToCamp.put(creepUnit, this)
         creepTypes.add(new Creep(creepUnit))
         let creepTypeId = creepUnit.getTypeId()
-        totalLevel += UnitType.getUnitType(creepTypeId).getPowerLevel()
+        totalLevel += getUnitType(creepTypeId).getPowerLevel()
         if BuffConfiguration.unitTypeToBuffConfig.has(creepTypeId)
             let customBuff = BuffConfiguration.unitTypeToBuffConfig.get(creepTypeId).customBuff
             doAfter(0.01) ->
@@ -284,7 +285,7 @@ public class CreepCamp
         if buffConfig != null and buffConfig.bountyBuff != null
             killer.addBuff(killer, buffConfig.bountyDuration, buffConfig.bountyBuff, 1)
 
-        let bounty = UnitType.getUnitType(u.getTypeId()).getBounty()
+        let bounty = getUnitType(u.getTypeId()).getBounty()
         createGoldBountyTextTag(u, bounty, killer.getOwner())
         let killerId = killer.getOwner().getId()
         PlayerWrapper.addUnitKill(killerId)
@@ -293,9 +294,9 @@ public class CreepCamp
         killer.healHP(killer, killer.getMaxHP()*0.05)
         killer.healMana(killer, killer.getMaxMana()*0.05)
 
-        let uType = UnitType.getUnitType(u.getTypeId())
+        let uType = getUnitType(u.getTypeId())
         if uType != null
-            Hero.getHero(killer).addXp(uType.getPowerLevel()*8.)
+            killer.toHero().addXp(uType.getPowerLevel()*8.)
     
 
     private static function onDeath()

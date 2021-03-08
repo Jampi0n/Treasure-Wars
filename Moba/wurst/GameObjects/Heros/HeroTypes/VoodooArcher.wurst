@@ -9,7 +9,7 @@ constant THIS_HERO = HERO_VOODOO_ARCHER
 constant THIS_ID = 12
 constant THIS_BUTTON_POS = 0 //button pos from 0 to 11
 constant THIS_ICON = Icons.bTNShadowHunter
-HeroType heroType = null
+IHeroType heroType = null
 
 constant ABILITY_VOODOO_ARROWS = 'AY2P'
 constant ABILITY_GHOST_ARROWS = 'AY2Q'
@@ -312,7 +312,7 @@ function castBigBadVoodoo()
             fx.destr()
         else
             for p in enemyList
-                for Hero hero in Players.heroList(p)
+                for IHero hero in Players.heroList(p)
                     let target = hero.toUnit()
                     if target.isTargetable(caster.getOwner(), false, true)
                         caster.dealDamage(target, 0.1 * BBV_DAMAGE[level-1].bonus(caster.getInt(), BBV_DAMAGE_BONUS), ReductionType.NONE)
@@ -428,7 +428,7 @@ function initHeroType()
     
 init
     
-    heroType = new HeroType(THIS_HERO, THIS_ICON, THIS_ID, false)
+    heroType = Hero.createType(THIS_HERO, THIS_ICON, THIS_ID, false)
     ..setOnInitFunction(() -> initHeroType())
 
     setupTooltips()

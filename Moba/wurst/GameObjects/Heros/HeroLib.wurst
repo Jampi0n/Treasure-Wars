@@ -1,0 +1,66 @@
+package HeroLib
+
+import HeroTypeImpl
+import HeroImpl
+import ErrorHandling
+import public IHero
+import public IHeroType
+import DynamicTooltips
+
+
+public abstract class Hero
+    static function create(int playerId, int unitId, vec2 pos, angle facing) returns IHero
+        return new HeroImpl(playerId, unitId, pos, facing)
+
+    static function setup(unit u) returns IHero
+        return new HeroImpl(u)
+
+    static function copyInventory(unit copyFrom, unit copyTo)
+        for i = 0 to 5
+            let itm = copyTo.itemInSlot(i)
+            let itmId = copyFrom.itemInSlot(i).getTypeId()
+            if itm.getTypeId() != itmId
+                itm.remove()
+                copyTo.addItemToSlot(itmId, i)
+
+    static function getAbilityOffset(int heroId) returns integer
+        return HeroTypeImpl.getAbilityOffset(heroId)
+
+    static function getHeroTypeCount() returns int
+        return HeroTypeImpl.getHeroTypeCount()
+    
+    static function getNthHeroType(int index) returns IHeroType
+        return HeroTypeImpl.getNthHeroType(index)
+
+    static function createType(int unitId, string icon, int heroId, bool hasAI) returns IHeroType
+        return new HeroTypeImpl(unitId, icon, heroId, hasAI)
+
+public function addDynamicTooltipStrength(IHeroType herotype, DynamicTooltip tooltip)
+    HeroTypeImpl.addDynamicTooltipStrength(herotype, tooltip)
+        
+public function addDynamicTooltipIntelligence(IHeroType herotype, DynamicTooltip tooltip)
+    HeroTypeImpl.addDynamicTooltipIntelligence(herotype, tooltip)
+
+public function addDynamicTooltipBoth(IHeroType herotype, DynamicTooltip tooltip)
+    HeroTypeImpl.addDynamicTooltipBoth(herotype, tooltip)
+
+public function createHeroButton(int heroId, int buttonPos, string icon)
+    HeroTypeImpl.createHeroButton(heroId, buttonPos, icon)
+
+function charToAbilitySlot(string char) returns AbilitySlot
+    AbilitySlot ret = AbilitySlot.PASSIVE
+    let s = char.toUpperCase()
+    if s == "Q"
+        ret = AbilitySlot.Q
+    else if s == "W"
+        ret = AbilitySlot.W
+    else if s == "E"
+        ret = AbilitySlot.E
+    else if s == "R"
+        ret = AbilitySlot.R
+    else if s == "D"
+        ret = AbilitySlot.PASSIVE
+    else
+        error("unknown skill slot: "+char)
+
+    return ret

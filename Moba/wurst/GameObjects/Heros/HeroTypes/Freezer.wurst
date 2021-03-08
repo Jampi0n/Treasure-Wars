@@ -8,7 +8,7 @@ constant THIS_HERO = HERO_FREEZER
 constant THIS_ID = 9
 constant THIS_BUTTON_POS = 9 //button pos from 0 to 11
 constant THIS_ICON = Icons.bTNFrostArmor
-HeroType heroType = null
+IHeroType heroType = null
 
 constant ABILITY_COLD_HAND = 'AZ9P'
 constant ABILITY_FROST_NOVA = 'AZ9Q'
@@ -644,7 +644,7 @@ function initHeroType()
 
         
 init
-    heroType = new HeroType(THIS_HERO, THIS_ICON, THIS_ID, true)
+    heroType = Hero.createType(THIS_HERO, THIS_ICON, THIS_ID, true)
     ..setOnInitFunction(() -> initHeroType())
 
     setupTooltips()

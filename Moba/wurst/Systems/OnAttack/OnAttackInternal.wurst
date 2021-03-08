@@ -1,7 +1,6 @@
 package OnAttackInternal
 
 import DamageDetection
-import initlater HeroType
 import ClosureTimers
 import initlater SeaDruid
 import initlater TrollBerserker
@@ -9,16 +8,18 @@ import initlater Paladin
 import initlater Destroyer
 import StandardTextTags
 import initlater Creeps
-import OnAttackInclude
+import IOnAttack
 import ItemIds
 import initlater HeroAI
 import LinkedList
 import Gameplay
-import UnitWrapper
+import UnitLib
 import Buff
 import Constants
 import PlayerControl
 import UnitTypeConfig
+import HeroLib
+import Stats
 
 //import initlater ItemShopSystem
 
@@ -253,7 +254,7 @@ public class OnAttackInternal
         onAttackFunctionListAdvanced.add(onAttack)
 
     protected static function onAttackAbilities(unit attacker, unit target, boolean isActive, boolean advanced)
-        let heroType = HeroType.getHeroType(attacker.getTypeId())
+        let heroType = getHeroType(attacker.getTypeId())
         if(heroType!=null)
             heroType.onAttack(attacker, target, isActive, advanced)
 

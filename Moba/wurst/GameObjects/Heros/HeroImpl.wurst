@@ -1,18 +1,20 @@
-package HeroControl
+package HeroImpl
 
 import HashMap
 import GameTimer
-import HeroType
 import Upgrades
 import TimerUtils
 import ClosureTimers
 import Execute
-import ErrorHandling
+import IHero
+import IHeroType
 import TeamUtil
-import UnitWrapper
+import UnitLib
 import PlayerControl
 import Constants
 import LinkedList
+import HeroTypeImpl
+import Stats
 
 constant HP_PER_LEVEL = 15
 constant STRENGTH_BONUS = 45
@@ -61,23 +63,20 @@ function initAssistLists()
         destroy indexList
         
 
-public function delayInit(real maxDelay, CallbackSingle cb)
-    doAfter(GetRandomReal(1, maxDelay), cb)
-
-public class Hero
+public class HeroImpl implements IHero
 
     static constant assistDuration = 10.
 
     private player owner
     private int ownerId
-    private HeroType heroType
+    private IHeroType heroType
     private unit hero
     private integer level
     private static constant onDamageTrigger = CreateTrigger()
     private static constant onDeathTrigger = CreateTrigger()
     private static constant onLevelUpTrigger = CreateTrigger()
     //protected static Hero array heroes
-    private static constant unitToHero = new HashMap<unit, Hero>
+    private static constant unitToHero = new HashMap<unit, HeroImpl>
     private constant assistMap = new HashMap<int, real>
     private int lastAssistant = -1
     private timer reviveTimer
@@ -109,17 +108,15 @@ public class Hero
             
             if unitToHero.has(heroUnit)
                 let hero = unitToHero.get(heroUnit)
-                //for i = 0 to 3
-                    //hero.defaultCooldown[i] = BlzGetAbilityCooldown(hero.skillIds[i], hero.toUnit().getAbilityLevel(hero.skillIds[i]))
                 hero.updateCooldowns()
 
         end))
         ..registerAnyUnitEvent(EVENT_PLAYER_HERO_SKILL)
 
 
-    function setup()
+    private function setup()
         this.team = Players.team(this.ownerId)
-        this.heroType = HeroType.getHeroType(this.hero.getTypeId())
+        this.heroType = HeroTypeImpl.getHeroType(this.hero.getTypeId())
 
         this.skillIds[0] = this.heroType.getAbilityId(AbilitySlot.Q)
         this.skillIds[1] = this.heroType.getAbilityId(AbilitySlot.W)
@@ -140,7 +137,6 @@ public class Hero
         
         
         unitToHero.put(this.hero, this)
-        //heroes[this.owner.getId()] = this
         Players.addHero(this.ownerId, this)
 
         onDamageTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DAMAGED)
@@ -160,9 +156,6 @@ public class Hero
 
         if this.heroType.getUsesHeroGlow()
             this.heroGlow = createUnit(this.hero.getOwner(), 'n00H', this.hero.getPos(), angle(0))
-
-            
-
             doPeriodically(0.03, (CallbackPeriodic _) ->(begin
                 if this.hero.isAlive()
                     this.heroGlow.setXY(this.hero.getPos())
@@ -170,25 +163,14 @@ public class Hero
 
         wrapper.addStatAbsoluteBonus(Stat.MR, this.heroType.getBase(Stat.MR) * 1 )
         wrapper.addStatAbsoluteBonus(Stat.HR, this.heroType.getBase(Stat.HR) * 3 )
-
         wrapper.addStatAbsoluteBonus(Stat.HP, this.heroType.getBase(Stat.HP) * 15 + HP_PER_LEVEL )
         wrapper.addStatAbsoluteBonus(Stat.MP, this.heroType.getBase(Stat.MP) * 10 )
-
         wrapper.addStatAbsoluteBonus(Stat.MS, this.heroType.getBase(Stat.MS) )
-
-        //upgrade level 1
         SetPlayerTechResearched(this.owner, UPG_AR , this.heroType.getBase(Stat.AR))
         SetPlayerTechResearched(this.owner, UPG_AS , this.heroType.getBase(Stat.AS))
-
-        //SetPlayerTechResearched(upgradePlayer, UPG_MS , this.heroType.getBase(Stat.MS))
-        //this.hero.updateDefaultMovementSpeed()
-
         SetHeroStr(this.hero, this.heroType.getBase(Stat.STR) + STRENGTH_BONUS , true)
         SetHeroAgi(this.hero, this.heroType.getBase(Stat.AGI), true)
         SetHeroInt(this.hero, this.heroType.getBase(Stat.INT), true)
-
-
-        
 
         wrapper.updateBaseStatsHero()
 
@@ -224,10 +206,21 @@ public class Hero
         this.ownerId = owner.getId()
         this.setup()
 
-    function toUnit() returns unit
+    static function copyInventory(unit copyFrom, unit copyTo)
+        for i = 0 to 5
+            let itm = copyTo.itemInSlot(i)
+            let itmId = copyFrom.itemInSlot(i).getTypeId()
+            if itm.getTypeId() != itmId
+                itm.remove()
+                copyTo.addItemToSlot(itmId, i)
+
+    static function getHero(unit whichUnit) returns HeroImpl
+        return unitToHero.get(whichUnit)
+
+    override function toUnit() returns unit
         return this.hero
 
-    static function regenerate()
+    protected static function regenerate()
         for i = 0 to MAX_HERO_COUNT-1
             let heroes = Players.heroList(i)
             if heroes != null
@@ -238,38 +231,20 @@ public class Hero
                         heroUnit.healHP(heroUnit, wrapper.getStatTotalValue(Stat.HR) / 100)
                         heroUnit.healMana(heroUnit, wrapper.getStatTotalValue(Stat.MR) / 100)
 
-    function upgrade()
+    private function upgrade()
         let newLvl = GetHeroLevel(this.hero)
         let wrapper = this.hero.wrapper()
         SetPlayerTechResearched(this.owner, UPG_AR , this.heroType.calculateStat(Stat.AR, newLvl))
         SetPlayerTechResearched(this.owner, UPG_AS , this.heroType.calculateStat(Stat.AS, newLvl))
-        
-
         wrapper.addStatAbsoluteBonus(Stat.HP, (this.heroType.calculateStat(Stat.HP, newLvl) - this.heroType.calculateStat(Stat.HP, this.level)) * 15 )
-        //upgrade bug
-        //SetPlayerTechResearched(upgradePlayer, UPG_HP , this.heroType.calculateStat(Stat.HP, newLvl))
-        //SetPlayerTechResearched(upgradePlayer, UPG_HR , this.heroType.calculateStat(Stat.HR, lvl))
-        
         wrapper.addStatAbsoluteBonus(Stat.MP, (this.heroType.calculateStat(Stat.MP, newLvl) - this.heroType.calculateStat(Stat.MP, this.level)) * 10 )
-        //upgrade bug
-        //SetPlayerTechResearched(upgradePlayer, UPG_MP , this.heroType.calculateStat(Stat.MP, newLvl))
-        //SetPlayerTechResearched(upgradePlayer, UPG_MR , this.heroType.calculateStat(Stat.MR, lvl))
-        
         wrapper.addStatAbsoluteBonus(Stat.MR, (this.heroType.calculateStat(Stat.MR, newLvl) - this.heroType.calculateStat(Stat.MR, this.level)) * 1 )
         wrapper.addStatAbsoluteBonus(Stat.HR, (this.heroType.calculateStat(Stat.HR, newLvl) - this.heroType.calculateStat(Stat.HR, this.level)) * 3 )
-
         wrapper.addStatAbsoluteBonus(Stat.HP, (newLvl - this.level) * HP_PER_LEVEL )
-
-        //SetPlayerTechResearched(upgradePlayer, UPG_MS , this.heroType.calculateStat(Stat.MS, newLvl))
-        //this.hero.updateDefaultMovementSpeed()
-
         wrapper.addStatAbsoluteBonus(Stat.MS, this.heroType.calculateStat(Stat.MS, newLvl) - this.heroType.calculateStat(Stat.MS, this.level))
-
-
         SetHeroStr(this.hero, this.heroType.calculateStat(Stat.STR, newLvl) + STRENGTH_BONUS , true)
         SetHeroAgi(this.hero, this.heroType.calculateStat(Stat.AGI, newLvl), true)
         SetHeroInt(this.hero, this.heroType.calculateStat(Stat.INT, newLvl), true)
-
 
         wrapper.updateBaseStatsHero()
 
@@ -278,18 +253,18 @@ public class Hero
 
         this.level = newLvl
 
-    function onLevelUp()
+    private function onLevelUp()
         this.upgrade()
 
-    static function onLevelUpStatic()
+    private static function onLevelUpStatic()
         unitToHero.get( GetTriggerUnit()).onLevelUp()
     
     //handles assists
-    function addAssistDuration(int playerId)
+    private function addAssistDuration(int playerId)
         this.assistMap.put(playerId ,getElapsedGameTime() + assistDuration)
         this.lastAssistant = playerId
 
-    function onDamage()
+    private function onDamage()
         let damageSource = GetEventDamageSource().getOwner()
         let damageSourceId = damageSource.getId()
         if damageSource != null
@@ -300,10 +275,10 @@ public class Hero
                 if Teams.first1() <= damageSourceId and damageSourceId <= Teams.last1()
                     this.addAssistDuration(damageSource.getId())
 
-    static function onDamageStatic()
+    private static function onDamageStatic()
         unitToHero.get( GetTriggerUnit()).onDamage()
 
-    function revive()
+    private function revive()
         TimerDialogDisplay(this.reviveWindow, false)
         vec2 pos
         if this.team == TEAM_1
@@ -331,17 +306,15 @@ public class Hero
                 ..setXY(pos)
                 ..setVertexColor(colorA(255, 255, 255, 255))
 
-
-    static function reviveStatic()
+    private static function reviveStatic()
         let t = GetExpiredTimer()
-        let hero = t.getData() castTo Hero
+        let hero = t.getData() castTo HeroImpl
         t.pause()
         hero.revive()
 
     //handles death
-    function onDeath()
+    private function onDeath()
         //indetify true killer
-
         if this.heroGlow != null
             this.heroGlow.setVertexColor(colorA(255, 255, 255, 0))
 
@@ -364,10 +337,8 @@ public class Hero
 
         let gameTime = getElapsedGameTime()
         let assistList = new LinkedList<int>
-
         int assistListId = 0
         string assistString
-
         boolean unknownKiller = false
 
         if replaceKiller
@@ -392,101 +363,58 @@ public class Hero
                     assistList.add(assistantId)
                     assistListId += LIST_ID_POW_2[assistantId]
             assistString = assistStringListTeam1[assistListId]
-        
-
         let assistants = assistList.size()
-
 
         if not unknownKiller
             if killingId <= Teams.last2()
                 let assistBounty = ASSIST_BOUNTY[assistants]
-
                 let killBounty = KILL_BOUNTY[assistants]
-
                 if assistants == 0
                     printTimed(Players.coloredName(this.ownerId) + " was killed by " + Players.coloredName(killingId) + " for |cffffcc00"+killBounty.toString()+"|r gold.", 10)
                 else
                     printTimed(Players.coloredName(this.ownerId) + " was killed by " + Players.coloredName(killingId) +
                     " for |cffffcc00" + killBounty.toString() + "|r gold. " + assistString + "|cffffcc00" + assistBounty.toString() +"|r gold for helping.", 10)
-
-
                 doAfter(0.1) ->
                     for p in assistList
                         PlayerWrapper.addGoldEx(p, assistBounty)
                         PlayerWrapper.addAssist(p)
                     PlayerWrapper.addGoldEx(killingId, killBounty)
                     PlayerWrapper.addHeroKill(killingId, killingId <= Teams.last2())
-                
                     let xp = (this.level + 5) * 10.
                     Teams.rewardXp(Teams.invert(this.team), this.hero.getPos(), xp)
                     destroy assistList
-                    
             else
                 printTimed(Players.coloredName(this.ownerId) + " was killed by " + killingPlayer.getName() + ".", 10)
-
                 destroy assistList
         else
             printTimed(Players.coloredName(this.ownerId) + " died.", 10)
             destroy assistList
-
-        
-
-        
-        this.reviveTimer
-            ..start(10.+level*2, function reviveStatic)
+        this.reviveTimer.start(10.+level*2, function reviveStatic)
         if GetLocalPlayer() == owner
             TimerDialogDisplay(this.reviveWindow, true)
-
         doAfter(0.1) ->
             PlayerWrapper.addDeath(this.ownerId)
 
-
-    static function onDeathStatic()
+    private static function onDeathStatic()
         unitToHero.get( GetTriggerUnit()).onDeath()
 
-
-
-    function toString() returns string
+    override function toString() returns string
         return "Hero "+ this.owner.getName() +"="+this.hero.getName()
 
-    function getHeroType() returns HeroType
+    override function getHeroType() returns IHeroType
         return this.heroType
 
-    function getLevel() returns int
+    override function getLevel() returns int
         return this.level
 
-    static function copyInventory(unit copyFrom, unit copyTo)
-        for i = 0 to 5
-            let itm = copyTo.itemInSlot(i)
-            let itmId = copyFrom.itemInSlot(i).getTypeId()
-            if itm.getTypeId() != itmId
-                itm.remove()
-                copyTo.addItemToSlot(itmId, i)
-
-    static function getHero(unit whichUnit) returns Hero
-        return unitToHero.get(whichUnit)
-
-    /*static function getHero(int index) returns Hero
-        if index < 0 or index > MAX_HERO_COUNT - 1
-            printWarning("Index does not exist")
-            return null
-        return heroes[index]*/
-
-    /*static function getHero(CPlayer owner) returns Hero
-        return getHero(owner.getId())
-
-    static function getHero(player owner) returns Hero
-        return getHero(owner.getId())*/
-
-
-    function addXp(real xp)
+    override function addXp(real xp)
         this.sharedXp += xp
         let intXp = this.sharedXp.toInt()
         this.hero.addXp(intXp, true)
         this.sharedXp -= intXp
 
     //once the game is over
-    function destroyTimer()
+    override function destroyTimer()
         TimerDialogDisplay(this.reviveWindow, false)
         DestroyTimerDialog(this.reviveWindow)
         this.reviveTimer.release()
@@ -494,7 +422,7 @@ public class Hero
     /*
     **  Changing cooldowns of morph abilities crashes the game, once they are used.
     */
-    function updateCooldowns()
+    override function updateCooldowns()
         /*
         for i = 0 to 3
             real newCd = (this.defaultCooldown[i]+this.cooldownMod[i]) / (1.0+0.01*heroUnit.wrapper().getStatTotalValue(Stat.CD))
@@ -504,40 +432,16 @@ public class Hero
             Tooltips do not need to be updated instantly. This serves as a cooldown to prevent lag spikes.
         */
         tooltipUpdateTimer.start(0.125) ->
-            let hero = GetExpiredTimer().getData() castTo Hero
+            let hero = GetExpiredTimer().getData() castTo HeroImpl
             let heroType = hero.getHeroType()
             let heroUnit = hero.toUnit()
             heroType.updateTooltipsStr(heroUnit)
             heroType.updateTooltipsInt(heroUnit)
 
-function charToAbilitySlot(string char) returns AbilitySlot
-    AbilitySlot ret = AbilitySlot.PASSIVE
-    let s = char.toUpperCase()
-    if s == "Q"
-        ret = AbilitySlot.Q
-    else if s == "W"
-        ret = AbilitySlot.W
-    else if s == "E"
-        ret = AbilitySlot.E
-    else if s == "R"
-        ret = AbilitySlot.R
-    else if s == "D"
-        ret = AbilitySlot.PASSIVE
-    else
-        error("unknown skill slot: "+char)
-
-    return ret
-
-
 init
-    Hero.classInit()
+    setGetHeroFunction((unit u) -> HeroImpl.getHero(u))
+    HeroImpl.classInit()
     initAssistLists()
     CreateTrigger()
-        ..addAction(function Hero.regenerate)
+        ..addAction(function HeroImpl.regenerate)
         ..registerTimerEvent(0.1, true)
-    /*doAfter(4) () ->
-        for i = 0 to 30
-            print("["+ i.toString() + "]" + assistStringListTeam1[i])
-
-        for i = 0 to 30
-            print("["+ i.toString() + "]" + assistStringListTeam2[i])*/

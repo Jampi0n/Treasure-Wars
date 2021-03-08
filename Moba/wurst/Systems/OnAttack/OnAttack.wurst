@@ -2,7 +2,7 @@ package OnAttack
 
 import DamageDetection
 import OnAttackInternal
-import UnitWrapper
+import UnitLib
 
 public function unit.dealDamageNoEvent(unit target, real amount, ReductionType reductionType)
     disableDamageDetect()

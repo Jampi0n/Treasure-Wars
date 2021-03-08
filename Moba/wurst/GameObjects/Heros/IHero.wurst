@@ -1,0 +1,22 @@
+package IHero
+
+import IHeroType
+
+public interface IHero
+    function toString() returns string
+    function getHeroType() returns IHeroType
+    function getLevel() returns int
+    function addXp(real xp)
+    function destroyTimer()
+    function updateCooldowns()
+    function toUnit() returns unit
+
+interface GetterFunction
+    function get(unit u) returns IHero
+GetterFunction getterFunction = null
+
+public function setGetHeroFunction(GetterFunction func)
+    getterFunction = func
+
+public function unit.toHero() returns IHero
+    return getterFunction.get(this)

@@ -1,6 +1,6 @@
 package TeamUtil
 
-import initlater HeroControl
+import IHero
 import Constants
 import LinkedList
 import ErrorHandling
@@ -53,7 +53,7 @@ public abstract class Teams
         compiletime(COLOR[1] + NAME[1] + "|r"),
         compiletime(COLOR[2] + NAME[2] + "|r")
     ]
-    static constant HEROES = [new LinkedList<Hero>(), new LinkedList<Hero>(), new LinkedList<Hero>()]
+    static constant HEROES = [new LinkedList<IHero>(), new LinkedList<IHero>(), new LinkedList<IHero>()]
     static constant HEROES_1 = HEROES[TEAM_1]
     static constant HEROES_2 = HEROES[TEAM_2]
     static constant HERO_COUNT = [0,0,0]
@@ -111,7 +111,7 @@ public abstract class Teams
 
     static function rewardXp(int team, vec2 pos, real xp)
         isValidArmyTeamIndex(team)
-        let xpHeroes = new LinkedList<Hero>()
+        let xpHeroes = new LinkedList<IHero>()
         let allies = HEROES[team]
         real tmpXp = xp
         for hero in allies
@@ -136,16 +136,16 @@ public abstract class Players
     protected static string array COLOR
     protected static string array COLORED_NAME
 
-    protected static LinkedList<Hero> array HEROES
+    protected static LinkedList<IHero> array HEROES
 
     protected static function initPlayers()
         for i = 0 to bj_MAX_PLAYER_SLOTS
-            HEROES[i] = new LinkedList<Hero>
+            HEROES[i] = new LinkedList<IHero>
             NAME[i] = players[i].getName()
             COLOR[i] = players[i].getColor().toColor().toColorString()
             COLORED_NAME[i] = COLOR[i] + NAME[i] + "|r"
 
-    @inline static function heroList(int p) returns LinkedList<Hero>
+    @inline static function heroList(int p) returns LinkedList<IHero>
         isValidHeroPlayerIndex(p)
         return HEROES[p]
 
@@ -228,7 +228,7 @@ public abstract class Players
         isValidPlayerIndex(p)
         return isArmy1(p) or isArmy2(p)
 
-    static function addHero(int p, Hero hero)
+    static function addHero(int p, IHero hero)
         isValidHeroPlayerIndex(p)
         let team = Players.team(p)
         HEROES[p].add(hero)

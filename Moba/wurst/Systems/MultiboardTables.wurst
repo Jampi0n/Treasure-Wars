@@ -1,0 +1,299 @@
+package MultiboardTables
+
+import Assets
+import UtilityFunctions
+import LinkedList
+import initlater PlayerControl
+import Constants
+import TeamUtil
+import ClosureTimers
+
+public class StatTable
+
+    static protected multiboard mBoard
+
+    static int array columnToPlayer
+    static int array playerToColumn
+
+    static int rowCount = 0
+
+    static constant playerList = new LinkedList<int>
+
+    static function setStatTitle(int row, string title)
+        mBoard.getItem(row, 0)
+            ..setValue(title)
+            ..release()
+
+        rowCount++
+
+    static function setStatTitles()
+        setStatTitle(rowCount, "Players >")
+        setStatTitle(rowCount, "Stats v")
+        setStatTitle(rowCount, "Heroes killed:")
+        setStatTitle(rowCount, "Deaths:")
+        setStatTitle(rowCount, "Assists:")
+        setStatTitle(rowCount, "Units killed:")
+        setStatTitle(rowCount, "Damage dealt:")
+        setStatTitle(rowCount, "Damage taken:")
+        setStatTitle(rowCount, "Healing done:")
+        setStatTitle(rowCount, "Healing received:")
+        setStatTitle(rowCount, "Gold earned:")
+        setStatTitle(rowCount, "Hydra's slain:")
+        setStatTitle(rowCount, "Buildings razed:")
+
+    static function setRowStat(int row, int column, string value)
+        mBoard.getItem(row, column)
+            ..setValue(value)
+            ..release()
+
+        rowCount++
+
+    static function setRowStats(int column)
+        let id = columnToPlayer[column]
+        let tmp = rowCount
+        rowCount = 2
+        setRowStat(rowCount, column, PlayerWrapper.heroKills[id].toString())
+        setRowStat(rowCount, column, PlayerWrapper.deaths[id].toString())
+        setRowStat(rowCount, column, PlayerWrapper.assists[id].toString())
+        setRowStat(rowCount, column, PlayerWrapper.unitKills[id].toString())
+        setRowStat(rowCount, column, PlayerWrapper.statDamageDealt[id].toStatString())
+        setRowStat(rowCount, column, PlayerWrapper.statDamageTaken[id].toStatString())
+        setRowStat(rowCount, column, PlayerWrapper.statHealingDone[id].toStatString())
+        setRowStat(rowCount, column, PlayerWrapper.statHealingReceived[id].toStatString())
+        setRowStat(rowCount, column, PlayerWrapper.statGoldGained[id].toString())
+        setRowStat(rowCount, column, PlayerWrapper.statHydrasKilled[id].toString())
+        setRowStat(rowCount, column, PlayerWrapper.statBuildingsRazed[id].toString())
+
+        rowCount = tmp
+
+    static function create()
+        int count = 2
+        columnToPlayer[1] = Teams.army1()
+        playerToColumn[Teams.army1()] = 1
+        for i = 0 to MAX_HERO_COUNT-1
+            if Players.heroList(i).size() != 0
+                columnToPlayer[count] = i
+                playerToColumn[i] = count
+                count++
+
+            if i == Teams.last1()
+                columnToPlayer[count] = Teams.army2()
+                playerToColumn[Teams.army2()] = count
+                count++
+
+        mBoard = CreateMultiboard()
+            ..setColumnCount(count)
+            ..setRowCount(13)
+            ..setItemsStyle(true, false)
+            ..setTitle("Stats: "+
+                Teams.COLOR[TEAM_1]+Teams.HERO_KILLS[TEAM_1].toString()+"|r / "+
+                Teams.COLOR[TEAM_2]+Teams.HERO_KILLS[TEAM_2].toString()+"|r"  )
+            ..display(true)
+            ..minimize()
+
+        for j = 0 to mBoard.getRowCount() - 1
+            for i = 1 to mBoard.getColumnCount() - 1 
+                mBoard.getItem(j, i)
+                    ..setWidth(0.05)
+                    ..release()
+            mBoard.getItem(j, 0)
+                ..setWidth(0.14)
+                ..release()
+
+        for i = 1 to mBoard.getColumnCount() - 1 
+            let id = columnToPlayer[i]
+            let p = players[id]
+            let color = p.getColor().toColor()
+            let icon = PlayerWrapper.getIcon(id)
+
+
+            let name = p.getName().substring(0, 5)
+
+            mBoard.getItem(0, i)
+                ..setValueColor(color.red, color.green, color.blue, 255)
+                ..setStyle(true, true)
+                ..setValue(name)
+                ..setIcon(icon)
+                ..release()
+
+            mBoard.getItem(1, i)
+                ..setValueColor(color.red, color.green, color.blue, 255)
+                ..setValue("xxxxxx")
+                ..release()
+
+            setRowStats(i)
+
+        setStatTitles()
+
+public class ScoreTable
+
+    static protected multiboard mBoard
+
+    static int array rowToPlayer
+    static int array playerToRow
+
+    private static real array width
+
+    static constant playerList = new LinkedList<int>
+
+    static function isMinimized() returns bool
+        return mBoard.isMinimized()
+
+    static function minimize()
+        mBoard.minimize()
+
+    static function maximize()
+        mBoard.maximize()
+
+    static function updateHeader(int team)
+        let row = (team == TEAM_1 ? 0 : Teams.HERO_PLAYER_COUNT[TEAM_1] + 1)
+        let teamName = Teams.COLORED_NAME[team]
+        
+        mBoard.getItem(row, 0)
+            ..setStyle(true, false)
+            ..setValue(teamName)
+            ..setWidth(width[0])
+            ..release() 
+        mBoard.getItem(row, 1)
+            ..setStyle(false, true)
+            ..setValue("H")
+            ..setIcon(Icons.bTNHelmutPurple)
+            ..setWidth(width[1])
+            ..release() 
+        mBoard.getItem(row, 2)
+            ..setStyle(false, true)
+            ..setValue("D")
+            ..setIcon(Icons.bTNSkeletonWarrior)
+            ..setWidth(width[2])
+            ..release() 
+        mBoard.getItem(row, 3)
+            ..setStyle(false, true)
+            ..setValue("A")
+            ..setIcon(Icons.bTNStatUp)
+            ..setWidth(width[3])
+            ..release() 
+        mBoard.getItem(row, 4)
+            ..setStyle(false, true)
+            ..setValue("U")
+            ..setIcon(Icons.bTNFootman)
+            ..setWidth(width[4])
+            ..release() 
+
+    static function addIcon(int id)
+        mBoard.getItem(playerToRow[id], 0)
+            ..setIcon(PlayerWrapper.getIcon(id))
+            ..release() 
+
+    static function update()
+        int index = 0
+        mBoard.display(true)
+
+        updateHeader(TEAM_1)
+        updateHeader(TEAM_2)
+
+        for int i in playerList
+            let p = players[i]
+            var row = 1 + index
+
+            if Players.team(i) == TEAM_2
+                row++
+
+            rowToPlayer[row] = i
+            playerToRow[i] = row
+
+            let icon = PlayerWrapper.icon[i]
+
+            mBoard.getItem(row, 0)
+                ..setStyle(true, true)
+                ..setValue(p.getNameColored())
+                ..setIcon(icon)
+                ..setWidth(width[0])
+                ..release() 
+            mBoard.getItem(row, 1)
+                ..setStyle(true, false)
+                ..setValue(PlayerWrapper.heroKills[i].toString()) 
+                ..setWidth(width[1])
+                ..release() 
+            mBoard.getItem(row, 2)
+                ..setStyle(true, false)
+                ..setValue(PlayerWrapper.deaths[i].toString()) 
+                ..setWidth(width[2])
+                ..release() 
+            mBoard.getItem(row, 3)
+                ..setStyle(true, false)
+                ..setValue(PlayerWrapper.assists[i].toString()) 
+                ..setWidth(width[3])
+                ..release() 
+            mBoard.getItem(row, 4)
+                ..setStyle(true, false)
+                ..setValue(PlayerWrapper.unitKills[i].toString())
+                ..setWidth(width[4])
+                ..release() 
+            index++
+
+    static function updatePlayerHeroKills(int i)
+        let row = playerToRow[i]
+        mBoard.getItem(row, 1)
+            ..setValue(PlayerWrapper.heroKills[i].toString()) 
+            ..release() 
+
+        mBoard.setTitle("Score: "+
+            Teams.COLOR[TEAM_1]+Teams.HERO_KILLS[TEAM_1].toString()+"|r / "+
+            Teams.COLOR[TEAM_2]+Teams.HERO_KILLS[TEAM_2].toString()+"|r"  )
+
+    static function updatePlayerDeaths(int i)
+        let row = playerToRow[i]
+        mBoard.getItem(row, 2)
+            ..setValue(PlayerWrapper.deaths[i].toString()) 
+            ..release() 
+
+    static function updatePlayerAssists(int i)
+        let row = playerToRow[i]
+        mBoard.getItem(row, 3)
+            ..setValue(PlayerWrapper.assists[i].toString()) 
+            ..release() 
+            
+    static function updatePlayerUnitKills(int i)
+        let row = playerToRow[i]
+        mBoard.getItem(row, 4)
+            ..setValue(PlayerWrapper.unitKills[i].toString())
+            ..release() 
+
+    static function display()
+    
+        Log.trace("displaying score")
+        mBoard.display(true)
+
+    static function create()
+        width[0] = 0.1
+        width[1] = 0.03
+        width[2] = 0.03
+        width[3] = 0.03
+        width[4] = 0.03
+
+        width[5] = 0.09
+        width[6] = 0.09
+        width[7] = 0.06
+        width[8] = 0.07
+        width[9] = 0.09
+        width[10] = 0.09
+
+        mBoard = CreateMultiboard()
+            ..setColumnCount(5)
+            ..setRowCount(2)
+            ..setItemsStyle(true, false)
+            ..setTitle("Score: "+players[Teams.army1()].getColor().toColor().toColorString()+"0|r / "+players[Teams.army2()].getColor().toColor().toColorString()+"0|r"  )
+            ..display(true)
+            ..minimize()
+        doAfter(0.02, () -> mBoard.maximize())
+        
+
+    static function addPlayer(int i)
+        doAfter(0.01) ->
+            playerList.add(i)
+            playerList.sortWith( (int p1, int p2) -> (p1 - p2) )
+            mBoard.setRowCount(mBoard.getRowCount()+1)
+            update()
+
+init
+    doAfter(0, () -> ScoreTable.create())
