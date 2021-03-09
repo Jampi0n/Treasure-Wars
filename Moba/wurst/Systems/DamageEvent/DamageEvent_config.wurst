@@ -1,0 +1,10 @@
+package DamageEvent_config
+
+import ModDamage
+
+@config public var ON_HIT_BUFF = 'B005'
+@config public var ON_HIT_BUFF_ARROW = 'B006'
+@config public var ON_HIT_BUFF_ALTERNATE = 'B00G'
+
+@config public function modDamage(unit source, unit target, real damage, bool attack, bool arrow, bool alternate) returns real
+    return ModDamage.modDamage(source, target, damage, attack, arrow, alternate)

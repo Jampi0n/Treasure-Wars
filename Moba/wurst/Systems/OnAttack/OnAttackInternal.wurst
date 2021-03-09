@@ -283,7 +283,7 @@ public class OnAttackInternal
 
 
 init
-    addOnDamageFunc(Condition(function OnAttackInternal.onDamage))
+    //addOnDamageFunc(Condition(function OnAttackInternal.onDamage))
 
     //use hashmap, so onAttack is more efficient
     //if there are a lot of heroes, if-then-else to find the correct

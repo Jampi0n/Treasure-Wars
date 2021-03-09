@@ -45,12 +45,18 @@ function itemBow()
     setInfo("Bow", "+ {0} strength|nDeals {1} additional damage to units.".format(str.toString(), unitDmg.toString() ))
     addStatBonusAbsolute(Stat.STR, str)
 
-    if not compiletime
+    addDamageAttackFunction() (unit source, unit target, real damage) ->
+        print("Bow is now better: " + source.getName() + "->" + target.getName())
+        if not target.isType(UNIT_TYPE_HERO) and not target.isType(UNIT_TYPE_STRUCTURE)
+            let dmg = source.countItemsOfType(ITEM_ID_BOW) * unitDmg * 100
+            source.dealDamage(target, dmg.toReal(), ReductionType.PHYSICAL)
+
+    /*if not compiletime
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
             if not target.isType(UNIT_TYPE_HERO) and not target.isType(UNIT_TYPE_STRUCTURE) and attacker.isType(UNIT_TYPE_HERO)
                 let dmg = attacker.countItemsOfType(ITEM_ID_BOW) * unitDmg
                 attacker.dealDamage(target, dmg.toReal(), ReductionType.PHYSICAL)
-        end))
+        end))*/
 
 
 
