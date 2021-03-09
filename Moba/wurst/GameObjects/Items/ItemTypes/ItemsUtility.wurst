@@ -118,11 +118,10 @@ function itemWarHorn()
             target.wrapper().addStatRelativeBonus(Stat.STR, -adBonus*10)
         end))
 
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if not target.isType(UNIT_TYPE_HERO) and not target.isType(UNIT_TYPE_STRUCTURE) and attacker.isType(UNIT_TYPE_HERO)
-                let dmg = attacker.countItemsOfType(ITEM_ID_WAR_HORN) * unitDmg
-                attacker.dealDamage(target, dmg.toReal(), ReductionType.PHYSICAL)
-        end))
+        addDamageAttackFunction() (unit source, unit target, real damage) ->
+            if not target.isType(UNIT_TYPE_HERO) and not target.isType(UNIT_TYPE_STRUCTURE)
+                let dmg = source.countItemsOfType(ITEM_ID_WAR_HORN) * unitDmg
+                source.dealDamage(target, dmg.toReal(), ReductionType.PHYSICAL)
 
 @compiletime
 function initItems1()

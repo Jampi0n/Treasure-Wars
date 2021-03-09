@@ -105,11 +105,10 @@ function firehandGauntlets()
     addStatBonusAbsolute(Stat.AS, as)
 
     if not compiletime
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if attacker.hasItemById(ITEM_ID_FIREHAND_GAUNTLETS) and not target.isType(UNIT_TYPE_STRUCTURE)
-                attacker.dealDamage(target, magicDmg.toReal() * attacker.countItemsOfType(ITEM_ID_FIREHAND_GAUNTLETS) , ReductionType.MAGIC)
+        addDamageAttackFunction() (unit source, unit target, real damage) ->
+            if not target.isType(UNIT_TYPE_STRUCTURE)
+                source.dealDamage(target, magicDmg.toReal() * source.countItemsOfType(ITEM_ID_FIREHAND_GAUNTLETS) , ReductionType.MAGIC)
                 target.addEffect(Abilities.fireBallMissile, "chest").destr()
-        end))
 
 function spikedArmor()
     let ar = 36
@@ -123,11 +122,10 @@ function spikedArmor()
     addStatBonusAbsolute(Stat.AR, ar)
     addStatBonusAbsolute(Stat.HP, hp)
     if not compiletime
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if target.isType(UNIT_TYPE_HERO) and not attacker.isType(UNIT_TYPE_STRUCTURE)
+        addHitAttackFunction() (unit source, unit target, real damage) ->
+            if not source.isType(UNIT_TYPE_STRUCTURE)
                 let dmg = target.countItemsOfType(ITEM_ID_SPIKED_ARMOR) * spikeDmg
-                target.dealDamage(attacker, dmg.toReal(), ReductionType.PHYSICAL)
-        end))
+                target.dealDamage(source, dmg.toReal(), ReductionType.PHYSICAL)
     
 function runicArmor()
     let ar = 15
@@ -269,11 +267,10 @@ function spikes()
     setInfo("Spikes", "Enemies attacking the hero will take {0} damage."
     .format(spikeDmg.toString()))
     if not compiletime
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
+        addDamageAttackFunction() (unit source, unit target, real damage) ->
             if target.isType(UNIT_TYPE_HERO)
                 let dmg = target.countItemsOfType(ITEM_ID_SPIKES) * spikeDmg
-                target.dealDamage(attacker, dmg.toReal(), ReductionType.PHYSICAL)
-        end))
+                target.dealDamage(source, dmg.toReal(), ReductionType.PHYSICAL)
 
 function shield()
     let ar = 8
@@ -337,12 +334,10 @@ function spikedMail()
     addStatBonusAbsolute(Stat.HP, hp)
 
     if not compiletime
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if target.isType(UNIT_TYPE_HERO) and not attacker.isType(UNIT_TYPE_STRUCTURE)
+        addHitAttackFunction() (unit source, unit target, real damage) ->
+            if not source.isType(UNIT_TYPE_STRUCTURE)
                 let dmg = target.countItemsOfType(ITEM_ID_SPIKED_MAIL) * spikeDmg
-                target.dealDamage(attacker, dmg.toReal(), ReductionType.PHYSICAL)
-        end))
-
+                target.dealDamage(source, dmg.toReal(), ReductionType.PHYSICAL)
 
 function heavyArmor()
     let ar = 20

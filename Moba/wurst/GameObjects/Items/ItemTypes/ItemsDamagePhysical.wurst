@@ -51,15 +51,6 @@ function itemBow()
             let dmg = source.countItemsOfType(ITEM_ID_BOW) * unitDmg * 100
             source.dealDamage(target, dmg.toReal(), ReductionType.PHYSICAL)
 
-    /*if not compiletime
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if not target.isType(UNIT_TYPE_HERO) and not target.isType(UNIT_TYPE_STRUCTURE) and attacker.isType(UNIT_TYPE_HERO)
-                let dmg = attacker.countItemsOfType(ITEM_ID_BOW) * unitDmg
-                attacker.dealDamage(target, dmg.toReal(), ReductionType.PHYSICAL)
-        end))*/
-
-
-
 constant BLOOD_SWORD_BUFF_ID = compiletime(createAuraBuff("Blood Sword", "This unit has reduced armor and takes damage over time.", "BTNBarbarianBrutalSlasher"))
 constant BLOOD_SWORD_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, BLOOD_SWORD_BUFF_ID, "", ""))
 
@@ -95,12 +86,10 @@ function itemBloodSword()
             thisBuff.getTarget().wrapper().addStatRelativeBonus(Stat.AR, 250)
         end))
 
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            
-            if attacker.isType(UNIT_TYPE_HERO) and attacker.hasItemById(ITEM_ID_BLOOD_SWORD) and not target.isType(UNIT_TYPE_STRUCTURE)
-                target.addBuffReduced(attacker, buffDur.toReal(), bloodSwordBuff, 1)
-                target.addEffect(Abilities.orbCorruptionSpecialArt, "chest").destr()
-        end))
+        addDamageAttackFunction() (unit source, unit target, real damage) ->
+            if not target.isType(UNIT_TYPE_STRUCTURE)
+                target.addBuffReduced(source, buffDur.toReal(), bloodSwordBuff, 1)
+
 
 
 function itemCursedSword()
@@ -120,11 +109,10 @@ function itemCursedSword()
     addStatBonusAbsolute(Stat.AS, as)
 
     if not compiletime
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if attacker.hasItemById(ITEM_ID_CURSED_SWORD) and not target.isType(UNIT_TYPE_STRUCTURE)
-                attacker.dealDamage(target, voidDmg * target.getMaxHP() * 0.01 , ReductionType.NONE)
+        addDamageAttackFunction() (unit source, unit target, real damage) ->
+            if not target.isType(UNIT_TYPE_STRUCTURE)
+                source.dealDamage(target, voidDmg * target.getMaxHP() * 0.01 , ReductionType.NONE)
                 target.addEffect(Abilities.avengerMissile, "chest").destr()
-        end))
 
         createItemEffectTrigger()
         ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
@@ -156,11 +144,10 @@ function itemInfernalBow()
     addStatBonusAbsolute(Stat.HP, hp)
 
     if not compiletime
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if attacker.hasItemById(ITEM_ID_INFERNAL_BOW) and not target.isType(UNIT_TYPE_STRUCTURE)
-                attacker.dealDamage(target, magicDmg.toReal() * attacker.countItemsOfType(ITEM_ID_INFERNAL_BOW) , ReductionType.MAGIC)
+        addDamageAttackFunction() (unit source, unit target, real damage) ->
+            if not target.isType(UNIT_TYPE_STRUCTURE)
+                source.dealDamage(target, magicDmg.toReal() * source.countItemsOfType(ITEM_ID_INFERNAL_BOW) , ReductionType.MAGIC)
                 target.addEffect(Abilities.fireBallMissile, "chest").destr()
-        end))
 
 
 function itemEnchantedBlade()
@@ -181,13 +168,12 @@ function itemEnchantedBlade()
     addStatBonusAbsolute(Stat.AGI, wp)
 
     if not compiletime
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if attacker.hasItemById(ITEM_ID_ENCHANTED_BLADE) and target.getMana() > 0 and not target.isType(UNIT_TYPE_STRUCTURE)
+        addDamageAttackFunction() (unit source, unit target, real damage) ->
+            if target.getMana() > 0 and not target.isType(UNIT_TYPE_STRUCTURE)
                 let manaBurned = min(mBurn.toReal() , target.getMana())
-                attacker.damageMana(target, manaBurned, ReductionType.NONE)
-                attacker.dealDamage(target, manaBurned, ReductionType.MAGIC)
+                source.damageMana(target, manaBurned, ReductionType.NONE)
+                source.dealDamage(target, manaBurned, ReductionType.MAGIC)
                 target.addEffect(Abilities.spellBreakerAttack, "chest").destr()
-        end))
 
 constant AXE_BUFF_ID = compiletime(createAuraBuff("Axe of Decay", "This unit's movement speed is reduced.", "BTNINV_Axe_15"))
 constant AXE_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, AXE_BUFF_ID, Abilities.crippleTarget, ""))
@@ -230,10 +216,9 @@ function itemAxeOfDecay()
             thisBuff.getTarget().wrapper().addStatRelativeBonus(Stat.MS, slow*10)
         end))
 
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if attacker.hasItemById(ITEM_ID_AXE_OF_DECAY) and not target.isType(UNIT_TYPE_STRUCTURE)
-                target.addBuffReduced( attacker, slowDur.toReal(), axeBuff, 1)
-        end))
+        addDamageAttackFunction() (unit source, unit target, real damage) ->
+            if not target.isType(UNIT_TYPE_STRUCTURE)
+                target.addBuffReduced( source, slowDur.toReal(), axeBuff, 1)
         
 
 function itemSacrificialDagger()
@@ -319,12 +304,10 @@ function itemMace()
             thisBuff.getCaster().dealDamage(thisBuff.getTarget(), bleedDmg/bleedDuration, ReductionType.PHYSICAL)
         end) )
 
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            
-            if attacker.isType(UNIT_TYPE_HERO) and attacker.hasItemById(ITEM_ID_MACE) and not target.isType(UNIT_TYPE_STRUCTURE)
-                target.addBuffReduced( attacker, bleedDuration.toReal(), maceBuff, 1)
+        addDamageAttackFunction() (unit source, unit target, real damage) ->
+            if not target.isType(UNIT_TYPE_STRUCTURE)
+                target.addBuffReduced( source, bleedDuration.toReal(), maceBuff, 1)
                 target.addEffect(Abilities.hydraliskImpact, "chest").destr()
-        end))
 
 constant HAMMER_BUFF_ID = compiletime(createAuraBuff("Break Armor", "This unit's armor is broken; it has reduced armor.", "BTNINV_Hammer_10"))
 constant HAMMER_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, HAMMER_BUFF_ID, "", ""))
@@ -353,12 +336,10 @@ function itemHammerOfMight()
             thisBuff.getTarget().wrapper().addStatRelativeBonus(Stat.AR, armorDmg*10)
         end))
 
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            
-            if attacker.isType(UNIT_TYPE_HERO) and attacker.hasItemById(ITEM_ID_HAMMER_OF_MIGHT) and not target.isType(UNIT_TYPE_STRUCTURE)
-                target.addBuffReduced( attacker, armorDuration.toReal(), hammerBuff, 1)
+        addDamageAttackFunction() (unit source, unit target, real damage) ->
+            if not target.isType(UNIT_TYPE_STRUCTURE)
+                target.addBuffReduced( source, armorDuration.toReal(), hammerBuff, 1)
                 target.addEffect(Abilities.bloodElfSpellThiefMISSILE, "chest").destr()
-        end))
 
 
 
@@ -377,11 +358,10 @@ function itemRavenSword()
     addStatBonusAbsolute(Stat.AS, as)
 
     if not compiletime
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if attacker.hasItemById(ITEM_ID_RAVEN_SWORD) and not target.isType(UNIT_TYPE_STRUCTURE)
-                attacker.dealDamage(target, voidDmg.toReal() * attacker.countItemsOfType(ITEM_ID_RAVEN_SWORD) , ReductionType.NONE)
+        addDamageAttackFunction() (unit source, unit target, real damage) ->
+            if not target.isType(UNIT_TYPE_STRUCTURE)
+                source.dealDamage(target, voidDmg.toReal() * source.countItemsOfType(ITEM_ID_RAVEN_SWORD) , ReductionType.NONE)
                 target.addEffect(Abilities.avengerMissile, "chest").destr()
-        end))
 
 
             
@@ -437,12 +417,10 @@ function itemArmorBreaker()
             thisBuff.getTarget().wrapper().addStatRelativeBonus(Stat.AR, armorDmg*10)
         end))
 
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            
-            if attacker.isType(UNIT_TYPE_HERO) and attacker.hasItemById(ITEM_ID_ARMOR_BREAKER) and not target.isType(UNIT_TYPE_STRUCTURE)
-                target.addBuffReduced( attacker, armorDuration.toReal(), hammerBuff, 1)
+        addDamageAttackFunction() (unit source, unit target, real damage) ->
+            if not target.isType(UNIT_TYPE_STRUCTURE)
+                target.addBuffReduced( source, armorDuration.toReal(), hammerBuff, 1)
                 target.addEffect(Abilities.bloodElfSpellThiefMISSILE, "chest").destr()
-        end))
 
 
 constant CHILLING_BLADE_BUFF_ID = compiletime(createAuraBuff("Chilling Blade", "This unit was hit by Chilling Blade; it has reduced movement speed.", "BTNMysticDagger"))
@@ -474,10 +452,9 @@ function itemChillingBlade()
             wrapper.decBlue()
         end))
 
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if attacker.hasItemById(ITEM_ID_CHILLING_DAGGER) and not target.isType(UNIT_TYPE_STRUCTURE)
-                target.addBuffReduced( attacker, slowDuration.toReal(), slowBuff, 1)
-        end))
+        addDamageAttackFunction() (unit source, unit target, real damage) ->
+            if not target.isType(UNIT_TYPE_STRUCTURE)
+                target.addBuffReduced( source, slowDuration.toReal(), slowBuff, 1)
 
 @compiletime
 function initItems1()
