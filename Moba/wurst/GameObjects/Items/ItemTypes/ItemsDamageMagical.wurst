@@ -27,11 +27,11 @@ function itemBootsOfDarkness()
     end))
 
     if not compiletime
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if attacker.hasItemById(ITEM_ID_BOOTS_OF_DARKNESS) and not target.isType(UNIT_TYPE_STRUCTURE)
-                attacker.dealDamage(target, voidDmg.toReal() * attacker.countItemsOfType(ITEM_ID_BOOTS_OF_DARKNESS) , ReductionType.NONE)
+        addDamageAttackFunction() (unit source, unit target, real damage) ->
+            if not target.isType(UNIT_TYPE_STRUCTURE)
+                source.dealDamage(target, voidDmg.toReal() * source.countItemsOfType(ITEM_ID_BOOTS_OF_DARKNESS) , ReductionType.NONE)
                 target.addEffect(Abilities.avengerMissile, "chest").destr()
-        end))
+
 
 
 function itemMageAmulet()
@@ -78,11 +78,10 @@ function itemGemOfDarkness()
     setInfo("Gem of Darkness", "Attacks deal {0} additional void damage.".format(voidDmg.toString()))
     
     if not compiletime
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if attacker.hasItemById(ITEM_ID_GEM_OF_DARKNESS) and not target.isType(UNIT_TYPE_STRUCTURE)
-                attacker.dealDamage(target, voidDmg.toReal() * attacker.countItemsOfType(ITEM_ID_GEM_OF_DARKNESS) , ReductionType.NONE)
+        addDamageAttackFunction() (unit source, unit target, real damage) ->
+            if not target.isType(UNIT_TYPE_STRUCTURE)
+                source.dealDamage(target, voidDmg.toReal() * source.countItemsOfType(ITEM_ID_GEM_OF_DARKNESS) , ReductionType.NONE)
                 target.addEffect(Abilities.avengerMissile, "chest").destr()
-        end))
 
 
 function itemSkull()
@@ -107,11 +106,10 @@ function itemVoodooDoll()
     setInfo("Voodoo Doll", "Restores {0} mana points everytime you are attacked.".format(mp.toString()))
 
     if not compiletime
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if target.hasItemById(ITEM_ID_VOODOO_DOLL) and not attacker.isType(UNIT_TYPE_STRUCTURE)
+        addDamageAttackFunction() (unit source, unit target, real damage) ->
+            if not source.isType(UNIT_TYPE_STRUCTURE)
                 target.healMana(target, mp.toReal() * target.countItemsOfType(ITEM_ID_VOODOO_DOLL))
                 target.addEffect(Abilities.spiritTouchTarget, "origin").destr()
-        end))
 
 function itemSpellBook()
     let intel = 16
@@ -128,13 +126,12 @@ function itemMagicStaff()
     setInfo("Magic Staff", "Attacks drain {0} mana from the target.".format(mana.toString()))
     
     if not compiletime
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if attacker.hasItemById(ITEM_ID_MAGIC_STAFF) and target.getMana() > 0 and not target.isType(UNIT_TYPE_STRUCTURE)
-                let manaDrained = min(mana.toReal() * attacker.countItemsOfType(ITEM_ID_MAGIC_STAFF) , target.getMana())
-                attacker.healMana(attacker, manaDrained)
-                attacker.damageMana(target, manaDrained, ReductionType.NONE)
+        addDamageAttackFunction() (unit source, unit target, real damage) ->
+            if target.getMana() > 0 and not target.isType(UNIT_TYPE_STRUCTURE)
+                let manaDrained = min(mana.toReal() * source.countItemsOfType(ITEM_ID_MAGIC_STAFF) , target.getMana())
+                source.healMana(source, manaDrained)
+                source.damageMana(target, manaDrained, ReductionType.NONE)
                 target.addEffect(Abilities.arcaneTowerAttack, "chest").destr()
-        end))
 
 
 function itemApprenticeScroll()
@@ -198,13 +195,12 @@ function itemVisionWard()
     addStatBonusAbsolute(Stat.INT, intel)
 
     if not compiletime
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if attacker.hasItemById(ITEM_ID_VISION_WARD) and target.getMana() > 0 and not target.isType(UNIT_TYPE_STRUCTURE)
-                let manaDrained = min(mana.toReal() * attacker.countItemsOfType(ITEM_ID_VISION_WARD) , target.getMana())
-                attacker.healMana(attacker, manaDrained)
-                attacker.damageMana(target, manaDrained, ReductionType.NONE)
+        addDamageAttackFunction() (unit source, unit target, real damage) ->
+            if target.getMana() > 0 and not target.isType(UNIT_TYPE_STRUCTURE)
+                let manaDrained = min(mana.toReal() * source.countItemsOfType(ITEM_ID_VISION_WARD) , target.getMana())
+                source.healMana(source, manaDrained)
+                source.damageMana(target, manaDrained, ReductionType.NONE)
                 target.addEffect(Abilities.arcaneTowerAttack, "chest").destr()
-        end))
 
 
 
@@ -221,16 +217,17 @@ function itemVoodooMask()
     addRequirement(ITEM_ID_GEM_OF_DARKNESS)
 
     if not compiletime
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if target.hasItemById(ITEM_ID_VOODOO_MASK) and not attacker.isType(UNIT_TYPE_STRUCTURE)
+        addHitAttackFunction() (unit source, unit target, real damage) ->
+            if not source.isType(UNIT_TYPE_STRUCTURE)
                 target.healMana(target, mp.toReal() * target.countItemsOfType(ITEM_ID_VOODOO_MASK))
                 target.addEffect(Abilities.spiritTouchTarget, "origin").destr()
-        end))
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if attacker.hasItemById(ITEM_ID_VOODOO_MASK) and not target.isType(UNIT_TYPE_STRUCTURE)
-                attacker.dealDamage(target, voidDmg.toReal() * attacker.countItemsOfType(ITEM_ID_VOODOO_MASK) , ReductionType.NONE)
+        // currently only one attack effect per item is supported
+        // this is because the pointer to the damage function is stored in a hashtable at (unit,item type id)
+        /*OnAttack.addOnAttackFunc((unit source, unit target, boolean isActive) -> (begin
+            if source.hasItemById(ITEM_ID_VOODOO_MASK) and not target.isType(UNIT_TYPE_STRUCTURE)
+                source.dealDamage(target, voidDmg.toReal() * source.countItemsOfType(ITEM_ID_VOODOO_MASK) , ReductionType.NONE)
                 target.addEffect(Abilities.avengerMissile, "chest").destr()
-        end))
+        end))*/
 
 
 function itemEvilBook()
@@ -284,15 +281,14 @@ function itemScepterOfTheTides()
     addStatBonusAbsolute(Stat.INT, intel)
 
     if not compiletime
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if attacker.hasItemById(ITEM_ID_SCEPTER_OF_THE_TIDES) and not target.isType(UNIT_TYPE_STRUCTURE)
-                let manaDrained = min(manaDrain.toReal() * attacker.countItemsOfType(ITEM_ID_SCEPTER_OF_THE_TIDES) , target.getMana())
-                attacker.dealDamage(target, voidDmg.toReal() * attacker.countItemsOfType(ITEM_ID_SCEPTER_OF_THE_TIDES) , ReductionType.NONE)
-                attacker.healMana(attacker, manaDrained)
-                attacker.damageMana(target, manaDrained, ReductionType.NONE)
+        addDamageAttackFunction() (unit source, unit target, real damage) ->
+            if not target.isType(UNIT_TYPE_STRUCTURE)
+                let manaDrained = min(manaDrain.toReal() * source.countItemsOfType(ITEM_ID_SCEPTER_OF_THE_TIDES) , target.getMana())
+                source.dealDamage(target, voidDmg.toReal() * source.countItemsOfType(ITEM_ID_SCEPTER_OF_THE_TIDES) , ReductionType.NONE)
+                source.healMana(source, manaDrained)
+                source.damageMana(target, manaDrained, ReductionType.NONE)
                 target.addEffect(Abilities.avengerMissile, "chest").destr()
                 target.addEffect(Abilities.arcaneTowerAttack, "chest").destr()
-        end))
 
 function itemMagmaCrystal()
     let mp = 125
@@ -312,11 +308,10 @@ function itemMagmaCrystal()
     addStatBonusAbsolute(Stat.HP, hp)
 
     if not compiletime
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if attacker.hasItemById(ITEM_ID_MAGMA_CRYSTAL) and not target.isType(UNIT_TYPE_STRUCTURE)
-                attacker.dealDamage(target, magicDmg.toReal() * attacker.countItemsOfType(ITEM_ID_MAGMA_CRYSTAL) , ReductionType.MAGIC)
+        addDamageAttackFunction() (unit source, unit target, real damage) ->
+            if not target.isType(UNIT_TYPE_STRUCTURE)
+                source.dealDamage(target, magicDmg.toReal() * source.countItemsOfType(ITEM_ID_MAGMA_CRYSTAL) , ReductionType.MAGIC)
                 target.addEffect(Abilities.fireBallMissile, "chest").destr()
-        end))
 
 function itemCursedMask()
     let intel = 25
@@ -392,16 +387,16 @@ function itemRingOfDarkness()
     addStatBonusAbsolute(Stat.MR, mr)
 
     if not compiletime
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if target.hasItemById(ITEM_ID_RING_OF_DARKNESS) and not attacker.isType(UNIT_TYPE_STRUCTURE)
+        addHitAttackFunction() (unit source, unit target, real damage) ->
+            if not source.isType(UNIT_TYPE_STRUCTURE)
                 target.healMana(target, mp.toReal() * target.countItemsOfType(ITEM_ID_RING_OF_DARKNESS))
                 target.addEffect(Abilities.spiritTouchTarget, "origin").destr()
-        end))
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if attacker.hasItemById(ITEM_ID_RING_OF_DARKNESS) and not target.isType(UNIT_TYPE_STRUCTURE)
-                attacker.dealDamage(target, voidDmg.toReal() * attacker.countItemsOfType(ITEM_ID_RING_OF_DARKNESS) , ReductionType.NONE)
+    
+        /*OnAttack.addOnAttackFunc((unit source, unit target, boolean isActive) -> (begin
+            if source.hasItemById(ITEM_ID_RING_OF_DARKNESS) and not target.isType(UNIT_TYPE_STRUCTURE)
+                source.dealDamage(target, voidDmg.toReal() * source.countItemsOfType(ITEM_ID_RING_OF_DARKNESS) , ReductionType.NONE)
                 target.addEffect(Abilities.avengerMissile, "chest").destr()
-        end))
+        end))*/
 
         createItemEffectTrigger()
         ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
@@ -482,15 +477,14 @@ function itemWandOfDeath()
     addStatBonusAbsolute(Stat.INT, intel)
 
     if not compiletime
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if attacker.hasItemById(ITEM_ID_WAND_OF_DEATH) and not target.isType(UNIT_TYPE_STRUCTURE)
-                let manaDrained = min(manaDrain.toReal() * attacker.countItemsOfType(ITEM_ID_WAND_OF_DEATH) , target.getMana())
-                attacker.dealDamage(target, voidDmg.toReal() * attacker.countItemsOfType(ITEM_ID_WAND_OF_DEATH) , ReductionType.NONE)
-                attacker.healMana(attacker, manaDrained)
-                attacker.damageMana(target, manaDrained, ReductionType.NONE)
+        addDamageAttackFunction() (unit source, unit target, real damage) ->
+            if not target.isType(UNIT_TYPE_STRUCTURE)
+                let manaDrained = min(manaDrain.toReal() * source.countItemsOfType(ITEM_ID_WAND_OF_DEATH) , target.getMana())
+                source.dealDamage(target, voidDmg.toReal() * source.countItemsOfType(ITEM_ID_WAND_OF_DEATH) , ReductionType.NONE)
+                source.healMana(source, manaDrained)
+                source.damageMana(target, manaDrained, ReductionType.NONE)
                 target.addEffect(Abilities.avengerMissile, "chest").destr()
                 target.addEffect(Abilities.arcaneTowerAttack, "chest").destr()
-        end))
 
 
             
@@ -531,11 +525,10 @@ function itemArcaneBlade()
     addStatBonusAbsolute(Stat.MP, mp)
 
     if not compiletime
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if attacker.hasItemById(ITEM_ID_ARCANE_BLADE) and not target.isType(UNIT_TYPE_STRUCTURE)
-                attacker.dealDamage(target, (dmg + attacker.getMana() * manaFactor/100) , ReductionType.MAGIC)
+        addDamageAttackFunction() (unit source, unit target, real damage) ->
+            if not target.isType(UNIT_TYPE_STRUCTURE)
+                source.dealDamage(target, (dmg + source.getMana() * manaFactor/100) , ReductionType.MAGIC)
                 target.addEffect(Abilities.farseerMissile, "chest").destr()
-        end))
 
 function itemVampiricGoblet()
     let intel = 40
