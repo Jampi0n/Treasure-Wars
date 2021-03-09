@@ -1,0 +1,9 @@
+package DamageIds
+
+int counter = 0
+function getDamageId() returns int
+    counter = counter + 1
+    return counter - 1
+
+public constant D_CRITICAL_STRIKE = getDamageId()
+public constant D_DEATH_FRENZY = getDamageId()

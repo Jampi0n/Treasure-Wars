@@ -1,0 +1,265 @@
+package DamageEvent
+
+import OnUnitEnterLeave
+import ErrorHandling
+import DamageDetection
+
+public interface DamageFunction
+    function damage(unit source, unit target, real damage)
+
+// This buff is used to detect regular attacks
+@configurable public var ON_HIT_BUFF = 0
+// This buff is used to detect special attacks
+@configurable public var ON_HIT_BUFF_ARROW = 0
+// This buff is used to detect special attacks
+@configurable public var ON_HIT_BUFF_ALTERNATE = 0
+
+/*
+Special attacks are mostly interesting for ranged units, because the hit can be delayed.
+Using the arrow or alternate buffs, the unit will produce attacks with different buffs.
+Even if the special attack phase is over, special attacks that hit afterwards can still be identified as special attacks.
+*/
+
+
+// Controls the size of fast data for every unit
+// Fast data is implemented as an array with inline access
+// Due to the array size limit, the number of units times the fast data size must be below 32678
+// Larger fast data sizes also require more time cleaning up when the unit is removed
+@configurable public var FAST_DATA_SIZE = 8
+
+@configurable public function modDamage(unit _source, unit _target, real damage, bool _attack, bool _arrow, bool _alternate) returns real
+    return damage
+
+class DamageFunctionListElement
+    DamageFunction f
+    DamageFunctionListElement next
+    DamageFunctionListElement prev
+    DamageFunctionList list
+    construct(DamageFunction f, DamageFunctionList list)
+        this.f = f
+        this.list = list
+
+class DamageFunctionList
+    DamageFunctionListElement first
+    function add(DamageFunction f) returns int
+        let newElement = new DamageFunctionListElement(f, this)
+        newElement.next = this.first
+        newElement.prev = null
+        if this.first != null
+            this.first.prev = newElement
+        this.first = newElement
+        return newElement castTo int
+    function remove(int pointer)
+        let removeElement = pointer castTo DamageFunctionListElement
+        if removeElement.list != this
+            error("Tried to remove a damage function from a different list!")
+        else
+            if first == removeElement
+                first = removeElement.next
+                if removeElement.next != null
+                    removeElement.next.prev = null
+                    destroy removeElement
+            else
+                removeElement.prev.next = removeElement.next
+                if removeElement.next != null
+                    removeElement.next.prev = removeElement.prev
+                destroy removeElement
+
+
+class DamageEventUnit
+    private static hashtable damageEventTable = InitHashtable()
+    protected static function fromUnit(unit u) returns DamageEventUnit
+        var d = damageEventTable.loadInt(u.getHandleId(), 0) castTo DamageEventUnit
+        if d == null
+            d = new DamageEventUnit(u)
+        return d
+
+    protected static function classInit()
+        onEnter() -> 
+            DamageEventUnit.fromUnit(getEnterLeaveUnit())
+        onLeave() ->
+            let d = DamageEventUnit.fromUnit(getEnterLeaveUnit())
+            if d != null
+                destroy d
+
+    protected static int array data
+
+    private unit u
+    private int h
+    private int numDamageFunctions = 0
+    private int numHitFunctions = 0
+    private DamageFunctionList damageFunctions = new DamageFunctionList()
+    private DamageFunctionList hitFunctions = new DamageFunctionList()
+
+    private int numDamageAttackFunctions = 0
+    private int numHitAttackFunctions = 0
+    private DamageFunctionList damageAttackFunctions = new DamageFunctionList()
+    private DamageFunctionList hitAttackFunctions = new DamageFunctionList()
+
+    construct(unit u)
+        this.u = u
+        this.h = u.getHandleId()
+        damageEventTable.saveInt(h, 0, this castTo int)
+    ondestroy
+        damageEventTable.flushChild(h)
+        for i = 0 to FAST_DATA_SIZE-1
+            this.saveIntFast(i, 0)
+    @inline
+    function hasDamageEvent() returns bool
+        return numDamageFunctions > 0
+    @inline
+    function hasHitEvent() returns bool
+        return numHitFunctions > 0
+    function onDamage(real damage, unit target)
+        DamageFunctionListElement current = this.damageFunctions.first
+        while current != null
+            current.f.damage(u, target, damage)
+            current = current.next
+    function onHit(real damage, unit source)
+        DamageFunctionListElement current = this.hitFunctions.first
+        while current != null
+            current.f.damage(source, u, damage)
+            current = current.next
+    function addOnDamageFunction(DamageFunction damageFunction) returns int
+        numDamageFunctions += 1
+        return damageFunctions.add(damageFunction)
+    function addOnHitFunction(DamageFunction damageFunction) returns int
+        numHitFunctions += 1
+        return hitFunctions.add(damageFunction)
+    function removeOnDamageFunction(int pointer)
+        numDamageFunctions -= 1
+        damageFunctions.remove(pointer)
+    function removeOnHitFunction(int pointer)
+        numHitFunctions -= 1
+        hitFunctions.remove(pointer)
+    @inline
+    function hasDamageAttackEvent() returns bool
+        return numDamageAttackFunctions > 0
+    @inline
+    function hasHitAttackEvent() returns bool
+        return numHitAttackFunctions > 0
+    function onDamageAttack(real damage, unit target)
+        DamageFunctionListElement current = this.damageAttackFunctions.first
+        while current != null
+            current.f.damage(u, target, damage)
+            current = current.next
+    function onHitAttack(real damage, unit source)
+        DamageFunctionListElement current = this.hitAttackFunctions.first
+        while current != null
+            current.f.damage(source, u, damage)
+            current = current.next
+    function addOnDamageAttackFunction(DamageFunction damageFunction) returns int
+        numDamageAttackFunctions += 1
+        return damageAttackFunctions.add(damageFunction)
+    function addOnHitAttackFunction(DamageFunction damageFunction) returns int
+        numHitAttackFunctions += 1
+        return hitAttackFunctions.add(damageFunction)
+    function removeOnDamageAttackFunction(int pointer)
+        numDamageAttackFunctions -= 1
+        damageAttackFunctions.remove(pointer)
+    function removeOnHitAttackFunction(int pointer)
+        numHitAttackFunctions -= 1
+        hitAttackFunctions.remove(pointer)
+    @inline
+    function saveIntSlow(int key, int value)
+        damageEventTable.saveInt(h, key, value)
+    @inline
+    function saveIntFast(int key, int value)
+        data[(this castTo int) * FAST_DATA_SIZE + key] = value
+
+    @inline
+    function loadIntSlow(int key) returns int
+        return damageEventTable.loadInt(h, key)
+    @inline
+    function loadIntFast(int key) returns int
+        return data[(this castTo int) * FAST_DATA_SIZE + key]
+
+public abstract class DamageEvent
+    static bool isAttack = false
+    static bool isArrow= false
+    static bool isAlternate = false
+
+    @inline
+    static function registerDamageEvent(unit u, DamageFunction damageFunction) returns int
+        return DamageEventUnit.fromUnit(u).addOnDamageFunction(damageFunction)
+    @inline
+    static function registerHitEvent(unit u, DamageFunction damageFunction) returns int
+        return DamageEventUnit.fromUnit(u).addOnHitFunction(damageFunction)
+    @inline
+    static function deregisterDamageEvent(unit u, int pointer)
+        DamageEventUnit.fromUnit(u).removeOnDamageFunction(pointer)
+    @inline
+    static function deregisterHitEvent(unit u, int pointer)
+        DamageEventUnit.fromUnit(u).removeOnHitFunction(pointer)
+    @inline
+    static function registerDamageAttackEvent(unit u, DamageFunction damageFunction) returns int
+        return DamageEventUnit.fromUnit(u).addOnDamageAttackFunction(damageFunction)
+    @inline
+    static function registerHitAttackEvent(unit u, DamageFunction damageFunction) returns int
+        return DamageEventUnit.fromUnit(u).addOnHitAttackFunction(damageFunction)
+    @inline
+    static function deregisterDamageAttackEvent(unit u, int pointer)
+        DamageEventUnit.fromUnit(u).removeOnDamageAttackFunction(pointer)
+    @inline
+    static function deregisterHitAttackEvent(unit u, int pointer)
+        DamageEventUnit.fromUnit(u).removeOnHitAttackFunction(pointer)
+    @inline
+    static function saveIntSlow(unit u, int key, int value)
+        DamageEventUnit.fromUnit(u).saveIntSlow(key, value)
+    @inline
+    static function loadIntSlow(unit u, int key) returns int
+        return DamageEventUnit.fromUnit(u).loadIntSlow(key)
+    @inline
+    static function saveIntFast(unit u, int key, int value)
+        DamageEventUnit.fromUnit(u).saveIntFast(key, value)
+    @inline
+    static function loadIntFast(unit u, int key) returns int
+        return DamageEventUnit.fromUnit(u).loadIntFast(key)
+
+    protected static function onDamage()
+        let source = GetEventDamageSource()
+        let target = GetTriggerUnit()
+        real damage = GetEventDamage()
+        bool attack = false
+        bool alternate = false
+        bool arrow = false
+        if(target.hasAbility(ON_HIT_BUFF))
+            target.removeAbility(ON_HIT_BUFF)
+            attack = true
+        if(target.hasAbility(ON_HIT_BUFF_ALTERNATE))
+            target.removeAbility(ON_HIT_BUFF_ALTERNATE)
+            attack = true
+            alternate = true
+        if(target.hasAbility(ON_HIT_BUFF_ARROW))
+            target.removeAbility(ON_HIT_BUFF_ARROW)
+            arrow = true
+            attack = true
+        DamageEvent.isAttack = attack
+        DamageEvent.isArrow = arrow
+        DamageEvent.isAlternate = alternate
+        let targetWrapper = DamageEventUnit.fromUnit(target)
+        let sourceWrapper = DamageEventUnit.fromUnit(source)
+        damage = modDamage(source, target, damage, attack, arrow, alternate)
+        //print(source.getName() + " damages " + target.getName() + ": " + damage.toString() + " " + attack.toString() + " " + arrow.toString() + " " + alternate.toString())
+        if sourceWrapper.hasDamageEvent()
+            print("-1")
+            sourceWrapper.onDamage(damage, target)
+        if targetWrapper.hasHitEvent()
+            print("-2")
+            targetWrapper.onHit(damage, source)
+        if attack
+            //print("attack")
+            if sourceWrapper.hasDamageAttackEvent()
+                print("1")
+                sourceWrapper.onDamageAttack(damage, target)
+            if targetWrapper.hasHitAttackEvent()
+                print("2")
+                targetWrapper.onHitAttack(damage, source)
+
+        //damage = max(0, damage)
+        //BlzSetEventDamage(damage)
+        
+init
+    DamageEventUnit.classInit()
+    addOnDamageFunc() -> 
+        DamageEvent.onDamage()

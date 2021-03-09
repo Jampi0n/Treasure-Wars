@@ -1,0 +1,7 @@
+package ModDamage
+
+//import DamageIds
+
+public abstract class ModDamage
+    static function modDamage(unit _source, unit _target, real damage, bool _attack, bool _active, bool _advanced) returns real
+        return damage

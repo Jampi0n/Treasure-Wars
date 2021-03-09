@@ -17,7 +17,7 @@ import public UnitLib
 import public OnAttack
 import public Buff
 import public StandardBuffs
-
+import public DamageEvent
 
 interface ItemPickUp
     function onItemPickUp()
@@ -152,6 +152,53 @@ public function addStatBonusRelative(Stat whichStat, int bonus)
         ItemEffect.triggerUnit.wrapper().addStatRelativeBonus(whichStat, -bonus)
     end))
 
+public function addDamageFunction(DamageFunction f)
+    if compiletime
+        return
+    addPickupFunction( ()-> (begin
+        if isUnique()
+            DamageEvent.saveIntSlow(getTriggerUnit(), getTriggerItemType(), DamageEvent.registerDamageEvent(getTriggerUnit(), f))
+    end))
+    addDropFunction( ()-> (begin
+        if isUnique()
+            DamageEvent.deregisterDamageEvent(getTriggerUnit(), DamageEvent.loadIntSlow(getTriggerUnit(), getTriggerItemType()))
+    end))
+
+public function addHitFunction(DamageFunction f)
+    if compiletime
+        return
+    addPickupFunction( ()-> (begin
+        if isUnique()
+            DamageEvent.saveIntSlow(getTriggerUnit(), getTriggerItemType(), DamageEvent.registerHitEvent(getTriggerUnit(), f))
+    end))
+    addDropFunction( ()-> (begin
+        if isUnique()
+            DamageEvent.deregisterHitEvent(getTriggerUnit(), DamageEvent.loadIntSlow(getTriggerUnit(), getTriggerItemType()))
+    end))
+
+public function addDamageAttackFunction(DamageFunction f)
+    if compiletime
+        return
+    addPickupFunction( ()-> (begin
+        if isUnique()
+            DamageEvent.saveIntSlow(getTriggerUnit(), getTriggerItemType(), DamageEvent.registerDamageAttackEvent(getTriggerUnit(), f))
+    end))
+    addDropFunction( ()-> (begin
+        if isUnique()
+            DamageEvent.deregisterDamageAttackEvent(getTriggerUnit(), DamageEvent.loadIntSlow(getTriggerUnit(), getTriggerItemType()))
+    end))
+
+public function addHitAttackFunction(DamageFunction f)
+    if compiletime
+        return
+    addPickupFunction( ()-> (begin
+        if isUnique()
+            DamageEvent.saveIntSlow(getTriggerUnit(), getTriggerItemType(), DamageEvent.registerHitAttackEvent(getTriggerUnit(), f))
+    end))
+    addDropFunction( ()-> (begin
+        if isUnique()
+            DamageEvent.deregisterHitAttackEvent(getTriggerUnit(), DamageEvent.loadIntSlow(getTriggerUnit(), getTriggerItemType()))
+    end))
 
 public function setupItem(int itemId, int category, int goldCost)
     if compiletime
