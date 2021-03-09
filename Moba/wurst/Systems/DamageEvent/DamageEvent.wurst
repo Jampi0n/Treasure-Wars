@@ -65,6 +65,12 @@ class DamageFunctionList
                     removeElement.next.prev = removeElement.prev
                 destroy removeElement
 
+    ondestroy
+        DamageFunctionListElement current = this.first
+        while current != null
+            let next = current.next
+            destroy current
+            current = next
 
 class DamageEventUnit
     private static hashtable damageEventTable = InitHashtable()
@@ -104,6 +110,10 @@ class DamageEventUnit
         damageEventTable.flushChild(h)
         for i = 0 to FAST_DATA_SIZE-1
             this.saveIntFast(i, 0)
+        destroy damageFunctions
+        destroy hitFunctions
+        destroy damageAttackFunctions
+        destroy hitAttackFunctions
     @inline
     function hasDamageEvent() returns bool
         return numDamageFunctions > 0
