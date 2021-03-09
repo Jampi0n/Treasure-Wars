@@ -367,6 +367,12 @@ function castMirrorImage()
     ..addStatAbsoluteBonus(Stat.AGI, casterWrapper.getStatTotalBonus(Stat.AGI))
     ..addStatAbsoluteBonus(Stat.MS, casterWrapper.getStatTotalBonus(Stat.MS))
 
+    //bleeding wound for mirror image
+    DamageEvent.registerDamageAttackEvent(mirrorImageUnit) (unit source, unit target, real damage) ->
+        if level != 0 and target.isTargetable(heroOwner, false, true) and not target.isType(UNIT_TYPE_STRUCTURE)
+            let b = target.addBuffReduced( trollManhunter, BLEEDING_WOUND_DURATION, buffBleedingWound, level)
+            b.setData(b.getData()+3)
+
         
 function onAttack(unit attacker, unit target, boolean _isActive)
     let level = attacker.getAbilityLevel(ABILITY_BLEEDING_WOUND)
@@ -503,15 +509,6 @@ function initHeroType()
 
         buffMirrorImage = new BuffType(false, DispelLevel.NONE)
         buffMirrorImage.setupBuffWithIcon(MIRROR_IMAGE_BUFF_ID, MIRROR_IMAGE_ABILITY_ID)
-
-        //bleeding wound for mirror image
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if attacker.getTypeId() == MIRROR_IMAGE_UNIT_ID
-                let level = trollManhunter.getAbilityLevel(ABILITY_BLEEDING_WOUND)
-                if level != 0 and target.isTargetable(heroOwner, false, true) and not target.isType(UNIT_TYPE_STRUCTURE)
-                    let b = target.addBuffReduced( trollManhunter, BLEEDING_WOUND_DURATION, buffBleedingWound, level)
-                    b.setData(b.getData()+3)
-        end))
 
     
 function createHeroType(IHero hero)

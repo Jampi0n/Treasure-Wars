@@ -300,6 +300,11 @@ function castSerpentWard()
 
     wrapper.addStatAbsoluteBonus(Stat.HP, SERPEND_WARD_HP[level-1] )
 
+    DamageEvent.registerDamageAttackEvent(ward) (unit source, unit target, real damage) ->
+        if not target.isType(UNIT_TYPE_STRUCTURE)
+            let hero = SUMMON_MAP.get(source)
+            target.addBuffReduced(hero, SERPENT_POISON_DURATION[level-1], buffSerpentPoison, level)
+
 function castBigBadVoodoo()
     let spellId = GetSpellAbilityId()
     let caster = GetTriggerUnit()
@@ -411,13 +416,6 @@ function initHeroType()
             whichBuff.getTarget().wrapper()
                 ..addStatRelativeBonus(Stat.MS, 10 * SERPENT_POISON_SLOW * (stacks))
                 ..addStatAbsoluteBonus(Stat.AR, SERPENT_POISON_ARMOR * (stacks))
-        end))
-
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if attacker.getTypeId() == SERPENT_WARD and not target.isType(UNIT_TYPE_STRUCTURE)
-                let hero = SUMMON_MAP.get(attacker)
-                let level = hero.getAbilityLevel(ABILITY_SERPENT_WARD)
-                target.addBuffReduced(hero, SERPENT_POISON_DURATION[level-1], buffSerpentPoison, level)
         end))
 
         CreateTrigger()

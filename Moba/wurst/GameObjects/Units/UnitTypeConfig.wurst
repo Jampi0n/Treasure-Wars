@@ -91,7 +91,7 @@ public constant STORMREAVER = createUnitTypeAndReturnId(200, 'n00X', 15, 15, 30,
 public constant SKELETAL_ORC = createUnitTypeAndReturnId(200, 'n00U', 15, 24, 10, 16, Units.skeletonOrc1, 3)
 
 init
-    doAfter(0, () -> (begin
+    /*doAfter(0, () -> (begin
         OnAttack.addOnAttackFunc((unit attacker, unit target, boolean _isActive) -> (begin
             if attacker.getTypeId() == TANK
                 let nearby = CreateGroup()
@@ -105,4 +105,4 @@ init
 
                 nearby.destr()
         end))
-    end))
+    end))*/

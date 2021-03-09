@@ -388,6 +388,24 @@ function castFrostWyrm()
     wrapper.addStatAbsoluteBonus(Stat.HP, caster.wrapper().getStatTotalBonus(Stat.HP) + FROST_WYRM_HP[level-1] )
     wrapper.addStatAbsoluteBonus(Stat.STR, ( (FROST_WYRM_INT_FACTOR/100) * caster.getInt() ).toInt()  + FROST_WYRM_DMG[level-1] )
 
+    DamageEvent.registerDamageAttackEvent(frostWyrm) (unit source, unit target, real damage) ->
+        let nearby = CreateGroup()
+        nearby.enumUnitsInRange(target.getPos(), FROST_WYRM_AOE)
+
+        let dmg = source.wrapper().getStatTotalValue(Stat.STR) * 0.5
+    
+        if not target.isType(UNIT_TYPE_STRUCTURE)
+            target.addBuffReduced(source, FROST_BREATH_DUR[level-1], buffFrostBreath, level)
+
+        while(not nearby.isEmpty())
+            let u = FirstOfGroup(nearby)
+            nearby.removeUnit(u)
+            if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(source.getOwner(), false, true) and u != target
+                u.addBuffReduced(source, FROST_BREATH_DUR[level-1], buffFrostBreath, level)
+                source.dealDamage(u, dmg, ReductionType.PHYSICAL)
+
+        nearby.destr()
+
 function castFreeze()
     let spellId = GetSpellAbilityId()
     let caster = GetTriggerUnit()
@@ -466,6 +484,10 @@ function teamFightAI(IHeroAI ai)
         if frostWyrm.getCurrentOrder() != OrderId("attack")
             frostWyrm.issueTargetOrder("attack", target)
 
+class FrostArmor
+    int intelligence
+    int damageEventPointer
+
 @compiletime
 function setupTooltips()
 
@@ -517,17 +539,26 @@ function initHeroType()
         buffFrostArmor = new BuffType(true, DispelLevel.DISPEL)
         buffFrostArmor.setupBuffWithIcon(ARMOR_BUFF_ID, ARMOR_ABILTIY_ID)
         buffFrostArmor.addFirstFunction( (Buff whichBuff) -> (begin
+            let target = whichBuff.getTarget()
             let level = whichBuff.getLevel()
             let intel = whichBuff.getCaster().getInt()
-            whichBuff.setData(intel)
-            whichBuff.getTarget().wrapper()
-                ..addStatAbsoluteBonus(Stat.AR, ARMOR_AR[level - 1].bonus(intel, ARMOR_AR_BONUS).round())
+            let forstArmor = new FrostArmor()
+            target.wrapper().addStatAbsoluteBonus(Stat.AR, ARMOR_AR[level - 1].bonus(intel, ARMOR_AR_BONUS).round())
+            forstArmor.intelligence = intel
+            forstArmor.damageEventPointer = DamageEvent.registerHitAttackEvent(target) (unit source, unit target, real damage) ->
+                if not source.isType(UNIT_TYPE_STRUCTURE) and source.isTargetable(target.getOwner(), false, true)
+                    let armorBuff = BuffList.getBuffOfType(target, buffFrostArmor)
+                    source.addBuffReduced(armorBuff.getCaster(), ARMOR_SLOW_DURATION[level-1].bonus(armorBuff.getData(), ARMOR_SLOW_DURATION_BONUS), buffFrostArmorSlow, level)
+            whichBuff.setData(forstArmor castTo int)
         end))
         buffFrostArmor.addEndFunction( (Buff whichBuff) -> (begin
-            let intel = whichBuff.getData()
+            let target = whichBuff.getTarget()
+            let frostArmor = whichBuff.getData() castTo FrostArmor
+            let intel = frostArmor.intelligence
             let level = whichBuff.getLevel()
-            whichBuff.getTarget().wrapper()
-                ..addStatAbsoluteBonus(Stat.AR, -ARMOR_AR[level - 1].bonus(intel, ARMOR_AR_BONUS).round())
+            target.wrapper().addStatAbsoluteBonus(Stat.AR, -ARMOR_AR[level - 1].bonus(intel, ARMOR_AR_BONUS).round())
+            DamageEvent.deregisterHitAttackEvent(target, frostArmor.damageEventPointer)
+            destroy frostArmor
         end))
 
 
@@ -597,38 +628,6 @@ function initHeroType()
             let wrapper = whichBuff.getTarget().wrapper()
             wrapper.addStatAbsoluteBonus(Stat.AR, -FREEZE_DEF)
             wrapper.addStatAbsoluteBonus(Stat.AGI, -FREEZE_DEF)
-        end))
-
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if attacker.getTypeId() == FROST_WYRM
-                let nearby = CreateGroup()
-                nearby.enumUnitsInRange(target.getPos(), FROST_WYRM_AOE)
-
-                let dmg = attacker.wrapper().getStatTotalValue(Stat.STR) * 0.5
-               
-                var level = lastFrostBreathLevel
-                if SUMMON_MAP.has(attacker)
-                    level = SUMMON_MAP.get(attacker).getAbilityLevel(ABILITY_FROST_WYRM)
-                    lastFrostBreathLevel = level
-
-                if not target.isType(UNIT_TYPE_STRUCTURE)
-                    target.addBuffReduced(attacker, FROST_BREATH_DUR[level-1], buffFrostBreath, level)
-
-                while(not nearby.isEmpty())
-                    let u = FirstOfGroup(nearby)
-                    nearby.removeUnit(u)
-                    if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(attacker.getOwner(), false, true) and u != target
-                        u.addBuffReduced(attacker, FROST_BREATH_DUR[level-1], buffFrostBreath, level)
-                        attacker.dealDamage(u, dmg, ReductionType.PHYSICAL)
-
-                nearby.destr()
-        end))
-
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
-            if BuffList.hasBuffType(target, buffFrostArmor) and not attacker.isType(UNIT_TYPE_STRUCTURE) and attacker.isTargetable(target.getOwner(), false, true)
-                let armorBuff = BuffList.getBuffOfType(target, buffFrostArmor)
-                let level = armorBuff.getLevel()
-                attacker.addBuffReduced(armorBuff.getCaster(), ARMOR_SLOW_DURATION[level-1].bonus(armorBuff.getData(), ARMOR_SLOW_DURATION_BONUS), buffFrostArmorSlow, level)
         end))
 
         CreateTrigger()
