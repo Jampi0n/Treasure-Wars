@@ -272,7 +272,7 @@ function onRapidStats(unit caster, int level) // add bonus
 function onRapid(unit caster, int level) // add bonus
     doAfter(0, () -> (begin
         onRapidStats(caster, level)
-        OnAttack.useAdvanced(caster, true)
+        DamageEvent.useAlternate(caster, true)
         let track = AttackOrderTrack.getAttackTrack(caster)
         if track != null
             let target =track.getTarget()
@@ -292,7 +292,7 @@ function onRapidEndStats(unit caster, int level) // remove bonus
 function onRapidEnd(unit caster, int level) // remove bonus
     doAfter(0, () -> (begin
         onRapidEndStats(caster, level)
-        OnAttack.useAdvanced(caster, false)
+        DamageEvent.useAlternate(caster, false)
     end))
     melee_dummy[caster.getOwner().getId()].setOwner(Player(caster.getOwner().getId()), false)
     
@@ -506,10 +506,11 @@ function initHeroType()
     delayInit(5) ->
 
         heroType
-            ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive, advanced))
-            ..setRetreatAI((IHeroAI ai) -> (retreatAI(ai)))
-            ..setAttackAI((IHeroAI ai) -> (attackAI(ai)))
-            ..setTeamFightAI((IHeroAI ai) -> (teamFightAI(ai)))
+        ..setRetreatAI((IHeroAI ai) -> (retreatAI(ai)))
+        ..setAttackAI((IHeroAI ai) -> (attackAI(ai)))
+        ..setTeamFightAI((IHeroAI ai) -> (teamFightAI(ai)))
+        ..setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean advanced) ->
+            onAttack(source, target, active, advanced)
 
         buffBash = new BuffType(true, DispelLevel.DISPEL)
 

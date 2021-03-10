@@ -513,10 +513,11 @@ function initHeroType()
     ..addItem(ITEM_ID_RUNIC_ARMOR)
     delayInit(5) ->
         heroType
-            ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target))
-            ..setRetreatAI((IHeroAI ai) -> (retreatAI(ai)))
-            ..setAttackAI((IHeroAI ai) -> (attackAI(ai)))
-            ..setTeamFightAI((IHeroAI ai) -> (teamFightAI(ai)))
+        ..setRetreatAI((IHeroAI ai) -> (retreatAI(ai)))
+        ..setAttackAI((IHeroAI ai) -> (attackAI(ai)))
+        ..setTeamFightAI((IHeroAI ai) -> (teamFightAI(ai)))
+        ..setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean advanced) ->
+            onAttack(source, target)
 
         buffFrostNova = new BuffType(false, DispelLevel.DISPEL)
         buffFrostNova.setupBuffWithIcon(NOVA_BUFF_ID, NOVA_ABILTIY_ID)

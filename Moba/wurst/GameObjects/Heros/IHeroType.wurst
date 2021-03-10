@@ -4,7 +4,7 @@ import initlater IHero
 import initlater IHeroAI
 import LinkedList
 import IUnit
-import IOnAttack
+import FastDamageEvent
 import Stats
 import HeroTypeImpl
 
@@ -33,8 +33,7 @@ public interface IHeroType
     function getMax(Stat stat) returns integer
     function setStat(Stat stat, integer min, integer max)
     function getUnitId() returns integer
-    function onAttack(unit attacker, unit target, boolean isActive, boolean advanced)
-    function setOnAttackFunc(OnAttackFunctionHero onAttack)
+    function setOnAttackFunc(DamageFunction onAttack)
     function calculateStat(Stat stat, integer level) returns integer
     function setBonusCalculation(CalculateTotalBonus bonusCalculation)
     function getBonusCalculation() returns CalculateTotalBonus

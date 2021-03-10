@@ -534,10 +534,12 @@ function initHeroType()
     ..addMorph(HERO_TREE_ROOTED)
     delayInit(5) ->
         heroType
-            ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
-            ..setRetreatAI((IHeroAI ai) -> (retreatAI(ai)))
-            ..setAttackAI((IHeroAI ai) -> (attackAI(ai)))
-            ..setTeamFightAI((IHeroAI ai) -> (teamFightAI(ai)))
+        ..setRetreatAI((IHeroAI ai) -> (retreatAI(ai)))
+        ..setAttackAI((IHeroAI ai) -> (attackAI(ai)))
+        ..setTeamFightAI((IHeroAI ai) -> (teamFightAI(ai)))
+        ..setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean advanced) ->
+            onAttack(source, target, active)
+
 
         BUFF_ENTAGLING_ROOTS.setupBuffWithIcon(ENTAGLING_ROOTS_BUFF_ID, ENTAGLING_ROOTS_ABILITY_ID)
 

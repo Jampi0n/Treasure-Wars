@@ -178,10 +178,10 @@ public function saveDamageEventInt(int key)
         return
     addPickupFunction() ->
         let u = DamageEventUnit.fromUnit(getTriggerUnit())
-        u.saveIntSlow(key, u.loadIntFast(key) + 1)
+        u.saveIntFast(key, u.loadIntFast(key) + 1)
     addDropFunction() ->
         let u = DamageEventUnit.fromUnit(getTriggerUnit())
-        u.saveIntSlow(key, u.loadIntFast(key) - 1)
+        u.saveIntFast(key, u.loadIntFast(key) - 1)
 
 
 public function setupItem(int itemId, int category, int goldCost)

@@ -1,9 +1,8 @@
 package UnitTypeConfig
 
 import Assets
-import ClosureTimers
 import UnitLib
-import initlater OnAttack
+import FastDamageEvent
 
 constant ATTACK_MELEE = 'R000'
 constant ATTACK_RANGED = 'R001'
@@ -91,18 +90,15 @@ public constant STORMREAVER = createUnitTypeAndReturnId(200, 'n00X', 15, 15, 30,
 public constant SKELETAL_ORC = createUnitTypeAndReturnId(200, 'n00U', 15, 24, 10, 16, Units.skeletonOrc1, 3)
 
 init
-    /*doAfter(0, () -> (begin
-        OnAttack.addOnAttackFunc((unit attacker, unit target, boolean _isActive) -> (begin
-            if attacker.getTypeId() == TANK
-                let nearby = CreateGroup()
-                nearby.enumUnitsInRange(target.getPos(), 250)
+    DamageEventUnitType.fromUnitTypeId(TANK).anyDamage.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
+        if attack
+            let nearby = CreateGroup()
+            nearby.enumUnitsInRange(target.getPos(), 250)
 
-                while(not nearby.isEmpty())
-                    let u = FirstOfGroup(nearby)
-                    nearby.removeUnit(u)
-                    if u.isTargetable(attacker.getOwner(), false, true) and u!=target
-                        attacker.dealDamage(u, 75, ReductionType.PHYSICAL)
+            while(not nearby.isEmpty())
+                let u = FirstOfGroup(nearby)
+                nearby.removeUnit(u)
+                if u.isTargetable(source.getOwner(), false, true) and u != target
+                    source.dealDamage(u, 75, ReductionType.PHYSICAL)
 
-                nearby.destr()
-        end))
-    end))*/
+            nearby.destr()

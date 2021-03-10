@@ -12,6 +12,7 @@ import Constants
 import public IUnitType
 import public IUnit
 import Stats
+import DamageDetection
 
 public function createUnitTypeAndReturnId(int baseHp, int unitId, int bounty, int baseAttack, int upgradeAttack, int attackUpgradeId, int baseArmor, int upgradeArmor, int armorUpgradeId, int hitBox, string modelPath, int powerLevel) returns int
     UnitType.create(baseHp, unitId, bounty, baseAttack, upgradeAttack, attackUpgradeId, baseArmor, upgradeArmor, armorUpgradeId, hitBox, modelPath, powerLevel)
@@ -123,6 +124,11 @@ public function unit.dealDamage(unit target, real amount, ReductionType reductio
         this.dealDamageAlways(target, amount, reductionType)
         if not IsUnitEnemy(target, this.getOwner()) and this != target
             Log.warn(this.getName()+" damages ally: "+target.getName())
+
+public function unit.dealDamageNoEvent(unit target, real amount, ReductionType reductionType)
+    disableDamageDetect()
+    this.dealDamage(target, amount, reductionType)
+    enableDamageDetect()
 
 public function unit.damageMana(unit target, real amount, ReductionType reductionType)
     real newAmount

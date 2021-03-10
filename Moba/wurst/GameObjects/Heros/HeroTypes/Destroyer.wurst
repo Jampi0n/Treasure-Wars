@@ -379,11 +379,11 @@ function initHeroType()
     ..addItem(ITEM_ID_CURSED_SWORD)
     delayInit(5) ->
         heroType
-            ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
-            ..setRetreatAI((IHeroAI ai) -> (retreatAI(ai)))
-            ..setAttackAI((IHeroAI ai) -> (attackAI(ai)))
-            ..setTeamFightAI((IHeroAI ai) -> (teamFightAI(ai)))
-
+        ..setRetreatAI((IHeroAI ai) -> (retreatAI(ai)))
+        ..setAttackAI((IHeroAI ai) -> (attackAI(ai)))
+        ..setTeamFightAI((IHeroAI ai) -> (teamFightAI(ai)))
+        ..setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean advanced) ->
+            onAttack(source, target, active)
 
         buffMeltingBreath = new BuffType(false, DispelLevel.DISPEL)
         buffMeltingBreath.setupBuffWithIcon(BREATH_BUFF_ID, BREATH_ABILITY_ID)
