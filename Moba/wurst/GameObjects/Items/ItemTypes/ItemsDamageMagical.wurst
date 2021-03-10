@@ -217,13 +217,10 @@ function itemVoodooMask()
         addHitFunction() (unit source, unit target, real damage) ->
             target.healMana(target, mp.toReal() * target.countItemsOfType(ITEM_ID_VOODOO_MASK))
             target.addEffect(Abilities.spiritTouchTarget, "origin").destr()
-        // currently only one attack effect per item is supported
-        // this is because the pointer to the damage function is stored in a hashtable at (unit,item type id)
-        /*OnAttack.addOnAttackFunc((unit source, unit target, boolean isActive) -> (begin
+        addDamageFunction() (unit source, unit target, real damage) ->
             if source.hasItemById(ITEM_ID_VOODOO_MASK) and not target.isType(UNIT_TYPE_STRUCTURE)
                 source.dealDamage(target, voidDmg.toReal() * source.countItemsOfType(ITEM_ID_VOODOO_MASK) , ReductionType.NONE)
                 target.addEffect(Abilities.avengerMissile, "chest").destr()
-        end))*/
 
 
 function itemEvilBook()
@@ -385,11 +382,10 @@ function itemRingOfDarkness()
             target.healMana(target, mp.toReal() * target.countItemsOfType(ITEM_ID_RING_OF_DARKNESS))
             target.addEffect(Abilities.spiritTouchTarget, "origin").destr()
     
-        /*OnAttack.addOnAttackFunc((unit source, unit target, boolean isActive) -> (begin
+        addDamageFunction() (unit source, unit target, real damage) ->
             if source.hasItemById(ITEM_ID_RING_OF_DARKNESS) and not target.isType(UNIT_TYPE_STRUCTURE)
                 source.dealDamage(target, voidDmg.toReal() * source.countItemsOfType(ITEM_ID_RING_OF_DARKNESS) , ReductionType.NONE)
                 target.addEffect(Abilities.avengerMissile, "chest").destr()
-        end))*/
 
         createItemEffectTrigger()
         ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)

@@ -167,10 +167,10 @@ public function addHitFunction(DamageFunction f)
         return
     addPickupFunction() ->
         if isUnique()
-            DamageEventUnit.fromUnit(getTriggerUnit()).saveIntSlow( getTriggerItemType(), DamageEventUnit.fromUnit(getTriggerUnit()).attackHitNoBuilding.add(f))
+            DamageEventUnit.fromUnit(getTriggerUnit()).saveIntSlow( -getTriggerItemType(), DamageEventUnit.fromUnit(getTriggerUnit()).attackHitNoBuilding.add(f))
     addDropFunction() ->
         if isUnique()
-            DamageEventUnit.fromUnit(getTriggerUnit()).attackHitNoBuilding.remove(DamageEventUnit.fromUnit(getTriggerUnit()).loadIntSlow(getTriggerItemType()))
+            DamageEventUnit.fromUnit(getTriggerUnit()).attackHitNoBuilding.remove(DamageEventUnit.fromUnit(getTriggerUnit()).loadIntSlow(-getTriggerItemType()))
 
 
 public function setupItem(int itemId, int category, int goldCost)
