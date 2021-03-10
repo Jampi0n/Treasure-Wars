@@ -368,7 +368,7 @@ function castMirrorImage()
     ..addStatAbsoluteBonus(Stat.MS, casterWrapper.getStatTotalBonus(Stat.MS))
 
     //bleeding wound for mirror image
-    DamageEvent.registerDamageAttackEvent(mirrorImageUnit) (unit source, unit target, real damage) ->
+    DamageEventUnit.fromUnit(mirrorImageUnit).attackHitNoBuilding.add() (unit source, unit target, real damage) ->
         if level != 0 and target.isTargetable(heroOwner, false, true) and not target.isType(UNIT_TYPE_STRUCTURE)
             let b = target.addBuffReduced( trollManhunter, BLEEDING_WOUND_DURATION, buffBleedingWound, level)
             b.setData(b.getData()+3)

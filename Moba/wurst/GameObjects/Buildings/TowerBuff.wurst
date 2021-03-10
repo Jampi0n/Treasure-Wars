@@ -8,7 +8,7 @@ import ObjectEditingPreset
 import Assets
 import Buff
 import UnitLib
-import DamageEvent
+import FastDamageEvent
 import Stats
 
 
@@ -51,6 +51,6 @@ init
 	let g = CreateGroup()
 	g.enumUnitsAll(null)
 	for u in g
-		DamageEvent.registerDamageAttackEvent(u) (unit source, unit target, real damage) ->
+		DamageEventUnit.fromUnit(u).attackHitNoBuilding.add() (unit source, unit target, real damage) ->
 			if target.isType(UNIT_TYPE_HERO)
 				target.addBuffReduced(source, TOWER_FOCUS_DUR, buffTowerFocus, 1)
