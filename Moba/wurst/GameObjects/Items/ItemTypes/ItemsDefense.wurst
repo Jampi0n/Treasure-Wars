@@ -107,7 +107,7 @@ function firehandGauntlets()
     addStatBonusAbsolute(Stat.AS, as)
 
     if not compiletime
-        addDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+        addAttackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             source.dealDamage(target, magicDmg.toReal() * source.countItemsOfType(ITEM_ID_FIREHAND_GAUNTLETS) , ReductionType.MAGIC)
             target.addEffect(Abilities.fireBallMissile, "chest").destr()
 
@@ -123,7 +123,7 @@ function spikedArmor()
     addStatBonusAbsolute(Stat.AR, ar)
     addStatBonusAbsolute(Stat.HP, hp)
     if not compiletime
-        addHitFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+        addAttackHitFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             let dmg = target.countItemsOfType(ITEM_ID_SPIKED_ARMOR) * spikeDmg
             target.dealDamage(source, dmg.toReal(), ReductionType.PHYSICAL)
     
@@ -268,7 +268,7 @@ function spikes()
     setInfo("Spikes", "Enemies attacking the hero will take {0} damage."
     .format(spikeDmg.toString()))
     if not compiletime
-        addDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+        addAttackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             if target.isType(UNIT_TYPE_HERO)
                 let dmg = target.countItemsOfType(ITEM_ID_SPIKES) * spikeDmg
                 target.dealDamage(source, dmg.toReal(), ReductionType.PHYSICAL)
@@ -336,7 +336,7 @@ function spikedMail()
     addStatBonusAbsolute(Stat.HP, hp)
 
     if not compiletime
-        addHitFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+        addAttackHitFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             let dmg = target.countItemsOfType(ITEM_ID_SPIKED_MAIL) * spikeDmg
             target.dealDamage(source, dmg.toReal(), ReductionType.PHYSICAL)
 
