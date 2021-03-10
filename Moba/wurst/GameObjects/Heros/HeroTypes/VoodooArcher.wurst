@@ -300,7 +300,7 @@ function castSerpentWard()
 
     wrapper.addStatAbsoluteBonus(Stat.HP, SERPEND_WARD_HP[level-1] )
 
-    DamageEvent.registerDamageAttackEvent(ward) (unit source, unit target, real damage) ->
+    DamageEventUnit.fromUnit(ward).attackHitNoBuilding.add() (unit source, unit target, real damage) ->
         if not target.isType(UNIT_TYPE_STRUCTURE)
             let hero = SUMMON_MAP.get(source)
             target.addBuffReduced(hero, SERPENT_POISON_DURATION[level-1], buffSerpentPoison, level)

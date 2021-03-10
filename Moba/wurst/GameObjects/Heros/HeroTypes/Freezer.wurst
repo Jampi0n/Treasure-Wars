@@ -388,7 +388,7 @@ function castFrostWyrm()
     wrapper.addStatAbsoluteBonus(Stat.HP, caster.wrapper().getStatTotalBonus(Stat.HP) + FROST_WYRM_HP[level-1] )
     wrapper.addStatAbsoluteBonus(Stat.STR, ( (FROST_WYRM_INT_FACTOR/100) * caster.getInt() ).toInt()  + FROST_WYRM_DMG[level-1] )
 
-    DamageEvent.registerDamageAttackEvent(frostWyrm) (unit source, unit target, real damage) ->
+    DamageEventUnit.fromUnit(frostWyrm).attackHitNoBuilding.add() (unit source, unit target, real damage) ->
         let nearby = CreateGroup()
         nearby.enumUnitsInRange(target.getPos(), FROST_WYRM_AOE)
 
@@ -545,8 +545,8 @@ function initHeroType()
             let forstArmor = new FrostArmor()
             target.wrapper().addStatAbsoluteBonus(Stat.AR, ARMOR_AR[level - 1].bonus(intel, ARMOR_AR_BONUS).round())
             forstArmor.intelligence = intel
-            forstArmor.damageEventPointer = DamageEvent.registerHitAttackEvent(target) (unit source, unit target, real damage) ->
-                if not source.isType(UNIT_TYPE_STRUCTURE) and source.isTargetable(target.getOwner(), false, true)
+            forstArmor.damageEventPointer = DamageEventUnit.fromUnit(target).attackHitNoBuilding.add() (unit source, unit target, real damage) ->
+                if source.isTargetable(target.getOwner(), false, true)
                     let armorBuff = BuffList.getBuffOfType(target, buffFrostArmor)
                     source.addBuffReduced(armorBuff.getCaster(), ARMOR_SLOW_DURATION[level-1].bonus(armorBuff.getData(), ARMOR_SLOW_DURATION_BONUS), buffFrostArmorSlow, level)
             whichBuff.setData(forstArmor castTo int)
@@ -557,7 +557,7 @@ function initHeroType()
             let intel = frostArmor.intelligence
             let level = whichBuff.getLevel()
             target.wrapper().addStatAbsoluteBonus(Stat.AR, -ARMOR_AR[level - 1].bonus(intel, ARMOR_AR_BONUS).round())
-            DamageEvent.deregisterHitAttackEvent(target, frostArmor.damageEventPointer)
+            DamageEventUnit.fromUnit(target).attackHitNoBuilding.remove(frostArmor.damageEventPointer)
             destroy frostArmor
         end))
 

@@ -36,7 +36,7 @@ import public TeamUtil
 import public ObjectEditingPreset
 import public ObjectIds
 import public ObjectIdGenerator
-import public DamageEvent
+import public FastDamageEvent
 
 public function delayInit(real maxDelay, CallbackSingle cb)
     doAfter(GetRandomReal(1, maxDelay), cb)

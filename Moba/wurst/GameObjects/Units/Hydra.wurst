@@ -10,7 +10,7 @@ import UnitTypeConfig
 import UnitLib
 import TeamUtil
 import Buff
-import OnAttack
+import FastDamageEvent
 import Stats
 
 constant REVIVE_TIME = 300.
@@ -146,6 +146,8 @@ init
             ..addStatAbsoluteBonus(Stat.AR, ACID_BREATH_ARMOR * stacks)
     end))
 
+    DamageEventUnitType.fromUnitTypeId(HYDRA).attackDamageNoBuilding.add() (unit source, unit target, real damage) ->
+        target.addBuffReduced(source, ACID_BREATH_DUR, buffAcidBreath, 1)
     /*OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
         if attacker.getTypeId() == HYDRA and not target.isType(UNIT_TYPE_STRUCTURE)
             target.addBuffReduced(attacker, ACID_BREATH_DUR, buffAcidBreath, 1)

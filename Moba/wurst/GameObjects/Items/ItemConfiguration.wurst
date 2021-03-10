@@ -17,7 +17,7 @@ import public UnitLib
 //import public OnAttack
 import public Buff
 import public StandardBuffs
-import public DamageEvent
+import public FastDamageEvent
 
 interface ItemPickUp
     function onItemPickUp()
@@ -155,50 +155,23 @@ public function addStatBonusRelative(Stat whichStat, int bonus)
 public function addDamageFunction(DamageFunction f)
     if compiletime
         return
-    addPickupFunction( ()-> (begin
+    addPickupFunction() ->
         if isUnique()
-            DamageEvent.saveIntSlow(getTriggerUnit(), getTriggerItemType(), DamageEvent.registerDamageEvent(getTriggerUnit(), f))
-    end))
-    addDropFunction( ()-> (begin
+            DamageEventUnit.fromUnit(getTriggerUnit()).saveIntSlow( getTriggerItemType(), DamageEventUnit.fromUnit(getTriggerUnit()).attackDamageNoBuilding.add(f))
+    addDropFunction() ->
         if isUnique()
-            DamageEvent.deregisterDamageEvent(getTriggerUnit(), DamageEvent.loadIntSlow(getTriggerUnit(), getTriggerItemType()))
-    end))
+            DamageEventUnit.fromUnit(getTriggerUnit()).attackDamageNoBuilding.remove(DamageEventUnit.fromUnit(getTriggerUnit()).loadIntSlow(getTriggerItemType()))
 
 public function addHitFunction(DamageFunction f)
     if compiletime
         return
-    addPickupFunction( ()-> (begin
+    addPickupFunction() ->
         if isUnique()
-            DamageEvent.saveIntSlow(getTriggerUnit(), getTriggerItemType(), DamageEvent.registerHitEvent(getTriggerUnit(), f))
-    end))
-    addDropFunction( ()-> (begin
+            DamageEventUnit.fromUnit(getTriggerUnit()).saveIntSlow( getTriggerItemType(), DamageEventUnit.fromUnit(getTriggerUnit()).attackHitNoBuilding.add(f))
+    addDropFunction() ->
         if isUnique()
-            DamageEvent.deregisterHitEvent(getTriggerUnit(), DamageEvent.loadIntSlow(getTriggerUnit(), getTriggerItemType()))
-    end))
+            DamageEventUnit.fromUnit(getTriggerUnit()).attackHitNoBuilding.remove(DamageEventUnit.fromUnit(getTriggerUnit()).loadIntSlow(getTriggerItemType()))
 
-public function addDamageAttackFunction(DamageFunction f)
-    if compiletime
-        return
-    addPickupFunction( ()-> (begin
-        if isUnique()
-            DamageEvent.saveIntSlow(getTriggerUnit(), getTriggerItemType(), DamageEvent.registerDamageAttackEvent(getTriggerUnit(), f))
-    end))
-    addDropFunction( ()-> (begin
-        if isUnique()
-            DamageEvent.deregisterDamageAttackEvent(getTriggerUnit(), DamageEvent.loadIntSlow(getTriggerUnit(), getTriggerItemType()))
-    end))
-
-public function addHitAttackFunction(DamageFunction f)
-    if compiletime
-        return
-    addPickupFunction( ()-> (begin
-        if isUnique()
-            DamageEvent.saveIntSlow(getTriggerUnit(), getTriggerItemType(), DamageEvent.registerHitAttackEvent(getTriggerUnit(), f))
-    end))
-    addDropFunction( ()-> (begin
-        if isUnique()
-            DamageEvent.deregisterHitAttackEvent(getTriggerUnit(), DamageEvent.loadIntSlow(getTriggerUnit(), getTriggerItemType()))
-    end))
 
 public function setupItem(int itemId, int category, int goldCost)
     if compiletime
