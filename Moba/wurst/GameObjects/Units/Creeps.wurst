@@ -16,6 +16,7 @@ import PlayerControl
 import TeamUtil
 import HeroLib
 import Stats
+import FastDamageEvent
 
 constant int DUMMY_CASTER = compiletime(UNIT_ID_GEN.next())
 constant int HEAL_BUFF_ID = compiletime(createDummyBuff())
@@ -91,6 +92,15 @@ function initCreepBuffs()
         target.healMana(target, 0.25 * SEA_ELEMENTAL_MP_REG)
     end)
 
+    TURTLE_BUFF.addFirstFunction((Buff whichBuff) -> begin
+        let pointer = DamageEventUnit.fromUnit(whichBuff.getTarget()).attackHitNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
+            target.dealDamage(source, damage * 0.1, ReductionType.PHYSICAL)
+        whichBuff.setData(pointer)
+    end)
+    TURTLE_BUFF.addEndFunction((Buff whichBuff) -> begin
+        DamageEventUnit.fromUnit(whichBuff.getTarget()).attackHitNoBuilding.remove(whichBuff.getData())
+    end)
+
     MURGUL_BUFF.addFirstFunction((Buff whichBuff) -> begin
         whichBuff.getTarget().wrapper().addStatAbsoluteBonus(Stat.AS, MURGUL_AS)
     end)
@@ -110,6 +120,15 @@ function initCreepBuffs()
     end)
     MAKRURA_BUFF.addEndFunction((Buff whichBuff) -> begin
         whichBuff.getTarget().wrapper().addStatAbsoluteBonus(Stat.AR, -MAKRURA_AR)
+    end)
+
+    REVENANT_BUFF.addFirstFunction((Buff whichBuff) -> begin
+        let pointer = DamageEventUnit.fromUnit(whichBuff.getTarget()).anyDamage.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
+            target.addBuffReduced(source, 2, REVENANT_SLOW_BUFF, 1)
+        whichBuff.setData(pointer)
+    end)
+    REVENANT_BUFF.addEndFunction((Buff whichBuff) -> begin
+        DamageEventUnit.fromUnit(whichBuff.getTarget()).anyDamage.remove(whichBuff.getData())
     end)
 
     REVENANT_SLOW_BUFF.addFirstFunction((Buff whichBuff) -> begin
