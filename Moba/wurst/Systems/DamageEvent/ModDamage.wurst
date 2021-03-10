@@ -1,7 +1,83 @@
 package ModDamage
 
 //import DamageIds
+import initlater SeaDruid
+import initlater TrollBerserker
+import initlater Paladin
+import initlater Destroyer
+import StandardTextTags
+import ItemIds
+import Gameplay
+import UnitLib
+import Buff
+import FastDamageEvent
+import DamageIds
+
+/*
+Optimized damage modification function.
+Items are handled by using DamageIds.
+Heroes can generally be filtered by type ids. 
+*/
 
 public abstract class ModDamage
-    static function modDamage(unit _source, unit _target, real damage, bool _attack, bool _active, bool _advanced) returns real
-        return damage
+    @inline
+    static function modDamage(unit source, unit target, DamageEventUnit _sourceWrapper, DamageEventUnit targetWrapper, int sourceTypeId, int targetTypeId, real originalDamage, bool attack, bool _active, bool advanced) returns real
+        real currentDamage = originalDamage
+        if originalDamage.abs() >= 0.000001 //damage very small, just ignore
+            /*
+                untargetable -> damage = 0 and no further damage handling
+                only for attacks, because every other damage will be dealt in code and there I can decide individually, if I want to deal damage
+            */
+            if (target.isType(UNIT_TYPE_ANCIENT) and attack) or gameOver
+                currentDamage = 0
+            else
+                // the following effects manage the damage dealt (attacker based)
+
+                // critical strike - TROLL BERSERKER
+                if advanced
+                    if sourceTypeId == HERO_TROLL_BERSERKER
+                        if not target.isType(UNIT_TYPE_STRUCTURE)
+                            let critical = BuffList.getBuffOfType(source, buffCriticalStrike)
+                            currentDamage = currentDamage * (100 + CRITICAL_DAMAGE_MULT[critical.getLevel()-1])/100
+                            createCriticalStrikeTextTag(target, currentDamage.toInt())
+                            critical.dispel()
+
+                // death frenzy - DESTROYER
+                if sourceTypeId == HERO_DESTROYER
+                    let deathFrenzyLevel = source.getAbilityLevel(ABILITY_DEATH_FRENZY)
+                    if deathFrenzyLevel > 0
+                        currentDamage *= 1 + DEATH_FRENZY_BONUS[deathFrenzyLevel-1]/100 * (1-source.getLife()/GetUnitState(source, UNIT_STATE_MAX_LIFE))
+                        
+
+                // the following effects manage damage taken (target based)
+
+                //heavy armored
+                if attack
+                    if targetTypeId == HERO_PALADIN
+                        let heavyArmoredLevel = target.getAbilityLevel(ABILITY_HEAVY_ARMORED)
+                        if heavyArmoredLevel > 0
+                            currentDamage -= HEAVY_ARMOED_REDUCTION[heavyArmoredLevel - 1]
+
+                // shield - ITEM
+                if attack
+                    if targetWrapper.loadIntFast(D_SHIELD) > 0
+                        currentDamage = currentDamage - 15 * target.countItemsOfType(ITEM_ID_SHIELD)
+                        currentDamage = currentDamage - 20 * target.countItemsOfType(ITEM_ID_HOLY_SHIELD)
+
+
+                //the following effects make use of the final damage
+
+                // mana shield - SEA DRUID
+                if targetTypeId == HERO_SEA_DRUID
+                    if BuffList.hasBuffType(target, buffManaShield)
+                        let manaShield = BuffList.getBuffOfType(target, buffManaShield)
+                        let level = manaShield.getLevel()
+                        manaShield.getTarget().damageMana(manaShield.getTarget(), MANA_SHIELD_REDUCTION[level-1] * MANA_PER_DAMAGE[level-1] * currentDamage, ReductionType.NONE)
+                        currentDamage = currentDamage * (1.-MANA_SHIELD_REDUCTION[level-1])
+
+                // void armor - ITEM
+                if targetWrapper.loadIntFast(D_VOID_ARMOR) > 0
+                    target.healMana(target, currentDamage * 0.1)
+                    currentDamage *= 0.9
+
+        return currentDamage

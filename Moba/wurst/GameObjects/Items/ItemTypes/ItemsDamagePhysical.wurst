@@ -45,7 +45,7 @@ function itemBow()
     setInfo("Bow", "+ {0} strength|nDeals {1} additional damage to units.".format(str.toString(), unitDmg.toString() ))
     addStatBonusAbsolute(Stat.STR, str)
 
-    addDamageFunction() (unit source, unit target, real damage) ->
+    addDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
         print("Bow is now better: " + source.getName() + "->" + target.getName())
         if not target.isType(UNIT_TYPE_HERO)
             let dmg = source.countItemsOfType(ITEM_ID_BOW) * unitDmg * 100
@@ -86,7 +86,7 @@ function itemBloodSword()
             thisBuff.getTarget().wrapper().addStatRelativeBonus(Stat.AR, 250)
         end))
 
-        addDamageFunction() (unit source, unit target, real damage) ->
+        addDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             target.addBuffReduced(source, buffDur.toReal(), bloodSwordBuff, 1)
 
 
@@ -108,7 +108,7 @@ function itemCursedSword()
     addStatBonusAbsolute(Stat.AS, as)
 
     if not compiletime
-        addDamageFunction() (unit source, unit target, real damage) ->
+        addDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             source.dealDamage(target, voidDmg * target.getMaxHP() * 0.01 , ReductionType.NONE)
             target.addEffect(Abilities.avengerMissile, "chest").destr()
 
@@ -142,7 +142,7 @@ function itemInfernalBow()
     addStatBonusAbsolute(Stat.HP, hp)
 
     if not compiletime
-        addDamageFunction() (unit source, unit target, real damage) ->
+        addDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             source.dealDamage(target, magicDmg.toReal() * source.countItemsOfType(ITEM_ID_INFERNAL_BOW) , ReductionType.MAGIC)
             target.addEffect(Abilities.fireBallMissile, "chest").destr()
 
@@ -165,7 +165,7 @@ function itemEnchantedBlade()
     addStatBonusAbsolute(Stat.AGI, wp)
 
     if not compiletime
-        addDamageFunction() (unit source, unit target, real damage) ->
+        addDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             if target.getMana() > 0
                 let manaBurned = min(mBurn.toReal() , target.getMana())
                 source.damageMana(target, manaBurned, ReductionType.NONE)
@@ -213,7 +213,7 @@ function itemAxeOfDecay()
             thisBuff.getTarget().wrapper().addStatRelativeBonus(Stat.MS, slow*10)
         end))
 
-        addDamageFunction() (unit source, unit target, real damage) ->
+        addDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             target.addBuffReduced( source, slowDur.toReal(), axeBuff, 1)
         
 
@@ -300,7 +300,7 @@ function itemMace()
             thisBuff.getCaster().dealDamage(thisBuff.getTarget(), bleedDmg/bleedDuration, ReductionType.PHYSICAL)
         end) )
 
-        addDamageFunction() (unit source, unit target, real damage) ->
+        addDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             target.addBuffReduced( source, bleedDuration.toReal(), maceBuff, 1)
             target.addEffect(Abilities.hydraliskImpact, "chest").destr()
 
@@ -331,7 +331,7 @@ function itemHammerOfMight()
             thisBuff.getTarget().wrapper().addStatRelativeBonus(Stat.AR, armorDmg*10)
         end))
 
-        addDamageFunction() (unit source, unit target, real damage) ->
+        addDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             target.addBuffReduced( source, armorDuration.toReal(), hammerBuff, 1)
             target.addEffect(Abilities.bloodElfSpellThiefMISSILE, "chest").destr()
 
@@ -352,7 +352,7 @@ function itemRavenSword()
     addStatBonusAbsolute(Stat.AS, as)
 
     if not compiletime
-        addDamageFunction() (unit source, unit target, real damage) ->
+        addDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             source.dealDamage(target, voidDmg.toReal() * source.countItemsOfType(ITEM_ID_RAVEN_SWORD) , ReductionType.NONE)
             target.addEffect(Abilities.avengerMissile, "chest").destr()
 
@@ -410,7 +410,7 @@ function itemArmorBreaker()
             thisBuff.getTarget().wrapper().addStatRelativeBonus(Stat.AR, armorDmg*10)
         end))
 
-        addDamageFunction() (unit source, unit target, real damage) ->
+        addDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             target.addBuffReduced( source, armorDuration.toReal(), hammerBuff, 1)
             target.addEffect(Abilities.bloodElfSpellThiefMISSILE, "chest").destr()
 
@@ -444,7 +444,7 @@ function itemChillingBlade()
             wrapper.decBlue()
         end))
 
-        addDamageFunction() (unit source, unit target, real damage) ->
+        addDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             target.addBuffReduced( source, slowDuration.toReal(), slowBuff, 1)
 
 @compiletime

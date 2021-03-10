@@ -1,10 +1,11 @@
 package FastDamageEvent_config
 
+import FastDamageEvent
 import ModDamage
 
 @config public var ON_HIT_BUFF = 'B005'
 @config public var ON_HIT_BUFF_ARROW = 'B006'
 @config public var ON_HIT_BUFF_ALTERNATE = 'B00G'
 
-@config public function modDamage(unit source, unit target, real damage, bool attack, bool arrow, bool alternate) returns real
-    return ModDamage.modDamage(source, target, damage, attack, arrow, alternate)
+@config public function modDamage(unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, int sourceTypeId, int targetTypeId, real damage, bool attack, bool arrow, bool alternate) returns real
+    return ModDamage.modDamage(source, target, sourceWrapper, targetWrapper, sourceTypeId, targetTypeId, damage, attack, arrow, alternate)

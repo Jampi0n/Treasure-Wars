@@ -1,9 +1,14 @@
 package DamageIds
 
+import FastDamageEvent
+import ErrorHandling
+
 int counter = 0
 function getDamageId() returns int
     counter = counter + 1
+    if counter >= FAST_DATA_SIZE
+        error("Too many damage ids")
     return counter - 1
 
-public constant D_CRITICAL_STRIKE = getDamageId()
-public constant D_DEATH_FRENZY = getDamageId()
+public constant D_SHIELD = getDamageId()
+public constant D_VOID_ARMOR = getDamageId()

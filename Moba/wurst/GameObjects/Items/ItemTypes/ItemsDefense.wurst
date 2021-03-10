@@ -49,6 +49,8 @@ function voidArmor()
     addStatBonusAbsolute(Stat.AR, ar)
     addStatBonusAbsolute(Stat.AGI, wp)
 
+    saveDamageEventInt(D_VOID_ARMOR)
+
 function armorOfCourage()
     let ar = 36
     let wp = 18
@@ -105,7 +107,7 @@ function firehandGauntlets()
     addStatBonusAbsolute(Stat.AS, as)
 
     if not compiletime
-        addDamageFunction() (unit source, unit target, real damage) ->
+        addDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             source.dealDamage(target, magicDmg.toReal() * source.countItemsOfType(ITEM_ID_FIREHAND_GAUNTLETS) , ReductionType.MAGIC)
             target.addEffect(Abilities.fireBallMissile, "chest").destr()
 
@@ -121,7 +123,7 @@ function spikedArmor()
     addStatBonusAbsolute(Stat.AR, ar)
     addStatBonusAbsolute(Stat.HP, hp)
     if not compiletime
-        addHitFunction() (unit source, unit target, real damage) ->
+        addHitFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             let dmg = target.countItemsOfType(ITEM_ID_SPIKED_ARMOR) * spikeDmg
             target.dealDamage(source, dmg.toReal(), ReductionType.PHYSICAL)
     
@@ -158,6 +160,7 @@ function holyShield()
     addStatBonusAbsolute(Stat.AR, ar)
     addStatBonusAbsolute(Stat.AGI, wp)
     addStatBonusAbsolute(Stat.HP, hp)
+    saveDamageEventInt(D_SHIELD)
 
     if not compiletime
         BUFF_HOLY_SHIELD.setupBuffWithIcon(HOLY_SHIELD_BUFF_ID, HOLY_SHIELD_ABILTIY_ID)
@@ -265,7 +268,7 @@ function spikes()
     setInfo("Spikes", "Enemies attacking the hero will take {0} damage."
     .format(spikeDmg.toString()))
     if not compiletime
-        addDamageFunction() (unit source, unit target, real damage) ->
+        addDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             if target.isType(UNIT_TYPE_HERO)
                 let dmg = target.countItemsOfType(ITEM_ID_SPIKES) * spikeDmg
                 target.dealDamage(source, dmg.toReal(), ReductionType.PHYSICAL)
@@ -277,6 +280,7 @@ function shield()
     setInfo("Shield", "+ {0} armor|nBlocks {1} damage of incoming attacks."
     .format(ar.toString(), block.toString()))
     addStatBonusAbsolute(Stat.AR, ar)
+    saveDamageEventInt(D_SHIELD)
 
 
 function ringOfHealth()
@@ -332,7 +336,7 @@ function spikedMail()
     addStatBonusAbsolute(Stat.HP, hp)
 
     if not compiletime
-        addHitFunction() (unit source, unit target, real damage) ->
+        addHitFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             let dmg = target.countItemsOfType(ITEM_ID_SPIKED_MAIL) * spikeDmg
             target.dealDamage(source, dmg.toReal(), ReductionType.PHYSICAL)
 

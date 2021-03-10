@@ -5,7 +5,7 @@ import ErrorHandling
 import DamageDetection
 
 public interface DamageFunction
-    function damage(unit source, unit target, real damage)
+    function damage(unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool _active, bool advanced)
 
 /** This buff is used to detect regular attacks **/
 @configurable public var ON_HIT_BUFF = 0
@@ -34,7 +34,7 @@ In order to improve speed, it is recommended to use DamageEventUnit save and loa
 Instead of checking for an item the state can be saved when the item is picked up and dropped.
 This is especially useful when a lot of damage modifiers are used, that only rarely are enabled.
 **/
-@configurable public function modDamage(unit _source, unit _target, real damage, bool _attack, bool _arrow, bool _alternate) returns real
+@configurable public function modDamage(unit _source, unit _target, DamageEventUnit _sourceWrapper, DamageEventUnit _targetWrapper, int _sourceTypeId, int _targetTypeId, real damage, bool _attack, bool _arrow, bool _alternate) returns real
     return damage
 
 class DamageFunctionListElement
@@ -110,10 +110,10 @@ Extension methods are used to prevent null checks and enable inlining.
 */
 @inline function DamageEventGroup.hasEvents() returns bool
     return this.n > 0
-@inline function DamageEventGroup.runEvents(unit source, unit target, real damage)
+@inline function DamageEventGroup.runEvents(unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate)
     DamageFunctionListElement current = this.list.first
     while current != null
-        current.f.damage(source, target, damage)
+        current.f.damage(source, target, sourceWrapper, targetWrapper, damage, attack, arrow, alternate)
         current = current.next
 
 /*
@@ -172,7 +172,6 @@ public class DamageEventUnit
 
     private unit u
     private int h
-
     DamageEventGroup anyDamage = new DamageEventGroup()
     DamageEventGroup anyHit = new DamageEventGroup()
     DamageEventGroup attackDamageNoBuilding = new DamageEventGroup()
@@ -207,9 +206,6 @@ public class DamageEventUnit
 
 public abstract class DamageEvent
     protected static hashtable damageEventTable = InitHashtable()
-    static bool isAttack = false
-    static bool isArrow= false
-    static bool isAlternate = false
     protected static DamageEventUnit nullUnit = new DamageEventUnit(null)
     protected static DamageEventUnitType nullUnitType = new DamageEventUnitType(0)
 
@@ -235,26 +231,28 @@ public abstract class DamageEvent
             target.removeAbility(ON_HIT_BUFF_ARROW)
             arrow = true
             attack = true
-        DamageEvent.isAttack = attack
-        DamageEvent.isArrow = arrow
-        DamageEvent.isAlternate = alternate
-        let targetWrapper = DamageEventUnit.get(target)
+
+        let sourceTypeId = source.getTypeId()
         let sourceWrapper = DamageEventUnit.get(source)
-        let targetType = DamageEventUnitType.get(target.getTypeId())
-        let sourceType = DamageEventUnitType.get(source.getTypeId())
-        damage = modDamage(source, target, damage, attack, arrow, alternate)
-        sourceWrapper.anyDamage.runEvents(source, target, damage)
-        sourceType.anyDamage.runEvents(source, target, damage)
-        targetWrapper.anyHit.runEvents(source, target, damage)
-        targetType.anyHit.runEvents(source, target, damage)
+        let sourceType = DamageEventUnitType.get(sourceTypeId)
+
+        let targetTypeId = target.getTypeId()
+        let targetWrapper = DamageEventUnit.get(target)
+        let targetType = DamageEventUnitType.get(targetTypeId)
+        
+        damage = modDamage(source, target, sourceWrapper, targetWrapper, sourceTypeId, targetTypeId, damage, attack, arrow, alternate)
+        sourceWrapper.anyDamage.runEvents(source, target, sourceWrapper, targetWrapper, damage, attack, arrow, alternate)
+        sourceType.anyDamage.runEvents(source, target, sourceWrapper, targetWrapper, damage, attack, arrow, alternate)
+        targetWrapper.anyHit.runEvents(source, target, sourceWrapper, targetWrapper, damage, attack, arrow, alternate)
+        targetType.anyHit.runEvents(source, target, sourceWrapper, targetWrapper, damage, attack, arrow, alternate)
         if attack
             if not target.isType(UNIT_TYPE_STRUCTURE) and not source.isType(UNIT_TYPE_STRUCTURE)
-                sourceWrapper.attackDamageNoBuilding.runEvents(source, target, damage)
-                sourceType.attackDamageNoBuilding.runEvents(source, target, damage)
-                targetWrapper.attackHitNoBuilding.runEvents(source, target, damage)
-                targetType.attackHitNoBuilding.runEvents(source, target, damage)
-        //damage = max(0, damage)
-        //BlzSetEventDamage(damage)
+                sourceWrapper.attackDamageNoBuilding.runEvents(source, target, sourceWrapper, targetWrapper, damage, attack, arrow, alternate)
+                sourceType.attackDamageNoBuilding.runEvents(source, target, sourceWrapper, targetWrapper, damage, attack, arrow, alternate)
+                targetWrapper.attackHitNoBuilding.runEvents(source, target, sourceWrapper, targetWrapper, damage, attack, arrow, alternate)
+                targetType.attackHitNoBuilding.runEvents(source, target, sourceWrapper, targetWrapper, damage, attack, arrow, alternate)
+        damage = max(0, damage)
+        BlzSetEventDamage(damage)
         
 init
     if DamageEvent.nullUnit castTo int != 1

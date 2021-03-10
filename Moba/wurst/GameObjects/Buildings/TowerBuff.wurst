@@ -51,6 +51,6 @@ init
 	let g = CreateGroup()
 	g.enumUnitsAll(null)
 	for u in g
-		DamageEventUnit.fromUnit(u).attackHitNoBuilding.add() (unit source, unit target, real damage) ->
+		DamageEventUnit.fromUnit(u).attackHitNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
 			if target.isType(UNIT_TYPE_HERO)
 				target.addBuffReduced(source, TOWER_FOCUS_DUR, buffTowerFocus, 1)
