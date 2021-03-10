@@ -46,9 +46,8 @@ function itemBow()
     addStatBonusAbsolute(Stat.STR, str)
 
     addDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
-        print("Bow is now better: " + source.getName() + "->" + target.getName())
         if not target.isType(UNIT_TYPE_HERO)
-            let dmg = source.countItemsOfType(ITEM_ID_BOW) * unitDmg * 100
+            let dmg = source.countItemsOfType(ITEM_ID_BOW) * unitDmg
             source.dealDamage(target, dmg.toReal(), ReductionType.PHYSICAL)
 
 constant BLOOD_SWORD_BUFF_ID = compiletime(createAuraBuff("Blood Sword", "This unit has reduced armor and takes damage over time.", "BTNBarbarianBrutalSlasher"))
