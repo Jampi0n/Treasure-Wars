@@ -155,22 +155,17 @@ For temporary effects, e.g. based on items, spells, ...
 **/
 public class DamageEventUnit
     static function fromUnit(unit u) returns DamageEventUnit
-        print("fromUnit " + u.getHandleId().toString())
         var d = (1 + DamageEvent.damageEventTable.loadInt(u.getHandleId(), 0)) castTo DamageEventUnit
         if d == DamageEvent.nullUnit
             d = new DamageEventUnit(u)
         return d
 
     protected static function get(unit u) returns DamageEventUnit
-        print("get " + u.getHandleId().toString())
         return (1 + DamageEvent.damageEventTable.loadInt(u.getHandleId(), 0)) castTo DamageEventUnit
     protected static function classInit()
         onLeave() ->
-            print(getEnterLeaveUnit().getName() + "_" + getEnterLeaveUnit().getPos().toString())
-            print(getEnterLeaveUnit().getHandleId())
             let d = DamageEventUnit.get(getEnterLeaveUnit())
             if d != null and d != DamageEvent.nullUnit
-                print(d castTo int)
                 destroy d
 
     protected static int array data
@@ -180,18 +175,14 @@ public class DamageEventUnit
 
     DamageEventGroup anyDamage = new DamageEventGroup()
     DamageEventGroup anyHit = new DamageEventGroup()
-    /*DamageEventGroup attackDamage = new DamageEventGroup()
-    DamageEventGroup attackHit = new DamageEventGroup()*/
     DamageEventGroup attackDamageNoBuilding = new DamageEventGroup()
     DamageEventGroup attackHitNoBuilding = new DamageEventGroup()
 
     construct(unit u)
         this.u = u
         this.h = u.getHandleId()
-        print("construct " + (this castTo int - 1).toString() +  " " + h.toString())
         DamageEvent.damageEventTable.saveInt(h, 0, this castTo int - 1)
     ondestroy
-        print("destroy " + this.h.toString())
         DamageEvent.damageEventTable.flushChild(h)
         for i = 0 to FAST_DATA_SIZE-1
             this.saveIntFast(i, 0)
@@ -252,7 +243,6 @@ public abstract class DamageEvent
         let targetType = DamageEventUnitType.get(target.getTypeId())
         let sourceType = DamageEventUnitType.get(source.getTypeId())
         damage = modDamage(source, target, damage, attack, arrow, alternate)
-        //print(source.getName() + " damages " + target.getName() + ": " + damage.toString() + " " + attack.toString() + " " + arrow.toString() + " " + alternate.toString())
         sourceWrapper.anyDamage.runEvents(source, target, damage)
         sourceType.anyDamage.runEvents(source, target, damage)
         targetWrapper.anyHit.runEvents(source, target, damage)
