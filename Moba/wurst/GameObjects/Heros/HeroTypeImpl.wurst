@@ -1,7 +1,7 @@
 package HeroTypeImpl
 
 import HashMap
-import IOnAttack
+import FastDamageEvent
 import Constants
 
 import AbilityObjEditing
@@ -28,7 +28,6 @@ public class HeroTypeImpl implements IHeroType
     private static constant heroIdToHeroType = new HashMap<integer, HeroTypeImpl>
     private int unitId
     private int heroId
-    OnAttackFunctionHero onAttack = null
     private CalculateTotalBonus bonusCalculation = null
 
     private OnCreateFunction onCreateFunction = null
@@ -115,12 +114,9 @@ public class HeroTypeImpl implements IHeroType
     override function getUnitId() returns integer
         return this.unitId
 
-    override function onAttack(unit attacker, unit target, boolean isActive, boolean advanced)
-        if this.onAttack != null
-            this.onAttack.onAttack(attacker, target, isActive, advanced)
 
-    override function setOnAttackFunc(OnAttackFunctionHero onAttack)
-        this.onAttack = onAttack
+    override function setOnAttackFunc(DamageFunction onAttack)
+        DamageEventUnitType.fromUnitTypeId(this.unitId).attackHitNoBuilding.add(onAttack)
 
     /** Calulates the stat of the hero type for a given level */
     override function calculateStat(Stat stat, integer level) returns integer

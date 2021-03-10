@@ -395,19 +395,20 @@ function initHeroType()
     delayInit(5) ->
 
         heroType
-            ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
-            ..setRetreatAI((IHeroAI ai) -> (retreatAI(ai)))
-            ..setAttackAI((IHeroAI ai) -> (attackAI(ai)))
-            ..setTeamFightAI((IHeroAI ai) -> (teamFightAI(ai)))
+        ..setRetreatAI((IHeroAI ai) -> (retreatAI(ai)))
+        ..setAttackAI((IHeroAI ai) -> (attackAI(ai)))
+        ..setTeamFightAI((IHeroAI ai) -> (teamFightAI(ai)))
+        ..setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean advanced) ->
+            onAttack(source, target, active)
 
         buffCriticalStrike = new BuffType(true, DispelLevel.NONE)
 
         buffCriticalStrike.setupBuffWithIcon(CRITICAL_BUFF_ID, CRITICAL_ABILITY_ID)
         buffCriticalStrike.addFirstFunction((Buff whichBuff) -> (begin
-            OnAttack.useAdvanced( whichBuff.getTarget(), true)
+            DamageEvent.useAlternate( whichBuff.getTarget(), true)
         end))
         buffCriticalStrike.addEndFunction((Buff whichBuff) -> (begin
-            OnAttack.useAdvanced( whichBuff.getTarget(), false)
+            DamageEvent.useAlternate( whichBuff.getTarget(), false)
         end))
 
         buffGrowth = new BuffType(true, DispelLevel.NONE)

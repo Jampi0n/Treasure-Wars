@@ -360,10 +360,11 @@ function initHeroType()
     ..addItem(ITEM_ID_BLESSED_GOBLET)
     delayInit(5) ->
         heroType
-            ..setOnAttackFunc((unit attacker, unit target, boolean isActive, boolean advanced) -> onAttack(attacker, target, isActive))
-            ..setRetreatAI((IHeroAI ai) -> (retreatAI(ai)))
-            ..setAttackAI((IHeroAI ai) -> (attackAI(ai)))
-            ..setTeamFightAI((IHeroAI ai) -> (teamFightAI(ai)))
+        ..setRetreatAI((IHeroAI ai) -> (retreatAI(ai)))
+        ..setAttackAI((IHeroAI ai) -> (attackAI(ai)))
+        ..setTeamFightAI((IHeroAI ai) -> (teamFightAI(ai)))
+        ..setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean advanced) ->
+            onAttack(source, target, active)
 
         BUFF_ENVENOMED_BLADES.setupBuffWithIcon(ENVENOMED_BLADES_BUFF_ID, ENVENOMED_BLADES_ABILITY_ID)
         BUFF_ENVENOMED_BLADES.setPeriodicTime(1)

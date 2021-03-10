@@ -7,6 +7,13 @@ import DamageDetection
 public interface DamageFunction
     function damage(unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool _active, bool advanced)
 
+/** This ability is used during regular attacks and every attacking unit should have it. **/
+@configurable public var ON_HIT_ABILITY = 0
+/** This ability is used during special attacks. **/
+@configurable public var ON_HIT_ABILITY_ALTERNATE = 0
+
+// It is recommended to use the ON_HIT_BUFF_ARROW buff for all arrow abilities. Then arrow abilities can easily be detected.
+
 /** This buff is used to detect regular attacks **/
 @configurable public var ON_HIT_BUFF = 0
 /** This buff is used to detect special attacks **/
@@ -45,6 +52,9 @@ class DamageFunctionListElement
     construct(DamageFunction f, DamageFunctionList list)
         this.f = f
         this.list = list
+
+    ondestroy
+        destroy f
 
 /**
 Efficient list implementation for damage functions.
@@ -111,6 +121,8 @@ Extension methods are used to prevent null checks and enable inlining.
 @inline function DamageEventGroup.hasEvents() returns bool
     return this.n > 0
 @inline function DamageEventGroup.runEvents(unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate)
+    if damage > 80
+        print("2")
     DamageFunctionListElement current = this.list.first
     while current != null
         current.f.damage(source, target, sourceWrapper, targetWrapper, damage, attack, arrow, alternate)
@@ -147,7 +159,7 @@ public class DamageEventUnitType
 
     construct(int unitTypeId)
         this.unitTypeId = unitTypeId
-        DamageEvent.damageEventTable.saveInt(unitTypeId, 0, this castTo int + 1)
+        DamageEvent.damageEventTable.saveInt(unitTypeId, 0, this castTo int - 1)
 
 /**
 Damage events for units.
@@ -239,6 +251,10 @@ public abstract class DamageEvent
         let targetTypeId = target.getTypeId()
         let targetWrapper = DamageEventUnit.get(target)
         let targetType = DamageEventUnitType.get(targetTypeId)
+
+        if damage > 80
+            print(sourceTypeId)
+            print(sourceType castTo int)
         
         damage = modDamage(source, target, sourceWrapper, targetWrapper, sourceTypeId, targetTypeId, damage, attack, arrow, alternate)
         sourceWrapper.anyDamage.runEvents(source, target, sourceWrapper, targetWrapper, damage, attack, arrow, alternate)
@@ -246,13 +262,25 @@ public abstract class DamageEvent
         targetWrapper.anyHit.runEvents(source, target, sourceWrapper, targetWrapper, damage, attack, arrow, alternate)
         targetType.anyHit.runEvents(source, target, sourceWrapper, targetWrapper, damage, attack, arrow, alternate)
         if attack
-            if not target.isType(UNIT_TYPE_STRUCTURE) and not source.isType(UNIT_TYPE_STRUCTURE)
+            if not target.isType(UNIT_TYPE_STRUCTURE)
                 sourceWrapper.attackDamageNoBuilding.runEvents(source, target, sourceWrapper, targetWrapper, damage, attack, arrow, alternate)
                 sourceType.attackDamageNoBuilding.runEvents(source, target, sourceWrapper, targetWrapper, damage, attack, arrow, alternate)
+            if not source.isType(UNIT_TYPE_STRUCTURE)
                 targetWrapper.attackHitNoBuilding.runEvents(source, target, sourceWrapper, targetWrapper, damage, attack, arrow, alternate)
                 targetType.attackHitNoBuilding.runEvents(source, target, sourceWrapper, targetWrapper, damage, attack, arrow, alternate)
         damage = max(0, damage)
         BlzSetEventDamage(damage)
+
+
+    static function useAlternate(unit whichUnit, boolean advanced)
+        if advanced
+            whichUnit
+                ..removeAbility(ON_HIT_ABILITY)
+                ..addAbility(ON_HIT_ABILITY_ALTERNATE)
+        else
+            whichUnit
+                ..removeAbility(ON_HIT_ABILITY_ALTERNATE)
+                ..addAbility(ON_HIT_ABILITY)
         
 init
     if DamageEvent.nullUnit castTo int != 1

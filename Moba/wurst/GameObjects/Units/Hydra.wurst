@@ -146,7 +146,11 @@ init
             ..addStatAbsoluteBonus(Stat.AR, ACID_BREATH_ARMOR * stacks)
     end))
 
-    DamageEventUnitType.fromUnitTypeId(HYDRA).attackDamageNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+    let tmp = DamageEventUnitType.fromUnitTypeId(HYDRA)
+    print(HYDRA)
+    print(tmp castTo int)
+    tmp.attackDamageNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+        print("hydra")
         target.addBuffReduced(source, ACID_BREATH_DUR, buffAcidBreath, 1)
     /*OnAttack.addOnAttackFunc((unit attacker, unit target, boolean isActive) -> (begin
         if attacker.getTypeId() == HYDRA and not target.isType(UNIT_TYPE_STRUCTURE)

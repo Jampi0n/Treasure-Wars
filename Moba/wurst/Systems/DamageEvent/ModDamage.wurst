@@ -35,10 +35,11 @@ public abstract class ModDamage
 
                 // critical strike - TROLL BERSERKER
                 if advanced
-                    if sourceTypeId == HERO_TROLL_BERSERKER
+                    if sourceTypeId == HERO_TROLL_BERSERKER or sourceTypeId == HERO_TROLL_BERSERKER_MELEE
                         if not target.isType(UNIT_TYPE_STRUCTURE)
                             let critical = BuffList.getBuffOfType(source, buffCriticalStrike)
-                            currentDamage = currentDamage * (100 + CRITICAL_DAMAGE_MULT[critical.getLevel()-1])/100
+                            print("critical")
+                            currentDamage = currentDamage * (1000 + CRITICAL_DAMAGE_MULT[critical.getLevel()-1])/100
                             createCriticalStrikeTextTag(target, currentDamage.toInt())
                             critical.dispel()
 
@@ -46,7 +47,8 @@ public abstract class ModDamage
                 if sourceTypeId == HERO_DESTROYER
                     let deathFrenzyLevel = source.getAbilityLevel(ABILITY_DEATH_FRENZY)
                     if deathFrenzyLevel > 0
-                        currentDamage *= 1 + DEATH_FRENZY_BONUS[deathFrenzyLevel-1]/100 * (1-source.getLife()/GetUnitState(source, UNIT_STATE_MAX_LIFE))
+                        print("death frenzy")
+                        currentDamage *= 1 + DEATH_FRENZY_BONUS[deathFrenzyLevel-1]/10 * (1-source.getLife()/GetUnitState(source, UNIT_STATE_MAX_LIFE))
                         
 
                 // the following effects manage damage taken (target based)
@@ -56,13 +58,15 @@ public abstract class ModDamage
                     if targetTypeId == HERO_PALADIN
                         let heavyArmoredLevel = target.getAbilityLevel(ABILITY_HEAVY_ARMORED)
                         if heavyArmoredLevel > 0
-                            currentDamage -= HEAVY_ARMOED_REDUCTION[heavyArmoredLevel - 1]
+                            print("heavy armored")
+                            currentDamage -= HEAVY_ARMOED_REDUCTION[heavyArmoredLevel - 1]*10
 
                 // shield - ITEM
                 if attack
                     if targetWrapper.loadIntFast(D_SHIELD) > 0
-                        currentDamage = currentDamage - 15 * target.countItemsOfType(ITEM_ID_SHIELD)
-                        currentDamage = currentDamage - 20 * target.countItemsOfType(ITEM_ID_HOLY_SHIELD)
+                        print("shield")
+                        currentDamage = currentDamage - 15 * target.countItemsOfType(ITEM_ID_SHIELD) * 10
+                        currentDamage = currentDamage - 20 * target.countItemsOfType(ITEM_ID_HOLY_SHIELD) * 10
 
 
                 //the following effects make use of the final damage
@@ -70,14 +74,16 @@ public abstract class ModDamage
                 // mana shield - SEA DRUID
                 if targetTypeId == HERO_SEA_DRUID
                     if BuffList.hasBuffType(target, buffManaShield)
+                        print("mana shield")
                         let manaShield = BuffList.getBuffOfType(target, buffManaShield)
                         let level = manaShield.getLevel()
-                        manaShield.getTarget().damageMana(manaShield.getTarget(), MANA_SHIELD_REDUCTION[level-1] * MANA_PER_DAMAGE[level-1] * currentDamage, ReductionType.NONE)
-                        currentDamage = currentDamage * (1.-MANA_SHIELD_REDUCTION[level-1])
+                        manaShield.getTarget().damageMana(manaShield.getTarget(), 0.9 * MANA_PER_DAMAGE[level-1] * currentDamage, ReductionType.NONE)
+                        currentDamage = currentDamage * 0.1//(1.-MANA_SHIELD_REDUCTION[level-1])
 
                 // void armor - ITEM
                 if targetWrapper.loadIntFast(D_VOID_ARMOR) > 0
-                    target.healMana(target, currentDamage * 0.1)
-                    currentDamage *= 0.9
+                    print("void armor")
+                    target.healMana(target, currentDamage * 0.25)
+                    currentDamage *= 0.25
 
         return currentDamage
