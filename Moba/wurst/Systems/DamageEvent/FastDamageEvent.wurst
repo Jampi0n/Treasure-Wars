@@ -121,8 +121,6 @@ Extension methods are used to prevent null checks and enable inlining.
 @inline function DamageEventGroup.hasEvents() returns bool
     return this.n > 0
 @inline function DamageEventGroup.runEvents(unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate)
-    if damage > 80
-        print("2")
     DamageFunctionListElement current = this.list.first
     while current != null
         current.f.damage(source, target, sourceWrapper, targetWrapper, damage, attack, arrow, alternate)
@@ -251,10 +249,6 @@ public abstract class DamageEvent
         let targetTypeId = target.getTypeId()
         let targetWrapper = DamageEventUnit.get(target)
         let targetType = DamageEventUnitType.get(targetTypeId)
-
-        if damage > 80
-            print(sourceTypeId)
-            print(sourceType castTo int)
         
         damage = modDamage(source, target, sourceWrapper, targetWrapper, sourceTypeId, targetTypeId, damage, attack, arrow, alternate)
         sourceWrapper.anyDamage.runEvents(source, target, sourceWrapper, targetWrapper, damage, attack, arrow, alternate)
