@@ -388,7 +388,7 @@ function castFrostWyrm()
     wrapper.addStatAbsoluteBonus(Stat.HP, caster.wrapper().getStatTotalBonus(Stat.HP) + FROST_WYRM_HP[level-1] )
     wrapper.addStatAbsoluteBonus(Stat.STR, ( (FROST_WYRM_INT_FACTOR/100) * caster.getInt() ).toInt()  + FROST_WYRM_DMG[level-1] )
 
-    DamageEventUnit.fromUnit(frostWyrm).attackHitNoBuilding.add() (unit source, unit target, real damage) ->
+    DamageEventUnit.fromUnit(frostWyrm).attackHitNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
         let nearby = CreateGroup()
         nearby.enumUnitsInRange(target.getPos(), FROST_WYRM_AOE)
 
@@ -545,7 +545,7 @@ function initHeroType()
             let forstArmor = new FrostArmor()
             target.wrapper().addStatAbsoluteBonus(Stat.AR, ARMOR_AR[level - 1].bonus(intel, ARMOR_AR_BONUS).round())
             forstArmor.intelligence = intel
-            forstArmor.damageEventPointer = DamageEventUnit.fromUnit(target).attackHitNoBuilding.add() (unit source, unit target, real damage) ->
+            forstArmor.damageEventPointer = DamageEventUnit.fromUnit(target).attackHitNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
                 if source.isTargetable(target.getOwner(), false, true)
                     let armorBuff = BuffList.getBuffOfType(target, buffFrostArmor)
                     source.addBuffReduced(armorBuff.getCaster(), ARMOR_SLOW_DURATION[level-1].bonus(armorBuff.getData(), ARMOR_SLOW_DURATION_BONUS), buffFrostArmorSlow, level)

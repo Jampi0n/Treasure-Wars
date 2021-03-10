@@ -27,7 +27,7 @@ function itemBootsOfDarkness()
     end))
 
     if not compiletime
-        addDamageFunction() (unit source, unit target, real damage) ->
+        addDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             source.dealDamage(target, voidDmg.toReal() * source.countItemsOfType(ITEM_ID_BOOTS_OF_DARKNESS) , ReductionType.NONE)
             target.addEffect(Abilities.avengerMissile, "chest").destr()
 
@@ -77,7 +77,7 @@ function itemGemOfDarkness()
     setInfo("Gem of Darkness", "Attacks deal {0} additional void damage.".format(voidDmg.toString()))
     
     if not compiletime
-        addDamageFunction() (unit source, unit target, real damage) ->
+        addDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             source.dealDamage(target, voidDmg.toReal() * source.countItemsOfType(ITEM_ID_GEM_OF_DARKNESS) , ReductionType.NONE)
             target.addEffect(Abilities.avengerMissile, "chest").destr()
 
@@ -104,7 +104,7 @@ function itemVoodooDoll()
     setInfo("Voodoo Doll", "Restores {0} mana points everytime you are attacked.".format(mp.toString()))
 
     if not compiletime
-        addDamageFunction() (unit source, unit target, real damage) ->
+        addDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             target.healMana(target, mp.toReal() * target.countItemsOfType(ITEM_ID_VOODOO_DOLL))
             target.addEffect(Abilities.spiritTouchTarget, "origin").destr()
 
@@ -123,7 +123,7 @@ function itemMagicStaff()
     setInfo("Magic Staff", "Attacks drain {0} mana from the target.".format(mana.toString()))
     
     if not compiletime
-        addDamageFunction() (unit source, unit target, real damage) ->
+        addDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             if target.getMana() > 0
                 let manaDrained = min(mana.toReal() * source.countItemsOfType(ITEM_ID_MAGIC_STAFF) , target.getMana())
                 source.healMana(source, manaDrained)
@@ -192,7 +192,7 @@ function itemVisionWard()
     addStatBonusAbsolute(Stat.INT, intel)
 
     if not compiletime
-        addDamageFunction() (unit source, unit target, real damage) ->
+        addDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             if target.getMana() > 0
                 let manaDrained = min(mana.toReal() * source.countItemsOfType(ITEM_ID_VISION_WARD) , target.getMana())
                 source.healMana(source, manaDrained)
@@ -214,10 +214,10 @@ function itemVoodooMask()
     addRequirement(ITEM_ID_GEM_OF_DARKNESS)
 
     if not compiletime
-        addHitFunction() (unit source, unit target, real damage) ->
+        addHitFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             target.healMana(target, mp.toReal() * target.countItemsOfType(ITEM_ID_VOODOO_MASK))
             target.addEffect(Abilities.spiritTouchTarget, "origin").destr()
-        addDamageFunction() (unit source, unit target, real damage) ->
+        addDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             if source.hasItemById(ITEM_ID_VOODOO_MASK) and not target.isType(UNIT_TYPE_STRUCTURE)
                 source.dealDamage(target, voidDmg.toReal() * source.countItemsOfType(ITEM_ID_VOODOO_MASK) , ReductionType.NONE)
                 target.addEffect(Abilities.avengerMissile, "chest").destr()
@@ -274,7 +274,7 @@ function itemScepterOfTheTides()
     addStatBonusAbsolute(Stat.INT, intel)
 
     if not compiletime
-        addDamageFunction() (unit source, unit target, real damage) ->
+        addDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             let manaDrained = min(manaDrain.toReal() * source.countItemsOfType(ITEM_ID_SCEPTER_OF_THE_TIDES) , target.getMana())
             source.dealDamage(target, voidDmg.toReal() * source.countItemsOfType(ITEM_ID_SCEPTER_OF_THE_TIDES) , ReductionType.NONE)
             source.healMana(source, manaDrained)
@@ -300,7 +300,7 @@ function itemMagmaCrystal()
     addStatBonusAbsolute(Stat.HP, hp)
 
     if not compiletime
-        addDamageFunction() (unit source, unit target, real damage) ->
+        addDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             source.dealDamage(target, magicDmg.toReal() * source.countItemsOfType(ITEM_ID_MAGMA_CRYSTAL) , ReductionType.MAGIC)
             target.addEffect(Abilities.fireBallMissile, "chest").destr()
 
@@ -378,11 +378,11 @@ function itemRingOfDarkness()
     addStatBonusAbsolute(Stat.MR, mr)
 
     if not compiletime
-        addHitFunction() (unit source, unit target, real damage) ->
+        addHitFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             target.healMana(target, mp.toReal() * target.countItemsOfType(ITEM_ID_RING_OF_DARKNESS))
             target.addEffect(Abilities.spiritTouchTarget, "origin").destr()
     
-        addDamageFunction() (unit source, unit target, real damage) ->
+        addDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             if source.hasItemById(ITEM_ID_RING_OF_DARKNESS) and not target.isType(UNIT_TYPE_STRUCTURE)
                 source.dealDamage(target, voidDmg.toReal() * source.countItemsOfType(ITEM_ID_RING_OF_DARKNESS) , ReductionType.NONE)
                 target.addEffect(Abilities.avengerMissile, "chest").destr()
@@ -466,7 +466,7 @@ function itemWandOfDeath()
     addStatBonusAbsolute(Stat.INT, intel)
 
     if not compiletime
-        addDamageFunction() (unit source, unit target, real damage) ->
+        addDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             let manaDrained = min(manaDrain.toReal() * source.countItemsOfType(ITEM_ID_WAND_OF_DEATH) , target.getMana())
             source.dealDamage(target, voidDmg.toReal() * source.countItemsOfType(ITEM_ID_WAND_OF_DEATH) , ReductionType.NONE)
             source.healMana(source, manaDrained)
@@ -513,7 +513,7 @@ function itemArcaneBlade()
     addStatBonusAbsolute(Stat.MP, mp)
 
     if not compiletime
-        addDamageFunction() (unit source, unit target, real damage) ->
+        addDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             source.dealDamage(target, (dmg + source.getMana() * manaFactor/100) , ReductionType.MAGIC)
             target.addEffect(Abilities.farseerMissile, "chest").destr()
 
