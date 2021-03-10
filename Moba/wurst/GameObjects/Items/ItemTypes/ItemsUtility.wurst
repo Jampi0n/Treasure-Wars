@@ -118,7 +118,7 @@ function itemWarHorn()
             target.wrapper().addStatRelativeBonus(Stat.STR, -adBonus*10)
         end))
 
-        addDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+        addAttackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             if not target.isType(UNIT_TYPE_HERO)
             let dmg = source.countItemsOfType(ITEM_ID_WAR_HORN) * unitDmg
             source.dealDamage(target, dmg.toReal(), ReductionType.PHYSICAL)

@@ -153,25 +153,53 @@ public function addStatBonusRelative(Stat whichStat, int bonus)
         ItemEffect.triggerUnit.wrapper().addStatRelativeBonus(whichStat, -bonus)
     end))
 
-public function addDamageFunction(DamageFunction f)
+public function addAttackDamageFunction(DamageFunction f)
+    addAttackDamageFunction(1, f)
+public function addAttackDamageFunction(int factor, DamageFunction f)
     if compiletime
         return
     addPickupFunction() ->
         if isUnique()
-            DamageEventUnit.fromUnit(getTriggerUnit()).saveIntSlow( getTriggerItemType(), DamageEventUnit.fromUnit(getTriggerUnit()).attackDamageNoBuilding.add(f))
+            DamageEventUnit.fromUnit(getTriggerUnit()).saveIntSlow(factor * getTriggerItemType(), DamageEventUnit.fromUnit(getTriggerUnit()).attackDamageNoBuilding.add(f))
     addDropFunction() ->
         if isUnique()
-            DamageEventUnit.fromUnit(getTriggerUnit()).attackDamageNoBuilding.remove(DamageEventUnit.fromUnit(getTriggerUnit()).loadIntSlow(getTriggerItemType()))
+            DamageEventUnit.fromUnit(getTriggerUnit()).attackDamageNoBuilding.remove(DamageEventUnit.fromUnit(getTriggerUnit()).loadIntSlow(factor * getTriggerItemType()))
 
-public function addHitFunction(DamageFunction f)
+public function addAttackHitFunction(DamageFunction f)
+    addAttackHitFunction(1, f)
+public function addAttackHitFunction(int factor, DamageFunction f)
     if compiletime
         return
     addPickupFunction() ->
         if isUnique()
-            DamageEventUnit.fromUnit(getTriggerUnit()).saveIntSlow( -getTriggerItemType(), DamageEventUnit.fromUnit(getTriggerUnit()).attackHitNoBuilding.add(f))
+            DamageEventUnit.fromUnit(getTriggerUnit()).saveIntSlow(factor *getTriggerItemType(), DamageEventUnit.fromUnit(getTriggerUnit()).attackHitNoBuilding.add(f))
     addDropFunction() ->
         if isUnique()
-            DamageEventUnit.fromUnit(getTriggerUnit()).attackHitNoBuilding.remove(DamageEventUnit.fromUnit(getTriggerUnit()).loadIntSlow(-getTriggerItemType()))
+            DamageEventUnit.fromUnit(getTriggerUnit()).attackHitNoBuilding.remove(DamageEventUnit.fromUnit(getTriggerUnit()).loadIntSlow(factor *getTriggerItemType()))
+
+public function addAnyDamageFunction(DamageFunction f)
+    addAnyDamageFunction(1, f)
+public function addAnyDamageFunction(int factor, DamageFunction f)
+    if compiletime
+        return
+    addPickupFunction() ->
+        if isUnique()
+            DamageEventUnit.fromUnit(getTriggerUnit()).saveIntSlow(factor * getTriggerItemType(), DamageEventUnit.fromUnit(getTriggerUnit()).anyDamage.add(f))
+    addDropFunction() ->
+        if isUnique()
+            DamageEventUnit.fromUnit(getTriggerUnit()).anyDamage.remove(DamageEventUnit.fromUnit(getTriggerUnit()).loadIntSlow(factor * getTriggerItemType()))
+
+public function addAnyHitFunction(DamageFunction f)
+    addAnyHitFunction(1, f)
+public function addAnyHitFunction(int factor, DamageFunction f)
+    if compiletime
+        return
+    addPickupFunction() ->
+        if isUnique()
+            DamageEventUnit.fromUnit(getTriggerUnit()).saveIntSlow(factor *getTriggerItemType(), DamageEventUnit.fromUnit(getTriggerUnit()).anyHit.add(f))
+    addDropFunction() ->
+        if isUnique()
+            DamageEventUnit.fromUnit(getTriggerUnit()).anyHit.remove(DamageEventUnit.fromUnit(getTriggerUnit()).loadIntSlow(factor *getTriggerItemType()))
 
 public function saveDamageEventInt(int key)
     if compiletime
