@@ -29,6 +29,7 @@ public class HeroTypeImpl implements IHeroType
     private int unitId
     private int heroId
     private CalculateTotalBonus bonusCalculation = null
+    private LinkedList<int> alternateUnitTypeIds = new LinkedList<int>
 
     private OnCreateFunction onCreateFunction = null
     private OnInitFunction onInitFunction = null
@@ -94,6 +95,7 @@ public class HeroTypeImpl implements IHeroType
 
     override function addMorph(int id)
         unitIdToHeroType.put(id, this)
+        this.alternateUnitTypeIds.add(id)
 
     override function setBase(Stat stat, integer value)
         this.statsBase[stat.toInt()] = value
@@ -116,7 +118,9 @@ public class HeroTypeImpl implements IHeroType
 
 
     override function setOnAttackFunc(DamageFunction onAttack)
-        DamageEventUnitType.fromUnitTypeId(this.unitId).attackHitNoBuilding.add(onAttack)
+        DamageEventUnitType.fromUnitTypeId(this.unitId).attackDamageNoBuilding.add(onAttack)
+        for unitTypeId in alternateUnitTypeIds
+            DamageEventUnitType.fromUnitTypeId(unitTypeId).attackDamageNoBuilding.add(onAttack)
 
     /** Calulates the stat of the hero type for a given level */
     override function calculateStat(Stat stat, integer level) returns integer
