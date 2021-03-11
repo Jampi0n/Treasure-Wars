@@ -514,17 +514,14 @@ function initHeroType()
             whichWrapper.defaultBonusCalcualtion(whichStat)
         else
             if whichStat == Stat.HP or whichStat == Stat.MP //if hp or mana was changed, calculate special values.
-                /*let hp = Stat.HP.toInt()
-                let mp = Stat.MP.toInt()
-                let arrayOffset = whichWrapper.arrayOffset
                 whichWrapper.defaultBonusCalcualtion(Stat.HP)
                 whichWrapper.defaultBonusCalcualtion(Stat.MP)
-                let hpBonus = UnitWrapper.statsTotalBonus_static[arrayOffset + hp]
-                let mpBonus = UnitWrapper.statsTotalBonus_static[arrayOffset + mp]
-                UnitWrapper.statsTotalBonus_static[arrayOffset + hp] = hpBonus + ((1/ANCIENT_KNOWLEDGE_HP_BONUS[lvl-1]) * (mpBonus + whichWrapper.getStatBaseValue(Stat.MP)) ).toInt()
-                UnitWrapper.statsTotalBonus_static[arrayOffset + mp] = mpBonus + ((1/ANCIENT_KNOWLEDGE_MP_BONUS[lvl-1]) * (hpBonus + whichWrapper.getStatBaseValue(Stat.HP)) ).toInt()
-                whichWrapper.applyTotalStatBonus(Stat.HP)
-                whichWrapper.applyTotalStatBonus(Stat.MP)*/
+                let hpBonus = whichWrapper.getHealthBonus()
+                let mpBonus = whichWrapper.getManaBonus()
+                whichWrapper.setStatBonusInternal(Stat.HP, hpBonus + ((1/ANCIENT_KNOWLEDGE_HP_BONUS[lvl-1]) * (mpBonus + whichWrapper.getManaBase()) ).toInt())
+                whichWrapper.setStatBonusInternal(Stat.MP, mpBonus + ((1/ANCIENT_KNOWLEDGE_MP_BONUS[lvl-1]) * (hpBonus + whichWrapper.getHealthBase()) ).toInt())
+                whichWrapper.applyHealth()
+                whichWrapper.applyMana()
             else //else calculate default values
                 whichWrapper.defaultBonusCalcualtion(whichStat)
     end))
@@ -573,8 +570,8 @@ function createHeroType(IHero hero)
     ..addAction() ->
         if GetLearnedSkill() == ABILITY_ANCIENT_KNOWLEDGE
             GetTriggerUnit().wrapper()
-            ..updateTotalStatBonus(Stat.HP)
-            ..updateTotalStatBonus(Stat.MP)
+            ..updateHealth()
+            ..updateMana()
 
 
 

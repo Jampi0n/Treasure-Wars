@@ -18,6 +18,42 @@ import initlater TeamUtil
 import initlater IUnitType
 import initlater IUnit
 
+/*
+This file is huge. The end is mostly optimized convenience functions.
+*/
+function initAtTop()
+    onUnitIndex(() -> UnitImpl.create(getIndexingUnit()))
+    onUnitDeindex(() -> UnitImpl.getWrapper(getIndexingUnit()).destr() )
+
+    BuffConfiguration.setGetBuffListFunction( (unit u) -> UnitImpl.getBuffList(u))
+
+    BuffConfiguration.setCreateBuffListFunction( (unit u) -> (begin
+        let w = UnitImpl.getWrapper(u)
+        if w != null
+            w.createBuffList()
+        else
+            error("The unit "+u.getName()+" had no wrapper.")
+            UnitImpl.create(u)
+            w.createBuffList()
+    end))
+
+    setHitBoxFunction( (unit u) -> (begin
+        real ret = 32
+        if u.isType(UNIT_TYPE_HERO)
+            ret = 64
+        else
+            let unitType = UnitType.get(u.getTypeId())
+            if unitType!=null
+                ret = unitType.getHitBox().toReal()
+        return ret
+    end))
+
+    CreateTrigger()
+    ..registerPlayerChatEvent(players[0], "-s", true)
+    ..addAction() ->
+        UnitImpl.getWrapper(PlayerWrapper.getPlayerHero(0, 0).toUnit()).printStats()
+
+
 public class UnitImpl implements IUnit
 
     private CalculateTotalBonus bonusCalculation = null
@@ -30,6 +66,8 @@ public class UnitImpl implements IUnit
     private static constant unitMap = new HashMap<unit, UnitImpl>()
     private unit assocUnit
     private int ownerId
+    private IHeroType heroType = null
+    private IUnitType unitType = null
 
     //protected real currentMovementSpeed
     //protected real defaultMovementSpeed
@@ -77,6 +115,13 @@ public class UnitImpl implements IUnit
             this.team = Players.team(this.ownerId)
             this.arrayOffset = (this castTo int) * STAT_COUNT
 
+            if this.assocUnit.isType(UNIT_TYPE_HERO)
+                this.heroType = HeroType.get(this.assocUnit.getTypeId())
+                if this.heroType == null
+                    error("HeroType could not be resolved: " + this.assocUnit.getName())
+            else
+                this.unitType = UnitType.get(this.assocUnit.getTypeId())
+
             allUnits[unitWrapperCount] = this.assocUnit
             this.index = unitWrapperCount
             unitWrapperCount++
@@ -106,9 +151,7 @@ public class UnitImpl implements IUnit
             statBaseValue_static[this.arrayOffset + Stat.MP.toInt()] = this.assocUnit.getMaxMana().toInt()
             statBaseValue_static[this.arrayOffset + Stat.CD.toInt()] = 0
 
-            let uType = UnitType.get(this.assocUnit.getTypeId())
-
-            if uType != null
+            if this.unitType != null
                 updateBaseStatsUnits()
             else if this.assocUnit.isType(UNIT_TYPE_HERO)
                 statBaseValue_static[this.arrayOffset + Stat.AD.toInt()] = statBaseValue_static[this.arrayOffset + Stat.STR.toInt()]
@@ -121,14 +164,13 @@ public class UnitImpl implements IUnit
                             Log.warn("Warning unknown unit type: ("+GetUnitName(this.assocUnit) + ")_" + this.assocUnit.getTypeId().toRawCode() + "_" + this.assocUnit.getTypeId().toString())
 
     override function updateBaseStatsUnits()
-        let uType = UnitType.get(this.assocUnit.getTypeId())
-        if uType != null
-            statBaseValue_static[this.arrayOffset + Stat.STR.toInt()] = uType.getBaseAttack() + uType.getUpgradeAttack(this.assocUnit.getOwner())
-            statBaseValue_static[this.arrayOffset + Stat.AR.toInt()] = uType.getBaseArmor() + uType.getUpgradeArmor(this.assocUnit.getOwner())
-            statBaseValue_static[this.arrayOffset + Stat.HP.toInt()] = uType.getBaseHp() //(uType.getBaseHp() * ( 1 + 0.1 * uType.getUpgradeArmorCount(this.assocUnit.getOwner()))).round()
+        if unitType != null
+            statBaseValue_static[this.arrayOffset + Stat.STR.toInt()] = unitType.getBaseAttack() + unitType.getUpgradeAttack(this.assocUnit.getOwner())
+            statBaseValue_static[this.arrayOffset + Stat.AR.toInt()] = unitType.getBaseArmor() + unitType.getUpgradeArmor(this.assocUnit.getOwner())
+            statBaseValue_static[this.arrayOffset + Stat.HP.toInt()] = unitType.getBaseHp() //(unitType.getBaseHp() * ( 1 + 0.1 * unitType.getUpgradeArmorCount(this.assocUnit.getOwner()))).round()
             //willpower is same as armor
-            statBaseValue_static[this.arrayOffset + Stat.AGI.toInt()] = uType.getBaseArmor() + uType.getUpgradeArmor(this.assocUnit.getOwner())
-            this.addStatAbsoluteBonus(Stat.HP, 0)
+            statBaseValue_static[this.arrayOffset + Stat.AGI.toInt()] = unitType.getBaseArmor() + unitType.getUpgradeArmor(this.assocUnit.getOwner())
+            modHealth(0)
 
     override function updateBaseStatsHero()
         if not this.assocUnit.isType(UNIT_TYPE_HERO)
@@ -200,87 +242,30 @@ public class UnitImpl implements IUnit
         return this.bonusCalculation
 
     override function defaultBonusCalcualtion(Stat whichStat)
-        let stat = whichStat.toInt()
-        UnitImpl.statsTotalBonus_static[this.arrayOffset + stat] = ((this.getStatAbsoluteBonus(whichStat)) * (1. + this.getStatRelativeBonus(whichStat)/1000 ) + (this.getStatBaseValue(whichStat) * this.getStatRelativeBonus(whichStat)/1000) ).round()
-    
+        let factor = this.getStatRelativeBonus(whichStat) / 1000
+        UnitImpl.setStatBonusInternal(whichStat, (this.getStatAbsoluteBonus(whichStat) * (1+factor) + this.getStatBase(whichStat) * factor).round() )
 
     /**
     Updates the total stat bonus based on base stat, absolute stat bonus and relative stat bonus
     **/
+    @deprecated
     override function updateTotalStatBonus(Stat whichStat)
-        if this.bonusCalculation != null
-            this.bonusCalculation.calculate(this, whichStat)
-        else
-            this.defaultBonusCalcualtion(whichStat)
-            
-        this.applyTotalStatBonus(whichStat)
-        
-
-    override function applyTotalStatBonus(Stat whichStat)
-        if whichStat != Stat.MS and whichStat != Stat.HR and whichStat!= Stat.MR and whichStat!= Stat.HP and whichStat!= Stat.MP and whichStat != Stat.CD
-            if whichStat == Stat.STR or whichStat == Stat.INT
-                //update ability tooltips
-                if this.assocUnit.isType(UNIT_TYPE_HERO)
-                    this.assocUnit.setBonus(whichStat, statsTotalBonus_static[this.arrayOffset + whichStat.toInt()])
-                    let hero = this.assocUnit.toHero()
-                    if hero != null
-                        let hType = hero.getHeroType()
-                        if whichStat == Stat.STR
-                            hType.updateTooltipsStr(this.assocUnit)
-                        else
-                            hType.updateTooltipsInt(this.assocUnit)
-                else
-                    if whichStat == Stat.STR // units get AD increased instead of STR
-                        this.assocUnit.setBonus(Stat.AD, statsTotalBonus_static[this.arrayOffset + whichStat.toInt()])
-                    else
-                        this.assocUnit.setBonus(whichStat, statsTotalBonus_static[this.arrayOffset + whichStat.toInt()])
-            else
-                this.assocUnit.setBonus(whichStat, statsTotalBonus_static[this.arrayOffset + whichStat.toInt()])
-                        
-        else
-            if whichStat == Stat.MS
-                this.assocUnit.setMoveSpeed( this.getStatBaseValue(whichStat) + statsTotalBonus_static[this.arrayOffset + whichStat.toInt()].toReal() )
-            else if whichStat == Stat.HP
-                this.assocUnit.setMaxHP(this.getStatTotalValue(Stat.HP), true)
-            else if whichStat == Stat.MP
-                this.assocUnit.setMaxMana(this.getStatTotalValue(Stat.MP), true)
-            else if whichStat == Stat.CD
-                let hero = this.assocUnit.toHero()
-                if hero != null
-                    hero.updateCooldowns()
-    /**
-    Sets the absolute stat bonus and updates the total bonus.
-    **/
-    override function setStatAbsoluteBonus(Stat whichStat, int newValue)
-        let stat = whichStat.toInt()
-        statsAbsoluteBonus_static[this.arrayOffset + stat] = newValue
-        updateTotalStatBonus(whichStat)
-
 
     /**
     If real values are needed, the variable statsAbsoluteBonusReal keeps track of the bonus and increases the standard int value,
     as soon as it is over 1.
     **/  
+    @deprecated
     override function addStatAbsoluteBonusReal(Stat whichStat, int plusValue)
-        let arrayIndex = this.arrayOffset + whichStat.toInt()
-        statsAbsoluteBonusReal_static[arrayIndex] += plusValue
-        if statsAbsoluteBonusReal_static[arrayIndex].abs() >= 1000
-            addStatAbsoluteBonus(whichStat, (statsAbsoluteBonusReal_static[arrayIndex]/1000).toInt() )
-            statsAbsoluteBonusReal_static[arrayIndex] -= (statsAbsoluteBonusReal_static[arrayIndex]/1000).toInt()*1000
+        modStatFractionDispatch(whichStat, plusValue)
             
-
-    /**
-    Sets the relative stat bonus and updates the total bonus.
-    **/
-    override function setStatRelativeBonus(Stat whichStat, int newValue)
-        statsRelativeBonus_static[this.arrayOffset + whichStat.toInt()] = newValue
-        updateTotalStatBonus(whichStat)
-
+    @deprecated
     override function addStatAbsoluteBonus(Stat whichStat, int plusValue)
-        this.setStatAbsoluteBonus(whichStat, statsAbsoluteBonus_static[this.arrayOffset + whichStat.toInt()] + plusValue)
+        modStatDispatch(whichStat, plusValue)
 
+    @deprecated
     override function addStatRelativeBonus(Stat whichStat, int plusValue)
-        this.setStatRelativeBonus(whichStat, statsRelativeBonus_static[this.arrayOffset + whichStat.toInt()] + plusValue)
+        modStatRelativeDispatch(whichStat, plusValue)
 
     override function printStats()
         for i = 0 to STAT_COUNT-1
@@ -292,26 +277,23 @@ public class UnitImpl implements IUnit
 
     override function toUnit() returns unit
         return this.assocUnit
-
-    override function getStatAbsoluteBonus(Stat whichStat) returns int
-        return statsAbsoluteBonus_static[this.arrayOffset + whichStat.toInt()]
-
-    override function getStatRelativeBonus(Stat whichStat) returns int
-        return statsRelativeBonus_static[this.arrayOffset + whichStat.toInt()]
     
+    @deprecated
     override function getStatBaseValue(Stat whichStat) returns int
-        return statBaseValue_static[this.arrayOffset + whichStat.toInt()]
+        return getStatBase(whichStat)
 
+    @deprecated
     override function getStatTotalBonus(Stat whichStat) returns int
-        return statsTotalBonus_static[this.arrayOffset + whichStat.toInt()]
+        return getStatBonus(whichStat)
 
+    @deprecated
     override function getStatTotalValue(Stat whichStat) returns int
-        return this.getStatTotalBonus(whichStat) + this.getStatBaseValue(whichStat)
+        return getStat(whichStat)
 
     override function copyBaseStatsFrom(IUnit wrapper)
         for i = 0 to STAT_COUNT - 1
             statBaseValue_static[this.arrayOffset + i] = statBaseValue_static[(wrapper castTo UnitImpl).arrayOffset + i]
-            this.updateTotalStatBonus(i castTo Stat)
+            this.updateStat(i castTo Stat)
 
     override function incBlue()
         blueCount++
@@ -339,34 +321,375 @@ public class UnitImpl implements IUnit
             else if this.team == TEAM_2
                 UnitShareVision(this.toUnit(), players[Teams.army1()], false)
 
+    override function applyAll()
+        this
+        ..applyHealth()
+        ..applyMana()
+        ..applyHealthRegen()
+        ..applyManaRegen()
+        ..applyStrength()
+        ..applyWillpower()
+        ..applyIntelligence()
+        ..applyAttackSpeed()
+        ..applyArmor()
+        ..applyMoveSpeed()
+    override function applyStatDispatch(Stat whichStat)
+        switch whichStat
+            case AR | AS | AGI
+                this.assocUnit.setBonusDispatchStat(whichStat, this.getStatBonus(whichStat))
+            case STR
+                if this.heroType != null
+                    this.assocUnit.setBonusStrength(this.getStatBonus(whichStat))
+                    this.heroType.updateTooltipsStr(this.assocUnit)
+                else
+                    this.assocUnit.setBonusDamage(this.getStatBonus(whichStat))
+            case INT
+                if this.heroType != null
+                    this.assocUnit.setBonusIntelligence(this.getStatBonus(whichStat))
+                    this.heroType.updateTooltipsInt(this.assocUnit)
+            case MS
+                this.assocUnit.setMoveSpeed(this.getMoveSpeed().toReal())
+            case HP
+                this.assocUnit.setMaxHP(this.getHealth(), true)
+            case MP
+                this.assocUnit.setMaxMana(this.getMana(), true)
+            default
+
+    @inline override function applyArmor()
+        this.assocUnit.setBonusArmor(this.getArmorBonus())
+    @inline override function applyAttackSpeed()
+        this.assocUnit.setBonusAttackSpeed(this.getAttackSpeedBonus())
+    @inline override function applyStrength()
+        if this.heroType != null
+            this.assocUnit.setBonusStrength(this.getStrengthBonus())
+            this.heroType.updateTooltipsInt(this.assocUnit)
+        else
+            this.assocUnit.setBonusDamage(this.getStrengthBonus())
+    @inline override function applyWillpower()
+        this.assocUnit.setBonusAgility(this.getWillpowerBonus())
+    @inline override function applyIntelligence()
+        if this.heroType != null
+            this.assocUnit.setBonusIntelligence(this.getIntelligenceBonus())
+            this.heroType.updateTooltipsInt(this.assocUnit)
+    @inline override function applyMoveSpeed()
+        this.assocUnit.setMoveSpeed(this.getMoveSpeed().toReal())
+    @inline override function applyHealth()
+        this.assocUnit.setMaxHP(this.getHealth(), true)
+    @inline override function applyMana()
+        this.assocUnit.setMaxMana(this.getMana(), true)
+    @inline override function applyHealthRegen()
+    @inline override function applyManaRegen()
+
+    override function updateAll()
+        this
+        ..updateHealth()
+        ..updateMana()
+        ..updateHealthRegen()
+        ..updateManaRegen()
+        ..updateStrength()
+        ..updateWillpower()
+        ..updateIntelligence()
+        ..updateAttackSpeed()
+        ..updateArmor()
+        ..updateMoveSpeed()
+
+    override function updateStat(Stat whichStat)
+        if this.bonusCalculation != null
+            this.bonusCalculation.calculate(this, whichStat)
+        else
+            this.defaultBonusCalcualtion(whichStat)
+
+    @inline override function updateArmor()
+        updateStat(Stat.AR)
+    @inline override function updateAttackSpeed()
+        updateStat(Stat.AS)
+    @inline override function updateStrength()
+        updateStat(Stat.STR)
+    @inline override function updateWillpower()
+        updateStat(Stat.AGI)
+    @inline override function updateIntelligence()
+        updateStat(Stat.INT)
+    @inline override function updateMoveSpeed()
+        updateStat(Stat.MS)
+    @inline override function updateHealth()
+        updateStat(Stat.HP)
+    @inline override function updateMana()
+        updateStat(Stat.MP)
+    @inline override function updateHealthRegen()
+        updateStat(Stat.HR)
+    @inline override function updateManaRegen()
+        updateStat(Stat.MR)
+
+    @inline private function modStatHelper(Stat whichStat, int modifier)
+        setStatAbsoluteBonusInternal(whichStat, getStatAbsoluteBonus(whichStat) + modifier)
+    @inline override function modStatDispatch(Stat whichStat, int modifier)
+        modStatHelper(whichStat, modifier)
+        updateStat(whichStat)
+        applyStatDispatch(whichStat)
+    @inline override function modArmor(int modifier)
+        modStatHelper(Stat.AR, modifier)
+        updateArmor()
+        applyArmor()
+    @inline override function modAttackSpeed(int modifier)
+        modStatHelper(Stat.AS, modifier)
+        updateAttackSpeed()
+        applyAttackSpeed()
+    @inline override function modStrength(int modifier)
+        modStatHelper(Stat.STR, modifier)
+        updateStrength()
+        applyStrength()
+    @inline override function modWillpower(int modifier)
+        modStatHelper(Stat.AGI, modifier)
+        updateWillpower()
+        applyWillpower()
+    @inline override function modIntelligence(int modifier)
+        modStatHelper(Stat.INT, modifier)
+        updateIntelligence()
+        applyIntelligence()
+    @inline override function modMoveSpeed(int modifier)
+        modStatHelper(Stat.MS, modifier)
+        updateMoveSpeed()
+        applyMoveSpeed()
+    @inline override function modHealth(int modifier)
+        modStatHelper(Stat.HP, modifier)
+        updateHealth()
+        applyHealth()
+    @inline override function modMana(int modifier)
+        modStatHelper(Stat.MP, modifier)
+        updateMoveSpeed()
+        applyMoveSpeed()
+    @inline override function modHealthRegen(int modifier)
+        modStatHelper(Stat.HR, modifier)
+        updateHealthRegen()
+        applyHealthRegen()
+    @inline override function modManaRegen(int modifier)
+        modStatHelper(Stat.MR, modifier)
+        updateManaRegen()
+        applyManaRegen()
+
+    @inline private function modStatRelativeHelper(Stat whichStat, int modifier)
+        setStatRelativeBonusInternal(whichStat, getStatRelativeBonus(whichStat) + modifier)
+    @inline override function modStatRelativeDispatch(Stat whichStat, int modifier)        
+        modStatRelativeHelper(whichStat, modifier)
+        updateStat(whichStat)
+        applyStatDispatch(whichStat)
+    @inline override function modArmorRelative(int modifier)
+        modStatRelativeHelper(Stat.AR, modifier)
+        updateArmor()
+        applyArmor()
+    @inline override function modAttackSpeedRelative(int modifier)
+        modStatRelativeHelper(Stat.AS, modifier)
+        updateAttackSpeed()
+        applyAttackSpeed()
+    @inline override function modStrengthRelative(int modifier)
+        modStatRelativeHelper(Stat.STR, modifier)
+        updateStrength()
+        applyStrength()
+    @inline override function modWillpowerRelative(int modifier)
+        modStatRelativeHelper(Stat.AGI, modifier)
+        updateWillpower()
+        applyWillpower()
+    @inline override function modIntelligenceRelative(int modifier)
+        modStatRelativeHelper(Stat.INT, modifier)
+        updateIntelligence()
+        applyIntelligence()
+    @inline override function modMoveSpeedRelative(int modifier)
+        modStatRelativeHelper(Stat.MS, modifier)
+        updateMoveSpeed()
+        applyMoveSpeed()
+    @inline override function modHealthRelative(int modifier)
+        modStatRelativeHelper(Stat.HP, modifier)
+        updateHealth()
+        applyHealth()
+    @inline override function modManaRelative(int modifier)
+        modStatRelativeHelper(Stat.MP, modifier)
+        updateMoveSpeed()
+        applyMoveSpeed()
+    @inline override function modHealthRegenRelative(int modifier)
+        modStatRelativeHelper(Stat.HR, modifier)
+        updateHealthRegen()
+        applyHealthRegen()
+    @inline override function modManaRegenRelative(int modifier)
+        modStatRelativeHelper(Stat.MR, modifier)
+        updateManaRegen()
+        applyManaRegen()
+
+    private function modStatFractionHelper(Stat whichStat, int modifier)
+        let arrayIndex = this.arrayOffset + whichStat.toInt()
+        statsAbsoluteBonusReal_static[arrayIndex] += modifier
+        if statsAbsoluteBonusReal_static[arrayIndex].abs() >= 1000
+            modStatHelper(whichStat, (statsAbsoluteBonusReal_static[arrayIndex]/1000).toInt() )
+            statsAbsoluteBonusReal_static[arrayIndex] -= (statsAbsoluteBonusReal_static[arrayIndex]/1000).toInt()*1000
+    @inline override function modStatFractionDispatch(Stat whichStat, int modifier)
+        modStatFractionHelper(whichStat, modifier)
+        updateStat(whichStat)
+        applyStatDispatch(whichStat)
+    @inline override function modArmorFraction(int modifier)
+        modStatFractionHelper(Stat.AR, modifier)
+        updateArmor()
+        applyArmor()
+    @inline override function modAttackSpeedFraction(int modifier)
+        modStatFractionHelper(Stat.AR, modifier)
+        updateAttackSpeed()
+        applyAttackSpeed()
+    @inline override function modStrengthFraction(int modifier)
+        modStatFractionHelper(Stat.AR, modifier)
+        updateStrength()
+        applyStrength()
+    @inline override function modWillpowerFraction(int modifier)
+        modStatFractionHelper(Stat.AR, modifier)
+        updateWillpower()
+        applyWillpower()
+    @inline override function modIntelligenceFraction(int modifier)
+        modStatFractionHelper(Stat.AR, modifier)
+        updateIntelligence()
+        applyIntelligence()
+    @inline override function modMoveSpeedFraction(int modifier)
+        modStatFractionHelper(Stat.AR, modifier)
+        updateMoveSpeed()
+        applyMoveSpeed()
+    @inline override function modHealthFraction(int modifier)
+        modStatFractionHelper(Stat.AR, modifier)
+        updateHealth()
+        applyHealth()
+    @inline override function modManaFraction(int modifier)
+        modStatFractionHelper(Stat.AR, modifier)
+        updateMana()
+        applyMana()
+    @inline override function modHealthRegenFraction(int modifier)
+        modStatFractionHelper(Stat.AR, modifier)
+        updateHealthRegen()
+        applyHealthRegen()
+    @inline override function modManaRegenFraction(int modifier)
+        modStatFractionHelper(Stat.AR, modifier)
+        updateManaRegen()
+        applyManaRegen()
+
+    @inline override function getStat(Stat whichStat) returns int
+        return this.getStatBase(whichStat) + this.getStatBonus(whichStat)
+    @inline override function getArmor() returns int
+        return this.getArmorBase() + this.getArmorBonus()
+    @inline override function getAttackSpeed() returns int
+        return this.getAttackSpeedBase() + this.getAttackSpeedBonus()
+    @inline override function getStrength() returns int
+        return this.getStrengthBase() + this.getStrengthBonus()
+    @inline override function getWillpower() returns int
+        return this.getWillpowerBase() + this.getWillpowerBonus()
+    @inline override function getIntelligence() returns int
+        return this.getIntelligenceBase() + this.getIntelligenceBonus()
+    @inline override function getMoveSpeed() returns int
+        return this.getMoveSpeedBase() + this.getMoveSpeedBonus()
+    @inline override function getHealth() returns int
+        return this.getHealthBase() + this.getHealthBonus()
+    @inline override function getMana() returns int
+        return this.getManaBase() + this.getManaBonus()
+    @inline override function getHealthRegen() returns int
+        return this.getHealthRegenBase() + this.getHealthRegenBonus()
+    @inline override function getManaRegen() returns int
+        return this.getManaRegenBase() + this.getManaRegenBonus()
+
+    @inline override function getStatBonus(Stat whichStat) returns int
+        return statsTotalBonus_static[this.arrayOffset + whichStat.toInt()]
+    @inline override function getArmorBonus() returns int
+        return getStatBonus(Stat.AR)
+    @inline override function getAttackSpeedBonus() returns int
+        return getStatBonus(Stat.AS)
+    @inline override function getStrengthBonus() returns int
+        return getStatBonus(Stat.STR)
+    @inline override function getWillpowerBonus() returns int
+        return getStatBonus(Stat.AGI)
+    @inline override function getIntelligenceBonus() returns int
+        return getStatBonus(Stat.INT)
+    @inline override function getMoveSpeedBonus() returns int
+        return getStatBonus(Stat.MS)
+    @inline override function getHealthBonus() returns int
+        return getStatBonus(Stat.HP)
+    @inline override function getManaBonus() returns int
+        return getStatBonus(Stat.MP)
+    @inline override function getHealthRegenBonus() returns int
+        return getStatBonus(Stat.HR)
+    @inline override function getManaRegenBonus() returns int
+        return getStatBonus(Stat.MR)
+
+    @inline override function getStatBase(Stat whichStat) returns int
+        return statBaseValue_static[this.arrayOffset + whichStat.toInt()]
+    @inline override function getArmorBase() returns int
+        return getStatBase(Stat.AR)
+    @inline override function getAttackSpeedBase() returns int
+        return getStatBase(Stat.AS)
+    @inline override function getStrengthBase() returns int
+        return getStatBase(Stat.STR)
+    @inline override function getWillpowerBase() returns int
+        return getStatBase(Stat.AGI)
+    @inline override function getIntelligenceBase() returns int
+        return getStatBase(Stat.INT)
+    @inline override function getMoveSpeedBase() returns int
+        return getStatBase(Stat.MS)
+    @inline override function getHealthBase() returns int
+        return getStatBase(Stat.HP)
+    @inline override function getManaBase() returns int
+        return getStatBase(Stat.MP)
+    @inline override function getHealthRegenBase() returns int
+        return getStatBase(Stat.HR)
+    @inline override function getManaRegenBase() returns int
+        return getStatBase(Stat.MR)
+
+    @inline override function getStatAbsoluteBonus(Stat whichStat) returns int
+        return statsAbsoluteBonus_static[this.arrayOffset + whichStat.toInt()]
+    @inline override function getArmorAbsoluteBonus() returns int
+        return getStatAbsoluteBonus(Stat.AR)
+    @inline override function getAttackSpeedAbsoluteBonus() returns int
+        return getStatAbsoluteBonus(Stat.AS)
+    @inline override function getStrengthAbsoluteBonus() returns int
+        return getStatAbsoluteBonus(Stat.STR)
+    @inline override function getWillpowerAbsoluteBonus() returns int
+        return getStatAbsoluteBonus(Stat.AGI)
+    @inline override function getIntelligenceAbsoluteBonus() returns int
+        return getStatAbsoluteBonus(Stat.INT)
+    @inline override function getMoveSpeedAbsoluteBonus() returns int
+        return getStatAbsoluteBonus(Stat.MS)
+    @inline override function getHealthAbsoluteBonus() returns int
+        return getStatAbsoluteBonus(Stat.HP)
+    @inline override function getManaAbsoluteBonus() returns int
+        return getStatAbsoluteBonus(Stat.MP)
+    @inline override function getHealthRegenAbsoluteBonus() returns int
+        return getStatAbsoluteBonus(Stat.HR)
+    @inline override function getManaRegenAbsoluteBonus() returns int
+        return getStatAbsoluteBonus(Stat.MR)
+
+    @inline override function getStatRelativeBonus(Stat whichStat) returns int
+        return statsRelativeBonus_static[this.arrayOffset + whichStat.toInt()]
+    @inline override function getArmorRelativeBonus() returns int
+        return getStatRelativeBonus(Stat.AR)
+    @inline override function getAttackSpeedRelativeBonus() returns int
+        return getStatRelativeBonus(Stat.AS)
+    @inline override function getStrengthRelativeBonus() returns int
+        return getStatRelativeBonus(Stat.STR)
+    @inline override function getWillpowerRelativeBonus() returns int
+        return getStatRelativeBonus(Stat.AGI)
+    @inline override function getIntelligenceRelativeBonus() returns int
+        return getStatRelativeBonus(Stat.INT)
+    @inline override function getMoveSpeedRelativeBonus() returns int
+        return getStatRelativeBonus(Stat.MS)
+    @inline override function getHealthRelativeBonus() returns int
+        return getStatRelativeBonus(Stat.HP)
+    @inline override function getManaRelativeBonus() returns int
+        return getStatRelativeBonus(Stat.MP)
+    @inline override function getHealthRegenRelativeBonus() returns int
+        return getStatRelativeBonus(Stat.HR)
+    @inline override function getManaRegenRelativeBonus() returns int
+        return getStatRelativeBonus(Stat.MR)
+
+    @inline override function setStatBonusInternal(Stat whichStat, int value)
+        statsTotalBonus_static[this.arrayOffset + whichStat.toInt()] = value
+    @inline override function setStatBaseInternal(Stat whichStat, int value)
+        statBaseValue_static[this.arrayOffset + whichStat.toInt()] = value
+    @inline override function setStatAbsoluteBonusInternal(Stat whichStat, int value)
+        statsAbsoluteBonus_static[this.arrayOffset + whichStat.toInt()] = value
+    @inline override function setStatAbsoluteBonusRealInternal(Stat whichStat, int value)
+        statsAbsoluteBonusReal_static[this.arrayOffset + whichStat.toInt()] = value
+    @inline override function setStatRelativeBonusInternal(Stat whichStat, int value)
+        statsRelativeBonus_static[this.arrayOffset + whichStat.toInt()] = value
+
 init
-    onUnitIndex(() -> UnitImpl.create(getIndexingUnit()))
-    onUnitDeindex(() -> UnitImpl.getWrapper(getIndexingUnit()).destr() )
-
-    BuffConfiguration.setGetBuffListFunction( (unit u) -> UnitImpl.getBuffList(u))
-
-    BuffConfiguration.setCreateBuffListFunction( (unit u) -> (begin
-        let w = UnitImpl.getWrapper(u)
-        if w != null
-            w.createBuffList()
-        else
-            error("The unit "+u.getName()+" had no wrapper.")
-            UnitImpl.create(u)
-            w.createBuffList()
-    end))
-
-    setHitBoxFunction( (unit u) -> (begin
-        real ret = 32
-        if u.isType(UNIT_TYPE_HERO)
-            ret = 64
-        else
-            let unitType = UnitType.get(u.getTypeId())
-            if unitType!=null
-                ret = unitType.getHitBox().toReal()
-        return ret
-    end))
-
-    CreateTrigger()
-    ..registerPlayerChatEvent(players[0], "-s", true)
-    ..addAction() ->
-        UnitImpl.getWrapper(PlayerWrapper.getPlayerHero(0, 0).toUnit()).printStats()
+    initAtTop()

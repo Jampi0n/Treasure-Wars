@@ -14,26 +14,178 @@ public interface IUnit
     function setBonusCalculation(CalculateTotalBonus bonusCalculation)
     function getBonusCalculation() returns CalculateTotalBonus
     function defaultBonusCalcualtion(Stat whichStat)
-    function updateTotalStatBonus(Stat whichStat)
-    function applyTotalStatBonus(Stat whichStat)
-    function setStatAbsoluteBonus(Stat whichStat, int newValue)
+    
+    // deprecated stat API
+    @deprecated function updateTotalStatBonus(Stat whichStat)
     function addStatAbsoluteBonusReal(Stat whichStat, int plusValue)
-    function setStatRelativeBonus(Stat whichStat, int newValue)
     function addStatAbsoluteBonus(Stat whichStat, int plusValue)
     function addStatRelativeBonus(Stat whichStat, int plusValue)
-    function printStats()
-    function printStat(Stat whichStat)
-    function toUnit() returns unit
-    function getStatAbsoluteBonus(Stat whichStat) returns int
-    function getStatRelativeBonus(Stat whichStat) returns int
     function getStatBaseValue(Stat whichStat) returns int
     function getStatTotalBonus(Stat whichStat) returns int
     function getStatTotalValue(Stat whichStat) returns int
+    
+    function printStats()
+    function printStat(Stat whichStat)
+    function toUnit() returns unit
+
     function copyBaseStatsFrom(IUnit wrapper)
     function incBlue()
     function decBlue()
     function incReveal()
     function decReveal()
+
+    // new stat API
+    // functions with Dispatch need to do branching based on the stat, which is inefficient
+
+
+    // modify stat by absolute value
+    function modStatDispatch(Stat whichStat, int modifier)
+    function modArmor(int modifier)
+    function modAttackSpeed(int modifier)
+    function modStrength(int modifier)
+    function modWillpower(int modifier)
+    function modIntelligence(int modifier)
+    function modMoveSpeed(int modifier)
+    function modHealth(int modifier)
+    function modMana(int modifier)
+    function modHealthRegen(int modifier)
+    function modManaRegen(int modifier)
+
+    // modify stat by changing the stat multiplier (in 1/1000)
+    // e.g. modifier=100 means +10%
+    // Multiple relative modifiers stack additively
+    // Absolute modifiers are also multiplied
+    function modStatRelativeDispatch(Stat whichStat, int modifier)        
+    function modArmorRelative(int modifier)
+    function modAttackSpeedRelative(int modifier)
+    function modStrengthRelative(int modifier)
+    function modWillpowerRelative(int modifier)
+    function modIntelligenceRelative(int modifier)
+    function modMoveSpeedRelative(int modifier)
+    function modHealthRelative(int modifier)
+    function modManaRelative(int modifier)
+    function modHealthRegenRelative(int modifier)
+    function modManaRegenRelative(int modifier)
+
+    // modify stat by fractional value (in 1/1000)
+    // e.g. modifier = 1000 is equivlent to using modStatDispatch() with modifier = 1
+    // This is useful, when many small effects are stacked and rounding each of them would result in too large errors
+    function modStatFractionDispatch(Stat whichStat, int modifier)
+    function modArmorFraction(int modifier)
+    function modAttackSpeedFraction(int modifier)
+    function modStrengthFraction(int modifier)
+    function modWillpowerFraction(int modifier)
+    function modIntelligenceFraction(int modifier)
+    function modMoveSpeedFraction(int modifier)
+    function modHealthFraction(int modifier)
+    function modManaFraction(int modifier)
+    function modHealthRegenFraction(int modifier)
+    function modManaRegenFraction(int modifier)
+
+    // get current stat value
+    function getStat(Stat whichStat) returns int
+    function getArmor() returns int
+    function getAttackSpeed() returns int
+    function getStrength() returns int
+    function getWillpower() returns int
+    function getIntelligence() returns int
+    function getMoveSpeed() returns int
+    function getHealth() returns int
+    function getMana() returns int
+    function getHealthRegen() returns int
+    function getManaRegen() returns int
+
+    // get total bonus value
+    function getStatBonus(Stat whichStat) returns int
+    function getArmorBonus() returns int
+    function getAttackSpeedBonus() returns int
+    function getStrengthBonus() returns int
+    function getWillpowerBonus() returns int
+    function getIntelligenceBonus() returns int
+    function getMoveSpeedBonus() returns int
+    function getHealthBonus() returns int
+    function getManaBonus() returns int
+    function getHealthRegenBonus() returns int
+    function getManaRegenBonus() returns int
+
+    // get base value
+    function getStatBase(Stat whichStat) returns int
+    function getArmorBase() returns int
+    function getAttackSpeedBase() returns int
+    function getStrengthBase() returns int
+    function getWillpowerBase() returns int
+    function getIntelligenceBase() returns int
+    function getMoveSpeedBase() returns int
+    function getHealthBase() returns int
+    function getManaBase() returns int
+    function getHealthRegenBase() returns int
+    function getManaRegenBase() returns int
+
+    // get absolute bonus value
+    function getStatAbsoluteBonus(Stat whichStat) returns int
+    function getArmorAbsoluteBonus() returns int
+    function getAttackSpeedAbsoluteBonus() returns int
+    function getStrengthAbsoluteBonus() returns int
+    function getWillpowerAbsoluteBonus() returns int
+    function getIntelligenceAbsoluteBonus() returns int
+    function getMoveSpeedAbsoluteBonus() returns int
+    function getHealthAbsoluteBonus() returns int
+    function getManaAbsoluteBonus() returns int
+    function getHealthRegenAbsoluteBonus() returns int
+    function getManaRegenAbsoluteBonus() returns int
+
+    // get realtive bonus value (in 1/1000)
+    function getStatRelativeBonus(Stat whichStat) returns int
+    function getArmorRelativeBonus() returns int
+    function getAttackSpeedRelativeBonus() returns int
+    function getStrengthRelativeBonus() returns int
+    function getWillpowerRelativeBonus() returns int
+    function getIntelligenceRelativeBonus() returns int
+    function getMoveSpeedRelativeBonus() returns int
+    function getHealthRelativeBonus() returns int
+    function getManaRelativeBonus() returns int
+    function getHealthRegenRelativeBonus() returns int
+    function getManaRegenRelativeBonus() returns int
+
+    // The following functions offer low level access
+    // They are automatically executed for the "mod" functions 
+
+    // update stats
+    // recaluclates the total bonus value
+    function updateAll()
+    function updateStat(Stat whichStat)
+    function updateArmor()
+    function updateAttackSpeed()
+    function updateStrength()
+    function updateWillpower()
+    function updateIntelligence()
+    function updateMoveSpeed()
+    function updateHealth()
+    function updateMana()
+    function updateHealthRegen()
+    function updateManaRegen()
+
+    // apply stats
+    // applies the current array values to the unit
+    function applyAll()
+    function applyStatDispatch(Stat whichStat)
+    function applyArmor()
+    function applyAttackSpeed()
+    function applyStrength()
+    function applyWillpower()
+    function applyIntelligence()
+    function applyMoveSpeed()
+    function applyHealth()
+    function applyMana()
+    function applyHealthRegen()
+    function applyManaRegen()
+
+    // These functions only update the arrays but do not update the stats. Be careful when using them.
+    function setStatBonusInternal(Stat whichStat, int value)
+    function setStatBaseInternal(Stat whichStat, int value)
+    function setStatAbsoluteBonusInternal(Stat whichStat, int value)
+    function setStatAbsoluteBonusRealInternal(Stat whichStat, int value)
+    function setStatRelativeBonusInternal(Stat whichStat, int value)
 
 public function unit.wrapper() returns IUnit
     return UnitImpl.getWrapper(this)
