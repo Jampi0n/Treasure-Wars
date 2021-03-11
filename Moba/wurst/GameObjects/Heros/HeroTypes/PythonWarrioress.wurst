@@ -387,13 +387,13 @@ function initHeroType()
         end) )
         BUFF_POISON_SPIT.addFirstFunction( (Buff thisBuff) -> (begin
             let wrapper = thisBuff.getTarget().wrapper()
-            wrapper.addStatRelativeBonus( Stat.MS, POISON_SPIT_SLOW_MS[thisBuff.getLevel()-1]*10 )
-            wrapper.addStatAbsoluteBonus( Stat.AR, POISON_SPIT_ARMOR_REDUCTION[thisBuff.getLevel()-1] )
+            wrapper.modMoveSpeedRelative( POISON_SPIT_SLOW_MS[thisBuff.getLevel()-1]*10 )
+            wrapper.modArmor( POISON_SPIT_ARMOR_REDUCTION[thisBuff.getLevel()-1] )
         end) )
         BUFF_POISON_SPIT.addEndFunction( (Buff thisBuff) -> (begin
             let wrapper = thisBuff.getTarget().wrapper()
-            wrapper.addStatRelativeBonus( Stat.MS, -POISON_SPIT_SLOW_MS[thisBuff.getLevel()-1]*10 )
-            wrapper.addStatAbsoluteBonus( Stat.AR, -POISON_SPIT_ARMOR_REDUCTION[thisBuff.getLevel()-1] )
+            wrapper.modMoveSpeedRelative( -POISON_SPIT_SLOW_MS[thisBuff.getLevel()-1]*10 )
+            wrapper.modArmor( -POISON_SPIT_ARMOR_REDUCTION[thisBuff.getLevel()-1] )
         end) )
 
 init

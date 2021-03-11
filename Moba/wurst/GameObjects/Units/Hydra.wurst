@@ -11,7 +11,6 @@ import UnitLib
 import TeamUtil
 import Buff
 import FastDamageEvent
-import Stats
 
 constant REVIVE_TIME = 300.
 constant MAX_LEVEL = 5
@@ -72,26 +71,25 @@ function onHydraDeath()
 
             let lvl = creepLevel
             udg_Hydra.wrapper()
-                ..addStatAbsoluteBonus(Stat.STR, DMG[lvl])
-                ..addStatAbsoluteBonus(Stat.HP, HP[lvl])
-                ..addStatAbsoluteBonus(Stat.AR, ARMOR[lvl])
-                ..addStatAbsoluteBonus(Stat.AGI, WILLPOWER[lvl])
-                ..addStatAbsoluteBonus(Stat.AS, ATTACK_SPEED[lvl])
+            ..modStrength(DMG[lvl])
+            ..modHealth(HP[lvl])
+            ..modArmor(ARMOR[lvl])
+            ..modWillpower(WILLPOWER[lvl])
+            ..modAttackSpeed(ATTACK_SPEED[lvl])
 
         end))
 
 function unit.hydraBonus()
     this.wrapper()
-        ..addStatAbsoluteBonus(Stat.AS, 6)
-        ..addStatAbsoluteBonus(Stat.STR, 3)
-        ..addStatAbsoluteBonus(Stat.AGI, 3)
-        ..addStatAbsoluteBonus(Stat.INT, 3)
-        ..addStatAbsoluteBonus(Stat.AR, 3)
-
-        ..addStatAbsoluteBonus(Stat.HP, 45)
-        ..addStatAbsoluteBonus(Stat.HR, 9)
-        ..addStatAbsoluteBonus(Stat.MP, 30)
-        ..addStatAbsoluteBonus(Stat.MR, 3)
+    ..modAttackSpeed(6)
+    ..modStrength(3)
+    ..modWillpower(3)
+    ..modIntelligence(3)
+    ..modArmor(3)
+    ..modHealth(45)
+    ..modHealthRegen(9)
+    ..modMana(30)
+    ..modManaRegen(3)
 
 
 init
@@ -108,11 +106,11 @@ init
     let lvl = creepLevel
     doAfter(0) ->
         udg_Hydra.wrapper()
-            ..addStatAbsoluteBonus(Stat.STR, DMG[lvl])
-            ..addStatAbsoluteBonus(Stat.HP, HP[lvl])
-            ..addStatAbsoluteBonus(Stat.AR, ARMOR[lvl])
-            ..addStatAbsoluteBonus(Stat.AGI, WILLPOWER[lvl])
-            ..addStatAbsoluteBonus(Stat.AS, ATTACK_SPEED[lvl])
+        ..modStrength(DMG[lvl])
+        ..modHealth(HP[lvl])
+        ..modArmor(ARMOR[lvl])
+        ..modWillpower(WILLPOWER[lvl])
+        ..modAttackSpeed(ATTACK_SPEED[lvl])
 
     CreateTrigger()
         ..registerPlayerUnitEvent(players[CREEP_NORMAL_OWNER], EVENT_PLAYER_UNIT_DEATH, null)
@@ -124,9 +122,9 @@ init
 
     buffAcidBreath.addFirstFunction( (Buff whichBuff) -> (begin
         whichBuff.getTarget().wrapper()
-            ..addStatAbsoluteBonus(Stat.AS, -ACID_BREATH_SLOW)
-            ..addStatRelativeBonus(Stat.MS, -ACID_BREATH_SLOW*10)
-            ..addStatAbsoluteBonus(Stat.AR, -ACID_BREATH_ARMOR)
+        ..modAttackSpeed( -ACID_BREATH_SLOW)
+        ..modMoveSpeedRelative(-ACID_BREATH_SLOW*10)
+        ..modArmor(-ACID_BREATH_ARMOR)
         whichBuff.setData(1)
     end))
 
@@ -134,16 +132,16 @@ init
         let stacks = whichBuff.getData() + 1
         whichBuff.setData(stacks)
         whichBuff.getTarget().wrapper()
-            ..addStatAbsoluteBonus(Stat.AR, -ACID_BREATH_ARMOR)
+        ..modArmor(-ACID_BREATH_ARMOR)
     end))
 
 
     buffAcidBreath.addEndFunction( (Buff whichBuff) -> (begin
         let stacks = whichBuff.getData()
         whichBuff.getTarget().wrapper()
-            ..addStatAbsoluteBonus(Stat.AS, ACID_BREATH_SLOW)
-            ..addStatRelativeBonus(Stat.MS, ACID_BREATH_SLOW*10)
-            ..addStatAbsoluteBonus(Stat.AR, ACID_BREATH_ARMOR * stacks)
+        ..modAttackSpeed( ACID_BREATH_SLOW)
+        ..modMoveSpeedRelative(ACID_BREATH_SLOW*10)
+        ..modArmor(ACID_BREATH_ARMOR * stacks)
     end))
 
     DamageEventUnitType.fromUnitTypeId(HYDRA).attackDamageNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->

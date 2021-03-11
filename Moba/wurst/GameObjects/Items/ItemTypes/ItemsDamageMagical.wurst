@@ -18,12 +18,12 @@ function itemBootsOfDarkness()
     addStatBonusRelative(Stat.INT, intelFactor*10)
     addPickupFunction(()->(begin
         if isUnique() and hasNot(ITEM_ID_HEAVY_BOOTS) and hasNot(ITEM_ID_LIGHT_BOOTS)
-            getTriggerUnit().wrapper().addStatAbsoluteBonus(Stat.MS, ms)
+            getTriggerUnit().wrapper().modMoveSpeed(ms)
     end))
 
     addDropFunction(()->(begin
         if isUnique() and hasNot(ITEM_ID_HEAVY_BOOTS) and hasNot(ITEM_ID_LIGHT_BOOTS)
-            getTriggerUnit().wrapper().addStatAbsoluteBonus(Stat.MS, -ms)
+            getTriggerUnit().wrapper().modMoveSpeed(-ms)
     end))
 
     if not compiletime
@@ -467,10 +467,10 @@ function itemWandOfDeath()
     addAnyDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
         let wp = damage * 0.02
         let wrapper = target.wrapper()
-        wrapper.addStatAbsoluteBonusReal(Stat.AGI, (-wp*1000).toInt())
+        wrapper.modWillpowerRelative((-wp*1000).toInt())
         doAfter(10, () -> (begin
             if target.isAlive() or target.isType(UNIT_TYPE_HERO)
-                wrapper.addStatAbsoluteBonusReal(Stat.AGI, (wp*1000).toInt() )
+                wrapper.modWillpowerRelative((wp*1000).toInt() )
         end))
     addAttackDamageFunction(-1) (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
         let manaDrained = min(manaDrain.toReal() * source.countItemsOfType(ITEM_ID_WAND_OF_DEATH) , target.getMana())
@@ -578,11 +578,11 @@ function itemScrollOfConjuration()
 
     addPickupFunction(() -> (begin
         if isUnique()
-            getTriggerUnit().wrapper().addStatRelativeBonus(Stat.INT,  intelFactor*10)
+            getTriggerUnit().wrapper().modIntelligenceRelative(intelFactor*10)
     end))
     addDropFunction(() -> (begin
         if isUnique()
-            getTriggerUnit().wrapper().addStatRelativeBonus(Stat.INT,  -intelFactor*10)
+            getTriggerUnit().wrapper().modIntelligenceRelative(-intelFactor*10)
     end))
 
     if not compiletime

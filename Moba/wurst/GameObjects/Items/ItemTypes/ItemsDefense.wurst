@@ -314,11 +314,11 @@ function heavyBoots()
 
     addPickupFunction(()->(begin
         if isUnique() and hasNot(ITEM_ID_BOOTS_OF_DARKNESS) and hasNot(ITEM_ID_LIGHT_BOOTS)
-            getTriggerUnit().wrapper().addStatAbsoluteBonus(Stat.MS, ms)
+            getTriggerUnit().wrapper().modMoveSpeed(ms)
     end))
     addDropFunction(()->(begin
         if isUnique() and hasNot(ITEM_ID_BOOTS_OF_DARKNESS) and hasNot(ITEM_ID_LIGHT_BOOTS)
-            getTriggerUnit().wrapper().addStatAbsoluteBonus(Stat.MS, -ms)
+            getTriggerUnit().wrapper().modMoveSpeed(-ms)
     end))
     
 

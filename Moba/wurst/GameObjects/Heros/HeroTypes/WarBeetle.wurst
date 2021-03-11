@@ -449,13 +449,13 @@ function initHeroType()
 
         buffBite.addFirstFunction( (Buff whichBuff) -> (begin
             whichBuff.getTarget().wrapper()
-                ..addStatRelativeBonus(Stat.MS, -BITE_SLOW * 10)
+                ..modMoveSpeedRelative( -BITE_SLOW * 10)
 
         end))
 
         buffBite.addEndFunction( (Buff whichBuff) -> (begin
             whichBuff.getTarget().wrapper()
-                ..addStatRelativeBonus(Stat.MS, BITE_SLOW * 10)
+                ..modMoveSpeedRelative( BITE_SLOW * 10)
         end))
 
         buffUnbreakable = new BuffType(true, DispelLevel.NONE)
@@ -465,10 +465,10 @@ function initHeroType()
             let level = whichBuff.getLevel()
             let target = whichBuff.getTarget()
             target.wrapper()
-                ..addStatAbsoluteBonus(Stat.HP, UNBREAKABLE_HP[level-1])
-                ..addStatAbsoluteBonus(Stat.STR, UNBREAKABLE_STR[level-1])
-                ..addStatAbsoluteBonus(Stat.AR, UNBREAKABLE_DEF[level-1])
-                ..addStatAbsoluteBonus(Stat.AGI, UNBREAKABLE_DEF[level-1])
+                ..modHealth( UNBREAKABLE_HP[level-1])
+                ..modStrength( UNBREAKABLE_STR[level-1])
+                ..modArmor( UNBREAKABLE_DEF[level-1])
+                ..modWillpower( UNBREAKABLE_DEF[level-1])
 
             target.setScale(UNBREAKABLE_SCALE)
         end))
@@ -477,10 +477,10 @@ function initHeroType()
             let level = whichBuff.getLevel()
             let target = whichBuff.getTarget()
             target.wrapper()
-                ..addStatAbsoluteBonus(Stat.HP, -UNBREAKABLE_HP[level-1])
-                ..addStatAbsoluteBonus(Stat.STR, -UNBREAKABLE_STR[level-1])
-                ..addStatAbsoluteBonus(Stat.AR, -UNBREAKABLE_DEF[level-1])
-                ..addStatAbsoluteBonus(Stat.AGI, -UNBREAKABLE_DEF[level-1])
+                ..modHealth( -UNBREAKABLE_HP[level-1])
+                ..modStrength( -UNBREAKABLE_STR[level-1])
+                ..modArmor( -UNBREAKABLE_DEF[level-1])
+                ..modWillpower( -UNBREAKABLE_DEF[level-1])
 
             target.setScale(0.9)
         end))
@@ -494,9 +494,9 @@ function createHeroType(IHero hero)
         if GetLearnedSkill() == ABILITY_HARD_SHELL
             let newLevel = u.getAbilityLevel(ABILITY_HARD_SHELL)
             if newLevel!= 1
-                u.wrapper().addStatAbsoluteBonus(Stat.AR, -HARD_SHELL_ARMOR[newLevel-2])
+                u.wrapper().modArmor( -HARD_SHELL_ARMOR[newLevel-2])
 
-            u.wrapper().addStatAbsoluteBonus(Stat.AR, HARD_SHELL_ARMOR[newLevel-1])
+            u.wrapper().modArmor( HARD_SHELL_ARMOR[newLevel-1])
     end))
 
 

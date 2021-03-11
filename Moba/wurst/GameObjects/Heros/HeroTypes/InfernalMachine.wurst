@@ -266,8 +266,8 @@ function rapidFire(int abilityId)
 unit array melee_dummy
 
 function onRapidStats(unit caster, int level) // add bonus
-    caster.wrapper().addStatAbsoluteBonus(Stat.AS, RAPID_FIRE_ATTACK_SPEED[level-1] - 80)
-    caster.wrapper().addStatAbsoluteBonus(Stat.MS, 0)
+    caster.wrapper().modAttackSpeed( RAPID_FIRE_ATTACK_SPEED[level-1] - 80)
+    caster.wrapper().modMoveSpeed( 0)
 
 function onRapid(unit caster, int level) // add bonus
     doAfter(0, () -> (begin
@@ -285,8 +285,8 @@ function onRapid(unit caster, int level) // add bonus
         BuffList.getBuffOfType(caster, buffBash).dispel()
 
 function onRapidEndStats(unit caster, int level) // remove bonus
-    caster.wrapper().addStatAbsoluteBonus(Stat.AS, -RAPID_FIRE_ATTACK_SPEED[level-1] + 80)
-    caster.wrapper().addStatAbsoluteBonus(Stat.MS, 0)
+    caster.wrapper().modAttackSpeed( -RAPID_FIRE_ATTACK_SPEED[level-1] + 80)
+    caster.wrapper().modMoveSpeed( 0)
 
 
 function onRapidEnd(unit caster, int level) // remove bonus
@@ -516,10 +516,10 @@ function initHeroType()
 
         buffBash.setupBuffWithIcon(BASH_BUFF_ID, BASH_ABILITY_ID)
         buffBash.addFirstFunction((Buff whichBuff) -> (begin
-            whichBuff.getTarget().wrapper().addStatAbsoluteBonus(Stat.MS, BASH_MOVEMENT_SPEED[whichBuff.getLevel()-1])
+            whichBuff.getTarget().wrapper().modMoveSpeed( BASH_MOVEMENT_SPEED[whichBuff.getLevel()-1])
         end))
         buffBash.addEndFunction((Buff whichBuff) -> (begin
-            whichBuff.getTarget().wrapper().addStatAbsoluteBonus(Stat.MS, -BASH_MOVEMENT_SPEED[whichBuff.getLevel()-1])
+            whichBuff.getTarget().wrapper().modMoveSpeed( -BASH_MOVEMENT_SPEED[whichBuff.getLevel()-1])
         end))
 
         buffInnerFire = new BuffType(true, DispelLevel.DISPEL)
@@ -529,17 +529,17 @@ function initHeroType()
             let wrapper = whichBuff.getTarget().wrapper()
             let intel = whichBuff.getCaster().getInt()
             whichBuff.setData(intel)
-            wrapper.addStatRelativeBonus(Stat.STR, 10 * INNER_FIRE_DMG[level-1].bonus(intel, INNER_FIRE_DMG_BONUS).toInt() )
-            wrapper.addStatAbsoluteBonus(Stat.AR, INNER_FIRE_DEF[level-1].bonus(intel, INNER_FIRE_DEF_BONUS).toInt() )
-            wrapper.addStatAbsoluteBonus(Stat.AGI, INNER_FIRE_DEF[level-1].bonus(intel, INNER_FIRE_DEF_BONUS).toInt() )
+            wrapper.modStrengthRelative( 10 * INNER_FIRE_DMG[level-1].bonus(intel, INNER_FIRE_DMG_BONUS).toInt() )
+            wrapper.modArmor( INNER_FIRE_DEF[level-1].bonus(intel, INNER_FIRE_DEF_BONUS).toInt() )
+            wrapper.modWillpower( INNER_FIRE_DEF[level-1].bonus(intel, INNER_FIRE_DEF_BONUS).toInt() )
         end))
         buffInnerFire.addEndFunction((Buff whichBuff) -> (begin
             let level = whichBuff.getLevel()
             let wrapper = whichBuff.getTarget().wrapper()
             let intel = whichBuff.getData()
-            wrapper.addStatRelativeBonus(Stat.STR, -10 * INNER_FIRE_DMG[level-1].bonus(intel, INNER_FIRE_DMG_BONUS).toInt() )
-            wrapper.addStatAbsoluteBonus(Stat.AR, -INNER_FIRE_DEF[level-1].bonus(intel, INNER_FIRE_DEF_BONUS).toInt() )
-            wrapper.addStatAbsoluteBonus(Stat.AGI, -INNER_FIRE_DEF[level-1].bonus(intel, INNER_FIRE_DEF_BONUS).toInt() )
+            wrapper.modStrengthRelative( -10 * INNER_FIRE_DMG[level-1].bonus(intel, INNER_FIRE_DMG_BONUS).toInt() )
+            wrapper.modArmor( -INNER_FIRE_DEF[level-1].bonus(intel, INNER_FIRE_DEF_BONUS).toInt() )
+            wrapper.modWillpower( -INNER_FIRE_DEF[level-1].bonus(intel, INNER_FIRE_DEF_BONUS).toInt() )
         end))
 
 

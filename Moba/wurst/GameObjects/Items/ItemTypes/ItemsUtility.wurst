@@ -11,12 +11,12 @@ function itemLightBoots()
     setInfo("Light Boots", "+ {0} movement speed|nMovement speed bonus from boots does not stack.".format(ms.toString()))
     addPickupFunction(()->(begin
         if isUnique() and hasNot(ITEM_ID_HEAVY_BOOTS) and hasNot(ITEM_ID_BOOTS_OF_DARKNESS)
-            getTriggerUnit().wrapper().addStatAbsoluteBonus(Stat.MS, ms)
+            getTriggerUnit().wrapper().modMoveSpeed(ms)
     end))
 
     addDropFunction(()->(begin
         if isUnique() and hasNot(ITEM_ID_HEAVY_BOOTS) and hasNot(ITEM_ID_BOOTS_OF_DARKNESS)
-            getTriggerUnit().wrapper().addStatAbsoluteBonus(Stat.MS, -ms)
+            getTriggerUnit().wrapper().modMoveSpeed(-ms)
     end))
 
 constant WAR_DRUM_BUFF_ID = compiletime(createAuraBuff("War Drum", "This unit has increased attack and movement speed.", "BTNTribalDrumOfWar"))
@@ -67,14 +67,14 @@ function itemWarDrum()
         BUFF_WAR_DRUM.setupBuffWithIcon(WAR_DRUM_BUFF_ID, WAR_DRUM_ABILTIY_ID)
         BUFF_WAR_DRUM.addFirstFunction((Buff thisBuff) -> (begin
             thisBuff.getTarget().wrapper()
-            ..addStatAbsoluteBonus(Stat.MS, msBonus)
-            ..addStatAbsoluteBonus(Stat.AS, asBonus)
+            ..modMoveSpeed(msBonus)
+            ..modAttackSpeed(asBonus)
         end))
 
         BUFF_WAR_DRUM.addEndFunction((Buff thisBuff) -> (begin
             thisBuff.getTarget().wrapper()
-            ..addStatAbsoluteBonus(Stat.MS, -msBonus)
-            ..addStatAbsoluteBonus(Stat.AS, -asBonus)
+            ..modMoveSpeed(-msBonus)
+            ..modAttackSpeed(-asBonus)
         end))
 
         createItemEffectTrigger()
@@ -110,12 +110,12 @@ function itemWarHorn()
         BUFF_WAR_HORN.setupBuffWithIcon(WAR_HORN_BUFF_ID, WAR_HORN_ABILTIY_ID)
         BUFF_WAR_HORN.addFirstFunction((Buff thisBuff) -> (begin
             let target = thisBuff.getTarget()
-            target.wrapper().addStatRelativeBonus(Stat.STR, adBonus*10)
+            target.wrapper().modStrengthRelative(adBonus*10)
         end))
 
         BUFF_WAR_HORN.addEndFunction((Buff thisBuff) -> (begin
             let target = thisBuff.getTarget()
-            target.wrapper().addStatRelativeBonus(Stat.STR, -adBonus*10)
+            target.wrapper().modStrengthRelative(-adBonus*10)
         end))
 
         addAttackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->

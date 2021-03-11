@@ -8,7 +8,6 @@ import ClosureTimers
 import SoundUtils
 import TeamUtil
 import StandardTextTags
-import Stats
 
 constant REVIVE_TIME = 150.
 constant MAX_LEVEL = 5
@@ -65,11 +64,11 @@ function onDragonTurtleDeath()
 
             let lvl = creepLevel
             udg_DragonTurtle.wrapper()
-                ..addStatAbsoluteBonus(Stat.STR, DMG[lvl])
-                ..addStatAbsoluteBonus(Stat.HP, HP[lvl])
-                ..addStatAbsoluteBonus(Stat.AR, ARMOR[lvl])
-                ..addStatAbsoluteBonus(Stat.AGI, WILLPOWER[lvl])
-                ..addStatAbsoluteBonus(Stat.AS, ATTACK_SPEED[lvl])
+            ..modStrength(DMG[lvl])
+            ..modHealth(HP[lvl])
+            ..modArmor(ARMOR[lvl])
+            ..modWillpower(WILLPOWER[lvl])
+            ..modAttackSpeed(ATTACK_SPEED[lvl])
 
         end))
 
@@ -88,11 +87,11 @@ init
     let lvl = creepLevel
     doAfter(0) ->
         udg_DragonTurtle.wrapper()
-            ..addStatAbsoluteBonus(Stat.STR, DMG[lvl])
-            ..addStatAbsoluteBonus(Stat.HP, HP[lvl])
-            ..addStatAbsoluteBonus(Stat.AR, ARMOR[lvl])
-            ..addStatAbsoluteBonus(Stat.AGI, WILLPOWER[lvl])
-            ..addStatAbsoluteBonus(Stat.AS, ATTACK_SPEED[lvl])
+        ..modStrength(DMG[lvl])
+        ..modHealth(HP[lvl])
+        ..modArmor(ARMOR[lvl])
+        ..modWillpower(WILLPOWER[lvl])
+        ..modAttackSpeed(ATTACK_SPEED[lvl])
 
     CreateTrigger()
         ..registerPlayerUnitEvent(players[CREEP_NORMAL_OWNER], EVENT_PLAYER_UNIT_DEATH, null)

@@ -134,11 +134,11 @@ public function addStatBonusAbsolute(Stat whichStat, int bonus)
         return
 
     addPickupFunction( ()-> (begin
-        ItemEffect.triggerUnit.wrapper().addStatAbsoluteBonus(whichStat, bonus)
+        ItemEffect.triggerUnit.wrapper().modStatDispatch(whichStat, bonus)
     end))
 
     addDropFunction( ()-> (begin
-        ItemEffect.triggerUnit.wrapper().addStatAbsoluteBonus(whichStat, -bonus)
+        ItemEffect.triggerUnit.wrapper().modStatDispatch(whichStat, -bonus)
     end))
 
 public function addStatBonusRelative(Stat whichStat, int bonus)
@@ -146,11 +146,11 @@ public function addStatBonusRelative(Stat whichStat, int bonus)
         return
 
     addPickupFunction( ()-> (begin
-        ItemEffect.triggerUnit.wrapper().addStatRelativeBonus(whichStat, bonus)
+        ItemEffect.triggerUnit.wrapper().modStatRelativeDispatch(whichStat, bonus)
     end))
 
     addDropFunction( ()-> (begin
-        ItemEffect.triggerUnit.wrapper().addStatRelativeBonus(whichStat, -bonus)
+        ItemEffect.triggerUnit.wrapper().modStatRelativeDispatch(whichStat, -bonus)
     end))
 
 public function addAttackDamageFunction(DamageFunction f)

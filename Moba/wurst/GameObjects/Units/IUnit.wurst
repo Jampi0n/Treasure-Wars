@@ -17,12 +17,12 @@ public interface IUnit
     
     // deprecated stat API
     @deprecated function updateTotalStatBonus(Stat whichStat)
-    function addStatAbsoluteBonusReal(Stat whichStat, int plusValue)
-    function addStatAbsoluteBonus(Stat whichStat, int plusValue)
-    function addStatRelativeBonus(Stat whichStat, int plusValue)
-    function getStatBaseValue(Stat whichStat) returns int
-    function getStatTotalBonus(Stat whichStat) returns int
-    function getStatTotalValue(Stat whichStat) returns int
+    @deprecated function addStatAbsoluteBonusReal(Stat whichStat, int plusValue)
+    @deprecated function addStatAbsoluteBonus(Stat whichStat, int plusValue)
+    @deprecated function addStatRelativeBonus(Stat whichStat, int plusValue)
+    @deprecated function getStatBaseValue(Stat whichStat) returns int
+    @deprecated function getStatTotalBonus(Stat whichStat) returns int
+    @deprecated function getStatTotalValue(Stat whichStat) returns int
     
     function printStats()
     function printStat(Stat whichStat)
@@ -57,6 +57,7 @@ public interface IUnit
     // Absolute modifiers are also multiplied
     function modStatRelativeDispatch(Stat whichStat, int modifier)        
     function modArmorRelative(int modifier)
+    @deprecated("Attack speed only has an absolute modifier (which works as a relative one)")
     function modAttackSpeedRelative(int modifier)
     function modStrengthRelative(int modifier)
     function modWillpowerRelative(int modifier)

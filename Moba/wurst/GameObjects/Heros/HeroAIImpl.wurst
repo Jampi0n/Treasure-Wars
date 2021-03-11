@@ -10,7 +10,6 @@ import RecommendedItems
 import ShopGUI
 import HashMap
 import Constants
-import Stats
 import LinkedList
 import initlater HeroLib
 import initlater PlayerControl
@@ -358,34 +357,34 @@ public class HeroAIImpl implements IHeroAI
         if diff == AI_DIFFICULTY_NORMAL
             let gold = 500
             PlayerWrapper.addGoldEx(this.ownerId, gold )
-            wrapper.addStatRelativeBonus(Stat.AGI, 100)
-            wrapper.addStatRelativeBonus(Stat.AR, 100)
-            wrapper.addStatAbsoluteBonus(Stat.AS, 10)
-            wrapper.addStatRelativeBonus(Stat.HP, 100)
-            wrapper.addStatRelativeBonus(Stat.HR, 100)
-            wrapper.addStatRelativeBonus(Stat.INT, 100)
-            wrapper.addStatRelativeBonus(Stat.MP, 100)
-            wrapper.addStatRelativeBonus(Stat.MR, 100)
-            wrapper.addStatRelativeBonus(Stat.STR, 100)
 
-            wrapper.addStatAbsoluteBonus(Stat.HR, 30)
-            wrapper.addStatAbsoluteBonus(Stat.MR, 20)
+            wrapper.modAttackSpeed(10)
+            wrapper.modHealthRelative(100)
+            wrapper.modHealthRegenRelative(100)
+            wrapper.modManaRelative(100)
+            wrapper.modManaRegenRelative(100)
+            wrapper.modStrengthRelative(100)
+            wrapper.modWillpowerRelative(100)
+            wrapper.modIntelligenceRelative(100)
+
+            wrapper.modHealthRegen(30)
+            wrapper.modManaRegen(20)
+
             
         else if diff == AI_DIFFICULTY_INSANE
             let gold = 1500
             PlayerWrapper.addGoldEx(this.ownerId, gold )
-            wrapper.addStatRelativeBonus(Stat.AGI, 200)
-            wrapper.addStatRelativeBonus(Stat.AR, 200)
-            wrapper.addStatAbsoluteBonus(Stat.AS, 20)
-            wrapper.addStatRelativeBonus(Stat.HP, 200)
-            wrapper.addStatRelativeBonus(Stat.HR, 200)
-            wrapper.addStatRelativeBonus(Stat.INT, 200)
-            wrapper.addStatRelativeBonus(Stat.MP, 200)
-            wrapper.addStatRelativeBonus(Stat.MR, 200)
-            wrapper.addStatRelativeBonus(Stat.STR, 200)
+            wrapper.modAttackSpeed(20)
+            wrapper.modHealthRelative(200)
+            wrapper.modHealthRegenRelative(200)
+            wrapper.modManaRelative(200)
+            wrapper.modManaRegenRelative(200)
+            wrapper.modStrengthRelative(200)
+            wrapper.modWillpowerRelative(200)
+            wrapper.modIntelligenceRelative(200)
 
-            wrapper.addStatAbsoluteBonus(Stat.HR, 60)
-            wrapper.addStatAbsoluteBonus(Stat.MR, 40)
+            wrapper.modHealthRegen(60)
+            wrapper.modManaRegen(40)
 
 
         //should not happen for everyone at the same time (lag)

@@ -298,7 +298,7 @@ function castSerpentWard()
     ward.setTimedLife(SERPENT_WARD_DURATION)
     SUMMON_MAP.put(ward, caster)
 
-    wrapper.addStatAbsoluteBonus(Stat.HP, SERPEND_WARD_HP[level-1] )
+    wrapper.modHealth( SERPEND_WARD_HP[level-1] )
 
     DamageEventUnit.fromUnit(ward).attackHitNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
         if not target.isType(UNIT_TYPE_STRUCTURE)
@@ -395,8 +395,8 @@ function initHeroType()
         buffSerpentPoison.addFirstFunction( (Buff whichBuff) -> (begin
             let level = whichBuff.getLevel()
             whichBuff.getTarget().wrapper()
-                ..addStatRelativeBonus(Stat.MS, -10 * SERPENT_POISON_SLOW * (SERPENT_POISON_FIRST_ATTACK_FACTOR * SERPENT_POISON_STACKS[level-1] div 10)  )
-                ..addStatAbsoluteBonus(Stat.AR, -SERPENT_POISON_ARMOR * (SERPENT_POISON_FIRST_ATTACK_FACTOR * SERPENT_POISON_STACKS[level-1] div 10)  )
+                ..modMoveSpeedRelative( -10 * SERPENT_POISON_SLOW * (SERPENT_POISON_FIRST_ATTACK_FACTOR * SERPENT_POISON_STACKS[level-1] div 10)  )
+                ..modArmor( -SERPENT_POISON_ARMOR * (SERPENT_POISON_FIRST_ATTACK_FACTOR * SERPENT_POISON_STACKS[level-1] div 10)  )
             whichBuff.setData(SERPENT_POISON_STACKS[level-1])
         end))
 
@@ -407,16 +407,16 @@ function initHeroType()
             let stackDiff = (newStacks div 10) - (prevStacks div 10)
             whichBuff.setData(newStacks)
             whichBuff.getTarget().wrapper()
-                ..addStatRelativeBonus(Stat.MS, -10 * SERPENT_POISON_SLOW * stackDiff) 
-                ..addStatAbsoluteBonus(Stat.AR, -SERPENT_POISON_ARMOR * stackDiff)
+                ..modMoveSpeedRelative( -10 * SERPENT_POISON_SLOW * stackDiff) 
+                ..modArmor( -SERPENT_POISON_ARMOR * stackDiff)
         end))
 
 
         buffSerpentPoison.addEndFunction( (Buff whichBuff) -> (begin
             let stacks = whichBuff.getData() div 10
             whichBuff.getTarget().wrapper()
-                ..addStatRelativeBonus(Stat.MS, 10 * SERPENT_POISON_SLOW * (stacks))
-                ..addStatAbsoluteBonus(Stat.AR, SERPENT_POISON_ARMOR * (stacks))
+                ..modMoveSpeedRelative( 10 * SERPENT_POISON_SLOW * (stacks))
+                ..modArmor( SERPENT_POISON_ARMOR * (stacks))
         end))
 
         CreateTrigger()

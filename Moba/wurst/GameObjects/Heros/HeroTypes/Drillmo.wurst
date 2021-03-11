@@ -472,13 +472,13 @@ function initHeroType()
         buffSpeedBoost.setupBuffWithIcon(SPEED_BOOST_BUFF_ID, SPEED_BOOST_ABILITY_ID)
         buffSpeedBoost.addFirstFunction((Buff whichBuff) -> (begin
             let target = whichBuff.getTarget()
-            target.wrapper().addStatRelativeBonus(Stat.MS, ((SPEED_BOOST[whichBuff.getLevel()-1].bonus(target.getInt(), SPEED_BOOST_BONUS)) * 10).toInt() )
+            target.wrapper().modMoveSpeedRelative( ((SPEED_BOOST[whichBuff.getLevel()-1].bonus(target.getInt(), SPEED_BOOST_BONUS)) * 10).toInt() )
             AddUnitAnimationProperties(target, "fast", true)
         end))
 
         buffSpeedBoost.addEndFunction((Buff whichBuff) -> (begin
             let target = whichBuff.getTarget()
-            target.wrapper().addStatRelativeBonus(Stat.MS, -((SPEED_BOOST[whichBuff.getLevel()-1].bonus(target.getInt(), SPEED_BOOST_BONUS)) * 10).toInt() )
+            target.wrapper().modMoveSpeedRelative( -((SPEED_BOOST[whichBuff.getLevel()-1].bonus(target.getInt(), SPEED_BOOST_BONUS)) * 10).toInt() )
             AddUnitAnimationProperties(target, "fast", false)
         end))
 
@@ -493,9 +493,9 @@ function createHeroType(IHero hero)
         if GetLearnedSkill() == ABILITY_OVERCHARGE
             let newLevel = u.getAbilityLevel(ABILITY_OVERCHARGE)
             if newLevel!= 1
-                u.wrapper().addStatAbsoluteBonus(Stat.AS, -OVERCHARGE_ATTACK_SPEED[newLevel-2])
+                u.wrapper().modAttackSpeed( -OVERCHARGE_ATTACK_SPEED[newLevel-2])
 
-            u.wrapper().addStatAbsoluteBonus(Stat.AS, OVERCHARGE_ATTACK_SPEED[newLevel-1])
+            u.wrapper().modAttackSpeed( OVERCHARGE_ATTACK_SPEED[newLevel-1])
     end))
 
 init

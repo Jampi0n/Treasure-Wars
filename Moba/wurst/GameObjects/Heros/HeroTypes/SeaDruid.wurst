@@ -536,14 +536,14 @@ function initHeroType()
         buffFish.addFirstFunction( (Buff whichBuff) -> (begin
             let level = whichBuff.getLevel()
             whichBuff.getTarget().wrapper()
-                ..addStatAbsoluteBonus(Stat.AS, -FISH_ATTACK_SPEED[level - 1])
-                ..addStatRelativeBonus(Stat.MS, -FISH_MOVE_SPEED[level - 1]*10)
+                ..modAttackSpeed( -FISH_ATTACK_SPEED[level - 1])
+                ..modMoveSpeedRelative( -FISH_MOVE_SPEED[level - 1]*10)
         end))
         buffFish.addEndFunction( (Buff whichBuff) -> (begin
             let level = whichBuff.getLevel()
             whichBuff.getTarget().wrapper()
-                ..addStatAbsoluteBonus(Stat.AS, FISH_ATTACK_SPEED[level - 1])
-                ..addStatRelativeBonus(Stat.MS, FISH_MOVE_SPEED[level - 1]*10)
+                ..modAttackSpeed( FISH_ATTACK_SPEED[level - 1])
+                ..modMoveSpeedRelative( FISH_MOVE_SPEED[level - 1]*10)
         end))
 
         buffManaShield = new BuffType(true, DispelLevel.NONE) // the actual effect is in OnAttack
@@ -557,11 +557,11 @@ function initHeroType()
         ritualBuff = new BuffType(false, DispelLevel.DISPEL)
         ritualBuff.setupBuffWithIcon(RITUAL_SLOW_BUFF_ID, RITUAL_SLOW_ABILITY_ID)
         ritualBuff.addFirstFunction((Buff thisBuff) -> (begin
-            thisBuff.getTarget().wrapper().addStatRelativeBonus(Stat.MS, -RITUAL_MOVEMENT_SLOW[thisBuff.getLevel()-1]*10)
+            thisBuff.getTarget().wrapper().modMoveSpeedRelative( -RITUAL_MOVEMENT_SLOW[thisBuff.getLevel()-1]*10)
         end))
 
         ritualBuff.addEndFunction((Buff thisBuff) -> (begin
-            thisBuff.getTarget().wrapper().addStatRelativeBonus(Stat.MS, RITUAL_MOVEMENT_SLOW[thisBuff.getLevel()-1]*10)
+            thisBuff.getTarget().wrapper().modMoveSpeedRelative( RITUAL_MOVEMENT_SLOW[thisBuff.getLevel()-1]*10)
         end))
 
 function createHeroType(IHero hero)

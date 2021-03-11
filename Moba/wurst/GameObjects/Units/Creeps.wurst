@@ -15,7 +15,6 @@ import Constants
 import PlayerControl
 import TeamUtil
 import HeroLib
-import Stats
 import FastDamageEvent
 
 constant int DUMMY_CASTER = compiletime(UNIT_ID_GEN.next())
@@ -102,24 +101,24 @@ function initCreepBuffs()
     end)
 
     MURGUL_BUFF.addFirstFunction((Buff whichBuff) -> begin
-        whichBuff.getTarget().wrapper().addStatAbsoluteBonus(Stat.AS, MURGUL_AS)
+        whichBuff.getTarget().wrapper().modAttackSpeed( MURGUL_AS)
     end)
     MURGUL_BUFF.addEndFunction((Buff whichBuff) -> begin
-        whichBuff.getTarget().wrapper().addStatAbsoluteBonus(Stat.AS, -MURGUL_AS)
+        whichBuff.getTarget().wrapper().modAttackSpeed( -MURGUL_AS)
     end)
 
     SEA_GIANT_BUFF.addFirstFunction((Buff whichBuff) -> begin
-        whichBuff.getTarget().wrapper().addStatRelativeBonus(Stat.STR, SEA_GIANT_STR * 10)
+        whichBuff.getTarget().wrapper().modStrengthRelative( SEA_GIANT_STR * 10)
     end)
     SEA_GIANT_BUFF.addEndFunction((Buff whichBuff) -> begin
-        whichBuff.getTarget().wrapper().addStatRelativeBonus(Stat.STR, -SEA_GIANT_STR * 10)
+        whichBuff.getTarget().wrapper().modStrengthRelative( -SEA_GIANT_STR * 10)
     end)
 
     MAKRURA_BUFF.addFirstFunction((Buff whichBuff) -> begin
-        whichBuff.getTarget().wrapper().addStatAbsoluteBonus(Stat.AR, MAKRURA_AR)
+        whichBuff.getTarget().wrapper().modArmor( MAKRURA_AR)
     end)
     MAKRURA_BUFF.addEndFunction((Buff whichBuff) -> begin
-        whichBuff.getTarget().wrapper().addStatAbsoluteBonus(Stat.AR, -MAKRURA_AR)
+        whichBuff.getTarget().wrapper().modArmor( -MAKRURA_AR)
     end)
 
     REVENANT_BUFF.addFirstFunction((Buff whichBuff) -> begin
@@ -132,10 +131,10 @@ function initCreepBuffs()
     end)
 
     REVENANT_SLOW_BUFF.addFirstFunction((Buff whichBuff) -> begin
-        whichBuff.getTarget().wrapper().addStatRelativeBonus(Stat.MS, -REVENANT_SLOW * 10)
+        whichBuff.getTarget().wrapper().modMoveSpeedRelative( -REVENANT_SLOW * 10)
     end)
     REVENANT_SLOW_BUFF.addEndFunction((Buff whichBuff) -> begin
-        whichBuff.getTarget().wrapper().addStatRelativeBonus(Stat.MS, REVENANT_SLOW * 10)
+        whichBuff.getTarget().wrapper().modMoveSpeedRelative( REVENANT_SLOW * 10)
     end)
 
 
@@ -273,8 +272,8 @@ public class CreepCamp
         allCreeps.addUnit(creepUnit)
         alive++
         unitToCamp.put(creepUnit, this)
-        creepUnit.wrapper().addStatRelativeBonus(Stat.STR, campLevel*200)
-        creepUnit.wrapper().addStatRelativeBonus(Stat.HP, campLevel*200)
+        creepUnit.wrapper().modStrengthRelative( campLevel*200)
+        creepUnit.wrapper().modHealthRelative( campLevel*200)
 
     private function respawn()
         if campLevel < MAX_CAMP_LEVEL

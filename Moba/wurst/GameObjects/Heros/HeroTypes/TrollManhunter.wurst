@@ -344,7 +344,7 @@ function castCripplingPain()
             bleedingWound.dispel()
             caster.dealDamage(u, stacks * CRIPPLING_PAIN_DAMAGE[level-1].bonus(caster.getInt(), CRIPPLING_PAIN_DAMAGE_BONUS), ReductionType.MAGIC)
 
-            u.wrapper().addStatRelativeBonus(Stat.MS, -10 * CRIPPLING_PAIN_SLOW[level-1] * stacks )
+            u.wrapper().modMoveSpeedRelative( -10 * CRIPPLING_PAIN_SLOW[level-1] * stacks )
             if u.isAlive()
                 let b = u.addBuffReduced(caster, CRIPPLING_PAIN_DURATION[level-1], buffCripplingPain, level)
                 b.setData(stacks * CRIPPLING_PAIN_SLOW[level-1])
@@ -360,12 +360,12 @@ function castMirrorImage()
     mirrorImageUnit.setVertexColor(255, 255, 255, 200)
     let casterWrapper = caster.wrapper()
     mirrorImageUnit.wrapper()
-    ..addStatAbsoluteBonus(Stat.AS, casterWrapper.getStatTotalBonus(Stat.AS))
-    ..addStatAbsoluteBonus(Stat.HP, casterWrapper.getStatTotalBonus(Stat.HP))
-    ..addStatAbsoluteBonus(Stat.STR, casterWrapper.getStatTotalBonus(Stat.STR))
-    ..addStatAbsoluteBonus(Stat.AR, casterWrapper.getStatTotalBonus(Stat.AR))
-    ..addStatAbsoluteBonus(Stat.AGI, casterWrapper.getStatTotalBonus(Stat.AGI))
-    ..addStatAbsoluteBonus(Stat.MS, casterWrapper.getStatTotalBonus(Stat.MS))
+    ..modAttackSpeed( casterWrapper.getAttackSpeedBonus())
+    ..modHealth( casterWrapper.getHealthBonus())
+    ..modStrength( casterWrapper.getStrengthBonus())
+    ..modArmor( casterWrapper.getArmorBonus())
+    ..modWillpower( casterWrapper.getWillpowerBonus())
+    ..modMoveSpeed( casterWrapper.getMoveSpeedBonus())
 
     //bleeding wound for mirror image
     DamageEventUnit.fromUnit(mirrorImageUnit).attackHitNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
@@ -444,13 +444,13 @@ function initHeroType()
 
         buffShadowStrike.addFirstFunction( (Buff whichBuff) -> (begin
             whichBuff.getTarget().wrapper()
-                ..addStatRelativeBonus(Stat.MS, -SHADOW_STRIKE_SLOW * 10)
+                ..modMoveSpeedRelative( -SHADOW_STRIKE_SLOW * 10)
 
         end))
 
         buffShadowStrike.addEndFunction( (Buff whichBuff) -> (begin
             whichBuff.getTarget().wrapper()
-                ..addStatRelativeBonus(Stat.MS, SHADOW_STRIKE_SLOW * 10)
+                ..modMoveSpeedRelative( SHADOW_STRIKE_SLOW * 10)
         end))
 
         buffDeathSpin = new BuffType(false, DispelLevel.NONE)
@@ -463,8 +463,8 @@ function initHeroType()
             AddUnitAnimationProperties(target, "spin", true)
             let level = whichBuff.getLevel()
             target.wrapper()
-                ..addStatAbsoluteBonus(Stat.AR, DEATH_SPIN_DEFENSE[level-1])
-                ..addStatAbsoluteBonus(Stat.AGI, DEATH_SPIN_DEFENSE[level-1])
+                ..modArmor( DEATH_SPIN_DEFENSE[level-1])
+                ..modWillpower( DEATH_SPIN_DEFENSE[level-1])
         end))
 
         buffDeathSpin.setPeriodicTime(0.25)
@@ -494,8 +494,8 @@ function initHeroType()
             AddUnitAnimationProperties(target, "spin", false)
             let level = whichBuff.getLevel()
             target.wrapper()
-                ..addStatAbsoluteBonus(Stat.AR, -DEATH_SPIN_DEFENSE[level-1])
-                ..addStatAbsoluteBonus(Stat.AGI, -DEATH_SPIN_DEFENSE[level-1])
+                ..modArmor( -DEATH_SPIN_DEFENSE[level-1])
+                ..modWillpower( -DEATH_SPIN_DEFENSE[level-1])
         end))
 
         buffCripplingPain = new BuffType(false, DispelLevel.DISPEL)
@@ -504,7 +504,7 @@ function initHeroType()
         buffCripplingPain.addEndFunction( (Buff whichBuff) -> (begin
             let stacks = whichBuff.getData()
             whichBuff.getTarget().wrapper()
-                ..addStatRelativeBonus(Stat.MS, 10 * stacks)
+                ..modMoveSpeedRelative( 10 * stacks)
         end))
 
 

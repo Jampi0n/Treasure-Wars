@@ -463,13 +463,13 @@ function initHeroType()
         BATTLE_ROAR.setupBuffWithIcon(BUFF_ID_BATTLE_ROAR, ABILITY_BATTLE_ROAR_BUFF)
         BATTLE_ROAR.addFirstFunction( (Buff thisBuff) -> (begin
             thisBuff.getTarget().wrapper()
-                ..addStatRelativeBonus( Stat.MS, BATTLE_ROAR_MS[thisBuff.getLevel()-1]*10 )
-                ..addStatAbsoluteBonus( Stat.AS, BATTLE_ROAR_AS[thisBuff.getLevel()-1] )
+                ..modMoveSpeedRelative( BATTLE_ROAR_MS[thisBuff.getLevel()-1]*10 )
+                ..modAttackSpeed( BATTLE_ROAR_AS[thisBuff.getLevel()-1] )
         end) )
         BATTLE_ROAR.addEndFunction( (Buff thisBuff) -> (begin
             thisBuff.getTarget().wrapper()
-                ..addStatRelativeBonus( Stat.MS, -BATTLE_ROAR_MS[thisBuff.getLevel()-1]*10 )
-                ..addStatAbsoluteBonus( Stat.AS, -BATTLE_ROAR_AS[thisBuff.getLevel()-1] )
+                ..modMoveSpeedRelative( -BATTLE_ROAR_MS[thisBuff.getLevel()-1]*10 )
+                ..modAttackSpeed( -BATTLE_ROAR_AS[thisBuff.getLevel()-1] )
         end) )
 
 

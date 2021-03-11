@@ -160,11 +160,11 @@ public class HeroImpl implements IHero
                     this.heroGlow.setXY(this.hero.getPos())
             end))
 
-        wrapper.addStatAbsoluteBonus(Stat.MR, this.heroType.getBase(Stat.MR) * 1 )
-        wrapper.addStatAbsoluteBonus(Stat.HR, this.heroType.getBase(Stat.HR) * 3 )
-        wrapper.addStatAbsoluteBonus(Stat.HP, this.heroType.getBase(Stat.HP) * 15 + HP_PER_LEVEL )
-        wrapper.addStatAbsoluteBonus(Stat.MP, this.heroType.getBase(Stat.MP) * 10 )
-        wrapper.addStatAbsoluteBonus(Stat.MS, this.heroType.getBase(Stat.MS) )
+        wrapper.modManaRegen(this.heroType.getBase(Stat.MR) * 1 )
+        wrapper.modHealthRegen(this.heroType.getBase(Stat.HR) * 3 )
+        wrapper.modHealth(this.heroType.getBase(Stat.HP) * 15 + HP_PER_LEVEL )
+        wrapper.modMana(this.heroType.getBase(Stat.MP) * 10 )
+        wrapper.modMoveSpeed(this.heroType.getBase(Stat.MS) )
         SetPlayerTechResearched(this.owner, UPG_AR , this.heroType.getBase(Stat.AR))
         SetPlayerTechResearched(this.owner, UPG_AS , this.heroType.getBase(Stat.AS))
         SetHeroStr(this.hero, this.heroType.getBase(Stat.STR) + STRENGTH_BONUS , true)
@@ -173,7 +173,8 @@ public class HeroImpl implements IHero
 
         wrapper.updateBaseStatsHero()
 
-        wrapper..updateAll().applyAll()
+        wrapper.updateAll()
+        wrapper.applyAll()
         
         if this.heroType.getOnCreateFunction() != null
             this.heroType.getOnCreateFunction().onCreate(this)
@@ -230,28 +231,28 @@ public class HeroImpl implements IHero
                     let heroUnit = hero.toUnit()
                     if heroUnit.isAlive()
                         let wrapper = heroUnit.wrapper()
-                        heroUnit.healHP(heroUnit, wrapper.getStatTotalValue(Stat.HR) / 100)
-                        heroUnit.healMana(heroUnit, wrapper.getStatTotalValue(Stat.MR) / 100)
+                        heroUnit.healHP(heroUnit, wrapper.getHealthRegen() / 100)
+                        heroUnit.healMana(heroUnit, wrapper.getManaRegen() / 100)
 
     private function upgrade()
         let newLvl = GetHeroLevel(this.hero)
         let wrapper = this.hero.wrapper()
         SetPlayerTechResearched(this.owner, UPG_AR , this.heroType.calculateStat(Stat.AR, newLvl))
         SetPlayerTechResearched(this.owner, UPG_AS , this.heroType.calculateStat(Stat.AS, newLvl))
-        wrapper.addStatAbsoluteBonus(Stat.HP, (this.heroType.calculateStat(Stat.HP, newLvl) - this.heroType.calculateStat(Stat.HP, this.level)) * 15 )
-        wrapper.addStatAbsoluteBonus(Stat.MP, (this.heroType.calculateStat(Stat.MP, newLvl) - this.heroType.calculateStat(Stat.MP, this.level)) * 10 )
-        wrapper.addStatAbsoluteBonus(Stat.MR, (this.heroType.calculateStat(Stat.MR, newLvl) - this.heroType.calculateStat(Stat.MR, this.level)) * 1 )
-        wrapper.addStatAbsoluteBonus(Stat.HR, (this.heroType.calculateStat(Stat.HR, newLvl) - this.heroType.calculateStat(Stat.HR, this.level)) * 3 )
-        wrapper.addStatAbsoluteBonus(Stat.HP, (newLvl - this.level) * HP_PER_LEVEL )
-        wrapper.addStatAbsoluteBonus(Stat.MS, this.heroType.calculateStat(Stat.MS, newLvl) - this.heroType.calculateStat(Stat.MS, this.level))
+        wrapper.modHealth( (this.heroType.calculateStat(Stat.HP, newLvl) - this.heroType.calculateStat(Stat.HP, this.level)) * 15 )
+        wrapper.modMana( (this.heroType.calculateStat(Stat.MP, newLvl) - this.heroType.calculateStat(Stat.MP, this.level)) * 10 )
+        wrapper.modManaRegen( (this.heroType.calculateStat(Stat.MR, newLvl) - this.heroType.calculateStat(Stat.MR, this.level)) * 1 )
+        wrapper.modHealthRegen( (this.heroType.calculateStat(Stat.HR, newLvl) - this.heroType.calculateStat(Stat.HR, this.level)) * 3 )
+        wrapper.modHealth( (newLvl - this.level) * HP_PER_LEVEL )
+        wrapper.modMoveSpeed( this.heroType.calculateStat(Stat.MS, newLvl) - this.heroType.calculateStat(Stat.MS, this.level))
         SetHeroStr(this.hero, this.heroType.calculateStat(Stat.STR, newLvl) + STRENGTH_BONUS , true)
         SetHeroAgi(this.hero, this.heroType.calculateStat(Stat.AGI, newLvl), true)
         SetHeroInt(this.hero, this.heroType.calculateStat(Stat.INT, newLvl), true)
 
         wrapper.updateBaseStatsHero()
 
-        for int i = 0 to STAT_COUNT - 1
-            wrapper.updateTotalStatBonus(i castTo Stat)
+        wrapper.updateAll()
+        wrapper.applyAll()
 
         this.level = newLvl
 
@@ -295,11 +296,11 @@ public class HeroImpl implements IHero
         if this.hero.getMoveSpeed() < 100
             let wrapper = this.hero.wrapper()
             Log.warn(this.hero.getName()+" has very low movement speed after revive.")
-            Log.warn("getStatTotalValue = "+wrapper.getStatTotalValue(Stat.MS).toString())
-            Log.warn("getStatTotalBonus = "+wrapper.getStatTotalBonus(Stat.MS).toString())
-            Log.warn("getStatAbsoluteBonus = "+wrapper.getStatAbsoluteBonus(Stat.MS).toString())
-            Log.warn("getStatRelativeBonus = "+wrapper.getStatRelativeBonus(Stat.MS).toString())
-            Log.warn("getStatBaseValue = "+wrapper.getStatBaseValue(Stat.MS).toString())
+            Log.warn("getStatTotalValue = "+wrapper.getMoveSpeed().toString())
+            Log.warn("getStatTotalBonus = "+wrapper.getMoveSpeedBonus().toString())
+            Log.warn("getStatAbsoluteBonus = "+wrapper.getMoveSpeedAbsoluteBonus().toString())
+            Log.warn("getStatRelativeBonus = "+wrapper.getMoveSpeedRelativeBonus().toString())
+            Log.warn("getStatBaseValue = "+wrapper.getMoveSpeedBase().toString())
             Log.warn("actual ms = "+this.hero.getMoveSpeed().toString())
             Log.warn("default ms = "+this.hero.getDefaultMovespeed().toString() )
 

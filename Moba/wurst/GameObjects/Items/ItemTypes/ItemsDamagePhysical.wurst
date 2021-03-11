@@ -78,11 +78,11 @@ function itemBloodSword()
         end) )
 
         bloodSwordBuff.addFirstFunction((Buff thisBuff) -> (begin
-            thisBuff.getTarget().wrapper().addStatRelativeBonus(Stat.AR, -250)
+            thisBuff.getTarget().wrapper().modArmorRelative(-250)
         end))
 
         bloodSwordBuff.addEndFunction((Buff thisBuff) -> (begin
-            thisBuff.getTarget().wrapper().addStatRelativeBonus(Stat.AR, 250)
+            thisBuff.getTarget().wrapper().modArmorRelative(250)
         end))
 
         addAttackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
@@ -205,11 +205,11 @@ function itemAxeOfDecay()
         let axeBuff = new BuffType(false, DispelLevel.DISPEL)
         axeBuff.setupBuffWithIcon(AXE_BUFF_ID, AXE_ABILTIY_ID)
         axeBuff.addFirstFunction((Buff thisBuff) -> (begin
-            thisBuff.getTarget().wrapper().addStatRelativeBonus(Stat.MS, -slow*10)
+            thisBuff.getTarget().wrapper().modMoveSpeedRelative(-slow*10)
         end))
 
         axeBuff.addEndFunction((Buff thisBuff) -> (begin
-            thisBuff.getTarget().wrapper().addStatRelativeBonus(Stat.MS, slow*10)
+            thisBuff.getTarget().wrapper().modMoveSpeedRelative(slow*10)
         end))
 
         addAttackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
@@ -326,11 +326,11 @@ function itemHammerOfMight()
         let hammerBuff = new BuffType(false, DispelLevel.DISPEL)
         hammerBuff.setupBuffWithIcon(HAMMER_BUFF_ID, HAMMER_ABILTIY_ID)
         hammerBuff.addFirstFunction((Buff thisBuff) -> (begin
-            thisBuff.getTarget().wrapper().addStatRelativeBonus(Stat.AR, -armorDmg*10)
+            thisBuff.getTarget().wrapper().modArmorRelative(-armorDmg*10)
         end))
 
         hammerBuff.addEndFunction((Buff thisBuff) -> (begin
-            thisBuff.getTarget().wrapper().addStatRelativeBonus(Stat.AR, armorDmg*10)
+            thisBuff.getTarget().wrapper().modArmorRelative(armorDmg*10)
         end))
 
         addAttackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
@@ -405,11 +405,11 @@ function itemArmorBreaker()
         let hammerBuff = new BuffType(false, DispelLevel.DISPEL)
         hammerBuff.setupBuffWithIcon(ARMOR_BREAKER_BUFF_ID, ARMOR_BREAKER_ABILITY_ID)
         hammerBuff.addFirstFunction((Buff thisBuff) -> (begin
-            thisBuff.getTarget().wrapper().addStatRelativeBonus(Stat.AR, -armorDmg*10)
+            thisBuff.getTarget().wrapper().modArmorRelative(-armorDmg*10)
         end))
 
         hammerBuff.addEndFunction((Buff thisBuff) -> (begin
-            thisBuff.getTarget().wrapper().addStatRelativeBonus(Stat.AR, armorDmg*10)
+            thisBuff.getTarget().wrapper().modArmorRelative(armorDmg*10)
         end))
 
         addAttackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
@@ -436,13 +436,13 @@ function itemChillingBlade()
         slowBuff.setupBuffWithIcon(CHILLING_BLADE_BUFF_ID, CHILLING_BLADE_ABILITY_ID)
         slowBuff.addFirstFunction((Buff thisBuff) -> (begin
             let wrapper = thisBuff.getTarget().wrapper()
-            wrapper.addStatRelativeBonus(Stat.MS, -slowAmount*10)
+            wrapper.modMoveSpeedRelative(-slowAmount*10)
             wrapper.incBlue()
         end))
 
         slowBuff.addEndFunction((Buff thisBuff) -> (begin
             let wrapper = thisBuff.getTarget().wrapper()
-            wrapper.addStatRelativeBonus(Stat.MS, slowAmount*10)
+            wrapper.modMoveSpeedRelative(slowAmount*10)
             wrapper.decBlue()
         end))
 

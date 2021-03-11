@@ -436,9 +436,9 @@ function createHeroType(IHero hero)
         if GetLearnedSkill() == ABILITY_FEL_MAGIC
             let newLevel = u.getAbilityLevel(ABILITY_FEL_MAGIC)
             if newLevel!= 1
-                u.wrapper().addStatRelativeBonus(Stat.INT, -FEL_MAGIC_INTEL[newLevel-2]*10)
+                u.wrapper().modIntelligenceRelative( -FEL_MAGIC_INTEL[newLevel-2]*10)
 
-            u.wrapper().addStatRelativeBonus(Stat.INT, FEL_MAGIC_INTEL[newLevel-1]*10)
+            u.wrapper().modIntelligenceRelative( FEL_MAGIC_INTEL[newLevel-1]*10)
     end))
 
     

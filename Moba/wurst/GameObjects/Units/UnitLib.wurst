@@ -11,7 +11,6 @@ import Missile
 import Constants
 import public IUnitType
 import public IUnit
-import Stats
 import DamageDetection
 
 public function createUnitTypeAndReturnId(int baseHp, int unitId, int bounty, int baseAttack, int upgradeAttack, int attackUpgradeId, int baseArmor, int upgradeArmor, int armorUpgradeId, int hitBox, string modelPath, int powerLevel) returns int
@@ -64,7 +63,7 @@ public function unit.getStr() returns int
     if this.isType(UNIT_TYPE_HERO)
         ret = GetHeroStr(this, true)
     else
-        ret = this.wrapper().getStatTotalValue(Stat.STR)
+        ret = this.wrapper().getStrength()
     return ret
 
 public function unit.getWp() returns int
@@ -72,7 +71,7 @@ public function unit.getWp() returns int
     if this.isType(UNIT_TYPE_HERO)
         ret = GetHeroAgi(this, true)
     else
-        ret = this.wrapper().getStatTotalValue(Stat.AGI)
+        ret = this.wrapper().getWillpower()
     return ret
 
 public function unit.getInt() returns int
@@ -80,7 +79,7 @@ public function unit.getInt() returns int
     if this.isType(UNIT_TYPE_HERO)
         ret = GetHeroInt(this, true)
     else
-        ret = this.wrapper().getStatTotalValue(Stat.INT)
+        ret = this.wrapper().getIntelligence()
     return ret
 
 public function unit.addBuff(unit caster, real duration, BuffType buffType, int level) returns Buff

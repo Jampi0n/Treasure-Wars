@@ -9,7 +9,6 @@ import Assets
 import Buff
 import UnitLib
 import FastDamageEvent
-import Stats
 
 
 constant int TOWER_FOCUS_MAX_STACKS = 5
@@ -28,8 +27,7 @@ init
 	buffTowerFocus.setupBuffWithIcon(TOWER_FOCUS_BUFF_ID, TOWER_FOCUS_ABILTIY_ID)
 
 	buffTowerFocus.addFirstFunction( (Buff whichBuff) -> (begin
-		whichBuff.getTarget().wrapper()
-		..addStatRelativeBonus(Stat.AR, -TOWER_FOCUS_ARMOR * 10)
+		whichBuff.getTarget().wrapper().modArmorRelative(-TOWER_FOCUS_ARMOR * 10)
 		whichBuff.setData(1)
 	end))
 
@@ -37,15 +35,13 @@ init
 		let stacks = whichBuff.getData() + 1
 		if stacks <= TOWER_FOCUS_MAX_STACKS
 			whichBuff.setData(stacks)
-			whichBuff.getTarget().wrapper()
-			..addStatRelativeBonus(Stat.AR, -TOWER_FOCUS_ARMOR * 10)
+			whichBuff.getTarget().wrapper().modArmorRelative(-TOWER_FOCUS_ARMOR * 10)
 	end))
 
 
 	buffTowerFocus.addEndFunction( (Buff whichBuff) -> (begin
 		let stacks = whichBuff.getData()
-		whichBuff.getTarget().wrapper()
-		..addStatRelativeBonus(Stat.AR, TOWER_FOCUS_ARMOR * stacks * 10)
+		whichBuff.getTarget().wrapper().modArmorRelative(TOWER_FOCUS_ARMOR * 10 * stacks)
 	end))
 
 	let g = CreateGroup()

@@ -298,10 +298,10 @@ class EatTreeAnimation
         this.checkTimer.release()
 
 function onRootStats(unit caster, int level) // add bonus
-    caster.wrapper().addStatAbsoluteBonus(Stat.AR, ROOT_RESISTANCE[level-1])
-    caster.wrapper().addStatAbsoluteBonus(Stat.AGI, ROOT_RESISTANCE[level-1])
-    caster.wrapper().addStatAbsoluteBonus(Stat.MS, 0)
-    doAfter(0, () -> caster.wrapper().addStatAbsoluteBonus(Stat.MS, 0) )
+    caster.wrapper().modArmor( ROOT_RESISTANCE[level-1])
+    caster.wrapper().modWillpower( ROOT_RESISTANCE[level-1])
+    caster.wrapper().modMoveSpeed( 0)
+    doAfter(0, () -> caster.wrapper().modMoveSpeed( 0) )
 
 function onRoot(unit caster, int level) // add bonus
     doAfter(0, () -> caster.setPropWindow(angle(0)))
@@ -310,10 +310,10 @@ function onRoot(unit caster, int level) // add bonus
     uprooted_dummy[caster.getOwner().getId()].setOwner(Player(PLAYER_NEUTRAL_PASSIVE), false)
 
 function onUprootStats(unit caster, int level) // remove bonus
-    caster.wrapper().addStatAbsoluteBonus(Stat.AR, -ROOT_RESISTANCE[level-1])
-    caster.wrapper().addStatAbsoluteBonus(Stat.AGI, -ROOT_RESISTANCE[level-1])
-    caster.wrapper().addStatAbsoluteBonus(Stat.MS, 0)
-    doAfter(0, () -> caster.wrapper().addStatAbsoluteBonus(Stat.MS, 0) )
+    caster.wrapper().modArmor( -ROOT_RESISTANCE[level-1])
+    caster.wrapper().modWillpower( -ROOT_RESISTANCE[level-1])
+    caster.wrapper().modMoveSpeed( 0)
+    doAfter(0, () -> caster.wrapper().modMoveSpeed( 0) )
     
 
 function onUproot(unit caster, int level) // remove bonus
@@ -573,9 +573,9 @@ function createHeroType(IHero hero)
         if GetLearnedSkill() == ABILITY_REGENERATION
             let newLevel = u.getAbilityLevel(ABILITY_REGENERATION)
             if newLevel!= 1
-                u.wrapper().addStatRelativeBonus(Stat.HR, -REGENERATION_HIT_POINT_REGEN[newLevel-2]*10)
+                u.wrapper().modHealthRegenRelative( -REGENERATION_HIT_POINT_REGEN[newLevel-2]*10)
 
-            u.wrapper().addStatRelativeBonus(Stat.HR, REGENERATION_HIT_POINT_REGEN[newLevel-1]*10)
+            u.wrapper().modHealthRegenRelative( REGENERATION_HIT_POINT_REGEN[newLevel-1]*10)
 
             
 
