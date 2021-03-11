@@ -14,8 +14,9 @@ function itemArcaneShield()
     addRequirement(ITEM_ID_MAGE_GLOVES)
     addRequirement(ITEM_ID_GEM_OF_HEALTH)
     addRequirement(ITEM_ID_SHIELD)
-    addStatBonusAbsolute(Stat.HP, hp)
-    addStatBonusAbsolute(Stat.AGI, wp)
+    onEither() (int factor) ->
+        modHealth(hp)
+        modWillpower(wp)
 
 function enchantedArmor()
     let mp = 125
@@ -28,10 +29,11 @@ function enchantedArmor()
     addRequirement(ITEM_ID_BATTLEMAGE_ARMOR)
     addRequirement(ITEM_ID_GEM_OF_HEALTH)
     addRequirement(ITEM_ID_WIZARDS_HAT)
-    addStatBonusAbsolute(Stat.MP, mp)
-    addStatBonusAbsolute(Stat.HP, hp)
-    addStatBonusAbsolute(Stat.AR, ar)
-    addStatBonusAbsolute(Stat.INT, intel)
+    onEither() (int factor) ->
+        modMana(mp)
+        modHealth(hp)
+        modArmor(ar)
+        modIntelligence(intel)
 
 function voidArmor()
     let mp = 150
@@ -44,12 +46,12 @@ function voidArmor()
     .format(mp.toString(), hp.toString(), ar.toString(), wp.toString(), dmgReduction.toString()))
     addRequirement(ITEM_ID_BATTLEMAGE_ARMOR)
     addRequirement(ITEM_ID_GHOST_HOOD)
-    addStatBonusAbsolute(Stat.MP, mp)
-    addStatBonusAbsolute(Stat.HP, hp)
-    addStatBonusAbsolute(Stat.AR, ar)
-    addStatBonusAbsolute(Stat.AGI, wp)
-
-    saveDamageEventInt(D_VOID_ARMOR)
+    onEither() (int factor) ->
+        modMana(mp)
+        modHealth(hp)
+        modArmor(ar)
+        modWillpower(wp)
+        damageEventInt(D_VOID_ARMOR)
 
 function armorOfCourage()
     let ar = 36
@@ -60,9 +62,10 @@ function armorOfCourage()
     .format(ar.toString(), wp.toString(), hp.toString()))
     addRequirement(ITEM_ID_HEAVY_ARMOR)
     addRequirement(ITEM_ID_STEEL_ARMOR)
-    addStatBonusAbsolute(Stat.AR, ar)
-    addStatBonusAbsolute(Stat.AGI, wp)
-    addStatBonusAbsolute(Stat.HP, hp)
+    onEither() (int factor) ->
+        modArmor(ar)
+        modWillpower(wp)
+        modHealth(hp)
 
 function helmetOfJustice()
     let intel = 25
@@ -74,9 +77,10 @@ function helmetOfJustice()
     .format(intel.toString(), ar.toString(), hr.toString(), killMana.toString()))
     addRequirement(ITEM_ID_HEAVY_HELMET)
     addRequirement(ITEM_ID_CURSED_MASK)
-    addStatBonusAbsolute(Stat.INT, intel)
-    addStatBonusAbsolute(Stat.HR, hr)
-    addStatBonusAbsolute(Stat.AR, ar)
+    onEither() (int factor) ->
+        modIntelligence(intel)
+        modHealthRegen(hr)
+        modArmor(ar)
 
     if not compiletime
         createItemEffectTrigger()
@@ -101,13 +105,13 @@ function firehandGauntlets()
     addRequirement(ITEM_ID_GAUNTLET_OF_PROTECTION)
     addRequirement(ITEM_ID_MAGMA_CRYSTAL)
     addRequirement(ITEM_ID_GLOVES_OF_HASTE)
-    addStatBonusAbsolute(Stat.MP, mp)
-    addStatBonusAbsolute(Stat.HP, hp)
-    addStatBonusAbsolute(Stat.AR, ar)
-    addStatBonusAbsolute(Stat.AS, as)
+    onEither() (int factor) ->
+        modMana(mp)
+        modHealth(hp)
+        modArmor(ar)
+        modAttackSpeed(as)
 
-    if not compiletime
-        addAttackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+        attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             source.dealDamage(target, magicDmg.toReal() * source.countItemsOfType(ITEM_ID_FIREHAND_GAUNTLETS) , ReductionType.MAGIC)
             target.addEffect(Abilities.fireBallMissile, "chest").destr()
 
@@ -120,10 +124,10 @@ function spikedArmor()
     .format(ar.toString(), hp.toString(), spikeDmg.toString()))
     addRequirement(ITEM_ID_SPIKED_MAIL)
     addRequirement(ITEM_ID_HEAVY_ARMOR)
-    addStatBonusAbsolute(Stat.AR, ar)
-    addStatBonusAbsolute(Stat.HP, hp)
-    if not compiletime
-        addAttackHitFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+    onEither() (int factor) ->
+        modArmor(ar)
+        modHealth(hp)
+        attackHitFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             let dmg = target.countItemsOfType(ITEM_ID_SPIKED_ARMOR) * spikeDmg
             target.dealDamage(source, dmg.toReal(), ReductionType.PHYSICAL)
     
@@ -136,9 +140,10 @@ function runicArmor()
     .format(ar.toString(), wp.toString(), hp.toString()))
     addRequirement(ITEM_ID_STEEL_ARMOR)
     addRequirement(ITEM_ID_ANCIENT_STONE_TABLET)
-    addStatBonusAbsolute(Stat.AR, ar)
-    addStatBonusAbsolute(Stat.AGI, wp)
-    addStatBonusAbsolute(Stat.HP, hp)
+    onEither() (int factor) ->
+        modArmor(ar)
+        modWillpower(wp)
+        modHealth(hp)
     
 
 constant HOLY_SHIELD_BUFF_ID = compiletime(createAuraBuff("Holy Shield", "This unit is protected by Holy Shield; it is untargetable.", "BTNGoldenShieldHoly"))
@@ -157,10 +162,11 @@ function holyShield()
     setAbilities('A00G')
     addRequirement(ITEM_ID_SHIELD)
     addRequirement(ITEM_ID_ANCIENT_STONE_TABLET)
-    addStatBonusAbsolute(Stat.AR, ar)
-    addStatBonusAbsolute(Stat.AGI, wp)
-    addStatBonusAbsolute(Stat.HP, hp)
-    saveDamageEventInt(D_SHIELD)
+    onEither() (int factor) ->
+        modArmor(ar)
+        modWillpower(wp)
+        modHealth(hp)
+        damageEventInt(D_SHIELD)
 
     if not compiletime
         BUFF_HOLY_SHIELD.setupBuffWithIcon(HOLY_SHIELD_BUFF_ID, HOLY_SHIELD_ABILTIY_ID)
@@ -181,16 +187,18 @@ function mageArmor()
     setupItem(ITEM_ID_MAGE_ARMOR, CATEGORY, 800)
     setInfo("Mage Armor", "+ {0} mana points|n +{1} hit points|n +{2} armor"
     .format(mp.toString(), hp.toString(), ar.toString()))
-    addStatBonusAbsolute(Stat.MP, mp)
-    addStatBonusAbsolute(Stat.HP, hp)
-    addStatBonusAbsolute(Stat.AR, ar)
+    onEither() (int factor) ->
+        modMana(mp)
+        modHealth(hp)
+        modArmor(ar)
 
 function mageGloves()
     let wp = 8
     setupItem(ITEM_ID_MAGE_GLOVES, CATEGORY, 400)
     setInfo("Mage Gloves", "+ {0} willpower"
     .format(wp.toString()))
-    addStatBonusAbsolute(Stat.AGI, wp)
+    onEither() (int factor) ->
+        modWillpower(wp)
 
 
 function ghostHood()
@@ -203,10 +211,11 @@ function ghostHood()
     .format(mp.toString(), hp.toString(), ar.toString(), wp.toString()))
     addRequirement(ITEM_ID_MAGE_ARMOR)
     addRequirement(ITEM_ID_MAGE_GLOVES)
-    addStatBonusAbsolute(Stat.MP, mp)
-    addStatBonusAbsolute(Stat.AGI, wp)
-    addStatBonusAbsolute(Stat.HP, hp)
-    addStatBonusAbsolute(Stat.AR, ar)
+    onEither() (int factor) ->
+        modMana(mp)
+        modWillpower(wp)
+        modHealth(hp)
+        modArmor(ar)
 
 
 
@@ -218,8 +227,9 @@ function ancientStoneTablet()
     .format(hp.toString(), wp.toString()))
     addRequirement(ITEM_ID_GEM_OF_HEALTH)
     addRequirement(ITEM_ID_MAGE_GLOVES)
-    addStatBonusAbsolute(Stat.HP, hp)
-    addStatBonusAbsolute(Stat.AGI, wp)
+    onEither() (int factor) ->
+        modHealth(hp)
+        modWillpower(wp)
 
 
 function battlemageArmor()
@@ -231,9 +241,10 @@ function battlemageArmor()
     .format(mp.toString(), hp.toString(), ar.toString()))
     addRequirement(ITEM_ID_MAGE_ARMOR)
     addRequirement(ITEM_ID_GEM_OF_HEALTH)
-    addStatBonusAbsolute(Stat.MP, mp)
-    addStatBonusAbsolute(Stat.HP, hp)
-    addStatBonusAbsolute(Stat.AR, ar)
+    onEither() (int factor) ->
+        modMana(mp)
+        modHealth(hp)
+        modArmor(ar)
 
 
 function platedGauntlets()
@@ -241,7 +252,8 @@ function platedGauntlets()
     setupItem(ITEM_ID_PLATED_GAUNTLETS, CATEGORY, 400)
     setInfo("Plated Gauntlets", "+ {0} armor"
     .format(armor.toString()))
-    addStatBonusAbsolute(Stat.AR, armor)
+    onEither() (int factor) ->
+        modArmor(armor)
 
 
 function leatherArmor()
@@ -250,8 +262,9 @@ function leatherArmor()
     setupItem(ITEM_ID_LEATHER_ARMOR, CATEGORY, 825)
     setInfo("Leather Armor", "+ {0} armor|n+ {1} hit points"
     .format(ar.toString(), hp.toString()))
-    addStatBonusAbsolute(Stat.AR, ar)
-    addStatBonusAbsolute(Stat.HP, hp)
+    onEither() (int factor) ->
+        modArmor(ar)
+        modHealth(hp)
 
 
 function gemOfHealth()
@@ -259,7 +272,8 @@ function gemOfHealth()
     setupItem(ITEM_ID_GEM_OF_HEALTH, CATEGORY, 500)
     setInfo("Gem Of Health","+ {0} hit points"
     .format(hp.toString()))
-    addStatBonusAbsolute(Stat.HP, hp)
+    onEither() (int factor) ->
+        modHealth(hp)
 
 
 function spikes()
@@ -267,8 +281,8 @@ function spikes()
     setupItem(ITEM_ID_SPIKES, CATEGORY, 600)
     setInfo("Spikes", "Enemies attacking the hero will take {0} damage."
     .format(spikeDmg.toString()))
-    if not compiletime
-        addAttackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+    onEither() (int factor) ->
+        attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             if target.isType(UNIT_TYPE_HERO)
                 let dmg = target.countItemsOfType(ITEM_ID_SPIKES) * spikeDmg
                 target.dealDamage(source, dmg.toReal(), ReductionType.PHYSICAL)
@@ -279,8 +293,9 @@ function shield()
     setupItem(ITEM_ID_SHIELD, CATEGORY, 850)
     setInfo("Shield", "+ {0} armor|nBlocks {1} damage of incoming attacks."
     .format(ar.toString(), block.toString()))
-    addStatBonusAbsolute(Stat.AR, ar)
-    saveDamageEventInt(D_SHIELD)
+    onEither() (int factor) ->
+        modArmor(ar)
+        damageEventInt(D_SHIELD)
 
 
 function ringOfHealth()
@@ -288,7 +303,8 @@ function ringOfHealth()
     setupItem(ITEM_ID_RING_OF_HEALTH, CATEGORY, 500)
     setInfo("Ring of Health", "+ {0} hit point regeneration per 10 seconds"
     .format(hr.toString()))
-    addStatBonusAbsolute(Stat.HR, hr)
+    onEither() (int factor) ->
+        modHealthRegen(hr)
 
 
 function gauntletsOfProtection()
@@ -297,7 +313,8 @@ function gauntletsOfProtection()
     setInfo("Gauntlets Of Protection", "+ {0} armor"
     .format(ar.toString()))
     addRequirement(ITEM_ID_PLATED_GAUNTLETS)
-    addStatBonusAbsolute(Stat.AR, ar)
+    onEither() (int factor) ->
+        modArmor(ar)
 
 
 function heavyBoots()
@@ -307,20 +324,13 @@ function heavyBoots()
     setupItem(ITEM_ID_HEAVY_BOOTS, CATEGORY, 2400)
     setInfo("Heavy Boots", "+{1} armor|n+ {2} hit points|n+ {0} movement speed|nMovement speed bonus from boots does not stack."
     .format(ms.toString(), ar.toString(), hp.toString()))
-    addStatBonusAbsolute(Stat.AR, ar)
-    addStatBonusAbsolute(Stat.HP, hp)
+    onEither() (int factor) ->
+        modArmor(ar)
+        modHealth(hp)
+        if isUnique() and hasNot(ITEM_ID_BOOTS_OF_DARKNESS) and hasNot(ITEM_ID_LIGHT_BOOTS)
+            modMoveSpeed(ms)
     addRequirement(ITEM_ID_LIGHT_BOOTS)
     addRequirement(ITEM_ID_GEM_OF_HEALTH)
-
-    addPickupFunction(()->(begin
-        if isUnique() and hasNot(ITEM_ID_BOOTS_OF_DARKNESS) and hasNot(ITEM_ID_LIGHT_BOOTS)
-            getTriggerUnit().wrapper().modMoveSpeed(ms)
-    end))
-    addDropFunction(()->(begin
-        if isUnique() and hasNot(ITEM_ID_BOOTS_OF_DARKNESS) and hasNot(ITEM_ID_LIGHT_BOOTS)
-            getTriggerUnit().wrapper().modMoveSpeed(-ms)
-    end))
-    
 
 function spikedMail()
     let ar = 12
@@ -332,11 +342,10 @@ function spikedMail()
     addRequirement(ITEM_ID_SPIKES)
     addRequirement(ITEM_ID_LEATHER_ARMOR)
 
-    addStatBonusAbsolute(Stat.AR, ar)
-    addStatBonusAbsolute(Stat.HP, hp)
-
-    if not compiletime
-        addAttackHitFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+    onEither() (int factor) ->
+        modArmor(ar)
+        modHealth(hp)
+        attackHitFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             let dmg = target.countItemsOfType(ITEM_ID_SPIKED_MAIL) * spikeDmg
             target.dealDamage(source, dmg.toReal(), ReductionType.PHYSICAL)
 
@@ -348,8 +357,10 @@ function heavyArmor()
     .format(ar.toString(), hp.toString()))
     addRequirement(ITEM_ID_LEATHER_ARMOR)
     addRequirement(ITEM_ID_GEM_OF_HEALTH)
-    addStatBonusAbsolute(Stat.AR, ar)
-    addStatBonusAbsolute(Stat.HP, hp)
+
+    onEither() (int factor) ->
+        modArmor(ar)
+        modHealth(hp)
 
 
 function heavyHelmet()
@@ -359,8 +370,10 @@ function heavyHelmet()
     setInfo("Heavy Helmet","+ {0} armor|n+ {1} hit points regeneration per 10 seconds"
     .format(ar.toString(), hr.toString()))
     addRequirement(ITEM_ID_RING_OF_HEALTH)
-    addStatBonusAbsolute(Stat.AR, ar)
-    addStatBonusAbsolute(Stat.HR, hr)
+    
+    onEither() (int factor) ->
+        modArmor(ar)
+        modHealthRegen(hr)
 
 
 function steelArmor()
@@ -372,9 +385,10 @@ function steelArmor()
     .format(ar.toString(), wp.toString(), hp.toString()))
     addRequirement(ITEM_ID_MAGE_GLOVES)
     addRequirement(ITEM_ID_LEATHER_ARMOR)
-    addStatBonusAbsolute(Stat.AR, ar)
-    addStatBonusAbsolute(Stat.AGI, wp)
-    addStatBonusAbsolute(Stat.HP, hp)
+    onEither() (int factor) ->
+        modArmor(ar)
+        modWillpower(wp)
+        modHealth(hp)
 
 
 @compiletime

@@ -26,14 +26,23 @@ interface ItemPickUp
 interface ItemDrop
     function onItemDrop()
 
-public function getTriggerItem() returns item
+interface ItemDropOrPickUp
+    function dropOrPickUp(int factor)
+
+public function getItemItem() returns item
     return ItemEffect.triggerItem
 
-public function getTriggerItemType() returns int
+public function getItemItemType() returns int
     return ItemEffect.triggerItem.getTypeId()
 
-public function getTriggerUnit() returns unit
+public function getItemUnit() returns unit
     return ItemEffect.triggerUnit
+
+public function getItemUnitWrapper() returns IUnit
+    return ItemEffect.triggerWrapper
+
+public function getItemSign() returns int
+    return ItemEffect.inventoryChangeDirection
 
 public class ItemEffect
 
@@ -41,12 +50,15 @@ public class ItemEffect
 
     protected static item triggerItem
     protected static unit triggerUnit
+    protected static IUnit triggerWrapper
+    protected static int inventoryChangeDirection
 
     private static constant itemIdToEffect = new HashMap<int, ItemEffect>
     private static trigger onItemPickUp = CreateTrigger()
     private static trigger onItemDrop = CreateTrigger()
     protected constant onPickUp = new LinkedList<ItemPickUp>
     protected constant onDrop = new LinkedList<ItemDrop>
+    protected constant onDropOrPickUp = new LinkedList<ItemDropOrPickUp>
     private LinkedList<trigger> attachedTriggers = null
 
     private int useCount = 0
@@ -90,23 +102,31 @@ public class ItemEffect
         triggerItem = GetManipulatedItem()
         if itemIdToEffect.has(triggerItem.getTypeId())
             triggerUnit = GetTriggerUnit()
+            triggerWrapper = triggerUnit.wrapper()
+            inventoryChangeDirection = 1
             let itemType = itemIdToEffect.get(triggerItem.getTypeId())
             itemType.useCount++
             if itemType.useCount == 1
                 itemType.enableEffect()
             for c in itemType.onPickUp
                 c.onItemPickUp()
+            for c in itemType.onDropOrPickUp
+                c.dropOrPickUp(1)
 
     static function onItemDrop()
         triggerItem = GetManipulatedItem()
         if itemIdToEffect.has(triggerItem.getTypeId())
             triggerUnit = GetTriggerUnit()
+            triggerWrapper = triggerUnit.wrapper()
+            inventoryChangeDirection = -1
             let itemType = itemIdToEffect.get(triggerItem.getTypeId())
             itemType.useCount--
             if itemType.useCount == 0
                 itemType.disableEffect()
             for c in itemType.onDrop
                 c.onItemDrop()
+            for c in itemType.onDropOrPickUp
+                c.dropOrPickUp(-1)
 
 
 int currentItemId
@@ -117,100 +137,107 @@ ItemInShop currentItemInShop
 public function createItemEffectTrigger() returns trigger
     return currentItemEffect.attachTrigger(CreateTrigger())
 
-public function addPickupFunction(ItemPickUp onPickUp)
+public function onPickUp(ItemPickUp onPickUp)
     if compiletime
         return
         
     currentItemEffect.onPickUp.add(onPickUp)
 
-public function addDropFunction(ItemDrop onDrop)
+public function onDrop(ItemDrop onDrop)
     if compiletime
         return
 
     currentItemEffect.onDrop.add(onDrop)
 
-public function addStatBonusAbsolute(Stat whichStat, int bonus)
+public function onEither(ItemDropOrPickUp onDropOrPickUp)
     if compiletime
         return
 
-    addPickupFunction( ()-> (begin
-        ItemEffect.triggerUnit.wrapper().modStatDispatch(whichStat, bonus)
-    end))
+    currentItemEffect.onDropOrPickUp.add(onDropOrPickUp)
 
-    addDropFunction( ()-> (begin
-        ItemEffect.triggerUnit.wrapper().modStatDispatch(whichStat, -bonus)
-    end))
+public function anyDamageFunction(DamageFunction f)
+    anyDamageFunction(1, f)
+public function anyDamageFunction(int factor, DamageFunction f)
+    if isUnique()
+        let u = DamageEventUnit.fromUnit(getItemUnit())
+        if getItemSign() == 1
+            u.saveIntSlow(factor * getItemItemType(), u.anyDamage.add(f))
+        else
+            u.anyDamage.remove(u.loadIntSlow(factor * getItemItemType()))
 
-public function addStatBonusRelative(Stat whichStat, int bonus)
-    if compiletime
-        return
+public function anyHitFunction(DamageFunction f)
+    anyHitFunction(1, f)
+public function anyHitFunction(int factor, DamageFunction f)
+    if isUnique()
+        let u = DamageEventUnit.fromUnit(getItemUnit())
+        if getItemSign() == 1
+            u.saveIntSlow(factor * getItemItemType(), u.anyHit.add(f))
+        else
+            u.anyHit.remove(u.loadIntSlow(factor * getItemItemType()))
 
-    addPickupFunction( ()-> (begin
-        ItemEffect.triggerUnit.wrapper().modStatRelativeDispatch(whichStat, bonus)
-    end))
+public function attackDamageFunction(DamageFunction f)
+    attackDamageFunction(1, f)
+public function attackDamageFunction(int factor, DamageFunction f)
+    if isUnique()
+        let u = DamageEventUnit.fromUnit(getItemUnit())
+        if getItemSign() == 1
+            u.saveIntSlow(factor * getItemItemType(), u.attackDamageNoBuilding.add(f))
+        else
+            u.attackDamageNoBuilding.remove(u.loadIntSlow(factor * getItemItemType()))
 
-    addDropFunction( ()-> (begin
-        ItemEffect.triggerUnit.wrapper().modStatRelativeDispatch(whichStat, -bonus)
-    end))
+public function attackHitFunction(DamageFunction f)
+    attackHitFunction(1, f)
+public function attackHitFunction(int factor, DamageFunction f)
+    if isUnique()
+        let u = DamageEventUnit.fromUnit(getItemUnit())
+        if getItemSign() == 1
+            u.saveIntSlow(factor * getItemItemType(), u.attackHitNoBuilding.add(f))
+        else
+            u.attackHitNoBuilding.remove(u.loadIntSlow(factor * getItemItemType()))
 
-public function addAttackDamageFunction(DamageFunction f)
-    addAttackDamageFunction(1, f)
-public function addAttackDamageFunction(int factor, DamageFunction f)
-    if compiletime
-        return
-    addPickupFunction() ->
-        if isUnique()
-            DamageEventUnit.fromUnit(getTriggerUnit()).saveIntSlow(factor * getTriggerItemType(), DamageEventUnit.fromUnit(getTriggerUnit()).attackDamageNoBuilding.add(f))
-    addDropFunction() ->
-        if isUnique()
-            DamageEventUnit.fromUnit(getTriggerUnit()).attackDamageNoBuilding.remove(DamageEventUnit.fromUnit(getTriggerUnit()).loadIntSlow(factor * getTriggerItemType()))
+public function damageEventInt(int key)
+    let u = DamageEventUnit.fromUnit(getItemUnit())
+    u.saveIntFast(key, u.loadIntFast(key) + getItemSign())
 
-public function addAttackHitFunction(DamageFunction f)
-    addAttackHitFunction(1, f)
-public function addAttackHitFunction(int factor, DamageFunction f)
-    if compiletime
-        return
-    addPickupFunction() ->
-        if isUnique()
-            DamageEventUnit.fromUnit(getTriggerUnit()).saveIntSlow(factor *getTriggerItemType(), DamageEventUnit.fromUnit(getTriggerUnit()).attackHitNoBuilding.add(f))
-    addDropFunction() ->
-        if isUnique()
-            DamageEventUnit.fromUnit(getTriggerUnit()).attackHitNoBuilding.remove(DamageEventUnit.fromUnit(getTriggerUnit()).loadIntSlow(factor *getTriggerItemType()))
+public function modArmor(int modifier)
+    getItemUnitWrapper().modArmor(modifier * getItemSign())
+public function modAttackSpeed(int modifier)
+    getItemUnitWrapper().modAttackSpeed(modifier * getItemSign())
+public function modStrength(int modifier)
+    getItemUnitWrapper().modStrength(modifier * getItemSign())
+public function modWillpower(int modifier)
+    getItemUnitWrapper().modWillpower(modifier * getItemSign())
+public function modIntelligence(int modifier)
+    getItemUnitWrapper().modIntelligence(modifier * getItemSign())
+public function modMoveSpeed(int modifier)
+    getItemUnitWrapper().modMoveSpeed(modifier * getItemSign())
+public function modHealth(int modifier)
+    getItemUnitWrapper().modHealth(modifier * getItemSign())
+public function modMana(int modifier)
+    getItemUnitWrapper().modMana(modifier * getItemSign())
+public function modHealthRegen(int modifier)
+    getItemUnitWrapper().modHealthRegen(modifier * getItemSign())
+public function modManaRegen(int modifier)
+    getItemUnitWrapper().modManaRegen(modifier * getItemSign())
 
-public function addAnyDamageFunction(DamageFunction f)
-    addAnyDamageFunction(1, f)
-public function addAnyDamageFunction(int factor, DamageFunction f)
-    if compiletime
-        return
-    addPickupFunction() ->
-        if isUnique()
-            DamageEventUnit.fromUnit(getTriggerUnit()).saveIntSlow(factor * getTriggerItemType(), DamageEventUnit.fromUnit(getTriggerUnit()).anyDamage.add(f))
-    addDropFunction() ->
-        if isUnique()
-            DamageEventUnit.fromUnit(getTriggerUnit()).anyDamage.remove(DamageEventUnit.fromUnit(getTriggerUnit()).loadIntSlow(factor * getTriggerItemType()))
-
-public function addAnyHitFunction(DamageFunction f)
-    addAnyHitFunction(1, f)
-public function addAnyHitFunction(int factor, DamageFunction f)
-    if compiletime
-        return
-    addPickupFunction() ->
-        if isUnique()
-            DamageEventUnit.fromUnit(getTriggerUnit()).saveIntSlow(factor *getTriggerItemType(), DamageEventUnit.fromUnit(getTriggerUnit()).anyHit.add(f))
-    addDropFunction() ->
-        if isUnique()
-            DamageEventUnit.fromUnit(getTriggerUnit()).anyHit.remove(DamageEventUnit.fromUnit(getTriggerUnit()).loadIntSlow(factor *getTriggerItemType()))
-
-public function saveDamageEventInt(int key)
-    if compiletime
-        return
-    addPickupFunction() ->
-        let u = DamageEventUnit.fromUnit(getTriggerUnit())
-        u.saveIntFast(key, u.loadIntFast(key) + 1)
-    addDropFunction() ->
-        let u = DamageEventUnit.fromUnit(getTriggerUnit())
-        u.saveIntFast(key, u.loadIntFast(key) - 1)
-
+public function modArmorRelative(int modifier)
+    getItemUnitWrapper().modArmorRelative(modifier * getItemSign())
+public function modStrengthRelative(int modifier)
+    getItemUnitWrapper().modStrengthRelative(modifier * getItemSign())
+public function modWillpowerRelative(int modifier)
+    getItemUnitWrapper().modWillpowerRelative(modifier * getItemSign())
+public function modIntelligenceRelative(int modifier)
+    getItemUnitWrapper().modIntelligenceRelative(modifier * getItemSign())
+public function modMoveSpeedRelative(int modifier)
+    getItemUnitWrapper().modMoveSpeedRelative(modifier * getItemSign())
+public function modHealthRelative(int modifier)
+    getItemUnitWrapper().modHealthRelative(modifier * getItemSign())
+public function modManaRelative(int modifier)
+    getItemUnitWrapper().modManaRelative(modifier * getItemSign())
+public function modHealthRegenRelative(int modifier)
+    getItemUnitWrapper().modHealthRegenRelative(modifier * getItemSign())
+public function modManaRegenRelative(int modifier)
+    getItemUnitWrapper().modManaRegenRelative(modifier * getItemSign())
 
 public function setupItem(int itemId, int category, int goldCost)
     if compiletime
@@ -266,11 +293,11 @@ public function addRequirement(int itemId)
 
 //returns if the picked up item is the first of its type and if the dropped item is the last of its type
 public function isUnique() returns boolean
-    return getTriggerUnit().countItemsOfType(getTriggerItem().getTypeId()) == 1
+    return getItemUnit().countItemsOfType(getItemItemType()) == 1
 
 //returns if the the hero has not this item
 public function hasNot(int itemTypeId) returns boolean
-    return getTriggerUnit().countItemsOfType(itemTypeId) == 0
+    return getItemUnit().countItemsOfType(itemTypeId) == 0
 
 init
     ItemEffect.classInit()

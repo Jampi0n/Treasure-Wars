@@ -9,7 +9,8 @@ function itemHammerOfStrength()
     let str = 8
     setupItem(ITEM_ID_HAMMER_OF_STRENGTH, CATEGORY, 400)
     setInfo("Hammer of Strength", "+ {0} strength".format(str.toString()))
-    addStatBonusAbsolute(Stat.STR, str)
+    onEither() (int factor) ->
+        modStrength(str)
 
 
 function itemGlovesOfHaste()
@@ -17,7 +18,8 @@ function itemGlovesOfHaste()
     
     setupItem(ITEM_ID_GLOVES_OF_HASTE, CATEGORY, 400)
     setInfo("Gloves of Haste", "+ {0}% attack speed".format(as.toString()))
-    addStatBonusAbsolute(Stat.AS, as)
+    onEither() (int factor) ->
+        modAttackSpeed(as)
 
 
 function itemWarAxe()
@@ -25,7 +27,8 @@ function itemWarAxe()
     
     setupItem(ITEM_ID_WAR_AXE, CATEGORY, 800)
     setInfo("War Axe", "+ {0} strength".format(str.toString()))
-    addStatBonusAbsolute(Stat.STR, str)
+    onEither() (int factor) ->
+        modStrength(str)
 
 
 function itemDagger()
@@ -34,8 +37,10 @@ function itemDagger()
     
     setupItem(ITEM_ID_DAGGER, CATEGORY, 800)
     setInfo("Dagger", "+ {0} strength\n+ {1}% attack speed".format(str.toString(), as.toString()))
-    addStatBonusAbsolute(Stat.STR, str)
-    addStatBonusAbsolute(Stat.AS, as)
+
+    onEither() (int factor) ->
+        modStrength(str)
+        modAttackSpeed(as)
 
 function itemBow()
     let str = 12
@@ -43,12 +48,12 @@ function itemBow()
     
     setupItem(ITEM_ID_BOW, CATEGORY, 750)
     setInfo("Bow", "+ {0} strength|nDeals {1} additional damage to units.".format(str.toString(), unitDmg.toString() ))
-    addStatBonusAbsolute(Stat.STR, str)
-
-    addAttackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
-        if not target.isType(UNIT_TYPE_HERO)
-            let dmg = source.countItemsOfType(ITEM_ID_BOW) * unitDmg
-            source.dealDamage(target, dmg.toReal(), ReductionType.PHYSICAL)
+    onEither() (int factor) ->
+        modStrength(str)
+        attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+            if not target.isType(UNIT_TYPE_HERO)
+                let dmg = source.countItemsOfType(ITEM_ID_BOW) * unitDmg
+                source.dealDamage(target, dmg.toReal(), ReductionType.PHYSICAL)
 
 constant BLOOD_SWORD_BUFF_ID = compiletime(createAuraBuff("Blood Sword", "This unit has reduced armor and takes damage over time.", "BTNBarbarianBrutalSlasher"))
 constant BLOOD_SWORD_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, BLOOD_SWORD_BUFF_ID, "", ""))
@@ -65,7 +70,6 @@ function itemBloodSword()
         ))
     addRequirement(ITEM_ID_HAMMER_OF_MIGHT)
     addRequirement(ITEM_ID_MACE)
-    addStatBonusAbsolute(Stat.STR, str)
 
     if not compiletime
         let bloodSwordBuff = new BuffType(false, DispelLevel.DISPEL)
@@ -85,8 +89,11 @@ function itemBloodSword()
             thisBuff.getTarget().wrapper().modArmorRelative(250)
         end))
 
-        addAttackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
-            target.addBuffReduced(source, buffDur.toReal(), bloodSwordBuff, 1)
+        onEither() (int factor) ->
+            modStrength(str)
+
+            attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+                target.addBuffReduced(source, buffDur.toReal(), bloodSwordBuff, 1)
 
 
 
@@ -103,14 +110,13 @@ function itemCursedSword()
         ))
     addRequirement(ITEM_ID_RAVEN_SWORD)
     addRequirement(ITEM_ID_SKULL_AXE)
-    addStatBonusAbsolute(Stat.STR, str)
-    addStatBonusAbsolute(Stat.AS, as)
-
-    if not compiletime
-        addAttackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+    onEither() (int factor) ->
+        modStrength(str)
+        modAttackSpeed(as)
+        attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             source.dealDamage(target, voidDmg * target.getMaxHP() * 0.01 , ReductionType.NONE)
             target.addEffect(Abilities.avengerMissile, "chest").destr()
-
+    if not compiletime
         createItemEffectTrigger()
         ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
         ..addAction(() -> (begin
@@ -136,12 +142,11 @@ function itemInfernalBow()
         ))
     addRequirement(ITEM_ID_MAGMA_CRYSTAL)
     addRequirement(ITEM_ID_BOW)
-    addStatBonusAbsolute(Stat.STR, str)
-    addStatBonusAbsolute(Stat.MP, mp)
-    addStatBonusAbsolute(Stat.HP, hp)
-
-    if not compiletime
-        addAttackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+    onEither() (int factor) ->
+        modStrength(str)
+        modMana(mp)
+        modHealth(hp)
+        attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             source.dealDamage(target, magicDmg.toReal() * source.countItemsOfType(ITEM_ID_INFERNAL_BOW) , ReductionType.MAGIC)
             target.addEffect(Abilities.fireBallMissile, "chest").destr()
 
@@ -159,12 +164,11 @@ function itemEnchantedBlade()
     addRequirement(ITEM_ID_DAGGER)
     addRequirement(ITEM_ID_MAGE_GLOVES)
     addRequirement(ITEM_ID_WAR_AXE)
-    addStatBonusAbsolute(Stat.AS, as)
-    addStatBonusAbsolute(Stat.STR, str)
-    addStatBonusAbsolute(Stat.AGI, wp)
-
-    if not compiletime
-        addAttackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+    onEither() (int factor) ->
+        modAttackSpeed(as)
+        modStrength(str)
+        modWillpower(wp)
+        attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             if target.getMana() > 0
                 let manaBurned = min(mBurn.toReal() , target.getMana())
                 source.damageMana(target, manaBurned, ReductionType.NONE)
@@ -187,7 +191,6 @@ function itemAxeOfDecay()
             str.toString(), hp.toString(), mana.toString(), slow.toString(), slowDur.toString()
         ))
     addRequirement(ITEM_ID_SKULL_AXE)
-    addStatBonusAbsolute(Stat.STR, str)
 
     if not compiletime
         createItemEffectTrigger()
@@ -212,8 +215,10 @@ function itemAxeOfDecay()
             thisBuff.getTarget().wrapper().modMoveSpeedRelative(slow*10)
         end))
 
-        addAttackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
-            target.addBuffReduced( source, slowDur.toReal(), axeBuff, 1)
+        onEither() (int factor) ->
+            modStrength(str)
+            attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+                target.addBuffReduced( source, slowDur.toReal(), axeBuff, 1)
         
 
 function itemSacrificialDagger()
@@ -232,12 +237,13 @@ function itemSacrificialDagger()
     addRequirement(ITEM_ID_SKULL)
     addRequirement(ITEM_ID_RING_OF_HEALTH)
     
-    addStatBonusAbsolute(Stat.HR, hr)
-    addStatBonusAbsolute(Stat.STR, str)
-    addStatBonusAbsolute(Stat.AS, as)
+    onEither() (int factor) ->
+        modHealthRegen(hr)
+        modStrength(str)
+        modAttackSpeed(as)
 
-    addAttackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
-        source.healHP(source, damage * 0.12)
+        attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
+            source.healHP(source, damage * 0.12)
 
     if not compiletime
         createItemEffectTrigger()
@@ -261,7 +267,8 @@ function itemSkullAxe()
         ))
     addRequirement(ITEM_ID_WAR_AXE)
     addRequirement(ITEM_ID_SKULL)
-    addStatBonusAbsolute(Stat.STR, str)
+    onEither() (int factor) ->
+        modStrength(str)
 
     if not compiletime
         createItemEffectTrigger()
@@ -292,7 +299,6 @@ function itemMace()
         ))
     addRequirement(ITEM_ID_SPIKES)
     addRequirement(ITEM_ID_WAR_AXE)
-    addStatBonusAbsolute(Stat.STR, str)
 
     if not compiletime
         let maceBuff = new BuffType(false, DispelLevel.DISPEL)
@@ -302,9 +308,11 @@ function itemMace()
             thisBuff.getCaster().dealDamage(thisBuff.getTarget(), bleedDmg/bleedDuration, ReductionType.PHYSICAL)
         end) )
 
-        addAttackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
-            target.addBuffReduced( source, bleedDuration.toReal(), maceBuff, 1)
-            target.addEffect(Abilities.hydraliskImpact, "chest").destr()
+        onEither() (int factor) ->
+            modStrength(str)
+            attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+                target.addBuffReduced( source, bleedDuration.toReal(), maceBuff, 1)
+                target.addEffect(Abilities.hydraliskImpact, "chest").destr()
 
 constant HAMMER_BUFF_ID = compiletime(createAuraBuff("Break Armor", "This unit's armor is broken; it has reduced armor.", "BTNINV_Hammer_10"))
 constant HAMMER_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, HAMMER_BUFF_ID, "", ""))
@@ -320,8 +328,6 @@ function itemHammerOfMight()
         ))
     addRequirement(ITEM_ID_SPIKES)
     addRequirement(ITEM_ID_HAMMER_OF_STRENGTH)
-    addStatBonusAbsolute(Stat.STR, str)
-
     if not compiletime
         let hammerBuff = new BuffType(false, DispelLevel.DISPEL)
         hammerBuff.setupBuffWithIcon(HAMMER_BUFF_ID, HAMMER_ABILTIY_ID)
@@ -332,12 +338,11 @@ function itemHammerOfMight()
         hammerBuff.addEndFunction((Buff thisBuff) -> (begin
             thisBuff.getTarget().wrapper().modArmorRelative(armorDmg*10)
         end))
-
-        addAttackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
-            target.addBuffReduced( source, armorDuration.toReal(), hammerBuff, 1)
-            target.addEffect(Abilities.bloodElfSpellThiefMISSILE, "chest").destr()
-
-
+        onEither() (int factor) ->
+            modStrength(str)
+            attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+                target.addBuffReduced( source, armorDuration.toReal(), hammerBuff, 1)
+                target.addEffect(Abilities.bloodElfSpellThiefMISSILE, "chest").destr()
 
 function itemRavenSword()
     let voidDmg = 16
@@ -350,11 +355,10 @@ function itemRavenSword()
         ))
     addRequirement(ITEM_ID_DAGGER)
     addRequirement(ITEM_ID_GEM_OF_DARKNESS)
-    addStatBonusAbsolute(Stat.STR, str)
-    addStatBonusAbsolute(Stat.AS, as)
-
-    if not compiletime
-        addAttackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+    onEither() (int factor) ->
+        modStrength(str)
+        modAttackSpeed(as)
+        attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             source.dealDamage(target, voidDmg.toReal() * source.countItemsOfType(ITEM_ID_RAVEN_SWORD) , ReductionType.NONE)
             target.addEffect(Abilities.avengerMissile, "chest").destr()
 
@@ -399,8 +403,6 @@ function itemArmorBreaker()
             activeDmg.toString(), activeArmor.toString(), activeDuration.toString()
         ) )
 
-    addStatBonusAbsolute(Stat.STR, str)
-
     if not compiletime
         let hammerBuff = new BuffType(false, DispelLevel.DISPEL)
         hammerBuff.setupBuffWithIcon(ARMOR_BREAKER_BUFF_ID, ARMOR_BREAKER_ABILITY_ID)
@@ -411,10 +413,11 @@ function itemArmorBreaker()
         hammerBuff.addEndFunction((Buff thisBuff) -> (begin
             thisBuff.getTarget().wrapper().modArmorRelative(armorDmg*10)
         end))
-
-        addAttackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
-            target.addBuffReduced( source, armorDuration.toReal(), hammerBuff, 1)
-            target.addEffect(Abilities.bloodElfSpellThiefMISSILE, "chest").destr()
+        onEither() (int factor) ->
+            modStrength(str)
+            attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+                target.addBuffReduced( source, armorDuration.toReal(), hammerBuff, 1)
+                target.addEffect(Abilities.bloodElfSpellThiefMISSILE, "chest").destr()
 
 
 constant CHILLING_BLADE_BUFF_ID = compiletime(createAuraBuff("Chilling Blade", "This unit was hit by Chilling Blade; it has reduced movement speed.", "BTNMysticDagger"))
@@ -428,8 +431,6 @@ function itemChillingBlade()
     setInfo("Chilling Blade", "+ {0} strength|n|cffffcc00Passive:|r|nAttacks reduce the target's movement speed by {1}% for {2} seconds".format(
             str.toString(), slowAmount.toString(), slowDuration.toString()
         )+ "|n|cffffcc00Active:|r|nasd" )
-
-    addStatBonusAbsolute(Stat.STR, str)
 
     if not compiletime
         let slowBuff = new BuffType(false, DispelLevel.DISPEL)
@@ -445,9 +446,10 @@ function itemChillingBlade()
             wrapper.modMoveSpeedRelative(slowAmount*10)
             wrapper.decBlue()
         end))
-
-        addAttackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
-            target.addBuffReduced( source, slowDuration.toReal(), slowBuff, 1)
+        onEither() (int factor) ->
+            modStrength(str)
+            attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+                target.addBuffReduced( source, slowDuration.toReal(), slowBuff, 1)
 
 @compiletime
 function initItems1()

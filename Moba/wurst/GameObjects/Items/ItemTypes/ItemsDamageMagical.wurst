@@ -15,19 +15,11 @@ function itemBootsOfDarkness()
     addRequirement(ITEM_ID_LIGHT_BOOTS)
     addRequirement(ITEM_ID_GEM_OF_DARKNESS)
 
-    addStatBonusRelative(Stat.INT, intelFactor*10)
-    addPickupFunction(()->(begin
+    onEither() (int factor) ->
+        modIntelligenceRelative(intelFactor*10)
         if isUnique() and hasNot(ITEM_ID_HEAVY_BOOTS) and hasNot(ITEM_ID_LIGHT_BOOTS)
-            getTriggerUnit().wrapper().modMoveSpeed(ms)
-    end))
-
-    addDropFunction(()->(begin
-        if isUnique() and hasNot(ITEM_ID_HEAVY_BOOTS) and hasNot(ITEM_ID_LIGHT_BOOTS)
-            getTriggerUnit().wrapper().modMoveSpeed(-ms)
-    end))
-
-    if not compiletime
-        addAttackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+            modMoveSpeed(ms)
+        attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
             source.dealDamage(target, voidDmg.toReal() * source.countItemsOfType(ITEM_ID_BOOTS_OF_DARKNESS) , ReductionType.NONE)
             target.addEffect(Abilities.avengerMissile, "chest").destr()
 
@@ -38,10 +30,9 @@ function itemMageAmulet()
     let hp = 100
     setupItem(ITEM_ID_MAGE_AMULET, CATEGORY, 825)
     setInfo("Mage Amulet", "+ {0} mana points|n +{1} hit points".format(mp.toString(), hp.toString()))
-    addStatBonusAbsolute(Stat.MP, mp)
-    addStatBonusAbsolute(Stat.HP, hp)
-
-
+    onEither() (int factor) ->
+        modMana(mp)
+        modHealth(hp)
 
 function itemManaRing()
     let mr = 10
@@ -49,7 +40,8 @@ function itemManaRing()
     setupItem(ITEM_ID_MANA_RING, CATEGORY, 500)
     setInfo("Ring of Mana", "+ {0} mana point regeneration per 10 seconds".format(mr.toString()))
 
-    addStatBonusAbsolute(Stat.MR, mr)
+    onEither() (int factor) ->
+        modManaRegen(mr)
 
 
 
@@ -59,7 +51,8 @@ function itemWizardsHat()
     setupItem(ITEM_ID_WIZARDS_HAT, CATEGORY, 400)
     setInfo("Wizard's Hat", "+ {0} intelligence".format(intel.toString()))
     
-    addStatBonusAbsolute(Stat.INT, intel)
+    onEither() (int factor) ->
+        modIntelligence(intel)
 
             
 function itemGemOfMana()
@@ -68,7 +61,8 @@ function itemGemOfMana()
     setupItem(ITEM_ID_GEM_OF_MANA, CATEGORY, 500)
     setInfo("Gem of Mana", "+ {0} mana points".format(mp.toString()))
     
-    addStatBonusAbsolute(Stat.MP, mp)
+    onEither() (int factor) ->
+        modMana(mp)
             
 function itemGemOfDarkness()
     let voidDmg = 12
@@ -76,8 +70,8 @@ function itemGemOfDarkness()
     setupItem(ITEM_ID_GEM_OF_DARKNESS, CATEGORY, 500)
     setInfo("Gem of Darkness", "Attacks deal {0} additional void damage.".format(voidDmg.toString()))
     
-    if not compiletime
-        addAttackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+    onEither() (int factor) ->
+        attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
             source.dealDamage(target, voidDmg.toReal() * source.countItemsOfType(ITEM_ID_GEM_OF_DARKNESS) , ReductionType.NONE)
             target.addEffect(Abilities.avengerMissile, "chest").destr()
 
@@ -103,8 +97,8 @@ function itemVoodooDoll()
     setupItem(ITEM_ID_VOODOO_DOLL, CATEGORY, 600)
     setInfo("Voodoo Doll", "Restores {0} mana points everytime you are attacked.".format(mp.toString()))
 
-    if not compiletime
-        addAttackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+    onEither() (int factor) ->
+        attackHitFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
             target.healMana(target, mp.toReal() * target.countItemsOfType(ITEM_ID_VOODOO_DOLL))
             target.addEffect(Abilities.spiritTouchTarget, "origin").destr()
 
@@ -113,8 +107,9 @@ function itemSpellBook()
     
     setupItem(ITEM_ID_SPELL_BOOK, CATEGORY, 800)
     setInfo("Spell Book", "+ {0} intelligence".format(intel.toString()))
-    
-    addStatBonusAbsolute(Stat.INT, intel)
+
+    onEither() (int factor) ->
+        modIntelligence(intel)
 
 function itemMagicStaff()
     let mana = 7
@@ -122,8 +117,8 @@ function itemMagicStaff()
     setupItem(ITEM_ID_MAGIC_STAFF, CATEGORY, 640)
     setInfo("Magic Staff", "Attacks drain {0} mana from the target.".format(mana.toString()))
     
-    if not compiletime
-        addAttackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+    onEither() (int factor) ->
+        attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             if target.getMana() > 0
                 let manaDrained = min(mana.toReal() * source.countItemsOfType(ITEM_ID_MAGIC_STAFF) , target.getMana())
                 source.healMana(source, manaDrained)
@@ -159,8 +154,9 @@ function itemSkullPendant()
     addRequirement(ITEM_ID_SKULL)
     addRequirement(ITEM_ID_MAGE_AMULET)
     
-    addStatBonusAbsolute(Stat.HP, hp)
-    addStatBonusAbsolute(Stat.MP, mp)
+    onEither() (int factor) ->
+        modHealth(hp)
+        modMana(mp)
 
     if not compiletime
         createItemEffectTrigger()
@@ -187,12 +183,11 @@ function itemVisionWard()
     addRequirement(ITEM_ID_GEM_OF_HEALTH)
     setAbilities('A00D')
     
-    addStatBonusAbsolute(Stat.MP, mp)
-    addStatBonusAbsolute(Stat.HP, hp)
-    addStatBonusAbsolute(Stat.INT, intel)
-
-    if not compiletime
-        addAttackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+    onEither() (int factor) ->
+        modMana(mp)
+        modHealth(hp)
+        modIntelligence(intel)
+        attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             if target.getMana() > 0
                 let manaDrained = min(mana.toReal() * source.countItemsOfType(ITEM_ID_VISION_WARD) , target.getMana())
                 source.healMana(source, manaDrained)
@@ -212,14 +207,14 @@ function itemVoodooMask()
         ))
     addRequirement(ITEM_ID_VOODOO_DOLL)
     addRequirement(ITEM_ID_GEM_OF_DARKNESS)
-
-    addAttackHitFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
-        target.healMana(target, mp.toReal() * target.countItemsOfType(ITEM_ID_VOODOO_MASK))
-        target.addEffect(Abilities.spiritTouchTarget, "origin").destr()
-    addAttackDamageFunction(-1) (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
-        if source.hasItemById(ITEM_ID_VOODOO_MASK) and not target.isType(UNIT_TYPE_STRUCTURE)
-            source.dealDamage(target, voidDmg.toReal() * source.countItemsOfType(ITEM_ID_VOODOO_MASK) , ReductionType.NONE)
-            target.addEffect(Abilities.avengerMissile, "chest").destr()
+    onEither() (int factor) ->
+        attackHitFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+            target.healMana(target, mp.toReal() * target.countItemsOfType(ITEM_ID_VOODOO_MASK))
+            target.addEffect(Abilities.spiritTouchTarget, "origin").destr()
+        attackDamageFunction(-1) (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+            if source.hasItemById(ITEM_ID_VOODOO_MASK) and not target.isType(UNIT_TYPE_STRUCTURE)
+                source.dealDamage(target, voidDmg.toReal() * source.countItemsOfType(ITEM_ID_VOODOO_MASK) , ReductionType.NONE)
+                target.addEffect(Abilities.avengerMissile, "chest").destr()
 
 
 function itemEvilBook()
@@ -232,7 +227,9 @@ function itemEvilBook()
         ))
     addRequirement(ITEM_ID_APPRENTICES_SCROLL)
     addRequirement(ITEM_ID_SPELL_BOOK)
-    addStatBonusAbsolute(Stat.INT, intel)
+
+    onEither() (int factor) ->
+        modIntelligence(intel)
 
     if not compiletime
         createItemEffectTrigger()
@@ -255,8 +252,9 @@ function itemFrostRing()
     addRequirement(ITEM_ID_GEM_OF_MANA)
     addRequirement(ITEM_ID_MANA_RING)
     
-    addStatBonusAbsolute(Stat.MP, mp)
-    addStatBonusAbsolute(Stat.MR, mr)
+    onEither() (int factor) ->
+        modMana(mp)
+        modManaRegen(mr)
 
 function itemScepterOfTheTides()
     let intel = 25
@@ -270,10 +268,9 @@ function itemScepterOfTheTides()
     addRequirement(ITEM_ID_MAGIC_STAFF)
     addRequirement(ITEM_ID_GEM_OF_DARKNESS)
     
-    addStatBonusAbsolute(Stat.INT, intel)
-
-    if not compiletime
-        addAttackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+    onEither() (int factor) ->
+        modIntelligence(intel)
+        attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             let manaDrained = min(manaDrain.toReal() * source.countItemsOfType(ITEM_ID_SCEPTER_OF_THE_TIDES) , target.getMana())
             source.dealDamage(target, voidDmg.toReal() * source.countItemsOfType(ITEM_ID_SCEPTER_OF_THE_TIDES) , ReductionType.NONE)
             source.healMana(source, manaDrained)
@@ -295,11 +292,11 @@ function itemMagmaCrystal()
     addRequirement(ITEM_ID_GEM_OF_HEALTH)
     addRequirement(ITEM_ID_GEM_OF_MANA)
     
-    addStatBonusAbsolute(Stat.MP, mp)
-    addStatBonusAbsolute(Stat.HP, hp)
+    onEither() (int factor) ->
+        modMana(mp)
+        modHealth(hp)
 
-    if not compiletime
-        addAttackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+        attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             source.dealDamage(target, magicDmg.toReal() * source.countItemsOfType(ITEM_ID_MAGMA_CRYSTAL) , ReductionType.MAGIC)
             target.addEffect(Abilities.fireBallMissile, "chest").destr()
 
@@ -315,7 +312,8 @@ function itemCursedMask()
     addRequirement(ITEM_ID_SKULL)
     addRequirement(ITEM_ID_WIZARDS_HAT)
     
-    addStatBonusAbsolute(Stat.INT, intel)
+    onEither() (int factor) ->
+        modIntelligence(intel)
 
     if not compiletime
         createItemEffectTrigger()
@@ -341,8 +339,9 @@ function itemEmeraldPendant()
     addRequirement(ITEM_ID_GEM_OF_HEALTH)
     addRequirement(ITEM_ID_GEM_OF_MANA)
     
-    addStatBonusAbsolute(Stat.HP, hp)
-    addStatBonusAbsolute(Stat.MP, mp)
+    onEither() (int factor) ->
+        modHealth(hp)
+        modMana(mp)
 
     if not compiletime
         createItemEffectTrigger()
@@ -373,15 +372,14 @@ function itemRingOfDarkness()
     addRequirement(ITEM_ID_MANA_RING)
     addRequirement(ITEM_ID_VOODOO_MASK)
     
-    addStatBonusAbsolute(Stat.INT, intel)
-    addStatBonusAbsolute(Stat.MR, mr)
-
-    if not compiletime
-        addAttackHitFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+    onEither() (int factor) ->
+        modIntelligence(intel)
+        modManaRegen(mr)
+        attackHitFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             target.healMana(target, mp.toReal() * target.countItemsOfType(ITEM_ID_RING_OF_DARKNESS))
             target.addEffect(Abilities.spiritTouchTarget, "origin").destr()
     
-        addAttackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+        attackDamageFunction(-1) (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             if source.hasItemById(ITEM_ID_RING_OF_DARKNESS) and not target.isType(UNIT_TYPE_STRUCTURE)
                 source.dealDamage(target, voidDmg.toReal() * source.countItemsOfType(ITEM_ID_RING_OF_DARKNESS) , ReductionType.NONE)
                 target.addEffect(Abilities.avengerMissile, "chest").destr()
@@ -423,18 +421,16 @@ function itemBlessedGoblet()
     addRequirement(ITEM_ID_GEM_OF_HEALTH)
     addRequirement(ITEM_ID_GEM_OF_MANA)
     
-    addStatBonusAbsolute(Stat.MP, mp)
-    addStatBonusAbsolute(Stat.HP, hp)
+    onEither() (int factor) ->
+        modMana(mp)
+        modHealth(hp)
+        if isUnique()
+            if factor == 1
+                blessedHeroes.addUnit(getItemUnit())
+            else
+                blessedHeroes.removeUnit(getItemUnit())
 
     
-    addPickupFunction(() -> (begin
-        if isUnique()
-            blessedHeroes.addUnit(getTriggerUnit())
-    end))
-    addDropFunction(() -> (begin
-        if isUnique()
-            blessedHeroes.removeUnit(getTriggerUnit())
-    end))
 
     if not compiletime
         createItemEffectTrigger()
@@ -462,23 +458,24 @@ function itemWandOfDeath()
     addRequirement(ITEM_ID_MAGIC_STAFF)
     addRequirement(ITEM_ID_GEM_OF_DARKNESS)
     
-    addStatBonusAbsolute(Stat.INT, intel)
+    onEither() (int factor) ->
+        modIntelligence(intel)
 
-    addAnyDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
-        let wp = damage * 0.02
-        let wrapper = target.wrapper()
-        wrapper.modWillpowerRelative((-wp*1000).toInt())
-        doAfter(10, () -> (begin
-            if target.isAlive() or target.isType(UNIT_TYPE_HERO)
-                wrapper.modWillpowerRelative((wp*1000).toInt() )
-        end))
-    addAttackDamageFunction(-1) (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
-        let manaDrained = min(manaDrain.toReal() * source.countItemsOfType(ITEM_ID_WAND_OF_DEATH) , target.getMana())
-        source.dealDamage(target, voidDmg.toReal() * source.countItemsOfType(ITEM_ID_WAND_OF_DEATH) , ReductionType.NONE)
-        source.healMana(source, manaDrained)
-        source.damageMana(target, manaDrained, ReductionType.NONE)
-        target.addEffect(Abilities.avengerMissile, "chest").destr()
-        target.addEffect(Abilities.arcaneTowerAttack, "chest").destr()
+        anyDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
+            let wp = damage * 0.02
+            let wrapper = target.wrapper()
+            wrapper.modWillpowerFraction((-wp*1000).toInt())
+            doAfter(10, () -> (begin
+                if target.isAlive() or target.isType(UNIT_TYPE_HERO)
+                    wrapper.modWillpowerFraction((wp*1000).toInt() )
+            end))
+        attackDamageFunction(-1) (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+            let manaDrained = min(manaDrain.toReal() * source.countItemsOfType(ITEM_ID_WAND_OF_DEATH) , target.getMana())
+            source.dealDamage(target, voidDmg.toReal() * source.countItemsOfType(ITEM_ID_WAND_OF_DEATH) , ReductionType.NONE)
+            source.healMana(source, manaDrained)
+            source.damageMana(target, manaDrained, ReductionType.NONE)
+            target.addEffect(Abilities.avengerMissile, "chest").destr()
+            target.addEffect(Abilities.arcaneTowerAttack, "chest").destr()
 
 
             
@@ -497,12 +494,13 @@ function itemWandOfBlood()
     addRequirement(ITEM_ID_RING_OF_HEALTH)
     addRequirement(ITEM_ID_GEM_OF_HEALTH)
     
-    addStatBonusAbsolute(Stat.INT, intel)
-    addStatBonusAbsolute(Stat.HR, hr)
-    addStatBonusAbsolute(Stat.HP, hp)
+    onEither() (int factor) ->
+        modIntelligence(intel)
+        modHealth(hp)
+        modHealthRegen(hr)
 
-    addAnyDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
-        source.healHP(source, damage * 0.08)
+        anyDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
+            source.healHP(source, damage * 0.08)
 
             
 function itemArcaneBlade()
@@ -518,11 +516,11 @@ function itemArcaneBlade()
     addRequirement(ITEM_ID_RAVEN_SWORD)
     addRequirement(ITEM_ID_GEM_OF_MANA)
     
-    addStatBonusAbsolute(Stat.AS, as)
-    addStatBonusAbsolute(Stat.MP, mp)
+    onEither() (int factor) ->
+        modAttackSpeed(as)
+        modMana(mp)
 
-    if not compiletime
-        addAttackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+        attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             source.dealDamage(target, (dmg + source.getMana() * manaFactor/100) , ReductionType.MAGIC)
             target.addEffect(Abilities.farseerMissile, "chest").destr()
 
@@ -542,14 +540,15 @@ function itemVampiricGoblet()
     addRequirement(ITEM_ID_SKULL_PENDANT)
     addRequirement(ITEM_ID_CURSED_MASK)
     
-    addStatBonusAbsolute(Stat.INT, intel)
-    addStatBonusAbsolute(Stat.HP, hp)
-    addStatBonusAbsolute(Stat.MP, mp)
+    onEither() (int factor) ->
+        modMana(mp)
+        modHealth(hp)
+        modIntelligence(intel)
 
-    addAnyDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
-        if target.isType(UNIT_TYPE_HERO)
-            source.healHP(source, damage * 0.2)
-            source.healMana(source, damage * 0.15)
+        anyDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
+            if target.isType(UNIT_TYPE_HERO)
+                source.healHP(source, damage * 0.2)
+                source.healMana(source, damage * 0.15)
 
     if not compiletime
         createItemEffectTrigger()
@@ -573,17 +572,10 @@ function itemScrollOfConjuration()
     addRequirement(ITEM_ID_APPRENTICES_SCROLL)
     addRequirement(ITEM_ID_EVIL_BOOK)
     addRequirement(ITEM_ID_SPELL_BOOK)
-    
-    addStatBonusAbsolute(Stat.INT, intel)
-
-    addPickupFunction(() -> (begin
+    onEither() (int factor) ->
+        modIntelligence(intel)
         if isUnique()
-            getTriggerUnit().wrapper().modIntelligenceRelative(intelFactor*10)
-    end))
-    addDropFunction(() -> (begin
-        if isUnique()
-            getTriggerUnit().wrapper().modIntelligenceRelative(-intelFactor*10)
-    end))
+            getItemUnitWrapper().modIntelligenceRelative(intelFactor*10*factor)
 
     if not compiletime
         createItemEffectTrigger()
@@ -610,10 +602,11 @@ function itemBracerOfPower()
     addRequirement(ITEM_ID_GEM_OF_HEALTH)
     addRequirement(ITEM_ID_RING_OF_HEALTH)
     
-    addStatBonusAbsolute(Stat.HP, hp)
-    addStatBonusAbsolute(Stat.MP, mp)
-    addStatBonusAbsolute(Stat.HR, hr)
-    addStatBonusAbsolute(Stat.MR, mr)
+    onEither() (int factor) ->
+        modMana(mp)
+        modHealth(hp)
+        modManaRegen(mr)
+        modHealthRegen(hr)
 
 
 @compiletime

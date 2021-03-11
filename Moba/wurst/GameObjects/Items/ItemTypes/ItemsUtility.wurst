@@ -9,15 +9,10 @@ function itemLightBoots()
     
     setupItem(ITEM_ID_LIGHT_BOOTS, CATEGORY, 500)
     setInfo("Light Boots", "+ {0} movement speed|nMovement speed bonus from boots does not stack.".format(ms.toString()))
-    addPickupFunction(()->(begin
+    onEither() (int factor) ->
         if isUnique() and hasNot(ITEM_ID_HEAVY_BOOTS) and hasNot(ITEM_ID_BOOTS_OF_DARKNESS)
-            getTriggerUnit().wrapper().modMoveSpeed(ms)
-    end))
+            modMoveSpeed(ms)
 
-    addDropFunction(()->(begin
-        if isUnique() and hasNot(ITEM_ID_HEAVY_BOOTS) and hasNot(ITEM_ID_BOOTS_OF_DARKNESS)
-            getTriggerUnit().wrapper().modMoveSpeed(-ms)
-    end))
 
 constant WAR_DRUM_BUFF_ID = compiletime(createAuraBuff("War Drum", "This unit has increased attack and movement speed.", "BTNTribalDrumOfWar"))
 constant WAR_DRUM_ABILTIY_ID = compiletime(createPositiveBuffAbility(1, WAR_DRUM_BUFF_ID, Abilities.generalAuraTarget, ""))
@@ -55,14 +50,13 @@ function itemWarDrum()
         ))
     addRequirement(ITEM_ID_GLOVES_OF_HASTE)
     addRequirement(ITEM_ID_LIGHT_BOOTS)
-    addPickupFunction(() -> (begin
+    onEither() (int factor) ->
         if isUnique() and hasNot(ITEM_ID_WAR_HORN)
-            auraHeroes.addUnit(getTriggerUnit())
-    end))
-    addDropFunction(() -> (begin
-        if isUnique() and hasNot(ITEM_ID_WAR_HORN)
-            auraHeroes.removeUnit(getTriggerUnit())
-    end))
+            if factor == 1
+                auraHeroes.addUnit(getItemUnit())
+            else
+                auraHeroes.removeUnit(getItemUnit())
+    
     if not compiletime
         BUFF_WAR_DRUM.setupBuffWithIcon(WAR_DRUM_BUFF_ID, WAR_DRUM_ABILTIY_ID)
         BUFF_WAR_DRUM.addFirstFunction((Buff thisBuff) -> (begin
@@ -96,15 +90,19 @@ function itemWarHorn()
     addRequirement(ITEM_ID_HAMMER_OF_STRENGTH)
     addRequirement(ITEM_ID_WAR_AXE)
     addRequirement(ITEM_ID_BOW)
-    addStatBonusAbsolute(Stat.STR, str)
-    addPickupFunction(() -> (begin
+
+    onEither() (int factor) ->
+        modStrength(str)
         if isUnique() and hasNot(ITEM_ID_WAR_DRUM)
-            auraHeroes.addUnit(getTriggerUnit())
-    end))
-    addDropFunction(() -> (begin
-        if isUnique() and hasNot(ITEM_ID_WAR_DRUM)
-            auraHeroes.removeUnit(getTriggerUnit())
-    end))
+            if factor == 1
+                auraHeroes.addUnit(getItemUnit())
+            else
+                auraHeroes.removeUnit(getItemUnit())
+
+        attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+            if not target.isType(UNIT_TYPE_HERO)
+            let dmg = source.countItemsOfType(ITEM_ID_WAR_HORN) * unitDmg
+            source.dealDamage(target, dmg.toReal(), ReductionType.PHYSICAL)
 
     if not compiletime
         BUFF_WAR_HORN.setupBuffWithIcon(WAR_HORN_BUFF_ID, WAR_HORN_ABILTIY_ID)
@@ -118,10 +116,7 @@ function itemWarHorn()
             target.wrapper().modStrengthRelative(-adBonus*10)
         end))
 
-        addAttackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
-            if not target.isType(UNIT_TYPE_HERO)
-            let dmg = source.countItemsOfType(ITEM_ID_WAR_HORN) * unitDmg
-            source.dealDamage(target, dmg.toReal(), ReductionType.PHYSICAL)
+
 
 @compiletime
 function initItems1()
