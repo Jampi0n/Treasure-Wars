@@ -44,6 +44,9 @@ This is especially useful when a lot of damage modifiers are used, that only rar
 @configurable public function modDamage(unit _source, unit _target, DamageEventUnit _sourceWrapper, DamageEventUnit _targetWrapper, int _sourceTypeId, int _targetTypeId, real damage, bool _attack, bool _arrow, bool _alternate) returns real
     return damage
 
+@configurable public function filterDamageEvent(unit _source, unit _target) returns bool
+    return true
+
 class DamageFunctionListElement
     DamageFunction f
     DamageFunctionListElement next
@@ -226,6 +229,8 @@ public abstract class DamageEvent
     protected static function onDamage()
         let source = GetEventDamageSource()
         let target = GetTriggerUnit()
+        if not filterDamageEvent(source, target)
+            return
         real damage = GetEventDamage()
         bool attack = false
         bool alternate = false

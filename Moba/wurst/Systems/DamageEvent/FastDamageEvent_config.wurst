@@ -2,6 +2,7 @@ package FastDamageEvent_config
 
 import FastDamageEvent
 import ModDamage
+import TeamUtil
 
 @config public var ON_HIT_ABILITY = 'A008'
 @config public var ON_HIT_ABILITY_ALTERNATE = 'A00I'
@@ -12,3 +13,10 @@ import ModDamage
 
 @config public function modDamage(unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, int sourceTypeId, int targetTypeId, real damage, bool attack, bool arrow, bool alternate) returns real
     return ModDamage.modDamage(source, target, sourceWrapper, targetWrapper, sourceTypeId, targetTypeId, damage, attack, arrow, alternate)
+
+/*
+Only process damage events, if at least one hero player participates.
+This removes processing of army vs army. Army never fights against creeps.
+*/
+@config public function filterDamageEvent(unit source, unit target) returns bool
+    return Players.isHero(source.getOwner().getId()) or Players.isHero(target.getOwner().getId())
