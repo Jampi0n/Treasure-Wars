@@ -16,6 +16,7 @@ import initlater PlayerControl
 import initlater UnitLib
 import initlater TeamUtil
 import initlater IHeroAI
+import FastDamageEvent
 
 enum AIState
     ATTACK //attack moves towards the enemy base, focus is on pushing/killing minions
@@ -393,6 +394,9 @@ public class HeroAIImpl implements IHeroAI
                 this.buyItems()
                 this.selectSkills()
         end))
+
+        DamageEventUnit.fromUnit(this.heroUnit).anyHit.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
+            this.onDamage(damage)
         
     protected function changeState(AIState newState)
         if this.state != newState
@@ -480,7 +484,7 @@ public class HeroAIImpl implements IHeroAI
             this.teamFight.removeAI(this)
             this.teamFight = null
 
-    override function onDamage(real damage)
+    private function onDamage(real damage)
         this.damageCurrent += damage
 
     protected function retreatTemporarily(int counter, boolean useAI)

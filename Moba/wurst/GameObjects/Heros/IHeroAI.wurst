@@ -165,7 +165,6 @@ public interface IHeroAI
     function getTeamFightTarget() returns unit
     function attackedByTower()
     function buyItems()
-    function onDamage(real damage)
     function issue(string order) returns boolean
     function issue(string order, vec2 target) returns boolean
     function issue(string order, widget targetWidget) returns boolean

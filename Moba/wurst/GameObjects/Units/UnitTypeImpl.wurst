@@ -98,16 +98,14 @@ function onUnitDeath()
     let dyingType = UnitTypeImpl.getUnitType(dyingUnit.getTypeId())
 
     if dyingType != null
-
-        
-        let killingUnit = GetKillingUnit()
-        let killingId = killingUnit.getOwner().getId()
+        // army unit dies
         let dyingId = dyingUnit.getOwner().getId()
         let dyingTeam = Players.team(dyingId)
-        let pos = dyingUnit.getPos()
-
-        // army unit dies
         if dyingTeam == TEAM_1 or dyingTeam == TEAM_2
+            let killingUnit = GetKillingUnit()
+            let killingId = killingUnit.getOwner().getId()
+            let pos = dyingUnit.getPos()
+        
             let bounty = dyingType.getBounty()
             let xp = dyingType.getPowerLevel() * 8.0
 
