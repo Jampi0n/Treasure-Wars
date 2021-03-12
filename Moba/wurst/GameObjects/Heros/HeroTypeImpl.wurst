@@ -9,13 +9,23 @@ import LinkedList
 import RecommendedItems
 import Preloader
 import Stats
-import initlater DynamicTooltips
+import DynamicTooltips
 import IHero
-import initlater PickHero
 import IUnit
+import ErrorHandling
+import ClosureTimers
 
 int array SLOT_ID
 string array BUTTON_ORDER_STRING
+
+int array tavernButtons
+HashMap<int, IHeroType> buttonToHeroType
+
+public function getTavernButton(int index) returns int
+    return tavernButtons[index]
+
+public function getHeroFromButton(int index) returns IHeroType
+    return buttonToHeroType.get(index)
 
 
 public class HeroTypeImpl implements IHeroType
@@ -320,8 +330,50 @@ public class HeroType
     static function getAbilityOffset(int heroId) returns int
         return HeroTypeImpl.getAbilityOffset(heroId)
 
+public function addButtonToTavern(int heroId, int buttonPos, IHeroType heroType, int tavernId)
+    let buttonId = HeroType.getAbilityOffset(heroId) + 66 //B
+    let q = heroType.getAbilityId(AbilitySlot.Q)
+    let w = heroType.getAbilityId(AbilitySlot.W)
+    let e = heroType.getAbilityId(AbilitySlot.E)
+    let r = heroType.getAbilityId(AbilitySlot.R)
+    let passive = heroType.getAbilityId(AbilitySlot.PASSIVE)
+    let nameQ = "(Q) |cffffcc00" + GetObjectName(q) + "|r"
+    let nameW = "(W) |cffffcc00" + GetObjectName(w) + "|r"
+    let nameE = "(E) |cffffcc00" + GetObjectName(e) + "|r"
+    let nameR = "(R) |cffffcc00" + GetObjectName(r) + "|r"
+    let namePassive = "(Passive) |cffffcc00" + GetObjectName(passive) + "|r"
+    let tooltipQ = DynamicTooltip.getDynamicTooltip(q).getSummary()
+    let tooltipW = DynamicTooltip.getDynamicTooltip(w).getSummary()
+    let tooltipE = DynamicTooltip.getDynamicTooltip(e).getSummary()
+    let tooltipR = DynamicTooltip.getDynamicTooltip(r).getSummary()
+    let tooltipPassive = DynamicTooltip.getDynamicTooltip(passive).getSummary()
+    if tavernButtons[12 * tavernId + buttonPos] != -1
+        error("tavernButtons["+(12 * tavernId + buttonPos).toString()+"] = " + tavernButtons[12 * tavernId + buttonPos].toString())
+    else
+        tavernButtons[12 * tavernId + buttonPos] = buttonId
+        buttonToHeroType.put(HeroType.getAbilityOffset(heroId) + 66, heroType)
+        BlzSetAbilityTooltip(buttonId, GetObjectName(heroType.getUnitId()), 0)
+        let tooltip = namePassive + "|n" + tooltipPassive + "|n|n" + 
+        nameQ + "|n" + tooltipQ + "|n|n" + 
+        nameW + "|n" + tooltipW + "|n|n" + 
+        nameE + "|n" + tooltipE + "|n|n" + 
+        nameR + "|n" + tooltipR
+
+        BlzSetAbilityExtendedTooltip(buttonId, tooltip, 0)
+        //BlzSetAbilityExtendedTooltip(buttonId, tooltip, 1)
+        let compareTooltip = BlzGetAbilityExtendedTooltip(buttonId, 0)
+        doAfter(0) () ->   
+            //print("T=" + tooltip)
+            //print("C=" + compareTooltip)
+            if compareTooltip != tooltip
+                print("error")
+                error("Tooltip for hero " + GetObjectName(heroType.getUnitId()) + " was not correctly generated.")
+
 init
-    initBeforeHeroType()
+    buttonToHeroType = new HashMap<int, IHeroType>()
+    for i = 0 to 47
+        tavernButtons[i] = -1
+
     SLOT_ID[AbilitySlot.Q castTo int] = 81
     SLOT_ID[AbilitySlot.W castTo int] = 87
     SLOT_ID[AbilitySlot.E castTo int] = 69

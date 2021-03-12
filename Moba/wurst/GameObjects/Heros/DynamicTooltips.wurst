@@ -2,7 +2,7 @@ package DynamicTooltips
 
 import UtilityFunctions
 import LinkedList
-import UnitLib
+//import UnitLib
 import AbilityObjEditing
 import HashMap
 import HeroObjectEditing
@@ -237,17 +237,17 @@ public class DynamicTooltip
         return evaluateLearnStringLevel(level, 100, 100, true)
 
     function evaluateLearnStringLevel(unit whichUnit) returns string
-        return evaluateLearnStringLevel(whichUnit.getAbilityLevel(this.abilityTypeId), whichUnit.getStr(), whichUnit.getInt(), false)
+        return evaluateLearnStringLevel(whichUnit.getAbilityLevel(this.abilityTypeId), whichUnit.getStr(true), whichUnit.getInt(true), false)
 
     function evaluateLearnStringLevel(unit whichUnit, int level) returns string
-        return evaluateLearnStringLevel(level, whichUnit.getStr(), whichUnit.getInt(), false)
+        return evaluateLearnStringLevel(level, whichUnit.getStr(true), whichUnit.getInt(true), false)
 
 
     function evaluateLearnString() returns string
         return evaluateLearnString(100, 100, true)
 
     function evaluateLearnString(unit whichUnit) returns string
-        return evaluateLearnString(whichUnit.getStr(), whichUnit.getInt(), false)
+        return evaluateLearnString(whichUnit.getStr(true), whichUnit.getInt(true), false)
 
 
     function evaluateNormalString(int level) returns string
@@ -255,17 +255,17 @@ public class DynamicTooltip
     
     function evaluateNormalString(unit whichUnit) returns string
         let level = whichUnit.getAbilityLevel(this.abilityTypeId)
-        return evaluateNormalString(level, whichUnit.getStr(), whichUnit.getInt(), BlzGetUnitAbilityCooldown(whichUnit, this.abilityTypeId, level - 1), false)
+        return evaluateNormalString(level, whichUnit.getStr(true), whichUnit.getInt(true), BlzGetUnitAbilityCooldown(whichUnit, this.abilityTypeId, level - 1), false)
 
     function evaluateNormalString(unit whichUnit, int level) returns string
-        return evaluateNormalString(level, whichUnit.getStr(), whichUnit.getInt(), BlzGetUnitAbilityCooldown(whichUnit, this.abilityTypeId, level - 1), false)
+        return evaluateNormalString(level, whichUnit.getStr(true), whichUnit.getInt(true), BlzGetUnitAbilityCooldown(whichUnit, this.abilityTypeId, level - 1), false)
 
     function evaluateTurnOffString(int level) returns string
         return evaluateTurnOffString(level, 100, 100, -1, true)
 
     function evaluateTurnOffString(unit whichUnit) returns string
         let level = whichUnit.getAbilityLevel(this.abilityTypeId)
-        return evaluateTurnOffString(level, whichUnit.getStr(), whichUnit.getInt(), BlzGetUnitAbilityCooldown(whichUnit, this.abilityTypeId, level - 1), false)
+        return evaluateTurnOffString(level, whichUnit.getStr(true), whichUnit.getInt(true), BlzGetUnitAbilityCooldown(whichUnit, this.abilityTypeId, level - 1), false)
 
     function evaluateTurnOffString(unit whichUnit, int level) returns string
-        return evaluateTurnOffString(level, whichUnit.getStr(), whichUnit.getInt(), BlzGetUnitAbilityCooldown(whichUnit, this.abilityTypeId, level - 1), false)
+        return evaluateTurnOffString(level, whichUnit.getStr(true), whichUnit.getInt(true), BlzGetUnitAbilityCooldown(whichUnit, this.abilityTypeId, level - 1), false)

@@ -7,7 +7,6 @@ import ShopGUI
 import ShopManager
 import ErrorHandling
 import HeroAIImpl
-import DynamicTooltips
 import TeamUtil
 import Constants
 import PlayerControl
@@ -34,8 +33,6 @@ unit array tavern
 unit array patron
 fogmodifier array tavernVision
 bool array playerHasPicked
-int array tavernButtons
-HashMap<int, IHeroType> buttonToHeroType
 
 IHeroType array remainingHeroTypes
 int remainingHeroTypesCount
@@ -171,7 +168,7 @@ function allPick()
     tavern[3].setColor(PLAYER_COLOR_GREEN)
 
     for i = 0 to 47
-        tavern[i div 12].addAbility(tavernButtons[i])
+        tavern[i div 12].addAbility(getTavernButton(i))
     
 
 
@@ -227,7 +224,7 @@ function onClick()
                 break
 
         triggerTavern.removeAbility(clickedButtonId)
-        createUnit(triggerPlayer, buttonToHeroType.get(clickedButtonId).getUnitId() , tavern[0].getPos(), angle(0))
+        createUnit(triggerPlayer, getHeroFromButton(clickedButtonId).getUnitId() , tavern[0].getPos(), angle(0))
 
         locked = false
 
@@ -341,49 +338,7 @@ function startPickMode()
     print("|cffffcc00Available modes are all random (-ar) and all pick (-ap).|r")
 
 
-public function addButtonToTavern(int heroId, int buttonPos, IHeroType heroType, int tavernId)
-    let buttonId = HeroType.getAbilityOffset(heroId) + 66 //B
-    let q = heroType.getAbilityId(AbilitySlot.Q)
-    let w = heroType.getAbilityId(AbilitySlot.W)
-    let e = heroType.getAbilityId(AbilitySlot.E)
-    let r = heroType.getAbilityId(AbilitySlot.R)
-    let passive = heroType.getAbilityId(AbilitySlot.PASSIVE)
-    let nameQ = "(Q) |cffffcc00" + GetObjectName(q) + "|r"
-    let nameW = "(W) |cffffcc00" + GetObjectName(w) + "|r"
-    let nameE = "(E) |cffffcc00" + GetObjectName(e) + "|r"
-    let nameR = "(R) |cffffcc00" + GetObjectName(r) + "|r"
-    let namePassive = "(Passive) |cffffcc00" + GetObjectName(passive) + "|r"
-    let tooltipQ = DynamicTooltip.getDynamicTooltip(q).getSummary()
-    let tooltipW = DynamicTooltip.getDynamicTooltip(w).getSummary()
-    let tooltipE = DynamicTooltip.getDynamicTooltip(e).getSummary()
-    let tooltipR = DynamicTooltip.getDynamicTooltip(r).getSummary()
-    let tooltipPassive = DynamicTooltip.getDynamicTooltip(passive).getSummary()
-    if tavernButtons[12 * tavernId + buttonPos] != -1
-        error("tavernButtons["+(12 * tavernId + buttonPos).toString()+"] = " + tavernButtons[12 * tavernId + buttonPos].toString())
-    else
-        tavernButtons[12 * tavernId + buttonPos] = buttonId
-        buttonToHeroType.put(HeroType.getAbilityOffset(heroId) + 66, heroType)
-        BlzSetAbilityTooltip(buttonId, GetObjectName(heroType.getUnitId()), 0)
-        let tooltip = namePassive + "|n" + tooltipPassive + "|n|n" + 
-        nameQ + "|n" + tooltipQ + "|n|n" + 
-        nameW + "|n" + tooltipW + "|n|n" + 
-        nameE + "|n" + tooltipE + "|n|n" + 
-        nameR + "|n" + tooltipR
 
-        BlzSetAbilityExtendedTooltip(buttonId, tooltip, 0)
-        //BlzSetAbilityExtendedTooltip(buttonId, tooltip, 1)
-        let compareTooltip = BlzGetAbilityExtendedTooltip(buttonId, 0)
-        doAfter(0) () ->   
-            //print("T=" + tooltip)
-            //print("C=" + compareTooltip)
-            if compareTooltip != tooltip
-                print("error")
-                error("Tooltip for hero " + GetObjectName(heroType.getUnitId()) + " was not correctly generated.")
-
-public function initBeforeHeroType()
-    buttonToHeroType = new HashMap<int, IHeroType>()
-    for i = 0 to 47
-        tavernButtons[i] = -1
 
 init
     doAfter(0, ()-> startPickMode())
