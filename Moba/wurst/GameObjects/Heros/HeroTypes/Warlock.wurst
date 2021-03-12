@@ -239,7 +239,7 @@ function castFireBolt()
     end) )
     ..setHitFunction((Missile missile, unit target) -> (begin
         let missileCaster = missile.getOwner()
-        missileCaster.dealDamage(Missile.getMissileTarget(), (FIREBOLT_DAMAGE[level-1]).bonus(missileCaster.getInt(), FIREBOLT_DAMAGE_BONUS), ReductionType.MAGIC)
+        missileCaster.dealDamage(Missile.getMissileTarget(), (FIREBOLT_DAMAGE[level-1]).bonus(missileCaster.getHeroInt(), FIREBOLT_DAMAGE_BONUS), ReductionType.MAGIC)
         missile.destr()
 
     end) )
@@ -255,7 +255,7 @@ function castInfernalMeteor()
         let nearby = CreateGroup()
         nearby.enumUnitsInRange(pos, METEOR_AOE[level-1])
     
-        let dmg = METEOR_DAMAGE[level - 1].bonus(caster.getInt(), METEOR_DAMAGE_BONUS)
+        let dmg = METEOR_DAMAGE[level - 1].bonus(caster.getHeroInt(), METEOR_DAMAGE_BONUS)
 
         while(not nearby.isEmpty())
             let target = FirstOfGroup(nearby)
@@ -365,7 +365,7 @@ function initHeroType()
             let nearby = CreateGroup()
             nearby.enumUnitsInRange(pos, RAY_OF_DEATH_AFTER_AOE)
 
-            let dmg = RAY_OF_DEATH_AFTER_DAMAGE[caster.getAbilityLevel(ABILITY_RAY_OF_DEATH)-1].bonus(caster.getInt(), RAY_OF_DEATH_AFTER_DAMAGE_BONUS)
+            let dmg = RAY_OF_DEATH_AFTER_DAMAGE[caster.getAbilityLevel(ABILITY_RAY_OF_DEATH)-1].bonus(caster.getHeroInt(), RAY_OF_DEATH_AFTER_DAMAGE_BONUS)
 
             while(not nearby.isEmpty())
                 let target = FirstOfGroup(nearby)
@@ -388,7 +388,7 @@ function initHeroType()
             if not caster.getCurrentOrder() == OrderId("magicleash") or not target.isTargetable(caster.getOwner(), false, true)
                 whichBuff.dispel()
             else
-                caster.dealDamage(target, 0.1 * RAY_OF_DEATH_DAMAGE[caster.getAbilityLevel(ABILITY_RAY_OF_DEATH)-1].bonus(caster.getInt(), RAY_OF_DEATH_DAMAGE_BONUS), ReductionType.MAGIC)
+                caster.dealDamage(target, 0.1 * RAY_OF_DEATH_DAMAGE[caster.getAbilityLevel(ABILITY_RAY_OF_DEATH)-1].bonus(caster.getHeroInt(), RAY_OF_DEATH_DAMAGE_BONUS), ReductionType.MAGIC)
                 target.addEffect(Abilities.illidanMissile, "chest").destr()
         end))
 
@@ -400,7 +400,7 @@ function initHeroType()
             let target = whichBuff.getTarget()
             let caster = whichBuff.getCaster()
             if target.isTargetable(caster.getOwner(), false, true)
-                caster.dealDamage(target, 0.5 * SOUL_BURN_DAMAGE[caster.getAbilityLevel(ABILITY_SOUL_BURN)-1].bonus(caster.getInt(), SOUL_BURN_DAMAGE_BONUS), ReductionType.MAGIC)
+                caster.dealDamage(target, 0.5 * SOUL_BURN_DAMAGE[caster.getAbilityLevel(ABILITY_SOUL_BURN)-1].bonus(caster.getHeroInt(), SOUL_BURN_DAMAGE_BONUS), ReductionType.MAGIC)
         end))
 
     CreateTrigger()

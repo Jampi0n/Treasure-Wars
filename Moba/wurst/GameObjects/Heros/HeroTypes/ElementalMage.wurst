@@ -253,7 +253,7 @@ function onAttack(unit attacker, unit target, boolean _advanced)
             stacks = 0
             target.addBuffReduced(attacker, MARK_STUN, STUNNED, 1).setDispelLevel(DispelLevel.DISPEL)
         mark.setData(stacks)
-        attacker.dealDamage(target, MARK_DMG[markLevel-1].bonus(attacker.getInt(), MARK_DMG_BONUS), ReductionType.MAGIC)
+        attacker.dealDamage(target, MARK_DMG[markLevel-1].bonus(attacker.getHeroInt(), MARK_DMG_BONUS), ReductionType.MAGIC)
 
 
 function castFrostBolt()
@@ -272,7 +272,7 @@ function castFrostBolt()
     end) )
     ..setHitFunction((Missile missile, unit target) -> (begin
         let missileCaster = missile.getOwner()
-        missileCaster.dealDamage(Missile.getMissileTarget(), (FROST_BOLT_DAMAGE[level-1]).bonus(missileCaster.getInt(), FROST_BOLT_DAMAGE_BONUS), ReductionType.MAGIC)
+        missileCaster.dealDamage(Missile.getMissileTarget(), (FROST_BOLT_DAMAGE[level-1]).bonus(missileCaster.getHeroInt(), FROST_BOLT_DAMAGE_BONUS), ReductionType.MAGIC)
         Missile.getMissileTarget().addBuffReduced(missileCaster, FROST_BOLT_DURATION[level-1], buffFrostBolt, level)
     end) )
         
@@ -285,7 +285,7 @@ function castFireBlink()
 
     nearby.enumUnitsInRange(vec2(GetSpellTargetX(),GetSpellTargetY()), FIRE_BLINK_AOE)
 
-    let dmg = (FIRE_BLINK_DAMAGE[level-1]).bonus(caster.getInt(), FIRE_BLINK_DAMAGE_BONUS)
+    let dmg = (FIRE_BLINK_DAMAGE[level-1]).bonus(caster.getHeroInt(), FIRE_BLINK_DAMAGE_BONUS)
     while(not nearby.isEmpty())
         let target = FirstOfGroup(nearby)
         nearby.removeUnit(target)
@@ -330,8 +330,8 @@ function castFrostAndFlame()
             destroy fx
             
 
-        let dmg = (FF_IMPACT_DAMAGE[level-1]).bonus(caster.getInt(), FF_IMPACT_DAMAGE_BONUS)
-        let dur = FF_BUFF_DURATION[level-1].bonus(caster.getInt(), FF_BUFF_DURATION_BONUS)
+        let dmg = (FF_IMPACT_DAMAGE[level-1]).bonus(caster.getHeroInt(), FF_IMPACT_DAMAGE_BONUS)
+        let dur = FF_BUFF_DURATION[level-1].bonus(caster.getHeroInt(), FF_BUFF_DURATION_BONUS)
         while(not nearby.isEmpty())
             let target = FirstOfGroup(nearby)
             nearby.removeUnit(target)
@@ -415,7 +415,7 @@ function initHeroType()
             let caster = whichBuff.getCaster()
             let target = whichBuff.getTarget()
             if target.isTargetable(caster.getOwner(), false, true)
-                caster.dealDamage(target, 0.25 * FF_DOT[whichBuff.getLevel()-1].bonus(caster.getInt(), FF_DOT_BONUS), ReductionType.MAGIC)
+                caster.dealDamage(target, 0.25 * FF_DOT[whichBuff.getLevel()-1].bonus(caster.getHeroInt(), FF_DOT_BONUS), ReductionType.MAGIC)
         end))
 
         buffFrostBolt = new BuffType(false, DispelLevel.DISPEL)

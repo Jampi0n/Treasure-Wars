@@ -959,8 +959,8 @@ function determineWinChance(int team, vec2 pos) returns real
 */
 function determineHeroOffensiveStrength(unit hero) returns real
     let mana = hero.getMana()/hero.getMaxMana()
-    let str = hero.getStr()
-    let intel = hero.getInt()
+    let str = hero.getHeroStr()
+    let intel = hero.getHeroInt()
     let lvl = hero.getLevel() + 5
 
     return (str + str * mana * (lvl/30) + 2 * intel * mana * (lvl/30)) / 4 //0-100 (standard values, can be higher)
@@ -972,7 +972,7 @@ function determineHeroOffensiveStrength(unit hero) returns real
 function determineHeroDefensiveStrength(unit hero) returns real
     let hp = hero.getHP()
     let armor = hero.getArmor()
-    let wp = hero.getWp()
+    let wp = hero.getHeroWp()
     bool inBase
     if hero.getOwner().getId() <= Teams.last1()
         inBase = gg_rct_GreenHeroTower.contains(hero.getPos())

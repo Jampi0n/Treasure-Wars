@@ -46,29 +46,23 @@ public function unit.isMovable() returns boolean
         return false
     return true
 
-public function unit.getStr() returns int
-    int ret
-    if this.isType(UNIT_TYPE_HERO)
-        ret = GetHeroStr(this, true)
-    else
-        ret = this.wrapper().getStrength()
-    return ret
+public function unit.getUnitStr() returns int
+    return this.wrapper().getStrength()
 
-public function unit.getWp() returns int
-    int ret
-    if this.isType(UNIT_TYPE_HERO)
-        ret = GetHeroAgi(this, true)
-    else
-        ret = this.wrapper().getWillpower()
-    return ret
+public function unit.getUnitWp() returns int
+    return this.wrapper().getWillpower()
 
-public function unit.getInt() returns int
-    int ret
-    if this.isType(UNIT_TYPE_HERO)
-        ret = GetHeroInt(this, true)
-    else
-        ret = this.wrapper().getIntelligence()
-    return ret
+public function unit.getUnitInt() returns int
+    return this.wrapper().getIntelligence()
+
+public function unit.getHeroStr() returns int
+    return this.getStr(true)
+
+public function unit.getHeroWp() returns int
+    return this.getAgi(true)
+
+public function unit.getHeroInt() returns int
+    return this.getInt(true)
 
 public function unit.addBuff(unit caster, real duration, BuffType buffType, int level) returns Buff
     Buff ret = null
@@ -82,7 +76,7 @@ public function unit.addBuff(unit caster, real duration, BuffType buffType, int 
 
 public function unit.addBuffReduced(unit caster, real duration, BuffType buffType, int level) returns Buff
     //buff reduction only uses 1/4 of the wp, so it reduces duration not as much as it reduces damage
-    real realDuration =  duration.reduce( (this.getWp()/4).toInt() , 0.01 )
+    real realDuration =  duration.reduce( (this.getUnitWp()/4).toInt() , 0.01 )
     if this.hasItemById(ITEM_ID_ARCANE_SHIELD)
         realDuration = realDuration * 0.85
     Buff ret = null
@@ -99,7 +93,7 @@ public function unit.dealDamageAlways(unit target, real amount, ReductionType re
     let damageType = reductionType == ReductionType.PHYSICAL ? DAMAGE_TYPE_NORMAL : DAMAGE_TYPE_UNIVERSAL
     real newAmount
     if reductionType == ReductionType.MAGIC
-        let wp = target.getWp()
+        let wp = target.getUnitWp()
         newAmount = amount.reduceMagic(wp)
     else
         newAmount = amount
@@ -120,7 +114,7 @@ public function unit.dealDamageNoEvent(unit target, real amount, ReductionType r
 public function unit.damageMana(unit target, real amount, ReductionType reductionType)
     real newAmount
     if reductionType == ReductionType.MAGIC
-        let wp = target.getWp()
+        let wp = target.getUnitWp()
         newAmount = amount.reduceMagic(wp)
     else if reductionType == ReductionType.PHYSICAL
         let ar = target.getArmor().round()

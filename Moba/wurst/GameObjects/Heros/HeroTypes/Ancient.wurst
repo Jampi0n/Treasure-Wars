@@ -293,7 +293,7 @@ class EatTreeAnimation
             target.setHP(1)
             caster.dealDamage(target, 10, ReductionType.NONE)
             target.remove()
-            caster.healHP(caster, DEVOUR_HEAL[level-1].bonus(caster.getInt(), DEVOUR_HEAL_BONUS))
+            caster.healHP(caster, DEVOUR_HEAL[level-1].bonus(caster.getHeroInt(), DEVOUR_HEAL_BONUS))
 
         this.checkTimer.release()
 
@@ -353,7 +353,7 @@ class NaturesWrath
                 let nearby = CreateGroup()
                 nearby.enumUnitsInRange(caster.getPos(), NATURES_WRATH_AOE)
 
-                let dmg = 0.02 * (NATURES_WRATH_TOTAL_DAMAGE[level-1].bonus(caster.getInt(), NATURES_WRATH_TOTAL_DAMAGE_BONUS))/NATURES_WRATH_DURATION[level-1]
+                let dmg = 0.02 * (NATURES_WRATH_TOTAL_DAMAGE[level-1].bonus(caster.getHeroInt(), NATURES_WRATH_TOTAL_DAMAGE_BONUS))/NATURES_WRATH_DURATION[level-1]
 
                 while(not nearby.isEmpty())
                     let u = FirstOfGroup(nearby)
@@ -377,7 +377,7 @@ function onAttack(unit attacker, unit target, boolean _isActive)
         let nearby = CreateGroup()
         nearby.enumUnitsInRange(target.getPos(), ROOT_AOE_RANGE[level-1])
 
-        let dmg = ROOT_AOE_DAMAGE[level-1].bonus(attacker.getStr(), ROOT_AOE_DAMAGE_BONUS)
+        let dmg = ROOT_AOE_DAMAGE[level-1].bonus(attacker.getHeroStr(), ROOT_AOE_DAMAGE_BONUS)
 
         while(not nearby.isEmpty())
             let u = FirstOfGroup(nearby)
@@ -408,7 +408,7 @@ function castEntangle()
     let level = caster.getAbilityLevel(spellId)
     let startPos = caster.getPos()
     let direction = startPos.angleTo(vec2(GetSpellTargetX(), GetSpellTargetY()))
-    let intelligence = caster.getInt()
+    let intelligence = caster.getHeroInt()
     let dur = ENTANGLE_DURATION[level-1].bonus(intelligence, ENTANGLE_DURATION_BONUS)
     let damage = ENTANGLE_HIT_DAMAGE[level-1].bonus(intelligence, ENTANGLE_HIT_DAMAGE_BONUS)
     for i = 0 to 8

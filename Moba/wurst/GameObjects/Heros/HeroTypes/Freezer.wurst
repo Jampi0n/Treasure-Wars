@@ -355,8 +355,8 @@ function castFrostNova()
     nearby.enumUnitsInRange(target.getPos(), NOVA_AOE)
     addEffect(Abilities.frostNovaTarget, target.getPos()).destr()
 
-    let dmg = NOVA_AOE_DMG[level-1].bonus(caster.getInt(), NOVA_AOE_DMG_BONUS)
-    let dur = NOVA_DURATION[level-1].bonus(caster.getInt(), NOVA_DURATION_BONUS)
+    let dmg = NOVA_AOE_DMG[level-1].bonus(caster.getHeroInt(), NOVA_AOE_DMG_BONUS)
+    let dur = NOVA_DURATION[level-1].bonus(caster.getHeroInt(), NOVA_DURATION_BONUS)
 
     while(not nearby.isEmpty())
         let u = FirstOfGroup(nearby)
@@ -367,7 +367,7 @@ function castFrostNova()
 
     nearby.destr()
 
-    caster.dealDamage(target, NOVA_TARGET_DMG[level-1].bonus(caster.getInt(), NOVA_TARGET_DMG_BONUS), ReductionType.MAGIC)
+    caster.dealDamage(target, NOVA_TARGET_DMG[level-1].bonus(caster.getHeroInt(), NOVA_TARGET_DMG_BONUS), ReductionType.MAGIC)
 
 function castFrostArmor()
     let spellId = GetSpellAbilityId()
@@ -386,7 +386,7 @@ function castFrostWyrm()
     let wrapper = frostWyrm.wrapper()
     wrapper.modAttackSpeed( caster.wrapper().getAttackSpeedBonus())
     wrapper.modHealth( caster.wrapper().getHealthBonus() + FROST_WYRM_HP[level-1] )
-    wrapper.modStrength( ( (FROST_WYRM_INT_FACTOR/100) * caster.getInt() ).toInt()  + FROST_WYRM_DMG[level-1] )
+    wrapper.modStrength( ( (FROST_WYRM_INT_FACTOR/100) * caster.getHeroInt() ).toInt()  + FROST_WYRM_DMG[level-1] )
 
     DamageEventUnit.fromUnit(frostWyrm).attackHitNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
         let nearby = CreateGroup()
@@ -542,7 +542,7 @@ function initHeroType()
         buffFrostArmor.addFirstFunction( (Buff whichBuff) -> (begin
             let target = whichBuff.getTarget()
             let level = whichBuff.getLevel()
-            let intel = whichBuff.getCaster().getInt()
+            let intel = whichBuff.getCaster().getHeroInt()
             let forstArmor = new FrostArmor()
             target.wrapper().modArmor( ARMOR_AR[level - 1].bonus(intel, ARMOR_AR_BONUS).round())
             forstArmor.intelligence = intel
@@ -618,7 +618,7 @@ function initHeroType()
             if target.isTargetable(caster.getOwner(), false, true)
                 fx.setXY(target.getPos())
                 target.addBuff(whichBuff.getCaster(), 0.1, STUNNED, 1).setDispelLevel(DispelLevel.BREAK)
-                caster.dealDamage(target, 0.05 * FREEZE_DMG[level-1].bonus(caster.getInt(), FREEZE_DMG_BONUS), ReductionType.MAGIC)
+                caster.dealDamage(target, 0.05 * FREEZE_DMG[level-1].bonus(caster.getHeroInt(), FREEZE_DMG_BONUS), ReductionType.MAGIC)
             else
                 whichBuff.dispel()
         end))

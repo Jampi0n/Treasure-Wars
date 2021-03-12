@@ -267,7 +267,7 @@ function onDamage()
         if target.isTargetable(caster.getOwner(), false, true) and not hitByBreath.contains(target)
             let level = caster.getAbilityLevel(ABILITY_BREATH)
             hitByBreath.addUnit(target)
-            caster.dealDamage(target, BREATH_DAMAGE[level-1].bonus(caster.getInt(), BREATH_DAMAGE_BONUS), ReductionType.MAGIC)
+            caster.dealDamage(target, BREATH_DAMAGE[level-1].bonus(caster.getHeroInt(), BREATH_DAMAGE_BONUS), ReductionType.MAGIC)
             target.addBuffReduced(caster, BREATH_DURATION, buffMeltingBreath, level)
 
 
@@ -487,9 +487,9 @@ function initHeroType()
             let owner = caster.getOwner()
             let level = whichBuff.getData()
             if caster.hasAbility(IMMOLATION_BUFF_ID)
-                let dmg = IMMOLATION_DAMAGE[level-1].bonus(caster.getInt(), IMMOLATION_DAMAGE_BONUS) * 0.2
+                let dmg = IMMOLATION_DAMAGE[level-1].bonus(caster.getHeroInt(), IMMOLATION_DAMAGE_BONUS) * 0.2
                 //use hp to not trigger damage event
-                caster.addHP(-(0.5 * dmg.reduceMagic(caster.getWp())))
+                caster.addHP(-(0.5 * dmg.reduceMagic(caster.getHeroWp())))
                 let g = CreateGroup()
                 g.enumUnitsInRange(caster.getPos(), 250)
                 while true

@@ -296,7 +296,7 @@ class Pull
                     if minUnit != null
                         this.pulledUnit = minUnit
                         hasPulled = true
-                        this.caster.dealDamage(this.pulledUnit, PULL_DAMAGE[this.level-1].bonus(this.caster.getStr(), PULL_DAMAGE_BONUS), ReductionType.PHYSICAL)
+                        this.caster.dealDamage(this.pulledUnit, PULL_DAMAGE[this.level-1].bonus(this.caster.getHeroStr(), PULL_DAMAGE_BONUS), ReductionType.PHYSICAL)
                         this.pulledUnit.addBuff(caster, 0.15, STUNNED, 1).setDispelLevel(DispelLevel.BREAK)
 
                 else
@@ -335,7 +335,7 @@ function castSpikeBall()
             let nearby = CreateGroup()
             nearby.enumUnitsInRange(ballPos, 250)
 
-            let dmg = SPIKE_BALL_DMG[level-1].bonus(caster.getStr(), SPIKE_BALL_DMG_BONUS)
+            let dmg = SPIKE_BALL_DMG[level-1].bonus(caster.getHeroStr(), SPIKE_BALL_DMG_BONUS)
 
             while(not nearby.isEmpty())
                 let target = FirstOfGroup(nearby)
@@ -364,7 +364,7 @@ function onDamage()
         let nearby = CreateGroup()
         nearby.enumUnitsInRange(u.getPos(), 250)
 
-        let dmg = ROCKET_DMG[level-1].bonus(caster.getStr(), ROCKET_DMG_BONUS)
+        let dmg = ROCKET_DMG[level-1].bonus(caster.getHeroStr(), ROCKET_DMG_BONUS)
 
         while(not nearby.isEmpty())
             let target = FirstOfGroup(nearby)
@@ -378,7 +378,7 @@ function retreatAI(IHeroAI ai)
     let hero = ai.getHeroUnit()
     let target = hero.findTarget(ROCKET_RANGE[hero.getAbilityLevel(ABILITY_ROCKET)-1], AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
     let rocketLvl = hero.getAbilityLevel(ABILITY_ROCKET)-1
-    if target.isTargetable(hero.getOwner(), false, true) and target.getHP()*(1+ARMOR_REDUCTION*target.getArmor()) <= 0.9 * ROCKET_DMG[rocketLvl].bonus(hero.getStr(), ROCKET_DMG_BONUS)
+    if target.isTargetable(hero.getOwner(), false, true) and target.getHP()*(1+ARMOR_REDUCTION*target.getArmor()) <= 0.9 * ROCKET_DMG[rocketLvl].bonus(hero.getHeroStr(), ROCKET_DMG_BONUS)
         ai.issue("acidbomb", target)
 
     ai.issue("berserk")
@@ -390,7 +390,7 @@ function attackAI(IHeroAI ai)
     if hero.getMana()/hero.getMaxMana() > 0.5
         let rocketLvl = hero.getAbilityLevel(ABILITY_ROCKET)-1
         target = hero.findTarget(ROCKET_RANGE[rocketLvl], AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
-        if target.isTargetable(hero.getOwner(), false, true) and target.getHP()*(1+ARMOR_REDUCTION*target.getArmor()) <= 0.9 * ROCKET_DMG[rocketLvl].bonus(hero.getStr(), ROCKET_DMG_BONUS)
+        if target.isTargetable(hero.getOwner(), false, true) and target.getHP()*(1+ARMOR_REDUCTION*target.getArmor()) <= 0.9 * ROCKET_DMG[rocketLvl].bonus(hero.getHeroStr(), ROCKET_DMG_BONUS)
             ai.issue("acidbomb", target)
 
     target = hero.findTarget(250, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_HEALTH, null)
@@ -465,20 +465,20 @@ function initHeroType()
         buffSpikeBall.addPeriodicFunction((Buff whichBuff) -> (begin
             let caster = whichBuff.getCaster()
             let level = whichBuff.getLevel()
-            caster.dealDamage(whichBuff.getTarget(), 0.25 * SPIKE_BALL_DOT_DMG[level-1].bonus(caster.getStr(), SPIKE_BALL_DOT_DMG_BONUS) / SPIKE_BALL_DOT_DURATION[level-1] , ReductionType.PHYSICAL)
+            caster.dealDamage(whichBuff.getTarget(), 0.25 * SPIKE_BALL_DOT_DMG[level-1].bonus(caster.getHeroStr(), SPIKE_BALL_DOT_DMG_BONUS) / SPIKE_BALL_DOT_DURATION[level-1] , ReductionType.PHYSICAL)
         end))
 
         buffSpeedBoost = new BuffType(true, DispelLevel.NONE)
         buffSpeedBoost.setupBuffWithIcon(SPEED_BOOST_BUFF_ID, SPEED_BOOST_ABILITY_ID)
         buffSpeedBoost.addFirstFunction((Buff whichBuff) -> (begin
             let target = whichBuff.getTarget()
-            target.wrapper().modMoveSpeedRelative( ((SPEED_BOOST[whichBuff.getLevel()-1].bonus(target.getInt(), SPEED_BOOST_BONUS)) * 10).toInt() )
+            target.wrapper().modMoveSpeedRelative( ((SPEED_BOOST[whichBuff.getLevel()-1].bonus(target.getHeroInt(), SPEED_BOOST_BONUS)) * 10).toInt() )
             AddUnitAnimationProperties(target, "fast", true)
         end))
 
         buffSpeedBoost.addEndFunction((Buff whichBuff) -> (begin
             let target = whichBuff.getTarget()
-            target.wrapper().modMoveSpeedRelative( -((SPEED_BOOST[whichBuff.getLevel()-1].bonus(target.getInt(), SPEED_BOOST_BONUS)) * 10).toInt() )
+            target.wrapper().modMoveSpeedRelative( -((SPEED_BOOST[whichBuff.getLevel()-1].bonus(target.getHeroInt(), SPEED_BOOST_BONUS)) * 10).toInt() )
             AddUnitAnimationProperties(target, "fast", false)
         end))
 

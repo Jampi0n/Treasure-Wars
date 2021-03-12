@@ -312,7 +312,7 @@ function castShadowStrike()
                 b.setData(b.getData()+3)
 
             target.addBuffReduced(caster, SHADOW_STRIKE_SLOW_DURATION[level-1], buffShadowStrike, level)
-            caster.dealDamage(target, SHADOW_STRIKE_DAMAGE[level-1].bonus(caster.getStr(), SHADOW_STRIKE_DAMAGE_BONUS), ReductionType.PHYSICAL)
+            caster.dealDamage(target, SHADOW_STRIKE_DAMAGE[level-1].bonus(caster.getHeroStr(), SHADOW_STRIKE_DAMAGE_BONUS), ReductionType.PHYSICAL)
     doAfter(0.85) ->
         addEffect(Abilities.mirrorImageDeathCaster, spawnPos).destr()
         illusion.remove()
@@ -342,7 +342,7 @@ function castCripplingPain()
             let bleedingWound = BuffList.getBuffOfType(u, buffBleedingWound)
             let stacks = bleedingWound.getData() div 4
             bleedingWound.dispel()
-            caster.dealDamage(u, stacks * CRIPPLING_PAIN_DAMAGE[level-1].bonus(caster.getInt(), CRIPPLING_PAIN_DAMAGE_BONUS), ReductionType.MAGIC)
+            caster.dealDamage(u, stacks * CRIPPLING_PAIN_DAMAGE[level-1].bonus(caster.getHeroInt(), CRIPPLING_PAIN_DAMAGE_BONUS), ReductionType.MAGIC)
 
             u.wrapper().modMoveSpeedRelative( -10 * CRIPPLING_PAIN_SLOW[level-1] * stacks )
             if u.isAlive()
@@ -483,7 +483,7 @@ function initHeroType()
                     let bleedingWoundLevel = caster.getAbilityLevel(ABILITY_BLEEDING_WOUND)
                     if bleedingWoundLevel > 0
                         u.addBuffReduced(caster, BLEEDING_WOUND_DURATION, buffBleedingWound, bleedingWoundLevel)
-                    caster.dealDamage(u, 0.25 * DEATH_SPIN_DAMAGE[level-1].bonus(caster.getStr(), DEATH_SPIN_DAMAGE_BONUS), ReductionType.PHYSICAL)
+                    caster.dealDamage(u, 0.25 * DEATH_SPIN_DAMAGE[level-1].bonus(caster.getHeroStr(), DEATH_SPIN_DAMAGE_BONUS), ReductionType.PHYSICAL)
             g.destr()
         end))
 

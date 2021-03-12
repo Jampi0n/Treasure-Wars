@@ -235,8 +235,8 @@ function castWarStomp()
     let nearby = CreateGroup()
     nearby.enumUnitsInRange(caster.getPos(), WAR_STOMP_AOE)
 
-    let dur = WAR_STOMP_DURATION[level-1].bonus(caster.getStr(), WAR_STOMP_DURATION_BONUS)
-    let dmg = WAR_STOMP_DAMAGE[level-1].bonus(caster.getStr(), WAR_STOMP_DAMAGE_BONUS)
+    let dur = WAR_STOMP_DURATION[level-1].bonus(caster.getHeroStr(), WAR_STOMP_DURATION_BONUS)
+    let dmg = WAR_STOMP_DAMAGE[level-1].bonus(caster.getHeroStr(), WAR_STOMP_DAMAGE_BONUS)
 
     while(not nearby.isEmpty())
         let target = FirstOfGroup(nearby)
@@ -273,7 +273,7 @@ class VenoumosBeetle
     construct(unit caster, unit target)
 
         this.owner = caster
-        this.ownerIntelligence = owner.getInt()
+        this.ownerIntelligence = owner.getHeroInt()
         this.target = target
         this.level = caster.getAbilityLevel(ABILITY_VENOMOUS_BEETLE)
         this.dummy = createUnit(DUMMY_PLAYER, VENOMOUS_BEETLE, owner.getPos(), owner.getPos().angleTo(target.getPos()))

@@ -238,7 +238,7 @@ class DivinePunishment
             let nearby = CreateGroup()
             nearby.enumUnitsInRange(this.caster.getPos(), DIVINE_PUNISHMENT_AOE)
 
-            let dmg = DIVINE_PUNISHMENT_DMG[level-1].bonus(this.caster.getInt(), DIVINE_PUNISHMENT_DMG_BONUS)
+            let dmg = DIVINE_PUNISHMENT_DMG[level-1].bonus(this.caster.getHeroInt(), DIVINE_PUNISHMENT_DMG_BONUS)
 
             while(not nearby.isEmpty())
                 let target = FirstOfGroup(nearby)
@@ -293,7 +293,7 @@ function castShieldBash()
     let nearby = CreateGroup()
     nearby.enumUnitsInRange(casterPos.polarOffset(casterAngle, 120), 220)
 
-    let dmg = SHIELD_BASH_DMG[level-1].bonus(caster.getStr(), SHIELD_BASH_DMG_BONUS)
+    let dmg = SHIELD_BASH_DMG[level-1].bonus(caster.getHeroStr(), SHIELD_BASH_DMG_BONUS)
     let dur = SHIELD_BASH_DURATION[level-1]
 
     while(not nearby.isEmpty())
@@ -312,7 +312,7 @@ function castRoar()
     let nearby = CreateGroup()
     nearby.enumUnitsInRange(caster.getPos(), BATTLE_ROAR_AOE[level-1])
 
-    let dur = BATTLE_ROAR_DURATION[level-1].bonus(caster.getInt(), BATTLE_ROAR_DURATION_BONUS)
+    let dur = BATTLE_ROAR_DURATION[level-1].bonus(caster.getHeroInt(), BATTLE_ROAR_DURATION_BONUS)
 
     while(not nearby.isEmpty())
         let target = FirstOfGroup(nearby)
@@ -327,7 +327,7 @@ function castHolyShield()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
     let target = GetSpellTargetUnit()
-    let dur = HOLY_SHIELD_DURATION[level-1].bonus(caster.getInt(), HOLY_SHIELD_DURATION_BONUS)
+    let dur = HOLY_SHIELD_DURATION[level-1].bonus(caster.getHeroInt(), HOLY_SHIELD_DURATION_BONUS)
     target.addBuff( caster, dur, BUFF_HOLY_SHIELD, level)
     target.addBuff( caster, dur, INVULERNABLE, level)
 

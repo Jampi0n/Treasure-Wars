@@ -250,8 +250,8 @@ function onDamage()
         if target.isTargetable(caster.getOwner(), false, true)
             let level = caster.getAbilityLevel(ABILITY_DEATH_PACT)
             GetEventDamageSource().dealDamage(target, 
-            DEATH_COIL_DMG_BASE[level-1].bonus(caster.getInt(), DEATH_COIL_DMG_BASE_BONUS)+
-            skeletonCount*DEATH_COIL_DMG_FACTOR[level-1].bonus(caster.getInt(), DEATH_COIL_DMG_FACTOR_BONUS), ReductionType.MAGIC)
+            DEATH_COIL_DMG_BASE[level-1].bonus(caster.getHeroInt(), DEATH_COIL_DMG_BASE_BONUS)+
+            skeletonCount*DEATH_COIL_DMG_FACTOR[level-1].bonus(caster.getHeroInt(), DEATH_COIL_DMG_FACTOR_BONUS), ReductionType.MAGIC)
         doAfter(1, () -> (begin
             caster.removeAbility(ABILITY_DEATH_COIL)
             caster.getOwner().setAbilityAvailable(ABILITY_DEATH_PACT, true)
@@ -287,7 +287,7 @@ function castArrow()
     end) )
         ..setHitFunction((Missile missile, unit target) -> (begin
         let missileCaster = missile.getOwner()
-        missileCaster.dealDamage(Missile.getMissileTarget(), (PIERCING_SHOT_DAMAGE[level-1]).bonus(missileCaster.getStr(), PIERCING_SHOT_DAMAGE_BONUS), ReductionType.PHYSICAL)
+        missileCaster.dealDamage(Missile.getMissileTarget(), (PIERCING_SHOT_DAMAGE[level-1]).bonus(missileCaster.getHeroStr(), PIERCING_SHOT_DAMAGE_BONUS), ReductionType.PHYSICAL)
 
     end) )
         ..setMaxRange(1000)
@@ -299,7 +299,7 @@ function castTerror()
     let nearby = CreateGroup()
     nearby.enumUnitsInRange(caster.getPos(), TERROR_AOE[level-1])
 
-    let dur = TERROR_DURATION[level-1].bonus(caster.getInt(), TERROR_DURATION_BONUS)
+    let dur = TERROR_DURATION[level-1].bonus(caster.getHeroInt(), TERROR_DURATION_BONUS)
 
     while(not nearby.isEmpty())
         let target = FirstOfGroup(nearby)

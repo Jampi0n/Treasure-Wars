@@ -262,7 +262,7 @@ function castTidalFury()
     let nearby = CreateGroup()
     nearby.enumUnitsInRange(casterPos, TIDAL_FURY_AOE)
 
-    let hitDmg = TIDAL_FURY_HIT_DMG[level-1].bonus(caster.getStr(), TIDAL_FURY_HIT_DMG_BONUS)
+    let hitDmg = TIDAL_FURY_HIT_DMG[level-1].bonus(caster.getHeroStr(), TIDAL_FURY_HIT_DMG_BONUS)
 
     while(not nearby.isEmpty())
         let target = FirstOfGroup(nearby)
@@ -280,7 +280,7 @@ function castTidalFury()
             end) )
                 ..setHitFunction((Missile missile, unit target) -> (begin
                 let missileCaster = missile.getOwner()
-                missileCaster.dealDamage(target, (TIDAL_FURY_WAVE_DMG[level-1]).bonus(missileCaster.getInt(), TIDAL_FURY_WAVE_DMG_BONUS), ReductionType.MAGIC)
+                missileCaster.dealDamage(target, (TIDAL_FURY_WAVE_DMG[level-1]).bonus(missileCaster.getHeroInt(), TIDAL_FURY_WAVE_DMG_BONUS), ReductionType.MAGIC)
     
             end) )
                 ..setMaxRange(500)
@@ -293,7 +293,7 @@ function castGiantFish()
         let level = caster.getAbilityLevel(ABILITY_GIANT_FISH)
         nearby.enumUnitsInRange(detectionUnit.getPos(), FISH_AOE[level-1])
 
-        let dmg = FISH_DAMAGE[level-1].bonus(caster.getInt(), FISH_DAMAGE_BONUS)
+        let dmg = FISH_DAMAGE[level-1].bonus(caster.getHeroInt(), FISH_DAMAGE_BONUS)
 
         while(not nearby.isEmpty())
             let target = FirstOfGroup(nearby)
@@ -347,8 +347,8 @@ class RitualOfTheSeas
             nearby.enumUnitsInRange(this.caster.getPos(), RITUAL_AOE[level-1])
 
 
-            let manaDrain = RITUAL_MANA_DRAIN[level-1].bonus(caster.getInt(), RITUAL_MANA_DRAIN_BONUS)
-            let hpDrain = RITUAL_HP_DRAIN[level-1].bonus(caster.getInt(), RITUAL_HP_DRAIN_BONUS)
+            let manaDrain = RITUAL_MANA_DRAIN[level-1].bonus(caster.getHeroInt(), RITUAL_MANA_DRAIN_BONUS)
+            let hpDrain = RITUAL_HP_DRAIN[level-1].bonus(caster.getHeroInt(), RITUAL_HP_DRAIN_BONUS)
 
             while(not nearby.isEmpty())
                 let target = FirstOfGroup(nearby)
@@ -358,14 +358,14 @@ class RitualOfTheSeas
 
                         if target.isAlive() and target.wrapper() != null
                             if this.count > 0
-                                let manaDrained = min( target.getMana(), manaDrain.reduceMagic(target.getWp()))
-                                let hpDrained = min( target.getHP(), hpDrain.reduceMagic(target.getWp()))
+                                let manaDrained = min( target.getMana(), manaDrain.reduceMagic(target.getUnitWp()))
+                                let hpDrained = min( target.getHP(), hpDrain.reduceMagic(target.getUnitWp()))
 
                                 if target.isType(UNIT_TYPE_HERO)
                                     caster.healMana(caster, manaDrained * RITUAL_MANA_RATIO/100 )
                                     caster.healHP(caster, hpDrained * RITUAL_HP_RATIO/100 )
 
-                                caster.damageMana(target, manaDrain.reduceMagic(target.getWp()), ReductionType.NONE)
+                                caster.damageMana(target, manaDrain.reduceMagic(target.getUnitWp()), ReductionType.NONE)
                                 caster.dealDamage(target, hpDrain, ReductionType.MAGIC)
 
                             target.addBuffReduced( caster, RITUAL_SLOW_DURATION, ritualBuff, level)

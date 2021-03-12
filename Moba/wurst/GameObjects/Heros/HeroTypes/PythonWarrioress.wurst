@@ -239,7 +239,7 @@ function castMistwalk()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
     caster.dispelNegativeBuffs(DispelLevel.BREAK)
-    caster.addBuff( caster, (MISTWALK_DURATION[level-1]).bonus(caster.getInt(), MISTWALK_DURATION_BONUS), INVIS, 1).setDispelLevel(DispelLevel.DISPEL)
+    caster.addBuff( caster, (MISTWALK_DURATION[level-1]).bonus(caster.getHeroInt(), MISTWALK_DURATION_BONUS), INVIS, 1).setDispelLevel(DispelLevel.DISPEL)
 
 function castPoisonSpit()
     let caster = GetTriggerUnit()
@@ -272,7 +272,7 @@ function castEmpoweredStrike()
     let caster = GetTriggerUnit()
     let level = caster.getAbilityLevel(spellId)
     let target = GetSpellTargetUnit()
-    caster.dealDamage(target, (EMPOWERED_STRIKE_DAMAGE[level-1]).bonus(caster.getStr(), EMPOWERED_STRIKE_DAMAGE_BONUS) , ReductionType.PHYSICAL)
+    caster.dealDamage(target, (EMPOWERED_STRIKE_DAMAGE[level-1]).bonus(caster.getHeroStr(), EMPOWERED_STRIKE_DAMAGE_BONUS) , ReductionType.PHYSICAL)
     target.addEffect("Abilities\\Spells\\Other\\Stampede\\StampedeMissileDeath.mdl", "chest").destr()
     SOUND_EMPOWERED_STRIKE.playOnPoint(target.getPos3Zero()).snd.setVolume(150)
 
@@ -286,8 +286,8 @@ function castParalyzingStrike()
     let portPos = targetPos.polarOffset(casterPos.angleTo(targetPos), 100)
     SOUND_PARALYZING_STRIKE.playOnPoint(targetPos.toVec3())
     doAfter(0, () -> caster.setPos(portPos))
-    target.addBuffReduced( caster, (PARALYZING_STRIKE_DURATION[level-1]).bonus(caster.getInt(), PARALYZING_STRIKE_DURATION_BONUS) , STUNNED, 1).setDispelLevel(DispelLevel.DISPEL)
-    caster.dealDamage(target, (PARALYZING_STRIKE_DAMAGE[level-1]).bonus(caster.getInt(), PARALYZING_STRIKE_DAMAGE_BONUS) , ReductionType.MAGIC)
+    target.addBuffReduced( caster, (PARALYZING_STRIKE_DURATION[level-1]).bonus(caster.getHeroInt(), PARALYZING_STRIKE_DURATION_BONUS) , STUNNED, 1).setDispelLevel(DispelLevel.DISPEL)
+    caster.dealDamage(target, (PARALYZING_STRIKE_DAMAGE[level-1]).bonus(caster.getHeroInt(), PARALYZING_STRIKE_DAMAGE_BONUS) , ReductionType.MAGIC)
 
 function onAttack(unit attacker, unit target, boolean _isActive)
     let level = attacker.getAbilityLevel(ABILITY_ENVENOMED_BLADES)
@@ -373,7 +373,7 @@ function initHeroType()
             let caster = thisBuff.getCaster()
             if target.isTargetable(caster.getOwner(), false, true)
                 caster.dealDamage(target, 
-                (ENVENOMED_BLADES_DAMAGE[thisBuff.getLevel()-1]).bonus(caster.getInt(), ENVENOMED_BLADES_DAMAGE_BONUS)
+                (ENVENOMED_BLADES_DAMAGE[thisBuff.getLevel()-1]).bonus(caster.getHeroInt(), ENVENOMED_BLADES_DAMAGE_BONUS)
                 , ReductionType.MAGIC)
         end) )
         
@@ -382,7 +382,7 @@ function initHeroType()
         BUFF_POISON_SPIT.setupBuffWithIcon(POISON_SPIT_BUFF_ID, POISON_SPIT_ABILITY_ID)
         BUFF_POISON_SPIT.addApplyFunction( (Buff thisBuff) -> (begin
             thisBuff.getCaster().dealDamage(thisBuff.getTarget(), 
-            (POISON_SPIT_DOT[thisBuff.getLevel()-1]).bonus(thisBuff.getCaster().getInt(), POISON_SPIT_DOT_BONUS)/4
+            (POISON_SPIT_DOT[thisBuff.getLevel()-1]).bonus(thisBuff.getCaster().getHeroInt(), POISON_SPIT_DOT_BONUS)/4
             , ReductionType.MAGIC)
         end) )
         BUFF_POISON_SPIT.addFirstFunction( (Buff thisBuff) -> (begin
