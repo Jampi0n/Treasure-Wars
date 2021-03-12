@@ -2,8 +2,6 @@ package Blacksmith
 
 import BuildingsInclude
 
-public int array UPGRADES = ['R000', 'R001', 'R002', 'R003']
-public int array UPGRADE_ITEMS = ['I002', 'I003', 'I004', 'I005']
 
 public unit array blacksmith = [udg_GreenBlacksmith[0], udg_GreenBlacksmith[1], udg_BrownBlacksmith[0], udg_BrownBlacksmith[1]]
 public boolean array blacksmithAlive = [true, true, true, true]
@@ -40,3 +38,40 @@ public class Blacksmith extends Building
                     if not u.isType(UNIT_TYPE_STRUCTURE)
                         u.wrapper().updateBaseStatsUnits()
                 g.destr()
+
+    static function findNextUpgrade(int team) returns int
+
+        let teamPlayer = players[Teams.army(team)]
+        int array upgrades
+        int max = 5
+        int index = -1
+        for i = 0 to 3
+            upgrades[i] = GetPlayerTechCount(teamPlayer, UPGRADES[i], true)
+            if upgrades[i] < max
+                max = upgrades[i]
+                index = i
+
+        int ret = -1
+        if index != -1
+            ret = UPGRADE_ITEMS[index]
+
+        return ret
+
+    static function findNextBlacksmith(int team, vec2 pos) returns unit
+        unit ret = null
+        real minDist = 1000000
+        if team == TEAM_1
+            for i=0 to 1
+                if blacksmithAlive[i]
+                    let dist = pos.distanceTo(blacksmith[i].getPos())
+                    if dist < minDist 
+                        minDist = dist
+                        ret = blacksmith[i]
+        else
+            for i=2 to 3
+                if blacksmithAlive[i]
+                    let dist = pos.distanceTo(blacksmith[i].getPos())
+                    if dist < minDist 
+                        minDist = dist
+                        ret = blacksmith[i]
+        return ret

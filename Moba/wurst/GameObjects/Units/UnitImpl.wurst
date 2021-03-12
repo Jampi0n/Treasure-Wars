@@ -11,12 +11,14 @@ import ErrorHandling
 import ObjectIds
 import UnitIndexer
 import Missile
-import initlater PlayerControl
-import initlater IHeroType
-import initlater IHero
-import initlater TeamUtil
-import initlater IUnitType
-import initlater IUnit
+import PlayerControl
+import IHero
+import TeamUtil
+import IUnitType
+import IUnit
+import UnitTypeImpl
+import HeroTypeImpl
+
 
 /*
 This file is huge. The end is mostly optimized convenience functions.
@@ -693,3 +695,8 @@ public class UnitImpl implements IUnit
 
 init
     initAtTop()
+
+public function unit.wrapper() returns IUnit
+    return UnitImpl.getWrapper(this)
+public function unit.getBuffList() returns BuffList
+    return UnitImpl.getBuffList(this)

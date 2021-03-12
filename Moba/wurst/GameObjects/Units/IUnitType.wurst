@@ -1,7 +1,5 @@
 package IUnitType
 
-import UnitTypeImpl
-
 public interface IUnitType
     function getUnitId() returns int
     function getBounty() returns int
@@ -20,8 +18,3 @@ public abstract class IUnitTypeStatic
     abstract function get(int unitTypeId) returns IUnitType
     abstract function create(int baseHp, int unitId, int bounty, int baseAttack, int upgradeAttack, int attackUpgradeId, int baseArmor, int upgradeArmor, int armorUpgradeId, int hitBox, string modelPath, int powerLevel) returns IUnitType
 
-public abstract class UnitType
-    static function get(int unitTypeId) returns IUnitType
-        return UnitTypeImpl.getUnitType(unitTypeId)
-    static function create(int baseHp, int unitId, int bounty, int baseAttack, int upgradeAttack, int attackUpgradeId, int  baseArmor, int upgradeArmor, int armorUpgradeId, int hitBox, string modelPath, int powerLevel) returns IUnitType
-        return new UnitTypeImpl(baseHp, unitId, bounty, baseAttack, upgradeAttack, attackUpgradeId, baseArmor, upgradeArmor, armorUpgradeId, hitBox, modelPath, powerLevel)

@@ -1,8 +1,7 @@
 package UnitTypeConfig
 
 import Assets
-import UnitLib
-import FastDamageEvent
+import UnitTypeImpl
 
 constant ATTACK_MELEE = 'R000'
 constant ATTACK_RANGED = 'R001'
@@ -88,17 +87,3 @@ public constant SEA_GIANT = createUnitTypeAndReturnId(700, 'n00W', 40, 52, 25, 4
 public constant STORMREAVER = createUnitTypeAndReturnId(200, 'n00X', 15, 15, 30, 16, Units.orcWarlock1, 3)
 
 public constant SKELETAL_ORC = createUnitTypeAndReturnId(200, 'n00U', 15, 24, 10, 16, Units.skeletonOrc1, 3)
-
-init
-    DamageEventUnitType.fromUnitTypeId(TANK).anyDamage.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
-        if attack
-            let nearby = CreateGroup()
-            nearby.enumUnitsInRange(target.getPos(), 250)
-
-            while(not nearby.isEmpty())
-                let u = FirstOfGroup(nearby)
-                nearby.removeUnit(u)
-                if u.isTargetable(source.getOwner(), false, true) and u != target
-                    source.dealDamage(u, 75, ReductionType.PHYSICAL)
-
-            nearby.destr()

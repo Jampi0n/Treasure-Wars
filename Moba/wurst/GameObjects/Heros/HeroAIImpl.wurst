@@ -3,7 +3,6 @@ package HeroAIImpl
 import TimerUtils
 import ClosureTimers
 import ItemInShop
-import Blacksmith
 import BuildingIds
 import ErrorHandling
 import RecommendedItems
@@ -11,12 +10,14 @@ import ShopGUI
 import HashMap
 import Constants
 import LinkedList
-import initlater HeroLib
-import initlater PlayerControl
-import initlater UnitLib
-import initlater TeamUtil
-import initlater IHeroAI
+import PlayerControl
+import UnitLib
+import TeamUtil
 import FastDamageEvent
+import UnitImpl
+import IHero
+import UnitTypeImpl
+import Blacksmith
 
 enum AIState
     ATTACK //attack moves towards the enemy base, focus is on pushing/killing minions
@@ -33,6 +34,110 @@ constant real TEAM_FIGHT_RANGE = 1200
 constant real HALF_DISTANCE = 11200
 constant real UPDATE_INTERVAL = 0.35
 
+public function unit.findAreaTarget(real range, real aoe, int heroValue) returns targetPoint
+    int currentValue = 0
+
+    let g = CreateGroup()
+    let nearby = CreateGroup()
+    let pos = this.getPos()
+
+    let owner = this.getOwner()
+    unit u
+    g.enumUnitsInRange(pos, range)
+    let targetUnit = g.getRandomUnit()
+    let unitPos = targetUnit.getPos()
+    if targetUnit != null
+        if not targetUnit.isType(UNIT_TYPE_STRUCTURE) and targetUnit.isAlive() and targetUnit.isVisible(owner) and IsUnitEnemy(targetUnit, owner)
+            nearby.enumUnitsInRange(unitPos, aoe)
+            while(true)
+                
+                u = FirstOfGroup(nearby)
+                if u == null
+                    break
+                nearby.removeUnit(u)
+            
+                if not u.isType(UNIT_TYPE_STRUCTURE) and u.isAlive() and u.isVisible(owner) and IsUnitEnemy(u, owner)
+                    if u.isType(UNIT_TYPE_HERO)
+                        currentValue += heroValue
+                    else
+                        currentValue++
+
+    nearby.destr()
+    g.destr()
+
+    return targetPoint(unitPos, currentValue)
+
+
+
+public function unit.findTarget(real range, AbilityTargetFocus focus, AbilityTargetPriority priority, Filter filter) returns unit
+    let g = CreateGroup()
+    let pos = this.getPos()
+
+    real currentPrio = 0
+    unit currentTarget = null
+    real newPrio
+    boolean valid
+
+    unit u
+    g.enumUnitsInRange(pos, range)
+    while(true)
+        u = FirstOfGroup(g)
+        if u == null
+            break
+        g.removeUnit(u)
+        newPrio = 0
+        valid = false
+        if not u.isType(UNIT_TYPE_STRUCTURE) and u.isAlive() and u.isVisible(this.getOwner())
+            if focus == AbilityTargetFocus.ALLY_HERO and u.isType(UNIT_TYPE_HERO) and u.getOwner().isAllyOf(this.getOwner()) and u!=this
+                valid = true
+            else if focus == AbilityTargetFocus.ALLY_UNIT and not u.isType(UNIT_TYPE_HERO) and u.getOwner().isAllyOf(this.getOwner()) and u.getOwner() != this.getOwner()
+                valid = true
+            else if focus == AbilityTargetFocus.ALLY and u.getOwner().isAllyOf(this.getOwner()) and u.getOwner() != this.getOwner()
+                valid = true
+            else if focus == AbilityTargetFocus.FRIEND_HERO and u.isType(UNIT_TYPE_HERO) and (u.getOwner().isAllyOf(this.getOwner()) or u.getOwner() == this.getOwner())
+                valid = true
+            else if focus == AbilityTargetFocus.FRIEND_UNIT and not u.isType(UNIT_TYPE_HERO) and (u.getOwner().isAllyOf(this.getOwner()) or u.getOwner() == this.getOwner())
+                valid = true
+            else if focus == AbilityTargetFocus.FRIEND and (u.getOwner().isAllyOf(this.getOwner()) or u.getOwner() == this.getOwner())
+                valid = true
+            else if focus == AbilityTargetFocus.ENEMY_HERO and u.isType(UNIT_TYPE_HERO) and u.getOwner().isEnemyOf(this.getOwner()) and not u.isType(UNIT_TYPE_ANCIENT)
+                valid = true            
+            else if focus == AbilityTargetFocus.ENEMY_UNIT and not u.isType(UNIT_TYPE_HERO) and u.getOwner().isEnemyOf(this.getOwner()) and not u.isType(UNIT_TYPE_ANCIENT)
+                valid = true
+            else if focus == AbilityTargetFocus.ENEMY and u.getOwner().isEnemyOf(this.getOwner()) and not u.isType(UNIT_TYPE_ANCIENT)
+                valid = true
+
+        if filter != null
+            valid = valid and filter.filter(u)
+
+        if valid
+            if priority == AbilityTargetPriority.LOW_HEALTH
+                newPrio = 1/u.getHP()
+            else if priority == AbilityTargetPriority.LOW_DISTANCE
+                newPrio = 1/u.getPos().distanceTo(pos)
+            else if priority == AbilityTargetPriority.HIGH_VALUE
+                let uType = UnitType.get(u.getTypeId())
+                if uType != null
+                    newPrio = uType.getBounty().toReal()
+                else
+                    newPrio = 0
+            else if priority == AbilityTargetPriority.HIGH_HEALTH
+                newPrio = u.getHP()
+
+
+        if newPrio > currentPrio
+            currentTarget = u
+            currentPrio = newPrio
+
+
+
+        
+    if filter != null
+        destroy filter
+
+
+    g.destr()
+    return currentTarget
 
 class TeamFight
 
@@ -538,8 +643,8 @@ public class HeroAIImpl implements IHeroAI
                     this.changeState(AIState.BUY_UPGRADES)
                     if(not this.noMoreUpgrades)
                         this.upgradeTimer = 4
-                        this.desiredUpgrade = HeroAIImpl.findNextUpgrade(this.team)
-                        this.targetBlacksmith = HeroAIImpl.findNextBlacksmith(this.team, this.heroUnit.getPos())
+                        this.desiredUpgrade = Blacksmith.findNextUpgrade(this.team)
+                        this.targetBlacksmith = Blacksmith.findNextBlacksmith(this.team, this.heroUnit.getPos())
                         if this.desiredUpgrade == -1 or this.targetBlacksmith == null
                             this.noMoreUpgrades = true
                             this.wantedUpgrades = 0
@@ -563,8 +668,8 @@ public class HeroAIImpl implements IHeroAI
                     let dist = this.heroUnit.getPos().distanceTo(smithPos)
                     if dist<300
                         if this.upgradeTimer > 0
-                            this.desiredUpgrade = HeroAIImpl.findNextUpgrade(this.team)
-                            this.targetBlacksmith = HeroAIImpl.findNextBlacksmith(this.team, this.heroUnit.getPos())
+                            this.desiredUpgrade = Blacksmith.findNextUpgrade(this.team)
+                            this.targetBlacksmith = Blacksmith.findNextBlacksmith(this.team, this.heroUnit.getPos())
                             if this.desiredUpgrade == -1 or this.targetBlacksmith == null
                                 this.noMoreUpgrades = true
                                 this.wantedUpgrades = 0
@@ -732,43 +837,6 @@ public class HeroAIImpl implements IHeroAI
                 this.upgradeGold -= 5000
 
                 //print(this.heroUnit.getOwner().getColor().toColor().toColorString()+"["+this.heroUnit.getName()+"]|r "+" wants upgrades: "+I2S(this.wantedUpgrades))
-
-    private static function findNextUpgrade(int team) returns int
-
-        let teamPlayer = players[Teams.army(team)]
-        int array upgrades
-        int max = 5
-        int index = -1
-        for i = 0 to 3
-            upgrades[i] = GetPlayerTechCount(teamPlayer, UPGRADES[i], true)
-            if upgrades[i] < max
-                max = upgrades[i]
-                index = i
-
-        int ret = -1
-        if index != -1
-            ret = UPGRADE_ITEMS[index]
-
-        return ret
-
-    private static function findNextBlacksmith(int team, vec2 pos) returns unit
-        unit ret = null
-        real minDist = 1000000
-        if team == TEAM_1
-            for i=0 to 1
-                if blacksmithAlive[i]
-                    let dist = pos.distanceTo(blacksmith[i].getPos())
-                    if dist < minDist 
-                        minDist = dist
-                        ret = blacksmith[i]
-        else
-            for i=2 to 3
-                if blacksmithAlive[i]
-                    let dist = pos.distanceTo(blacksmith[i].getPos())
-                    if dist < minDist 
-                        minDist = dist
-                        ret = blacksmith[i]
-        return ret
 
 
 /*
@@ -947,6 +1015,14 @@ function determineHeroStrength(unit hero) returns real
 
 
     return ret
+
+public function unit.toHeroAI() returns IHeroAI
+    return HeroAIImpl.getAI(this)
+public abstract class HeroAI
+    static function getAiList(int i) returns LinkedList<IHeroAI>
+        return HeroAIImpl.getAiList(i)
+    static function create(IHero hero, aidifficulty diff) returns IHeroAI
+        return new HeroAIImpl(hero, diff)
 
 init
     HeroAIImpl.classInit()

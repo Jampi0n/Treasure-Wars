@@ -9,11 +9,10 @@ import LinkedList
 import RecommendedItems
 import Preloader
 import Stats
-import initlater UnitLib
 import initlater DynamicTooltips
-import initlater IHeroAI
+import IHero
 import initlater PickHero
-import initlater IHeroType
+import IUnit
 
 int array SLOT_ID
 string array BUTTON_ORDER_STRING
@@ -308,6 +307,18 @@ function initOrderStrings()
     BUTTON_ORDER_STRING[9] = "chainlightning"
     BUTTON_ORDER_STRING[10] = "charm"
     BUTTON_ORDER_STRING[11] = "clusterrockets"
+
+public class HeroType
+    static function get(int unitTypeId) returns IHeroType
+        return HeroTypeImpl.getHeroType(unitTypeId)
+    static function create(int unitTypeId, string icon, int heroId, bool hasAI) returns IHeroType
+        return new HeroTypeImpl(unitTypeId, icon, heroId, hasAI)
+    static function getNumberOfTypes() returns int
+        return HeroTypeImpl.getHeroTypeCount()
+    static function getNthType(int i) returns IHeroType
+        return HeroTypeImpl.getNthHeroType(i)
+    static function getAbilityOffset(int heroId) returns int
+        return HeroTypeImpl.getAbilityOffset(heroId)
 
 init
     initBeforeHeroType()

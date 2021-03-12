@@ -6,14 +6,17 @@ import HashMap
 import ShopGUI
 import ShopManager
 import ErrorHandling
-import IHeroAI
+import HeroAIImpl
 import DynamicTooltips
-import HeroLib
 import TeamUtil
 import Constants
 import PlayerControl
 import UnitLib
 import BuffTypeConfig
+import IHero
+import HeroImpl
+import HeroTypeImpl
+import UnitImpl
 
 public PickMode pickMode
 timer chooseModeTimer

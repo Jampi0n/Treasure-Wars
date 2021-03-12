@@ -1,8 +1,6 @@
 package IUnit
 
 import Stats
-import Buff
-import UnitImpl
 
 public interface CalculateTotalBonus
     function calculate(IUnit u, Stat whichStat)
@@ -188,8 +186,4 @@ public interface IUnit
     function setStatAbsoluteBonusRealInternal(Stat whichStat, int value)
     function setStatRelativeBonusInternal(Stat whichStat, int value)
 
-public function unit.wrapper() returns IUnit
-    return UnitImpl.getWrapper(this)
-public function unit.getBuffList() returns BuffList
-    return UnitImpl.getBuffList(this)
 

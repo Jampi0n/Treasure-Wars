@@ -1,12 +1,11 @@
 package PlayerControl
 
 import LinkedList
-import MultiboardTables
+import initlater MultiboardTables
 import TeamUtil
 import Constants
 
-import initlater HeroLib
-import initlater IHeroAI
+import IHero
 
 /*
 * This package handles players
@@ -25,7 +24,8 @@ public enum PlayerType
 constant EMPTY_INT_LIST = new LinkedList<int>
 
 
-
+public interface OnGoldEarned
+    function onGoldEarned(int playerId, int goldAmount)
 
 public abstract class PlayerWrapper  
     /*static constant team1HeroPlayers = new LinkedList<int>
@@ -33,6 +33,7 @@ public abstract class PlayerWrapper
 
     static int team1HeroCount = 0
     static int team2HeroCount = 0*/
+    static LinkedList<OnGoldEarned> onGoldEarned = new LinkedList<OnGoldEarned>()
 
     static int array unitKills
     static int array heroKills
@@ -160,8 +161,8 @@ public abstract class PlayerWrapper
     static function addGoldEx(int id, int gold)
         players[id].addGold(gold)
         statGoldGained[id] += gold
-        for ai in HeroAI.getAiList(id)
-            ai.addGold(gold)
+        for c in onGoldEarned
+            c.onGoldEarned(id, gold)
 
 
 function initPlayers()

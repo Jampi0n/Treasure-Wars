@@ -4,9 +4,9 @@ import HashMap
 import Constants
 import StandardTextTags
 import Assets
-import initlater PlayerControl
-import initlater TeamUtil
-import initlater IUnitType
+import PlayerControl
+import TeamUtil
+import IUnitType
 
 public class UnitTypeImpl implements IUnitType
 
@@ -127,6 +127,24 @@ function onUnitDeath()
             //xp
             if killerIsHero == 1 or not killingUnit.isType(UNIT_TYPE_STRUCTURE)
                 Teams.rewardXp(Teams.invert(dyingTeam), pos, xp)
+
+public abstract class UnitType
+    static function get(int unitTypeId) returns IUnitType
+        return UnitTypeImpl.getUnitType(unitTypeId)
+    static function create(int baseHp, int unitId, int bounty, int baseAttack, int upgradeAttack, int attackUpgradeId, int  baseArmor, int upgradeArmor, int armorUpgradeId, int hitBox, string modelPath, int powerLevel) returns IUnitType
+        return new UnitTypeImpl(baseHp, unitId, bounty, baseAttack, upgradeAttack, attackUpgradeId, baseArmor, upgradeArmor, armorUpgradeId, hitBox, modelPath, powerLevel)
+
+public function createUnitTypeAndReturnId(int baseHp, int unitId, int bounty, int baseAttack, int upgradeAttack, int attackUpgradeId, int baseArmor, int upgradeArmor, int armorUpgradeId, int hitBox, string modelPath, int powerLevel) returns int
+    UnitType.create(baseHp, unitId, bounty, baseAttack, upgradeAttack, attackUpgradeId, baseArmor, upgradeArmor, armorUpgradeId, hitBox, modelPath, powerLevel)
+    return unitId
+
+public function createUnitTypeAndReturnId(int baseHp, int unitId, int bounty, int baseAttack, int baseArmor, int hitBox, string modelPath, int powerLevel) returns int
+    UnitType.create(baseHp, unitId, bounty, baseAttack, 0, 0, baseArmor, 0, 0, hitBox, modelPath, powerLevel)
+    return unitId
+
+public function createUnitTypeAndReturnId(int unitId) returns int
+    UnitType.create(100, unitId, 0, 0, 0, 0, 0, 0, 0, 32, "", 0)
+    return unitId
 
 init
     CreateTrigger()

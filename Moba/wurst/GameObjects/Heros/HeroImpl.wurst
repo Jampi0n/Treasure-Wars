@@ -9,11 +9,12 @@ import Execute
 import Constants
 import LinkedList
 import Stats
-import initlater IHero
-import initlater IHeroType
-import initlater TeamUtil
-import initlater UnitLib
-import initlater PlayerControl
+import UnitImpl
+import IHero
+import HeroTypeImpl
+import TeamUtil
+import UnitLib
+import PlayerControl
 
 constant HP_PER_LEVEL = 15
 constant STRENGTH_BONUS = 45
@@ -440,6 +441,24 @@ public class HeroImpl implements IHero
             let heroUnit = hero.toUnit()
             heroType.updateTooltipsStr(heroUnit)
             heroType.updateTooltipsInt(heroUnit)
+
+public function unit.toHero() returns IHero
+    return HeroImpl.getHero(this)
+        
+public abstract class Hero
+    static function create(int playerId, int unitId, vec2 pos, angle facing) returns IHero
+        return new HeroImpl(playerId, unitId, pos, facing)
+
+    static function setup(unit u) returns IHero
+        return new HeroImpl(u)
+
+    static function copyInventory(unit copyFrom, unit copyTo)
+        for i = 0 to 5
+            let itm = copyTo.itemInSlot(i)
+            let itmId = copyFrom.itemInSlot(i).getTypeId()
+            if itm.getTypeId() != itmId
+                itm.remove()
+                copyTo.addItemToSlot(itmId, i)
 
 init
     HeroImpl.classInit()

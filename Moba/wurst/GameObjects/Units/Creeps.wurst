@@ -14,7 +14,9 @@ import UnitTypeConfig
 import Constants
 import PlayerControl
 import TeamUtil
-import HeroLib
+import UnitImpl
+import UnitTypeImpl
+import HeroImpl
 import FastDamageEvent
 
 constant int DUMMY_CASTER = compiletime(UNIT_ID_GEN.next())

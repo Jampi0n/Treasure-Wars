@@ -9,9 +9,16 @@ import public HeroObjectEditing
 import public Assets
 import public AbilityObjEditing
 import public LinkedList
-import public initlater IHeroAI
+import public IHero
+import public HeroImpl
+import public HeroTypeImpl
+import public IUnit
+import public UnitImpl
+import public IUnitType
+import public UnitTypeImpl
+import public HeroAIImpl
 import public ItemIds
-import public initlater PickHero
+import public PickHero
 import public GeneralEvents
 import public Missile
 import public SoundUtils
@@ -36,6 +43,7 @@ import public ObjectEditingPreset
 import public ObjectIds
 import public ObjectIdGenerator
 import public FastDamageEvent
+import public DynamicTooltips
 
 public function delayInit(real maxDelay, CallbackSingle cb)
     doAfter(GetRandomReal(1, maxDelay), cb)

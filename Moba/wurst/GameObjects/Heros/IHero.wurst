@@ -1,7 +1,61 @@
 package IHero
 
-import IHeroType
-import HeroImpl
+import LinkedList
+import IUnit
+import FastDamageEvent
+import Stats
+
+public enum AbilitySlot
+    Q
+    W
+    E
+    R
+    PASSIVE
+
+public interface AIBehaviour
+    function run(IHeroAI ai)
+
+public interface OnCreateFunction
+    function onCreate(IHero hero)
+
+public interface OnInitFunction
+    function onInit()
+
+public interface IHeroType
+    function initialize()
+    function addMorph(int id)
+    function setBase(Stat stat, integer value)
+    function getBase(Stat stat) returns integer
+    function setMax(Stat stat, integer value)
+    function getMax(Stat stat) returns integer
+    function setStat(Stat stat, integer min, integer max)
+    function getUnitId() returns integer
+    function setOnAttackFunc(DamageFunction onAttack)
+    function calculateStat(Stat stat, integer level) returns integer
+    function setBonusCalculation(CalculateTotalBonus bonusCalculation)
+    function getBonusCalculation() returns CalculateTotalBonus
+    function setOnCreateFunction(OnCreateFunction onCreate)
+    function getOnCreateFunction() returns OnCreateFunction
+    function setOnInitFunction(OnInitFunction onInit)
+    function getOnInitFunction() returns OnInitFunction
+    function getIcon() returns string
+    function getHeroId() returns int
+    function hasAI() returns boolean
+    function setRetreatAI(AIBehaviour ai)
+    function setAttackAI(AIBehaviour ai)
+    function setTeamFightAI(AIBehaviour ai)
+    function retreatAI(IHeroAI ai)
+    function attackAI(IHeroAI ai)
+    function teamFightAI(IHeroAI ai)
+    function getItemBuild() returns LinkedList<int>
+    function getSkillBuild() returns string
+    function addItem(int itemId)
+    function setSkillBuild(string skillBuild)
+    function updateTooltipsStr(unit whichUnit)
+    function updateTooltipsInt(unit whichUnit)
+    function getAbilityId(AbilitySlot slot) returns int
+    function useHeroGlow()
+    function getUsesHeroGlow() returns boolean
 
 public interface IHero
     function toString() returns string
@@ -12,22 +66,64 @@ public interface IHero
     function updateCooldowns()
     function toUnit() returns unit
 
+public enum Lane
+    TOP
+    MID
+    BOT
 
-public function unit.toHero() returns IHero
-    return HeroImpl.getHero(this)
+public enum AbilityTargetType
+    INSTANT
+    UNIT
+    AREA
+    LINE
 
-public abstract class Hero
-    static function create(int playerId, int unitId, vec2 pos, angle facing) returns IHero
-        return new HeroImpl(playerId, unitId, pos, facing)
+public enum AbilityTargetFocus
+    SELF
+    ALLY_HERO
+    ALLY_UNIT
+    ALLY
+    FRIEND_HERO
+    FRIEND_UNIT
+    FRIEND
+    ENEMY_HERO
+    ENEMY_UNIT
+    ENEMY
 
-    static function setup(unit u) returns IHero
-        return new HeroImpl(u)
+public enum AbilityTargetPriority
+    LOW_HEALTH
+    LOW_DISTANCE
+    HIGH_VALUE
+    HIGH_HEALTH
 
-    static function copyInventory(unit copyFrom, unit copyTo)
-        for i = 0 to 5
-            let itm = copyTo.itemInSlot(i)
-            let itmId = copyFrom.itemInSlot(i).getTypeId()
-            if itm.getTypeId() != itmId
-                itm.remove()
-                copyTo.addItemToSlot(itmId, i)
 
+public interface Filter
+    function filter(unit u) returns boolean
+
+
+public tuple targetPoint(vec2 pos, int value)
+
+public function targetPoint.getValue() returns int
+    return this.value
+
+public function targetPoint.getPos() returns vec2
+    return this.pos
+
+public interface IHeroAI
+    function aiMessage(string _msg)
+    function getHomeLoc() returns vec2
+    function getTargetLoc() returns vec2
+    function getOwningPlayer() returns player
+    function getHero() returns IHero
+    function getHeroUnit() returns unit
+    function getCasting() returns boolean
+    function getAttacking() returns boolean
+    function getTeamFightLoc() returns vec2
+    function getTeamFightTarget() returns unit
+    function attackedByTower()
+    function buyItems()
+    function issue(string order) returns boolean
+    function issue(string order, vec2 target) returns boolean
+    function issue(string order, widget targetWidget) returns boolean
+    function attack(widget targetWidget) returns boolean
+    function togglePause()
+    function addGold(int gold)
