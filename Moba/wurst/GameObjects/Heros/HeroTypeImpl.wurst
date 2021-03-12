@@ -369,6 +369,40 @@ public function addButtonToTavern(int heroId, int buttonPos, IHeroType heroType,
                 print("error")
                 error("Tooltip for hero " + GetObjectName(heroType.getUnitId()) + " was not correctly generated.")
 
+public function addDynamicTooltipStrength(IHeroType herotype, DynamicTooltip tooltip)
+    HeroTypeImpl.addDynamicTooltipStrength(herotype, tooltip)
+                    
+public function addDynamicTooltipIntelligence(IHeroType herotype, DynamicTooltip tooltip)
+    HeroTypeImpl.addDynamicTooltipIntelligence(herotype, tooltip)
+
+public function addDynamicTooltipBoth(IHeroType herotype, DynamicTooltip tooltip)
+    HeroTypeImpl.addDynamicTooltipBoth(herotype, tooltip)
+
+public function createHeroButton(int heroId, int buttonPos, string icon)
+    HeroTypeImpl.createHeroButton(heroId, buttonPos, icon)
+
+function charToAbilitySlot(string char) returns AbilitySlot
+    AbilitySlot ret = AbilitySlot.PASSIVE
+    let s = char.toUpperCase()
+    if s == "Q"
+        ret = AbilitySlot.Q
+    else if s == "W"
+        ret = AbilitySlot.W
+    else if s == "E"
+        ret = AbilitySlot.E
+    else if s == "R"
+        ret = AbilitySlot.R
+    else if s == "D"
+        ret = AbilitySlot.PASSIVE
+    else
+        error("unknown skill slot: "+char)
+
+    return ret
+
+public function delayInit(real maxDelay, CallbackSingle cb)
+    doAfter(GetRandomReal(1, maxDelay), cb)
+            
+
 init
     buttonToHeroType = new HashMap<int, IHeroType>()
     for i = 0 to 47

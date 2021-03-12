@@ -33,7 +33,6 @@ import public StandardBuffs
 import public UnitLib
 import public AbilityScaling
 import public BuffTypeConfig
-import public HeroLib
 import public UnitTypeConfig
 import public Constants
 import public TeamUtil
@@ -42,6 +41,3 @@ import public ObjectIds
 import public ObjectIdGenerator
 import public FastDamageEvent
 import public DynamicTooltips
-
-public function delayInit(real maxDelay, CallbackSingle cb)
-    doAfter(GetRandomReal(1, maxDelay), cb)
