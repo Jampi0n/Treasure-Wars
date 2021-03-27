@@ -31,15 +31,6 @@ public interface IUnit
     function getBonusCalculation() returns CalculateTotalBonus
     function defaultBonusCalcualtion(Stat whichStat)
     
-    // deprecated stat API
-    @deprecated function updateTotalStatBonus(Stat whichStat)
-    @deprecated function addStatAbsoluteBonusReal(Stat whichStat, int plusValue)
-    @deprecated function addStatAbsoluteBonus(Stat whichStat, int plusValue)
-    @deprecated function addStatRelativeBonus(Stat whichStat, int plusValue)
-    @deprecated function getStatBaseValue(Stat whichStat) returns int
-    @deprecated function getStatTotalBonus(Stat whichStat) returns int
-    @deprecated function getStatTotalValue(Stat whichStat) returns int
-    
     function printStats()
     function printStat(Stat whichStat)
     function toUnit() returns unit

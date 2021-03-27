@@ -240,28 +240,6 @@ public class UnitImpl implements IUnit
         let factor = this.getStatRelativeBonus(whichStat) / 1000
         UnitImpl.setStatBonusInternal(whichStat, (this.getStatAbsoluteBonus(whichStat) * (1+factor) + this.getStatBase(whichStat) * factor).round() )
 
-    /**
-    Updates the total stat bonus based on base stat, absolute stat bonus and relative stat bonus
-    **/
-    @deprecated
-    override function updateTotalStatBonus(Stat whichStat)
-
-    /**
-    If real values are needed, the variable statsAbsoluteBonusReal keeps track of the bonus and increases the standard int value,
-    as soon as it is over 1.
-    **/  
-    @deprecated
-    override function addStatAbsoluteBonusReal(Stat whichStat, int plusValue)
-        modStatFractionDispatch(whichStat, plusValue)
-            
-    @deprecated
-    override function addStatAbsoluteBonus(Stat whichStat, int plusValue)
-        modStatDispatch(whichStat, plusValue)
-
-    @deprecated
-    override function addStatRelativeBonus(Stat whichStat, int plusValue)
-        modStatRelativeDispatch(whichStat, plusValue)
-
     override function printStats()
         for i = 0 to STAT_COUNT-1
             printStat(i castTo Stat)
@@ -272,18 +250,6 @@ public class UnitImpl implements IUnit
 
     override function toUnit() returns unit
         return this.assocUnit
-    
-    @deprecated
-    override function getStatBaseValue(Stat whichStat) returns int
-        return getStatBase(whichStat)
-
-    @deprecated
-    override function getStatTotalBonus(Stat whichStat) returns int
-        return getStatBonus(whichStat)
-
-    @deprecated
-    override function getStatTotalValue(Stat whichStat) returns int
-        return getStat(whichStat)
 
     override function copyBaseStatsFrom(IUnit wrapper)
         for i = 0 to STAT_COUNT - 1
