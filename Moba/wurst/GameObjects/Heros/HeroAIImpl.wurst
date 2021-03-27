@@ -521,12 +521,13 @@ public class HeroAIImpl implements IHeroAI
         for i = 0 to RecommendedItems.getCount(unitTypeId) - 1
             let itm = RecommendedItems.getItem(unitTypeId, i)
             if not this.heroUnit.hasItemById(itm.getItemId())
-                let bought = heroIssueBuyItem(this.heroUnit, itm, null, null)
-                if bought == null
+                let bought = heroTryBuy(this.heroUnit, itm)
+                if bought == 0
                     break
                 else
                     if i == RecommendedItems.getCount(unitTypeId) - 1
-                        hasAllItems = true
+                        if this.heroUnit.hasItemById(itm.getItemId())
+                            hasAllItems = true
 
     private function selectSingleSkill(string char)
         int abilcode = -1

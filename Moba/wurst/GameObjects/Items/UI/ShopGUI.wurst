@@ -27,6 +27,11 @@ public interface BuySuccess
 public interface BuyFailed
     function failed(unit hero, int itemId, int cost, int gold)
 
+/**
+Buys the item for the hero, if the hero has enough gold.
+Required items are considered and used to reduce the cost.
+Executes buySuccess or buyFailed depending on the outcome.
+**/
 public function heroIssueBuyItem(unit hero, ItemInShop itm, BuySuccess buySuccess, BuyFailed buyFailed) returns item
     if hero == null
         return null
@@ -95,7 +100,46 @@ function heroRemoveRequiredItems(unit hero, ItemInShop itm)
 
     heroRemoveRequiredItemsHelp(itm)
 
+int array heroTryBuyItemsSlotItemId
+int heroTryBuyItemsFreeSlots = 0
+unit heroTryBuyItemsHero
 
+function heroTryBuySetup(unit hero)
+    heroTryBuyItemsHero = hero
+    heroTryBuyItemsFreeSlots = 0
+    for slot = 0 to 5
+        heroTryBuyItemsSlotItemId[slot] = hero.itemInSlot(slot).getTypeId()
+        if heroTryBuyItemsSlotItemId[slot] == 0
+            heroTryBuyItemsFreeSlots += 1
+
+function heroTryBuy(ItemInShop itm) returns int
+    let currentCost = getItemCostForHero(heroTryBuyItemsHero, itm)
+    let totalCost = itm.getTotalCost()
+    // if currentCost < totalCost, then the hero has at least one required item, whose space can be used for the final item
+    if currentCost < totalCost or heroTryBuyItemsFreeSlots > 0
+        let gold = heroTryBuyItemsHero.getOwner().getGold()
+        if gold >= currentCost
+            heroIssueBuyItem(heroTryBuyItemsHero, itm, null, null)
+            return 1
+        else
+            int ret = 0
+            for ItemInShop required in itm.getRequirements()
+                if not heroTryBuyItemsHero.hasItemById(required.getItemId())
+                    let bought = heroTryBuy(required)
+                    if bought > 0
+                        heroTryBuySetup(heroTryBuyItemsHero)
+                        ret = 2
+            return ret
+    return 0
+
+/**
+Attempts to buy the item for the hero. If not enough gold is available,
+required items are attempted to be bought instead. Only buys items, if
+there is space (considers freed space by required items).
+**/
+public function heroTryBuy(unit hero, ItemInShop itm) returns int
+    heroTryBuySetup(hero)
+    return heroTryBuy(itm)
 
 /*
     A hero inventory is a virtual container that stores the number of each item type a hero has.
