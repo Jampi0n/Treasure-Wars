@@ -229,8 +229,6 @@ public abstract class DamageEvent
     protected static function onDamage()
         let source = GetEventDamageSource()
         let target = GetTriggerUnit()
-        if not filterDamageEvent(source, target)
-            return
         real damage = GetEventDamage()
         bool attack = false
         bool alternate = false

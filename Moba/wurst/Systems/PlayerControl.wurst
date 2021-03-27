@@ -498,3 +498,4 @@ public class ScoreTable
 
 init
     initPlayers()
+    doAfter(0, () -> ScoreTable.create())
