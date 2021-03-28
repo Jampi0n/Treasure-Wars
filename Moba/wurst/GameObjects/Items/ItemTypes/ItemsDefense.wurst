@@ -20,7 +20,7 @@ function itemArcaneShield()
 
 function enchantedArmor()
     let mp = 125
-    let hp = 350
+    let hp = 375
     let ar = 25
     let intel = 20
     setupItem(ITEM_ID_ENCHANTED_ARMOR, CATEGORY, 3950)
@@ -37,7 +37,7 @@ function enchantedArmor()
 
 function voidArmor()
     let mp = 150
-    let hp = 275
+    let hp = 300
     let ar = 20
     let wp = 20
     let dmgReduction = 10 // -> onAttack
@@ -234,7 +234,7 @@ function ancientStoneTablet()
 
 function battlemageArmor()
     let mp = 75
-    let hp = 180
+    let hp = 215
     let ar = 15
     setupItem(ITEM_ID_BATTLEMAGE_ARMOR, CATEGORY, 1700)
     setInfo("Battlemage Armor", "+ {0} mana points|n+ {1} hit points|n+ {2} armor"
