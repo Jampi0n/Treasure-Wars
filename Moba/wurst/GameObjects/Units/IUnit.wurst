@@ -57,6 +57,7 @@ public interface IUnit
     function modMana(int modifier)
     function modHealthRegen(int modifier)
     function modManaRegen(int modifier)
+    function modCooldown(int modifier)
 
     // modify stat by changing the stat multiplier (in 1/1000)
     // e.g. modifier=100 means +10%
@@ -74,6 +75,8 @@ public interface IUnit
     function modManaRelative(int modifier)
     function modHealthRegenRelative(int modifier)
     function modManaRegenRelative(int modifier)
+    @deprecated("Cooldown only has an absolute modifier (which works as a relative one)")
+    function modCooldownRelative(int modifier)
 
     // modify stat by fractional value (in 1/1000)
     // e.g. modifier = 1000 is equivlent to using modStatDispatch() with modifier = 1
@@ -89,6 +92,7 @@ public interface IUnit
     function modManaFraction(int modifier)
     function modHealthRegenFraction(int modifier)
     function modManaRegenFraction(int modifier)
+    function modCooldownFraction(int modifier)
 
     // get current stat value
     function getStat(Stat whichStat) returns int
@@ -102,6 +106,7 @@ public interface IUnit
     function getMana() returns int
     function getHealthRegen() returns int
     function getManaRegen() returns int
+    function getCooldown() returns int
 
     // get total bonus value
     function getStatBonus(Stat whichStat) returns int
@@ -115,6 +120,7 @@ public interface IUnit
     function getManaBonus() returns int
     function getHealthRegenBonus() returns int
     function getManaRegenBonus() returns int
+    function getCooldownBonus() returns int
 
     // get base value
     function getStatBase(Stat whichStat) returns int
@@ -128,6 +134,7 @@ public interface IUnit
     function getManaBase() returns int
     function getHealthRegenBase() returns int
     function getManaRegenBase() returns int
+    function getCooldownBase() returns int
 
     // get absolute bonus value
     function getStatAbsoluteBonus(Stat whichStat) returns int
@@ -141,6 +148,7 @@ public interface IUnit
     function getManaAbsoluteBonus() returns int
     function getHealthRegenAbsoluteBonus() returns int
     function getManaRegenAbsoluteBonus() returns int
+    function getCooldownAbsoluteBonus() returns int
 
     // get realtive bonus value (in 1/1000)
     function getStatRelativeBonus(Stat whichStat) returns int
@@ -154,6 +162,8 @@ public interface IUnit
     function getManaRelativeBonus() returns int
     function getHealthRegenRelativeBonus() returns int
     function getManaRegenRelativeBonus() returns int
+    function getCooldownRelativeBonus() returns int
+
 
     // The following functions offer low level access
     // They are automatically executed for the "mod" functions 
@@ -172,6 +182,7 @@ public interface IUnit
     function updateMana()
     function updateHealthRegen()
     function updateManaRegen()
+    function updateCooldown()
 
     // apply stats
     // applies the current array values to the unit
@@ -187,6 +198,7 @@ public interface IUnit
     function applyMana()
     function applyHealthRegen()
     function applyManaRegen()
+    function applyCooldown()
 
     // These functions only update the arrays but do not update the stats. Be careful when using them.
     function setStatBonusInternal(Stat whichStat, int value)

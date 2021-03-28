@@ -60,6 +60,8 @@ public class HeroTypeImpl implements IHeroType
 
     private string icon = "ReplaceableTextures\\CommandButtons\\BTNSelectHeroOn.blp"
 
+    private bool array [4] allowCooldownChange
+
     protected constant dynamicIntelligence = new LinkedList<DynamicTooltip>
     protected constant dynamicStrength = new LinkedList<DynamicTooltip>
 
@@ -91,6 +93,9 @@ public class HeroTypeImpl implements IHeroType
         preloadUnit(this.getUnitId())
 
         this.recommendedItems = new RecommendedItems(unitId)
+
+        for i = 0 to 3
+            allowCooldownChange[i] = true
 
         heroTypes[heroTypeCount] = this
         heroTypeCount++
@@ -250,6 +255,11 @@ public class HeroTypeImpl implements IHeroType
     override function getAbilityId(AbilitySlot slot) returns int
         return getAbilityOffset(this.heroId) + SLOT_ID[slot castTo int]
 
+    override function disableCooldownChange(int skillIndex)
+        allowCooldownChange[skillIndex] = false
+
+    override function getAllowCooldownChange(int skillIndex) returns bool
+        return allowCooldownChange[skillIndex]
 
     static function addDynamicTooltipStrength(IHeroType herotype, DynamicTooltip tooltip)
         if herotype!=null

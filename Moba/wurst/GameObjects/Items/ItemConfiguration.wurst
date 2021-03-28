@@ -200,6 +200,8 @@ public function modHealthRegen(int modifier)
     getItemUnitWrapper().modHealthRegen(modifier * getItemSign())
 public function modManaRegen(int modifier)
     getItemUnitWrapper().modManaRegen(modifier * getItemSign())
+public function modCooldown(int modifier)
+    getItemUnitWrapper().modCooldown(modifier * getItemSign())
 
 public function modArmorRelative(int modifier)
     getItemUnitWrapper().modArmorRelative(modifier * getItemSign())

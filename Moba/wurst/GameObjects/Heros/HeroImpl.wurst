@@ -85,6 +85,7 @@ public class HeroImpl implements IHero
 
     private int array [5] skillIds
 
+    private bool array [4] allowCooldownChange
     private real array [4] defaultCooldown
     //modifies each cooldown seperately
     private real array [4] cooldownMod
@@ -108,6 +109,9 @@ public class HeroImpl implements IHero
             
             if unitToHero.has(heroUnit)
                 let hero = unitToHero.get(heroUnit)
+                for i = 0 to 3
+                    if hero.skillIds[i] == GetLearnedSkill()
+                        hero.defaultCooldown[i] = BlzGetUnitAbilityCooldown(heroUnit, hero.skillIds[i], GetLearnedSkillLevel()-1)
                 hero.updateCooldowns()
 
         end))
@@ -132,6 +136,7 @@ public class HeroImpl implements IHero
         for i = 0 to 3
             this.cooldownMod[i] = 0
             this.defaultCooldown[i] = 0
+            this.allowCooldownChange[i] = this.heroType.getAllowCooldownChange(i)
 
         execute( -> this.heroType.initialize())
         
@@ -427,10 +432,10 @@ public class HeroImpl implements IHero
     **  Changing cooldowns of morph abilities crashes the game, once they are used.
     */
     override function updateCooldowns()
-        /*
         for i = 0 to 3
-            real newCd = (this.defaultCooldown[i]+this.cooldownMod[i]) / (1.0+0.01*heroUnit.wrapper().getStatTotalValue(Stat.CD))
-            BlzSetUnitAbilityCooldown(heroUnit, skillIds[i], GetUnitAbilityLevel(heroUnit, skillIds[i]), newCd )  */
+            if allowCooldownChange[i]
+                let newCd = (this.defaultCooldown[i]+this.cooldownMod[i]) / (1.0+0.01*hero.wrapper().getCooldown())
+                BlzSetUnitAbilityCooldown(hero, skillIds[i], GetUnitAbilityLevel(hero, skillIds[i]) - 1, newCd )  
         
         /*
             Tooltips do not need to be updated instantly. This serves as a cooldown to prevent lag spikes.

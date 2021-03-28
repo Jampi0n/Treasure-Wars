@@ -16,6 +16,7 @@ import TeamUtil
 import IUnit
 import UnitTypeImpl
 import HeroTypeImpl
+import initlater HeroImpl
 
 
 /*
@@ -294,26 +295,24 @@ public class UnitImpl implements IUnit
         ..applyAttackSpeed()
         ..applyArmor()
         ..applyMoveSpeed()
+        ..applyCooldown()
+
     override function applyStatDispatch(Stat whichStat)
         switch whichStat
             case AR | AS | AGI
                 this.assocUnit.setBonusDispatchStat(whichStat, this.getStatBonus(whichStat))
             case STR
-                if this.heroType != null
-                    this.assocUnit.setBonusStrength(this.getStatBonus(whichStat))
-                    this.heroType.updateTooltipsStr(this.assocUnit)
-                else
-                    this.assocUnit.setBonusDamage(this.getStatBonus(whichStat))
+                this.applyStrength()
             case INT
-                if this.heroType != null
-                    this.assocUnit.setBonusIntelligence(this.getStatBonus(whichStat))
-                    this.heroType.updateTooltipsInt(this.assocUnit)
+                this.applyIntelligence()
             case MS
-                this.assocUnit.setMoveSpeed(this.getMoveSpeed().toReal())
+                this.applyMoveSpeed()
             case HP
-                this.assocUnit.setMaxHP(this.getHealth(), true)
+                this.applyHealth()
             case MP
-                this.assocUnit.setMaxMana(this.getMana(), true)
+                this.applyMana()
+            case CD
+                this.applyCooldown()
             default
 
     @inline override function applyArmor()
@@ -340,6 +339,9 @@ public class UnitImpl implements IUnit
         this.assocUnit.setMaxMana(this.getMana(), true)
     @inline override function applyHealthRegen()
     @inline override function applyManaRegen()
+    @inline override function applyCooldown()
+        if this.heroType != null
+            this.assocUnit.toHero().updateCooldowns()
 
     override function updateAll()
         this
@@ -353,6 +355,7 @@ public class UnitImpl implements IUnit
         ..updateAttackSpeed()
         ..updateArmor()
         ..updateMoveSpeed()
+        ..updateCooldown()
 
     override function updateStat(Stat whichStat)
         if this.bonusCalculation != null
@@ -380,6 +383,8 @@ public class UnitImpl implements IUnit
         updateStat(Stat.HR)
     @inline override function updateManaRegen()
         updateStat(Stat.MR)
+    @inline override function updateCooldown()
+        updateStat(Stat.CD)
 
     @inline private function modStatHelper(Stat whichStat, int modifier)
         setStatAbsoluteBonusInternal(whichStat, getStatAbsoluteBonus(whichStat) + modifier)
@@ -427,6 +432,10 @@ public class UnitImpl implements IUnit
         modStatHelper(Stat.MR, modifier)
         updateManaRegen()
         applyManaRegen()
+    @inline override function modCooldown(int modifier)
+        modStatHelper(Stat.CD, modifier)
+        updateCooldown()
+        applyCooldown()
 
     @inline private function modStatRelativeHelper(Stat whichStat, int modifier)
         setStatRelativeBonusInternal(whichStat, getStatRelativeBonus(whichStat) + modifier)
@@ -474,6 +483,10 @@ public class UnitImpl implements IUnit
         modStatRelativeHelper(Stat.MR, modifier)
         updateManaRegen()
         applyManaRegen()
+    @inline override function modCooldownRelative(int modifier)
+        modStatRelativeHelper(Stat.CD, modifier)
+        updateCooldown()
+        applyCooldown()
 
     private function modStatFractionHelper(Stat whichStat, int modifier)
         let arrayIndex = this.arrayOffset + whichStat.toInt()
@@ -490,41 +503,45 @@ public class UnitImpl implements IUnit
         updateArmor()
         applyArmor()
     @inline override function modAttackSpeedFraction(int modifier)
-        modStatFractionHelper(Stat.AR, modifier)
+        modStatFractionHelper(Stat.AS, modifier)
         updateAttackSpeed()
         applyAttackSpeed()
     @inline override function modStrengthFraction(int modifier)
-        modStatFractionHelper(Stat.AR, modifier)
+        modStatFractionHelper(Stat.STR, modifier)
         updateStrength()
         applyStrength()
     @inline override function modWillpowerFraction(int modifier)
-        modStatFractionHelper(Stat.AR, modifier)
+        modStatFractionHelper(Stat.AGI, modifier)
         updateWillpower()
         applyWillpower()
     @inline override function modIntelligenceFraction(int modifier)
-        modStatFractionHelper(Stat.AR, modifier)
+        modStatFractionHelper(Stat.INT, modifier)
         updateIntelligence()
         applyIntelligence()
     @inline override function modMoveSpeedFraction(int modifier)
-        modStatFractionHelper(Stat.AR, modifier)
+        modStatFractionHelper(Stat.MS, modifier)
         updateMoveSpeed()
         applyMoveSpeed()
     @inline override function modHealthFraction(int modifier)
-        modStatFractionHelper(Stat.AR, modifier)
+        modStatFractionHelper(Stat.HP, modifier)
         updateHealth()
         applyHealth()
     @inline override function modManaFraction(int modifier)
-        modStatFractionHelper(Stat.AR, modifier)
+        modStatFractionHelper(Stat.MP, modifier)
         updateMana()
         applyMana()
     @inline override function modHealthRegenFraction(int modifier)
-        modStatFractionHelper(Stat.AR, modifier)
+        modStatFractionHelper(Stat.HR, modifier)
         updateHealthRegen()
         applyHealthRegen()
     @inline override function modManaRegenFraction(int modifier)
-        modStatFractionHelper(Stat.AR, modifier)
+        modStatFractionHelper(Stat.MR, modifier)
         updateManaRegen()
         applyManaRegen()
+    @inline override function modCooldownFraction(int modifier)
+        modStatFractionHelper(Stat.CD, modifier)
+        updateCooldown()
+        applyCooldown()
 
     @inline override function getStat(Stat whichStat) returns int
         return this.getStatBase(whichStat) + this.getStatBonus(whichStat)
@@ -548,6 +565,8 @@ public class UnitImpl implements IUnit
         return this.getHealthRegenBase() + this.getHealthRegenBonus()
     @inline override function getManaRegen() returns int
         return this.getManaRegenBase() + this.getManaRegenBonus()
+    @inline override function getCooldown() returns int
+        return this.getCooldownBase() + this.getCooldownBonus()
 
     @inline override function getStatBonus(Stat whichStat) returns int
         return statsTotalBonus_static[this.arrayOffset + whichStat.toInt()]
@@ -571,6 +590,8 @@ public class UnitImpl implements IUnit
         return getStatBonus(Stat.HR)
     @inline override function getManaRegenBonus() returns int
         return getStatBonus(Stat.MR)
+    @inline override function getCooldownBonus() returns int
+        return getStatBonus(Stat.CD)
 
     @inline override function getStatBase(Stat whichStat) returns int
         return statBaseValue_static[this.arrayOffset + whichStat.toInt()]
@@ -594,6 +615,8 @@ public class UnitImpl implements IUnit
         return getStatBase(Stat.HR)
     @inline override function getManaRegenBase() returns int
         return getStatBase(Stat.MR)
+    @inline override function getCooldownBase() returns int
+        return getStatBase(Stat.CD)
 
     @inline override function getStatAbsoluteBonus(Stat whichStat) returns int
         return statsAbsoluteBonus_static[this.arrayOffset + whichStat.toInt()]
@@ -617,6 +640,8 @@ public class UnitImpl implements IUnit
         return getStatAbsoluteBonus(Stat.HR)
     @inline override function getManaRegenAbsoluteBonus() returns int
         return getStatAbsoluteBonus(Stat.MR)
+    @inline override function getCooldownAbsoluteBonus() returns int
+        return getStatAbsoluteBonus(Stat.CD)
 
     @inline override function getStatRelativeBonus(Stat whichStat) returns int
         return statsRelativeBonus_static[this.arrayOffset + whichStat.toInt()]
@@ -640,6 +665,8 @@ public class UnitImpl implements IUnit
         return getStatRelativeBonus(Stat.HR)
     @inline override function getManaRegenRelativeBonus() returns int
         return getStatRelativeBonus(Stat.MR)
+    @inline override function getCooldownRelativeBonus() returns int
+        return getStatRelativeBonus(Stat.CD)
 
     @inline override function setStatBonusInternal(Stat whichStat, int value)
         statsTotalBonus_static[this.arrayOffset + whichStat.toInt()] = value

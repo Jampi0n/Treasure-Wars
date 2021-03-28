@@ -55,7 +55,9 @@ public interface IHeroType
     function updateTooltipsInt(unit whichUnit)
     function getAbilityId(AbilitySlot slot) returns int
     function useHeroGlow()
-    function getUsesHeroGlow() returns boolean
+    function getUsesHeroGlow() returns bool
+    function disableCooldownChange(int skillIndex)
+    function getAllowCooldownChange(int skillIndex) returns bool
 
 public interface IHero
     function toString() returns string
