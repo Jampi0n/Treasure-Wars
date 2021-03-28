@@ -6,7 +6,8 @@ import TeamUtil
 import OnUnitEnterLeave
 import ErrorHandling
 
-constant SHOW_STATE_COLORS = false
+constant DEBUG_LINES = false
+constant DEBUG_TEXT = false
 constant UPDATE_INTERVAL = 2.0
 constant NUM_GROUPS = 8
 
@@ -16,12 +17,16 @@ enum PathState
     PATH
     ENEMY_TOWN
 
-constant DISTANCE_THRESHOLD = 360000 // squared
+constant DISTANCE_THRESHOLD = 640000 // squared
 
 constant TOP_X_THRESHOLD = gg_rct_CornerTopBrown.getCenterX()
 constant TOP_Y_THRESHOLD = gg_rct_CornerTopGreen.getCenterY()
 constant BOT_X_THRESHOLD = gg_rct_CornerBotGreen.getCenterX()
 constant BOT_Y_THRESHOLD = gg_rct_CornerBotBrown.getCenterY()
+constant TOP_Y_GREEN_FIRST = gg_rct_GreenTopFirst.getCenterY()
+constant TOP_X_BROWN_FIRST = gg_rct_BrownTopFirst.getCenterX()
+constant BOT_X_GREEN_FIRST = gg_rct_GreenBotFirst.getCenterX()
+constant BOT_Y_BROWN_FIRST = gg_rct_BrownBotFirst.getCenterY()
 
 public enum AssignedPath
     GREEN_TOP
@@ -40,20 +45,33 @@ enum PathStateNew
 function getPathStage(AssignedPath path, vec2 pos) returns int
     if path == GREEN_TOP or path == BROWN_TOP
         if pos.y < TOP_Y_THRESHOLD
-            return 1
+            if pos.y < TOP_Y_GREEN_FIRST
+                return 1
+            else
+                return 2
+
         else if pos.x > TOP_X_THRESHOLD
-            return 3
+            if pos.x > TOP_X_BROWN_FIRST
+                return 5
+            else
+                return 4
         else
-            return 2
+            return 3
     if path == GREEN_BOT or path == BROWN_BOT
         if pos.x < BOT_X_THRESHOLD
-            return 5
+            if pos.x < BOT_X_GREEN_FIRST
+                return 11
+            else
+                return 12
         else if pos.y > BOT_Y_THRESHOLD
-            return 7
+            if pos.y > BOT_Y_BROWN_FIRST
+                return 15
+            else
+                return 14
         else
-            return 6
+            return 13
     if path == GREEN_MID or path == BROWN_MID
-        return 4
+        return 8
 
     error("no matching path")
 
@@ -68,25 +86,49 @@ vec2 array targetPoint
 vec2 array finalPoint
 
 function initTargetPoints()
-    targetPoint[2] = gg_rct_GreenCastle.getCenter()
-    targetPoint[3] = gg_rct_CornerTop.getCenter() + vec2(-400, 400)
-    targetPoint[4] = gg_rct_CornerTopGreen.getCenter() + vec2(-400, -400)
-    targetPoint[5] = gg_rct_CornerTopBrown.getCenter() + vec2(400, 400)
-    targetPoint[6] = gg_rct_CornerTop.getCenter() + vec2(-400, 400)
-    targetPoint[7] = gg_rct_BrownCastle.getCenter()
+    targetPoint[0] = gg_rct_GreenCastle.getCenter() + vec2(-500, -500)
+    targetPoint[1] = gg_rct_GreenCastle.getCenter() + vec2(-500, -500)
 
-    targetPoint[8] = gg_rct_GreenCastle.getCenter()
-    targetPoint[9] = gg_rct_BrownCastle.getCenter()
+    targetPoint[2] = gg_rct_GreenCastle.getCenter() + vec2(-500, -500)
+    targetPoint[3] = gg_rct_GreenTopFirst.getCenter() + vec2(0, 500)
+    targetPoint[4] = gg_rct_GreenTopFirst.getCenter() + vec2(0, -500)
+    targetPoint[5] = gg_rct_CornerTop.getCenter() + vec2(100, -100)
+    targetPoint[6] = gg_rct_CornerTopGreen.getCenter() + vec2(-400, -400)
+    targetPoint[7] = gg_rct_CornerTopBrown.getCenter() + vec2(400, 400)
+    targetPoint[8] = gg_rct_CornerTop.getCenter() + vec2(100, -100)
+    targetPoint[9] = gg_rct_BrownTopFirst.getCenter() + vec2(500, 0)
+    targetPoint[10] = gg_rct_BrownTopFirst.getCenter() + vec2(-500, 0)
+    targetPoint[11] = gg_rct_BrownCastle.getCenter() + vec2(500, 500)
 
-    targetPoint[10] = gg_rct_GreenCastle.getCenter()
-    targetPoint[11] = gg_rct_CornerBot.getCenter() + vec2(400, -400)
-    targetPoint[12] = gg_rct_CornerBotGreen.getCenter() + vec2(-400, -400)
-    targetPoint[13] = gg_rct_CornerBotBrown.getCenter() + vec2(400, 400)
-    targetPoint[14] = gg_rct_CornerBot.getCenter() + vec2(400, -400)
-    targetPoint[15] = gg_rct_BrownCastle.getCenter()
+    targetPoint[12] = gg_rct_BrownCastle.getCenter() + vec2(500, 500)
+    targetPoint[13] = gg_rct_BrownCastle.getCenter() + vec2(500, 500)
 
-    finalPoint[Teams.army1()] = gg_rct_BrownCastle.getCenter()
-    finalPoint[Teams.army2()] = gg_rct_GreenCastle.getCenter()
+    targetPoint[14] = gg_rct_GreenCastle.getCenter() + vec2(-500, -500)
+    targetPoint[15] = gg_rct_GreenCastle.getCenter() + vec2(-500, -500)
+    targetPoint[16] = gg_rct_GreenCastle.getCenter() + vec2(-500, -500)
+    targetPoint[17] = gg_rct_BrownCastle.getCenter() + vec2(500, 500)
+    targetPoint[18] = gg_rct_BrownCastle.getCenter() + vec2(500, 500)
+    targetPoint[19] = gg_rct_BrownCastle.getCenter() + vec2(500, 500)
+
+    targetPoint[20] = gg_rct_GreenCastle.getCenter() + vec2(-500, -500)
+    targetPoint[21] = gg_rct_GreenCastle.getCenter() + vec2(-500, -500)
+
+    targetPoint[22] = gg_rct_GreenCastle.getCenter() + vec2(-500, -500)
+    targetPoint[23] = gg_rct_GreenBotFirst.getCenter() + vec2(500, 0)
+    targetPoint[24] = gg_rct_GreenBotFirst.getCenter() + vec2(-500, 0)
+    targetPoint[25] = gg_rct_CornerBot.getCenter() + vec2(-100, 100)
+    targetPoint[26] = gg_rct_CornerBotGreen.getCenter() + vec2(-400, -400)
+    targetPoint[27] = gg_rct_CornerBotBrown.getCenter() + vec2(400, 400)
+    targetPoint[28] = gg_rct_CornerBot.getCenter() + vec2(-100, 100)
+    targetPoint[29] = gg_rct_BrownBotFirst.getCenter() + vec2(0, 500)
+    targetPoint[30] = gg_rct_BrownBotFirst.getCenter() + vec2(0,-500)
+    targetPoint[31] = gg_rct_BrownCastle.getCenter() + vec2(500, 500)
+
+    targetPoint[32] = gg_rct_BrownCastle.getCenter() + vec2(500, 500)
+    targetPoint[33] = gg_rct_BrownCastle.getCenter() + vec2(500, 500)
+
+    finalPoint[Teams.army1()] = gg_rct_BrownCastle.getCenter() + vec2(500, 500)
+    finalPoint[Teams.army2()] = gg_rct_GreenCastle.getCenter() + vec2(-500, -500)
 
 function attackMoveGroup()
     let u = GetEnumUnit()
@@ -97,7 +139,7 @@ function attackMoveGroup()
         return
     let pos = u.getPos()
     let stage = getPathStage(pathUnit.path, pos)
-    let dist = pos.distanceToSegmentSq(targetPoint[stage*2], targetPoint[stage*2+1])
+    let dist = pathUnit.direction?pos.distanceToSegmentSq(targetPoint[stage*2-1], targetPoint[stage*2+1]):pos.distanceToSegmentSq(targetPoint[stage*2+2], targetPoint[stage*2])
     let index = pathUnit.index
 
     if dist <= DISTANCE_THRESHOLD
@@ -142,7 +184,7 @@ function returnMoveGroup()
         return
     let pos = u.getPos()
     let stage = getPathStage(pathUnit.path, pos)
-    let dist = pos.distanceToSegmentSq(targetPoint[stage*2], targetPoint[stage*2+1])
+    let dist = pathUnit.direction?pos.distanceToSegmentSq(targetPoint[stage*2-1], targetPoint[stage*2+1]):pos.distanceToSegmentSq(targetPoint[stage*2+2], targetPoint[stage*2])
     let index = pathUnit.index
 
     if dist <= DISTANCE_THRESHOLD
@@ -153,6 +195,7 @@ function returnMoveGroup()
                 returnMoveGroup[index].removeUnit(u)
                 siegeMoveGroup[index].addUnit(u)
             else
+                pathUnit.state = PathStateNew.ATTACK_MOVE
                 returnMoveGroup[index].removeUnit(u)
                 attackMoveGroup[index].addUnit(u)
             u.issuePointOrder("attack", targetPoint[stage*2+1])
@@ -224,12 +267,21 @@ public class PathUnitNew
     protected static constant unitToPathUnit = new HashMap<unit,PathUnitNew>
     protected bool direction
     protected bool attacking = false
+    protected texttag info
+    protected static PathUnitNew array allPathUnits
+    protected static int numPathUnits = 0
+    protected int staticArrayIndex
+    protected lightning currentLineSegment
 
     construct(unit whichUnit, AssignedPath path)
         this.index = (this castTo int) mod NUM_GROUPS
         this.whichUnit = whichUnit
         this.path = path
         this.state = PathStateNew.ATTACK_MOVE
+        if DEBUG_TEXT
+            this.info = createTTEx(this.whichUnit.getPos3with(10), "!", 1)
+        if DEBUG_LINES
+            this.currentLineSegment = addLightning(LIGHTNING_MAGIC_LEASH, false, vec2(0, 0), vec2(0,0))
         
         let stage = getPathStage(path, whichUnit.getPos())
         attackMoveGroup[this.index].addUnit(whichUnit)
@@ -242,14 +294,38 @@ public class PathUnitNew
             whichUnit.issuePointOrder("attack", targetPoint[stage*2])
             this.lastValidPos = targetPoint[stage*2+1]
 
+        staticArrayIndex = numPathUnits
+        allPathUnits[staticArrayIndex] = this
+        numPathUnits += 1
+
     ondestroy
         unitToPathUnit.remove(this.whichUnit)
-
-
+        allPathUnits[staticArrayIndex] = allPathUnits[numPathUnits-1]
+        numPathUnits -= 1
+        if DEBUG_TEXT
+            this.info.destr()
+        if DEBUG_LINES
+            this.currentLineSegment.destr()
 
 init
     initTargetPoints()
     initMovement()
+    if DEBUG_TEXT or DEBUG_LINES
+        doPeriodically(0.02) (CallbackPeriodic cb) ->
+            for i = 0 to PathUnitNew.numPathUnits-1
+                let p = PathUnitNew.allPathUnits[i]
+                let stage = getPathStage(p.path, p.whichUnit.getPos())
+                p.info.setPos(p.whichUnit.getPos3with(10))
+                if DEBUG_TEXT
+                    let pos = p.whichUnit.getPos()
+                    let dist = (p.direction?pos.distanceToSegmentSq(targetPoint[stage*2-1], targetPoint[stage*2+1]):pos.distanceToSegmentSq(targetPoint[stage*2+2], targetPoint[stage*2])).round()
+                    p.info.setText(stage.toString() + " " + (p.state castTo int).toString() + " " + dist.toString(), 10)
+                if DEBUG_LINES
+                    let start = p.direction?targetPoint[stage*2-1]:targetPoint[stage*2+2]
+                    let _end = p.direction?targetPoint[stage*2+1]:targetPoint[stage*2]
+                    p.currentLineSegment.move(false, start, _end)
+    
+        
 
     CreateTrigger()..registerAnyUnitEvent(EVENT_PLAYER_UNIT_ATTACKED)..addAction() ->
         let u = GetAttacker()
