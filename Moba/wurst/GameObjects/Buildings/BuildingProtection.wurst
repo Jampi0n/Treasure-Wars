@@ -1,0 +1,128 @@
+package BuildingProtection
+
+import LinkedList
+import HashMap
+import BuildingIds
+
+function unit.protects(vararg unit units)
+    let buildingList = new LinkedList<unit>()
+    buildingList.add(this)
+    let list = new LinkedList<unit>()
+    for unit u in units
+        list.add(u)
+    new BuildingProtection(buildingList, list, true)
+
+function LinkedList<unit>.protectsAnd(LinkedList<unit> units)
+    new BuildingProtection(this, units, true)
+
+function LinkedList<unit>.protectsOr(LinkedList<unit> units)
+    new BuildingProtection(this, units, false)
+
+function LinkedList<unit>.protectsAnd(vararg unit units)
+    let list = new LinkedList<unit>()
+    for unit u in units
+        list.add(u)
+    this.protectsAnd(list)
+
+function LinkedList<unit>.protectsOr(vararg unit units)
+    let list = new LinkedList<unit>()
+    for unit u in units
+        list.add(u)
+    this.protectsOr(list)
+
+class BuildingProtection
+    static function onDeath(unit building)
+        if protectorMap.has(building)
+            let protection = protectorMap.get(building)
+            if protection.requireAll
+                protection.buildings.remove(building)
+                if protection.buildings.isEmpty()
+                    destroy protection
+            else
+                destroy protection
+
+    private static constant protectorMap = new HashMap<unit,BuildingProtection>()
+    private static BuildingProtection array allInstances
+    private static int numInstances = 0
+    private int instanceIndex
+    private LinkedList<unit> buildings
+    private LinkedList<unit> protects
+    private bool requireAll
+
+    construct(LinkedList<unit> buildings, LinkedList<unit> protects, bool requireAll)
+        this.buildings = buildings
+        this.protects = protects
+        this.requireAll = requireAll
+        this.instanceIndex = numInstances
+        allInstances[this.instanceIndex] = this
+        numInstances++
+        for unit u in this.buildings
+            protectorMap.put(u, this)
+        for unit u in this.protects
+            UnitAddType(u, UNIT_TYPE_ANCIENT)
+            u.setInvulnerable(true)
+    
+    ondestroy
+        for unit u in this.buildings
+            protectorMap.remove(u)
+        for unit u in this.protects
+            UnitRemoveType(u, UNIT_TYPE_ANCIENT)
+            u.setInvulnerable(false)
+        destroy this.protects
+        destroy this.buildings
+        allInstances[this.instanceIndex] = allInstances[numInstances]
+        numInstances--
+
+function LinkedList<unit>.addFarmsFromRect(rect rec)
+    let g = CreateGroup()
+    g.enumUnitsInRect(rec)
+    for u in g
+        if u.getTypeId() == FARM
+            this.add(u)
+    g.destr()
+
+init
+    LinkedList<unit> protectedList
+    udg_GreenTowersTop[0].protects(udg_GreenTowersTop[1])
+    udg_GreenTowersTop[1].protects(udg_GreenTowersTop[2], udg_GreenTowersTop[3])
+
+    protectedList = (new LinkedList<unit>())..add(udg_GreenTowersTop[4], udg_GreenWorkShop[0], udg_GreenBlacksmith[0])..addFarmsFromRect(gg_rct_GreenFarmsTop)
+    (new LinkedList<unit>)..add(udg_GreenTowersTop[2], udg_GreenTowersTop[3]).protectsAnd(protectedList)
+    udg_GreenTowersTop[4].protects(udg_GreenBarracks[0])
+
+    udg_GreenTowersMid[0].protects(udg_GreenTowersMid[1], udg_GreenTowersMid[2])
+    protectedList = (new LinkedList<unit>())..add(udg_GreenTowersMid[3], udg_GreenTowersMid[4])..addFarmsFromRect(gg_rct_GreenFarmsMid)
+    (new LinkedList<unit>)..add(udg_GreenTowersMid[1], udg_GreenTowersMid[2]).protectsAnd(protectedList)
+    (new LinkedList<unit>)..add(udg_GreenTowersMid[3], udg_GreenTowersMid[4]).protectsAnd(udg_GreenBarracks[1])
+
+    udg_GreenTowersBot[0].protects(udg_GreenTowersBot[1])
+    udg_GreenTowersBot[1].protects(udg_GreenTowersBot[2], udg_GreenTowersBot[3])
+
+    protectedList = (new LinkedList<unit>())..add(udg_GreenTowersBot[4], udg_GreenWorkShop[1], udg_GreenBlacksmith[1])..addFarmsFromRect(gg_rct_GreenFarmsBot)
+    (new LinkedList<unit>)..add(udg_GreenTowersBot[2], udg_GreenTowersBot[3]).protectsAnd(protectedList)
+    udg_GreenTowersBot[4].protects(udg_GreenBarracks[2])
+
+    (new LinkedList<unit>)..add(udg_GreenBarracks[0], udg_GreenBarracks[1], udg_GreenBarracks[2]).protectsOr(udg_GreenTowersMid[5], udg_GreenTowersMid[6])
+    (new LinkedList<unit>)..add(udg_GreenTowersMid[5], udg_GreenTowersMid[6]).protectsAnd(udg_GreenCastle)
+
+    udg_BrownTowersTop[0].protects(udg_BrownTowersTop[1])
+    udg_BrownTowersTop[1].protects(udg_BrownTowersTop[2], udg_BrownTowersTop[3])
+
+    protectedList = (new LinkedList<unit>())..add(udg_BrownTowersTop[4], udg_BrownWorkShop[0], udg_BrownBlacksmith[0])..addFarmsFromRect(gg_rct_BrownFarmsTop)
+    (new LinkedList<unit>)..add(udg_BrownTowersTop[2], udg_BrownTowersTop[3]).protectsAnd(protectedList)
+    udg_BrownTowersTop[4].protects(udg_BrownBarracks[0])
+
+    udg_BrownTowersMid[0].protects(udg_BrownTowersMid[1], udg_BrownTowersMid[2])
+    protectedList = (new LinkedList<unit>())..add(udg_BrownTowersMid[3], udg_BrownTowersMid[4])..addFarmsFromRect(gg_rct_BrownFarmsMid)
+    (new LinkedList<unit>)..add(udg_BrownTowersMid[1], udg_BrownTowersMid[2]).protectsAnd(protectedList)
+    (new LinkedList<unit>)..add(udg_BrownTowersMid[3], udg_BrownTowersMid[4]).protectsAnd(udg_BrownBarracks[1])
+
+    udg_BrownTowersBot[0].protects(udg_BrownTowersBot[1])
+    udg_BrownTowersBot[1].protects(udg_BrownTowersBot[2], udg_BrownTowersBot[3])
+
+    protectedList = (new LinkedList<unit>())..add(udg_BrownTowersBot[4], udg_BrownWorkShop[1], udg_BrownBlacksmith[1])..addFarmsFromRect(gg_rct_BrownFarmsBot)
+    (new LinkedList<unit>)..add(udg_BrownTowersBot[2], udg_BrownTowersBot[3]).protectsAnd(protectedList)
+    udg_BrownTowersBot[4].protects(udg_BrownBarracks[2])
+
+    (new LinkedList<unit>)..add(udg_BrownBarracks[0], udg_BrownBarracks[1], udg_BrownBarracks[2]).protectsOr(udg_BrownTowersMid[5], udg_BrownTowersMid[6])
+    (new LinkedList<unit>)..add(udg_BrownTowersMid[5], udg_BrownTowersMid[6]).protectsAnd(udg_BrownCastle)

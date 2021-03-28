@@ -9,6 +9,7 @@ import HashMap
 import TeamUtil
 import PlayerControl
 import StandardTextTags
+import BuildingProtection
 
 public abstract class Building
 	protected int unitTypeId = 0
@@ -28,6 +29,7 @@ public abstract class Building
 				let buildingInstance = unitTypeToBuilding.get(building.getTypeId())
 				buildingInstance.rewardBounty(building, killer)
 				buildingInstance.onDeath(building,killer)
+				BuildingProtection.onDeath(building)
 		onAbilityTrigger.registerPlayerUnitEvent(players[Teams.army1()], EVENT_PLAYER_UNIT_SELL_ITEM, null)
 		onAbilityTrigger.registerPlayerUnitEvent(players[Teams.army2()], EVENT_PLAYER_UNIT_SELL_ITEM, null)
 		onAbilityTrigger.addAction() ->
