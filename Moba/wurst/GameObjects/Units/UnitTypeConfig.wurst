@@ -53,7 +53,7 @@ public constant WALL = createUnitTypeAndReturnId(200, 'o001', 0, 0, 0, 32, "", 0
 public constant MIRROR_IMAGE_UNIT_ID = createUnitTypeAndReturnId(400, 'h01M', 100, 40, 10, 64, "Models\\TrollManhunter.mdx", 10)
 
 
-public constant STANDARD_ICON = createUnitTypeAndReturnId('ncop')
+public constant STANDARD_ICON = createUnitTypeAndReturnId('n00N')
 
 public constant HYDRA = createUnitTypeAndReturnId(3500, 'n00I', 0, 300, 100, 160, Units.hydra, 50)
 
@@ -61,7 +61,7 @@ public constant HYDRA_ICON = createUnitTypeAndReturnId('n010')
 
 public constant DRAGON_TURTLE = createUnitTypeAndReturnId(2000, 'n00K', 0, 300, 100, 160, Units.dragonSeaTurtleRange, 30)
 
-public constant DRAGON_TURTLE_ICON = createUnitTypeAndReturnId('n00N')
+public constant DRAGON_TURTLE_ICON = createUnitTypeAndReturnId('ncop')
 
 
 public constant JUNGLE_BEAST = createUnitTypeAndReturnId(300, 'n00L', 20, 20, 15, 32, Units.jungleBeast1, 4)
