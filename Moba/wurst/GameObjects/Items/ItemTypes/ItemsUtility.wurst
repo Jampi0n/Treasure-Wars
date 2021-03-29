@@ -31,23 +31,44 @@ function itemLightBoots()
         if isFirstBoots()
             modMoveSpeed(ms)
 
+constant int BUFF_GUARDIAN = compiletime(createAuraBuff("Guardian Boots", "This unit moves faster after teleporting to a building.", "BTNSandalZ3"))
+constant int ABILITY_GUARDIAN = compiletime(createPositiveBuffAbility(1, BUFF_GUARDIAN, Abilities.speedTarget, "origin"))
+BuffType buffGuardian
+constant int GUARDIAN_DURATION = 15
 function itemBootsGuardian()
     let ms = 40
+    let extraMs = 30
+    let dur = GUARDIAN_DURATION
     setupItem(ITEM_ID_BOOTS_GUARDIAN, CATEGORY, 3000)
-    setInfo("Guardian Boots", "Boots of Speed:|nIncreases movement speed by {0}.|nTeleport:|nTeleports to an allied building after 3 seconds of channeling. 120 seconds cooldown.".format(ms.toString()))
+    setInfo("Guardian Boots", "Boots of Speed:|nIncreases movement speed by {0}.|nTeleport:|nTeleports to an allied building after 3 seconds of channeling and increases movement speed by {1} for {2} seconds. 120 seconds cooldown.".format(ms.toString(), extraMs.toString(), dur.toString()))
     addRequirement(ITEM_ID_BOOTS_BASE)
     addRequirement(ITEM_ID_STAFF_OF_TELEPORTATION)
     setAbilities(TELEPORT_ABILITY_2)
     setCooldownGroup(TELEPORT_ABILITY_1)
+
+    buffGuardian = new BuffType(true, DispelLevel.NONE)
+    if not compiletime
+        buffGuardian.setupBuffWithIcon(BUFF_GUARDIAN, ABILITY_GUARDIAN)
+        buffGuardian.addLevelFunction() (Buff thisBuff, int factor) ->
+            thisBuff.getTarget().wrapper().modMoveSpeed(factor * extraMs)
+
     onEither() (int factor) ->
         if isFirstBoots()
             modMoveSpeed(ms)
 
-constant int BUFF_RUNNER = compiletime(createAuraBuff("Runner", "This unit moves faster until it is damaged by an enemy hero.", "BTNSandalZ3"))
+        let trg = itemTrigger()
+        if trg != null
+            trg.registerUnitEvent(getItemUnit(), EVENT_UNIT_SPELL_FINISH)
+            trg.addAction() ->
+                if GetSpellAbilityId() == TELEPORT_ABILITY_2
+                    GetTriggerUnit().addBuff(GetTriggerUnit(), GUARDIAN_DURATION.toReal(), buffGuardian, 1)
+
+
+constant int BUFF_RUNNER = compiletime(createAuraBuff("Runner Boots", "This unit moves faster until it is damaged by an enemy hero.", "BTNSandalZ3"))
 constant int ABILITY_RUNNER = compiletime(createPositiveBuffAbility(1, BUFF_RUNNER, Abilities.speedTarget, "origin"))
 function itemBootsRunner()
     let ms = 40
-    let extraMs = 50
+    let extraMs = 30
     let dur = 10
     setupItem(ITEM_ID_BOOTS_RUNNER, CATEGORY, 3000)
     setInfo("Runner Boots", "Boots of Speed:|nIncreases movement speed by {0}.|nUnique:|nIncreases movement speed by {1}, if the hero was not damaged by an enemy hero for {2} seconds.".format(ms.toString(), extraMs.toString(), dur.toString()))
@@ -86,6 +107,8 @@ function itemBootsRunner()
             if source.isType(UNIT_TYPE_HERO)
                 target.addBuff(target, dur.toReal(), runnerInactive, 1)
             
+constant int BUFF_HUNTER = compiletime(createAuraBuff("Hunter Boots", "This unit moves faster after attacking an enemy hero.", "BTNFireBoot"))
+constant int ABILITY_HUNTER = compiletime(createPositiveBuffAbility(1, BUFF_HUNTER, Abilities.speedTarget, "origin"))
 function itemBootsHunter()
     let ms = 40
     let extraMs = 30
@@ -93,19 +116,47 @@ function itemBootsHunter()
     setupItem(ITEM_ID_BOOTS_HUNTER, CATEGORY, 3000)
     setInfo("Hunter Boots", "Boots of Speed:|nIncreases movement speed by {0}.|nUnique:|nIncreases movement speed by {1} for {2} seconds after attacking an enemy hero.".format(ms.toString(), extraMs.toString(), dur.toString()))
     addRequirement(ITEM_ID_BOOTS_BASE)
+
+    let hunter = new BuffType(true, DispelLevel.NONE)
+    if not compiletime
+        hunter.setupBuffWithIcon(BUFF_HUNTER, ABILITY_HUNTER)
+        hunter.addLevelFunction() (Buff thisBuff, int factor) ->
+            thisBuff.getTarget().wrapper().modMoveSpeed(factor * extraMs)
+
     onEither() (int factor) ->
         if isFirstBoots()
             modMoveSpeed(ms)
+        attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
+            if target.isType(UNIT_TYPE_HERO)
+                source.addBuff(target, dur.toReal(), hunter, 1)
+
+constant int BUFF_WIZARD = compiletime(createAuraBuff("Wizard Boots", "This unit moves faster after casting spells.", "BTNWalkersOfDarkness"))
+constant int ABILITY_WIZARD = compiletime(createPositiveBuffAbility(1, BUFF_WIZARD, Abilities.speedTarget, "origin"))
+BuffType buffWizard
+constant int WIZARD_DURATION = 5
 function itemBootsWizard()
     let ms = 40
     let extraMs = 30
-    let dur = 5
+    let dur = WIZARD_DURATION
     setupItem(ITEM_ID_BOOTS_WIZARD, CATEGORY, 3000)
     setInfo("Wizard Boots", "Boots of Speed:|nIncreases movement speed by {0}.|nUnique:|nIncreases movement speed by {1} for {2} seconds after casting a spell.".format(ms.toString(), extraMs.toString(), dur.toString()))
     addRequirement(ITEM_ID_BOOTS_BASE)
+
+    buffWizard = new BuffType(true, DispelLevel.NONE)
+    if not compiletime
+        buffWizard.setupBuffWithIcon(BUFF_WIZARD, ABILITY_WIZARD)
+        buffWizard.addLevelFunction() (Buff thisBuff, int factor) ->
+            thisBuff.getTarget().wrapper().modMoveSpeed(factor * extraMs)
+
     onEither() (int factor) ->
         if isFirstBoots()
             modMoveSpeed(ms)
+
+        let trg = itemTrigger()
+        if trg != null
+            trg.registerUnitEvent(getItemUnit(), EVENT_UNIT_SPELL_EFFECT)
+            trg.addAction() ->
+                GetTriggerUnit().addBuff(GetTriggerUnit(), WIZARD_DURATION.toReal(), buffWizard, 1)
 
 
 
