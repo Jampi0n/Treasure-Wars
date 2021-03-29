@@ -505,12 +505,12 @@ function initHeroType()
     onCast(ABILITY_FROST_WYRM, () -> castFrostWyrm())
     onCast(ABILITY_FREEZE, () -> castFreeze())
     heroType..setSkillBuild("EQWQQQQEWEWEWEW")
-    ..addItem(ITEM_ID_BOOTS_OF_DARKNESS)
-    ..addItem(ITEM_ID_ENCHANTED_ARMOR)
-    ..addItem(ITEM_ID_BLESSED_GOBLET)
-    ..addItem(ITEM_ID_SCROLL_OF_CONJURATION)
-    ..addItem(ITEM_ID_VAMPIRIC_GOBLET)
-    ..addItem(ITEM_ID_RUNIC_ARMOR)
+    ..addItem(ITEM_ID_BOOTS_BASE)
+    //..addItem(ITEM_ID_ENCHANTED_ARMOR)
+    //..addItem(ITEM_ID_BLESSED_GOBLET)
+    //..addItem(ITEM_ID_SCROLL_OF_CONJURATION)
+    //..addItem(ITEM_ID_VAMPIRIC_GOBLET)
+    //..addItem(ITEM_ID_RUNIC_ARMOR)
     delayInit(5) ->
         heroType
         ..setRetreatAI((IHeroAI ai) -> (retreatAI(ai)))
@@ -521,94 +521,80 @@ function initHeroType()
 
         buffFrostNova = new BuffType(false, DispelLevel.DISPEL)
         buffFrostNova.setupBuffWithIcon(NOVA_BUFF_ID, NOVA_ABILTIY_ID)
-        buffFrostNova.addFirstFunction( (Buff whichBuff) -> (begin
-            let level = whichBuff.getLevel()
-            whichBuff.getTarget().wrapper()
-                ..modAttackSpeed( -NOVA_AS[level - 1])
-                ..modMoveSpeedRelative( -NOVA_MS[level - 1]*10)
-                ..incBlue()
-        end))
-        buffFrostNova.addEndFunction( (Buff whichBuff) -> (begin
-            let level = whichBuff.getLevel()
-            whichBuff.getTarget().wrapper()
-                ..modAttackSpeed( NOVA_AS[level - 1])
-                ..modMoveSpeedRelative( NOVA_MS[level - 1]*10)
-                ..decBlue()
-        end))
+        buffFrostNova.addSetupFunction() (Buff thisBuff, int factor) ->
+            thisBuff.getTarget().wrapper().modBlue(factor)
+        buffFrostNova.addLevelFunction() (Buff thisBuff, int factor) ->
+            let level = thisBuff.getLevel()
+            thisBuff.getTarget().wrapper()
+            ..modAttackSpeed( -factor * NOVA_AS[level - 1])
+            ..modMoveSpeedRelative( -factor * NOVA_MS[level - 1]*10)
 
 
         buffFrostArmor = new BuffType(true, DispelLevel.DISPEL)
         buffFrostArmor.setupBuffWithIcon(ARMOR_BUFF_ID, ARMOR_ABILTIY_ID)
-        buffFrostArmor.addFirstFunction( (Buff whichBuff) -> (begin
-            let target = whichBuff.getTarget()
-            let level = whichBuff.getLevel()
-            let intel = whichBuff.getCaster().getHeroInt()
-            let forstArmor = new FrostArmor()
-            target.wrapper().modArmor( ARMOR_AR[level - 1].bonus(intel, ARMOR_AR_BONUS).round())
-            forstArmor.intelligence = intel
-            forstArmor.damageEventPointer = DamageEventUnit.fromUnit(target).attackHitNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
-                if source.isTargetable(target.getOwner(), false, true)
-                    let armorBuff = BuffList.getBuffOfType(target, buffFrostArmor)
-                    source.addBuffReduced(armorBuff.getCaster(), ARMOR_SLOW_DURATION[level-1].bonus(armorBuff.getData(), ARMOR_SLOW_DURATION_BONUS), buffFrostArmorSlow, level)
-            whichBuff.setData(forstArmor castTo int)
-        end))
-        buffFrostArmor.addEndFunction( (Buff whichBuff) -> (begin
-            let target = whichBuff.getTarget()
-            let frostArmor = whichBuff.getData() castTo FrostArmor
-            let intel = frostArmor.intelligence
-            let level = whichBuff.getLevel()
-            target.wrapper().modArmor( -ARMOR_AR[level - 1].bonus(intel, ARMOR_AR_BONUS).round())
-            DamageEventUnit.fromUnit(target).attackHitNoBuilding.remove(frostArmor.damageEventPointer)
-            destroy frostArmor
-        end))
+        buffFrostArmor.addLevelFunction() (Buff thisBuff, int factor) ->
+            if factor == 1
+                let target = thisBuff.getTarget()
+                let level = thisBuff.getLevel()
+                let intel = thisBuff.getCaster().getHeroInt()
+                let forstArmor = new FrostArmor()
+                target.wrapper().modArmor( ARMOR_AR[level - 1].bonus(intel, ARMOR_AR_BONUS).round())
+                forstArmor.intelligence = intel
+                forstArmor.damageEventPointer = DamageEventUnit.fromUnit(target).attackHitNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+                    if source.isTargetable(target.getOwner(), false, true)
+                        let armorBuff = BuffList.getBuffOfType(target, buffFrostArmor)
+                        source.addBuffReduced(armorBuff.getCaster(), ARMOR_SLOW_DURATION[level-1].bonus(armorBuff.getData(), ARMOR_SLOW_DURATION_BONUS), buffFrostArmorSlow, level)
+                thisBuff.setData(forstArmor castTo int)
+            else
+                let target = thisBuff.getTarget()
+                let frostArmor = thisBuff.getData() castTo FrostArmor
+                let intel = frostArmor.intelligence
+                let level = thisBuff.getLevel()
+                target.wrapper().modArmor( -ARMOR_AR[level - 1].bonus(intel, ARMOR_AR_BONUS).round())
+                DamageEventUnit.fromUnit(target).attackHitNoBuilding.remove(frostArmor.damageEventPointer)
+                destroy frostArmor
 
 
         buffFrostArmorSlow = new BuffType(false, DispelLevel.DISPEL)
         buffFrostArmorSlow.setupBuffWithIcon(ARMOR_SLOW_BUFF_ID, ARMOR_SLOW_ABILTIY_ID)
-        buffFrostArmorSlow.addFirstFunction( (Buff whichBuff) -> (begin
-            let level = whichBuff.getLevel()
-            whichBuff.getTarget().wrapper()
-                ..modAttackSpeed( -ARMOR_SLOW[level - 1])
-                ..modMoveSpeedRelative( -ARMOR_SLOW[level - 1]*10)
-                ..incBlue()
-        end))
-        buffFrostArmorSlow.addEndFunction( (Buff whichBuff) -> (begin
-            let level = whichBuff.getLevel()
-            whichBuff.getTarget().wrapper()
-                ..modAttackSpeed( ARMOR_SLOW[level - 1])
-                ..modMoveSpeedRelative( ARMOR_SLOW[level - 1]*10)
-                ..decBlue()
-        end))
+        buffFrostArmorSlow.addSetupFunction() (Buff thisBuff, int factor) ->
+            thisBuff.getTarget().wrapper().modBlue(factor)
+        buffFrostArmorSlow.addLevelFunction() (Buff thisBuff, int factor) ->
+            let level = thisBuff.getLevel()
+            thisBuff.getTarget().wrapper()
+            ..modAttackSpeed( -factor * ARMOR_SLOW[level - 1])
+            ..modMoveSpeedRelative( -factor * ARMOR_SLOW[level - 1]*10)
+
 
 
         buffFrostBreath = new BuffType(false, DispelLevel.DISPEL)
         buffFrostBreath.setupBuffWithIcon(FROST_BREATH_BUFF_ID, FROST_BREATH_ABILTIY_ID)
-        buffFrostBreath.addFirstFunction( (Buff whichBuff) -> (begin
-            let level = whichBuff.getLevel()
-            whichBuff.getTarget().wrapper()
-                ..modMoveSpeedRelative( -FROST_BREATH_SLOW[level - 1]*10)
-                ..incBlue()
-        end))
-        buffFrostBreath.addEndFunction( (Buff whichBuff) -> (begin
-            let level = whichBuff.getLevel()
-            whichBuff.getTarget().wrapper()
-                ..modMoveSpeedRelative( FROST_BREATH_SLOW[level - 1]*10)
-                ..decBlue()
-        end))
-
-
+        buffFrostBreath.addSetupFunction() (Buff thisBuff, int factor) ->
+            thisBuff.getTarget().wrapper().modBlue(factor)
+            buffFrostBreath.addLevelFunction() (Buff thisBuff, int factor) ->
+            let level = thisBuff.getLevel()
+            thisBuff.getTarget().wrapper()
+            ..modMoveSpeedRelative( -factor * FROST_BREATH_SLOW[level - 1]*10)
 
         buffFreeze= new BuffType(false, DispelLevel.BREAK)
         buffFreeze.setupBuffWithIcon(FREEZE_BUFF_ID, FREEZE_ABILTIY_ID)
-        buffFreeze.addFirstFunction( (Buff whichBuff) -> (begin
-            whichBuff.getTarget().addBuff(whichBuff.getCaster(), 0.1, STUNNED, 1).setDispelLevel(DispelLevel.BREAK)
-            let fx = createUnit(Player(PLAYER_NEUTRAL_PASSIVE), FREEZE_EFFECT, whichBuff.getTarget().getPos(), angle(GetRandomReal(0, 2 * bj_PI)))
-            whichBuff.setData(fx.getHandleId())
-            Freeze.effectMap.put(fx.getHandleId(), fx)
-            let wrapper = whichBuff.getTarget().wrapper()
-            wrapper.modArmor( FREEZE_DEF)
-            wrapper.modWillpower( FREEZE_DEF)
-        end))
+        buffFreeze.addSetupFunction() (Buff thisBuff, int factor) ->
+            if factor == 1
+                thisBuff.getTarget().addBuff(thisBuff.getCaster(), 0.1, STUNNED, 1).setDispelLevel(DispelLevel.BREAK)
+                let fx = createUnit(Player(PLAYER_NEUTRAL_PASSIVE), FREEZE_EFFECT, thisBuff.getTarget().getPos(), angle(GetRandomReal(0, 2 * bj_PI)))
+                thisBuff.setData(fx.getHandleId())
+                Freeze.effectMap.put(fx.getHandleId(), fx)
+                let wrapper = thisBuff.getTarget().wrapper()
+                wrapper.modArmor( FREEZE_DEF)
+                wrapper.modWillpower( FREEZE_DEF)
+            else
+                let fx = Freeze.effectMap.get(thisBuff.getData())
+                fx.remove()
+                thisBuff.setData(0)
+                let wrapper = thisBuff.getTarget().wrapper()
+                wrapper.modArmor( -FREEZE_DEF)
+                wrapper.modWillpower( -FREEZE_DEF)
+
         buffFreeze.setPeriodicTime(0.05)
         buffFreeze.addPeriodicFunction( (Buff whichBuff) -> (begin
             let target = whichBuff.getTarget()
@@ -621,14 +607,6 @@ function initHeroType()
                 caster.dealDamage(target, 0.05 * FREEZE_DMG[level-1].bonus(caster.getHeroInt(), FREEZE_DMG_BONUS), ReductionType.MAGIC)
             else
                 whichBuff.dispel()
-        end))
-        buffFreeze.addEndFunction( (Buff whichBuff) -> (begin
-            let fx = Freeze.effectMap.get(whichBuff.getData())
-            fx.remove()
-            whichBuff.setData(0)
-            let wrapper = whichBuff.getTarget().wrapper()
-            wrapper.modArmor( -FREEZE_DEF)
-            wrapper.modWillpower( -FREEZE_DEF)
         end))
 
         CreateTrigger()

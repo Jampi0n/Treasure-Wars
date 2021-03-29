@@ -348,12 +348,12 @@ function initHeroType()
     onCast(ABILITY_SERPENT_WARD, () -> castSerpentWard())
     onCast(ABILITY_BIG_BAD_VOODOO, () -> castBigBadVoodoo())
     heroType..setSkillBuild("QWQWQWQWQWEEEEE")
-    ..addItem(ITEM_ID_HEAVY_BOOTS)
-    ..addItem(ITEM_ID_BLOOD_SWORD)
-    ..addItem(ITEM_ID_INFERNAL_BOW)
-    ..addItem(ITEM_ID_RUNIC_ARMOR)
-    ..addItem(ITEM_ID_SACRIFICIAL_DAGGER)
-    ..addItem(ITEM_ID_CURSED_SWORD)
+    ..addItem(ITEM_ID_BOOTS_BASE)
+    //..addItem(ITEM_ID_BLOOD_SWORD)
+    //..addItem(ITEM_ID_INFERNAL_BOW)
+    //..addItem(ITEM_ID_RUNIC_ARMOR)
+    //..addItem(ITEM_ID_SACRIFICIAL_DAGGER)
+    //..addItem(ITEM_ID_CURSED_SWORD)
     delayInit(5) ->
         heroType
         ..setRetreatAI((IHeroAI ai) -> (retreatAI(ai)))
@@ -391,14 +391,14 @@ function initHeroType()
             Stacks SERPENT_POSION_MAX_STACKS times. In reality the total stack count is capped at
             SERPENT_POSION_MAX_STACKS * SERPENT_POISON_STACKS[level-1]
         */
-
-        buffSerpentPoison.addFirstFunction( (Buff whichBuff) -> (begin
-            let level = whichBuff.getLevel()
-            whichBuff.getTarget().wrapper()
-                ..modMoveSpeedRelative( -10 * SERPENT_POISON_SLOW * (SERPENT_POISON_FIRST_ATTACK_FACTOR * SERPENT_POISON_STACKS[level-1] div 10)  )
-                ..modArmor( -SERPENT_POISON_ARMOR * (SERPENT_POISON_FIRST_ATTACK_FACTOR * SERPENT_POISON_STACKS[level-1] div 10)  )
-            whichBuff.setData(SERPENT_POISON_STACKS[level-1])
-        end))
+        buffSerpentPoison.addSetupFunction() (Buff thisBuff, int factor) ->
+            let level = thisBuff.getLevel()
+            let target = thisBuff.getTarget().wrapper()
+            if factor == 1
+                thisBuff.setData(SERPENT_POISON_STACKS[level-1])
+            let stacks = thisBuff.getData() div 10
+            target.modMoveSpeedRelative( -factor * 10 * SERPENT_POISON_SLOW * (stacks))
+            target.modArmor( -factor * SERPENT_POISON_ARMOR * (stacks))
 
         buffSerpentPoison.addStackFunction( (Buff whichBuff) -> (begin
             let level = whichBuff.getLevel()
@@ -409,14 +409,6 @@ function initHeroType()
             whichBuff.getTarget().wrapper()
                 ..modMoveSpeedRelative( -10 * SERPENT_POISON_SLOW * stackDiff) 
                 ..modArmor( -SERPENT_POISON_ARMOR * stackDiff)
-        end))
-
-
-        buffSerpentPoison.addEndFunction( (Buff whichBuff) -> (begin
-            let stacks = whichBuff.getData() div 10
-            whichBuff.getTarget().wrapper()
-                ..modMoveSpeedRelative( 10 * SERPENT_POISON_SLOW * (stacks))
-                ..modArmor( SERPENT_POISON_ARMOR * (stacks))
         end))
 
         CreateTrigger()

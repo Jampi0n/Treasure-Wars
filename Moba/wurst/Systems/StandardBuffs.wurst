@@ -14,16 +14,18 @@ public constant UNTARGETABLE = new BuffType(true, DispelLevel.NONE)
 
 init
     dispelBuffsOnDeath()
-    INVULERNABLE.addFirstFunction() (Buff whichBuff) ->
-        let target = whichBuff.getTarget()
-        target.dispelNegativeBuffs(DispelLevel.BREAK)
-        UnitAddType(target, UNIT_TYPE_ANCIENT)
-    INVULERNABLE.addEndFunction() (Buff whichBuff) ->
-        UnitRemoveType(whichBuff.getTarget(), UNIT_TYPE_ANCIENT)
+    INVULERNABLE.addSetupFunction() (Buff thisBuff, int factor) -> 
+        if factor == 1
+            let target = thisBuff.getTarget()
+            target.dispelNegativeBuffs(DispelLevel.BREAK)
+            UnitAddType(target, UNIT_TYPE_ANCIENT)
+        else
+            UnitRemoveType(thisBuff.getTarget(), UNIT_TYPE_ANCIENT)
 
-    UNTARGETABLE.addFirstFunction() (Buff whichBuff) ->
-        let target = whichBuff.getTarget()
-        target.dispelBuffs(DispelLevel.BREAK)
-        UnitAddType(target, UNIT_TYPE_SAPPER)
-    UNTARGETABLE.addEndFunction() (Buff whichBuff) ->
-        UnitRemoveType(whichBuff.getTarget(), UNIT_TYPE_SAPPER)
+    UNTARGETABLE.addSetupFunction() (Buff thisBuff, int factor) -> 
+        if factor == 1
+            let target = thisBuff.getTarget()
+            target.dispelBuffs(DispelLevel.BREAK)
+            UnitAddType(target, UNIT_TYPE_SAPPER)
+        else
+            UnitRemoveType(thisBuff.getTarget(), UNIT_TYPE_SAPPER)

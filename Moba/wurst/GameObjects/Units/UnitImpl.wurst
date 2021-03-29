@@ -267,6 +267,13 @@ public class UnitImpl implements IUnit
         if blueCount == 0
             this.assocUnit.setVertexColor(255, 255, 255, 255)
 
+    override function modBlue(int value)
+        blueCount += value
+        if blueCount > 0
+            this.assocUnit.setVertexColor(140, 220, 255, 255)
+        else
+            this.assocUnit.setVertexColor(255, 255, 255, 255)
+
     override function incReveal()
         revealCount++
         if revealCount == 1
@@ -278,6 +285,19 @@ public class UnitImpl implements IUnit
     override function decReveal()
         revealCount--
         if revealCount == 0
+            if this.team == TEAM_1
+                UnitShareVision(this.toUnit(), players[Teams.army2()], false)
+            else if this.team == TEAM_2
+                UnitShareVision(this.toUnit(), players[Teams.army1()], false)
+
+    override function modReveal(int value)
+        revealCount += value
+        if revealCount > 0
+            if this.team == TEAM_1
+                UnitShareVision(this.toUnit(), players[Teams.army2()], true)
+            else if this.team == TEAM_2
+                UnitShareVision(this.toUnit(), players[Teams.army1()], true)
+        else
             if this.team == TEAM_1
                 UnitShareVision(this.toUnit(), players[Teams.army2()], false)
             else if this.team == TEAM_2

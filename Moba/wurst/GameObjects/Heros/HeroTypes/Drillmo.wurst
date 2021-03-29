@@ -438,12 +438,12 @@ function initHeroType()
     onCast(ABILITY_SPIKE_BALL, () -> castSpikeBall())
     onCast(ABILITY_SPEED_BOOST, () -> castSpeedBoost())
     heroType..setSkillBuild("WQEWQWWQWQQEEEE")
-    ..addItem(ITEM_ID_HEAVY_BOOTS)
-    ..addItem(ITEM_ID_RUNIC_ARMOR)
-    ..addItem(ITEM_ID_FIREHAND_GAUNTLETS)
-    ..addItem(ITEM_ID_BLOOD_SWORD)
-    ..addItem(ITEM_ID_SPIKED_ARMOR)
-    ..addItem(ITEM_ID_CURSED_SWORD)
+    ..addItem(ITEM_ID_BOOTS_BASE)
+    //..addItem(ITEM_ID_RUNIC_ARMOR)
+    //..addItem(ITEM_ID_FIREHAND_GAUNTLETS)
+    //..addItem(ITEM_ID_BLOOD_SWORD)
+    //..addItem(ITEM_ID_SPIKED_ARMOR)
+    //..addItem(ITEM_ID_CURSED_SWORD)
     delayInit(5) ->
         heroType
             ..setRetreatAI((IHeroAI ai) -> (retreatAI(ai)))
@@ -470,18 +470,11 @@ function initHeroType()
 
         buffSpeedBoost = new BuffType(true, DispelLevel.NONE)
         buffSpeedBoost.setupBuffWithIcon(SPEED_BOOST_BUFF_ID, SPEED_BOOST_ABILITY_ID)
-        buffSpeedBoost.addFirstFunction((Buff whichBuff) -> (begin
-            let target = whichBuff.getTarget()
-            target.wrapper().modMoveSpeedRelative( ((SPEED_BOOST[whichBuff.getLevel()-1].bonus(target.getHeroInt(), SPEED_BOOST_BONUS)) * 10).toInt() )
-            AddUnitAnimationProperties(target, "fast", true)
-        end))
-
-        buffSpeedBoost.addEndFunction((Buff whichBuff) -> (begin
-            let target = whichBuff.getTarget()
-            target.wrapper().modMoveSpeedRelative( -((SPEED_BOOST[whichBuff.getLevel()-1].bonus(target.getHeroInt(), SPEED_BOOST_BONUS)) * 10).toInt() )
-            AddUnitAnimationProperties(target, "fast", false)
-        end))
-
+        buffSpeedBoost.addSetupFunction() (Buff thisBuff, int factor) ->
+            AddUnitAnimationProperties(thisBuff.getTarget(), "fast", factor == 1)
+        buffSpeedBoost.addLevelFunction() (Buff thisBuff, int factor) ->
+            let target = thisBuff.getTarget()
+            target.wrapper().modMoveSpeedRelative( factor * ((SPEED_BOOST[thisBuff.getLevel()-1].bonus(target.getHeroInt(), SPEED_BOOST_BONUS)) * 10).toInt() )
 
         addOnDamageFunc( Condition( function onDamage ) )
 

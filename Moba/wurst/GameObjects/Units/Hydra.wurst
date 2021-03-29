@@ -121,13 +121,19 @@ init
 
     buffAcidBreath.setupBuffWithIcon(ACID_BREATH_BUFF_ID, ACID_BREATH_ABILTIY_ID)
 
-    buffAcidBreath.addFirstFunction( (Buff whichBuff) -> (begin
-        whichBuff.getTarget().wrapper()
-        ..modAttackSpeed( -ACID_BREATH_SLOW)
-        ..modMoveSpeedRelative(-ACID_BREATH_SLOW*10)
-        ..modArmor(-ACID_BREATH_ARMOR)
-        whichBuff.setData(1)
-    end))
+    buffAcidBreath.addSetupFunction() (Buff thisBuff, int factor) ->
+        if factor == 1
+            thisBuff.getTarget().wrapper()
+            ..modAttackSpeed( -ACID_BREATH_SLOW)
+            ..modMoveSpeedRelative(-ACID_BREATH_SLOW*10)
+            ..modArmor(-ACID_BREATH_ARMOR)
+            thisBuff.setData(1)
+        else
+            let stacks = thisBuff.getData()
+            thisBuff.getTarget().wrapper()
+            ..modAttackSpeed( ACID_BREATH_SLOW)
+            ..modMoveSpeedRelative(ACID_BREATH_SLOW*10)
+            ..modArmor(ACID_BREATH_ARMOR * stacks)
 
     buffAcidBreath.addStackFunction( (Buff whichBuff) -> (begin
         let stacks = whichBuff.getData() + 1
@@ -137,13 +143,7 @@ init
     end))
 
 
-    buffAcidBreath.addEndFunction( (Buff whichBuff) -> (begin
-        let stacks = whichBuff.getData()
-        whichBuff.getTarget().wrapper()
-        ..modAttackSpeed( ACID_BREATH_SLOW)
-        ..modMoveSpeedRelative(ACID_BREATH_SLOW*10)
-        ..modArmor(ACID_BREATH_ARMOR * stacks)
-    end))
+
 
     DamageEventUnitType.fromUnitTypeId(HYDRA).attackDamageNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
         target.addBuffReduced(source, ACID_BREATH_DUR, buffAcidBreath, 1)

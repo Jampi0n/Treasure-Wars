@@ -271,6 +271,7 @@ function castTidalFury()
             caster.dealDamage(target, hitDmg, ReductionType.PHYSICAL)
             if target.isMovable() and not target.isType(UNIT_TYPE_FLYING)
                 Knockback2d.knockback(target, caster.getPos().polarOffset(caster.getPos().angleTo(target.getPos()), 500), 1000)
+                target.cancelChannel()
 
             new Missile(caster, caster.getPos().withZ(80), 900, caster.getPos().angleTo(target.getPos()), Abilities.crushingWaveMissile)
                 ..hitOnce()
@@ -502,12 +503,12 @@ function initHeroType()
     onCast(ABILITY_MANA_SHIELD, () -> castManaShield())
     onCast(ABILITY_RITUAL_OF_THE_SEAS, () -> castRitualOfTheSea())
     heroType..setSkillBuild("QWEQQWEQWQEWEWE")
-    ..addItem(ITEM_ID_HEAVY_BOOTS)
-    ..addItem(ITEM_ID_BLESSED_GOBLET)
-    ..addItem(ITEM_ID_BRACER_OF_POWER)
-    ..addItem(ITEM_ID_SPIKED_ARMOR)
-    ..addItem(ITEM_ID_ARCANE_BLADE)
-    ..addItem(ITEM_ID_ARCANE_SHIELD)
+    ..addItem(ITEM_ID_BOOTS_BASE)
+    //..addItem(ITEM_ID_BLESSED_GOBLET)
+    //..addItem(ITEM_ID_BRACER_OF_POWER)
+    //..addItem(ITEM_ID_SPIKED_ARMOR)
+    //..addItem(ITEM_ID_ARCANE_BLADE)
+    //..addItem(ITEM_ID_ARCANE_SHIELD)
     ..setBonusCalculation((IUnit whichWrapper, Stat whichStat) -> (begin
         let lvl = whichWrapper.toUnit().getAbilityLevel(ABILITY_ANCIENT_KNOWLEDGE)
         if lvl == 0
@@ -533,18 +534,12 @@ function initHeroType()
 
         buffFish = new BuffType(false, DispelLevel.DISPEL)
         buffFish.setupBuffWithIcon(FISH_BUFF_ID, FISH_ABILTIY_ID)
-        buffFish.addFirstFunction( (Buff whichBuff) -> (begin
-            let level = whichBuff.getLevel()
-            whichBuff.getTarget().wrapper()
-                ..modAttackSpeed( -FISH_ATTACK_SPEED[level - 1])
-                ..modMoveSpeedRelative( -FISH_MOVE_SPEED[level - 1]*10)
-        end))
-        buffFish.addEndFunction( (Buff whichBuff) -> (begin
-            let level = whichBuff.getLevel()
-            whichBuff.getTarget().wrapper()
-                ..modAttackSpeed( FISH_ATTACK_SPEED[level - 1])
-                ..modMoveSpeedRelative( FISH_MOVE_SPEED[level - 1]*10)
-        end))
+        buffFish.addLevelFunction() (Buff thisBuff, int factor) ->
+            let level = thisBuff.getLevel()
+            thisBuff.getTarget().wrapper()
+            ..modAttackSpeed( -factor * FISH_ATTACK_SPEED[level - 1])
+            ..modMoveSpeedRelative( -factor * FISH_MOVE_SPEED[level - 1]*10)
+
 
         buffManaShield = new BuffType(true, DispelLevel.NONE) // the actual effect is in OnAttack
             ..setPeriodicTime(0.1)
@@ -556,13 +551,9 @@ function initHeroType()
 
         ritualBuff = new BuffType(false, DispelLevel.DISPEL)
         ritualBuff.setupBuffWithIcon(RITUAL_SLOW_BUFF_ID, RITUAL_SLOW_ABILITY_ID)
-        ritualBuff.addFirstFunction((Buff thisBuff) -> (begin
-            thisBuff.getTarget().wrapper().modMoveSpeedRelative( -RITUAL_MOVEMENT_SLOW[thisBuff.getLevel()-1]*10)
-        end))
+        ritualBuff.addLevelFunction() (Buff thisBuff, int factor) ->
+            thisBuff.getTarget().wrapper().modMoveSpeedRelative( -factor * RITUAL_MOVEMENT_SLOW[thisBuff.getLevel()-1]*10)
 
-        ritualBuff.addEndFunction((Buff thisBuff) -> (begin
-            thisBuff.getTarget().wrapper().modMoveSpeedRelative( RITUAL_MOVEMENT_SLOW[thisBuff.getLevel()-1]*10)
-        end))
 
 function createHeroType(IHero hero)
     CreateTrigger()

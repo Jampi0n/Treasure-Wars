@@ -93,51 +93,37 @@ function initCreepBuffs()
         target.healMana(target, 0.25 * SEA_ELEMENTAL_MP_REG)
     end)
 
-    TURTLE_BUFF.addFirstFunction((Buff whichBuff) -> begin
-        let pointer = DamageEventUnit.fromUnit(whichBuff.getTarget()).attackHitNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
-            target.dealDamage(source, damage * 0.1, ReductionType.PHYSICAL)
-        whichBuff.setData(pointer)
-    end)
-    TURTLE_BUFF.addEndFunction((Buff whichBuff) -> begin
-        DamageEventUnit.fromUnit(whichBuff.getTarget()).attackHitNoBuilding.remove(whichBuff.getData())
-    end)
+    TURTLE_BUFF.addSetupFunction() (Buff thisBuff, int factor) ->
+        if factor == 1
+            let pointer = DamageEventUnit.fromUnit(thisBuff.getTarget()).attackHitNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
+                target.dealDamage(source, damage * 0.1, ReductionType.PHYSICAL)
+            thisBuff.setData(pointer)
+        else
+            DamageEventUnit.fromUnit(thisBuff.getTarget()).attackHitNoBuilding.remove(thisBuff.getData())
 
-    MURGUL_BUFF.addFirstFunction((Buff whichBuff) -> begin
-        whichBuff.getTarget().wrapper().modAttackSpeed( MURGUL_AS)
-    end)
-    MURGUL_BUFF.addEndFunction((Buff whichBuff) -> begin
-        whichBuff.getTarget().wrapper().modAttackSpeed( -MURGUL_AS)
-    end)
+    MURGUL_BUFF.addLevelFunction() (Buff thisBuff, int factor) ->
+        thisBuff.getTarget().wrapper().modAttackSpeed( factor * MURGUL_AS)
 
-    SEA_GIANT_BUFF.addFirstFunction((Buff whichBuff) -> begin
-        whichBuff.getTarget().wrapper().modStrengthRelative( SEA_GIANT_STR * 10)
-    end)
-    SEA_GIANT_BUFF.addEndFunction((Buff whichBuff) -> begin
-        whichBuff.getTarget().wrapper().modStrengthRelative( -SEA_GIANT_STR * 10)
-    end)
 
-    MAKRURA_BUFF.addFirstFunction((Buff whichBuff) -> begin
-        whichBuff.getTarget().wrapper().modArmor( MAKRURA_AR)
-    end)
-    MAKRURA_BUFF.addEndFunction((Buff whichBuff) -> begin
-        whichBuff.getTarget().wrapper().modArmor( -MAKRURA_AR)
-    end)
+    SEA_GIANT_BUFF.addLevelFunction() (Buff thisBuff, int factor) ->
+        thisBuff.getTarget().wrapper().modStrengthRelative( factor * SEA_GIANT_STR * 10)
 
-    REVENANT_BUFF.addFirstFunction((Buff whichBuff) -> begin
-        let pointer = DamageEventUnit.fromUnit(whichBuff.getTarget()).anyDamage.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
-            target.addBuffReduced(source, 2, REVENANT_SLOW_BUFF, 1)
-        whichBuff.setData(pointer)
-    end)
-    REVENANT_BUFF.addEndFunction((Buff whichBuff) -> begin
-        DamageEventUnit.fromUnit(whichBuff.getTarget()).anyDamage.remove(whichBuff.getData())
-    end)
 
-    REVENANT_SLOW_BUFF.addFirstFunction((Buff whichBuff) -> begin
-        whichBuff.getTarget().wrapper().modMoveSpeedRelative( -REVENANT_SLOW * 10)
-    end)
-    REVENANT_SLOW_BUFF.addEndFunction((Buff whichBuff) -> begin
-        whichBuff.getTarget().wrapper().modMoveSpeedRelative( REVENANT_SLOW * 10)
-    end)
+    MAKRURA_BUFF.addLevelFunction() (Buff thisBuff, int factor) ->
+        thisBuff.getTarget().wrapper().modArmor( factor * MAKRURA_AR)
+
+
+    REVENANT_BUFF.addSetupFunction() (Buff thisBuff, int factor) ->
+        if factor == 1
+            let pointer = DamageEventUnit.fromUnit(thisBuff.getTarget()).anyDamage.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
+                target.addBuffReduced(source, 2, REVENANT_SLOW_BUFF, 1)
+            thisBuff.setData(pointer)
+        else
+            DamageEventUnit.fromUnit(thisBuff.getTarget()).anyDamage.remove(thisBuff.getData())
+
+    REVENANT_SLOW_BUFF..addLevelFunction() (Buff thisBuff, int factor) ->
+        thisBuff.getTarget().wrapper().modMoveSpeedRelative( -factor * REVENANT_SLOW * 10)
+
 
 
     new BuffConfiguration(MURGUL_BUFF, 90)

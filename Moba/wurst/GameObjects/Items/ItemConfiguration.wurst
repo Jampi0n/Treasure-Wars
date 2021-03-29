@@ -21,8 +21,16 @@ import public FastDamageEvent
 import public DamageIds
 import public UnitImpl
 import public IUnit
+import public ChannelTeleport
 import ErrorHandling
 
+public class IntToTrigger
+    trigger trg
+    construct()
+        this.trg = CreateTrigger()
+
+    ondestroy
+        this.trg.destr()
 
 interface ItemDropOrPickUp
     function dropOrPickUp(int factor)
@@ -135,6 +143,32 @@ public function onEither(ItemDropOrPickUp onDropOrPickUp)
     if currentItemEffect.onDropOrPickUp != null
         error("The item already has an effect!")
     currentItemEffect.onDropOrPickUp = onDropOrPickUp
+
+/**
+Adds a trigger which is active while the item is carried by the hero.
+The trigger is returned only if the item is unique and the item was picked up.
+Check if the trigger is null:
+
+onEither() (int factor) ->
+    let trg = itemTrigger()
+    if trg != null
+        trg.register...
+        trg.addAction...
+        ...
+**/
+public function itemTrigger() returns trigger
+    return itemTrigger(1)
+
+public function itemTrigger(int factor) returns trigger
+    if isUnique()
+        if getItemSign() == 1
+            let trg = new IntToTrigger()
+            DamageEventUnit.fromUnit(getItemUnit()).saveIntSlow(factor * getItemItemType(), trg castTo int)
+            return trg.trg
+        else
+            destroy DamageEventUnit.fromUnit(getItemUnit()).loadIntSlow(factor * getItemItemType()) castTo IntToTrigger
+            return null
+    return null
 
 public function anyDamageFunction(DamageFunction f)
     anyDamageFunction(1, f)
@@ -281,6 +315,16 @@ public function isUnique() returns boolean
 //returns if the the hero has not this item
 public function hasNot(int itemTypeId) returns boolean
     return getItemUnit().countItemsOfType(itemTypeId) == 0
+
+public function isUniqueExt(vararg int itemTypeIds) returns boolean
+    let u = getItemUnit()
+    int sum = 0
+    for int id in itemTypeIds
+        sum += u.countItemsOfType(id)
+    return sum == 1
+
+public function isFirstBoots() returns bool
+    return isUniqueExt(ITEM_ID_BOOTS_BASE, ITEM_ID_BOOTS_GUARDIAN, ITEM_ID_BOOTS_HUNTER, ITEM_ID_BOOTS_RUNNER, ITEM_ID_BOOTS_WIZARD)
 
 init
     ItemEffect.classInit()

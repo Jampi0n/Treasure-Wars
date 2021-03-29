@@ -60,8 +60,8 @@ public abstract class ModDamage
                 // shield - ITEM
                 if attack
                     if targetWrapper.loadIntFast(D_SHIELD) > 0
-                        currentDamage = currentDamage - 15 * target.countItemsOfType(ITEM_ID_SHIELD)
-                        currentDamage = currentDamage - 20 * target.countItemsOfType(ITEM_ID_HOLY_SHIELD)
+                        //currentDamage = currentDamage - 15 * target.countItemsOfType(ITEM_ID_SHIELD)
+                        //currentDamage = currentDamage - 20 * target.countItemsOfType(ITEM_ID_HOLY_SHIELD)
 
 
                 //the following effects make use of the final damage

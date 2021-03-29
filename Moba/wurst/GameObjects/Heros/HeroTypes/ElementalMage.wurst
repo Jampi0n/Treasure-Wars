@@ -382,12 +382,12 @@ function initHeroType()
     onCast(ABILITY_ELEMENTAL_MARK, () -> castElementalMark())
     onCast(ABILITY_FROST_AND_FLAME, () -> castFrostAndFlame())
     heroType..setSkillBuild("QWEQWQWQWQWEEEE")
-    ..addItem(ITEM_ID_HEAVY_BOOTS)
-    ..addItem(ITEM_ID_RUNIC_ARMOR)
-    ..addItem(ITEM_ID_AXE_OF_DECAY)
-    ..addItem(ITEM_ID_BLESSED_GOBLET)
-    ..addItem(ITEM_ID_ARCANE_SHIELD)
-    ..addItem(ITEM_ID_WAR_DRUM)
+    ..addItem(ITEM_ID_BOOTS_BASE)
+    //..addItem(ITEM_ID_RUNIC_ARMOR)
+    //..addItem(ITEM_ID_AXE_OF_DECAY)
+    //..addItem(ITEM_ID_BLESSED_GOBLET)
+    //..addItem(ITEM_ID_ARCANE_SHIELD)
+    //..addItem(ITEM_ID_WAR_DRUM)
     delayInit(5) ->
         heroType
         ..setRetreatAI((IHeroAI ai) -> (retreatAI(ai)))
@@ -398,18 +398,11 @@ function initHeroType()
 
         buffFFBuff = new BuffType(false, DispelLevel.DISPEL)
         buffFFBuff.setupBuffWithIcon(FF_BUFF_ID, FF_ABILITY_ID)
-        buffFFBuff.addFirstFunction( (Buff whichBuff) -> (begin
-            let level = whichBuff.getLevel()
-            whichBuff.getTarget().wrapper()
-                ..modMoveSpeedRelative( -FF_SLOW[level - 1]*10)
-                ..incBlue()
-        end))
-        buffFFBuff.addEndFunction( (Buff whichBuff) -> (begin
-            let level = whichBuff.getLevel()
-            whichBuff.getTarget().wrapper()
-                ..modMoveSpeedRelative( FF_SLOW[level - 1]*10)
-                ..decBlue()
-        end))
+        buffFFBuff.addSetupFunction() (Buff thisBuff, int factor) ->
+            thisBuff.getTarget().wrapper().modBlue(factor)
+        buffFFBuff.addLevelFunction() (Buff thisBuff, int factor) ->
+            thisBuff.getTarget().wrapper().modMoveSpeedRelative( -factor * FF_SLOW[thisBuff.getLevel() - 1]*10)
+
         buffFFBuff.setPeriodicTime(0.25)
         buffFFBuff.addPeriodicFunction((Buff whichBuff) -> (begin
             let caster = whichBuff.getCaster()
@@ -420,30 +413,29 @@ function initHeroType()
 
         buffFrostBolt = new BuffType(false, DispelLevel.DISPEL)
         buffFrostBolt.setupBuffWithIcon(FROST_BOLT_BUFF_ID, FROST_BOLT_ABILITY_ID)
-        buffFrostBolt.addFirstFunction( (Buff whichBuff) -> (begin
-            let level = whichBuff.getLevel()
-            whichBuff.getTarget().wrapper()
-                ..modMoveSpeedRelative( -FROST_BOLT_SLOW[level - 1]*10)
-                ..modAttackSpeed( -FROST_BOLT_SLOW[level - 1])
-                ..incBlue()
-        end))
-        buffFrostBolt.addEndFunction( (Buff whichBuff) -> (begin
-            let level = whichBuff.getLevel()
-            whichBuff.getTarget().wrapper()
-                ..modMoveSpeedRelative( FROST_BOLT_SLOW[level - 1]*10)
-                ..modAttackSpeed( FROST_BOLT_SLOW[level - 1])
-                ..decBlue()
-        end))
+        buffFrostBolt.addSetupFunction() (Buff thisBuff, int factor) ->
+            thisBuff.getTarget().wrapper().modBlue(factor)
+
+        buffFrostBolt.addLevelFunction() (Buff thisBuff, int factor) ->
+            let level = thisBuff.getLevel()
+            thisBuff.getTarget().wrapper()
+                ..modMoveSpeedRelative( -factor * FROST_BOLT_SLOW[level - 1]*10)
+                ..modAttackSpeed( -factor * FROST_BOLT_SLOW[level - 1])
 
         buffFrenzy = new BuffType(true, DispelLevel.NONE)
         buffFrenzy.setupBuffWithIcon(FRENZY_BUFF_ID, FRENZY_ABILITY_ID)
-        buffFrenzy.addFirstFunction( (Buff whichBuff) -> (begin
-            let level = whichBuff.getLevel() - 1
-            let stacks = (FRENZY_BONUS[level]*10).toInt()
-            whichBuff.getTarget().wrapper()
+        buffFrenzy.addSetupFunction() (Buff thisBuff, int factor) ->
+            if factor == 1
+                let level = thisBuff.getLevel() - 1
+                let stacks = (FRENZY_BONUS[level]*10).toInt()
+                thisBuff.getTarget().wrapper()
                 ..modAttackSpeed( stacks div 10 )
-            whichBuff.setData(stacks)
-        end))
+                thisBuff.setData(stacks)
+            else
+                let stacks = thisBuff.getData()
+                thisBuff.getTarget().wrapper()
+                ..modAttackSpeed( -(stacks div 10))
+
         buffFrenzy.addStackFunction( (Buff whichBuff) -> (begin
             let level = whichBuff.getLevel() - 1
             let oldStacks = whichBuff.getData()
@@ -453,24 +445,13 @@ function initHeroType()
             whichBuff.getTarget().wrapper()
                 ..modAttackSpeed( (newStacks div 10) - (oldStacks div 10))
         end))
-        buffFrenzy.addEndFunction( (Buff whichBuff) -> (begin
-            let stacks = whichBuff.getData()
-            whichBuff.getTarget().wrapper()
-                ..modAttackSpeed( -(stacks div 10))
-        end))
+
 
         buffElementalMark = new BuffType(false, DispelLevel.DISPEL)
         buffElementalMark.setupBuffWithIcon(MARK_BUFF_ID, MARK_ABILITY_ID)
-        buffElementalMark.addFirstFunction( (Buff whichBuff) -> (begin
-            let level = whichBuff.getLevel()
-            whichBuff.getTarget().wrapper()
-                ..modWillpower( -MARK_WP_REDUCTION[level - 1])
-        end))
-        buffElementalMark.addEndFunction( (Buff whichBuff) -> (begin
-            let level = whichBuff.getLevel()
-            whichBuff.getTarget().wrapper()
-                ..modWillpower( MARK_WP_REDUCTION[level - 1])
-        end))
+        buffElementalMark.addLevelFunction() (Buff thisBuff, int factor) ->
+            let level = thisBuff.getLevel()
+            thisBuff.getTarget().wrapper().modWillpower( -factor * MARK_WP_REDUCTION[level - 1])
 
 
 init

@@ -87,10 +87,10 @@ function mistwalk(int abilityId)
             MISTWALK_DURATION[lvl-1].toExactString()))
     addDynamicTooltipIntelligence(heroType, tooltip)
 
-constant int array POISON_SPIT_SLOW_MS = [-30, -35, -40, -45, -50]
+constant int array POISON_SPIT_SLOW_MS = [30, 35, 40, 45, 50]
 constant real array POISON_SPIT_DOT = [25, 35, 45, 55, 65]
 constant real POISON_SPIT_DOT_BONUS = 80.
-constant int array POISON_SPIT_ARMOR_REDUCTION = [-10, -15, -20, -25, -30]
+constant int array POISON_SPIT_ARMOR_REDUCTION = [10, 15, 20, 25, 30]
 constant real array POISON_SPIT_DURATION = [6, 7, 8, 9, 10]
 constant real array POISON_SPIT_AOE = [200, 225, 250, 275, 300]
 
@@ -131,13 +131,13 @@ function poisonSpit(int abilityId)
     (int lvl) -> (begin
         return "{0}{I0} damage per second, {1} slow, {2} armor, lasts {3} seconds.".format(
         POISON_SPIT_DOT[lvl-1].str(), 
-        (-POISON_SPIT_SLOW_MS[lvl-1]).str()+"%",
-        (-POISON_SPIT_ARMOR_REDUCTION[lvl-1]).str(),
+        POISON_SPIT_SLOW_MS[lvl-1].str()+"%",
+        POISON_SPIT_ARMOR_REDUCTION[lvl-1].str(),
         POISON_SPIT_DURATION[lvl-1].str())
     end) )
     for lvl = 1 to 5
         tooltip.setNormalString(true, lvl, "Spits poison at the target area. Enemies within the area of effect are slowed by {0}, have their armor reduced by {1} and take {2}{I0} damage per second.|nLasts {3} seconds.".format(
-            (-POISON_SPIT_SLOW_MS[lvl-1]).str()+"%", (-POISON_SPIT_ARMOR_REDUCTION[lvl-1]).str(), POISON_SPIT_DOT[lvl-1].str(), POISON_SPIT_DURATION[lvl-1].str()))
+            POISON_SPIT_SLOW_MS[lvl-1].str()+"%", POISON_SPIT_ARMOR_REDUCTION[lvl-1].str(), POISON_SPIT_DOT[lvl-1].str(), POISON_SPIT_DURATION[lvl-1].str()))
     addDynamicTooltipIntelligence(heroType, tooltip)
 
 constant real array EMPOWERED_STRIKE_DAMAGE = [85, 130, 175, 220, 265]
@@ -352,12 +352,12 @@ function initHeroType()
     onCast(ABILITY_EMPOWERED_STRIKE, () -> castEmpoweredStrike())
     onCast(ABILITY_PARALYZING_STRIKE, () -> castParalyzingStrike())
     heroType..setSkillBuild("WEQEEWEWEWWQQQQ")
-    ..addItem(ITEM_ID_BOOTS_OF_DARKNESS)
-    ..addItem(ITEM_ID_ENCHANTED_ARMOR)
-    ..addItem(ITEM_ID_WAND_OF_DEATH)
-    ..addItem(ITEM_ID_RUNIC_ARMOR)
-    ..addItem(ITEM_ID_SCROLL_OF_CONJURATION)
-    ..addItem(ITEM_ID_BLESSED_GOBLET)
+    ..addItem(ITEM_ID_BOOTS_BASE)
+    //..addItem(ITEM_ID_ENCHANTED_ARMOR)
+    //..addItem(ITEM_ID_WAND_OF_DEATH)
+    //..addItem(ITEM_ID_RUNIC_ARMOR)
+    //..addItem(ITEM_ID_SCROLL_OF_CONJURATION)
+    //..addItem(ITEM_ID_BLESSED_GOBLET)
     delayInit(5) ->
         heroType
         ..setRetreatAI((IHeroAI ai) -> (retreatAI(ai)))
@@ -385,16 +385,11 @@ function initHeroType()
             (POISON_SPIT_DOT[thisBuff.getLevel()-1]).bonus(thisBuff.getCaster().getHeroInt(), POISON_SPIT_DOT_BONUS)/4
             , ReductionType.MAGIC)
         end) )
-        BUFF_POISON_SPIT.addFirstFunction( (Buff thisBuff) -> (begin
+        BUFF_POISON_SPIT.addLevelFunction() (Buff thisBuff, int factor) ->
             let wrapper = thisBuff.getTarget().wrapper()
-            wrapper.modMoveSpeedRelative( POISON_SPIT_SLOW_MS[thisBuff.getLevel()-1]*10 )
-            wrapper.modArmor( POISON_SPIT_ARMOR_REDUCTION[thisBuff.getLevel()-1] )
-        end) )
-        BUFF_POISON_SPIT.addEndFunction( (Buff thisBuff) -> (begin
-            let wrapper = thisBuff.getTarget().wrapper()
-            wrapper.modMoveSpeedRelative( -POISON_SPIT_SLOW_MS[thisBuff.getLevel()-1]*10 )
-            wrapper.modArmor( -POISON_SPIT_ARMOR_REDUCTION[thisBuff.getLevel()-1] )
-        end) )
+            wrapper.modMoveSpeedRelative( -factor * POISON_SPIT_SLOW_MS[thisBuff.getLevel()-1]*10 )
+            wrapper.modArmor( -factor * POISON_SPIT_ARMOR_REDUCTION[thisBuff.getLevel()-1] )
+
 
 init
     heroType = HeroType.create(THIS_HERO, THIS_ICON, THIS_ID, true)

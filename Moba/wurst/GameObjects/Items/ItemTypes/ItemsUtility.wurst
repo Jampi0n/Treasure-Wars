@@ -4,127 +4,119 @@ import ItemConfiguration
 
 constant CATEGORY = 2
 
+function generateTeleportAbility(real cooldown) returns int
+    let id = ABIL_ID_GEN.next()
+    new AbilityDefinitionStaffoTeleportation(id)
+    ..setCastRange(1, 999999)
+    ..setCooldown(1, cooldown)
+    ..setLevels(1)
+    ..setTargetsAllowed(1, "friend,invulnerable,structure,vulnerable,item")
+    return id
+
+constant TELEPORT_ABILITY_1 = compiletime(generateTeleportAbility(180))
+constant TELEPORT_ABILITY_2 = compiletime(generateTeleportAbility(120))
+
+
+function itemStaffOfTeleportation()
+    setupItem(ITEM_ID_STAFF_OF_TELEPORTATION, CATEGORY, 500)
+    setInfo("Staff of Teleportation", "Teleport:|nTeleports to an allied building after 3 seconds of channeling. 180 seconds cooldown.")
+    setAbilities(TELEPORT_ABILITY_1)
+
+
 function itemLightBoots()
     let ms = 40
-    
-    setupItem(ITEM_ID_LIGHT_BOOTS, CATEGORY, 500)
-    setInfo("Light Boots", "+ {0} movement speed|nMovement speed bonus from boots does not stack.".format(ms.toString()))
+    setupItem(ITEM_ID_BOOTS_BASE, CATEGORY, 500)
+    setInfo("Boots of Speed", "Boots of Speed:|nIncreases movement speed by {0}.".format(ms.toString()))
     onEither() (int factor) ->
-        if isUnique() and hasNot(ITEM_ID_HEAVY_BOOTS) and hasNot(ITEM_ID_BOOTS_OF_DARKNESS)
+        if isFirstBoots()
             modMoveSpeed(ms)
 
-
-constant WAR_DRUM_BUFF_ID = compiletime(createAuraBuff("War Drum", "This unit has increased attack and movement speed.", "BTNTribalDrumOfWar"))
-constant WAR_DRUM_ABILTIY_ID = compiletime(createPositiveBuffAbility(1, WAR_DRUM_BUFF_ID, Abilities.generalAuraTarget, ""))
-constant BuffType BUFF_WAR_DRUM = new BuffType( true, DispelLevel.NONE)        
-constant WAR_HORN_BUFF_ID = compiletime(createAuraBuff("War Horn", "This unit has increased attack damage.", "BTNHorn"))
-constant WAR_HORN_ABILTIY_ID = compiletime(createPositiveBuffAbility(1, WAR_HORN_BUFF_ID, Abilities.generalAuraTarget, ""))
-constant BuffType BUFF_WAR_HORN = new BuffType( true, DispelLevel.NONE)       
-group auraHeroes = CreateGroup()
-
-function checkAura()
-    let auraHero = GetEnumUnit()
-
-    if auraHero.isAlive()
-        let nearby = CreateGroup()
-        nearby.enumUnitsInRange(auraHero.getPos(), 900)
-
-        while(not nearby.isEmpty())
-            let target = FirstOfGroup(nearby)
-            nearby.removeUnit(target)
-            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(auraHero.getOwner(), true, false)
-                if auraHero.hasItemById(ITEM_ID_WAR_DRUM)
-                    target.addBuff( auraHero, 0.5, BUFF_WAR_DRUM, 1)
-                if auraHero.hasItemById(ITEM_ID_WAR_HORN)
-                    target.addBuff( auraHero, 0.5, BUFF_WAR_HORN, 1)
-
-        nearby.destr()
-
-function itemWarDrum()
-    let asBonus = 20
-    let msBonus = 40
-    
-    setupItem(ITEM_ID_WAR_DRUM, CATEGORY, 3100)
-    setInfo("War Drum", "Increases nearby unit's attack speed by {0}% and movement speed by {1}. This effect does not stack".format(
-            asBonus.toString(), msBonus.toString()
-        ))
-    addRequirement(ITEM_ID_GLOVES_OF_HASTE)
-    addRequirement(ITEM_ID_LIGHT_BOOTS)
+function itemBootsGuardian()
+    let ms = 40
+    setupItem(ITEM_ID_BOOTS_GUARDIAN, CATEGORY, 3000)
+    setInfo("Guardian Boots", "Boots of Speed:|nIncreases movement speed by {0}.|nTeleport:|nTeleports to an allied building after 3 seconds of channeling. 120 seconds cooldown.".format(ms.toString()))
+    addRequirement(ITEM_ID_BOOTS_BASE)
+    addRequirement(ITEM_ID_STAFF_OF_TELEPORTATION)
+    setAbilities(TELEPORT_ABILITY_2)
+    setCooldownGroup(TELEPORT_ABILITY_1)
     onEither() (int factor) ->
-        if isUnique() and hasNot(ITEM_ID_WAR_HORN)
-            if factor == 1
-                auraHeroes.addUnit(getItemUnit())
-            else
-                auraHeroes.removeUnit(getItemUnit())
-    
+        if isFirstBoots()
+            modMoveSpeed(ms)
+
+constant int BUFF_RUNNER = compiletime(createAuraBuff("Runner", "This unit moves faster until it is damaged by an enemy hero.", "BTNSandalZ3"))
+constant int ABILITY_RUNNER = compiletime(createPositiveBuffAbility(1, BUFF_RUNNER, Abilities.speedTarget, "origin"))
+function itemBootsRunner()
+    let ms = 40
+    let extraMs = 50
+    let dur = 10
+    setupItem(ITEM_ID_BOOTS_RUNNER, CATEGORY, 3000)
+    setInfo("Runner Boots", "Boots of Speed:|nIncreases movement speed by {0}.|nUnique:|nIncreases movement speed by {1}, if the hero was not damaged by an enemy hero for {2} seconds.".format(ms.toString(), extraMs.toString(), dur.toString()))
+    addRequirement(ITEM_ID_BOOTS_BASE)
+    let runnerInactive = new BuffType(false, DispelLevel.NONE)
+    let runnerActive = new BuffType(true, DispelLevel.NONE)
     if not compiletime
-        BUFF_WAR_DRUM.setupBuffWithIcon(WAR_DRUM_BUFF_ID, WAR_DRUM_ABILTIY_ID)
-        BUFF_WAR_DRUM.addFirstFunction((Buff thisBuff) -> (begin
-            thisBuff.getTarget().wrapper()
-            ..modMoveSpeed(msBonus)
-            ..modAttackSpeed(asBonus)
-        end))
-
-        BUFF_WAR_DRUM.addEndFunction((Buff thisBuff) -> (begin
-            thisBuff.getTarget().wrapper()
-            ..modMoveSpeed(-msBonus)
-            ..modAttackSpeed(-asBonus)
-        end))
-
-        createItemEffectTrigger()
-        ..registerTimerEvent(0.25, true)
-        ..addAction(() -> (begin
-            ForGroup(auraHeroes, function checkAura)
-        end) )
-    
-
-function itemWarHorn()
-    let adBonus = 25
-    let str = 20
-    let unitDmg = 25
-    
-    setupItem(ITEM_ID_WAR_HORN, CATEGORY, 3100)
-    setInfo("War Horn", "+{0} strength|nDeals {1} additional damage to units.|nIncreases nearby unit's strength by {2}%.".format(
-            str.toString(), unitDmg.toString(), adBonus.toString()
-        ))
-    addRequirement(ITEM_ID_HAMMER_OF_STRENGTH)
-    addRequirement(ITEM_ID_WAR_AXE)
-    addRequirement(ITEM_ID_BOW)
+        runnerActive.setupBuffWithIcon(BUFF_RUNNER, ABILITY_RUNNER)
+        runnerActive.addLevelFunction() (Buff thisBuff, int factor) ->
+            thisBuff.getTarget().wrapper().modMoveSpeed(factor * extraMs)
+        runnerInactive.addSetupFunction() (Buff thisBuff, int factor) ->
+            if factor == 1
+                let active = BuffList.getBuffOfType(thisBuff.getTarget(), runnerActive)
+                if active != null
+                    active.dispel()
+            else
+                let target = thisBuff.getTarget()
+                if target.countItemsOfType(ITEM_ID_BOOTS_RUNNER) > 0
+                    target.addBuff(target, -1, runnerActive, 1)
 
     onEither() (int factor) ->
-        modStrength(str)
-        if isUnique() and hasNot(ITEM_ID_WAR_DRUM)
+        if isFirstBoots()
+            modMoveSpeed(ms)
+        if isUnique()
             if factor == 1
-                auraHeroes.addUnit(getItemUnit())
+                getItemUnit().addBuff(getItemUnit(), dur.toReal(), runnerInactive, 1)
             else
-                auraHeroes.removeUnit(getItemUnit())
-
-        attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
-            if not target.isType(UNIT_TYPE_HERO)
-            let dmg = source.countItemsOfType(ITEM_ID_WAR_HORN) * unitDmg
-            source.dealDamage(target, dmg.toReal(), ReductionType.PHYSICAL)
-
-    if not compiletime
-        BUFF_WAR_HORN.setupBuffWithIcon(WAR_HORN_BUFF_ID, WAR_HORN_ABILTIY_ID)
-        BUFF_WAR_HORN.addFirstFunction((Buff thisBuff) -> (begin
-            let target = thisBuff.getTarget()
-            target.wrapper().modStrengthRelative(adBonus*10)
-        end))
-
-        BUFF_WAR_HORN.addEndFunction((Buff thisBuff) -> (begin
-            let target = thisBuff.getTarget()
-            target.wrapper().modStrengthRelative(-adBonus*10)
-        end))
+                let u = getItemUnit()
+                let inactive = BuffList.getBuffOfType(u, runnerInactive)
+                if inactive != null
+                    inactive.dispel()
+                let active = BuffList.getBuffOfType(u, runnerActive)
+                if active != null
+                    active.dispel()
+        anyHitFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
+            if source.isType(UNIT_TYPE_HERO)
+                target.addBuff(target, dur.toReal(), runnerInactive, 1)
+            
+function itemBootsHunter()
+    let ms = 40
+    let extraMs = 30
+    let dur = 4
+    setupItem(ITEM_ID_BOOTS_HUNTER, CATEGORY, 3000)
+    setInfo("Hunter Boots", "Boots of Speed:|nIncreases movement speed by {0}.|nUnique:|nIncreases movement speed by {1} for {2} seconds after attacking an enemy hero.".format(ms.toString(), extraMs.toString(), dur.toString()))
+    addRequirement(ITEM_ID_BOOTS_BASE)
+    onEither() (int factor) ->
+        if isFirstBoots()
+            modMoveSpeed(ms)
+function itemBootsWizard()
+    let ms = 40
+    let extraMs = 30
+    let dur = 5
+    setupItem(ITEM_ID_BOOTS_WIZARD, CATEGORY, 3000)
+    setInfo("Wizard Boots", "Boots of Speed:|nIncreases movement speed by {0}.|nUnique:|nIncreases movement speed by {1} for {2} seconds after casting a spell.".format(ms.toString(), extraMs.toString(), dur.toString()))
+    addRequirement(ITEM_ID_BOOTS_BASE)
+    onEither() (int factor) ->
+        if isFirstBoots()
+            modMoveSpeed(ms)
 
 
 
 @compiletime
 function initItems1()
+    itemStaffOfTeleportation()
     itemLightBoots()
-    itemWarDrum()
-    itemWarHorn()
-
-
+    itemBootsGuardian()
+    itemBootsRunner()
+    itemBootsHunter()
+    itemBootsWizard()
 init
     execute() ->
         initItems1()

@@ -429,12 +429,12 @@ function initHeroType()
     onCast(ABILITY_JUMP, () -> castJump())
     onCast(ABILITY_UNBREAKABLE, () -> castUnbreakable())
     heroType..setSkillBuild("QWEQWQWQWQWEEEE")
-    ..addItem(ITEM_ID_HEAVY_BOOTS)
-    ..addItem(ITEM_ID_RUNIC_ARMOR)
-    ..addItem(ITEM_ID_AXE_OF_DECAY)
-    ..addItem(ITEM_ID_BLESSED_GOBLET)
-    ..addItem(ITEM_ID_ARCANE_SHIELD)
-    ..addItem(ITEM_ID_WAR_DRUM)
+    ..addItem(ITEM_ID_BOOTS_BASE)
+    //..addItem(ITEM_ID_RUNIC_ARMOR)
+    //..addItem(ITEM_ID_AXE_OF_DECAY)
+    //..addItem(ITEM_ID_BLESSED_GOBLET)
+    //..addItem(ITEM_ID_ARCANE_SHIELD)
+    //..addItem(ITEM_ID_WAR_DRUM)
     ..useHeroGlow()
     delayInit(5) ->
         heroType
@@ -447,43 +447,24 @@ function initHeroType()
 
         buffBite.setupBuffWithIcon(BITE_BUFF_ID, BITE_ABILITY_ID)
 
-        buffBite.addFirstFunction( (Buff whichBuff) -> (begin
-            whichBuff.getTarget().wrapper()
-                ..modMoveSpeedRelative( -BITE_SLOW * 10)
-
-        end))
-
-        buffBite.addEndFunction( (Buff whichBuff) -> (begin
-            whichBuff.getTarget().wrapper()
-                ..modMoveSpeedRelative( BITE_SLOW * 10)
-        end))
+        buffBite.addLevelFunction() (Buff thisBuff, int factor) ->
+            thisBuff.getTarget().wrapper().modMoveSpeedRelative( -factor * BITE_SLOW * 10)
 
         buffUnbreakable = new BuffType(true, DispelLevel.NONE)
 
         buffUnbreakable.setupBuffWithIcon(UNBREAKABLE_BUFF_ID, UNBREAKABLE_ABILITY_ID)
-        buffUnbreakable.addFirstFunction((Buff whichBuff) -> (begin
-            let level = whichBuff.getLevel()
-            let target = whichBuff.getTarget()
+        buffUnbreakable.addLevelFunction() (Buff thisBuff, int factor) ->
+            let level = thisBuff.getLevel()
+            let target = thisBuff.getTarget()
             target.wrapper()
-                ..modHealth( UNBREAKABLE_HP[level-1])
-                ..modStrength( UNBREAKABLE_STR[level-1])
-                ..modArmor( UNBREAKABLE_DEF[level-1])
-                ..modWillpower( UNBREAKABLE_DEF[level-1])
-
-            target.setScale(UNBREAKABLE_SCALE)
-        end))
-
-        buffUnbreakable.addEndFunction((Buff whichBuff) -> (begin
-            let level = whichBuff.getLevel()
-            let target = whichBuff.getTarget()
-            target.wrapper()
-                ..modHealth( -UNBREAKABLE_HP[level-1])
-                ..modStrength( -UNBREAKABLE_STR[level-1])
-                ..modArmor( -UNBREAKABLE_DEF[level-1])
-                ..modWillpower( -UNBREAKABLE_DEF[level-1])
-
-            target.setScale(0.9)
-        end))
+                ..modHealth( factor * UNBREAKABLE_HP[level-1])
+                ..modStrength( factor * UNBREAKABLE_STR[level-1])
+                ..modArmor( factor * UNBREAKABLE_DEF[level-1])
+                ..modWillpower( factor * UNBREAKABLE_DEF[level-1])
+            if factor == 1
+                target.setScale(UNBREAKABLE_SCALE)
+            else
+                target.setScale(0.9)
 
 function createHeroType(IHero hero)
     let heroUnit = hero.toUnit()

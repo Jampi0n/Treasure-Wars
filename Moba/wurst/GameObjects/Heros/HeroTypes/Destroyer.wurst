@@ -371,12 +371,12 @@ function initHeroType()
     onCast(ABILITY_BONE_WALL, () -> castBoneWall())
     onCast(ABILITY_WILD_RAGE, () -> castWildRage())
     heroType..setSkillBuild("QWQWQWQWQWEEEEE")
-    ..addItem(ITEM_ID_HEAVY_BOOTS)
-    ..addItem(ITEM_ID_BLOOD_SWORD)
-    ..addItem(ITEM_ID_INFERNAL_BOW)
-    ..addItem(ITEM_ID_RUNIC_ARMOR)
-    ..addItem(ITEM_ID_SACRIFICIAL_DAGGER)
-    ..addItem(ITEM_ID_CURSED_SWORD)
+    ..addItem(ITEM_ID_BOOTS_BASE)
+    //..addItem(ITEM_ID_BLOOD_SWORD)
+    //..addItem(ITEM_ID_INFERNAL_BOW)
+    //..addItem(ITEM_ID_RUNIC_ARMOR)
+    //..addItem(ITEM_ID_SACRIFICIAL_DAGGER)
+    //..addItem(ITEM_ID_CURSED_SWORD)
     delayInit(5) ->
         heroType
         ..setRetreatAI((IHeroAI ai) -> (retreatAI(ai)))
@@ -387,14 +387,8 @@ function initHeroType()
 
         buffMeltingBreath = new BuffType(false, DispelLevel.DISPEL)
         buffMeltingBreath.setupBuffWithIcon(BREATH_BUFF_ID, BREATH_ABILITY_ID)
-
-        buffMeltingBreath.addFirstFunction( (Buff whichBuff) -> (begin
-            whichBuff.getTarget().wrapper().modArmorRelative( -BREATH_ARMOR_REDUCTION[whichBuff.getLevel()-1] * 10)
-        end))
-
-        buffMeltingBreath.addEndFunction( (Buff whichBuff) -> (begin
-            whichBuff.getTarget().wrapper().modArmorRelative( BREATH_ARMOR_REDUCTION[whichBuff.getLevel()-1] * 10)
-        end))
+        buffMeltingBreath.addLevelFunction() (Buff thisBuff, int factor) ->
+            thisBuff.getTarget().wrapper().modArmorRelative( -factor * BREATH_ARMOR_REDUCTION[thisBuff.getLevel()-1] * 10)
 
         buffPreyTarget = new BuffType(false, DispelLevel.DISPEL)
         buffPreyTarget.setupBuffWithIcon(PREY_TARGET_BUFF_ID, PREY_TARGET_ABILITY_ID)
@@ -422,37 +416,16 @@ function initHeroType()
                     caster.wrapper().modMoveSpeedRelative( -PREY_MOVE_SPEED[whichBuff.getLevel()-1]*10)
                 
         end))
+        buffPreyTarget.addLevelFunction() (Buff thisBuff, int factor) ->
+            if factor == -1
+                let caster = thisBuff.getCaster()
+                let level = thisBuff.getLevel()
+                if thisBuff.getData()==1
+                    caster.wrapper().modMoveSpeedRelative( -PREY_MOVE_SPEED[level-1]*10)
 
-        buffPreyTarget.addFirstFunction( (Buff whichBuff) -> (begin
-            let caster = whichBuff.getCaster()
-            let target = whichBuff.getTarget()
-            let level = whichBuff.getLevel()
-            whichBuff.setData(0)
-            let direction = caster.getPos().angleTo(target.getPos())
-            let facing = caster.getFacingAngle()
-            var diffDegrees = (direction - facing).degrees() %360
-
-            if diffDegrees < 0
-                diffDegrees += 360
-            if diffDegrees > 180
-                diffDegrees = 360 - diffDegrees
-
-            if diffDegrees < 90
-                whichBuff.setData(1)
-                caster.wrapper().modMoveSpeedRelative( PREY_MOVE_SPEED[level-1]*10)
-
-        end))
-
-        buffPreyTarget.addEndFunction( (Buff whichBuff) -> (begin
-            let caster = whichBuff.getCaster()
-            let level = whichBuff.getLevel()
-            if whichBuff.getData()==1
-                caster.wrapper().modMoveSpeedRelative( -PREY_MOVE_SPEED[level-1]*10)
-
-            let casterBuff = BuffList.getBuffOfType(caster, buffPreyCaster)
-            if casterBuff!= null
-                casterBuff.dispel()
-        end))
+                let casterBuff = BuffList.getBuffOfType(caster, buffPreyCaster)
+                if casterBuff!= null
+                    casterBuff.dispel()
 
         buffPreyCaster = new BuffType(true, DispelLevel.NONE)
         buffPreyCaster.setupBuffWithIcon(PREY_CASTER_BUFF_ID, PREY_CASTER_ABILITY_ID)
@@ -460,27 +433,15 @@ function initHeroType()
         buffPreySlow = new BuffType(true, DispelLevel.DISPEL)
         buffPreySlow.setupBuffWithIcon(PREY_SLOW_BUFF_ID, PREY_SLOW_ABILITY_ID)
 
-        buffPreySlow.addFirstFunction( (Buff whichBuff) -> (begin
-            whichBuff.getTarget().wrapper().modMoveSpeedRelative( -PREY_SLOW * 10)
-        end))
-
-        buffPreySlow.addEndFunction( (Buff whichBuff) -> (begin
-            whichBuff.getTarget().wrapper().modMoveSpeedRelative( PREY_SLOW * 10)
-        end))
+        buffPreySlow.addLevelFunction() (Buff thisBuff, int factor) ->
+            thisBuff.getTarget().wrapper().modMoveSpeedRelative( -factor * PREY_SLOW * 10)
 
         buffImmolation = new BuffType(true, DispelLevel.NONE)
         buffImmolation.setPeriodicTime(0.2)
 
-        buffImmolation.addFirstFunction( (Buff whichBuff) -> (begin
-            let level = whichBuff.getLevel()
-            whichBuff.setData(level)
-            whichBuff.getCaster().wrapper().modAttackSpeed( IMMOLATION_ATTACK_SPEED[level-1])
-        end))
-
-        buffImmolation.addEndFunction( (Buff whichBuff) -> (begin
-            let level = whichBuff.getData()
-            whichBuff.getCaster().wrapper().modAttackSpeed( -IMMOLATION_ATTACK_SPEED[level-1])
-        end))
+        buffImmolation.addLevelFunction() (Buff thisBuff, int factor) ->
+            let level = thisBuff.getLevel()
+            thisBuff.getCaster().wrapper().modAttackSpeed( IMMOLATION_ATTACK_SPEED[level-1])
 
         buffImmolation.addPeriodicFunction((Buff whichBuff) -> (begin
             let caster = whichBuff.getCaster()

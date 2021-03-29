@@ -27,10 +27,13 @@ init
 	buffTowerFocus = new BuffType(false, DispelLevel.DISPEL)
 	buffTowerFocus.setupBuffWithIcon(TOWER_FOCUS_BUFF_ID, TOWER_FOCUS_ABILTIY_ID)
 
-	buffTowerFocus.addFirstFunction( (Buff whichBuff) -> (begin
-		whichBuff.getTarget().wrapper().modArmorRelative(-TOWER_FOCUS_ARMOR * 10)
-		whichBuff.setData(1)
-	end))
+	buffTowerFocus.addSetupFunction() (Buff thisBuff, int factor) ->
+		if factor == 1
+			thisBuff.getTarget().wrapper().modArmorRelative(-TOWER_FOCUS_ARMOR * 10)
+			thisBuff.setData(1)
+		else
+			let stacks = thisBuff.getData()
+			thisBuff.getTarget().wrapper().modArmorRelative(TOWER_FOCUS_ARMOR * 10 * stacks)
 
 	buffTowerFocus.addStackFunction( (Buff whichBuff) -> (begin
 		let stacks = whichBuff.getData() + 1
@@ -39,11 +42,6 @@ init
 			whichBuff.getTarget().wrapper().modArmorRelative(-TOWER_FOCUS_ARMOR * 10)
 	end))
 
-
-	buffTowerFocus.addEndFunction( (Buff whichBuff) -> (begin
-		let stacks = whichBuff.getData()
-		whichBuff.getTarget().wrapper().modArmorRelative(TOWER_FOCUS_ARMOR * 10 * stacks)
-	end))
 
 	let g = CreateGroup()
 	g.enumUnitsAll(null)

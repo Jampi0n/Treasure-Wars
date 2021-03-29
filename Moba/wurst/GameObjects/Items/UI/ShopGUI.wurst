@@ -420,8 +420,8 @@ public class GUI
 
         this.setInventoryUnit(inventoryUnit)
         this.inventoryUnitTypeId = this.inventoryUnit.getTypeId()
-        //start with seconds page, because first depends on hero
-        this.selectedItem = this.getItemFromList(1,0)
+        //do not start with first (0-th) page, because it depends on hero (recommended items)
+        this.selectedItem = this.getItemFromList(2,0)
         this.selectedRecipe = this.selectedItem
 
         this.forPlayer = whichPlayer

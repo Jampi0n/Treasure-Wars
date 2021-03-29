@@ -77,8 +77,8 @@ public function unit.addBuff(unit caster, real duration, BuffType buffType, int 
 public function unit.addBuffReduced(unit caster, real duration, BuffType buffType, int level) returns Buff
     //buff reduction only uses 1/4 of the wp, so it reduces duration not as much as it reduces damage
     real realDuration =  duration.reduce( (this.getUnitWp()/4).toInt() , 0.01 )
-    if this.hasItemById(ITEM_ID_ARCANE_SHIELD)
-        realDuration = realDuration * 0.85
+    //if this.hasItemById(ITEM_ID_ARCANE_SHIELD)
+        //realDuration = realDuration * 0.85
     Buff ret = null
     if (realDuration <= 0 and realDuration > -0.5) or realDuration > 600
         error("addBuffReduced add buff with unusual duration: " + realDuration.toString() + " " + (buffType castTo int).toString())
@@ -125,8 +125,8 @@ public function unit.damageMana(unit target, real amount, ReductionType reductio
 
 public function unit.healHP(unit target, real amount)
     real realAmount = amount
-    if this.hasItemById(ITEM_ID_BRACER_OF_POWER)
-        realAmount *= 1.15
+    //if this.hasItemById(ITEM_ID_BRACER_OF_POWER)
+    //  realAmount *= 1.15
 
     realAmount = min(realAmount, target.getMaxHP()-target.getHP())
     target.setHP(target.getHP() + realAmount)
@@ -136,8 +136,8 @@ public function unit.healHP(unit target, real amount)
 
 public function unit.healMana(unit target, real amount)
     real realAmount = amount
-    if this.hasItemById(ITEM_ID_BRACER_OF_POWER)
-        realAmount *= 1.15
+    //if this.hasItemById(ITEM_ID_BRACER_OF_POWER)
+    //  realAmount *= 1.15
 
     realAmount = min(realAmount, target.getMaxMana()-target.getMana())
     target.setMana(target.getMana() + realAmount)
@@ -182,6 +182,9 @@ public function unit.countItemsOfType(int itemTypeId) returns int
             count++
 
     return count
+
+public function unit.cancelChannel()
+    this.addBuff(this, 0.01, STUNNED, 1)
 
 public function enumUnitsInHitBoxRange(vec2 pos, real range) returns group
     let g = CreateGroup()

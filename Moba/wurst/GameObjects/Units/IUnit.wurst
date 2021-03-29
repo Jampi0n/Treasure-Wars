@@ -38,8 +38,10 @@ public interface IUnit
     function copyBaseStatsFrom(IUnit wrapper)
     function incBlue()
     function decBlue()
+    function modBlue(int value)
     function incReveal()
     function decReveal()
+    function modReveal(int value)
 
     // new stat API
     // functions with Dispatch need to do branching based on the stat, which is inefficient

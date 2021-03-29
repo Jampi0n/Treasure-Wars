@@ -341,13 +341,10 @@ function castCripplingPain()
         if BuffList.hasBuffType(u, buffBleedingWound)
             let bleedingWound = BuffList.getBuffOfType(u, buffBleedingWound)
             let stacks = bleedingWound.getData() div 4
-            bleedingWound.dispel()
+            u.addBuffReduced(caster, CRIPPLING_PAIN_DURATION[level-1], buffCripplingPain, level)
+
             caster.dealDamage(u, stacks * CRIPPLING_PAIN_DAMAGE[level-1].bonus(caster.getHeroInt(), CRIPPLING_PAIN_DAMAGE_BONUS), ReductionType.MAGIC)
 
-            u.wrapper().modMoveSpeedRelative( -10 * CRIPPLING_PAIN_SLOW[level-1] * stacks )
-            if u.isAlive()
-                let b = u.addBuffReduced(caster, CRIPPLING_PAIN_DURATION[level-1], buffCripplingPain, level)
-                b.setData(stacks * CRIPPLING_PAIN_SLOW[level-1])
 
     g.destr()
 
@@ -404,12 +401,12 @@ function initHeroType()
     onCast(ABILITY_CRIPPLING_PAIN, () -> castCripplingPain())
     onCast(ABILITY_MIRROR_IMAGE, () -> castMirrorImage())
     heroType..setSkillBuild("QWQWQWQWQWEEEEE")
-    ..addItem(ITEM_ID_HEAVY_BOOTS)
-    ..addItem(ITEM_ID_BLOOD_SWORD)
-    ..addItem(ITEM_ID_INFERNAL_BOW)
-    ..addItem(ITEM_ID_RUNIC_ARMOR)
-    ..addItem(ITEM_ID_SACRIFICIAL_DAGGER)
-    ..addItem(ITEM_ID_CURSED_SWORD)
+    ..addItem(ITEM_ID_BOOTS_BASE)
+    //..addItem(ITEM_ID_BLOOD_SWORD)
+    //..addItem(ITEM_ID_INFERNAL_BOW)
+    //..addItem(ITEM_ID_RUNIC_ARMOR)
+    //..addItem(ITEM_ID_SACRIFICIAL_DAGGER)
+    //..addItem(ITEM_ID_CURSED_SWORD)
     delayInit(5) ->
         heroType
         ..setRetreatAI((IHeroAI ai) -> (retreatAI(ai)))
@@ -424,9 +421,9 @@ function initHeroType()
         buffBleedingWound = new BuffType(false, DispelLevel.DISPEL)
         buffBleedingWound.setupBuffWithIcon(BLEEDING_WOUND_BUFF_ID, BLEEDING_WOUND_ABILITY_ID)
 
-        buffBleedingWound.addFirstFunction( (Buff whichBuff) -> (begin
-            whichBuff.setData(1)
-        end))
+        buffBleedingWound.addSetupFunction() (Buff thisBuff, int factor) ->
+            if factor == 1
+                thisBuff.setData(1)
 
         buffBleedingWound.addStackFunction( (Buff whichBuff) -> (begin
             whichBuff.setData(whichBuff.getData()+1)
@@ -442,30 +439,29 @@ function initHeroType()
 
         buffShadowStrike.setupBuffWithIcon(SHADOW_STRIKE_BUFF_ID, SHADOW_STRIKE_ABILITY_ID)
 
-        buffShadowStrike.addFirstFunction( (Buff whichBuff) -> (begin
-            whichBuff.getTarget().wrapper()
-                ..modMoveSpeedRelative( -SHADOW_STRIKE_SLOW * 10)
+        buffShadowStrike.addLevelFunction() (Buff thisBuff, int factor) ->
+            thisBuff.getTarget().wrapper().modMoveSpeedRelative( -factor * SHADOW_STRIKE_SLOW * 10)
 
-        end))
-
-        buffShadowStrike.addEndFunction( (Buff whichBuff) -> (begin
-            whichBuff.getTarget().wrapper()
-                ..modMoveSpeedRelative( SHADOW_STRIKE_SLOW * 10)
-        end))
 
         buffDeathSpin = new BuffType(false, DispelLevel.NONE)
         buffDeathSpin.setupBuffWithIcon(DEATH_SPIN_BUFF_ID, DEATH_SPIN_ABILITY_ID)
 
-        buffDeathSpin.addFirstFunction( (Buff whichBuff) -> (begin
-            notSpinning.setOwner(players[PLAYER_NEUTRAL_PASSIVE], false)
-            let target = whichBuff.getTarget()
-            target.addAbility(DEATH_SPIN_DISABLE_ATTACK)
-            AddUnitAnimationProperties(target, "spin", true)
-            let level = whichBuff.getLevel()
-            target.wrapper()
-                ..modArmor( DEATH_SPIN_DEFENSE[level-1])
-                ..modWillpower( DEATH_SPIN_DEFENSE[level-1])
-        end))
+        buffDeathSpin.addSetupFunction() (Buff thisBuff, int factor) ->
+            let target = thisBuff.getTarget()
+            if factor == 1
+                notSpinning.setOwner(players[PLAYER_NEUTRAL_PASSIVE], false)
+                target.addAbility(DEATH_SPIN_DISABLE_ATTACK)
+                AddUnitAnimationProperties(target, "spin", true)
+            else
+                notSpinning.setOwner(heroOwner, false)
+                target.removeAbility(DEATH_SPIN_DISABLE_ATTACK)
+                AddUnitAnimationProperties(target, "spin", false)
+
+        buffDeathSpin.addLevelFunction() (Buff thisBuff, int factor) ->
+            let level = thisBuff.getLevel()
+            thisBuff.getTarget().wrapper()
+            ..modArmor( factor * DEATH_SPIN_DEFENSE[level-1])
+            ..modWillpower( factor * DEATH_SPIN_DEFENSE[level-1])
 
         buffDeathSpin.setPeriodicTime(0.25)
         buffDeathSpin.addPeriodicFunction( (Buff whichBuff) -> (begin
@@ -487,25 +483,20 @@ function initHeroType()
             g.destr()
         end))
 
-        buffDeathSpin.addEndFunction( (Buff whichBuff) -> (begin
-            notSpinning.setOwner(heroOwner, false)
-            let target = whichBuff.getTarget()
-            target.removeAbility(DEATH_SPIN_DISABLE_ATTACK)
-            AddUnitAnimationProperties(target, "spin", false)
-            let level = whichBuff.getLevel()
-            target.wrapper()
-                ..modArmor( -DEATH_SPIN_DEFENSE[level-1])
-                ..modWillpower( -DEATH_SPIN_DEFENSE[level-1])
-        end))
-
         buffCripplingPain = new BuffType(false, DispelLevel.DISPEL)
         buffCripplingPain.setupBuffWithIcon(CRIPPLING_PAIN_BUFF_ID, CRIPPLING_PAIN_ABILITY_ID)
 
-        buffCripplingPain.addEndFunction( (Buff whichBuff) -> (begin
-            let stacks = whichBuff.getData()
-            whichBuff.getTarget().wrapper()
-                ..modMoveSpeedRelative( 10 * stacks)
-        end))
+        // store number of stacks of bleeding wound
+        buffCripplingPain.addSetupFunction() (Buff thisBuff, int factor) ->
+            let bleedingWound = BuffList.getBuffOfType(thisBuff.getTarget(), buffBleedingWound)
+            if bleedingWound != null
+                thisBuff.setData(bleedingWound.getData() div 4)
+                bleedingWound.dispel()
+            
+        buffCripplingPain.addLevelFunction() (Buff thisBuff, int factor) ->
+            let level = thisBuff.getLevel()
+            let stacks = thisBuff.getData()
+            thisBuff.getTarget().wrapper().modMoveSpeedRelative(-factor * CRIPPLING_PAIN_SLOW[level - 1] * 10 * stacks)
 
 
         buffMirrorImage = new BuffType(false, DispelLevel.NONE)

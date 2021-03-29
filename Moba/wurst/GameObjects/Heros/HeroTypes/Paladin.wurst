@@ -445,12 +445,12 @@ function initHeroType()
     onCast(ABILITY_DIVINE_PUNISHMENT, () -> castDivinePunishment())
     heroType
     ..setSkillBuild("QWEQQWEQQWEWEWE")
-    ..addItem(ITEM_ID_HEAVY_BOOTS)
-    ..addItem(ITEM_ID_RUNIC_ARMOR)
-    ..addItem(ITEM_ID_WAR_HORN)
-    ..addItem(ITEM_ID_ARMOR_OF_COURAGE)
-    ..addItem(ITEM_ID_ARCANE_SHIELD)
-    ..addItem(ITEM_ID_WAR_DRUM)
+    ..addItem(ITEM_ID_BOOTS_BASE)
+    //..addItem(ITEM_ID_RUNIC_ARMOR)
+    //..addItem(ITEM_ID_WAR_HORN)
+    //..addItem(ITEM_ID_ARMOR_OF_COURAGE)
+    //..addItem(ITEM_ID_ARCANE_SHIELD)
+    //..addItem(ITEM_ID_WAR_DRUM)
     delayInit(5) ->
         heroType
             ..setRetreatAI((IHeroAI ai) -> (retreatAI(ai)))
@@ -461,16 +461,10 @@ function initHeroType()
         BUFF_HOLY_SHIELD.setupBuffWithIcon(BUFF_ID_HOLY_SHIELD, ABILITY_HOLY_SHIELD_BUFF)
         
         BATTLE_ROAR.setupBuffWithIcon(BUFF_ID_BATTLE_ROAR, ABILITY_BATTLE_ROAR_BUFF)
-        BATTLE_ROAR.addFirstFunction( (Buff thisBuff) -> (begin
+        BATTLE_ROAR.addLevelFunction() (Buff thisBuff, int factor) ->
             thisBuff.getTarget().wrapper()
-                ..modMoveSpeedRelative( BATTLE_ROAR_MS[thisBuff.getLevel()-1]*10 )
-                ..modAttackSpeed( BATTLE_ROAR_AS[thisBuff.getLevel()-1] )
-        end) )
-        BATTLE_ROAR.addEndFunction( (Buff thisBuff) -> (begin
-            thisBuff.getTarget().wrapper()
-                ..modMoveSpeedRelative( -BATTLE_ROAR_MS[thisBuff.getLevel()-1]*10 )
-                ..modAttackSpeed( -BATTLE_ROAR_AS[thisBuff.getLevel()-1] )
-        end) )
+            ..modMoveSpeedRelative( factor * BATTLE_ROAR_MS[thisBuff.getLevel()-1]*10 )
+            ..modAttackSpeed( factor * BATTLE_ROAR_AS[thisBuff.getLevel()-1] )
 
 
 

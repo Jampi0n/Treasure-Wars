@@ -3,10 +3,38 @@ package ChannelTeleport
 import ClosureTimers
 import Assets
 import HashMap
-import DamageDetection
 import Buff
 import UnitLib
 import BuffTypeConfig
+import ObjectIdGenerator
+import UnitObjEditing
+import TimerUtils
+import FastDamageEvent
+
+function generateProgressDummy() returns int
+    let id = UNIT_ID_GEN.next()
+    new UnitDefinition(id, 'hfoo')
+    ..setNormalAbilities("")
+    ..setAttacksEnabled(0)
+    ..setMovementType(MovementType.Fly)
+    ..setSpeedBase(0)
+    ..setCollisionSize(0)
+    ..setUnitSoundSet("")
+    ..setSightRadiusDay(100)
+    ..setSightRadiusNight(100)
+    ..setSelectionScale(4)
+    ..setManaInitialAmount(100)
+    ..setManaMaximum(100)
+    ..setHitPointsMaximumBase(100)
+    ..setHitPointsRegenerationType("none")
+    ..setDeathType(0)
+    ..setUnitClassification("ancient")
+    ..setModelFile("dummy.mdx")
+    ..setMovementHeight(250)
+    return id
+
+constant PROGRESS_DUMMY = compiletime(generateProgressDummy())
+
 
 public class ChannelTeleport
 
@@ -15,52 +43,62 @@ public class ChannelTeleport
     private effect channelEffectCaster
     private effect channelEffectTarget
     private static constant unitMap = new HashMap<unit, ChannelTeleport>
-    private boolean alive = true
     private real maxDamage
     private real damage = 0
-
+    private unit progressDummy
+    private timer updateTimer
+    private real progress = 0
+    private real duration
+    private int damageEventId
 
     construct(unit caster, vec2 targetPos, real dur, real maxDamage)
         this.caster = caster
         this.targetPos = targetPos
         this.maxDamage = maxDamage
-        create(dur)
-
-    private function create(real dur)
+        this.duration = dur
+        this.progressDummy = createUnit(players[PLAYER_NEUTRAL_PASSIVE], PROGRESS_DUMMY, caster.getPos(), angle(0))
+        this.updateTimer = getTimer()..setData(this castTo int)
+        this.updateTimer.startPeriodic(0.1, function staticUpdate)
         this.caster.pause()
         this.channelEffectCaster = addEffect(Abilities.massTeleportTo, this.caster.getPos())
         this.channelEffectTarget = addEffect(Abilities.massTeleportTo, this.targetPos)
-        addOnDamageFunc(Condition(function onDamage))
+        this.damageEventId = DamageEventUnit.fromUnit(caster).anyHit.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
+            this.onDamage(damage)
         unitMap.put(this.caster, this)
-        doAfter(dur, () ->(begin
-            if this.alive
-                this.onTeleport()
-            else
-                destroy this
-        end))
 
-    private static function onDamage()
-        let teleport = unitMap.get(GetTriggerUnit())
-        if teleport != null
-            teleport.damage += GetEventDamage()
-            if teleport.maxDamage > -0.5 and teleport.damage > teleport.maxDamage
-                teleport.remove()
-            else
-                let u = GetTriggerUnit()
-                if BuffList.hasBuffType(u, STUNNED) or BuffList.hasBuffType(u, SILENCED) or not u.isMovable()
-                    teleport.remove()
-        
+    private static function staticUpdate()
+        let ct = GetExpiredTimer().getData() castTo ChannelTeleport
+        ct.update()
+    private function update()
+        progress += 0.1
+        if maxDamage > 0.5
+            this.progressDummy.setHP(100 - 100 * damage/maxDamage)
+        this.progressDummy.setMana(100 - 100 * progress/duration)
+        if progress >= duration
+            this.onTeleport()
+
+    private function onDamage(real damage)
+        this.damage += damage
+        print(this.damage)
+        if this.maxDamage > -0.5 and this.damage > this.maxDamage
+            destroy this
+        else
+            let u = GetTriggerUnit()
+            if BuffList.hasBuffType(u, STUNNED) or BuffList.hasBuffType(u, SILENCED) or not u.isMovable()
+                destroy this
+
     private function onTeleport()
         addEffect(Abilities.massTeleportCaster, this.caster.getPos()).destr()
         addEffect(Abilities.massTeleportTarget, this.targetPos).destr()
         this.caster.setPos(targetPos)
-        this.remove()
         destroy this
 
-    private function remove()
-        this.alive = false
+    ondestroy
+        DamageEventUnit.fromUnit(caster).anyHit.remove(this.damageEventId)
         this.channelEffectCaster.destr()
         this.channelEffectTarget.destr()
         unitMap.remove(this.caster)
-        doAfter(0.5) -> 
+        this.updateTimer.release()
+        this.progressDummy.remove()
+        doAfter(0.01) ->
             this.caster.unpause()
