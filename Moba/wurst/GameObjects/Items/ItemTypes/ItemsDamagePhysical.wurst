@@ -45,15 +45,6 @@ function itemArmorBreaker()
         ..targetNone()
         ..setArtCaster("")
         ..setManaCost(1, 0)
-    else
-        createItemEffectTrigger()
-        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_SPELL_EFFECT)
-        ..addAction() -> 
-            if GetSpellAbilityId() == ABILITY_ARMOR_BREAKER_SLAM
-                let caster = GetTriggerUnit()
-                let pos = caster.getPos()
-                addEffect(Abilities.thunderclapCaster, pos).destr()
-
 
     setupItem(ITEM_ID_ARMOR_BREAKER, CATEGORY, 3325)
     setAbilities(ABILITY_ARMOR_BREAKER_SLAM)
@@ -73,6 +64,15 @@ function itemArmorBreaker()
             attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
                 target.addBuffReduced( source, armorDuration.toReal(), hammerBuff, 1)
                 target.addEffect(Abilities.bloodElfSpellThiefMISSILE, "chest").destr()
+
+            let trg = itemTrigger()
+            if trg != null
+                trg.registerUnitEvent(getItemUnit(), EVENT_UNIT_SPELL_EFFECT)
+                trg.addAction() ->
+                    if GetSpellAbilityId() == ABILITY_ARMOR_BREAKER_SLAM
+                        let caster = GetTriggerUnit()
+                        let pos = caster.getPos()
+                        addEffect(Abilities.thunderclapCaster, pos).destr()
 
 
 constant CHILLING_BLADE_BUFF_ID = compiletime(createAuraBuff("Chilling Blade", "This unit was hit by Chilling Blade; it has reduced movement speed.", "BTNMysticDagger"))

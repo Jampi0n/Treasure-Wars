@@ -13,20 +13,24 @@ function generateTeleportAbility(real cooldown) returns int
     ..setTargetsAllowed(1, "friend,invulnerable,structure,vulnerable,item")
     return id
 
-constant TELEPORT_ABILITY_1 = compiletime(generateTeleportAbility(180))
-constant TELEPORT_ABILITY_2 = compiletime(generateTeleportAbility(120))
+constant TELEPORT_CD_1 = 180
+constant TELEPORT_ABILITY_1 = compiletime(generateTeleportAbility(TELEPORT_CD_1.toReal()))
+constant TELEPORT_CD_2 = 120
+constant TELEPORT_ABILITY_2 = compiletime(generateTeleportAbility(TELEPORT_CD_2.toReal()))
 
 
 function itemStaffOfTeleportation()
     setupItem(ITEM_ID_STAFF_OF_TELEPORTATION, CATEGORY, 500)
-    setInfo("Staff of Teleportation", "Teleport:|nTeleports to an allied building after 3 seconds of channeling. 180 seconds cooldown.")
+    addActive("Teleport", "Teleports to an allied building after 3 seconds of channeling. {0} seconds cooldown.".format(TELEPORT_CD_1.toString()))
+    setInfo("Staff of Teleportation")
     setAbilities(TELEPORT_ABILITY_1)
 
 
 function itemLightBoots()
     let ms = 40
     setupItem(ITEM_ID_BOOTS_BASE, CATEGORY, 500)
-    setInfo("Boots of Speed", "Boots of Speed:|nIncreases movement speed by {0}.".format(ms.toString()))
+    addPassive("Boots of Speed", "Increases movement speed by {0}".format(ms.toString()))
+    setInfo("Boots of Speed")
     onEither() (int factor) ->
         if isFirstBoots()
             modMoveSpeed(ms)
@@ -40,7 +44,9 @@ function itemBootsGuardian()
     let extraMs = 30
     let dur = GUARDIAN_DURATION
     setupItem(ITEM_ID_BOOTS_GUARDIAN, CATEGORY, 3000)
-    setInfo("Guardian Boots", "Boots of Speed:|nIncreases movement speed by {0}.|nTeleport:|nTeleports to an allied building after 3 seconds of channeling and increases movement speed by {1} for {2} seconds. 120 seconds cooldown.".format(ms.toString(), extraMs.toString(), dur.toString()))
+    addPassive("Boots of Speed", "Increases movement speed by {0}".format(ms.toString()))
+    addActive("Teleport", "Teleports to an allied building after 3 seconds of channeling and increases movement speed by {0} for {1} seconds. {2} seconds cooldown.".format(extraMs.toString(), dur.toString(), TELEPORT_CD_2.toString()))
+    setInfo("Guardian Boots")
     addRequirement(ITEM_ID_BOOTS_BASE)
     addRequirement(ITEM_ID_STAFF_OF_TELEPORTATION)
     setAbilities(TELEPORT_ABILITY_2)
@@ -55,7 +61,6 @@ function itemBootsGuardian()
     onEither() (int factor) ->
         if isFirstBoots()
             modMoveSpeed(ms)
-
         let trg = itemTrigger()
         if trg != null
             trg.registerUnitEvent(getItemUnit(), EVENT_UNIT_SPELL_FINISH)
@@ -71,7 +76,9 @@ function itemBootsRunner()
     let extraMs = 30
     let dur = 10
     setupItem(ITEM_ID_BOOTS_RUNNER, CATEGORY, 3000)
-    setInfo("Runner Boots", "Boots of Speed:|nIncreases movement speed by {0}.|nUnique:|nIncreases movement speed by {1}, if the hero was not damaged by an enemy hero for {2} seconds.".format(ms.toString(), extraMs.toString(), dur.toString()))
+    addPassive("Boots of Speed", "Increases movement speed by {0}".format(ms.toString()))
+    addUnique("Increases movement speed by {0}, if the hero was not damaged by an enemy hero for {1} seconds.".format(extraMs.toString(), dur.toString()))
+    setInfo("Runner Boots")
     addRequirement(ITEM_ID_BOOTS_BASE)
     let runnerInactive = new BuffType(false, DispelLevel.NONE)
     let runnerActive = new BuffType(true, DispelLevel.NONE)
@@ -114,7 +121,9 @@ function itemBootsHunter()
     let extraMs = 30
     let dur = 4
     setupItem(ITEM_ID_BOOTS_HUNTER, CATEGORY, 3000)
-    setInfo("Hunter Boots", "Boots of Speed:|nIncreases movement speed by {0}.|nUnique:|nIncreases movement speed by {1} for {2} seconds after attacking an enemy hero.".format(ms.toString(), extraMs.toString(), dur.toString()))
+    addPassive("Boots of Speed", "Increases movement speed by {0}".format(ms.toString()))
+    addUnique("Increases movement speed by {0} for {1} seconds after attacking an enemy hero.".format(extraMs.toString(), dur.toString()))
+    setInfo("Hunter Boots")
     addRequirement(ITEM_ID_BOOTS_BASE)
 
     let hunter = new BuffType(true, DispelLevel.NONE)
@@ -139,7 +148,9 @@ function itemBootsWizard()
     let extraMs = 30
     let dur = WIZARD_DURATION
     setupItem(ITEM_ID_BOOTS_WIZARD, CATEGORY, 3000)
-    setInfo("Wizard Boots", "Boots of Speed:|nIncreases movement speed by {0}.|nUnique:|nIncreases movement speed by {1} for {2} seconds after casting a spell.".format(ms.toString(), extraMs.toString(), dur.toString()))
+    addPassive("Boots of Speed", "Increases movement speed by {0}".format(ms.toString()))
+    addUnique("Increases movement speed by {0} for {1} seconds after casting a spell.".format(extraMs.toString(), dur.toString()))
+    setInfo("Wizard Boots")
     addRequirement(ITEM_ID_BOOTS_BASE)
 
     buffWizard = new BuffType(true, DispelLevel.NONE)

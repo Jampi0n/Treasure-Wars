@@ -63,7 +63,6 @@ public class ItemEffect
     private static trigger onItemPickUp = CreateTrigger()
     private static trigger onItemDrop = CreateTrigger()
     protected ItemDropOrPickUp onDropOrPickUp = null
-    private LinkedList<trigger> attachedTriggers = null
 
     private int useCount = 0
 
@@ -77,22 +76,6 @@ public class ItemEffect
         else
             return new ItemEffect(itemId)
 
-    function attachTrigger(trigger trg) returns trigger
-        if this.attachedTriggers == null
-            this.attachedTriggers = new LinkedList<trigger>
-
-        this.attachedTriggers.add(trg)
-        return trg
-
-    function enableEffect()
-        if this.attachedTriggers != null
-            for trg in this.attachedTriggers
-                trg.enable()
-
-    function disableEffect()
-        if this.attachedTriggers != null
-            for trg in this.attachedTriggers
-                trg.disable()
 
     static function classInit()
         onItemPickUp = CreateTrigger()
@@ -110,8 +93,6 @@ public class ItemEffect
             inventoryChangeDirection = 1
             let itemType = itemIdToEffect.get(triggerItem.getTypeId())
             itemType.useCount++
-            if itemType.useCount == 1
-                itemType.enableEffect()
             if itemType.onDropOrPickUp != null
                 itemType.onDropOrPickUp.dropOrPickUp(1)
 
@@ -123,19 +104,16 @@ public class ItemEffect
             inventoryChangeDirection = -1
             let itemType = itemIdToEffect.get(triggerItem.getTypeId())
             itemType.useCount--
-            if itemType.useCount == 0
-                itemType.disableEffect()
             if itemType.onDropOrPickUp != null
                 itemType.onDropOrPickUp.dropOrPickUp(-1)
 
 
 int currentItemId
+string currentDescription = ""
 ItemEffect currentItemEffect
 ItemDefinition currentItemDefinition
 ItemInShop currentItemInShop
 
-public function createItemEffectTrigger() returns trigger
-    return currentItemEffect.attachTrigger(CreateTrigger())
 
 public function onEither(ItemDropOrPickUp onDropOrPickUp)
     if compiletime
@@ -275,6 +253,21 @@ public function setInfo(string name, string desc)
         currentItemDefinition.setTooltipExtended(desc)
     else
         currentItemInShop.setupStrings(name, desc)
+
+public function setInfo(string name)
+    setInfo(name, currentDescription)
+    currentDescription = ""
+
+public function addLine(string text)
+    currentDescription += text + "|n"
+public function addText(string text)
+    currentDescription += text
+public function addPassive(string name, string desc)
+    currentDescription += COLOR_GOLD.toColorString() + name + ":|r|n" + desc + "|n"
+public function addUnique(string desc)
+    currentDescription += COLOR_GOLD.toColorString() + "Unique:|r|n" + desc + "|n"
+public function addActive(string name, string desc)
+    currentDescription += COLOR_GOLD.toColorString() + name + " (Active):|r|n" + desc + "|n"
 
 public function setAbilities(vararg int ids)
     if compiletime
