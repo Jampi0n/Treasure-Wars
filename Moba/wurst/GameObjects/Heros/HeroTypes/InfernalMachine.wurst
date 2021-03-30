@@ -161,6 +161,7 @@ function innerFire(int abilityId)
             INNER_FIRE_DURATION.toSmartString()
         ))
     addDynamicTooltipIntelligence(heroType, tooltip)
+    setAnimationSpeed(abilityId, 2)
 
 constant real array FLAME_THROWER_DAMAGE = [60, 90, 120, 150, 180]
 constant real FLAME_THROWER_DAMAGE_BONUS = 100
@@ -220,6 +221,7 @@ function flameThrower(int abilityId)
             FLAME_THROWER_DURATION[lvl-1].toSmartString()
         ))
     addDynamicTooltipIntelligence(heroType, tooltip)
+    setAnimationSpeed(abilityId, 2)
 
 constant int array RAPID_FIRE_ATTACK_SPEED = [80, 120, 160, 200, 240]
 constant real RAPID_FIRE_DURATION = 3
