@@ -301,7 +301,9 @@ function onRootStats(unit caster, int level) // add bonus
     caster.wrapper().modArmor( ROOT_RESISTANCE[level-1])
     caster.wrapper().modWillpower( ROOT_RESISTANCE[level-1])
     caster.wrapper().modMoveSpeed( 0)
-    doAfter(0, () -> caster.wrapper().modMoveSpeed( 0) )
+    doAfter(0) -> 
+        caster.toHero().morph()
+        caster.wrapper().modMoveSpeed(0)
 
 function onRoot(unit caster, int level) // add bonus
     doAfter(0, () -> caster.setPropWindow(angle(0)))
@@ -312,8 +314,10 @@ function onRoot(unit caster, int level) // add bonus
 function onUprootStats(unit caster, int level) // remove bonus
     caster.wrapper().modArmor( -ROOT_RESISTANCE[level-1])
     caster.wrapper().modWillpower( -ROOT_RESISTANCE[level-1])
-    caster.wrapper().modMoveSpeed( 0)
-    doAfter(0, () -> caster.wrapper().modMoveSpeed( 0) )
+    caster.wrapper().modMoveSpeed(0)
+    doAfter(0) ->
+        caster.toHero().morph()
+        caster.wrapper().modMoveSpeed(0)
     
 
 function onUproot(unit caster, int level) // remove bonus

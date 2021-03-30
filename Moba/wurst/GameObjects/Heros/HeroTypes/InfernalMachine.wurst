@@ -271,6 +271,7 @@ function onRapidStats(unit caster, int level) // add bonus
 
 function onRapid(unit caster, int level) // add bonus
     doAfter(0, () -> (begin
+        caster.toHero().morph()
         onRapidStats(caster, level)
         DamageEvent.useAlternate(caster, true)
         let track = AttackOrderTrack.getAttackTrack(caster)
@@ -291,6 +292,7 @@ function onRapidEndStats(unit caster, int level) // remove bonus
 
 function onRapidEnd(unit caster, int level) // remove bonus
     doAfter(0, () -> (begin
+        caster.toHero().morph()
         onRapidEndStats(caster, level)
         DamageEvent.useAlternate(caster, false)
     end))

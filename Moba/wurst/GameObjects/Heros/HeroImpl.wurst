@@ -177,7 +177,7 @@ public class HeroImpl implements IHero
         SetHeroAgi(this.hero, this.heroType.getBase(Stat.AGI), true)
         SetHeroInt(this.hero, this.heroType.getBase(Stat.INT), true)
         // modify base attack speed
-        this.hero.setFieldWeapon(UNIT_WEAPON_RF_ATTACK_BASE_COOLDOWN, 0, this.hero.getFieldWeapon(UNIT_WEAPON_RF_ATTACK_BASE_COOLDOWN, 0) * ATTACK_ANIMATION_FACTOR)
+        morph()
         // modify attack speed modifier to keep attack speed the same
         // divided by ATTACK_ANIMATION_FACTOR, because modAttackSpeed internally multiplies with ATTACK_ANIMATION_FACTOR
         wrapper.modAttackSpeed(((ATTACK_ANIMATION_FACTOR - 1.0) * 100 / ATTACK_ANIMATION_FACTOR).round())
@@ -451,6 +451,9 @@ public class HeroImpl implements IHero
             let heroUnit = hero.toUnit()
             heroType.updateTooltipsStr(heroUnit)
             heroType.updateTooltipsInt(heroUnit)
+
+    override function morph()
+        this.hero.setFieldWeapon(UNIT_WEAPON_RF_ATTACK_BASE_COOLDOWN, 0, this.hero.getFieldWeapon(UNIT_WEAPON_RF_ATTACK_BASE_COOLDOWN, 0) * ATTACK_ANIMATION_FACTOR)
 
 public function unit.toHero() returns IHero
     return HeroImpl.getHero(this)

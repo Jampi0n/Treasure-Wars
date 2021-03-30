@@ -243,6 +243,7 @@ function onMeleeStats(unit caster, int level) // add bonus
 
 function onSwitchToMelee(unit caster, int level) // add bonus
     doAfter(0, () -> (begin
+        caster.toHero().morph()
         onMeleeStats(caster, level)
         if BuffList.hasBuffType(caster, buffGrowth)
             caster.setScale(GROWTH_SCALE)
@@ -255,6 +256,7 @@ function onRangedStats(unit caster, int level) // remove bonus
 
 function onSwitchToRanged(unit caster, int level) // remove bonus
     doAfter(0, () -> (begin
+        caster.toHero().morph()
         onRangedStats(caster, level)
         if BuffList.hasBuffType(caster, buffGrowth)
             caster.setScale(GROWTH_SCALE)
