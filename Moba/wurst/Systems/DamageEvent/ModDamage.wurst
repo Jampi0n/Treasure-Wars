@@ -1,14 +1,14 @@
 package ModDamage
 
-import SeaDruid
+/*import SeaDruid
 import TrollBerserker
 import Paladin
 import Destroyer
 import StandardTextTags
-import ItemIds
+import ItemIds*/
 import Gameplay
 import UnitLib
-import Buff
+//import Buff
 import FastDamageEvent
 import DamageIds
 
@@ -20,7 +20,7 @@ Heroes can generally be filtered by type ids.
 
 public abstract class ModDamage
     @inline
-    static function modDamage(unit source, unit target, DamageEventUnit _sourceWrapper, DamageEventUnit targetWrapper, int sourceTypeId, int targetTypeId, real originalDamage, bool attack, bool _active, bool advanced) returns real
+    static function modDamage(unit _source, unit target, DamageEventUnit _sourceWrapper, DamageEventUnit targetWrapper, int _sourceTypeId, int _targetTypeId, real originalDamage, bool attack, bool _active, bool _advanced) returns real
         real currentDamage = originalDamage
         if originalDamage.abs() >= 0.000001 //damage very small, just ignore
             /*
@@ -31,7 +31,7 @@ public abstract class ModDamage
                 currentDamage = 0
             else
                 // the following effects manage the damage dealt (attacker based)
-
+                /*
                 // critical strike - TROLL BERSERKER
                 if advanced
                     if sourceTypeId == HERO_TROLL_BERSERKER or sourceTypeId == HERO_TROLL_BERSERKER_MELEE
@@ -56,7 +56,7 @@ public abstract class ModDamage
                         let heavyArmoredLevel = target.getAbilityLevel(ABILITY_HEAVY_ARMORED)
                         if heavyArmoredLevel > 0
                             currentDamage -= HEAVY_ARMOED_REDUCTION[heavyArmoredLevel - 1]
-
+                */
                 // shield - ITEM
                 if attack
                     if targetWrapper.loadIntFast(D_SHIELD) > 0
@@ -65,7 +65,7 @@ public abstract class ModDamage
 
 
                 //the following effects make use of the final damage
-
+                /*
                 // mana shield - SEA DRUID
                 if targetTypeId == HERO_SEA_DRUID
                     if BuffList.hasBuffType(target, buffManaShield)
@@ -74,7 +74,7 @@ public abstract class ModDamage
                         let level = manaShield.getLevel()
                         manaShield.getTarget().damageMana(manaShield.getTarget(), MANA_SHIELD_REDUCTION[level-1] * MANA_PER_DAMAGE[level-1] * currentDamage, ReductionType.NONE)
                         currentDamage = currentDamage * (1.-MANA_SHIELD_REDUCTION[level-1])
-
+                */
                 // void armor - ITEM
                 if targetWrapper.loadIntFast(D_VOID_ARMOR) > 0
                     target.healMana(target, currentDamage * 0.1)

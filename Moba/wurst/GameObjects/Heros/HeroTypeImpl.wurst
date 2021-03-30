@@ -14,9 +14,20 @@ import IHero
 import IUnit
 import ErrorHandling
 import ClosureTimers
+import ObjectIdGenerator
+import ObjectIds
+import Upgrades
 
 int array SLOT_ID
 string array BUTTON_ORDER_STRING
+
+function smartIcon(string icon) returns string
+    string realIcon = icon
+    if icon.length() < 20 or not icon.startsWith("ReplaceableTextures")
+        realIcon = "ReplaceableTextures\\CommandButtons\\" + realIcon
+    if not icon.endsWith(".blp")
+        realIcon += ".blp"
+    return realIcon
 
 int array tavernButtons
 HashMap<int, IHeroType> buttonToHeroType
@@ -40,14 +51,8 @@ public class HeroTypeImpl implements IHeroType
     private CalculateTotalBonus bonusCalculation = null
     private LinkedList<int> alternateUnitTypeIds = new LinkedList<int>
 
-    private OnCreateFunction onCreateFunction = null
-    private OnInitFunction onInitFunction = null
 
     private boolean hasAI = false
-
-    private AIBehaviour attackAI = null
-    private AIBehaviour retreatAI = null
-    private AIBehaviour teamFightAI = null
 
     private boolean useHeroGlow = false
 
@@ -65,47 +70,44 @@ public class HeroTypeImpl implements IHeroType
     protected constant dynamicIntelligence = new LinkedList<DynamicTooltip>
     protected constant dynamicStrength = new LinkedList<DynamicTooltip>
 
-    construct(int unitId, string icon, int heroId, boolean hasAI)
-        objectCount++
+    constant HeroTemplate TEMPLATE
+
+    construct(HeroTemplate template)
+        template.setup(this)
+        this.TEMPLATE = template
+        heroTypes[heroTypeCount] = this
+        heroTypeCount++
+        this.unitId = template.UNIT_ID_HERO
+        this.heroId = template.HERO_INDEX
         unitIdToHeroType.put(unitId, this)
         heroIdToHeroType.put(heroId, this)
-        this.unitId = unitId
-        this.heroId = heroId
         for i = 0 to STAT_COUNT-1
             statsBase[i]=0
             statsMax[i]=0
+        
+        this.icon = smartIcon(template.icon)
+        this.hasAI = template.hasAI()
 
-        string realIcon = icon
-        if icon.length() < 20 or not icon.startsWith("ReplaceableTextures")
-            realIcon = "ReplaceableTextures\\CommandButtons\\" + realIcon
-        if not icon.endsWith(".blp")
-            realIcon += ".blp"
+        if not compiletime
+            preloadAbility(this.getAbilityId(AbilitySlot.Q))
+            preloadAbility(this.getAbilityId(AbilitySlot.W))
+            preloadAbility(this.getAbilityId(AbilitySlot.E))
+            preloadAbility(this.getAbilityId(AbilitySlot.R))
+            preloadAbility(this.getAbilityId(AbilitySlot.PASSIVE))
+            preloadUnit(this.getUnitId())
 
-        this.icon = realIcon
-        this.hasAI = hasAI
+            this.recommendedItems = new RecommendedItems(unitId)
 
-
-        preloadAbility(this.getAbilityId(AbilitySlot.Q))
-        preloadAbility(this.getAbilityId(AbilitySlot.W))
-        preloadAbility(this.getAbilityId(AbilitySlot.E))
-        preloadAbility(this.getAbilityId(AbilitySlot.R))
-        preloadAbility(this.getAbilityId(AbilitySlot.PASSIVE))
-        preloadUnit(this.getUnitId())
-
-        this.recommendedItems = new RecommendedItems(unitId)
-
-        for i = 0 to 3
-            allowCooldownChange[i] = true
-
-        heroTypes[heroTypeCount] = this
-        heroTypeCount++
+            for i = 0 to 3
+                allowCooldownChange[i] = true
+            addButtonToTavern(this.heroId, 0, this, 0)
 
     //only initialize every herotype once
     override function initialize()
-        if getOnInitFunction() != null
-            getOnInitFunction().onInit()
-            destroy getOnInitFunction()
-            setOnInitFunction(null)
+        TEMPLATE.stats(this)
+        TEMPLATE.onInit(this)
+        delayInit(5) -> 
+            TEMPLATE.onInitDelayed(this)
 
     override function addMorph(int id)
         unitIdToHeroType.put(id, this)
@@ -162,23 +164,7 @@ public class HeroTypeImpl implements IHeroType
     override function getUsesHeroGlow() returns boolean
         return this.useHeroGlow
 
-    /**
-        HeroType and Hero are created. Now certain hero specific code can be run.
-    **/
-    override function setOnCreateFunction(OnCreateFunction onCreate)
-        this.onCreateFunction = onCreate
 
-    override function getOnCreateFunction() returns OnCreateFunction
-        return this.onCreateFunction
-
-    /**
-        Initializes the HeroType object. Used to setup all triggers and the stats. If the herotype is unused this is not run and saves a lot of memory.
-    **/
-    override function setOnInitFunction(OnInitFunction onInit)
-        this.onInitFunction = onInit
-
-    override function getOnInitFunction() returns OnInitFunction
-        return this.onInitFunction
 
     override function getIcon() returns string
         return this.icon
@@ -189,26 +175,14 @@ public class HeroTypeImpl implements IHeroType
     override function hasAI() returns boolean
         return this.hasAI
 
-    override function setRetreatAI(AIBehaviour ai)
-        this.retreatAI = ai
-
-    override function setAttackAI(AIBehaviour ai)
-        this.attackAI = ai
-
-    override function setTeamFightAI(AIBehaviour ai)
-        this.teamFightAI = ai
-
     override function retreatAI(IHeroAI ai)
-        if this.retreatAI != null
-            this.retreatAI.run(ai)
+        TEMPLATE.retreatAI(ai)
 
     override function attackAI(IHeroAI ai)
-        if this.attackAI != null
-            this.attackAI.run(ai)
+        TEMPLATE.attackAI(ai)
 
     override function teamFightAI(IHeroAI ai)
-        if this.teamFightAI != null
-            this.teamFightAI.run(ai)
+        TEMPLATE.teamFightAI(ai)
 
     override function getItemBuild() returns LinkedList<int>
         return this.itemBuild
@@ -331,8 +305,8 @@ function initOrderStrings()
 public class HeroType
     static function get(int unitTypeId) returns IHeroType
         return HeroTypeImpl.getHeroType(unitTypeId)
-    static function create(int unitTypeId, string icon, int heroId, bool hasAI) returns IHeroType
-        return new HeroTypeImpl(unitTypeId, icon, heroId, hasAI)
+    static function create(HeroTemplate template) returns IHeroType
+        return new HeroTypeImpl(template)
     static function getNumberOfTypes() returns int
         return HeroTypeImpl.getHeroTypeCount()
     static function getNthType(int i) returns IHeroType
@@ -377,7 +351,7 @@ public function addButtonToTavern(int heroId, int buttonPos, IHeroType heroType,
             //print("C=" + compareTooltip)
             if compareTooltip != tooltip
                 print("error")
-                error("Tooltip for hero " + GetObjectName(heroType.getUnitId()) + " was not correctly generated.")
+                error("Tooltip for hero " + GetObjectName(heroType.getUnitId()) + " was not correctly generated: " + buttonId.toRawCode())
 
 public function addDynamicTooltipStrength(IHeroType herotype, DynamicTooltip tooltip)
     HeroTypeImpl.addDynamicTooltipStrength(herotype, tooltip)
@@ -411,15 +385,195 @@ function charToAbilitySlot(string char) returns AbilitySlot
 
 public function delayInit(real maxDelay, CallbackSingle cb)
     doAfter(GetRandomReal(1, maxDelay), cb)
-            
+        
 
-init
-    buttonToHeroType = new HashMap<int, IHeroType>()
-    for i = 0 to 47
-        tavernButtons[i] = -1
+public abstract class HeroTemplate
+    static constant SPELL_TO_TEMPLATE = new HashMap<int, HeroTemplate>()
+    static constant SPELL_TO_SLOT = new HashMap<int, AbilitySlot>() 
+    static int numInstances = 0
+    constant int HERO_INDEX
+    constant int ABILITY_ID_Q 
+    constant int ABILITY_ID_W
+    constant int ABILITY_ID_E
+    constant int ABILITY_ID_R
+    constant int ABILITY_ID_PASSIVE
+    constant int UNIT_ID_HERO
+    string model = "units\\human\\HeroMountainKing\\HeroMountainKing.mdl"
+    string icon = "ReplaceableTextures\\CommandButtons\\BTNHeroMountainKing.blp"
+    real castPoint = 0.4
+    real castBackswing = 0.5
+    real blendTime = 0.15
+    real maxPitchAngle = 10.0
+    real maxRollAngle = 10.0
+    real selectionScale = 1.25
+    real shadowX = 60
+    real shadowY = 60
+    real shadowH = 150
+    real shadowW = 150
+    real runSpeed = 250
+    real walkSpeed = 250
+    real impactZ = 60
+    real launchX = 0
+    real launchY = 0
+    real launchZ = 60
+    string requiredAnimationNames = ""
+    real scalingValue = 1.0
+    string artSpecial = "Objects\\Spawnmodels\\Human\\HumanLargeDeathExplode\\HumanLargeDeathExplode.mdl"
+    ArmorSoundType armorSoundType = ArmorSoundType.Metal
+    real backswingPoint = 0.65
+    real damagePoint = 0.35
+    real cooldownTime = 2.22
+    WeaponSound weaponSound = WeaponSound.MetalHeavyBash
+    WeaponType weaponType = WeaponType.Normal
+    int range = 100
+    real turnRate = 0.6
+    MovementType movementType = MovementType.Foot
+    real movementHeight = 0
+    string unitSoundSet = "HeroMountainKing"
+    string name = "Mountain King"
+    string description = "Warrior Hero"
+    string properName = "Muradin"
+
+    construct()
+        this.HERO_INDEX = numInstances
+        numInstances++
+        this.UNIT_ID_HERO = HERO_ID_GEN.next()
+        let heroOffset = HeroType.getAbilityOffset(this.HERO_INDEX) 
+        this.ABILITY_ID_Q = heroOffset + SLOT_ID[AbilitySlot.Q castTo int]
+        this.ABILITY_ID_W = heroOffset + SLOT_ID[AbilitySlot.W castTo int]
+        this.ABILITY_ID_E = heroOffset+ SLOT_ID[AbilitySlot.E castTo int]
+        this.ABILITY_ID_R = heroOffset + SLOT_ID[AbilitySlot.R castTo int]
+        this.ABILITY_ID_PASSIVE = heroOffset + SLOT_ID[AbilitySlot.PASSIVE castTo int]
+        SPELL_TO_TEMPLATE.put(this.ABILITY_ID_Q, this)
+        SPELL_TO_TEMPLATE.put(this.ABILITY_ID_W, this)
+        SPELL_TO_TEMPLATE.put(this.ABILITY_ID_E, this)
+        SPELL_TO_TEMPLATE.put(this.ABILITY_ID_R, this)
+        SPELL_TO_SLOT.put(this.ABILITY_ID_Q, AbilitySlot.Q)
+        SPELL_TO_SLOT.put(this.ABILITY_ID_W, AbilitySlot.W)
+        SPELL_TO_SLOT.put(this.ABILITY_ID_E, AbilitySlot.E)
+        SPELL_TO_SLOT.put(this.ABILITY_ID_R, AbilitySlot.R)
+
+    /*
+    Called after the constructor. This needs to be outside of the constructor, because subclasses need to be initialized.
+    */
+    function setup(IHeroType heroType)
+        this.setupPassive(this.ABILITY_ID_PASSIVE, heroType)
+        this.setupQ(this.ABILITY_ID_Q, heroType)
+        this.setupW(this.ABILITY_ID_W, heroType)
+        this.setupE(this.ABILITY_ID_E, heroType)
+        this.setupR(this.ABILITY_ID_R, heroType)
+        this.objectDefinition()
+        if compiletime
+            let def = this.defaultHero(this.UNIT_ID_HERO)
+            this.applyObjectDefinition(def)
+            this.customDefintions(def)
+            createHeroButton(this.HERO_INDEX, 0, this.icon)
+        
+    function defaultHero(int id) returns HeroDefinition
+        let def = new HeroDefinition(id, 'Hmkg')
+        ..setHeroAbilities(commaList(ABILITY_ID_PASSIVE, ABILITY_ID_Q, ABILITY_ID_W, ABILITY_ID_E, ABILITY_ID_R))
+        ..setNormalAbilities("A008,AInv")
+        ..setAcquisitionRange(600.0)
+        ..setAttack1DamageBase(-1)
+        ..setAttack1DamageNumberofDice(1)
+        ..setAttack1DamageSidesperDie(1)
+        ..setAttack1TargetsAllowed("air,ground,nonancient,nonsapper,structure,ward")
+        ..setDefenseBase(0)
+        ..setDefenseUpgradeBonus(1)
+        ..setAgilityPerLevel(0)
+        ..setStrengthPerLevel(0)
+        ..setIntelligencePerLevel(0)
+        ..setFoodCost(0)
+        ..setGoldCost(0)
+        ..setLumberCost(0)
+        ..setHitPointsMaximumBase(400)
+        ..setHitPointsRegenerationRate(0.01)
+        ..setManaInitialAmount(100)
+        ..setManaMaximum(100)
+        ..setManaRegeneration(0)
+        ..setStartingAgility(1)
+        ..setStartingStrength(1)
+        ..setStartingIntelligence(1)
+        ..setStockMaximum(1)
+        ..setStockReplenishInterval(0)
+        ..setRequierementsForTier(2, "n006")
+        ..setUpgradesUsed(commaList(UPG_AS, UPG_AR, UPG_AD, UPG_HP, UPG_MP))
+        ..setProperNamesUsed(1)
+        return def
+    
+    function applyObjectDefinition(HeroDefinition def)
+        def
+        ..setModelFile(model)
+        ..setIconGameInterface(smartIcon(icon))
+        ..setAnimationCastBackswing(castBackswing)
+        ..setAnimationCastPoint(castPoint)
+        ..setAnimationBlendTimeseconds(blendTime)
+        ..setAnimationRunSpeed(runSpeed)
+        ..setAnimationWalkSpeed(walkSpeed)
+        ..setMaximumPitchAngledegrees(maxPitchAngle)
+        ..setMaximumRollAngledegrees(maxRollAngle)
+        ..setProjectileImpactZ(impactZ)
+        ..setProjectileLaunchX(launchX)
+        ..setProjectileLaunchZ(launchY)
+        ..setProjectileLaunchY(launchZ)
+        ..setRequiredAnimationNames(requiredAnimationNames)
+        ..setScalingValue(scalingValue)
+        ..setSelectionScale(selectionScale)
+        ..setArtSpecial(artSpecial)
+        ..setArmorSoundType(armorSoundType)
+        ..setAttack1AnimationBackswingPoint(backswingPoint)
+        ..setAttack1AnimationDamagePoint(damagePoint)
+        ..setAttack1CooldownTime(cooldownTime)
+        ..setAttack1WeaponSound(weaponSound)
+        ..setAttack1WeaponType(weaponType)
+        ..setAttack1Range(range)
+        ..setTurnRate(turnRate)
+        ..setMovementType(movementType)
+        ..setMovementHeight(movementHeight)
+        ..setUnitSoundSet(unitSoundSet)
+        ..setTooltipBasic(name)
+        ..setTooltipExtended(description)
+        ..setName(name)
+        ..setProperNames(properName)
+
+
+
+    function customDefintions(HeroDefinition _def)
+    function objectDefinition()
+    abstract function setupPassive(int abilityId, IHeroType heroType)
+    abstract function setupQ(int abilityId, IHeroType heroType)
+    abstract function setupW(int abilityId, IHeroType heroType)
+    abstract function setupE(int abilityId, IHeroType heroType)
+    abstract function setupR(int abilityId, IHeroType heroType)
+    function castQ()
+    function castW()
+    function castE()
+    function castR()
+    function stats(IHeroType _heroType)
+    function skillBuild() returns string
+        return ""
+    function retreatAI(IHeroAI _ai)
+    function attackAI(IHeroAI _ai)
+    function teamFightAI(IHeroAI _ai)
+    function recommendedItems(LinkedList<int> _list)
+    function onInit(IHeroType _heroType)
+    function onInitDelayed(IHeroType _heroType)
+    function onCreate(IHeroType _heroType, IHero _hero)
+    function hasAI() returns bool
+        return false
+
+@compiletime
+function initialize()
+    if not compiletime
+        buttonToHeroType = new HashMap<int, IHeroType>()
+        for i = 0 to 47
+            tavernButtons[i] = -1
 
     SLOT_ID[AbilitySlot.Q castTo int] = 81
     SLOT_ID[AbilitySlot.W castTo int] = 87
     SLOT_ID[AbilitySlot.E castTo int] = 69
     SLOT_ID[AbilitySlot.R castTo int] = 82
     SLOT_ID[AbilitySlot.PASSIVE castTo int] = 80
+
+init
+    initialize()

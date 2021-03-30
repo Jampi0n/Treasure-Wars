@@ -15,12 +15,6 @@ public enum AbilitySlot
 public interface AIBehaviour
     function run(IHeroAI ai)
 
-public interface OnCreateFunction
-    function onCreate(IHero hero)
-
-public interface OnInitFunction
-    function onInit()
-
 public interface IHeroType
     function initialize()
     function addMorph(int id)
@@ -34,16 +28,9 @@ public interface IHeroType
     function calculateStat(Stat stat, integer level) returns integer
     function setBonusCalculation(CalculateTotalBonus bonusCalculation)
     function getBonusCalculation() returns CalculateTotalBonus
-    function setOnCreateFunction(OnCreateFunction onCreate)
-    function getOnCreateFunction() returns OnCreateFunction
-    function setOnInitFunction(OnInitFunction onInit)
-    function getOnInitFunction() returns OnInitFunction
     function getIcon() returns string
     function getHeroId() returns int
     function hasAI() returns boolean
-    function setRetreatAI(AIBehaviour ai)
-    function setAttackAI(AIBehaviour ai)
-    function setTeamFightAI(AIBehaviour ai)
     function retreatAI(IHeroAI ai)
     function attackAI(IHeroAI ai)
     function teamFightAI(IHeroAI ai)

@@ -4,19 +4,6 @@ package TrollManhunter
 
 import HeroInclude
 
-public constant HERO_TROLL_MANHUNTER = 'H00U'
-constant THIS_HERO = HERO_TROLL_MANHUNTER
-constant THIS_ID = 14
-constant THIS_BUTTON_POS = 2 //button pos from 0 to 11
-constant THIS_ICON = "BTNHeroTrollManhunter"
-IHeroType heroType = null
-
-public constant ABILITY_BLEEDING_WOUND = 'AY4P'
-constant ABILITY_SHADOW_STRIKE = 'AY4Q'
-constant ABILITY_DEATH_SPIN = 'AY4W'
-constant ABILITY_CRIPPLING_PAIN = 'AY4E'
-constant ABILITY_MIRROR_IMAGE = 'AY4R'
-
 constant SOUND_SHADOW_STRIKE = new SoundDefinition(Sounds.metalHeavySliceFlesh2, false, true)
 constant SOUND_CRIPPLING_PAIN = new SoundDefinition(Sounds.howlOfTerror, false, true)
 
@@ -34,7 +21,7 @@ constant int BLEEDING_WOUND_BUFF_ID = compiletime(createAuraBuff("Bleeding Wound
 constant int BLEEDING_WOUND_ABILITY_ID = compiletime(createNegativeBuffAbility(5, BLEEDING_WOUND_BUFF_ID, "FatalWoundV2.mdx", "chest"))
 
 
-function passive(int abilityId)
+function passive(int abilityId, IHeroType heroType)
     if compiletime
         createNoEffectAbiltiy(abilityId)
             ..setupIcon("PASBloodSpike")
@@ -71,7 +58,7 @@ BuffType buffShadowStrike
 constant SHADOW_STRIKE_BUFF_ID = compiletime(createAuraBuff("Shadow Strike", "This unit was hit by Shadow Strike; it is slowed.", Icons.bTNBerserkForTrolls))
 constant SHADOW_STRIKE_ABILITY_ID = compiletime(createNegativeBuffAbility(5, SHADOW_STRIKE_BUFF_ID, Abilities.shadowstrike, "overhead"))
 
-function abilityQ(int abilityId)
+function abilityQ(int abilityId, IHeroType heroType)
 
     if compiletime
         let MANA = skillData(80, 80, 80, 80, 80)
@@ -139,7 +126,7 @@ constant int DEATH_SPIN_ABILITY_ID = compiletime(createNegativeBuffAbility(5, DE
 
 constant int DEATH_SPIN_DISABLE_ATTACK = compiletime(ABIL_ID_GEN.next())
 
-function abilityW(int abilityId)
+function abilityW(int abilityId, IHeroType heroType)
 
     if compiletime
         spinDummy()
@@ -191,7 +178,7 @@ constant int CRIPPLING_PAIN_ABILITY_ID = compiletime(createNegativeBuffAbility(5
 
 constant real CRIPPLING_PAIN_AOE = 1500
 
-function abilityE(int abilityId)
+function abilityE(int abilityId, IHeroType heroType)
 
     if compiletime
         let MANA = skillData(80, 85, 90, 95, 100)
@@ -241,7 +228,7 @@ constant int MIRROR_IMAGE_ABILITY_ID = compiletime(createPositiveBuffAbility(5, 
 
 
 
-function abilityR(int abilityId)
+function abilityR(int abilityId, IHeroType heroType)
 
     if compiletime
         let MANA = skillData(125, 125, 125, 125, 125)
@@ -276,9 +263,8 @@ function abilityR(int abilityId)
 
 
 
-function setupStats()
+function setupStats(IHeroType heroType)
     heroType
-        
         ..setStat(Stat.AR, 26, 41)
         ..setStat(Stat.AS, 63, 97)
         ..setStat(Stat.HP, 12, 33)
@@ -291,31 +277,6 @@ function setupStats()
         ..setStat(Stat.INT, 12, 25)
 
 
-function castShadowStrike()
-    let spellId = GetSpellAbilityId()
-    let caster = GetTriggerUnit()
-    let level = caster.getAbilityLevel(spellId)
-    let pos = caster.getPos()
-    let target = GetSpellTargetUnit()
-    let targetPos = target.getPos()
-    let angle = pos.angleTo(targetPos)
-    let spawnPos = targetPos.polarOffset(angle, 100)
-    let illusion = createUnit(caster.getOwner(), SHADOW_STRIKE_SHADOW_UNIT, spawnPos, angle+angle(bj_PI))
-    illusion.setAnimation("attack")
-    illusion.setVertexColor(255, 255, 255, 200)
-    doAfter(0.3) ->
-        if target.isTargetable(caster.getOwner(), false, true)
-            SOUND_SHADOW_STRIKE.playOnPoint(caster.getPos().toVec3()).snd.setVolume(150)
-            let bleedingWoundLevel = caster.getAbilityLevel(ABILITY_BLEEDING_WOUND)
-            if bleedingWoundLevel > 0
-                let b = target.addBuffReduced(caster, BLEEDING_WOUND_DURATION, buffBleedingWound, bleedingWoundLevel)
-                b.setData(b.getData()+3)
-
-            target.addBuffReduced(caster, SHADOW_STRIKE_SLOW_DURATION[level-1], buffShadowStrike, level)
-            caster.dealDamage(target, SHADOW_STRIKE_DAMAGE[level-1].bonus(caster.getHeroStr(), SHADOW_STRIKE_DAMAGE_BONUS), ReductionType.PHYSICAL)
-    doAfter(0.85) ->
-        addEffect(Abilities.mirrorImageDeathCaster, spawnPos).destr()
-        illusion.remove()
 
 function castDeathSpin()
     let spellId = GetSpellAbilityId()
@@ -370,52 +331,87 @@ function castMirrorImage()
             let b = target.addBuffReduced( trollManhunter, BLEEDING_WOUND_DURATION, buffBleedingWound, level)
             b.setData(b.getData()+3)
 
-        
-function onAttack(unit attacker, unit target, boolean _isActive)
-    let level = attacker.getAbilityLevel(ABILITY_BLEEDING_WOUND)
-    if level != 0 and target.isTargetable(attacker.getOwner(), false, true) and not target.isType(UNIT_TYPE_STRUCTURE)
-        let b = target.addBuffReduced( attacker, BLEEDING_WOUND_DURATION, buffBleedingWound, level)
-        b.setData(b.getData()+3)
-
-function retreatAI(IHeroAI _ai)
-
-function attackAI(IHeroAI _ai)
-
-function teamFightAI(IHeroAI _ai)
-            
-@compiletime
-function setupTooltips()
-
-    passive(ABILITY_BLEEDING_WOUND)
-    abilityQ(ABILITY_SHADOW_STRIKE)
-    abilityW(ABILITY_DEATH_SPIN)
-    abilityE(ABILITY_CRIPPLING_PAIN)
-    abilityR(ABILITY_MIRROR_IMAGE)
-    createHeroButton(THIS_ID, THIS_BUTTON_POS, THIS_ICON)
-
-
-function initHeroType()
-    setupStats()
-    onCast(ABILITY_SHADOW_STRIKE, () -> castShadowStrike())
-    onCast(ABILITY_DEATH_SPIN, () -> castDeathSpin())
-    onCast(ABILITY_CRIPPLING_PAIN, () -> castCripplingPain())
-    onCast(ABILITY_MIRROR_IMAGE, () -> castMirrorImage())
-    heroType..setSkillBuild("QWQWQWQWQWEEEEE")
-    ..addItem(ITEM_ID_BOOTS_BASE)
-    //..addItem(ITEM_ID_BLOOD_SWORD)
-    //..addItem(ITEM_ID_INFERNAL_BOW)
-    //..addItem(ITEM_ID_RUNIC_ARMOR)
-    //..addItem(ITEM_ID_SACRIFICIAL_DAGGER)
-    //..addItem(ITEM_ID_CURSED_SWORD)
-    delayInit(5) ->
-        heroType
-        ..setRetreatAI((IHeroAI ai) -> (retreatAI(ai)))
-        ..setAttackAI((IHeroAI ai) -> (attackAI(ai)))
-        ..setTeamFightAI((IHeroAI ai) -> (teamFightAI(ai)))
-        ..setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean advanced) ->
-            onAttack(source, target, active)
 
     
+class HeroTrollManHunter extends HeroTemplate
+    override function objectDefinition()
+        this.model = "Models\\HeroTrollManhunter.mdl"
+        this.icon = "BTNHeroTrollManhunter"
+        this.castPoint = 0.5
+        this.armorSoundType = ArmorSoundType.Flesh
+        this.backswingPoint = 0.15
+        this.damagePoint = 0.45
+        this.weaponSound = weaponSound.MetalHeavySlice
+        this.unitSoundSet = "HeadHunter"
+        this.name = "Troll Headhunter"
+        this.properName = "Zul'maran"
+        this.selectionScale = 1.6
+        this.shadowX = 70
+        this.shadowY = 70
+        this.shadowH = 180
+        this.shadowW = 180
+
+
+    override function stats(IHeroType heroType)
+        setupStats(heroType)
+    override function setupPassive(int abilityId, IHeroType heroType)
+        passive(abilityId, heroType)
+    override function setupQ(int abilityId, IHeroType heroType)
+        abilityQ(abilityId, heroType)
+    override function setupW(int abilityId, IHeroType heroType)
+        abilityW(abilityId, heroType)
+    override function setupE(int abilityId, IHeroType heroType)
+        abilityE(abilityId, heroType)
+    override function setupR(int abilityId, IHeroType heroType)
+        abilityR(abilityId, heroType)
+    override function onCreate(IHeroType heroType, IHero hero)
+        trollManhunter = hero.toUnit()
+        heroOwner = trollManhunter.getOwner()
+        notSpinning = createUnit(heroOwner, NOT_SPINNING, trollManhunter.getPos(), angle(0))
+    override function castQ()
+        let spellId = GetSpellAbilityId()
+        let caster = GetTriggerUnit()
+        let level = caster.getAbilityLevel(spellId)
+        let pos = caster.getPos()
+        let target = GetSpellTargetUnit()
+        let targetPos = target.getPos()
+        let angle = pos.angleTo(targetPos)
+        let spawnPos = targetPos.polarOffset(angle, 100)
+        let illusion = createUnit(caster.getOwner(), SHADOW_STRIKE_SHADOW_UNIT, spawnPos, angle+angle(bj_PI))
+        illusion.setAnimation("attack")
+        illusion.setVertexColor(255, 255, 255, 200)
+        doAfter(0.3) ->
+            if target.isTargetable(caster.getOwner(), false, true)
+                SOUND_SHADOW_STRIKE.playOnPoint(caster.getPos().toVec3()).snd.setVolume(150)
+                let bleedingWoundLevel = caster.getAbilityLevel(this.ABILITY_ID_PASSIVE)
+                if bleedingWoundLevel > 0
+                    let b = target.addBuffReduced(caster, BLEEDING_WOUND_DURATION, buffBleedingWound, bleedingWoundLevel)
+                    b.setData(b.getData()+3)
+
+                target.addBuffReduced(caster, SHADOW_STRIKE_SLOW_DURATION[level-1], buffShadowStrike, level)
+                caster.dealDamage(target, SHADOW_STRIKE_DAMAGE[level-1].bonus(caster.getHeroStr(), SHADOW_STRIKE_DAMAGE_BONUS), ReductionType.PHYSICAL)
+        doAfter(0.85) ->
+            addEffect(Abilities.mirrorImageDeathCaster, spawnPos).destr()
+            illusion.remove()
+    override function castW()
+        castDeathSpin()
+    override function castE()
+        castCripplingPain()
+    override function castR()
+        castMirrorImage()
+    override function skillBuild() returns string
+        return "QWQWQWQWQWEEEEE"
+    override function recommendedItems(LinkedList<int> list)
+        list.add(ITEM_ID_BOOTS_BASE)
+    override function onInitDelayed(IHeroType heroType)
+        heroType
+        ..setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean advanced) ->
+            let level = source.getAbilityLevel(this.ABILITY_ID_PASSIVE)
+            if level != 0 and target.isTargetable(source.getOwner(), false, true) and not target.isType(UNIT_TYPE_STRUCTURE)
+                let b = target.addBuffReduced( source, BLEEDING_WOUND_DURATION, buffBleedingWound, level)
+                b.setData(b.getData()+3)
+
+
         /*  bleeding wound: every attack increases actual stacks by 4, so bladestorm can increase by 1 every 0.25 seconds
             So dmg is 0.25 * 1/4 -> (interval) * (4 stacks)  */
         buffBleedingWound = new BuffType(false, DispelLevel.DISPEL)
@@ -476,7 +472,7 @@ function initHeroType()
                     break
                 g.removeUnit(u)
                 if u.isTargetable(heroOwner, false, true) and not u.isType(UNIT_TYPE_STRUCTURE)
-                    let bleedingWoundLevel = caster.getAbilityLevel(ABILITY_BLEEDING_WOUND)
+                    let bleedingWoundLevel = caster.getAbilityLevel(this.ABILITY_ID_PASSIVE)
                     if bleedingWoundLevel > 0
                         u.addBuffReduced(caster, BLEEDING_WOUND_DURATION, buffBleedingWound, bleedingWoundLevel)
                     caster.dealDamage(u, 0.25 * DEATH_SPIN_DAMAGE[level-1].bonus(caster.getHeroStr(), DEATH_SPIN_DAMAGE_BONUS), ReductionType.PHYSICAL)
@@ -502,19 +498,9 @@ function initHeroType()
         buffMirrorImage = new BuffType(false, DispelLevel.NONE)
         buffMirrorImage.setupBuffWithIcon(MIRROR_IMAGE_BUFF_ID, MIRROR_IMAGE_ABILITY_ID)
 
-    
-function createHeroType(IHero hero)
-    trollManhunter = hero.toUnit()
-    heroOwner = trollManhunter.getOwner()
-    notSpinning = createUnit(heroOwner, NOT_SPINNING, trollManhunter.getPos(), angle(0))
-    
-
-
 init
+    initialize()
     
-    heroType = HeroType.create(THIS_HERO, THIS_ICON, THIS_ID, false)
-    ..setOnInitFunction(() -> initHeroType())
-    ..setOnCreateFunction((IHero hero) -> createHeroType(hero))
-
-    setupTooltips()
-    addButtonToTavern(THIS_ID, THIS_BUTTON_POS, heroType, 1)
+@compiletime
+function initialize()
+    HeroType.create(new HeroTrollManHunter())

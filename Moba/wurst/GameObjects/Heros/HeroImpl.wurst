@@ -187,10 +187,27 @@ public class HeroImpl implements IHero
         wrapper.updateAll()
         wrapper.applyAll()
         
-        if this.heroType.getOnCreateFunction() != null
-            this.heroType.getOnCreateFunction().onCreate(this)
-            destroy this.heroType.getOnCreateFunction()
-            this.heroType.setOnCreateFunction(null)
+
+        CreateTrigger()
+        ..registerUnitEvent(this.hero, EVENT_UNIT_SPELL_EFFECT)
+        ..addAction() ->
+            let abilityId = GetSpellAbilityId()
+            if HeroTemplate.SPELL_TO_TEMPLATE.has(abilityId)
+                let template = HeroTemplate.SPELL_TO_TEMPLATE.get(abilityId)
+                let slot = HeroTemplate.SPELL_TO_SLOT.get(abilityId)
+                switch slot
+                    case Q
+                        template.castQ()
+                    case W
+                        template.castW()
+                    case E
+                        template.castE()
+                    case R
+                        template.castR()
+                    default
+
+            
+        (this.heroType castTo HeroTypeImpl).TEMPLATE.onCreate(this.heroType, this)
                 
 
 
