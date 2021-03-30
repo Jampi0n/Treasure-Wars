@@ -319,8 +319,12 @@ public class UnitImpl implements IUnit
 
     override function applyStatDispatch(Stat whichStat)
         switch whichStat
-            case AR | AS | AGI
-                this.assocUnit.setBonusDispatchStat(whichStat, this.getStatBonus(whichStat))
+            case AR
+                this.applyArmor()
+            case AS
+                this.applyAttackSpeed()
+            case AGI
+                this.applyWillpower()
             case STR
                 this.applyStrength()
             case INT
@@ -338,7 +342,7 @@ public class UnitImpl implements IUnit
     @inline override function applyArmor()
         this.assocUnit.setBonusArmor(this.getArmorBonus())
     @inline override function applyAttackSpeed()
-        this.assocUnit.setBonusAttackSpeed(this.getAttackSpeedBonus())
+        this.assocUnit.setBonusAttackSpeed((this.getAttackSpeedBonus() * ATTACK_ANIMATION_FACTOR).round())
     @inline override function applyStrength()
         if this.heroType != null
             this.assocUnit.setBonusStrength(this.getStrengthBonus())

@@ -176,6 +176,11 @@ public class HeroImpl implements IHero
         SetHeroStr(this.hero, this.heroType.getBase(Stat.STR) + STRENGTH_BONUS , true)
         SetHeroAgi(this.hero, this.heroType.getBase(Stat.AGI), true)
         SetHeroInt(this.hero, this.heroType.getBase(Stat.INT), true)
+        // modify base attack speed
+        this.hero.setFieldWeapon(UNIT_WEAPON_RF_ATTACK_BASE_COOLDOWN, 0, this.hero.getFieldWeapon(UNIT_WEAPON_RF_ATTACK_BASE_COOLDOWN, 0) * ATTACK_ANIMATION_FACTOR)
+        // modify attack speed modifier to keep attack speed the same
+        // divided by ATTACK_ANIMATION_FACTOR, because modAttackSpeed internally multiplies with ATTACK_ANIMATION_FACTOR
+        wrapper.modAttackSpeed(((ATTACK_ANIMATION_FACTOR - 1.0) * 100 / ATTACK_ANIMATION_FACTOR).round())
 
         wrapper.updateBaseStatsHero()
 

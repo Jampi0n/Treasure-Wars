@@ -1,6 +1,7 @@
 package ItemsDamagePhysical
 
 import ItemConfiguration
+import GameTimer
 
 constant CATEGORY = 3
 
@@ -78,6 +79,8 @@ function itemArmorBreaker()
 constant CHILLING_BLADE_BUFF_ID = compiletime(createAuraBuff("Chilling Blade", "This unit was hit by Chilling Blade; it has reduced movement speed.", "BTNMysticDagger"))
 constant CHILLING_BLADE_ABILITY_ID = compiletime(createNegativeBuffAbility(1, CHILLING_BLADE_BUFF_ID, Abilities.frostDamage, "chest"))
 
+real lastAttack = 0.0
+
 function itemChillingBlade()
     let str = 20
     let slowAmount = 30
@@ -97,7 +100,11 @@ function itemChillingBlade()
         onEither() (int factor) ->
             modStrength(str)
             attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
-                target.addBuffReduced( source, slowDuration.toReal(), slowBuff, 1)
+                //target.addBuffReduced( source, slowDuration.toReal(), slowBuff, 1)
+                let diff = getElapsedGameTime() - lastAttack
+                lastAttack = getElapsedGameTime()
+                print(diff)
+
 
 @compiletime
 function initItems1()

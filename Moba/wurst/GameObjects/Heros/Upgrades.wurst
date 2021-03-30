@@ -1,7 +1,8 @@
 package Upgrades
 
-//UpgradeObjEditing not yet fully implemented
-//I have to create the updates in the editor
+import Constants
+import UpgradeObjEditing
+
 
 public constant integer UPG_HP = 'RHhp'
 //public constant integer UPG_HR = 'RHhr'
@@ -12,7 +13,13 @@ public constant integer UPG_AS = 'RHas'
 public constant integer UPG_AR = 'RHar'
 //public constant integer UPG_MS = 'RHms'
 
+function generateUpgrade(int id) returns UpgradeDefinition
+    return new UpgradeDefinition(id)..setLevels(100)
 
-
-
-
+@compiletime
+function generateUpgrades()
+    generateUpgrade(UPG_HP).addEffectHitPointBonus(15,15)
+    generateUpgrade(UPG_MP).addEffectManaPointBonus(10, 10)
+    generateUpgrade(UPG_AD).addEffectAttackDamageBonus(1, 1)
+    generateUpgrade(UPG_AS).addEffectAttackSpeedBonus(0.01 * ATTACK_ANIMATION_FACTOR, 0.01 * ATTACK_ANIMATION_FACTOR)
+    generateUpgrade(UPG_AR).addEffectApplyDefenseUpgradeBonus()
