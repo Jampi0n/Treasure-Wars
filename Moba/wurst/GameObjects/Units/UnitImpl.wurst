@@ -5,7 +5,6 @@ import HashMap
 import LinkedList
 import Constants
 import Buff
-import Upgrades
 import BonusMod
 import ErrorHandling
 import ObjectIds
@@ -18,7 +17,15 @@ import UnitTypeImpl
 import HeroTypeImpl
 import initlater HeroImpl
 
+function unit.setBaseAttackSpeed(real value)
+    this.setAttackCooldown( value , 0)
+function unit.getBaseAttackSpeed() returns real
+    return this.getAttackCooldown(0)
 
+function unit.setBaseDamage(int value)
+    this.setBaseDamage(value, 0)
+function unit.getBaseDamage() returns int
+    return this.getBaseDamage(0)
 /*
 This file is huge. The end is mostly optimized convenience functions.
 */
@@ -68,6 +75,8 @@ public class UnitImpl implements IUnit
     //protected real currentMovementSpeed
     //protected real defaultMovementSpeed
 
+    private real scaleAttackAnimation = 1.0
+    private real baseAttackCooldown
     private static int array statBaseValue_static
     private static int array statsAbsoluteBonus_static //default = 0
     private static int array statsAbsoluteBonusReal_static //default = 0
@@ -113,10 +122,14 @@ public class UnitImpl implements IUnit
 
             if this.assocUnit.isType(UNIT_TYPE_HERO)
                 this.heroType = HeroType.get(this.assocUnit.getTypeId())
+                this.scaleAttackAnimation = ATTACK_ANIMATION_FACTOR
                 if this.heroType == null
                     error("HeroType could not be resolved: " + this.assocUnit.getName())
             else
                 this.unitType = UnitType.get(this.assocUnit.getTypeId())
+                if this.unitType != null
+                    if this.unitType.getScaleAttackAnimation()
+                        this.scaleAttackAnimation = ATTACK_ANIMATION_FACTOR
 
             allUnits[unitWrapperCount] = this.assocUnit
             this.index = unitWrapperCount
@@ -134,78 +147,57 @@ public class UnitImpl implements IUnit
                 statsTotalBonus_static[this.arrayOffset + i] = 0
 
             // Init base values
+            baseAttackCooldown = this.assocUnit.getBaseAttackSpeed()
             statBaseValue_static[this.arrayOffset + Stat.MS.toInt()] = GetUnitDefaultMoveSpeed(this.assocUnit).toInt()
-            statBaseValue_static[this.arrayOffset + Stat.STR.toInt()] = this.assocUnit.getStr(false)
+            statBaseValue_static[this.arrayOffset + Stat.STR.toInt()] = this.assocUnit.getBaseDamage()
             statBaseValue_static[this.arrayOffset + Stat.AGI.toInt()] = this.assocUnit.getAgi(false)
             statBaseValue_static[this.arrayOffset + Stat.INT.toInt()] = this.assocUnit.getInt(false)
             statBaseValue_static[this.arrayOffset + Stat.AR.toInt()] = this.assocUnit.getArmor().toInt()
             statBaseValue_static[this.arrayOffset + Stat.AD.toInt()] = 0 // strength
-            statBaseValue_static[this.arrayOffset + Stat.AS.toInt()] = 0 //not needed as only absolute bonus will be used
+            statBaseValue_static[this.arrayOffset + Stat.AS.toInt()] = 0
             statBaseValue_static[this.arrayOffset + Stat.HR.toInt()] = 0
             statBaseValue_static[this.arrayOffset + Stat.MR.toInt()] = 0
             statBaseValue_static[this.arrayOffset + Stat.HP.toInt()] = this.assocUnit.getMaxHP().toInt()
             statBaseValue_static[this.arrayOffset + Stat.MP.toInt()] = this.assocUnit.getMaxMana().toInt()
             statBaseValue_static[this.arrayOffset + Stat.CD.toInt()] = 0
-
-            if this.unitType != null
-                updateBaseStatsUnits()
-            else if this.assocUnit.isType(UNIT_TYPE_HERO)
-                statBaseValue_static[this.arrayOffset + Stat.AD.toInt()] = 0
-                statBaseValue_static[this.arrayOffset + Stat.AR.toInt()] = 0
-            else
+            applyBaseStats()
+            if this.unitType == null and this.heroType == null
                 if not this.assocUnit.isType(UNIT_TYPE_STRUCTURE)
                     if this.assocUnit.getAbilityLevel('Aloc') == 0
                         if not unknownUnitTypes.has(this.assocUnit.getTypeId())
                             unknownUnitTypes.add(this.assocUnit.getTypeId())
                             Log.warn("Warning unknown unit type: ("+GetUnitName(this.assocUnit) + ")_" + this.assocUnit.getTypeId().toRawCode() + "_" + this.assocUnit.getTypeId().toString())
 
-    override function updateBaseStatsUnits()
-        if unitType != null
-            statBaseValue_static[this.arrayOffset + Stat.STR.toInt()] = unitType.getBaseAttack() + unitType.getUpgradeAttack(this.assocUnit.getOwner())
-            statBaseValue_static[this.arrayOffset + Stat.AR.toInt()] = unitType.getBaseArmor() + unitType.getUpgradeArmor(this.assocUnit.getOwner())
-            statBaseValue_static[this.arrayOffset + Stat.HP.toInt()] = unitType.getBaseHp() //(unitType.getBaseHp() * ( 1 + 0.1 * unitType.getUpgradeArmorCount(this.assocUnit.getOwner()))).round()
-            //willpower is same as armor
-            statBaseValue_static[this.arrayOffset + Stat.AGI.toInt()] = unitType.getBaseArmor() + unitType.getUpgradeArmor(this.assocUnit.getOwner())
-            modHealth(0)
+    @inline
+    override function getBaseAttackCooldown() returns real
+        return this.baseAttackCooldown
 
-    override function updateBaseStatsHero()
-        if not this.assocUnit.isType(UNIT_TYPE_HERO)
-            Log.warn("Base stats for non-hero units are constant and must not be updated.")
-        statBaseValue_static[this.arrayOffset + Stat.STR.toInt()] = this.assocUnit.getStr(false)
-        statBaseValue_static[this.arrayOffset + Stat.AGI.toInt()] = this.assocUnit.getAgi(false)
-        statBaseValue_static[this.arrayOffset + Stat.INT.toInt()] = this.assocUnit.getInt(false)
+    @inline
+    override function setBaseAttackCooldown(real value)
+        this.baseAttackCooldown = value
 
-        statBaseValue_static[this.arrayOffset + Stat.AD.toInt()] = 0
-        statBaseValue_static[this.arrayOffset + Stat.AR.toInt()] = GetPlayerTechCount(this.assocUnit.getOwner(), UPG_AR, true)
-        statBaseValue_static[this.arrayOffset + Stat.AS.toInt()] = 0
-        
-        statBaseValue_static[this.arrayOffset + Stat.HP.toInt()] = 400 + GetPlayerTechCount(this.assocUnit.getOwner(), UPG_HP, true) * 15
-        statBaseValue_static[this.arrayOffset + Stat.HR.toInt()] = 0
-        
-        statBaseValue_static[this.arrayOffset + Stat.MP.toInt()] = 100 + GetPlayerTechCount(this.assocUnit.getOwner(), UPG_MP, true) * 10
-        statBaseValue_static[this.arrayOffset + Stat.MR.toInt()] = 0
-        //statBaseValue[Stat.MS.toInt()] = this.defaultMovementSpeed.toInt()
-        statBaseValue_static[this.arrayOffset + Stat.CD.toInt()] = 0
-
+    override function applyBaseStats()
+        if this.assocUnit.isType(UNIT_TYPE_HERO)
+            this.assocUnit.setStr(this.getStrengthBase())
+            this.assocUnit.setAgi(this.getWillpowerBase())
+            this.assocUnit.setInt(this.getIntelligenceBase())
+        else
+            this.assocUnit.setBaseDamage(this.getStrengthBase() - 1) // -1 because 1 damage is added by damage dice roll
+        this.assocUnit.setBaseAttackSpeed(this.baseAttackCooldown * this.scaleAttackAnimation)
+        this.assocUnit.setArmor(this.getArmorBase().toReal())
+        this.updateAll()
+        this.applyAll()
     /**
     Copies base stats from one unit to another.
     This is intended for unit copies of heroes.
     **/
     override function copyBaseStats(IUnit copyFrom)
+        this.setBaseAttackCooldown(copyFrom.getBaseAttackCooldown())
         for int i = 0 to STAT_COUNT-1
             let stat = i castTo Stat
             this.setStatBaseInternal(stat, copyFrom.getStatBase(stat))
-        this.assocUnit.setFieldWeapon(UNIT_WEAPON_IF_ATTACK_DAMAGE_BASE, 1, this.getStatBase(Stat.STR))
-        print(this.getStatBase(Stat.STR) - 1)
-        this.assocUnit.setArmor(this.getArmorBase().toReal())
-        // AD, AS always 0
-        // HP, HR, MP, MR, AGI, INT single calculated values
-        // CD not used by copies
-        
-        this.updateAll()
-        this.applyAll()
+        this.applyBaseStats()
 
-    
     ondestroy
         objectCount--
         for int i = 0 to STAT_COUNT-1
@@ -361,7 +353,8 @@ public class UnitImpl implements IUnit
     @inline override function applyArmor()
         this.assocUnit.setBonusArmor(this.getArmorBonus())
     @inline override function applyAttackSpeed()
-        this.assocUnit.setBonusAttackSpeed((this.getAttackSpeedBonus() * ATTACK_ANIMATION_FACTOR).round())
+        this.assocUnit.setBonusAttackSpeed((this.getAttackSpeedBonus() * this.scaleAttackAnimation).round())
+
     @inline override function applyStrength()
         if this.heroType != null
             this.assocUnit.setBonusStrength(this.getStrengthBonus())
@@ -384,7 +377,9 @@ public class UnitImpl implements IUnit
     @inline override function applyManaRegen()
     @inline override function applyCooldown()
         if this.heroType != null
-            this.assocUnit.toHero().updateCooldowns()
+            let hero = this.assocUnit.toHero()
+            if hero != null // when the hero us created, the unit wrapper exists before the hero, so hero may still be null
+                hero.updateCooldowns()
 
     override function updateAll()
         this

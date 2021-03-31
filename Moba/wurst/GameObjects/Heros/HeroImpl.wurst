@@ -2,7 +2,6 @@ package HeroImpl
 
 import HashMap
 import GameTimer
-import Upgrades
 import TimerUtils
 import ClosureTimers
 import Execute
@@ -26,6 +25,9 @@ string array assistStringListTeam1
 string array assistStringListTeam2
 
 constant int array LIST_ID_POW_2 = [1, 2, 4, 8, 16, 1, 2, 4, 8, 16]
+
+function convertAttackSpeed(real defaultAttackCooldown, int statValue) returns real
+    return defaultAttackCooldown / (1.0 + statValue/100.0)
 
 function initAssistLists()
     for i = 0 to 30 // 31 would be all 5, which is not needed
@@ -97,11 +99,16 @@ public class HeroImpl implements IHero
 
     private timer tooltipUpdateTimer
 
+    private real defaultAttackCooldown
+
 
     protected static function classInit()
         onDamageTrigger.addAction(function onDamageStatic)
         onDeathTrigger.addAction(function onDeathStatic)
         onLevelUpTrigger.addAction(function onLevelUpStatic)
+
+        for i = 0 to bj_MAX_PLAYER_SLOTS - 1
+            SetPlayerTechResearched(players[i], ATTACK_ANIMATION_OFFSET, 1)
 
         CreateTrigger()
         ..addAction(() -> (begin
@@ -165,27 +172,20 @@ public class HeroImpl implements IHero
                 if this.hero.isAlive()
                     this.heroGlow.setXY(this.hero.getPos())
             end))
-
+        defaultAttackCooldown = wrapper.getBaseAttackCooldown()
         wrapper.modManaRegen(this.heroType.getBase(Stat.MR) * 1 )
         wrapper.modHealthRegen(this.heroType.getBase(Stat.HR) * 3 )
         wrapper.modHealth(this.heroType.getBase(Stat.HP) * 15 + HP_PER_LEVEL )
         wrapper.modMana(this.heroType.getBase(Stat.MP) * 10 )
         wrapper.modMoveSpeed(this.heroType.getBase(Stat.MS) )
-        SetPlayerTechResearched(this.owner, UPG_AR , this.heroType.getBase(Stat.AR))
-        SetPlayerTechResearched(this.owner, UPG_AS , this.heroType.getBase(Stat.AS))
-        SetHeroStr(this.hero, this.heroType.getBase(Stat.STR) + STRENGTH_BONUS , true)
-        SetHeroAgi(this.hero, this.heroType.getBase(Stat.AGI), true)
-        SetHeroInt(this.hero, this.heroType.getBase(Stat.INT), true)
-        // modify base attack speed
-        morph()
-        // modify attack speed modifier to keep attack speed the same
-        // divided by ATTACK_ANIMATION_FACTOR, because modAttackSpeed internally multiplies with ATTACK_ANIMATION_FACTOR
-        wrapper.modAttackSpeed(((ATTACK_ANIMATION_FACTOR - 1.0) * 100 / ATTACK_ANIMATION_FACTOR).round())
+        wrapper.setStatBaseInternal(Stat.AR, this.heroType.getBase(Stat.AR))
+        wrapper.setBaseAttackCooldown(convertAttackSpeed(defaultAttackCooldown, this.heroType.getBase(Stat.AS)))
+        wrapper.setStatBaseInternal(Stat.STR, this.heroType.getBase(Stat.STR) + STRENGTH_BONUS)
+        wrapper.setStatBaseInternal(Stat.AGI, this.heroType.getBase(Stat.AGI))
+        wrapper.setStatBaseInternal(Stat.INT, this.heroType.getBase(Stat.INT))
 
-        wrapper.updateBaseStatsHero()
+        wrapper.applyBaseStats()
 
-        wrapper.updateAll()
-        wrapper.applyAll()
         
 
         CreateTrigger()
@@ -265,22 +265,20 @@ public class HeroImpl implements IHero
     private function upgrade()
         let newLvl = GetHeroLevel(this.hero)
         let wrapper = this.hero.wrapper()
-        SetPlayerTechResearched(this.owner, UPG_AR , this.heroType.calculateStat(Stat.AR, newLvl))
-        SetPlayerTechResearched(this.owner, UPG_AS , this.heroType.calculateStat(Stat.AS, newLvl))
+        wrapper.setBaseAttackCooldown(convertAttackSpeed(defaultAttackCooldown, this.heroType.calculateStat(Stat.AS, newLvl)))
         wrapper.modHealth( (this.heroType.calculateStat(Stat.HP, newLvl) - this.heroType.calculateStat(Stat.HP, this.level)) * 15 )
         wrapper.modMana( (this.heroType.calculateStat(Stat.MP, newLvl) - this.heroType.calculateStat(Stat.MP, this.level)) * 10 )
         wrapper.modManaRegen( (this.heroType.calculateStat(Stat.MR, newLvl) - this.heroType.calculateStat(Stat.MR, this.level)) * 1 )
         wrapper.modHealthRegen( (this.heroType.calculateStat(Stat.HR, newLvl) - this.heroType.calculateStat(Stat.HR, this.level)) * 3 )
         wrapper.modHealth( (newLvl - this.level) * HP_PER_LEVEL )
         wrapper.modMoveSpeed( this.heroType.calculateStat(Stat.MS, newLvl) - this.heroType.calculateStat(Stat.MS, this.level))
-        SetHeroStr(this.hero, this.heroType.calculateStat(Stat.STR, newLvl) + STRENGTH_BONUS , true)
-        SetHeroAgi(this.hero, this.heroType.calculateStat(Stat.AGI, newLvl), true)
-        SetHeroInt(this.hero, this.heroType.calculateStat(Stat.INT, newLvl), true)
-
-        wrapper.updateBaseStatsHero()
-
-        wrapper.updateAll()
-        wrapper.applyAll()
+        wrapper.setStatBaseInternal(Stat.AR, this.heroType.getBase(Stat.AR))
+        wrapper.setStatBaseInternal(Stat.STR, this.heroType.calculateStat(Stat.STR, newLvl) + STRENGTH_BONUS)
+        wrapper.setStatBaseInternal(Stat.AGI, this.heroType.calculateStat(Stat.AGI, newLvl))
+        wrapper.setStatBaseInternal(Stat.INT, this.heroType.calculateStat(Stat.INT, newLvl))
+        wrapper.setStatBaseInternal(Stat.AS, this.heroType.calculateStat(Stat.AS, newLvl))
+        wrapper.setStatBaseInternal(Stat.AR, this.heroType.calculateStat(Stat.AR, newLvl))
+        wrapper.applyBaseStats()
 
         this.level = newLvl
 
@@ -470,7 +468,7 @@ public class HeroImpl implements IHero
             heroType.updateTooltipsInt(heroUnit)
 
     override function morph()
-        this.hero.setFieldWeapon(UNIT_WEAPON_RF_ATTACK_BASE_COOLDOWN, 0, this.hero.getFieldWeapon(UNIT_WEAPON_RF_ATTACK_BASE_COOLDOWN, 0) * ATTACK_ANIMATION_FACTOR)
+        this.hero.wrapper().applyBaseStats()
 
 public function unit.toHero() returns IHero
     return HeroImpl.getHero(this)

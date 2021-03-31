@@ -357,6 +357,7 @@ class HeroTrollManHunter extends HeroTemplate
         list.add(ITEM_ID_BOOTS_BASE)
 
     override function onInitDelayed(IHeroType heroType)
+        UnitType.get(MIRROR_IMAGE_UNIT_ID).setScaleAttackAnimation(true)
         heroType
         ..setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean advanced) ->
             let level = source.getAbilityLevel(this.ABILITY_ID_PASSIVE)

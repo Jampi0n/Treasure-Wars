@@ -31,6 +31,8 @@ public class UnitTypeImpl implements IUnitType
 
     private string modelPath
 
+    private bool scaleAttackAnimation = false
+
     construct(int baseHp, int unitId, int bounty, int baseAttack, int upgradeAttack, int attackUpgradeId, int baseArmor, int upgradeArmor, int armorUpgradeId, int hitBox, string modelPath, int powerLevel)
         this.setup(baseHp, unitId, bounty, baseAttack, upgradeAttack, attackUpgradeId, baseArmor, upgradeArmor, armorUpgradeId, hitBox, modelPath, powerLevel)
 
@@ -91,6 +93,12 @@ public class UnitTypeImpl implements IUnitType
 
     override function getModel() returns string
         return this.modelPath
+
+    override function getScaleAttackAnimation() returns bool
+        return this.scaleAttackAnimation
+
+    override function setScaleAttackAnimation(bool value)
+        this.scaleAttackAnimation = value
 
 
 function onUnitDeath()

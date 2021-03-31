@@ -16,10 +16,17 @@ import ErrorHandling
 import ClosureTimers
 import ObjectIdGenerator
 import ObjectIds
-import Upgrades
+import UpgradeObjEditing
 
 int array SLOT_ID
 string array BUTTON_ORDER_STRING
+
+public constant ATTACK_ANIMATION_OFFSET = compiletime(generateAttackAnimationOffset())
+function generateAttackAnimationOffset() returns int
+    let id = UPGD_ID_GEN.next()
+    new UpgradeDefinition(id)
+    ..addEffectAttackSpeedBonus(ATTACK_ANIMATION_FACTOR - 1.0, 0)
+    return id
 
 function smartIcon(string icon) returns string
     string realIcon = icon
@@ -500,6 +507,7 @@ public abstract class HeroTemplate
         ..setStockReplenishInterval(0)
         ..setSightRadiusDay(1800)
         ..setDeathType(0)
+        ..setUpgradesUsed(ATTACK_ANIMATION_OFFSET.toRawCode())
         return def
     function defaultHero(int id) returns HeroDefinition
         let def = new HeroDefinition(id, 'Hmkg')
@@ -529,7 +537,8 @@ public abstract class HeroTemplate
         ..setStockMaximum(1)
         ..setStockReplenishInterval(0)
         ..setRequierementsForTier(2, "n006")
-        ..setUpgradesUsed(commaList(UPG_AS, UPG_AR, UPG_AD, UPG_HP, UPG_MP))
+        ..setUpgradesUsed(ATTACK_ANIMATION_OFFSET.toRawCode())
+        //..setUpgradesUsed(commaList(UPG_AS, UPG_AR, UPG_AD, UPG_HP, UPG_MP))
         ..setProperNamesUsed(1)
         return def
     

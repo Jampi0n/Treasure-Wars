@@ -1,6 +1,7 @@
 package Blacksmith
 
 import BuildingsInclude
+import Stats
 
 
 public unit array blacksmith = [udg_GreenBlacksmith[0], udg_GreenBlacksmith[1], udg_BrownBlacksmith[0], udg_BrownBlacksmith[1]]
@@ -36,7 +37,15 @@ public class Blacksmith extends Building
                         break
                     g.removeUnit(u)
                     if not u.isType(UNIT_TYPE_STRUCTURE)
-                        u.wrapper().updateBaseStatsUnits()
+                        // the unit stats are already applied by upgrades
+                        // only base value stats need to be updated and bonuses need to be recalculated
+                        u.wrapper()
+                        ..setStatBaseInternal(Stat.AR, u.getArmor().round())
+                        ..setStatBaseInternal(Stat.STR, u.getBaseDamage(0))
+                        ..setStatBaseInternal(Stat.AGI, u.getArmor().round())
+                        ..modArmor(0)
+                        ..modStrength(0)
+                        ..modWillpower(0)
                 g.destr()
 
     static function findNextUpgrade(int team) returns int

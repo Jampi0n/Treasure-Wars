@@ -17,6 +17,8 @@ public interface IUnitType
     function getUpgradeArmor(player owner) returns int
     function getHitBox() returns int
     function getModel() returns string
+    function getScaleAttackAnimation() returns bool
+    function setScaleAttackAnimation(bool value)
     
     public abstract class IUnitTypeStatic
         protected static IUnitTypeStatic singleton
@@ -24,8 +26,6 @@ public interface IUnitType
         abstract function create(int baseHp, int unitId, int bounty, int baseAttack, int upgradeAttack, int attackUpgradeId, int baseArmor, int upgradeArmor, int armorUpgradeId, int hitBox, string modelPath, int powerLevel) returns IUnitType
 
 public interface IUnit
-    function updateBaseStatsUnits()
-    function updateBaseStatsHero()
     function createBuffList()
     function setBonusCalculation(CalculateTotalBonus bonusCalculation)
     function getBonusCalculation() returns CalculateTotalBonus
@@ -46,6 +46,9 @@ public interface IUnit
     // new stat API
     // functions with Dispatch need to do branching based on the stat, which is inefficient
 
+    function getBaseAttackCooldown() returns real
+    function setBaseAttackCooldown(real value)
+    function applyBaseStats()
     function copyBaseStats(IUnit copyFrom)
     // modify stat by absolute value
     function modStatDispatch(Stat whichStat, int modifier)
