@@ -150,7 +150,7 @@ public class UnitImpl implements IUnit
             if this.unitType != null
                 updateBaseStatsUnits()
             else if this.assocUnit.isType(UNIT_TYPE_HERO)
-                statBaseValue_static[this.arrayOffset + Stat.AD.toInt()] = statBaseValue_static[this.arrayOffset + Stat.STR.toInt()]
+                statBaseValue_static[this.arrayOffset + Stat.AD.toInt()] = 0
                 statBaseValue_static[this.arrayOffset + Stat.AR.toInt()] = 0
             else
                 if not this.assocUnit.isType(UNIT_TYPE_STRUCTURE)
@@ -186,6 +186,25 @@ public class UnitImpl implements IUnit
         statBaseValue_static[this.arrayOffset + Stat.MR.toInt()] = 0
         //statBaseValue[Stat.MS.toInt()] = this.defaultMovementSpeed.toInt()
         statBaseValue_static[this.arrayOffset + Stat.CD.toInt()] = 0
+
+    /**
+    Copies base stats from one unit to another.
+    This is intended for unit copies of heroes.
+    **/
+    override function copyBaseStats(IUnit copyFrom)
+        for int i = 0 to STAT_COUNT-1
+            let stat = i castTo Stat
+            this.setStatBaseInternal(stat, copyFrom.getStatBase(stat))
+        this.assocUnit.setFieldWeapon(UNIT_WEAPON_IF_ATTACK_DAMAGE_BASE, 1, this.getStatBase(Stat.STR))
+        print(this.getStatBase(Stat.STR) - 1)
+        this.assocUnit.setArmor(this.getArmorBase().toReal())
+        // AD, AS always 0
+        // HP, HR, MP, MR, AGI, INT single calculated values
+        // CD not used by copies
+        
+        this.updateAll()
+        this.applyAll()
+
     
     ondestroy
         objectCount--

@@ -46,7 +46,7 @@ public interface IUnit
     // new stat API
     // functions with Dispatch need to do branching based on the stat, which is inefficient
 
-
+    function copyBaseStats(IUnit copyFrom)
     // modify stat by absolute value
     function modStatDispatch(Stat whichStat, int modifier)
     function modArmor(int modifier)
