@@ -470,6 +470,25 @@ public class HeroImpl implements IHero
     override function morph()
         this.hero.wrapper().applyBaseStats()
 
+    override function duplicate() returns IHero
+        let heroCopy = new HeroImpl(this.owner.getId(), this.heroType.getUnitId(), this.hero.getPos(), this.hero.getFacingAngle())
+        heroCopy.hero.setXp(this.hero.getXp(), false)
+
+        copyInventory(this.hero, heroCopy.hero)
+        for int i = 0 to 4
+            for int j = 1 to this.hero.getAbilityLevel(this.skillIds[i])
+                heroCopy.hero.selectSkill(this.skillIds[i])
+            let level = this.hero.getAbilityLevel(this.skillIds[i])
+            if level > 0
+                BlzStartUnitAbilityCooldown(heroCopy.hero, this.skillIds[i], this.hero.getAbilityCooldownRemaining(this.skillIds[i]))
+            
+        heroCopy.hero
+        ..setHP(this.hero.getHP())
+        ..setMana(this.hero.getMana())
+            
+        
+        return heroCopy
+
 public function unit.toHero() returns IHero
     return HeroImpl.getHero(this)
         

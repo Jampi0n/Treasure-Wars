@@ -334,7 +334,9 @@ class HeroTrollManHunter extends HeroTemplate
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
         let instance = TrollManHunterInstance.fromTrigger()
-        let mirrorImageUnit = createUnit(caster.getOwner(), MIRROR_IMAGE_UNIT_ID, caster.getPos(), caster.getFacingAngle())
+        let hero = caster.toHero().duplicate()
+        
+        /*let mirrorImageUnit = createUnit(caster.getOwner(), MIRROR_IMAGE_UNIT_ID, caster.getPos(), caster.getFacingAngle())
         instance.mirrorImage = mirrorImageUnit
         mirrorImageUnit.setTimedLife(MIRROR_IMAGE_DURATION[level-1])
         mirrorImageUnit.setVertexColor(255, 255, 255, 200)
@@ -354,7 +356,7 @@ class HeroTrollManHunter extends HeroTemplate
         DamageEventUnit.fromUnit(mirrorImageUnit).attackHitNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             if level != 0 and target.isTargetable(instance.owner, false, true) and not target.isType(UNIT_TYPE_STRUCTURE)
                 let b = target.addBuffReduced( instance.u, BLEEDING_WOUND_DURATION, buffBleedingWound, level)
-                b.setData(b.getData()+3)
+                b.setData(b.getData()+3)*/
 
     override function skillBuild() returns string
         return "QWQWQWQWQWEEEEE"
