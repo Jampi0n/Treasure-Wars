@@ -3,10 +3,16 @@ package TrollManhunter
 import HeroInclude
 
 constant int HERO_ORDER = 14
-unit notSpinning
-unit trollManhunter
-player heroOwner
-unit mirrorImageUnit
+
+
+class TrollManHunterInstance
+    use HeroInstance
+    unit notSpinning
+    unit mirrorImage
+
+    construct()
+        notSpinning = createUnit(this.owner, HeroTrollManHunter.NOT_SPINNING, u.getPos(), angle(0))
+        mirrorImage = null
 
 class HeroTrollManHunter extends HeroTemplate
     static constant SOUND_SHADOW_STRIKE = new SoundDefinition(Sounds.metalHeavySliceFlesh2, false, true)
@@ -267,9 +273,7 @@ class HeroTrollManHunter extends HeroTemplate
         addDynamicTooltipIntelligence(heroType, tooltip)
 
     override function onCreate(IHeroType heroType, IHero hero)
-        trollManhunter = hero.toUnit()
-        heroOwner = trollManhunter.getOwner()
-        notSpinning = createUnit(heroOwner, NOT_SPINNING, trollManhunter.getPos(), angle(0))
+        new TrollManHunterInstance()
 
     override function castQ()
         let spellId = GetSpellAbilityId()
@@ -329,7 +333,9 @@ class HeroTrollManHunter extends HeroTemplate
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
-        mirrorImageUnit = createUnit(caster.getOwner(), MIRROR_IMAGE_UNIT_ID, caster.getPos(), caster.getFacingAngle())
+        let instance = TrollManHunterInstance.fromTrigger()
+        let mirrorImageUnit = createUnit(caster.getOwner(), MIRROR_IMAGE_UNIT_ID, caster.getPos(), caster.getFacingAngle())
+        instance.mirrorImage = mirrorImageUnit
         mirrorImageUnit.setTimedLife(MIRROR_IMAGE_DURATION[level-1])
         mirrorImageUnit.setVertexColor(255, 255, 255, 200)
         let casterWrapper = caster.wrapper()
@@ -346,8 +352,8 @@ class HeroTrollManHunter extends HeroTemplate
 
         //bleeding wound for mirror image
         DamageEventUnit.fromUnit(mirrorImageUnit).attackHitNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
-            if level != 0 and target.isTargetable(heroOwner, false, true) and not target.isType(UNIT_TYPE_STRUCTURE)
-                let b = target.addBuffReduced( trollManhunter, BLEEDING_WOUND_DURATION, buffBleedingWound, level)
+            if level != 0 and target.isTargetable(instance.owner, false, true) and not target.isType(UNIT_TYPE_STRUCTURE)
+                let b = target.addBuffReduced( instance.u, BLEEDING_WOUND_DURATION, buffBleedingWound, level)
                 b.setData(b.getData()+3)
 
     override function skillBuild() returns string
@@ -398,12 +404,13 @@ class HeroTrollManHunter extends HeroTemplate
 
         buffDeathSpin.addSetupFunction() (Buff thisBuff, int factor) ->
             let target = thisBuff.getTarget()
+            let instance = TrollManHunterInstance.fromUnit(target)
             if factor == 1
-                notSpinning.setOwner(players[PLAYER_NEUTRAL_PASSIVE], false)
+                instance.notSpinning.setOwner(players[PLAYER_NEUTRAL_PASSIVE], false)
                 target.addAbility(DEATH_SPIN_DISABLE_ATTACK)
                 AddUnitAnimationProperties(target, "spin", true)
             else
-                notSpinning.setOwner(heroOwner, false)
+                instance.notSpinning.setOwner(instance.owner, false)
                 target.removeAbility(DEATH_SPIN_DISABLE_ATTACK)
                 AddUnitAnimationProperties(target, "spin", false)
 
@@ -416,6 +423,7 @@ class HeroTrollManHunter extends HeroTemplate
         buffDeathSpin.setPeriodicTime(0.25)
         buffDeathSpin.addPeriodicFunction( (Buff whichBuff) -> (begin
             let caster = whichBuff.getCaster()
+            let instance = TrollManHunterInstance.fromUnit(caster)
             let g = CreateGroup()
             let level = whichBuff.getLevel()
             g.enumUnitsInRange(caster.getPos(), DEATH_SPIN_AOE)
@@ -425,7 +433,7 @@ class HeroTrollManHunter extends HeroTemplate
                 if u == null
                     break
                 g.removeUnit(u)
-                if u.isTargetable(heroOwner, false, true) and not u.isType(UNIT_TYPE_STRUCTURE)
+                if u.isTargetable(instance.owner, false, true) and not u.isType(UNIT_TYPE_STRUCTURE)
                     let bleedingWoundLevel = caster.getAbilityLevel(this.ABILITY_ID_PASSIVE)
                     if bleedingWoundLevel > 0
                         u.addBuffReduced(caster, BLEEDING_WOUND_DURATION, buffBleedingWound, bleedingWoundLevel)

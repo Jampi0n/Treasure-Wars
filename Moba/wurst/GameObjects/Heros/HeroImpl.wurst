@@ -206,7 +206,7 @@ public class HeroImpl implements IHero
                         template.castR()
                     default
 
-            
+        HeroTemplate.lastCreatedHero = this
         (this.heroType castTo HeroTypeImpl).TEMPLATE.onCreate(this.heroType, this)
                 
 

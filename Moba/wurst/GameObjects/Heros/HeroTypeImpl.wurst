@@ -395,6 +395,7 @@ public function delayInit(real maxDelay, CallbackSingle cb)
         
 
 public abstract class HeroTemplate
+    static IHero lastCreatedHero
     static constant SPELL_TO_TEMPLATE = new HashMap<int, HeroTemplate>()
     static constant SPELL_TO_SLOT = new HashMap<int, AbilitySlot>() 
     static int numInstances = 0
@@ -607,6 +608,28 @@ public abstract class HeroTemplate
     function onCreate(IHeroType _heroType, IHero _hero)
     function hasAI() returns bool
         return false
+
+
+public module HeroInstance
+    static constant instanceMap = new HashMap<unit,thistype>()
+    IHero hero
+    unit u
+    player owner
+    int ownerId
+
+    static function fromTrigger() returns thistype
+        return fromUnit(GetTriggerUnit())
+
+    static function fromUnit(unit u) returns thistype
+        return instanceMap.get(u)
+
+    construct()
+        hero = HeroTemplate.lastCreatedHero
+        u = hero.toUnit()
+        owner = u.getOwner()
+        ownerId = owner.getId()
+        instanceMap.put(u, this)
+
 
 @compiletime
 function initialize()
