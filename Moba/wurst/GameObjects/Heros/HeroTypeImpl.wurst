@@ -57,7 +57,7 @@ public class HeroTypeImpl implements IHeroType
     private int heroId
     private CalculateTotalBonus bonusCalculation = null
     private LinkedList<int> alternateUnitTypeIds = new LinkedList<int>
-
+    private bool initialized = false
 
     private boolean hasAI = false
 
@@ -111,10 +111,12 @@ public class HeroTypeImpl implements IHeroType
 
     //only initialize every herotype once
     override function initialize()
-        TEMPLATE.stats(this)
-        TEMPLATE.onInit(this)
-        delayInit(5) -> 
-            TEMPLATE.onInitDelayed(this)
+        if not this.initialized
+            this.initialized = true
+            TEMPLATE.stats(this)
+            TEMPLATE.onInit(this)
+            delayInit(5) -> 
+                TEMPLATE.onInitDelayed(this)
 
     override function addMorph(int id)
         unitIdToHeroType.put(id, this)

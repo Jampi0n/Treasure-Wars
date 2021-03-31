@@ -42,7 +42,8 @@ public interface IUnit
     function incReveal()
     function decReveal()
     function modReveal(int value)
-
+    function getOwningHero() returns unit
+    function setOwningHero(unit owningHero)
     // new stat API
     // functions with Dispatch need to do branching based on the stat, which is inefficient
 

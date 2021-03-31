@@ -71,6 +71,7 @@ public class UnitImpl implements IUnit
     private int ownerId
     private IHeroType heroType = null
     private IUnitType unitType = null
+    private unit owningHero = null
 
     //protected real currentMovementSpeed
     //protected real defaultMovementSpeed
@@ -262,6 +263,12 @@ public class UnitImpl implements IUnit
 
     override function toUnit() returns unit
         return this.assocUnit
+
+    override function getOwningHero() returns unit
+        return this.owningHero
+
+    override function setOwningHero(unit owningHero)
+        this.owningHero = owningHero
 
     override function copyBaseStatsFrom(IUnit wrapper)
         for i = 0 to STAT_COUNT - 1

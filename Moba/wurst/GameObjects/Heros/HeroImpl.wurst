@@ -101,13 +101,21 @@ public class HeroImpl implements IHero
 
     private real defaultAttackCooldown
 
+    private bool permanent
+
+    private int instanceIndex
+    private static int numInstances = 0
+    private static HeroImpl array allInstances
+
 
     protected static function classInit()
         onDamageTrigger.addAction(function onDamageStatic)
         onDeathTrigger.addAction(function onDeathStatic)
         onLevelUpTrigger.addAction(function onLevelUpStatic)
+        
 
         for i = 0 to bj_MAX_PLAYER_SLOTS - 1
+            onLevelUpTrigger.registerPlayerUnitEvent(players[i], EVENT_PLAYER_HERO_LEVEL, null)
             SetPlayerTechResearched(players[i], ATTACK_ANIMATION_OFFSET, 1)
 
         CreateTrigger()
@@ -125,7 +133,17 @@ public class HeroImpl implements IHero
         ..registerAnyUnitEvent(EVENT_PLAYER_HERO_SKILL)
 
 
-    private function setup()
+    private function setup(unit owningHero)
+        this.instanceIndex = numInstances
+        allInstances[this.instanceIndex] = this
+        numInstances++
+       
+        this.permanent = owningHero == null
+        if this.permanent
+            this.hero.wrapper().setOwningHero(this.hero)
+        else
+            this.hero.wrapper().setOwningHero(owningHero)
+        
         this.team = Players.team(this.ownerId)
         this.heroType = HeroType.get(this.hero.getTypeId())
 
@@ -149,19 +167,19 @@ public class HeroImpl implements IHero
         
         
         unitToHero.put(this.hero, this)
-        Players.addHero(this.ownerId, this)
+        if this.permanent
+            Players.addHero(this.ownerId, this)
 
-        onDamageTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DAMAGED)
-        onDeathTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DEATH)
-        onLevelUpTrigger.registerUnitEvent(this.hero, EVENT_UNIT_HERO_LEVEL)
-            
         let wrapper = this.hero.wrapper()
 
-        this.reviveTimer = getTimer()
-        ..setData(this castTo int)
-        this.reviveWindow = CreateTimerDialog(this.reviveTimer)
-        TimerDialogDisplay(this.reviveWindow, false)
-        TimerDialogSetTitle(this.reviveWindow, Players.coloredName(this.ownerId))
+        if this.permanent
+            onDamageTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DAMAGED)
+            onDeathTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DEATH)
+            this.reviveTimer = getTimer()
+            ..setData(this castTo int)
+            this.reviveWindow = CreateTimerDialog(this.reviveTimer)
+            TimerDialogDisplay(this.reviveWindow, false)
+            TimerDialogSetTitle(this.reviveWindow, Players.coloredName(this.ownerId))
 
         if this.heroType.getBonusCalculation() != null
             wrapper.setBonusCalculation(this.heroType.getBonusCalculation())
@@ -221,21 +239,21 @@ public class HeroImpl implements IHero
 
 
 
-    construct(int playerId, int unitId, vec2 pos, angle facing)
+    construct(int playerId, int unitId, vec2 pos, angle facing, unit owningHero)
         objectCount++
         this.owner = players[playerId]
         this.ownerId = playerId
         this.level = 1
         this.hero = createUnit(this.owner, unitId, pos, facing)
-        this.setup()
+        this.setup(owningHero)
     
-    construct(unit u)
+    construct(unit u, unit owningHero)
         objectCount++
         this.hero = u
         this.level = GetHeroLevel(this.hero)
         this.owner = u.getOwner()
         this.ownerId = owner.getId()
-        this.setup()
+        this.setup(owningHero)
 
     static function copyInventory(unit copyFrom, unit copyTo)
         for i = 0 to 5
@@ -246,21 +264,21 @@ public class HeroImpl implements IHero
                 copyTo.addItemToSlot(itmId, i)
 
     static function getHero(unit whichUnit) returns HeroImpl
-        return unitToHero.get(whichUnit)
+        if unitToHero.has(whichUnit)
+            return unitToHero.get(whichUnit)
+        else
+            return null
 
     override function toUnit() returns unit
         return this.hero
 
     protected static function regenerate()
-        for i = 0 to MAX_HERO_COUNT-1
-            let heroes = Players.heroList(i)
-            if heroes != null
-                for hero in heroes
-                    let heroUnit = hero.toUnit()
-                    if heroUnit.isAlive()
-                        let wrapper = heroUnit.wrapper()
-                        heroUnit.healHP(heroUnit, wrapper.getHealthRegen() / 100)
-                        heroUnit.healMana(heroUnit, wrapper.getManaRegen() / 100)
+        for i = 0 to numInstances - 1
+            let heroUnit = allInstances[i].toUnit()
+            if heroUnit.isAlive()
+                let wrapper = heroUnit.wrapper()
+                heroUnit.healHP(heroUnit, wrapper.getHealthRegen() / 100)
+                heroUnit.healMana(heroUnit, wrapper.getManaRegen() / 100)
 
     private function upgrade()
         let newLvl = GetHeroLevel(this.hero)
@@ -286,7 +304,10 @@ public class HeroImpl implements IHero
         this.upgrade()
 
     private static function onLevelUpStatic()
-        unitToHero.get( GetTriggerUnit()).onLevelUp()
+        let u = GetTriggerUnit()
+        if unitToHero.has(u)
+            unitToHero.get(u).onLevelUp()
+
     
     //handles assists
     private function addAssistDuration(int playerId)
@@ -471,7 +492,7 @@ public class HeroImpl implements IHero
         this.hero.wrapper().applyBaseStats()
 
     override function duplicate() returns IHero
-        let heroCopy = new HeroImpl(this.owner.getId(), this.heroType.getUnitId(), this.hero.getPos(), this.hero.getFacingAngle())
+        let heroCopy = new HeroImpl(this.owner.getId(), this.heroType.getUnitId(), this.hero.getPos(), this.hero.getFacingAngle(), this.hero)
         heroCopy.hero.setXp(this.hero.getXp(), false)
 
         copyInventory(this.hero, heroCopy.hero)
@@ -489,15 +510,33 @@ public class HeroImpl implements IHero
         
         return heroCopy
 
+    ondestroy
+        numInstances--
+        allInstances[this.instanceIndex] = allInstances[numInstances]
+        unitToHero.remove(this.hero)
+
+/**
+Returns the hero instance for this unit or null if it does not exist.
+The hero instance may be a temporary hero.
+**/
 public function unit.toHero() returns IHero
     return HeroImpl.getHero(this)
-        
+
+/**
+Returns the permanent hero who owns this unit or null if the unit is not owned.
+All damage dealing units of hero players should be owned by exactly one hero.
+The owning hero gets credit for kills and damage by its owned units.
+Main heroes "own" themselves.
+**/
+public function unit.toOwningHero() returns IHero
+    return this.wrapper().getOwningHero().toHero()
+
 public abstract class Hero
     static function create(int playerId, int unitId, vec2 pos, angle facing) returns IHero
-        return new HeroImpl(playerId, unitId, pos, facing)
+        return new HeroImpl(playerId, unitId, pos, facing, null)
 
     static function setup(unit u) returns IHero
-        return new HeroImpl(u)
+        return new HeroImpl(u, null)
 
     static function copyInventory(unit copyFrom, unit copyTo)
         for i = 0 to 5

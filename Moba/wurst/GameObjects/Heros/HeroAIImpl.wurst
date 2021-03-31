@@ -338,7 +338,10 @@ public class HeroAIImpl implements IHeroAI
         return this.teamFight.getTarget()
 
     static function getAI(unit hero) returns HeroAIImpl
-        return heroAiMap.get(hero)
+        if heroAiMap.has(hero)
+            return heroAiMap.get(hero)
+        else
+            return null
 
     static function getAiList(int id) returns LinkedList<IHeroAI>
         return heroAIs[id]

@@ -18,6 +18,7 @@ import UnitImpl
 import UnitTypeImpl
 import HeroImpl
 import FastDamageEvent
+import ErrorHandling
 
 constant int DUMMY_CASTER = compiletime(UNIT_ID_GEN.next())
 constant int HEAL_BUFF_ID = compiletime(createDummyBuff())
@@ -302,7 +303,7 @@ public class CreepCamp
 
         let uType = UnitType.get(u.getTypeId())
         if uType != null
-            killer.toHero().addXp(uType.getPowerLevel()*8.)
+            killer.toOwningHero().addXp(uType.getPowerLevel()*8.)
     
 
     private static function onDeath()
@@ -322,7 +323,11 @@ public class CreepCamp
             if killer != null
                 let pId = killer.getOwner().getId()
                 if pId <= Teams.last2()
-                    onKill(u, PlayerWrapper.getPlayerHero(pId, 0).toUnit())
+                    let owningHero = killer.wrapper().getOwningHero()
+                    if owningHero != null
+                        onKill(u, owningHero)
+                    else
+                        error("A player owned unit that is not owned by a hero killed a creep")
 
 
 
