@@ -9,6 +9,7 @@ class TrollManHunterInstance
     use HeroInstance
     unit notSpinning
     unit mirrorImage
+    trigger onMirrorImageDeath = CreateTrigger()
 
     construct()
         notSpinning = createUnit(this.owner, HeroTrollManHunter.NOT_SPINNING, u.getPos(), angle(0))
@@ -337,33 +338,44 @@ class HeroTrollManHunter extends HeroTemplate
         g.destr()
 
     override function castR()
-        //let spellId = GetSpellAbilityId()
+        let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let owner = caster.getOwner()
-        //let level = caster.getAbilityLevel(spellId)
-        //let instance = TrollManHunterInstance.fromTrigger()
-        //let hero = caster.toHero().duplicate()
+        let level = caster.getAbilityLevel(spellId)
+        let instance = TrollManHunterInstance.fromTrigger()
+        if instance.mirrorImage != null
+            instance.mirrorImage.kill()
         doAfter(0) -> 
             let facing = caster.getFacingAngle()
             let pos = caster.getPos()
             let left = pos.polarOffset(facing + (90).fromDeg(), 100)
             let right = pos.polarOffset(facing - (90).fromDeg(), 100)
             let front = pos.polarOffset(facing, 100)
-            let copy = caster.toHero().duplicate().toUnit()
+            instance.mirrorImage = caster.toHero().duplicate().toUnit()
+            instance.mirrorImage.setTimedLife(MIRROR_IMAGE_DURATION[level-1])
+            instance.mirrorImage.disableAbility(ABILITY_ID_R, true, false)
+            instance.onMirrorImageDeath.destr()
+            instance.onMirrorImageDeath = CreateTrigger()
+            instance.onMirrorImageDeath.registerUnitEvent(instance.mirrorImage, EVENT_UNIT_DEATH)
+            instance.onMirrorImageDeath.addAction() ->
+                let inst = TrollManHunterInstance.fromUnit(GetTriggerUnit().toOwningHeroUnit())
+                addEffect(Abilities.mirrorImageDeathCaster, inst.mirrorImage.getPos()).destr()
+                inst.mirrorImage.remove()
+                inst.mirrorImage = null
             unit u1
             unit u2
             if GetRandomInt(0, 1) == 0
                 u1 = caster
-                u2 = copy
+                u2 = instance.mirrorImage
             else
-                u1 = copy
+                u1 = instance.mirrorImage
                 u2 = caster
             u1.setXY(left)
             u2.setXY(right)
             u1.issuePointOrder("attack", front)
             u2.issuePointOrder("attack", front)
             if Players.team(GetLocalPlayer().getId()) == Players.team(owner.getId())
-                copy.setVertexColor(color(0,0,255))
+                instance.mirrorImage.setVertexColor(color(0,0,255))
             if GetLocalPlayer() == owner
                 ClearSelection()
                 SelectUnit(u1, true)

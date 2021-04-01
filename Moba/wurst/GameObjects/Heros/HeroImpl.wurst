@@ -531,6 +531,9 @@ Main heroes "own" themselves.
 public function unit.toOwningHero() returns IHero
     return this.wrapper().getOwningHero().toHero()
 
+public function unit.toOwningHeroUnit() returns unit
+    return this.wrapper().getOwningHero()
+
 public abstract class Hero
     static function create(int playerId, int unitId, vec2 pos, angle facing) returns IHero
         return new HeroImpl(playerId, unitId, pos, facing, null)
