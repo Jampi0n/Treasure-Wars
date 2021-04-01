@@ -26,7 +26,7 @@ class HeroTrollManHunter extends HeroTemplate
     static constant int BLEEDING_WOUND_BUFF_ID = compiletime(createAuraBuff("Bleeding Wound", "This is under the effect of Bleeding Wound; it takes damage over time.", "BTNBloodSpike"))
     static constant int BLEEDING_WOUND_ABILITY_ID = compiletime(createNegativeBuffAbility(5, BLEEDING_WOUND_BUFF_ID, "FatalWoundV2.mdx", "chest"))
 
-    static constant int SHADOW_STRIKE_SHADOW_UNIT = 'h01L'
+    static constant int SHADOW_STRIKE_SHADOW_UNIT = compiletime(UNIT_ID_GEN.next())
     static constant real array SHADOW_STRIKE_DAMAGE = [75, 125, 175, 225, 275]
     static constant real SHADOW_STRIKE_DAMAGE_BONUS = 80
     static constant real array SHADOW_STRIKE_SLOW_DURATION = [1, 1.25, 1.5, 1.75, 2]
@@ -60,7 +60,6 @@ class HeroTrollManHunter extends HeroTemplate
     static constant int MIRROR_IMAGE_BUFF_ID = compiletime(createAuraBuff("Mirror Image", "This unit is under the effect of Mirror Image; it deals reduced damage.", "BTNSpell_Shadow_ShadowWard"))
     static constant int MIRROR_IMAGE_ABILITY_ID = compiletime(createPositiveBuffAbility(5, MIRROR_IMAGE_BUFF_ID, "", ""))
     static constant int MIRROR_IMAGE_ILLUSIONS = 1
-    static constant MIRROR_IMAGE_UNIT_ID = createUnitTypeAndReturnId(400, compiletime(UNIT_ID_GEN.next()), 100, 40, 10, 64, "Models\\TrollManhunter.mdx", 10)
 
 
     override function customDefintions(HeroDefinition aDef)
@@ -77,10 +76,18 @@ class HeroTrollManHunter extends HeroTemplate
         ..setUpgradesUsed("")
         ..setUnitSoundSet("")
         ..setName("Cannot be cast during Death Spin")
-        let def = defaultUnit(MIRROR_IMAGE_UNIT_ID)
+        let def = defaultUnit(SHADOW_STRIKE_SHADOW_UNIT)
         applyObjectDefinition(def)
         def
-        ..setLevel(10)
+        ..setNormalAbilities("Aloc")
+        ..setAttack1TargetsAllowed("air,ground,nonancient,nonsapper,structure,ward")
+        ..setCollisionSize(0)
+        ..setUnitSoundSet("")
+        ..setSightRadiusDay(500)
+        ..setSightRadiusNight(500)
+        ..setUnitClassification("ancient")
+        ..setUpgradesUsed("")
+
 
     override function objectDefinition()
         this.model = "Models\\HeroTrollManhunter.mdl"
@@ -362,28 +369,6 @@ class HeroTrollManHunter extends HeroTemplate
                 SelectUnit(u1, true)
                 SelectUnit(u2, true)
 
-        /*let mirrorImageUnit = createUnit(caster.getOwner(), MIRROR_IMAGE_UNIT_ID, caster.getPos(), caster.getFacingAngle())
-        instance.mirrorImage = mirrorImageUnit
-        mirrorImageUnit.setTimedLife(MIRROR_IMAGE_DURATION[level-1])
-        mirrorImageUnit.setVertexColor(255, 255, 255, 200)
-        let casterWrapper = caster.wrapper()
-        mirrorImageUnit.wrapper()
-        ..copyBaseStats(caster.wrapper())
-        ..modAttackSpeed( casterWrapper.getAttackSpeedBonus())
-        ..modHealth( casterWrapper.getHealthBonus())
-        ..modStrength( casterWrapper.getStrengthBonus())
-        ..modArmor( casterWrapper.getArmorBonus())
-        ..modWillpower( casterWrapper.getWillpowerBonus())
-        ..modMoveSpeed( casterWrapper.getMoveSpeedBonus())
-        ..modMana(casterWrapper.getManaBonus())
-        mirrorImageUnit.setMana(caster.getMana())
-
-        //bleeding wound for mirror image
-        DamageEventUnit.fromUnit(mirrorImageUnit).attackHitNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
-            if level != 0 and target.isTargetable(instance.owner, false, true) and not target.isType(UNIT_TYPE_STRUCTURE)
-                let b = target.addBuffReduced( instance.u, BLEEDING_WOUND_DURATION, buffBleedingWound, level)
-                b.setData(b.getData()+3)*/
-
     override function skillBuild() returns string
         return "QWQWQWQWQWEEEEE"
 
@@ -391,7 +376,6 @@ class HeroTrollManHunter extends HeroTemplate
         list.add(ITEM_ID_BOOTS_BASE)
 
     override function onInitDelayed(IHeroType heroType)
-        UnitType.get(MIRROR_IMAGE_UNIT_ID).setScaleAttackAnimation(true)
         heroType
         ..setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean advanced) ->
             let level = source.getAbilityLevel(this.ABILITY_ID_PASSIVE)
