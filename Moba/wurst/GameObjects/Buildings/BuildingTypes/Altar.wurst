@@ -4,7 +4,7 @@ import BuildingsInclude
 
 constant HOME_BUFF_ID = compiletime(createAuraBuff("Protected", "This unit is protected; it is invulnerable and is being healed.", Icons.bTNInvulnerable))
 constant HOME_ABILTIY_ID = compiletime(createPositiveBuffAbility(1, HOME_BUFF_ID, "Abilities\\Spells\\Human\\DivineShield\\DivineShieldTarget.mdl", ""))
-constant BUFF_HOME = new BuffType(true, DispelLevel.NONE)
+constant BUFF_HOME = new BuffType(true, DispelLevel.NONE) // this buff cannot be dispelled, because it depends on the position, so it would be reapplied immediately
 
 function homeInvulnerability()
 	group nearby = CreateGroup()

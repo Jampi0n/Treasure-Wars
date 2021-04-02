@@ -351,6 +351,7 @@ class HeroTrollManHunter extends HeroTemplate
             let left = pos.polarOffset(facing + (90).fromDeg(), 100)
             let right = pos.polarOffset(facing - (90).fromDeg(), 100)
             let front = pos.polarOffset(facing, 100)
+            caster.dispelBuffs(DispelLevel.BREAK) // dispel as many buffs as possible
             instance.mirrorImage = caster.toHero().duplicate().toUnit()
             instance.mirrorImage.setTimedLife(MIRROR_IMAGE_DURATION[level-1])
             instance.mirrorImage.disableAbility(ABILITY_ID_R, true, false)

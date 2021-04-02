@@ -52,7 +52,7 @@ function itemBootsGuardian()
     setAbilities(TELEPORT_ABILITY_2)
     setCooldownGroup(TELEPORT_ABILITY_1)
 
-    buffGuardian = new BuffType(true, DispelLevel.NONE)
+    buffGuardian = new BuffType(true, DispelLevel.DISPEL)
     if not compiletime
         buffGuardian.setupBuffWithIcon(BUFF_GUARDIAN, ABILITY_GUARDIAN)
         buffGuardian.addLevelFunction() (Buff thisBuff, int factor) ->
@@ -81,20 +81,29 @@ function itemBootsRunner()
     setInfo("Runner Boots")
     addRequirement(ITEM_ID_BOOTS_BASE)
     let runnerInactive = new BuffType(false, DispelLevel.NONE)
-    let runnerActive = new BuffType(true, DispelLevel.NONE)
+    let runnerActive = new BuffType(true, DispelLevel.DISPEL)
     if not compiletime
         runnerActive.setupBuffWithIcon(BUFF_RUNNER, ABILITY_RUNNER)
         runnerActive.addLevelFunction() (Buff thisBuff, int factor) ->
             thisBuff.getTarget().wrapper().modMoveSpeed(factor * extraMs)
+        runnerActive.addDispelFunction() (Buff thisBuff) ->
+            // if active is dispelled externally, add inactive
+            if thisBuff.getData() == 0
+                let target = thisBuff.getTarget()
+                target.addBuff(target, dur.toReal(), runnerInactive, 1)
         runnerInactive.addSetupFunction() (Buff thisBuff, int factor) ->
             if factor == 1
+                // remove active when inactive starts
                 let active = BuffList.getBuffOfType(thisBuff.getTarget(), runnerActive)
                 if active != null
+                    active.setData(1) // removes active without reapplying inactive
                     active.dispel()
             else
+                // add active when inactive ends
                 let target = thisBuff.getTarget()
                 if target.countItemsOfType(ITEM_ID_BOOTS_RUNNER) > 0
-                    target.addBuff(target, -1, runnerActive, 1)
+                    let active = target.addBuff(target, -1, runnerActive, 1) 
+                    active.setData(0)
 
     onEither() (int factor) ->
         if isFirstBoots()
@@ -109,6 +118,7 @@ function itemBootsRunner()
                     inactive.dispel()
                 let active = BuffList.getBuffOfType(u, runnerActive)
                 if active != null
+                    active.setData(1) // removes active without reapplying inactive
                     active.dispel()
         anyHitFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
             if source.isType(UNIT_TYPE_HERO)
@@ -126,7 +136,7 @@ function itemBootsHunter()
     setInfo("Hunter Boots")
     addRequirement(ITEM_ID_BOOTS_BASE)
 
-    let hunter = new BuffType(true, DispelLevel.NONE)
+    let hunter = new BuffType(true, DispelLevel.DISPEL)
     if not compiletime
         hunter.setupBuffWithIcon(BUFF_HUNTER, ABILITY_HUNTER)
         hunter.addLevelFunction() (Buff thisBuff, int factor) ->
@@ -153,7 +163,7 @@ function itemBootsWizard()
     setInfo("Wizard Boots")
     addRequirement(ITEM_ID_BOOTS_BASE)
 
-    buffWizard = new BuffType(true, DispelLevel.NONE)
+    buffWizard = new BuffType(true, DispelLevel.DISPEL)
     if not compiletime
         buffWizard.setupBuffWithIcon(BUFF_WIZARD, ABILITY_WIZARD)
         buffWizard.addLevelFunction() (Buff thisBuff, int factor) ->
