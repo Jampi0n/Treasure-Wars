@@ -495,7 +495,17 @@ public class HeroImpl implements IHero
         let heroCopy = new HeroImpl(this.owner.getId(), this.heroType.getUnitId(), this.hero.getPos(), this.hero.getFacingAngle(), this.hero)
         heroCopy.hero.setXp(this.hero.getXp(), false)
 
-        copyInventory(this.hero, heroCopy.hero)
+        for i = 0 to 5
+            let itm = heroCopy.hero.itemInSlot(i)
+            let itmId = this.hero.itemInSlot(i).getTypeId()
+            if itm.getTypeId() != itmId
+                itm.remove()
+                heroCopy.hero.addItemToSlot(itmId, i)
+        for i = 0 to 5
+            let itm = heroCopy.hero.itemInSlot(i)
+            itm.setDroppable(false)
+            itm.setPawnable(false)
+
         for int i = 0 to 4
             for int j = 1 to this.hero.getAbilityLevel(this.skillIds[i])
                 heroCopy.hero.selectSkill(this.skillIds[i])
