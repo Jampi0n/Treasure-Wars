@@ -186,6 +186,51 @@ public function unit.countItemsOfType(int itemTypeId) returns int
 public function unit.cancelChannel()
     this.addBuff(this, 0.01, STUNNED, 1)
 
+/*
+The item manipulation functions are applied to all items in the inventory.
+They are not public, because they need to be used together to ensure correctness.
+If dropping, picking up or abilities need to be disabled individually,
+triggers need to be set up to update items when they are picked up or dropped.
+If this is required, a new system using IHero or IUnit should be implemented instead.
+*/
+function unit.toggleItemDrop(bool flag)
+    for i = 0 to 5
+        let itm = this.itemInSlot(i)
+        if itm != null
+            itm.setDroppable(flag)
+            itm.setPawnable(flag)
+
+function unit.toggleItemPickup(bool flag)
+    for i = 0 to 5
+        let itm = this.itemInSlot(i)
+        let id = itm.getTypeId()
+        if flag == false
+            if id == 0
+                this.addItemById('phlt')
+        else
+            if id == 'phlt'
+                itm.remove()
+
+function unit.toggleItemAbilities(bool flag)
+    for i = 0 to 5
+        let itm = this.itemInSlot(i)
+        if itm != null
+            if flag
+                if not itm.getField(ITEM_BF_INCLUDE_AS_RANDOM_CHOICE)
+                    itm.setField(ITEM_BF_ACTIVELY_USED, true)
+                    itm.setField(ITEM_BF_INCLUDE_AS_RANDOM_CHOICE, true)
+            else
+                if itm.getField(ITEM_BF_ACTIVELY_USED)
+                    itm.setField(ITEM_BF_ACTIVELY_USED, false)
+                    itm.setField(ITEM_BF_INCLUDE_AS_RANDOM_CHOICE, false)
+            
+
+public function unit.toggleInventory(bool flag)
+    this.toggleItemPickup(flag)
+    this.toggleItemDrop(flag)
+    this.toggleItemAbilities(flag)
+
+
 public function enumUnitsInHitBoxRange(vec2 pos, real range) returns group
     let g = CreateGroup()
     g.enumUnitsInRange(pos, range + MAX_HIT_BOX)

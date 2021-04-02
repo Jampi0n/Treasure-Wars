@@ -56,11 +56,7 @@ class HeroTrollManHunter extends HeroTemplate
     static constant real CRIPPLING_PAIN_AOE = 1500
 
     static constant real array MIRROR_IMAGE_DURATION = [18, 21, 24, 27, 30]
-    static BuffType buffMirrorImage // the actual effect is in OnAttack
 
-    static constant int MIRROR_IMAGE_BUFF_ID = compiletime(createAuraBuff("Mirror Image", "This unit is under the effect of Mirror Image; it deals reduced damage.", "BTNSpell_Shadow_ShadowWard"))
-    static constant int MIRROR_IMAGE_ABILITY_ID = compiletime(createPositiveBuffAbility(5, MIRROR_IMAGE_BUFF_ID, "", ""))
-    static constant int MIRROR_IMAGE_ILLUSIONS = 1
 
 
     override function customDefintions(HeroDefinition aDef)
@@ -264,18 +260,14 @@ class HeroTrollManHunter extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceIntelligence(0)
-        tooltip.setSummary("Summons a mirror image of the Troll Headhunter, that can attack, but cannot cast spells or use items.")
-        tooltip.setLearnString(("Summons a mirror image of the Troll Headhunter."+
-        " The mirror image's health, armor, willpower, attack speed and attack damage scale with the Troll Headhunter's respective stats."+
-        " The mirror image applies Bleeding Wound, but cannot cast spells or use items.").format(MIRROR_IMAGE_ILLUSIONS.toString()), (int lvl) -> (begin
-            return "{0} seconds".format(
+        tooltip.setSummary("Dispels all buffs and summons a mirror image. The mirror image can attack, but cannot use active items or cast spells.")
+        tooltip.setLearnString("Dispels all buffs and summons a mirror image. The mirror image can attack, but cannot use active items or cast spells.", (int lvl) -> (begin
+            return "Lasts {0} seconds".format(
                 MIRROR_IMAGE_DURATION[lvl-1].str())
         end) )
         
         for lvl = 1 to 5
-            tooltip.setNormalString(true, lvl, ("Summons a mirror image of the Troll Headhunter."+
-            " The mirror image's health, armor, willpower, attack speed and attack damage scale with the Troll Headhunter's respective stats."+
-            " The mirror image applies Bleeding Wound, but cannot cast spells or use items.\nLasts {0} seconds.").format(
+            tooltip.setNormalString(true, lvl, ("Dispels all buffs and summons a mirror image. The mirror image can attack, cast spells and use items, but cannot drop or sell items.|nLasts {0} seconds.").format(
                 MIRROR_IMAGE_DURATION[lvl-1].str())
             )
         addDynamicTooltipIntelligence(heroType, tooltip)
@@ -352,9 +344,10 @@ class HeroTrollManHunter extends HeroTemplate
             let right = pos.polarOffset(facing - (90).fromDeg(), 100)
             let front = pos.polarOffset(facing, 100)
             caster.dispelBuffs(DispelLevel.BREAK) // dispel as many buffs as possible
-            instance.mirrorImage = caster.toHero().duplicate().toUnit()
+            let mirrorHero = caster.toHero().duplicate()
+            instance.mirrorImage = mirrorHero.toUnit()
             instance.mirrorImage.setTimedLife(MIRROR_IMAGE_DURATION[level-1])
-            instance.mirrorImage.disableAbility(ABILITY_ID_R, true, false)
+            mirrorHero.disableSkills(true, false)
             instance.onMirrorImageDeath.destr()
             instance.onMirrorImageDeath = CreateTrigger()
             instance.onMirrorImageDeath.registerUnitEvent(instance.mirrorImage, EVENT_UNIT_DEATH)
@@ -481,9 +474,6 @@ class HeroTrollManHunter extends HeroTemplate
             let stacks = thisBuff.getData()
             thisBuff.getTarget().wrapper().modMoveSpeedRelative(-factor * CRIPPLING_PAIN_SLOW[level - 1] * 10 * stacks)
 
-
-        buffMirrorImage = new BuffType(false, DispelLevel.NONE)
-        buffMirrorImage.setupBuffWithIcon(MIRROR_IMAGE_BUFF_ID, MIRROR_IMAGE_ABILITY_ID)
 
 init
     initialize()

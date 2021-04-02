@@ -491,6 +491,10 @@ public class HeroImpl implements IHero
     override function morph()
         this.hero.wrapper().applyBaseStats()
 
+    override function disableSkills(bool flag, bool hide)
+        for i = 0 to 3
+            this.hero.disableAbility(this.skillIds[i], flag, hide)
+
     override function duplicate() returns IHero
         let heroCopy = new HeroImpl(this.owner.getId(), this.heroType.getUnitId(), this.hero.getPos(), this.hero.getFacingAngle(), this.hero)
         heroCopy.hero.setXp(this.hero.getXp(), false)
@@ -501,10 +505,7 @@ public class HeroImpl implements IHero
             if itm.getTypeId() != itmId
                 itm.remove()
                 heroCopy.hero.addItemToSlot(itmId, i)
-        for i = 0 to 5
-            let itm = heroCopy.hero.itemInSlot(i)
-            itm.setDroppable(false)
-            itm.setPawnable(false)
+        heroCopy.hero.toggleInventory(false)
 
         for int i = 0 to 4
             for int j = 1 to this.hero.getAbilityLevel(this.skillIds[i])
