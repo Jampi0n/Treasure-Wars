@@ -103,7 +103,8 @@ function itemBootsRunner()
                 let target = thisBuff.getTarget()
                 if target.countItemsOfType(ITEM_ID_BOOTS_RUNNER) > 0
                     let active = target.addBuff(target, -1, runnerActive, 1) 
-                    active.setData(0)
+                    if active != null
+                        active.setData(0)
 
     onEither() (int factor) ->
         if isFirstBoots()
