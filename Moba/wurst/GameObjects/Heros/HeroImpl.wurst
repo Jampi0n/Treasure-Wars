@@ -7,13 +7,14 @@ import ClosureTimers
 import Execute
 import Constants
 import LinkedList
-import Stats
+import IUnit
 import UnitImpl
 import IHero
 import HeroTypeImpl
 import TeamUtil
 import UnitLib
 import PlayerControl
+import BonusMod
 
 constant HP_PER_LEVEL = 15
 constant STRENGTH_BONUS = 45
@@ -174,6 +175,7 @@ public class HeroImpl implements IHero
             Players.addHero(this.ownerId, this)
 
         let wrapper = this.hero.wrapper()
+        wrapper.initAsHero(this)
 
         if this.permanent
             onDamageTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DAMAGED)
@@ -459,6 +461,13 @@ public class HeroImpl implements IHero
 
     override function getLevel() returns int
         return this.level
+
+    override function updateTooltipsStr()
+        if this.updateTooltips
+            this.heroType.updateTooltipsStr(this.hero)
+    override function updateTooltipsInt()
+        if this.updateTooltips
+            this.heroType.updateTooltipsInt(this.hero)
 
     override function addXp(real xp)
         this.sharedXp += xp

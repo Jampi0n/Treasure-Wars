@@ -59,6 +59,8 @@ public interface IHero
     function duplicate(bool disableInventory, bool disableSpells) returns IHero
     function duplicate() returns IHero
         return duplicate(true, true)
+    function updateTooltipsStr()
+    function updateTooltipsInt()
 
 public enum Lane
     TOP

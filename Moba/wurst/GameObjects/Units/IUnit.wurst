@@ -1,6 +1,7 @@
 package IUnit
 
 import Stats
+import initlater IHero
 
 public interface CalculateTotalBonus
     function calculate(IUnit u, Stat whichStat)
@@ -34,6 +35,12 @@ public interface IUnit
     function printStats()
     function printStat(Stat whichStat)
     function toUnit() returns unit
+
+    function initAsHero(IHero hero)
+    function getHeroType() returns IHeroType
+    function toHero() returns IHero
+    function isHero() returns bool
+    function getTypeId() returns int
 
     function copyBaseStatsFrom(IUnit wrapper)
     function setDefaultColor(color c)

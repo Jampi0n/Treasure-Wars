@@ -15,7 +15,6 @@ import TeamUtil
 import IUnit
 import UnitTypeImpl
 import HeroTypeImpl
-import initlater HeroImpl
 
 function unit.setBaseAttackSpeed(real value)
     this.setAttackCooldown( value , 0)
@@ -69,6 +68,7 @@ public class UnitImpl implements IUnit
     private static constant unitMap = new HashMap<unit, UnitImpl>()
     private unit assocUnit
     private int ownerId
+    private IHero hero = null
     private IHeroType heroType = null
     private IUnitType unitType = null
     private unit owningHero = null
@@ -82,6 +82,9 @@ public class UnitImpl implements IUnit
     private static int array statsAbsoluteBonus_static //default = 0
     private static int array statsAbsoluteBonusReal_static //default = 0
     private static int array statsRelativeBonus_static //default = 0.00
+
+    private bool isHero
+    private int unitTypeId
 
     int arrayOffset
 
@@ -123,13 +126,16 @@ public class UnitImpl implements IUnit
             this.arrayOffset = (this castTo int) * STAT_COUNT
             this.defaultColor = color(assocUnit.getField(UNIT_IF_TINTING_COLOR_RED), assocUnit.getField(UNIT_IF_TINTING_COLOR_GREEN), assocUnit.getField(UNIT_IF_TINTING_COLOR_BLUE))
 
-            if this.assocUnit.isType(UNIT_TYPE_HERO)
-                this.heroType = HeroType.get(this.assocUnit.getTypeId())
+            this.unitTypeId = this.assocUnit.getTypeId()
+            this.isHero = this.assocUnit.isType(UNIT_TYPE_HERO)
+
+            if this.isHero
                 this.scaleAttackAnimation = ATTACK_ANIMATION_FACTOR
+                this.heroType = HeroType.get(this.assocUnit.getTypeId())
                 if this.heroType == null
                     error("HeroType could not be resolved: " + this.assocUnit.getName())
             else
-                this.unitType = UnitType.get(this.assocUnit.getTypeId())
+                this.unitType = UnitType.get(this.unitTypeId)
                 if this.unitType != null
                     if this.unitType.getScaleAttackAnimation()
                         this.scaleAttackAnimation = ATTACK_ANIMATION_FACTOR
@@ -212,6 +218,9 @@ public class UnitImpl implements IUnit
         create(createForUnit)
 
     static function getWrapper(unit whichUnit) returns UnitImpl
+        if whichUnit == null or whichUnit.getTypeId() == 0
+            error("Requesting wrapper for null unit.")
+            return null
         let w = unitMap.get(whichUnit)
         if w == null
             createForUnit = whichUnit
@@ -265,6 +274,21 @@ public class UnitImpl implements IUnit
 
     override function toUnit() returns unit
         return this.assocUnit
+
+    override function initAsHero(IHero hero)
+        this.hero = hero
+
+    override function getHeroType() returns IHeroType
+        return this.heroType
+
+    override function toHero() returns IHero
+        return this.hero
+
+    override function isHero() returns bool
+        return this.isHero
+
+    override function getTypeId() returns int
+        return this.unitTypeId
 
     override function getOwningHero() returns unit
         return this.owningHero
@@ -368,19 +392,20 @@ public class UnitImpl implements IUnit
         this.assocUnit.setBonusArmor(this.getArmorBonus())
     @inline override function applyAttackSpeed()
         this.assocUnit.setBonusAttackSpeed((this.getAttackSpeedBonus() * this.scaleAttackAnimation).round())
-
     @inline override function applyStrength()
-        if this.heroType != null
-            this.assocUnit.setBonusStrength(this.getStrengthBonus())
-            this.heroType.updateTooltipsStr(this.assocUnit)
+        if this.isHero
+            this.assocUnit.setBonusStrength(getStrengthBonus())
+            if this.hero != null
+                this.hero.updateTooltipsStr()
         else
-            this.assocUnit.setBonusDamage(this.getStrengthBonus())
+            this.assocUnit.setBonusDamage(getStrengthBonus())
     @inline override function applyWillpower()
         this.assocUnit.setBonusAgility(this.getWillpowerBonus())
     @inline override function applyIntelligence()
-        if this.heroType != null
-            this.assocUnit.setBonusIntelligence(this.getIntelligenceBonus())
-            this.heroType.updateTooltipsInt(this.assocUnit)
+        this.assocUnit.setBonusIntelligence(getIntelligenceBonus())
+        if this.isHero
+            if this.hero != null
+                this.hero.updateTooltipsInt()
     @inline override function applyMoveSpeed()
         this.assocUnit.setMoveSpeed(this.getMoveSpeed().toReal())
     @inline override function applyHealth()
@@ -390,10 +415,9 @@ public class UnitImpl implements IUnit
     @inline override function applyHealthRegen()
     @inline override function applyManaRegen()
     @inline override function applyCooldown()
-        if this.heroType != null
-            let hero = this.assocUnit.toHero()
-            if hero != null // when the hero us created, the unit wrapper exists before the hero, so hero may still be null
-                hero.updateCooldowns()
+        if this.isHero
+            if this.hero != null // when the hero us created, the unit wrapper exists before the hero, so hero may still be null
+                this.hero.updateCooldowns()
 
     override function updateAll()
         this
