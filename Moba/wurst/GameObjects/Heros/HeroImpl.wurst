@@ -102,6 +102,8 @@ public class HeroImpl implements IHero
     private real defaultAttackCooldown
 
     private bool permanent
+    private bool updateTooltips = true
+    private trigger onCastTrigger
 
     private int instanceIndex
     private static int numInstances = 0
@@ -139,6 +141,7 @@ public class HeroImpl implements IHero
         numInstances++
        
         this.permanent = owningHero == null
+        this.updateTooltips = this.permanent
         if this.permanent
             this.hero.wrapper().setOwningHero(this.hero)
         else
@@ -206,7 +209,7 @@ public class HeroImpl implements IHero
 
         
 
-        CreateTrigger()
+        this.onCastTrigger = CreateTrigger()
         ..registerUnitEvent(this.hero, EVENT_UNIT_SPELL_EFFECT)
         ..addAction() ->
             let abilityId = GetSpellAbilityId()
@@ -228,9 +231,9 @@ public class HeroImpl implements IHero
         (this.heroType castTo HeroTypeImpl).TEMPLATE.onCreate(this.heroType, this)
                 
 
-
-        this.heroType.updateTooltipsStr(this.hero)
-        this.heroType.updateTooltipsInt(this.hero)
+        if updateTooltips   
+            this.heroType.updateTooltipsStr(this.hero)
+            this.heroType.updateTooltipsInt(this.hero)
 
         this.tooltipUpdateTimer = getTimer()..setData(this castTo int)
 
@@ -481,12 +484,13 @@ public class HeroImpl implements IHero
         /*
             Tooltips do not need to be updated instantly. This serves as a cooldown to prevent lag spikes.
         */
-        tooltipUpdateTimer.start(0.125) ->
-            let hero = GetExpiredTimer().getData() castTo HeroImpl
-            let heroType = hero.getHeroType()
-            let heroUnit = hero.toUnit()
-            heroType.updateTooltipsStr(heroUnit)
-            heroType.updateTooltipsInt(heroUnit)
+        if updateTooltips
+            tooltipUpdateTimer.start(0.125) ->
+                let hero = GetExpiredTimer().getData() castTo HeroImpl
+                let heroType = hero.getHeroType()
+                let heroUnit = hero.toUnit()
+                heroType.updateTooltipsStr(heroUnit)
+                heroType.updateTooltipsInt(heroUnit)
 
     override function morph()
         this.hero.wrapper().applyBaseStats()
@@ -495,7 +499,7 @@ public class HeroImpl implements IHero
         for i = 0 to 3
             this.hero.disableAbility(this.skillIds[i], flag, hide)
 
-    override function duplicate() returns IHero
+    override function duplicate(bool disableInventory, bool disableSpells) returns IHero
         let heroCopy = new HeroImpl(this.owner.getId(), this.heroType.getUnitId(), this.hero.getPos(), this.hero.getFacingAngle(), this.hero)
         heroCopy.hero.setXp(this.hero.getXp(), false)
 
@@ -505,7 +509,8 @@ public class HeroImpl implements IHero
             if itm.getTypeId() != itmId
                 itm.remove()
                 heroCopy.hero.addItemToSlot(itmId, i)
-        heroCopy.hero.toggleInventory(false)
+        if disableInventory
+            heroCopy.hero.toggleInventory(false)
 
         for int i = 0 to 4
             for int j = 1 to this.hero.getAbilityLevel(this.skillIds[i])
@@ -513,15 +518,18 @@ public class HeroImpl implements IHero
             let level = this.hero.getAbilityLevel(this.skillIds[i])
             if level > 0
                 BlzStartUnitAbilityCooldown(heroCopy.hero, this.skillIds[i], this.hero.getAbilityCooldownRemaining(this.skillIds[i]))
-            
-        heroCopy.hero
-        ..setHP(this.hero.getHP())
-        ..setMana(this.hero.getMana())
+
+        if disableSpells
+            heroCopy.hero.setSkillPoints(0)
+
+        heroCopy.hero..setHP(this.hero.getHP()).setMana(this.hero.getMana())
             
         
         return heroCopy
 
     ondestroy
+        onCastTrigger.destr()
+        tooltipUpdateTimer.release()
         numInstances--
         allInstances[this.instanceIndex] = allInstances[numInstances]
         unitToHero.remove(this.hero)

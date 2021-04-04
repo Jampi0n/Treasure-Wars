@@ -216,6 +216,8 @@ public class HeroTypeImpl implements IHeroType
             
 
     override function updateTooltipsStr(unit whichUnit)
+        if whichUnit == null or whichUnit.getTypeId() == 0 or not whichUnit.isAlive()
+            error("no unit")
         if DYNAMIC_TOOLTIPS
             for dynamicTooltip in dynamicStrength
                 let abilityTypeId = dynamicTooltip.getAbilityTypeId()
@@ -226,6 +228,8 @@ public class HeroTypeImpl implements IHeroType
                     BlzSetAbilityActivatedExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateTurnOffString(whichUnit), lvl)
 
     override function updateTooltipsInt(unit whichUnit)
+        if whichUnit == null or whichUnit.getTypeId() == 0 or not whichUnit.isAlive()
+            error("no unit")
         if DYNAMIC_TOOLTIPS
             for dynamicTooltip in dynamicIntelligence
                 let abilityTypeId = dynamicTooltip.getAbilityTypeId()

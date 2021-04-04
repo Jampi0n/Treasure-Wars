@@ -369,7 +369,7 @@ class HeroTrollManHunter extends HeroTemplate
             u1.issuePointOrder("attack", front)
             u2.issuePointOrder("attack", front)
             if Players.team(GetLocalPlayer().getId()) == Players.team(owner.getId())
-                instance.mirrorImage.setVertexColor(color(0,0,255))
+                instance.mirrorImage.wrapper().setDefaultColor(color(0,0,255))
             if GetLocalPlayer() == owner
                 ClearSelection()
                 SelectUnit(u1, true)

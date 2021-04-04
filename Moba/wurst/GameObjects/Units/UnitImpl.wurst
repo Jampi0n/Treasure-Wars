@@ -95,6 +95,7 @@ public class UnitImpl implements IUnit
 
     protected BuffList buffList
 
+    private color defaultColor
     private int blueCount = 0
     private int revealCount = 0
 
@@ -120,6 +121,7 @@ public class UnitImpl implements IUnit
             this.assocUnit = assocUnit
             this.team = Players.team(this.ownerId)
             this.arrayOffset = (this castTo int) * STAT_COUNT
+            this.defaultColor = color(assocUnit.getField(UNIT_IF_TINTING_COLOR_RED), assocUnit.getField(UNIT_IF_TINTING_COLOR_GREEN), assocUnit.getField(UNIT_IF_TINTING_COLOR_BLUE))
 
             if this.assocUnit.isType(UNIT_TYPE_HERO)
                 this.heroType = HeroType.get(this.assocUnit.getTypeId())
@@ -275,6 +277,11 @@ public class UnitImpl implements IUnit
             statBaseValue_static[this.arrayOffset + i] = statBaseValue_static[(wrapper castTo UnitImpl).arrayOffset + i]
             this.updateStat(i castTo Stat)
 
+    override function setDefaultColor(color c)
+        this.defaultColor = c
+        if blueCount <= 0
+            this.assocUnit.setVertexColor(this.defaultColor)
+
     override function incBlue()
         blueCount++
         if blueCount == 1
@@ -283,14 +290,14 @@ public class UnitImpl implements IUnit
     override function decBlue()
         blueCount--
         if blueCount == 0
-            this.assocUnit.setVertexColor(255, 255, 255, 255)
+            this.assocUnit.setVertexColor(this.defaultColor)
 
     override function modBlue(int value)
         blueCount += value
         if blueCount > 0
             this.assocUnit.setVertexColor(140, 220, 255, 255)
         else
-            this.assocUnit.setVertexColor(255, 255, 255, 255)
+            this.assocUnit.setVertexColor(this.defaultColor)
 
     override function incReveal()
         revealCount++
@@ -365,7 +372,7 @@ public class UnitImpl implements IUnit
     @inline override function applyStrength()
         if this.heroType != null
             this.assocUnit.setBonusStrength(this.getStrengthBonus())
-            this.heroType.updateTooltipsInt(this.assocUnit)
+            this.heroType.updateTooltipsStr(this.assocUnit)
         else
             this.assocUnit.setBonusDamage(this.getStrengthBonus())
     @inline override function applyWillpower()

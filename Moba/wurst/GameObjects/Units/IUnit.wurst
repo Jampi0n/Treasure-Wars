@@ -36,6 +36,7 @@ public interface IUnit
     function toUnit() returns unit
 
     function copyBaseStatsFrom(IUnit wrapper)
+    function setDefaultColor(color c)
     function incBlue()
     function decBlue()
     function modBlue(int value)
