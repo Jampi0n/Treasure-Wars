@@ -18,6 +18,7 @@ class DeadEyInstance
 
 
 class HeroDeadEye extends HeroTemplate
+    use HeroTemplateModule
     static constant SOUND_BLACK_ARROW = new SoundDefinition(Sounds.raiseSkeleton1, false, true)
 
     static constant real array BLACK_ARROW_THRESHOLD = [20, 25, 30, 35, 40]

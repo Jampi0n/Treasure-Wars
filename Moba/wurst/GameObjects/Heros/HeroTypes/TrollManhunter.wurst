@@ -16,6 +16,8 @@ class TrollManHunterInstance
         mirrorImage = null
 
 class HeroTrollManHunter extends HeroTemplate
+    use HeroTemplateModule
+    
     static constant SOUND_SHADOW_STRIKE = new SoundDefinition(Sounds.metalHeavySliceFlesh2, false, true)
     static constant SOUND_CRIPPLING_PAIN = new SoundDefinition(Sounds.howlOfTerror, false, true)
     

@@ -1,0 +1,629 @@
+package Freezer
+//9
+
+import HeroInclude
+
+int HERO_ORDER = 9
+
+class FreezerInstance
+    use HeroInstance
+    unit frostWyrm = null
+
+class FrostArmor
+    int intelligence
+    int damageEventPointer
+
+class Freeze
+
+    private unit caster
+    private int level
+    private timer checkTimer
+
+    protected static constant effectMap = new HashMap<int,unit>()
+
+    construct(unit caster, int level)
+        this.caster = caster
+        this.level = level
+        this.checkTimer = getTimer()
+            ..setData(this castTo int)
+            ..startPeriodic(0.05, function updateStatic)
+
+        let g = CreateGroup()
+        g.enumUnitsInRange(this.caster.getPos(), HeroFreezer.FREEZE_AOE)
+        for unit u in g
+            if u.isTargetable(this.caster.getOwner(), false, true) and not u.isType(UNIT_TYPE_STRUCTURE)
+                u.addBuff(this.caster, -1, HeroFreezer.buffFreeze, this.level)
+        g.destr()
+
+    function update()
+        if this.caster.getCurrentOrder()!= OrderId("tranquility")
+            destroy this
+            return
+    
+    static function updateStatic()
+        (GetExpiredTimer().getData() castTo Freeze).update()
+
+    ondestroy
+        this.checkTimer.release()
+        let g = CreateGroup()
+        g.enumUnitsInRect(playableMapRect)
+        for unit u in g
+            let freezeBuff = BuffList.getBuffOfType(u, HeroFreezer.buffFreeze)
+            if freezeBuff != null
+                if freezeBuff.getCaster() == this.caster
+                    freezeBuff.dispel()
+
+        g.destr()
+
+class HeroFreezer extends HeroTemplate
+    use HeroTemplateModule
+    static constant int FREEZE_EFFECT = compiletime(UNIT_ID_GEN.next())
+
+    override function customDefintions(HeroDefinition aDef)
+        let u = new UnitDefinition(FREEZE_EFFECT, 'ewsp')
+        u..setName("Effect Dummy Unit")
+        ..setUpgradesUsed("")
+        ..setStructuresBuilt("")
+        ..setCollisionSize(0.0)
+        ..setRace(Race.Commoner)
+        ..setFoodCost(0)
+        ..setArmorType(ArmorType.Divine)
+        ..setIconGameInterface("ReplaceableTextures\\CommandButtons\\BTNtemp.blp")
+        ..setSpeedBase(522)
+        ..setModelFile(Abilities.freezingBreathTargetArt)
+        ..setAnimationBlendTimeseconds(0.0)
+        ..setAnimationCastBackswing(0.0)
+        ..setMaximumPitchAngledegrees(0.0)
+        ..setMaximumRollAngledegrees(0.0)
+        ..setArtSpecial("")
+        ..setProjectileImpactZ(0.0)
+        ..setProjectileLaunchZ(0.0)
+        ..setSightRadiusDay(1)
+        ..setSightRadiusNight(1)
+        ..setUnitClassification("_")
+        ..setPropulsionWindowdegrees(1.0)
+        ..setTooltipBasic("")
+        ..setNormalAbilities("Avul,Aloc")
+        ..setScalingValue(0.75)
+
+    override function objectDefinition()
+        this.model = "Models\\IcecrownSeer.mdl"
+        this.icon = "BTNFrostArmor"
+        this.castPoint = 0.4
+        this.castBackswing = 1.1
+        this.impactZ = 100
+        this.launchZ = 130
+        this.armorSoundType = ArmorSoundType.Ethereal
+        this.backswingPoint = 0.54
+        this.damagePoint = 0.46
+        this.weaponSound = weaponSound.Nothing
+        this.unitSoundSet = "HeroLich"
+        this.name = "Freezer"
+        this.properName = "Rak Coldskull"
+        this.selectionScale = 1.9
+        this.shadowX = 80
+        this.shadowY = 80
+        this.shadowH = 200
+        this.shadowW = 200
+        this.cooldownTime = 1.8
+        this.projectileArt = "Abilities\\Weapons\\LichMissile\\LichMissile.mdl"
+        this.projectileHoming = true
+        this.projectileSpeed = 900
+        this.range = 600
+        this.projectileArc = 0.0
+        this.weaponType = WeaponType.Missile
+
+
+    override function stats(IHeroType heroType)
+        heroType
+        ..setStat(Stat.AR, 27, 38)
+        ..setStat(Stat.AS, 0, 26)
+        ..setStat(Stat.HP, 7, 29)
+        ..setStat(Stat.HR, 4, 12)
+        ..setStat(Stat.MP, 25, 78)
+        ..setStat(Stat.MR, 19, 63)
+        ..setStat(Stat.MS, 7, 43)
+        ..setStat(Stat.STR, 3, 21)
+        ..setStat(Stat.AGI, 31, 43)
+        ..setStat(Stat.INT, 18, 63)
+
+    static constant int array COLD_HAND_MP = [2, 3, 4, 5, 6]
+
+
+    override function setupPassive(int abilityId, IHeroType heroType)
+        if compiletime
+            createNoEffectAbiltiy(abilityId)
+                ..setupWithHotKey("Cold Hand", "D")
+                ..setupIcon("PASDarkRitual")
+                ..setIconResearch(Icons.bTNDarkRitual)
+
+        let tooltip = new DynamicTooltip(abilityId)
+        tooltip.setReplaceIntelligence(0)
+        tooltip.setLearnString("Attacking restores mana points.", (int lvl) -> (begin
+            return "{0} mana points per attack".format(
+                COLD_HAND_MP[lvl-1].str())
+        end) )
+        for lvl = 1 to 5
+            tooltip.setNormalString(false, lvl, "Attacking restores {0} mana points.".format(
+                COLD_HAND_MP[lvl-1].str())
+            )
+        addDynamicTooltipIntelligence(heroType, tooltip)
+
+    static constant real array NOVA_TARGET_DMG =[50, 65, 80, 95, 110]
+    static constant real NOVA_TARGET_DMG_BONUS = 65
+
+    static constant real array NOVA_AOE_DMG =[50, 75, 100, 125, 150]
+    static constant real NOVA_AOE_DMG_BONUS = 90
+
+    static constant real NOVA_AOE = 250
+
+    static constant real array NOVA_DURATION = [1.6, 2, 2.4, 2.8, 3.2]
+    static constant real NOVA_DURATION_BONUS = 1.5
+
+    static constant int array NOVA_MS = [30, 30, 30, 30, 30]
+    static constant int array NOVA_AS = [20, 20, 20, 20, 20]
+
+    static BuffType buffFrostNova
+
+    static constant int NOVA_BUFF_ID = compiletime(createAuraBuff("Frost Nova", "This unit was hit by Frost Nova; its movement and attack speed are slowed.", Icons.bTNGlacier))
+    static constant int NOVA_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, NOVA_BUFF_ID, Abilities.frostDamage, "chest"))
+
+
+    override function setupQ(int abilityId, IHeroType heroType)
+
+        if compiletime
+            let MANA = skillData(130, 145, 160, 175, 190)
+            let COOLDOWN = skillData(10, 10, 10, 10, 10)
+            let RANGE = skillData(800, 800, 800, 800, 800)
+            
+            new AbilityDefinitionIllidanChannel(abilityId)
+                ..setAnimationNames("spell")
+                ..setArtCaster("")
+                ..setArtTarget("")
+                ..setArtSpecial("")
+                ..setArtEffect("")
+                ..setupIcon(Icons.bTNGlacier)
+                ..setupChannel(TargetType.UNIT, "frostnova", 1.1)
+                ..setupWithHotKey("Frost Nova", "Q")
+                ..targetEnemies()
+                ..setSkillData(COOLDOWN, MANA, RANGE)
+
+
+        let tooltip = new DynamicTooltip(abilityId)
+        tooltip.setReplaceIntelligence(NOVA_TARGET_DMG_BONUS, NOVA_AOE_DMG_BONUS, NOVA_DURATION_BONUS)
+        tooltip.setLearnString("Blasts enemy units around a target enemy unit with a wave of damaging frost that slows movement and attack rate.", (int lvl) -> (begin
+            return "{0}{I0} target damage, {1}{I1} nova damage, {2}{I2} seconds.".format(
+                NOVA_TARGET_DMG[lvl-1].str(),
+                NOVA_AOE_DMG[lvl-1].str(),
+                NOVA_DURATION[lvl-1].toExactString())
+        end) )
+        for lvl = 1 to 5
+            tooltip.setNormalString(true, lvl, "Blasts enemy units with a wave of frost that deals {0}{I0} damage to the target, and {1}{I1} nova damage. Cold damage slows units' movement and attack rate for {2}{I2} seconds.".format(
+                NOVA_TARGET_DMG[lvl-1].str(),
+                NOVA_AOE_DMG[lvl-1].str(),
+                NOVA_DURATION[lvl-1].toExactString()))
+        addDynamicTooltipIntelligence(heroType, tooltip)
+
+
+    static constant int array ARMOR_AR = [15, 20, 25, 30, 35]
+    static constant int ARMOR_AR_BONUS = 15
+    static constant real ARMOR_DURATION = 10
+    static constant int array ARMOR_SLOW = [25, 25, 25, 25, 25]
+    static constant real array ARMOR_SLOW_DURATION = [1, 1.25, 1.5, 1.75, 2]
+    static constant real ARMOR_SLOW_DURATION_BONUS = 1
+
+    static BuffType buffFrostArmor
+    static BuffType buffFrostArmorSlow
+
+    static constant int ARMOR_BUFF_ID = compiletime(createAuraBuff("Frost Armor", "This unit has Frost Armor; its armor is increased and units that attack it will have their movement speed and attack rate reduced for a short duration.", "BTNSpell_Frost_ChillingArmor"))
+    static constant int ARMOR_ABILTIY_ID = compiletime(createPositiveBuffAbility(5, ARMOR_BUFF_ID, Abilities.frostArmorTarget, "chest"))
+
+    static constant int ARMOR_SLOW_BUFF_ID = compiletime(createAuraBuff("Slowed", "This unit attacked a unit with Frost Armor; its movement and attack speed are slowed.", Icons.bTNFrost))
+    static constant int ARMOR_SLOW_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, ARMOR_SLOW_BUFF_ID, Abilities.frostDamage, "chest"))
+
+
+    override function setupW(int abilityId, IHeroType heroType)
+
+        if compiletime
+            let MANA = skillData(100, 100, 100, 100, 100)
+            let COOLDOWN = skillData(5, 5, 5, 5, 5)
+            let RANGE = skillData(700, 700, 700, 700, 700)
+
+            new AbilityDefinitionIllidanChannel(abilityId)
+                ..setAnimationNames("spell")
+                ..setArtCaster("")
+                ..setArtTarget("")
+                ..setArtEffect("")
+                ..setupChannel(TargetType.UNIT, "frostarmor", 1.1)
+                ..setupIcon("BTNSpell_Frost_ChillingArmor")
+                ..setupWithHotKey("Frost Armor", "W")
+                ..targetFriends()
+                ..setSkillData(COOLDOWN, MANA, RANGE)
+
+        let tooltip = new DynamicTooltip(abilityId)
+        tooltip.setReplaceIntelligence(ARMOR_AR_BONUS.toReal(), ARMOR_SLOW_DURATION_BONUS)
+        tooltip.setLearnString("Creates a shield of frost around a target friendly unit. The shield adds armor and slows units that attack it. Lasts {0} seconds.".format(ARMOR_DURATION.str()), (int lvl) -> (begin
+            return "{0}{I0} armor, {1} slow for {2}{I1} seconds.".format(
+                ARMOR_AR[lvl-1].str(),
+                ARMOR_SLOW[lvl-1].str(),
+                ARMOR_SLOW_DURATION[lvl-1].toExactString())
+        end) )
+
+        for lvl = 1 to 5
+            tooltip.setNormalString(true, lvl, "Creates a shield of frost around a target friendly unit. The shield adds {0}{I0} armor and slows units that attack it by {1}% for {2}{I1} seconds. Lasts {3} seconds.".format(
+                ARMOR_AR[lvl-1].str(),
+                ARMOR_SLOW[lvl-1].str(),
+                ARMOR_SLOW_DURATION[lvl-1].toExactString(),
+                ARMOR_DURATION.str()))
+        addDynamicTooltipIntelligence(heroType, tooltip)
+
+    static constant int array FROST_WYRM_HP = [100, 300, 500, 750, 1000]
+    static constant int array FROST_WYRM_DMG = [10, 20, 30, 40, 50]
+
+    static constant int FROST_WYRM_INT_FACTOR = 50
+
+    static constant real FROST_WYRM_AOE = 175
+
+    static constant int array FROST_BREATH_SLOW = [20, 20, 20, 20, 20]
+    static constant real array FROST_BREATH_DUR = [2, 2.25, 2.5, 2.75, 3]
+
+    static BuffType buffFrostBreath
+
+    static constant int FROST_BREATH_BUFF_ID = compiletime(createAuraBuff("Frost Breath", "This unit was hit by a Frost Wyrm; its movement and attack speed are slowed.", Icons.bTNBreathOfFrost))
+    static constant int FROST_BREATH_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, FROST_BREATH_BUFF_ID, Abilities.frostDamage, "chest"))
+            
+
+    override function setupE(int abilityId, IHeroType heroType)
+
+        if compiletime
+            let MANA = skillData(200, 250, 300, 350, 400)
+            let COOLDOWN = skillData(45, 45, 45, 45, 45)
+
+            new AbilityDefinitionRoar(abilityId)
+                ..setAnimationNames("spell")
+                ..setArtCaster("")
+                ..setupIcon(Icons.bTNFrostWyrm)
+                ..setupWithHotKey("Summon Frost Wyrm", "E")
+                ..targetNone()
+                ..setSkillData(COOLDOWN, MANA, 0)
+
+        let tooltip = new DynamicTooltip(abilityId)
+        tooltip.setReplaceIntelligence(FROST_WYRM_INT_FACTOR.toReal())  
+        tooltip.setSummary("Summons a powerful Frost Wyrm, that slows enemies it attacks.")
+        tooltip.setLearnString("Summons a powerful Frost Wyrm. The Frost Wyrm's attack speed and hit points scale with the respective stats of the Hero. The Frost Wyrm's attacks slow the targets.", (int lvl) -> (begin
+            return "{0}{I0} bonus damage, {1} bonus hit points, {2}% slow for {3} seconds.".format(
+                FROST_WYRM_DMG[lvl-1].str(),
+                FROST_WYRM_HP[lvl-1].str(),
+                FROST_BREATH_SLOW[lvl-1].str(),
+                FROST_BREATH_DUR[lvl-1].toExactString()
+            )
+        end) )
+        
+        for lvl = 1 to 5
+            tooltip.setNormalString(true, lvl, "Summons a powerful Frost Wyrm. The Frost Wyrm's attack speed and hit points scale with the respective stats of the Hero. Deals {0}{I0} bonus damage and has {1} additional hit points. The Frost Wyrm's attacks slow the targets by {2}% for {3} seconds.".format(
+                FROST_WYRM_DMG[lvl-1].str(),
+                FROST_WYRM_HP[lvl-1].str(),
+                FROST_BREATH_SLOW[lvl-1].str(),
+                FROST_BREATH_DUR[lvl-1].toExactString()
+            ))      
+        addDynamicTooltipIntelligence(heroType, tooltip)
+
+
+    static constant real FREEZE_AOE = 900
+    static constant real array FREEZE_DMG = [80, 100, 120, 140, 160]
+    static constant real FREEZE_DMG_BONUS = 100
+
+    static constant real array FREEZE_DURATION = [2.5, 2.75, 3, 3.25, 3.5]
+
+    static constant int FREEZE_DEF = 100
+
+    static BuffType buffFreeze
+
+    static int lastFrostBreathLevel = 1
+
+    static constant int FREEZE_BUFF_ID = compiletime(createAuraBuff("Freeze", "This unit is under the effect of freeze; it is stunned; but has increased armor and willpower.", Icons.bTNFreezingBreath))
+    static constant int FREEZE_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, FREEZE_BUFF_ID, "", ""))
+
+
+    override function setupR(int abilityId, IHeroType heroType)
+
+        if compiletime
+            let MANA = skillData(350, 350, 350, 350, 350)
+            let COOLDOWN = skillData(150, 140, 130, 120, 110)
+
+            let aDef = new AbilityDefinitionKeeperoftheGroveTranquility(abilityId)
+                ..setAnimationNames("spell,channel")
+                ..setupIcon(Icons.bTNFreezingBreath)
+                ..setupWithHotKey("Freeze", "R")
+                ..targetNone()
+                ..setSkillData(COOLDOWN, MANA, 0)
+
+            for lvl = 1 to 5
+                aDef
+                    ..setDurationHero(lvl, FREEZE_DURATION[lvl-1])
+                    ..setDurationNormal(lvl, FREEZE_DURATION[lvl-1])
+                    ..setEffects(lvl, "X000")
+
+        let tooltip = new DynamicTooltip(abilityId)
+        tooltip.setReplaceIntelligence(FREEZE_DMG_BONUS)
+        tooltip.setLearnString(CHANNELING_SPELL + "Freezes nearby enemies, disabling them and dealing damage over time. However, targets covered with ice have their armor and willpower increased by {0}.".format(FREEZE_DEF.str()), (int lvl) -> (begin
+            return "{0}{I0} damage per second, lasts {1} seconds.".format(
+                FREEZE_DMG[lvl-1].str(),
+                FREEZE_DURATION[lvl-1].toExactString()
+                )
+        end) )
+        
+        for lvl = 1 to 5
+            tooltip.setNormalString(true, lvl, CHANNELING_SPELL + "Freezes nearby enemies, disabling them for up to {1} seconds and dealing {0}{I0} damage per second. However, targets covered with ice have their armor and willpower increased by {2}.".format(
+                FREEZE_DMG[lvl-1].str(),
+                FREEZE_DURATION[lvl-1].toExactString(),
+                FREEZE_DEF.str()
+            ))
+        addDynamicTooltipIntelligence(heroType, tooltip)
+
+    override function castQ()
+        let spellId = GetSpellAbilityId()
+        let caster = GetTriggerUnit()
+        let level = caster.getAbilityLevel(spellId)
+        let target = GetSpellTargetUnit()
+        let nearby = CreateGroup()
+
+        nearby.enumUnitsInRange(target.getPos(), NOVA_AOE)
+        addEffect(Abilities.frostNovaTarget, target.getPos()).destr()
+
+        let dmg = NOVA_AOE_DMG[level-1].bonus(caster.getHeroInt(), NOVA_AOE_DMG_BONUS)
+        let dur = NOVA_DURATION[level-1].bonus(caster.getHeroInt(), NOVA_DURATION_BONUS)
+
+        while(not nearby.isEmpty())
+            let u = FirstOfGroup(nearby)
+            nearby.removeUnit(u)
+            if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(caster.getOwner(), false, true)
+                caster.dealDamage(u, dmg, ReductionType.MAGIC)
+                u.addBuffReduced(caster, dur, buffFrostNova, level)
+
+        nearby.destr()
+
+        caster.dealDamage(target, NOVA_TARGET_DMG[level-1].bonus(caster.getHeroInt(), NOVA_TARGET_DMG_BONUS), ReductionType.MAGIC)
+
+    override function castW()
+        let spellId = GetSpellAbilityId()
+        let caster = GetTriggerUnit()
+        let level = caster.getAbilityLevel(spellId)
+        GetSpellTargetUnit().addBuff( caster, ARMOR_DURATION, buffFrostArmor, level)
+
+    override function castE()
+        let spellId = GetSpellAbilityId()
+        let caster = GetTriggerUnit()
+        let level = caster.getAbilityLevel(spellId)
+        let instance = FreezerInstance.fromUnit(caster)
+        instance.frostWyrm.kill()
+        instance.frostWyrm = createUnit(caster.getOwner(), FROST_WYRM, caster.getPos(), angle(0))
+
+        let wrapper = instance.frostWyrm.wrapper()
+        wrapper.setOwningHero(caster.toHero())
+        wrapper.modAttackSpeed( caster.wrapper().getAttackSpeedBonus())
+        wrapper.modHealth( caster.wrapper().getHealthBonus() + FROST_WYRM_HP[level-1] )
+        wrapper.modStrength( ( (FROST_WYRM_INT_FACTOR/100) * caster.getHeroInt() ).toInt()  + FROST_WYRM_DMG[level-1] )
+
+        DamageEventUnit.fromUnit(instance.frostWyrm).attackDamageNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+            let nearby = CreateGroup()
+            nearby.enumUnitsInRange(target.getPos(), FROST_WYRM_AOE)
+
+            let dmg = source.wrapper().getStrength() * 0.5
+        
+            if not target.isType(UNIT_TYPE_STRUCTURE)
+                target.addBuffReduced(source, FROST_BREATH_DUR[level-1], buffFrostBreath, level)
+
+            while(not nearby.isEmpty())
+                let u = FirstOfGroup(nearby)
+                nearby.removeUnit(u)
+                if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(source.getOwner(), false, true) and u != target
+                    u.addBuffReduced(source, FROST_BREATH_DUR[level-1], buffFrostBreath, level)
+                    source.dealDamage(u, dmg, ReductionType.PHYSICAL)
+
+            nearby.destr()
+
+    override function castR()
+        let spellId = GetSpellAbilityId()
+        let caster = GetTriggerUnit()
+        let level = caster.getAbilityLevel(spellId)
+        new Freeze(caster, level)
+
+    override function retreatAI(IHeroAI _ai)
+
+    override function attackAI(IHeroAI ai)
+        let hero = ai.getHeroUnit()
+        let instance = FreezerInstance.fromUnit(hero)
+        let frostWyrm = instance.frostWyrm
+
+        if not frostWyrm.isAlive()
+            ai.issue("roar")
+
+        unit target
+        if hero.getMana()/hero.getMaxMana() > 0.5
+            target = hero.findTarget(800, AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
+            if target.isTargetable(hero.getOwner(), false, true)
+                ai.issue("frostnova", target)
+
+        target = hero.findTarget(600, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_HEALTH, null)
+        if target.isTargetable(hero.getOwner(), false, true)
+            if not ai.getAttacking()
+                ai.attack(target)
+
+        if frostWyrm.getCurrentOrder() != OrderId("patrol")
+            frostWyrm.issueTargetOrder("patrol", hero)
+    
+    override function teamFightAI(IHeroAI ai)
+        let ulti = ABILITY_ID_R
+        let hero = ai.getHeroUnit()
+
+        let instance = FreezerInstance.fromUnit(hero)
+        let frostWyrm = instance.frostWyrm
+
+        if not frostWyrm.isAlive()
+            ai.issue("roar")
+
+
+        ai.issue("frostnova", ai.getTeamFightTarget())
+
+        if hero.getAbilityLevel(ulti) > 0
+            let g = CreateGroup()
+            unit u
+            int count = 0
+            g.enumUnitsInRange(hero.getPos(), FREEZE_AOE)
+            while(true)
+                u = FirstOfGroup(g)
+                if u == null
+                    break
+                g.removeUnit(u)
+                if u.isTargetable(hero.getOwner(), false, true)
+                    if u.isType(UNIT_TYPE_HERO)
+                        count++
+
+            g.destr()
+            if count > 1
+                if ai.issue("tranquility")
+                    return
+
+            
+        unit target = hero.findTarget(600, AbilityTargetFocus.FRIEND_HERO, AbilityTargetPriority.HIGH_HEALTH, (unit u) -> (begin
+            return not BuffList.hasBuffType(u, buffFrostArmor)
+        end))
+        if target.isTargetable(hero.getOwner(), true, false)
+            ai.issue("frostarmor", target)
+
+        target = ai.getTeamFightTarget()
+        if target.isTargetable(hero.getOwner(), false, true)
+
+
+            if not ai.getAttacking()
+                ai.attack(target)
+
+            if frostWyrm.getCurrentOrder() != OrderId("attack")
+                frostWyrm.issueTargetOrder("attack", target)
+
+    override function skillBuild() returns string
+        return "EQWQQQQEWEWEWEW"
+
+    override function recommendedItems(LinkedList<int> list)
+        list.add(ITEM_ID_BOOTS_BASE)
+
+    override function onCreate(IHeroType heroType, IHero hero)
+        new FreezerInstance()
+
+    override function onInitDelayed(IHeroType heroType)
+        heroType
+        ..setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean advanced) ->
+            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(source.getOwner(), false, true)
+                let level = source.getAbilityLevel(ABILITY_ID_PASSIVE)
+                if level != 0
+                    source.healMana(source, COLD_HAND_MP[level-1].toReal())
+
+        buffFrostNova = new BuffType(false, DispelLevel.DISPEL)
+        buffFrostNova.setupBuffWithIcon(NOVA_BUFF_ID, NOVA_ABILTIY_ID)
+        buffFrostNova.addSetupFunction() (Buff thisBuff, int factor) ->
+            thisBuff.getTarget().wrapper().modBlue(factor)
+        buffFrostNova.addLevelFunction() (Buff thisBuff, int factor) ->
+            let level = thisBuff.getLevel()
+            thisBuff.getTarget().wrapper()
+            ..modAttackSpeed( -factor * NOVA_AS[level - 1])
+            ..modMoveSpeedRelative( -factor * NOVA_MS[level - 1]*10)
+
+
+        buffFrostArmor = new BuffType(true, DispelLevel.DISPEL)
+        buffFrostArmor.setupBuffWithIcon(ARMOR_BUFF_ID, ARMOR_ABILTIY_ID)
+        buffFrostArmor.addLevelFunction() (Buff thisBuff, int factor) ->
+            if factor == 1
+                let target = thisBuff.getTarget()
+                let level = thisBuff.getLevel()
+                let intel = thisBuff.getCaster().getHeroInt()
+                let forstArmor = new FrostArmor()
+                target.wrapper().modArmor( ARMOR_AR[level - 1].bonus(intel, ARMOR_AR_BONUS).round())
+                forstArmor.intelligence = intel
+                forstArmor.damageEventPointer = DamageEventUnit.fromUnit(target).attackHitNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+                    if source.isTargetable(target.getOwner(), false, true)
+                        let armorBuff = BuffList.getBuffOfType(target, buffFrostArmor)
+                        source.addBuffReduced(armorBuff.getCaster(), ARMOR_SLOW_DURATION[level-1].bonus(armorBuff.getData(), ARMOR_SLOW_DURATION_BONUS), buffFrostArmorSlow, level)
+                thisBuff.setData(forstArmor castTo int)
+            else
+                let target = thisBuff.getTarget()
+                let frostArmor = thisBuff.getData() castTo FrostArmor
+                let intel = frostArmor.intelligence
+                let level = thisBuff.getLevel()
+                target.wrapper().modArmor( -ARMOR_AR[level - 1].bonus(intel, ARMOR_AR_BONUS).round())
+                DamageEventUnit.fromUnit(target).attackHitNoBuilding.remove(frostArmor.damageEventPointer)
+                destroy frostArmor
+
+
+        buffFrostArmorSlow = new BuffType(false, DispelLevel.DISPEL)
+        buffFrostArmorSlow.setupBuffWithIcon(ARMOR_SLOW_BUFF_ID, ARMOR_SLOW_ABILTIY_ID)
+        buffFrostArmorSlow.addSetupFunction() (Buff thisBuff, int factor) ->
+            thisBuff.getTarget().wrapper().modBlue(factor)
+        buffFrostArmorSlow.addLevelFunction() (Buff thisBuff, int factor) ->
+            let level = thisBuff.getLevel()
+            thisBuff.getTarget().wrapper()
+            ..modAttackSpeed( -factor * ARMOR_SLOW[level - 1])
+            ..modMoveSpeedRelative( -factor * ARMOR_SLOW[level - 1]*10)
+
+
+
+        buffFrostBreath = new BuffType(false, DispelLevel.DISPEL)
+        buffFrostBreath.setupBuffWithIcon(FROST_BREATH_BUFF_ID, FROST_BREATH_ABILTIY_ID)
+        buffFrostBreath.addSetupFunction() (Buff thisBuff, int factor) ->
+            thisBuff.getTarget().wrapper().modBlue(factor)
+            buffFrostBreath.addLevelFunction() (Buff thisBuff, int factor) ->
+            let level = thisBuff.getLevel()
+            thisBuff.getTarget().wrapper()
+            ..modMoveSpeedRelative( -factor * FROST_BREATH_SLOW[level - 1]*10)
+
+        buffFreeze= new BuffType(false, DispelLevel.BREAK)
+        buffFreeze.setupBuffWithIcon(FREEZE_BUFF_ID, FREEZE_ABILTIY_ID)
+        buffFreeze.addSetupFunction() (Buff thisBuff, int factor) ->
+            if factor == 1
+                thisBuff.getTarget().addBuff(thisBuff.getCaster(), 0.1, STUNNED, 1).setDispelLevel(DispelLevel.BREAK)
+                let fx = createUnit(Player(PLAYER_NEUTRAL_PASSIVE), FREEZE_EFFECT, thisBuff.getTarget().getPos(), angle(GetRandomReal(0, 2 * bj_PI)))
+                thisBuff.setData(fx.getHandleId())
+                Freeze.effectMap.put(fx.getHandleId(), fx)
+                let wrapper = thisBuff.getTarget().wrapper()
+                wrapper.modArmor( FREEZE_DEF)
+                wrapper.modWillpower( FREEZE_DEF)
+            else
+                let fx = Freeze.effectMap.get(thisBuff.getData())
+                fx.remove()
+                thisBuff.setData(0)
+                let wrapper = thisBuff.getTarget().wrapper()
+                wrapper.modArmor( -FREEZE_DEF)
+                wrapper.modWillpower( -FREEZE_DEF)
+
+        buffFreeze.setPeriodicTime(0.05)
+        buffFreeze.addPeriodicFunction( (Buff whichBuff) -> (begin
+            let target = whichBuff.getTarget()
+            let caster = whichBuff.getCaster()
+            let level = whichBuff.getLevel()
+            let fx = Freeze.effectMap.get(whichBuff.getData())
+            if target.isTargetable(caster.getOwner(), false, true)
+                fx.setXY(target.getPos())
+                target.addBuff(whichBuff.getCaster(), 0.1, STUNNED, 1).setDispelLevel(DispelLevel.BREAK)
+                caster.dealDamage(target, 0.05 * FREEZE_DMG[level-1].bonus(caster.getHeroInt(), FREEZE_DMG_BONUS), ReductionType.MAGIC)
+            else
+                whichBuff.dispel()
+        end))
+
+        CreateTrigger()
+        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
+        ..addAction() ->
+            if GetTriggerUnit().getTypeId() == FROST_WYRM
+                let u = GetTriggerUnit()
+                let caster = u.wrapper().getOwningHero().toUnit()
+                let instance = FreezerInstance.fromUnit(caster)
+                instance.frostWyrm = null
+
+   
+
+        
+init
+    initialize()
+    
+@compiletime
+function initialize()
+    HeroType.create(new HeroFreezer(), HERO_ORDER)

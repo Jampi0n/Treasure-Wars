@@ -1,0 +1,543 @@
+package SeaDruid
+
+//3
+
+import HeroInclude
+
+int HERO_ORDER = 3
+
+class RitualOfTheSeas
+
+    private unit caster
+    private int level
+    private timer checkTimer
+    private int count
+
+    construct(unit caster)
+        this.count = 0
+        this.caster = caster
+        this.level = caster.getAbilityLevel(HeroSeaDruid.instance.ABILITY_ID_R)
+
+
+        this.checkTimer = getTimer()
+            ..setData(this castTo int)
+            ..startPeriodic(0.1, function updateStatic)
+
+    function update()
+        if this.count mod 20 == 0
+            this.caster.addEffect("Models\\PsyWave.mdx", "origin").destr()
+
+            let nearby = CreateGroup()
+            nearby.enumUnitsInRange(this.caster.getPos(), HeroSeaDruid.RITUAL_AOE[level-1])
+
+
+            let manaDrain = HeroSeaDruid.RITUAL_MANA_DRAIN[level-1].bonus(caster.getHeroInt(), HeroSeaDruid.RITUAL_MANA_DRAIN_BONUS)
+            let hpDrain = HeroSeaDruid.RITUAL_HP_DRAIN[level-1].bonus(caster.getHeroInt(), HeroSeaDruid.RITUAL_HP_DRAIN_BONUS)
+
+            while(not nearby.isEmpty())
+                let target = FirstOfGroup(nearby)
+                nearby.removeUnit(target)
+                if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(this.caster.getOwner(), false, true) and target.isVisible(this.caster.getOwner())
+                    doAfter(target.getPos().distanceTo(caster.getPos())/1000 , () -> (begin
+
+                        if target.isAlive() and target.wrapper() != null
+                            if this.count > 0
+                                let manaDrained = min( target.getMana(), manaDrain.reduceMagic(target.getUnitWp()))
+                                let hpDrained = min( target.getHP(), hpDrain.reduceMagic(target.getUnitWp()))
+
+                                if target.isType(UNIT_TYPE_HERO)
+                                    caster.healMana(caster, manaDrained * HeroSeaDruid.RITUAL_MANA_RATIO/100 )
+                                    caster.healHP(caster, hpDrained * HeroSeaDruid.RITUAL_HP_RATIO/100 )
+
+                                caster.damageMana(target, manaDrain.reduceMagic(target.getUnitWp()), ReductionType.NONE)
+                                caster.dealDamage(target, hpDrain, ReductionType.MAGIC)
+
+                            target.addBuffReduced( caster, HeroSeaDruid.RITUAL_SLOW_DURATION, HeroSeaDruid.ritualBuff, level)
+
+
+                    end))
+                    
+            nearby.destr()
+            this.count++
+            return
+
+        this.count++
+        if this.caster.getCurrentOrder()!= OrderId("tranquility")
+            destroy this
+            return
+    
+    static function updateStatic()
+        (GetExpiredTimer().getData() castTo RitualOfTheSeas).update()
+
+    ondestroy
+
+        this.checkTimer.release()
+
+class HeroSeaDruid extends HeroTemplate
+    use HeroTemplateModule
+
+    override function objectDefinition()
+
+    static constant real array ANCIENT_KNOWLEDGE_HP_BONUS = [6, 5.5, 5, 4.5, 4]
+    static constant real array ANCIENT_KNOWLEDGE_MP_BONUS = [12, 11, 10, 9, 8]
+
+
+    override function setupPassive(int abilityId, IHeroType heroType)
+        if compiletime
+            createNoEffectAbiltiy(abilityId)
+                ..setupIcon("PASSeaDruidism")
+                ..setupWithHotKey("Ancient Knowledge", "D")
+
+        let tooltip = new DynamicTooltip(abilityId)
+        tooltip.setReplaceIntelligence(0)
+        tooltip.setSummary("Increases hit points by a portion of his maximum mana points and vice versa.")
+        tooltip.setLearnString("Increases his maximum hit points for a portion of his maximum mana ponits and increases his maximum mana points by "+
+        "a portion of his maximum hit points.", (int lvl) -> (begin
+            return "1 hit point for every {0} mana points, 1 mana point for every {1} hit points".format(
+            ANCIENT_KNOWLEDGE_HP_BONUS[lvl-1].toExactString(), ANCIENT_KNOWLEDGE_MP_BONUS[lvl-1].toExactString())
+        end) )
+        for lvl = 1 to 5
+            tooltip.setNormalString(false, lvl, ("Increases maximum hit points by 1 for every {0} points of his maximum mana points and "+
+            "increases his maximum mana points by 1 for every {1} points of his maximum hit points.").format(
+                ANCIENT_KNOWLEDGE_HP_BONUS[lvl-1].toExactString(), ANCIENT_KNOWLEDGE_MP_BONUS[lvl-1].toExactString())
+            )
+        addDynamicTooltipIntelligence(heroType, tooltip)
+
+    static constant real array TIDAL_FURY_HIT_DMG = [75, 110, 145, 180, 215]
+    static constant real TIDAL_FURY_HIT_DMG_BONUS = 120
+
+    static constant real array TIDAL_FURY_WAVE_DMG = [20, 35, 50, 65, 80]
+    static constant real TIDAL_FURY_WAVE_DMG_BONUS = 40
+
+    static constant real TIDAL_FURY_AOE = 400
+
+
+    override function setupQ(int abilityId, IHeroType heroType)
+
+        if compiletime
+            let MANA = skillData(100, 110, 120, 130, 140)
+            let COOLDOWN = skillData(8, 8, 8, 8, 8)
+
+            new AbilityDefinitionPitLordHowlofTerror(abilityId)
+                ..setAnimationNames("attack,slam")
+                ..setupIcon(Icons.bTNCrushingWave)
+                ..setupWithHotKey("Tidal Fury", "Q")
+                ..setArtCaster("")
+                ..targetNone()
+                ..setSkillData(COOLDOWN, MANA, 0)
+
+
+        let tooltip = new DynamicTooltip(abilityId)
+        tooltip
+            ..setReplaceStrength(TIDAL_FURY_HIT_DMG_BONUS)
+            ..setReplaceIntelligence(TIDAL_FURY_WAVE_DMG_BONUS)
+        tooltip.setLearnString("Knocks enemies next to the Sea Druid back, dealing damage and releasing a crushing wave for every enemy unit hit. The wave deals damage to every enemy it passes through.", (int lvl) -> (begin
+            return "{0}{S0} knockback damage, {1}{I0} wave damage.".format(
+            TIDAL_FURY_HIT_DMG[lvl-1].str(), TIDAL_FURY_WAVE_DMG[lvl-1].str())
+        end))
+        for lvl = 1 to 5
+            tooltip.setNormalString(true, lvl, "Knocks enemies next to the Sea Druid back, dealing {0}{S0} damage and releasing a crushing wave for every enemy unit hit. The wave deals {1}{I0} damage to every enemy it passes through.".format(
+                TIDAL_FURY_HIT_DMG[lvl-1].str(), TIDAL_FURY_WAVE_DMG[lvl-1].str()))
+        addDynamicTooltipBoth(heroType, tooltip)
+
+
+    static constant real array FISH_DAMAGE = [100, 140, 180, 220, 260]
+    static constant real FISH_DAMAGE_BONUS = 140
+
+    static constant int array FISH_ATTACK_SPEED = [30, 40, 50, 60, 70]
+    static constant int array FISH_MOVE_SPEED = [30, 40, 50, 60, 70]
+
+    static constant real array FISH_SLOW_DURATION = [3, 3.5, 4, 4.5, 5]
+
+    static constant real array FISH_AOE = [200, 225, 250, 275, 300]
+
+    static constant int FISH_SPEED = 1000
+
+    static constant int FISH_BUFF_ID = compiletime(createAuraBuff("Giant Fish", "This unit was hit by a giant fish; its movement and attack speed are slowed.", "BTNDeepseaMurloc"))
+    static constant int FISH_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, FISH_BUFF_ID, Abilities.stasisTotemTarget, "overhead"))
+
+    static constant int FISH_ARTILLERY = compiletime(ArtilleryDetection.createArtilleryDummy(0, 0, 50, 3, "Fesh_Final2.mdx", FISH_SPEED, 0.3))
+
+    static constant SOUND_FISH_IMPACT = new SoundDefinition(Sounds.artilleryCorpseExplodeDeath1, false, true)
+
+    static BuffType buffFish
+
+
+
+    override function setupW(int abilityId, IHeroType heroType)
+
+        if compiletime
+            let MANA = skillData(115, 130, 145, 160, 175)
+            let COOLDOWN = skillData(12, 12, 12, 12, 12)
+            let RANGE = skillData(1200, 1200, 1200, 1200, 1200)
+
+            let aDef = new AbilityDefinitionIllidanChannel(abilityId)
+                ..setupIcon("BTNDeepseaMurloc")
+                ..setupWithHotKey("Giant Fish", "W")
+                ..setArtCaster("")
+                ..setArtEffect("")
+                ..setMissileArt("")
+                ..setArtTarget("")
+                ..setAnimationNames("spell")
+                ..setupChannel(TargetType.AREA, "shockwave", 0.75)
+                ..setSkillData(COOLDOWN, MANA, RANGE)
+
+            for lvl = 1 to 5
+                aDef
+                    ..setAreaofEffect(lvl, FISH_AOE[lvl-1])
+
+        let tooltip = new DynamicTooltip(abilityId)
+        tooltip.setReplaceIntelligence(FISH_DAMAGE_BONUS)
+        tooltip.setLearnString("Throws a giant fish at the target location, damaging and slowing enemies in the area.", (int lvl) -> (begin
+            return "{0}{I0} damage, {1}% attack speed. {2}% movement speed, {3} seconds.".format(
+                FISH_DAMAGE[lvl-1].str(), FISH_ATTACK_SPEED[lvl-1].str(), FISH_MOVE_SPEED[lvl-1].str(), FISH_SLOW_DURATION[lvl-1].str())
+        end) )
+        for lvl = 1 to 5
+            tooltip.setNormalString(true, lvl, "Throws a giant fish at the target location, dealing {0}{I0} magic damage and slowing attack speed by {1}% and movement speed by {2}% for {3} seconds.".format(
+                FISH_DAMAGE[lvl-1].str(), FISH_ATTACK_SPEED[lvl-1].str(), FISH_MOVE_SPEED[lvl-1].str(), FISH_SLOW_DURATION[lvl-1].str()))
+        addDynamicTooltipIntelligence(heroType, tooltip)
+
+
+    constant int MANA_SHIELD_BUFF_ID = compiletime(createBasicBuff("Mana Shield", "Uses mana to reduce incoming damage.", Icons.bTNNeutralManaShield, Abilities.manaShieldCaster, "origin"))
+
+    static constant real array MANA_SHIELD_REDUCTION = [0.2, 0.3, 0.4, 0.5, 0.6]
+    static constant real array MANA_PER_DAMAGE = [0.7, 0.7, 0.7, 0.7, 0.7]
+
+    static BuffType buffManaShield // the actual effect is in OnAttack
+
+
+    override function setupE(int abilityId, IHeroType heroType)
+        if compiletime
+            let MANA = skillData(50, 50, 50, 50, 50)
+            let MANA_PER_SECOND = [8., 11, 14, 17, 20]
+            let COOLDOWN = skillData(5, 5, 5, 5, 5)
+
+            let aDef = new AbilityDefinitionDemonHunterImmolation(abilityId)
+                ..setAnimationNames("")
+                ..setupIcon(Icons.bTNNeutralManaShield)
+                ..setIconTurnOff(Icons.bTNneutralManaShieldOff)
+                ..setupWithHotKey("Mana Shield", "E")
+                ..setTurnOff("Deactivate Mana Shield", "E")
+                ..targetNone()
+                ..setSkillData(COOLDOWN, MANA, 0)
+
+            for lvl = 1 to 5
+                aDef
+                    ..setDurationHero(lvl, 1)
+                    ..setDurationNormal(lvl, 1)
+                    ..setDamageperInterval(lvl, 0)
+                    ..setBuffs(lvl, MANA_SHIELD_BUFF_ID.toRawCode()+",BEia")
+                    ..setManaDrainedperSecond(lvl, MANA_PER_SECOND[lvl-1])
+
+        let tooltip = new DynamicTooltip(abilityId)
+        tooltip.setReplaceIntelligence(0)
+        tooltip.setLearnString("Reduces incoming damage at the cost of mana. Also drains mana while activated.", (int lvl) -> (begin
+            return "{0}% reduction, {1} mana points per blocked damage point.".format(
+                (MANA_SHIELD_REDUCTION[lvl-1]*100).str(), MANA_PER_DAMAGE[lvl-1].toExactString()
+            )
+        end) )
+
+        for lvl = 1 to 5
+            tooltip.setNormalString(false, lvl, "Reduces incoming damage by {0}%, by spending {1} mana points for every blocked point of damage. Also drains mana while activated.".format(
+                (MANA_SHIELD_REDUCTION[lvl-1]*100).str(), MANA_PER_DAMAGE[lvl-1].toExactString()
+            ))
+            tooltip.setTurnOffString(false, lvl, "Deactivate Mana Shield to stop draining mana.")
+        addDynamicTooltipIntelligence(heroType, tooltip)
+
+
+
+    static constant real array RITUAL_HP_DRAIN = [70, 100, 130, 160, 190]
+    static constant real array RITUAL_MANA_DRAIN = [30, 45, 60, 75, 90]
+
+    static constant real RITUAL_HP_DRAIN_BONUS = 120
+    static constant real RITUAL_MANA_DRAIN_BONUS = 60
+
+    static constant real array RITUAL_AOE = [900, 900, 900, 900, 900]
+
+    static constant int array RITUAL_WAVE_COUNT = [6, 7, 8, 9, 10]
+
+    static constant int array RITUAL_MOVEMENT_SLOW = [55, 60, 65, 70, 75]
+
+    static constant int RITUAL_HP_RATIO = 50
+    static constant int RITUAL_MANA_RATIO = 25
+
+    static constant RITUAL_SLOW_BUFF_ID = compiletime(createAuraBuff("Ritual of the Sea", "This unit's movement speed is reduced.", "BTNGuardianofTheSea"))
+    static constant RITUAL_SLOW_ABILITY_ID = compiletime(createNegativeBuffAbility(1, RITUAL_SLOW_BUFF_ID, "", ""))
+
+    static constant real RITUAL_SLOW_DURATION = 2.5
+
+    static BuffType ritualBuff
+
+    override function setupR(int abilityId, IHeroType heroType)
+        if compiletime
+            let MANA = skillData(250, 300, 350, 400, 450)
+            let COOLDOWN = skillData(120, 120, 120, 120, 120)
+
+            let aDef = new AbilityDefinitionKeeperoftheGroveTranquility(abilityId)
+                ..setAnimationNames("spell,channel")
+                ..setupIcon("BTNGuardianofTheSea")
+                ..setupWithHotKey("Ritual of the Seas", "R")
+                ..targetNone()
+                ..setSkillData(COOLDOWN, MANA, 0)
+
+            for lvl = 1 to 5
+                aDef
+                    ..setDurationHero(lvl, RITUAL_WAVE_COUNT[lvl-1]*2 + 0.1)
+                    ..setDurationNormal(lvl, RITUAL_WAVE_COUNT[lvl-1]*2 + 0.1)
+                    ..setEffects(lvl, "X000")
+
+        let tooltip = new DynamicTooltip(abilityId)
+        tooltip.setReplaceIntelligence(RITUAL_HP_DRAIN_BONUS, RITUAL_MANA_DRAIN_BONUS)
+        tooltip.setLearnString(CHANNELING_SPELL + "Sends out magical energy, that drains hit points and mana from nearby enemies and slows their movement speed.|nThe Sea Druid gets {0}% of the hit points and {1}% of the mana drained from enemy heroes.".format(
+            RITUAL_HP_RATIO.str(), RITUAL_MANA_RATIO.str()), (int lvl) -> (begin
+            return "{0}{I0} damage, {1}{I1} mana, {2}% slow, lasts for {3} waves.".format(
+                RITUAL_HP_DRAIN[lvl-1].str(), RITUAL_MANA_DRAIN[lvl-1].str(), RITUAL_MOVEMENT_SLOW[lvl-1].str(), RITUAL_WAVE_COUNT[lvl-1].str())
+        end) )
+        
+        for lvl = 1 to 5
+            tooltip.setNormalString(true, lvl, CHANNELING_SPELL + "Sends out magical energy, that drain {0}{I0} hit points and {1}{I1} mana from nearby enemies and slows their movement speed by {2}%.|nLasts for {3} waves.|nThe Sea Druid gets {4}% of the hit points and {4}% of the mana drained from enemy heroes.".format(
+                RITUAL_HP_DRAIN[lvl-1].str(), RITUAL_MANA_DRAIN[lvl-1].str(), RITUAL_WAVE_COUNT[lvl-1].str(), RITUAL_MOVEMENT_SLOW[lvl-1].str(),RITUAL_HP_RATIO.str(), RITUAL_MANA_RATIO.str()))
+        addDynamicTooltipIntelligence(heroType, tooltip)
+
+    override function stats(IHeroType heroType)
+        heroType
+            ..setStat(Stat.AR, 32, 51)
+            ..setStat(Stat.AS, 23, 32)
+            ..setStat(Stat.HP, 14, 61)
+            ..setStat(Stat.HR, 14, 42)
+            ..setStat(Stat.MP, 19, 84)
+            ..setStat(Stat.MR, 18, 75)
+            ..setStat(Stat.MS, 25, 42)
+            ..setStat(Stat.STR, 20, 74)
+            ..setStat(Stat.AGI, 35, 59)
+            ..setStat(Stat.INT, 13, 47)
+
+    override function castQ()
+        let spellId = GetSpellAbilityId()
+        let caster = GetTriggerUnit()
+        let level = caster.getAbilityLevel(spellId)
+        let casterPos = caster.getPos()
+        let nearby = CreateGroup()
+        nearby.enumUnitsInRange(casterPos, TIDAL_FURY_AOE)
+
+        let hitDmg = TIDAL_FURY_HIT_DMG[level-1].bonus(caster.getHeroStr(), TIDAL_FURY_HIT_DMG_BONUS)
+
+        while(not nearby.isEmpty())
+            let target = FirstOfGroup(nearby)
+            nearby.removeUnit(target)
+            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
+                caster.dealDamage(target, hitDmg, ReductionType.PHYSICAL)
+                if target.isMovable() and not target.isType(UNIT_TYPE_FLYING)
+                    Knockback2d.knockback(target, caster.getPos().polarOffset(caster.getPos().angleTo(target.getPos()), 500), 1000)
+                    target.cancelChannel()
+
+                new Missile(caster, caster.getPos().withZ(80), 900, caster.getPos().angleTo(target.getPos()), Abilities.crushingWaveMissile)
+                    ..hitOnce()
+                    ..setSize(125)
+                    ..setHitCondition((Missile missile, unit target) -> (begin
+                    return not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(missile.getOwner().getOwner(), false, true)
+                end) )
+                    ..setHitFunction((Missile missile, unit target) -> (begin
+                    let missileCaster = missile.getOwner()
+                    missileCaster.dealDamage(target, (TIDAL_FURY_WAVE_DMG[level-1]).bonus(missileCaster.getHeroInt(), TIDAL_FURY_WAVE_DMG_BONUS), ReductionType.MAGIC)
+        
+                end) )
+                    ..setMaxRange(500)
+        nearby.destr()
+
+    override function castW()
+        let caster = GetTriggerUnit()
+        ArtilleryDetection.fireArtillery(caster, FISH_ARTILLERY, caster.getPos(), vec2(GetSpellTargetX(), GetSpellTargetY())) (unit detectionUnit, unit caster, int data) ->
+            let nearby = CreateGroup()
+            let level = caster.getAbilityLevel(ABILITY_ID_W)
+            nearby.enumUnitsInRange(detectionUnit.getPos(), FISH_AOE[level-1])
+
+            let dmg = FISH_DAMAGE[level-1].bonus(caster.getHeroInt(), FISH_DAMAGE_BONUS)
+
+            while(not nearby.isEmpty())
+                let target = FirstOfGroup(nearby)
+                nearby.removeUnit(target)
+                if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(detectionUnit.getOwner(), false, true)
+
+                    caster.dealDamage(target, dmg, ReductionType.MAGIC)
+                    target.addBuffReduced(caster, FISH_SLOW_DURATION[level-1], buffFish, level)
+
+            nearby.destr()
+
+            let fx = new Fx(detectionUnit.getPos(), Abilities.stampedeMissileDeath)
+            fx.setScale(3)
+            destroy fx
+
+            SOUND_FISH_IMPACT.playOnPoint(detectionUnit.getPos3Zero()).snd.setVolume(120)
+            
+
+    override function castE()
+        let spellId = GetSpellAbilityId()
+        let caster = GetTriggerUnit()
+        let level = caster.getAbilityLevel(spellId)
+        caster.addBuff(caster, -1, buffManaShield, level)
+
+    override function castR()
+        let caster = GetTriggerUnit()
+        new RitualOfTheSeas(caster)
+
+        
+    override function retreatAI(IHeroAI ai)
+        ai.issue("immolation")
+
+
+    override function attackAI(IHeroAI ai)
+        let hero = ai.getHeroUnit()
+
+        ai.issue("unimmolation")
+
+        if hero.getMana()/hero.getMaxMana() > 0.5
+
+            let targetPos = hero.findAreaTarget(800, FISH_AOE[hero.getAbilityLevel(ABILITY_ID_W)-1], 3)
+            if targetPos.getValue() >= 6
+                ai.issue("shockwave", targetPos.getPos())
+
+            let g = CreateGroup()
+            unit u
+            int count = 0
+            g.enumUnitsInRange(hero.getPos(), TIDAL_FURY_AOE)
+            while(true)
+                u = FirstOfGroup(g)
+                if u == null
+                    break
+                g.removeUnit(u)
+                if u.isTargetable(hero.getOwner(), false, true) and not u.isType(UNIT_TYPE_STRUCTURE)
+                    if u.isType(UNIT_TYPE_HERO)
+                        count += 3
+                    else
+                        count ++
+            g.destr()
+
+            if count >= 4
+                if ai.issue("howlofterror")
+                    return
+
+        unit target = hero.findTarget(250, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_HEALTH, null)
+        if target.isTargetable(hero.getOwner(), false, true)
+            ai.attack(target)
+
+        target = hero.findTarget(500, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_DISTANCE, null)
+        if target.isTargetable(hero.getOwner(), false, true)
+            ai.attack(target)
+
+    override function teamFightAI(IHeroAI ai)
+
+        let hero = ai.getHeroUnit()
+
+        ai.issue("immolation")
+
+
+        
+        let g = CreateGroup()
+        unit u
+        int count = 0
+        g.enumUnitsInRange(hero.getPos(), TIDAL_FURY_AOE)
+        while(true)
+            u = FirstOfGroup(g)
+            if u == null
+                break
+            g.removeUnit(u)
+            if u.isTargetable(hero.getOwner(), false, true)
+                if u.isType(UNIT_TYPE_HERO)
+                    count++
+
+        if count != 0
+            if ai.issue("howlofterror")
+                return
+
+
+        count = 0
+        g.enumUnitsInRange(hero.getPos(), RITUAL_AOE[hero.getAbilityLevel(ABILITY_ID_R)-1])
+        while(true)
+            u = FirstOfGroup(g)
+            if u == null
+                break
+            g.removeUnit(u)
+            if u.isTargetable(hero.getOwner(), false, true)
+                if u.isType(UNIT_TYPE_HERO)
+                    count++
+
+        g.destr()
+        if count > 1
+            if ai.issue("tranquility")
+                return
+
+            
+        let target = ai.getTeamFightTarget()
+        if target.isTargetable(hero.getOwner(), false, true)
+            ai.issue("shockwave", target.getPos())
+            if not ai.getAttacking()
+                ai.attack(target)
+
+    override function skillBuild() returns string
+        return "QWEQQWEQWQEWEWE"
+
+    override function recommendedItems(LinkedList<int> list)
+        list.add(ITEM_ID_BOOTS_BASE)
+
+    override function onCreate(IHeroType heroType, IHero hero)
+        CreateTrigger()
+        ..registerUnitEvent(hero.toUnit(), EVENT_UNIT_HERO_SKILL)
+        ..addAction() ->
+            if GetLearnedSkill() == HeroSeaDruid.instance.ABILITY_ID_PASSIVE
+                GetTriggerUnit().wrapper()
+                ..updateHealth()
+                ..updateMana()
+
+    override function onInit(IHeroType heroType)
+        heroType
+        ..setBonusCalculation((IUnit whichWrapper, Stat whichStat) -> (begin
+            let lvl = whichWrapper.toUnit().getAbilityLevel(ABILITY_ID_PASSIVE)
+            if lvl == 0
+                whichWrapper.defaultBonusCalcualtion(whichStat)
+            else
+                if whichStat == Stat.HP or whichStat == Stat.MP //if hp or mana was changed, calculate special values.
+                    whichWrapper.defaultBonusCalcualtion(Stat.HP)
+                    whichWrapper.defaultBonusCalcualtion(Stat.MP)
+                    let hpBonus = whichWrapper.getHealthBonus()
+                    let mpBonus = whichWrapper.getManaBonus()
+                    whichWrapper.setStatBonusInternal(Stat.HP, hpBonus + ((1/ANCIENT_KNOWLEDGE_HP_BONUS[lvl-1]) * (mpBonus + whichWrapper.getManaBase()) ).toInt())
+                    whichWrapper.setStatBonusInternal(Stat.MP, mpBonus + ((1/ANCIENT_KNOWLEDGE_MP_BONUS[lvl-1]) * (hpBonus + whichWrapper.getHealthBase()) ).toInt())
+                    whichWrapper.applyHealth()
+                    whichWrapper.applyMana()
+                else //else calculate default values
+                    whichWrapper.defaultBonusCalcualtion(whichStat)
+        end))
+    override function onInitDelayed(IHeroType heroType)
+        buffFish = new BuffType(false, DispelLevel.DISPEL)
+        buffFish.setupBuffWithIcon(FISH_BUFF_ID, FISH_ABILTIY_ID)
+        buffFish.addLevelFunction() (Buff thisBuff, int factor) ->
+            let level = thisBuff.getLevel()
+            thisBuff.getTarget().wrapper()
+            ..modAttackSpeed( -factor * FISH_ATTACK_SPEED[level - 1])
+            ..modMoveSpeedRelative( -factor * FISH_MOVE_SPEED[level - 1]*10)
+
+
+        buffManaShield = new BuffType(true, DispelLevel.NONE) // the actual effect is in OnAttack
+            ..setPeriodicTime(0.1)
+        buffManaShield.addPeriodicFunction( (Buff whichBuff) -> (begin
+            let caster = whichBuff.getCaster()
+            if not caster.hasAbility(MANA_SHIELD_BUFF_ID)
+                whichBuff.dispel()
+        end))
+
+        ritualBuff = new BuffType(false, DispelLevel.DISPEL)
+        ritualBuff.setupBuffWithIcon(RITUAL_SLOW_BUFF_ID, RITUAL_SLOW_ABILITY_ID)
+        ritualBuff.addLevelFunction() (Buff thisBuff, int factor) ->
+            thisBuff.getTarget().wrapper().modMoveSpeedRelative( -factor * RITUAL_MOVEMENT_SLOW[thisBuff.getLevel()-1]*10)
+
+
+init
+    initialize()
+    
+@compiletime
+function initialize()
+    HeroType.create(new HeroSeaDruid(), HERO_ORDER)
+      
+
+   

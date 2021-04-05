@@ -18,6 +18,8 @@ import ObjectIdGenerator
 import ObjectIds
 import UpgradeObjEditing
 
+int currentHeroUnitTypeId = -1
+
 int array SLOT_ID
 string array BUTTON_ORDER_STRING
 
@@ -93,7 +95,7 @@ public class HeroTypeImpl implements IHeroType
             statsMax[i]=0
         
         this.icon = smartIcon(template.icon)
-        this.hasAI = template.hasAI()
+        this.hasAI = template.skillBuild() != ""
 
         if not compiletime
             preloadAbility(this.getAbilityId(AbilitySlot.Q))
@@ -399,7 +401,40 @@ function charToAbilitySlot(string char) returns AbilitySlot
 public function delayInit(real maxDelay, CallbackSingle cb)
     doAfter(GetRandomReal(1, maxDelay), cb)
         
+/*
+This module must be used for every child class of HeroTemplate.
+By using this module, every child class gets its own unique UNIT_TYPE_ID.
+This must be done with modules rather than parent classes in order to execute the compiletime function for every child class.
+The unit type id is stored in a global to avoid additional parameters.
 
+The module also offers an instance variable, which can be used as a singleton to access instance data from static context:
+
+class MyHero extends HeroTemplate
+    use HeroTemplateModule
+
+    int instanceVar = 0
+
+init
+    print(MyHero.instance.instanceVar)
+
+This is especially useful for triggers, because they cannot capture the instance.
+*/
+public module HeroTemplateModule
+    static thistype instance
+    static int UNIT_TYPE_ID = compiletime(HERO_ID_GEN.next())
+    construct()
+        currentHeroUnitTypeId = UNIT_TYPE_ID
+        if currentHeroUnitTypeId == -1
+            error("")
+        instance = this
+
+
+/**
+Must be used together with HeroTemplateModule:
+class MyHero extends HeroTemplate
+    use HeroTemplateModule
+    ...
+**/
 public abstract class HeroTemplate
     static IHero lastCreatedHero
     static constant SPELL_TO_TEMPLATE = new HashMap<int, HeroTemplate>()
@@ -411,7 +446,7 @@ public abstract class HeroTemplate
     constant int ABILITY_ID_E
     constant int ABILITY_ID_R
     constant int ABILITY_ID_PASSIVE
-    constant int UNIT_ID_HERO
+    int UNIT_ID_HERO
     int HERO_ORDER
     string model = "units\\human\\HeroMountainKing\\HeroMountainKing.mdl"
     string icon = "ReplaceableTextures\\CommandButtons\\BTNHeroMountainKing.blp"
@@ -456,7 +491,6 @@ public abstract class HeroTemplate
     construct()
         this.HERO_INDEX = numInstances
         numInstances++
-        this.UNIT_ID_HERO = HERO_ID_GEN.next()
         let heroOffset = HeroType.getAbilityOffset(this.HERO_INDEX) 
         this.ABILITY_ID_Q = heroOffset + SLOT_ID[AbilitySlot.Q castTo int]
         this.ABILITY_ID_W = heroOffset + SLOT_ID[AbilitySlot.W castTo int]
@@ -477,6 +511,10 @@ public abstract class HeroTemplate
     */
     function setup(IHeroType heroType, int heroOrder)
         this.HERO_ORDER = heroOrder
+        if currentHeroUnitTypeId == -1
+            error("")
+        this.UNIT_ID_HERO = currentHeroUnitTypeId
+        currentHeroUnitTypeId = -1
         this.setupPassive(this.ABILITY_ID_PASSIVE, heroType)
         this.setupQ(this.ABILITY_ID_Q, heroType)
         this.setupW(this.ABILITY_ID_W, heroType)
@@ -600,28 +638,26 @@ public abstract class HeroTemplate
 
 
     function customDefintions(HeroDefinition _def)
-    function objectDefinition()
+    abstract function objectDefinition()
     abstract function setupPassive(int abilityId, IHeroType heroType)
     abstract function setupQ(int abilityId, IHeroType heroType)
     abstract function setupW(int abilityId, IHeroType heroType)
     abstract function setupE(int abilityId, IHeroType heroType)
     abstract function setupR(int abilityId, IHeroType heroType)
-    function castQ()
-    function castW()
-    function castE()
-    function castR()
-    function stats(IHeroType _heroType)
+    abstract function castQ()
+    abstract function castW()
+    abstract function castE()
+    abstract function castR()
+    abstract function stats(IHeroType _heroType)
     function skillBuild() returns string
         return ""
     function retreatAI(IHeroAI _ai)
     function attackAI(IHeroAI _ai)
     function teamFightAI(IHeroAI _ai)
-    function recommendedItems(LinkedList<int> _list)
+    abstract function recommendedItems(LinkedList<int> _list)
     function onInit(IHeroType _heroType)
     function onInitDelayed(IHeroType _heroType)
     function onCreate(IHeroType _heroType, IHero _hero)
-    function hasAI() returns bool
-        return false
 
 
 public module HeroInstance
