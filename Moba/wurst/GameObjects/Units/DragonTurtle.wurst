@@ -38,8 +38,7 @@ function onDragonTurtleDeath()
 
         let killerId = GetKillingUnit().getOwner().getId()
         let killingTeam = Players.team(killerId)
-
-        let teamName = Players.coloredName(killingTeam)
+        let teamName = Players.coloredName(Teams.army(killingTeam))
 
         if not Players.isTeamNeutral(killerId)
             printTimed("Team "+teamName+" has killed a Dragon Turtle. All heroes get "+TEAM_REWARD.toString()+" gold. The Dragon Turtle will respawn in "+REVIVE_TIME.toInt().toString()+" seconds.", 10)
