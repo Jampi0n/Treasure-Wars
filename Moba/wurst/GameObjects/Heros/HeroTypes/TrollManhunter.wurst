@@ -352,7 +352,7 @@ class HeroTrollManHunter extends HeroTemplate
             instance.onMirrorImageDeath = CreateTrigger()
             instance.onMirrorImageDeath.registerUnitEvent(instance.mirrorImage, EVENT_UNIT_DEATH)
             instance.onMirrorImageDeath.addAction() ->
-                let inst = TrollManHunterInstance.fromUnit(GetTriggerUnit().toOwningHeroUnit())
+                let inst = TrollManHunterInstance.fromUnit(GetTriggerUnit().toOwningHero().toUnit())
                 addEffect(Abilities.mirrorImageDeathCaster, inst.mirrorImage.getPos()).destr()
                 destroy inst.mirrorImage.toHero()
                 inst.mirrorImage.remove()

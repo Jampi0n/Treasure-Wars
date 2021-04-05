@@ -440,6 +440,10 @@ public abstract class HeroTemplate
     real cooldownTime = 2.22
     WeaponSound weaponSound = WeaponSound.MetalHeavyBash
     WeaponType weaponType = WeaponType.Normal
+    string projectileArt = ""
+    int projectileSpeed = 1000
+    bool projectileHoming = true
+    real projectileArc = 0.15
     int range = 100
     real turnRate = 0.6
     MovementType movementType = MovementType.Foot
@@ -579,6 +583,10 @@ public abstract class HeroTemplate
         ..setAttack1WeaponSound(weaponSound)
         ..setAttack1WeaponType(weaponType)
         ..setAttack1Range(range)
+        ..setAttack1ProjectileArt(projectileArt)
+        ..setAttack1ProjectileHomingEnabled(projectileHoming)
+        ..setAttack1ProjectileSpeed(projectileSpeed)
+        ..setAttack1ProjectileArc(projectileArc)
         ..setTurnRate(turnRate)
         ..setMovementType(movementType)
         ..setMovementHeight(movementHeight)
@@ -627,7 +635,10 @@ public module HeroInstance
         return fromUnit(GetTriggerUnit())
 
     static function fromUnit(unit u) returns thistype
-        return instanceMap.get(u)
+        if instanceMap.has(u)
+            return instanceMap.get(u)
+        else
+            return null
 
     construct()
         hero = HeroTemplate.lastCreatedHero

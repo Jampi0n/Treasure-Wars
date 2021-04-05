@@ -3,6 +3,60 @@ package IUnit
 import Stats
 import initlater IHero
 
+int numPreConstructEvents = 0
+PreConstructEvent array preConstructEvents
+int numPostConstructEvents = 0
+PostConstructEvent array postConstructEvents
+int numPreDestroyEvents = 0
+PreDestroyEvent array preDestroyEvents
+int numPostDestroyEvents = 0
+PostDestroyEvent array postDestroyEvents
+
+public function addPreConstructEvent(PreConstructEvent c)
+    preConstructEvents[numPreConstructEvents] = c
+    numPreConstructEvents++
+
+public function runPreConstructEvents(unit u)
+    for i = 0 to numPreConstructEvents - 1
+        preConstructEvents[i].run(u)
+
+public function addPostConstructEvent(PostConstructEvent c)
+    postConstructEvents[numPostConstructEvents] = c
+    numPostConstructEvents++
+
+public function runPostConstructEvents(unit u, IUnit iUnit)
+    for i = 0 to numPostConstructEvents - 1
+        postConstructEvents[i].run(u, iUnit)
+
+public function addPreDestroyEvent(PreDestroyEvent c)
+    preDestroyEvents[numPreDestroyEvents] = c
+    numPreDestroyEvents++
+
+public function runPreDestroyEvents(unit u, IUnit iUnit)
+    for i = 0 to numPreDestroyEvents - 1
+        preDestroyEvents[i].run(u, iUnit)
+
+public function addPostDestroyEvent(PostDestroyEvent c)
+    postDestroyEvents[numPostDestroyEvents] = c
+    numPostDestroyEvents++
+
+public function runPostDestroyEvents(unit u)
+    for i = 0 to numPostDestroyEvents - 1
+        postDestroyEvents[i].run(u)
+    
+
+public interface PreConstructEvent
+    function run(unit u)
+
+public interface PostConstructEvent
+    function run(unit u, IUnit iUnit)
+
+public interface PreDestroyEvent
+    function run(unit u, IUnit iUnit)
+
+public interface PostDestroyEvent
+    function run(unit u)
+
 public interface CalculateTotalBonus
     function calculate(IUnit u, Stat whichStat)
 
@@ -50,8 +104,8 @@ public interface IUnit
     function incReveal()
     function decReveal()
     function modReveal(int value)
-    function getOwningHero() returns unit
-    function setOwningHero(unit owningHero)
+    function getOwningHero() returns IHero
+    function setOwningHero(IHero owningHero)
     // new stat API
     // functions with Dispatch need to do branching based on the stat, which is inefficient
 

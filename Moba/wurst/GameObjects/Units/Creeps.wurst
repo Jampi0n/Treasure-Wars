@@ -327,7 +327,7 @@ public class CreepCamp
                 if pId <= Teams.last2()
                     let owningHero = killer.wrapper().getOwningHero()
                     if owningHero != null
-                        onKill(u, owningHero)
+                        onKill(u, owningHero.toUnit())
                     else
                         error("A player owned unit that is not owned by a hero killed a creep")
 

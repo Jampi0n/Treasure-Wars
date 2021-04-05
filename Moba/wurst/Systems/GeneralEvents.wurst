@@ -2,7 +2,7 @@ package GeneralEvents
 
 import HashMap
 import ErrorHandling
-
+import DamageDetection
 
 //  Animation Speed
 
@@ -65,6 +65,8 @@ function onImpactTrigger()
 
 
 init
+    addOnDamageFunc(function onImpactTrigger)
+
     CreateTrigger()
     ..addAction(function onCastTrigger)
     ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_SPELL_EFFECT)

@@ -321,3 +321,12 @@ public function isFirstBoots() returns bool
 
 init
     ItemEffect.classInit()
+    /*
+    Drop items before the unit wrapper is destroyed.
+    The item drop event for removed units happens after the unit removal event, so if there are still items left when the unit wrapper is destroyed, the onDrop functions can no longer access the unit wrapper. To fix this, all items are dropped before the unit wrapper is destroyed.
+    */
+    addPreDestroyEvent() (unit u, IUnit iUnit) ->
+        for i = 0 to u.inventorySize() - 1
+            let itm = u.itemInSlot(i)
+            if itm != null
+                itm.remove()

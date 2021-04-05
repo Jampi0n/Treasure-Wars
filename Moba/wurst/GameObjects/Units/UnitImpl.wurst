@@ -8,7 +8,7 @@ import Buff
 import BonusMod
 import ErrorHandling
 import ObjectIds
-import UnitIndexer
+import OnUnitEnterLeave
 import Missile
 import IHero
 import TeamUtil
@@ -29,8 +29,18 @@ function unit.getBaseDamage() returns int
 This file is huge. The end is mostly optimized convenience functions.
 */
 function initAtTop()
-    onUnitIndex(() -> UnitImpl.create(getIndexingUnit()))
-    onUnitDeindex(() -> UnitImpl.getWrapper(getIndexingUnit()).destr() )
+
+    onEnter() ->
+        let u = getEnterLeaveUnit()
+        runPreConstructEvents(u)
+        let wrapper = new UnitImpl(u)
+        runPostConstructEvents(u, wrapper)
+    onLeave() ->
+        let u = getEnterLeaveUnit()
+        let wrapper = UnitImpl.getWrapper(u)
+        runPreDestroyEvents(u, wrapper)
+        wrapper.destr()
+        runPostDestroyEvents(u)
 
     BuffConfiguration.setGetBuffListFunction( (unit u) -> UnitImpl.getBuffList(u))
 
@@ -39,9 +49,7 @@ function initAtTop()
         if w != null
             w.createBuffList()
         else
-            error("The unit "+u.getName()+" had no wrapper.")
-            UnitImpl.create(u)
-            w.createBuffList()
+            error("The unit "+u.getName()+" has no wrapper.")
     end))
 
     setHitBoxFunction( (unit u) -> (begin
@@ -71,7 +79,7 @@ public class UnitImpl implements IUnit
     private IHero hero = null
     private IHeroType heroType = null
     private IUnitType unitType = null
-    private unit owningHero = null
+    private IHero owningHero = null
 
     //protected real currentMovementSpeed
     //protected real defaultMovementSpeed
@@ -108,12 +116,12 @@ public class UnitImpl implements IUnit
         In the getWrapper() function, a new wrapper will be created, if it does not exist already.
         To prevent cyclic function calls this is done with a trigger function.
     */
-    private static constant CREATE_TRIGGER = CreateTrigger()..addAction(function createWrapper)
+    /*private static constant CREATE_TRIGGER = CreateTrigger()..addAction(function createWrapper)
     private static unit createForUnit = null
 
     static function create(unit assocUnit)
         if not unitMap.has(assocUnit)
-            new UnitImpl(assocUnit)
+            new UnitImpl(assocUnit)*/
 
     construct(unit assocUnit)
         objectCount++
@@ -214,18 +222,19 @@ public class UnitImpl implements IUnit
             statsRelativeBonus_static[this.arrayOffset + i] = 0
             statsTotalBonus_static[this.arrayOffset + i] = 0
 
-    private static function createWrapper()
-        create(createForUnit)
+    /*private static function createWrapper()
+        create(createForUnit)*/
 
-    static function getWrapper(unit whichUnit) returns UnitImpl
-        if whichUnit == null or whichUnit.getTypeId() == 0
+    static function getWrapper(unit u) returns UnitImpl
+        if u == null or u.getTypeId() == 0
             error("Requesting wrapper for null unit.")
             return null
-        let w = unitMap.get(whichUnit)
+        let w = unitMap.get(u)
         if w == null
-            createForUnit = whichUnit
+            /*createForUnit = whichUnit
             CREATE_TRIGGER.execute()
-            return unitMap.get(whichUnit)
+            return unitMap.get(whichUnit)*/
+            error("The unit "+u.getName()+" has no wrapper.")
         return w
 
     static function getBuffList(unit whichUnit) returns BuffList
@@ -290,10 +299,10 @@ public class UnitImpl implements IUnit
     override function getTypeId() returns int
         return this.unitTypeId
 
-    override function getOwningHero() returns unit
+    override function getOwningHero() returns IHero
         return this.owningHero
 
-    override function setOwningHero(unit owningHero)
+    override function setOwningHero(IHero owningHero)
         this.owningHero = owningHero
 
     override function copyBaseStatsFrom(IUnit wrapper)

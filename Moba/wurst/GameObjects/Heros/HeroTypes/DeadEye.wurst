@@ -1,0 +1,436 @@
+package DeadEye
+
+import HeroInclude
+
+constant int HERO_ORDER = 1
+
+class DeadEyInstance
+    use HeroInstance
+
+    group skeletons = CreateGroup()
+    int skeletonCount = 0
+
+    construct()
+        print(this castTo int)
+
+    ondestroy
+        skeletons.destr()
+
+
+class HeroDeadEye extends HeroTemplate
+    static constant SOUND_BLACK_ARROW = new SoundDefinition(Sounds.raiseSkeleton1, false, true)
+
+    static constant real array BLACK_ARROW_THRESHOLD = [20, 25, 30, 35, 40]
+    static constant real array BLACK_ARROW_DURATION = [30, 35, 40, 45, 50]
+
+    static constant real array PIERCING_SHOT_DAMAGE = [80, 115, 150, 185, 210]
+    static constant real PIERCING_SHOT_DAMAGE_BONUS = 120
+
+    static constant real array TERROR_DURATION = [2, 2.6, 3.2, 3.8, 4.4]
+    static constant real TERROR_DURATION_BONUS = 2
+    static real array TERROR_AOE = [700, 750, 800, 850, 900]
+    static constant BUFF_TERROR = new BuffType(false, DispelLevel.DISPEL)
+    static constant TERROR_BUFF_ID = compiletime(createAuraBuff("Terror", "This unit was hit by Terror; its attacks will miss.", Icons.bTNHowlOfTerror))
+    static constant TERROR_ABILITY_ID = compiletime(createNegativeBuffAbility(5, TERROR_BUFF_ID, Abilities.howlTarget, ""))
+
+    static constant real array DEATH_COIL_DMG_BASE = [200, 250, 300, 350, 400]
+    static constant real array DEATH_COIL_DMG_FACTOR = [15, 20, 25, 30, 35]
+    static constant real DEATH_COIL_DMG_BASE_BONUS = 250
+    static constant real DEATH_COIL_DMG_FACTOR_BONUS = 60
+    static constant real DEATH_COIL_DURATION = 10
+
+    static constant BUFF_ID_ON_DEATH_COIL = compiletime(createDummyBuff())
+    static constant ABILITY_DEATH_COIL = compiletime(ABIL_ID_GEN.next())
+
+    override function customDefintions(HeroDefinition aDef)
+    override function objectDefinition()
+        this.model = "Models\\Deadeye.mdl"
+        this.icon = "BTNSkeletonArcher"
+        this.castBackswing = 0.3
+        this.castPoint = 0.7
+        this.armorSoundType = ArmorSoundType.Wood
+        this.backswingPoint = 0.15
+        this.damagePoint = 0.45
+        this.weaponSound = weaponSound.Nothing
+        this.unitSoundSet = "SkeletonArcher"
+        this.name = "Death Sniper"
+        this.properName = "Dead Eye"
+        this.scalingValue = 1.3
+        this.selectionScale = 1.9
+        this.shadowX = 70
+        this.shadowY = 70
+        this.shadowH = 180
+        this.shadowW = 180
+        this.cooldownTime = 1.8
+        this.projectileArt = "Abilities\\Spells\\Other\\BlackArrow\\BlackArrowMissile.mdl"
+        this.projectileSpeed = 1000
+        this.projectileArc = 0.1
+        this.range = 600
+        this.projectileHoming = true
+        this.weaponType = WeaponType.Missile 
+
+    override function stats(IHeroType heroType)
+        heroType
+        ..setStat(Stat.AR, 24, 36)
+        ..setStat(Stat.AS, 34, 88)
+        ..setStat(Stat.HP, 7, 32)
+        ..setStat(Stat.HR, 4, 19)
+        ..setStat(Stat.MP, 12, 29)
+        ..setStat(Stat.MR, 7, 22)
+        ..setStat(Stat.MS, 6, 21)
+        ..setStat(Stat.STR, 16, 91)
+        ..setStat(Stat.AGI, 24, 31)
+        ..setStat(Stat.INT, 6, 23)
+    override function setupPassive(int abilityId, IHeroType heroType)
+        if compiletime
+            createNoEffectAbiltiy(abilityId)
+                ..setupIcon("PASTheBlackArrow")
+                ..setupWithHotKey("Black Arrow", "D")
+
+        let tooltip = new DynamicTooltip(abilityId)
+        tooltip.setReplaceStrength(0)
+        tooltip.setLearnString("Increases the damage of killing attacks against enemies and spawns a skeleton.", (int lvl) -> (begin
+            return "{0} damage, lasts {1} seconds.".format(
+            BLACK_ARROW_THRESHOLD[lvl-1].str(), 
+            BLACK_ARROW_DURATION[lvl-1].str())
+        end) )
+        
+        for lvl = 1 to 5
+            tooltip.setNormalString(false, lvl, "Increases the damage of killing attacks against enemies by {0} and spawns a skeleton for {1} seconds.".format( 
+                BLACK_ARROW_THRESHOLD[lvl-1].str(), 
+                BLACK_ARROW_DURATION[lvl-1].str())
+                )
+        addDynamicTooltipStrength(heroType, tooltip)
+    override function setupQ(int abilityId, IHeroType heroType)
+        if compiletime
+            let MANA = skillData(70, 75, 80, 85, 90)
+            let COOLDOWN = skillData(9, 9, 9, 9, 9)
+            let RANGE = skillData(800, 800, 800, 800, 800)
+            let aDef = new AbilityDefinitionIllidanChannel(abilityId)
+                ..setupIcon("BTNBlackArrows")
+                ..setupWithHotKey("Piercing Shot", "Q")
+                ..setArtCaster("")
+                ..setArtEffect("")
+                ..setMissileArt("")
+                ..setArtTarget("")
+                ..setAnimationNames("spell,throw")
+                ..setSkillData(COOLDOWN, MANA, RANGE)
+
+            for lvl = 1 to 5
+                aDef
+                    ..setArtDuration(lvl, 0)
+                    ..setOptions(lvl, 1)
+                    ..setTargetType(lvl, 2)
+                    ..setFollowThroughTime(lvl, 0)
+                    ..setDisableOtherAbilities(lvl, false)
+                    ..setBaseOrderID(lvl, "channel")
+
+        let tooltip = new DynamicTooltip(abilityId)
+        tooltip.setReplaceStrength(PIERCING_SHOT_DAMAGE_BONUS)
+        tooltip.setLearnString("Shoots an arrow towards the target direction, dealing damage to enemies it strikes through.", (int lvl) -> (begin
+            return "{0}{S0} damage.".format(
+            PIERCING_SHOT_DAMAGE[lvl-1].str())
+        end) )
+        
+        for lvl = 1 to 5
+            tooltip.setNormalString(true, lvl, "Shoots an arrow towards the target direction, dealing {0}{S0} damage to enemies it strikes through.".format(
+                PIERCING_SHOT_DAMAGE[lvl-1].str())
+            )
+        addDynamicTooltipStrength(heroType, tooltip)
+    override function setupW(int abilityId, IHeroType heroType)
+        if compiletime
+            let MANA = skillData(70, 70, 70, 70, 70)
+            let COOLDOWN = skillData(13, 12, 11, 10, 9)
+            new AbilityDefinitionPitLordHowlofTerror(abilityId)
+                ..setAnimationNames("spell,slam")
+                ..setupIcon("BTNHowlOfTerror")
+                ..setupWithHotKey("Terror", "W")
+                ..targetNone()
+                ..setSkillData(COOLDOWN, MANA, 0)
+
+        let tooltip = new DynamicTooltip(abilityId)
+        tooltip.setReplaceIntelligence(TERROR_DURATION_BONUS)
+        tooltip.setLearnString("Terrifies nearby enemies, making them miss on their attacks.", (int lvl) -> (begin
+            return "{0}{I0} seconds, {1} area of effect.".format(
+            TERROR_DURATION[lvl-1].toExactString(),
+            TERROR_AOE[lvl-1].str())
+        end) )
+        for lvl = 1 to 5
+            tooltip.setNormalString(true, lvl, "Terrifies enemies within {0} range, making them miss on their attacks for {1}{I0} seconds.".format(
+                TERROR_AOE[lvl-1].str(), TERROR_DURATION[lvl-1].toString()))
+        addDynamicTooltipIntelligence(heroType, tooltip)
+    override function setupE(int abilityId, IHeroType heroType)
+        let COOLDOWN = skillData(18, 15, 12, 9, 6)
+        let RANGE = skillData(600, 750, 900, 1050, 1200)
+        if compiletime
+            let MANA = skillData(70, 65, 60, 55, 50)
+            let aDef = new AbilityDefinitionFarseerChainLightning(abilityId)
+                ..setAnimationNames("spell")
+                ..setupIcon("BTNSkeletalLongevity")
+                ..setupWithHotKey("Bone Brothers", "E")
+                ..setMissileArt("")
+                ..setArtTarget("")
+                ..setLightningEffects("")
+                ..setSkillData(COOLDOWN, MANA, RANGE)
+
+            for lvl = 1 to 5
+                aDef
+                    ..setDamageperTarget(lvl, 0)
+                    ..setDamageReductionperTarget(lvl, 0)
+                    ..setNumberofTargetsHit(lvl, 1)
+                    ..setTargetsAllowed(lvl, "nonsapper,player")
+
+        let tooltip = new DynamicTooltip(abilityId)
+        tooltip.setReplaceIntelligence(TERROR_DURATION_BONUS)
+        tooltip.setLearnString("Swaps position with one of his skeletons.", (lvl) -> (begin
+            return "{0} range, {1} seconds cooldown.".format( RANGE.data(lvl).str(), COOLDOWN.data(lvl).str())
+        end))
+        for lvl = 1 to 5
+            tooltip.setNormalString(true, lvl, "Swaps position with one of his skeletons.")
+        addDynamicTooltipIntelligence(heroType, tooltip)
+    override function setupR(int abilityId, IHeroType heroType)
+        if compiletime
+            let MANA = skillData(150, 160, 170, 180, 190)
+            let COOLDOWN = skillData(90, 90, 90, 90, 90)
+            let RANGE = skillData(800, 900, 1000, 1100, 1200)
+            new AbilityDefinitionRoar(abilityId)
+                ..setLevels(5)
+                ..setAnimationNames("spell")
+                ..setupIcon("BTNSkullSpirits")
+                ..setupWithHotKey("Death Pact", "R")
+                ..setArtCaster("Abilities\\Spells\\Undead\\DeathPact\\DeathPactCaster.mdl")
+                ..targetNone()
+                ..setSkillData(COOLDOWN, MANA, 0)
+
+            let aDefDeathCoil = createTargetMissile(ABILITY_DEATH_COIL, BUFF_ID_ON_DEATH_COIL)
+                ..setLevels(5)
+                ..setButtonPositionNormalX(3)
+                ..setButtonPositionNormalY(2)
+                ..setHotkeyNormal("R")
+                ..setupIcon("BTNDeathCoil")
+                ..setHeroAbility(false)
+                ..setMissileArt("Abilities\\Spells\\Undead\\DeathCoil\\DeathCoilMissile.mdl")
+                ..setMissileArc(0)
+                ..setMissileSpeed(1100)
+                ..setArtSpecial("Abilities\\Spells\\Undead\\DeathCoil\\DeathCoilSpecialArt.mdl")
+                ..targetEnemyHeroes()
+                ..setSkillData(DEATH_COIL_DURATION, 0, RANGE)
+
+
+            ABIL_DEF_MAP.put(aDefDeathCoil.getNewId(), aDefDeathCoil)
+
+            for lvl = 1 to 5
+                aDefDeathCoil
+                    ..setTooltipNormal(lvl, "(R) Death Coil - [|cffffcc00Level "+lvl.toString()+"|r]")
+
+
+        var tooltip = new DynamicTooltip(abilityId)
+        tooltip.setReplaceIntelligence(DEATH_COIL_DMG_BASE_BONUS, DEATH_COIL_DMG_FACTOR_BONUS)
+        tooltip.setLearnString("Sacrifices all his skeletons to unlock the power of Death Coil for "+DEATH_COIL_DURATION.str()+" seconds.|nDeath Coil deals massive magic damage at the target enemy hero. Sacrificing more skeletons increases the damage of Death Coil.", (int lvl) -> (begin
+            return "{0}{I0} base damage, {1}{I1} damage per sacrificed skeleton.".format(
+            DEATH_COIL_DMG_BASE[lvl-1].str(),
+            DEATH_COIL_DMG_FACTOR[lvl-1].str())
+        end) )
+        for lvl = 1 to 5
+            tooltip.setNormalString(true, lvl, "Sacrifices all his skeletons to unlock the power of Death Coil for {0} seconds.|nDeath Coil deals {1}{I0} plus {2}{I1} for every sacrificed skeleton magic damage to the target enemy hero.".format(
+                DEATH_COIL_DURATION.str(),
+                DEATH_COIL_DMG_BASE[lvl-1].str(),
+                DEATH_COIL_DMG_FACTOR[lvl-1].str()))
+
+        addDynamicTooltipIntelligence(heroType, tooltip)
+
+        tooltip = new DynamicTooltip(ABILITY_DEATH_COIL)
+        tooltip.setReplaceIntelligence(DEATH_COIL_DMG_BASE_BONUS, DEATH_COIL_DMG_FACTOR_BONUS)
+        tooltip.setLearnString("", (lvl) -> "" )
+        for lvl = 1 to 5
+            tooltip.setNormalString(true, lvl, "Deals {0}{I0} magic damage and additional {1}{I1} magic damage for every sacrificed skeleton to the target enemy hero.".format(
+                DEATH_COIL_DMG_BASE[lvl-1].str(),
+                DEATH_COIL_DMG_FACTOR[lvl-1].str()))
+        addDynamicTooltipIntelligence(heroType, tooltip)
+    override function onCreate(IHeroType heroType, IHero hero)
+        new DeadEyInstance()
+    override function castQ()
+        let spellId = GetSpellAbilityId()
+        let caster = GetTriggerUnit()
+        let level = caster.getAbilityLevel(spellId)
+        let facing = caster.getPos().angleTo(vec2(GetSpellTargetX(), GetSpellTargetY()))
+        new Missile(caster, caster.getPos().withZ(80), 1500, facing, "Abilities\\Weapons\\BallistaMissile\\BallistaMissile.mdl")
+            ..hitOnce()
+            ..setSize(75)
+            ..setScale(1.2)
+            ..addModel(Abilities.avengerMissile)
+            ..setHitCondition((Missile missile, unit target) -> (begin
+            return not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(missile.getOwner().getOwner(), false, true)
+        end) )
+            ..setHitFunction((Missile missile, unit target) -> (begin
+            let missileCaster = missile.getOwner()
+            missileCaster.dealDamage(Missile.getMissileTarget(), (PIERCING_SHOT_DAMAGE[level-1]).bonus(missileCaster.getHeroStr(), PIERCING_SHOT_DAMAGE_BONUS), ReductionType.PHYSICAL)
+
+        end) )
+            ..setMaxRange(1000)
+    override function castW()
+        let spellId = GetSpellAbilityId()
+        let caster = GetTriggerUnit()
+        let level = caster.getAbilityLevel(spellId)
+        let nearby = CreateGroup()
+        nearby.enumUnitsInRange(caster.getPos(), TERROR_AOE[level-1])
+
+        let dur = TERROR_DURATION[level-1].bonus(caster.getHeroInt(), TERROR_DURATION_BONUS)
+
+        while(not nearby.isEmpty())
+            let target = FirstOfGroup(nearby)
+            nearby.removeUnit(target)
+            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
+                target.addBuffReduced( caster, dur, MISS, 1).setDispelLevel(DispelLevel.DISPEL)
+                target.addBuffReduced( caster, dur, BUFF_TERROR, level)
+
+        nearby.destr()
+    override function castE()
+        let caster = GetTriggerUnit()
+        let target = GetSpellTargetUnit()
+        let targetPos = target.getPos()
+        let casterPos = caster.getPos()
+        doAfter(0) ->
+            target.setPos(casterPos)
+            caster.setPos(targetPos)
+            //target might nor be at the exact place, because it was still occupied by caster
+            target.setPos(casterPos)
+
+        let lfx = addLightning(LIGHTNING_DRAIN, true, targetPos, casterPos)
+        doAfter(0.5, ()->lfx.destr())
+    override function castR()
+        let spellId = GetSpellAbilityId()
+        let caster = GetTriggerUnit()
+        let instance = DeadEyInstance.fromUnit(caster)
+        print("pact: " + (instance castTo int).toString())
+        print(instance.skeletons.size())
+        let level = caster.getAbilityLevel(spellId)
+        var skeleton = FirstOfGroup(instance.skeletons)
+        var count = 0
+        while(skeleton!=null)
+            instance.skeletons.removeUnit(skeleton)
+            if(skeleton.isAlive())
+                skeleton.addEffect("Abilities\\Spells\\Undead\\DeathPact\\DeathPactTarget.mdl", "origin").destr()
+                skeleton.kill()
+                count++
+            skeleton = FirstOfGroup(instance.skeletons)
+        instance.skeletonCount = count
+        doAfter(0.25, () -> (begin
+            caster.hideAbility(spellId, true)
+            caster.addAbility(ABILITY_DEATH_COIL)
+            caster.setAbilityLevel(ABILITY_DEATH_COIL, level)
+            caster.toHero().updateTooltipsInt()
+        end))
+        doAfter(DEATH_COIL_DURATION+1, () -> (begin
+            caster.removeAbility(ABILITY_DEATH_COIL)
+            caster.hideAbility(spellId, false)
+        end))
+    override function skillBuild() returns string
+        return "QWQWQWQWQWEEEEE"
+    override function recommendedItems(LinkedList<int> list)
+        list.add(ITEM_ID_BOOTS_BASE)
+    override function retreatAI(IHeroAI ai)
+    override function attackAI(IHeroAI ai)
+        let hero = ai.getHeroUnit()
+
+        unit target
+        if hero.getMana()/hero.getMaxMana() > 0.5
+            target = hero.findTarget(500, AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
+            if target.isTargetable(hero.getOwner(), false, true)
+                ai.issue("channel", target.getPos())
+
+        target = hero.findTarget(600, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_HEALTH, null)
+        if target.isTargetable(hero.getOwner(), false, true)
+
+            if not ai.getAttacking()
+                ai.attack(target)
+    override function teamFightAI(IHeroAI ai)
+        let ulti = ABILITY_ID_R
+        let hero = ai.getHeroUnit()
+
+        if hero.getAbilityLevel(ulti) > 0
+            ai.issue("roar")
+            ai.issue("acidbomb", ai.getTeamFightTarget())
+
+        if ai.getTeamFightTarget().getPos().distanceTo(hero.getPos()) < 600
+            ai.issue("channel", ai.getTeamFightTarget().getPos())
+
+        let g = CreateGroup()
+        unit u
+        int count = 0
+        g.enumUnitsInRange(hero.getPos(), TERROR_AOE[hero.getAbilityLevel(ABILITY_ID_W)] - 150)
+        while(true)
+            u = FirstOfGroup(g)
+            if u == null
+                break
+            g.removeUnit(u)
+            if u.isTargetable(hero.getOwner(), false, true)
+                if u.isType(UNIT_TYPE_HERO)
+                    count++
+
+        g.destr()
+        if count != 0
+            if ai.issue("howlofterror")
+                return
+
+            
+        let target = ai.getTeamFightTarget()
+        if target.isTargetable(hero.getOwner(), false, true)
+
+
+            if not ai.getAttacking()
+                ai.attack(target)
+
+    override function onInitDelayed(IHeroType heroType)
+        BUFF_TERROR.setupBuffWithIcon(TERROR_BUFF_ID, TERROR_ABILITY_ID)
+        onImpact(BUFF_ID_ON_DEATH_COIL) (unit source, unit target) ->
+            let instance = DeadEyInstance.fromUnit(source)
+            print("coil: " + (instance castTo int).toString())
+            print(instance.skeletons.size())
+            if target.isTargetable(source.getOwner(), false, true)
+                let level = source.getAbilityLevel(ABILITY_ID_R)
+                GetEventDamageSource().dealDamage(target, 
+                DEATH_COIL_DMG_BASE[level-1].bonus(source.getHeroInt(), DEATH_COIL_DMG_BASE_BONUS)+
+                instance.skeletonCount*DEATH_COIL_DMG_FACTOR[level-1].bonus(source.getHeroInt(), DEATH_COIL_DMG_FACTOR_BONUS), ReductionType.MAGIC)
+            doAfter(1, () -> (begin
+                source.removeAbility(ABILITY_DEATH_COIL)
+                source.getOwner().setAbilityAvailable(ABILITY_ID_R, true)
+            end))
+        heroType.setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
+            let instance = DeadEyInstance.fromUnit(source)
+            print("attack: " + (instance castTo int).toString())
+            print(instance.skeletons.size())
+            let level = source.getAbilityLevel(ABILITY_ID_PASSIVE)
+            if level!=0 and target.isTargetable(source.getOwner(), false, true) and target.isVisible(source.getOwner()) and not target.isType(UNIT_TYPE_STRUCTURE) and not target.isType(UNIT_TYPE_HERO)
+                doAfter(0, () -> (begin
+                    if(target.getHP() <= BLACK_ARROW_THRESHOLD[level-1])
+                        let pos =  target.getPos()
+                        source.dealDamage(target, BLACK_ARROW_THRESHOLD[level-1]+1, ReductionType.NONE)
+                        doAfter(0.1, () -> (begin
+                            let skeleton = createUnit(source.getOwner(), 'n00B'+level, pos, source.getPos().angleTo(target.getPos()))
+                            skeleton.wrapper().setOwningHero(source.toHero())
+                            skeleton.setTimedLife(BLACK_ARROW_DURATION[level-1])
+                            instance.skeletons.addUnit(skeleton)
+                            SOUND_BLACK_ARROW.playOnPoint(pos.toVec3()).snd.setVolume(150)
+                        end))
+                end))
+
+        addPreDestroyEvent() (unit u, IUnit iUnit) ->
+            let owningHero = iUnit.getOwningHero()
+            if owningHero != null
+                let instance = DeadEyInstance.fromUnit(owningHero.toUnit())
+                print("leave: " + (instance castTo int).toString())
+                print(instance.skeletons.size())
+                if instance != null
+                    instance.skeletons.removeUnit(u)
+
+init
+    initialize()
+    
+@compiletime
+function initialize()
+    HeroType.create(new HeroDeadEye(), HERO_ORDER)
+
+
+
+        
