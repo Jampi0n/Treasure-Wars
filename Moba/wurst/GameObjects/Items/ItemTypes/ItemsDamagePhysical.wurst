@@ -66,7 +66,7 @@ function itemArmorBreaker()
                 target.addBuffReduced( source, armorDuration.toReal(), hammerBuff, 1)
                 target.addEffect(Abilities.bloodElfSpellThiefMISSILE, "chest").destr()
 
-            let trg = itemTrigger()
+            let trg = itemTrigger(-1)
             if trg != null
                 trg.registerUnitEvent(getItemUnit(), EVENT_UNIT_SPELL_EFFECT)
                 trg.addAction() ->
