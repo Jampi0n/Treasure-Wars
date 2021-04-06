@@ -18,8 +18,6 @@ import ObjectIdGenerator
 import ObjectIds
 import UpgradeObjEditing
 
-int currentHeroUnitTypeId = -1
-
 int array SLOT_ID
 string array BUTTON_ORDER_STRING
 
@@ -418,7 +416,13 @@ init
     print(MyHero.instance.instanceVar)
 
 This is especially useful for triggers, because they cannot capture the instance.
-*/
+    */
+int currentHeroUnitTypeId = -1
+
+public interface SetupOnCastTrigger
+    function setupForUnit(unit u) returns trigger
+
+public constant setupOnCastTriggerMap = new HashMap<int, SetupOnCastTrigger>()
 public module HeroTemplateModule
     static thistype instance
     static int UNIT_TYPE_ID = compiletime(HERO_ID_GEN.next())
@@ -427,6 +431,30 @@ public module HeroTemplateModule
         if currentHeroUnitTypeId == -1
             error("")
         instance = this
+        setupOnCastTriggerMap.put(UNIT_TYPE_ID, (unit u) -> setupOnCastTrigger(u))
+
+    function castQ()
+    function castW()
+    function castE()
+    function castR()
+    private static function setupOnCastTrigger(unit hero) returns trigger
+        let onCastTrigger = CreateTrigger()
+        ..registerUnitEvent(hero, EVENT_UNIT_SPELL_EFFECT)
+        ..addAction() ->
+            let abilityId = GetSpellAbilityId()
+            if HeroTemplate.SPELL_TO_SLOT.has(abilityId)
+                let slot = HeroTemplate.SPELL_TO_SLOT.get(abilityId)
+                switch slot
+                    case Q
+                        instance.castQ()
+                    case W
+                        instance.castW()
+                    case E
+                        instance.castE()
+                    case R
+                        instance.castR()
+                    default
+        return onCastTrigger
 
 
 /**
@@ -644,10 +672,6 @@ public abstract class HeroTemplate
     abstract function setupW(int abilityId, IHeroType heroType)
     abstract function setupE(int abilityId, IHeroType heroType)
     abstract function setupR(int abilityId, IHeroType heroType)
-    abstract function castQ()
-    abstract function castW()
-    abstract function castE()
-    abstract function castR()
     abstract function stats(IHeroType _heroType)
     function skillBuild() returns string
         return ""

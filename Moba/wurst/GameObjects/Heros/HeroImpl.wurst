@@ -208,26 +208,8 @@ public class HeroImpl implements IHero
         wrapper.setStatBaseInternal(Stat.INT, this.heroType.getBase(Stat.INT))
 
         wrapper.applyBaseStats()
-
         
-
-        this.onCastTrigger = CreateTrigger()
-        ..registerUnitEvent(this.hero, EVENT_UNIT_SPELL_EFFECT)
-        ..addAction() ->
-            let abilityId = GetSpellAbilityId()
-            if HeroTemplate.SPELL_TO_TEMPLATE.has(abilityId)
-                let template = HeroTemplate.SPELL_TO_TEMPLATE.get(abilityId)
-                let slot = HeroTemplate.SPELL_TO_SLOT.get(abilityId)
-                switch slot
-                    case Q
-                        template.castQ()
-                    case W
-                        template.castW()
-                    case E
-                        template.castE()
-                    case R
-                        template.castR()
-                    default
+        this.onCastTrigger = setupOnCastTriggerMap.get(this.heroType.getUnitId()).setupForUnit(this.hero)
 
         HeroTemplate.lastCreatedHero = this
         (this.heroType castTo HeroTypeImpl).TEMPLATE.onCreate(this.heroType, this)
