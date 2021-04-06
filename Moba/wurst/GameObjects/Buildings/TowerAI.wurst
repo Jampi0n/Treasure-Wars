@@ -7,7 +7,8 @@ package TowerAI
 
 import LinkedList
 import HashMap
-import DamageDetection
+import IUnit
+import UnitImpl
 import IHero
 import HeroAIImpl
 import TeamUtil
@@ -40,8 +41,7 @@ public class TowerAI
     private static constant towerList = new LinkedList<TowerAI>
     private static constant towerGroup = CreateGroup()
     private static constant towerMap = new HashMap<unit,TowerAI>
-    private static constant towerPos1 = new LinkedList<TowerPos>
-    private static constant towerPos2 = new LinkedList<TowerPos>
+    private static LinkedList<TowerPos> array towerPos = [new LinkedList<TowerPos>, new LinkedList<TowerPos>]
 
     static function classInit()
 
@@ -57,7 +57,7 @@ public class TowerAI
             if towerGroup.contains(GetTriggerUnit())
                 destroy towerMap.get(GetTriggerUnit())
 
-        addOnDamageFunc(Condition(function onDamage))
+        
 
         let g = CreateGroup()
         unit u
@@ -96,33 +96,24 @@ public class TowerAI
 
         this.pos = new TowerPos(tower.getX(), tower.getY(), this)
 
-        if tower.getOwner().getId() == Teams.army1()
-            towerPos1.add(this.pos)
-        else
-            towerPos2.add(this.pos)
+        towerPos[Players.team(tower.getOwner().getId())].add(this.pos)
 
     ondestroy
         towerGroup.removeUnit(this.tower)
         towerList.remove(this)
         towerMap.remove(this.tower)
-        if tower.getOwner().getId() == Teams.army1()
-            towerPos1.remove(this.pos)
-        else
-            towerPos2.remove(this.pos)
+        towerPos[Players.team(tower.getOwner().getId())].remove(this.pos)
 
-    static function onDamage()
-        let attacker = GetEventDamageSource()
-        let target = GetTriggerUnit()
 
-        if target.isType(UNIT_TYPE_HERO) and attacker.isType(UNIT_TYPE_HERO) and GetEventDamage() > 0.1
-            if IsUnitAlly(attacker, players[Teams.army1()]) and IsUnitAlly(target, players[Teams.army2()])
-                for TowerPos pos in towerPos2
-                    if pos.inRange(attacker, 800)
-                        pos.tower.attackHero(attacker)
-            else if IsUnitAlly(attacker, players[Teams.army2()]) and IsUnitAlly(target, players[Teams.army1()])
-                for TowerPos pos in towerPos1
-                    if pos.inRange(attacker, 800)
-                        pos.tower.attackHero(attacker)
+    static function onDamage(unit source, unit _target, real damage)
+        if damage > 0.1
+            let offendingHero = source.wrapper().getOwningHero()
+            if offendingHero != null
+                let offendingUnit = offendingHero.toUnit()
+                let offendingTeam = Players.team(offendingUnit.getOwner().getId())
+                for TowerPos pos in towerPos[Teams.invert(offendingTeam)]
+                    if pos.inRange(source, 800)
+                        pos.tower.attackHero(offendingUnit)
 
     function determineTarget()
         this.heroFocus = false

@@ -15,6 +15,8 @@ import TeamUtil
 import UnitLib
 import PlayerControl
 import BonusMod
+import FastDamageEvent
+import TowerAI
 
 constant HP_PER_LEVEL = 15
 constant STRENGTH_BONUS = 45
@@ -109,6 +111,8 @@ public class HeroImpl implements IHero
     private int instanceIndex
     private static int numInstances = 0
     private static HeroImpl array allInstances
+
+    private int anyHitPointer
 
 
     protected static function classInit()
@@ -223,6 +227,10 @@ public class HeroImpl implements IHero
 
         if PlayerWrapper.revealIcons
             PlayerWrapper.revealIcon(this.ownerId)
+
+        this.anyHitPointer = DamageEventUnit.fromUnit(this.hero).anyHit.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
+            TowerAI.onDamage(source, target, damage)
+
 
 
 
@@ -519,6 +527,7 @@ public class HeroImpl implements IHero
         return heroCopy
 
     ondestroy
+        DamageEventUnit.fromUnit(this.hero).anyHit.remove(this.anyHitPointer)
         onCastTrigger.destr()
         tooltipUpdateTimer.release()
         numInstances--
