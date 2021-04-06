@@ -331,7 +331,7 @@ class HeroSeaDruid extends HeroTemplate
             ..setStat(Stat.AGI, 35, 59)
             ..setStat(Stat.INT, 13, 47)
 
-    override function castQ()
+    override static function castQ()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
@@ -364,11 +364,11 @@ class HeroSeaDruid extends HeroTemplate
                     ..setMaxRange(500)
         nearby.destr()
 
-    override function castW()
+    override static function castW()
         let caster = GetTriggerUnit()
         ArtilleryDetection.fireArtillery(caster, FISH_ARTILLERY, caster.getPos(), vec2(GetSpellTargetX(), GetSpellTargetY())) (unit detectionUnit, unit caster, int data) ->
             let nearby = CreateGroup()
-            let level = caster.getAbilityLevel(ABILITY_ID_W)
+            let level = caster.getAbilityLevel(instance.ABILITY_ID_W)
             nearby.enumUnitsInRange(detectionUnit.getPos(), FISH_AOE[level-1])
 
             let dmg = FISH_DAMAGE[level-1].bonus(caster.getHeroInt(), FISH_DAMAGE_BONUS)
@@ -390,13 +390,13 @@ class HeroSeaDruid extends HeroTemplate
             SOUND_FISH_IMPACT.playOnPoint(detectionUnit.getPos3Zero()).snd.setVolume(120)
             
 
-    override function castE()
+    override static function castE()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
         caster.addBuff(caster, -1, buffManaShield, level)
 
-    override function castR()
+    override static function castR()
         let caster = GetTriggerUnit()
         new RitualOfTheSeas(caster)
 

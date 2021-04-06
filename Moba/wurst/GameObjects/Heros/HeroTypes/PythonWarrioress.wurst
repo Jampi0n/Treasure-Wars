@@ -246,17 +246,17 @@ class HeroPythonWarrioress extends HeroTemplate
             ..setStat(Stat.AGI, 38, 54)
             ..setStat(Stat.INT, 7, 43)
 
-    override function castQ()
+    override static function castQ()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
         caster.dispelNegativeBuffs(DispelLevel.BREAK)
         caster.addBuff( caster, (MISTWALK_DURATION[level-1]).bonus(caster.getHeroInt(), MISTWALK_DURATION_BONUS), INVIS, 1).setDispelLevel(DispelLevel.DISPEL)
 
-    override function castW()
+    override static function castW()
         let caster = GetTriggerUnit()
         ArtilleryDetection.fireArtillery(caster, POISON_SPIT_ARTILLERY, caster.getPos(), vec2(GetSpellTargetX(), GetSpellTargetY())) (unit detectionUnit, unit caster, int data) ->
-            let level = caster.getAbilityLevel(ABILITY_ID_W)
+            let level = caster.getAbilityLevel(instance.ABILITY_ID_W)
             let targetPos = detectionUnit.getPos()
             SOUND_POISON_SPIT.playOnPoint(targetPos.toVec3())
             for i = 0 to 9 + level*3
@@ -279,7 +279,7 @@ class HeroPythonWarrioress extends HeroTemplate
 
 
 
-    override function castE()
+    override static function castE()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
@@ -288,7 +288,7 @@ class HeroPythonWarrioress extends HeroTemplate
         target.addEffect("Abilities\\Spells\\Other\\Stampede\\StampedeMissileDeath.mdl", "chest").destr()
         SOUND_EMPOWERED_STRIKE.playOnPoint(target.getPos3Zero()).snd.setVolume(150)
 
-    override function castR()
+    override static function castR()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)

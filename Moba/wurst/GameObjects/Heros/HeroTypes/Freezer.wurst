@@ -361,7 +361,7 @@ class HeroFreezer extends HeroTemplate
             ))
         addDynamicTooltipIntelligence(heroType, tooltip)
 
-    override function castQ()
+    override static function castQ()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
@@ -385,13 +385,13 @@ class HeroFreezer extends HeroTemplate
 
         caster.dealDamage(target, NOVA_TARGET_DMG[level-1].bonus(caster.getHeroInt(), NOVA_TARGET_DMG_BONUS), ReductionType.MAGIC)
 
-    override function castW()
+    override static function castW()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
         GetSpellTargetUnit().addBuff( caster, ARMOR_DURATION, buffFrostArmor, level)
 
-    override function castE()
+    override static function castE()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
@@ -423,7 +423,7 @@ class HeroFreezer extends HeroTemplate
 
             nearby.destr()
 
-    override function castR()
+    override static function castR()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)

@@ -292,11 +292,11 @@ class HeroWarBeetle extends HeroTemplate
         addDynamicTooltipIntelligence(heroType, tooltip)
 
 
-    override function castQ()
+    override static function castQ()
         let caster = GetTriggerUnit()
         new VenoumosBeetle(caster, GetSpellTargetUnit())
 
-    override function castW()
+    override static function castW()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
@@ -315,12 +315,12 @@ class HeroWarBeetle extends HeroTemplate
 
         nearby.destr()
 
-    override function castE()
+    override static function castE()
         let caster = GetTriggerUnit()
         if caster.isMovable()
             Knockback2d.knockback(caster, vec2(GetSpellTargetX(),GetSpellTargetY()), 1200)
 
-    override function castR()
+    override static function castR()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)

@@ -293,7 +293,7 @@ class HeroPaladin extends HeroTemplate
             ..setStat(Stat.AGI, 33, 62)
             ..setStat(Stat.INT, 4, 19)
 
-    override function castQ()
+    override static function castQ()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
@@ -315,7 +315,7 @@ class HeroPaladin extends HeroTemplate
 
         nearby.destr()
 
-    override function castW()
+    override static function castW()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
@@ -332,7 +332,7 @@ class HeroPaladin extends HeroTemplate
 
         nearby.destr()
 
-    override function castE()
+    override static function castE()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
@@ -341,7 +341,7 @@ class HeroPaladin extends HeroTemplate
         target.addBuff( caster, dur, BUFF_HOLY_SHIELD, level)
         target.addBuff( caster, dur, INVULERNABLE, level)
 
-    override function castR()
+    override static function castR()
         let caster = GetTriggerUnit()
         new DivinePunishment(caster)
 

@@ -433,10 +433,10 @@ public module HeroTemplateModule
         instance = this
         setupOnCastTriggerMap.put(UNIT_TYPE_ID, (unit u) -> setupOnCastTrigger(u))
 
-    function castQ()
-    function castW()
-    function castE()
-    function castR()
+    static function castQ()
+    static function castW()
+    static function castE()
+    static function castR()
     private static function setupOnCastTrigger(unit hero) returns trigger
         let onCastTrigger = CreateTrigger()
         ..registerUnitEvent(hero, EVENT_UNIT_SPELL_EFFECT)
@@ -446,13 +446,13 @@ public module HeroTemplateModule
                 let slot = HeroTemplate.SPELL_TO_SLOT.get(abilityId)
                 switch slot
                     case Q
-                        instance.castQ()
+                        castQ()
                     case W
-                        instance.castW()
+                        castW()
                     case E
-                        instance.castE()
+                        castE()
                     case R
-                        instance.castR()
+                        castR()
                     default
         return onCastTrigger
 

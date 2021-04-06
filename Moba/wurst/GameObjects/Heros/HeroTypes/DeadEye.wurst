@@ -250,7 +250,7 @@ class HeroDeadEye extends HeroTemplate
         addDynamicTooltipIntelligence(heroType, tooltip)
     override function onCreate(IHeroType heroType, IHero hero)
         new DeadEyInstance()
-    override function castQ()
+    override static function castQ()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
@@ -269,7 +269,7 @@ class HeroDeadEye extends HeroTemplate
 
         end) )
             ..setMaxRange(1000)
-    override function castW()
+    override static function castW()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
@@ -286,7 +286,7 @@ class HeroDeadEye extends HeroTemplate
                 target.addBuffReduced( caster, dur, BUFF_TERROR, level)
 
         nearby.destr()
-    override function castE()
+    override static function castE()
         let caster = GetTriggerUnit()
         let target = GetSpellTargetUnit()
         let targetPos = target.getPos()
@@ -299,7 +299,7 @@ class HeroDeadEye extends HeroTemplate
 
         let lfx = addLightning(LIGHTNING_DRAIN, true, targetPos, casterPos)
         doAfter(0.5, ()->lfx.destr())
-    override function castR()
+    override static function castR()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let instance = DeadEyInstance.fromUnit(caster)

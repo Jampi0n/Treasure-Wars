@@ -258,7 +258,7 @@ class HeroElementalMage extends HeroTemplate
 
 
 
-    override function castQ()
+    override static function castQ()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
@@ -279,7 +279,7 @@ class HeroElementalMage extends HeroTemplate
         end) )
             
 
-    override function castW()
+    override static function castW()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
@@ -298,14 +298,14 @@ class HeroElementalMage extends HeroTemplate
 
         nearby.destr()
 
-    override function castE()
+    override static function castE()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
         let target = GetSpellTargetUnit()
         target.addBuffReduced(caster, MARK_DURATION, buffElementalMark, level)
 
-    override function castR()
+    override static function castR()
         let caster = GetTriggerUnit()
         let casterPos = caster.getPos()
         let casterAngle = caster.getFacingAngle()
@@ -315,7 +315,7 @@ class HeroElementalMage extends HeroTemplate
         
         ArtilleryDetection.fireArtillery(caster, FF_FLAME_ARTILLERY, behindCaster.polarOffset(casterAngle + angle(bj_PI/2), 600), targetPos) (unit impact, unit caster, int data) ->
             let nearby = CreateGroup()
-            let level = caster.getAbilityLevel(ABILITY_ID_R)
+            let level = caster.getAbilityLevel(instance.ABILITY_ID_R)
             nearby.enumUnitsInRange(impact.getPos(), FF_AOE)
 
             

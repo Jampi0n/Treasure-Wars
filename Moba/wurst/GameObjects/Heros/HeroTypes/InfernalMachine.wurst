@@ -325,13 +325,13 @@ class HeroInfernalMachine extends HeroTemplate
         addDynamicTooltipIntelligence(heroType, tooltip)
 
         
-    override function castQ()
+    override static function castQ()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
         caster.addBuff(caster, 4, buffBash, level)
 
-    override function castW()
+    override static function castW()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
@@ -346,11 +346,11 @@ class HeroInfernalMachine extends HeroTemplate
 
         nearby.destr()
 
-    override function castE()
+    override static function castE()
         let caster = GetTriggerUnit()
         ArtilleryDetection.fireArtillery(caster, FLAME_THROWER_ARTILLERY, caster.getPos(), vec2(GetSpellTargetX(), GetSpellTargetY())) (unit impact, unit caster, int data) ->
             let nearby = CreateGroup()
-            let level = caster.getAbilityLevel(ABILITY_ID_E)
+            let level = caster.getAbilityLevel(instance.ABILITY_ID_E)
             nearby.enumUnitsInRange(impact.getPos(), FLAME_THROWER_AOE[level-1])
 
             
@@ -410,11 +410,11 @@ class HeroInfernalMachine extends HeroTemplate
         end))
         caster.disableAbility(HeroInfernalMachine.instance.ABILITY_ID_Q, false, false)
 
-    override function castR()
+    override static function castR()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
-        if caster.getTypeId() == UNIT_ID_HERO
+        if caster.getTypeId() == instance.UNIT_ID_HERO
             doAfter( 0, () -> onRapid(caster, level))
         else
             doAfter( 0, () -> onRapidEnd(caster, level))

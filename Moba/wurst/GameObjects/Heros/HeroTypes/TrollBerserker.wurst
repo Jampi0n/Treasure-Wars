@@ -298,24 +298,24 @@ class HeroTrollBerserker extends HeroTemplate
             wrapper.modStrength( FOCUS_BONUS)
             doAfter(FOCUS_DURATION[level-1], () -> (wrapper.modStrength( -FOCUS_BONUS)))
         
-    override function castQ()
+    override static function castQ()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
         caster.addBuff(caster, 4, buffCriticalStrike, level)
 
-    override function castW()
+    override static function castW()
 
-    override function castE()
+    override static function castE()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
-        if caster.getTypeId() == UNIT_ID_HERO
+        if caster.getTypeId() == instance.UNIT_ID_HERO
             doAfter( SWITCH_DURATION, () -> onSwitchToMelee(caster, level))
         else
             doAfter( SWITCH_DURATION, () -> onSwitchToRanged(caster, level))
 
-    override function castR()
+    override static function castR()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)

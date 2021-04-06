@@ -262,7 +262,7 @@ class HeroVoodooArcher extends HeroTemplate
             ..setStat(Stat.AGI, 28, 43)
             ..setStat(Stat.INT, 9, 33)
 
-    override function castQ()
+    override static function castQ()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
@@ -289,7 +289,7 @@ class HeroVoodooArcher extends HeroTemplate
             caster.dealDamage(target, GHOST_ARROWS_DAMAGE[level-1].bonus(caster.getHeroStr(), GHOST_ARROWS_DAMAGE_BONUS), ReductionType.PHYSICAL)
         
 
-    override function castW()
+    override static function castW()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
@@ -298,7 +298,7 @@ class HeroVoodooArcher extends HeroTemplate
         target.addBuffReduced(caster, dur, buffMindCurseTarget, level)
         target.addBuffReduced(caster, dur, SILENCED, 1).setDispelLevel(DispelLevel.DISPEL)
 
-    override function castE()
+    override static function castE()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
@@ -314,7 +314,7 @@ class HeroVoodooArcher extends HeroTemplate
                 let hero = SUMMON_MAP.get(source)
                 target.addBuffReduced(hero, SERPENT_POISON_DURATION[level-1], buffSerpentPoison, level)
 
-    override function castR()
+    override static function castR()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)

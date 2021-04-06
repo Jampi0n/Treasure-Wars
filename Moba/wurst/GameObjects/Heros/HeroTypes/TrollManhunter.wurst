@@ -277,7 +277,7 @@ class HeroTrollManHunter extends HeroTemplate
     override function onCreate(IHeroType heroType, IHero hero)
         new TrollManHunterInstance()
 
-    override function castQ()
+    override static function castQ()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
@@ -292,7 +292,7 @@ class HeroTrollManHunter extends HeroTemplate
         doAfter(0.3) ->
             if target.isTargetable(caster.getOwner(), false, true)
                 SOUND_SHADOW_STRIKE.playOnPoint(caster.getPos().toVec3()).snd.setVolume(150)
-                let bleedingWoundLevel = caster.getAbilityLevel(this.ABILITY_ID_PASSIVE)
+                let bleedingWoundLevel = caster.getAbilityLevel(instance.ABILITY_ID_PASSIVE)
                 if bleedingWoundLevel > 0
                     let b = target.addBuffReduced(caster, BLEEDING_WOUND_DURATION, buffBleedingWound, bleedingWoundLevel)
                     b.setData(b.getData()+3)
@@ -302,14 +302,14 @@ class HeroTrollManHunter extends HeroTemplate
         doAfter(0.85) ->
             addEffect(Abilities.mirrorImageDeathCaster, spawnPos).destr()
             illusion.remove()
-    override function castW()
+    override static function castW()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
         caster.removeAbility('Bbsk')
         caster.addBuff(caster, DEATH_SPIN_DURATION, buffDeathSpin, level)
 
-    override function castE()
+    override static function castE()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
@@ -331,7 +331,7 @@ class HeroTrollManHunter extends HeroTemplate
                 caster.dealDamage(u, stacks * CRIPPLING_PAIN_DAMAGE[level-1].bonus(caster.getHeroInt(), CRIPPLING_PAIN_DAMAGE_BONUS), ReductionType.MAGIC)
         g.destr()
 
-    override function castR()
+    override static function castR()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let owner = caster.getOwner()

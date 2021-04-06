@@ -335,7 +335,7 @@ class HeroDrillmo extends HeroTemplate
         addDynamicTooltipStrength(heroType, tooltip)
         setAnimationSpeed(abilityId, 1.33)
 
-    override function castQ()
+    override static function castQ()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
@@ -344,7 +344,7 @@ class HeroDrillmo extends HeroTemplate
         let pull = new Pull(caster, level, vec2(GetSpellTargetX(), GetSpellTargetY()), b)
         b.setData(pull castTo int)
 
-    override function castW()
+    override static function castW()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
@@ -366,14 +366,14 @@ class HeroDrillmo extends HeroTemplate
                 nearby.destr()
         end))
 
-    override function castE()
+    override static function castE()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
         caster.addBuff(caster, SPEED_BOOST_DURATION[level-1], buffSpeedBoost, level)
         caster.removeAbility('Bbsk')
 
-    override function castR()
+    override static function castR()
             
     override function retreatAI(IHeroAI ai)
         let hero = ai.getHeroUnit()

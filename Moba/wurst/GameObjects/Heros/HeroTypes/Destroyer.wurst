@@ -283,15 +283,15 @@ class HeroDestroyer extends HeroTemplate
             target.addEffect(Abilities.stampedeMissileDeath, "origin")
 
 
-    override function castQ()
+    override static function castQ()
         let instance = DestroyerInstance.fromTrigger()
         instance.hitByBreath.clear()
 
-    override function castW()
+    override static function castW()
         let caster = GetTriggerUnit()
         caster.addBuff(caster, -1, buffImmolation, 1)
 
-    override function castE()
+    override static function castE()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
@@ -340,7 +340,7 @@ class HeroDestroyer extends HeroTemplate
                 model.destr()
                 wall.kill()
 
-    override function castR()
+    override static function castR()
         let spellId = GetSpellAbilityId()
         let target = GetSpellTargetUnit()
         let caster = GetTriggerUnit()
