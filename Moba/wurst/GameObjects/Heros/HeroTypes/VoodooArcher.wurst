@@ -38,8 +38,6 @@ class HeroVoodooArcher extends HeroTemplate
 
     static constant real array VOODOO_ARROW_DAMAGE = [5, 10, 15, 20, 25]
 
-    static constant SUMMON_MAP = new HashMap<unit,unit>
-
 
     override function setupPassive(int abilityId, IHeroType heroType)
         if compiletime
@@ -305,14 +303,8 @@ class HeroVoodooArcher extends HeroTemplate
         let ward = createUnit(caster.getOwner(), SERPENT_WARD, vec2(GetSpellTargetX(), GetSpellTargetY()), angle(0))
         let wrapper = ward.wrapper()
         ward.setTimedLife(SERPENT_WARD_DURATION)
-        SUMMON_MAP.put(ward, caster)
-
+        wrapper.setOwningHero(caster.toHero())
         wrapper.modHealth( SERPEND_WARD_HP[level-1] )
-
-        DamageEventUnit.fromUnit(ward).attackHitNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
-            if not target.isType(UNIT_TYPE_STRUCTURE)
-                let hero = SUMMON_MAP.get(source)
-                target.addBuffReduced(hero, SERPENT_POISON_DURATION[level-1], buffSerpentPoison, level)
 
     override static function castR()
         let spellId = GetSpellAbilityId()
@@ -401,11 +393,13 @@ class HeroVoodooArcher extends HeroTemplate
                 ..modArmor( -SERPENT_POISON_ARMOR * stackDiff)
         end))
 
-        CreateTrigger()
-        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
-        ..addAction() ->
-            if GetTriggerUnit().getTypeId() == SERPENT_WARD
-                SUMMON_MAP.remove(GetTriggerUnit())
+        
+        DamageEventUnitType.fromUnitTypeId(SERPENT_WARD).attackDamageNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+            let hero = source.wrapper().getOwningHero().toUnit()
+            let level = hero.getAbilityLevel(ABILITY_ID_E)
+            if not target.isType(UNIT_TYPE_STRUCTURE)
+                target.addBuffReduced(hero, SERPENT_POISON_DURATION[level-1], buffSerpentPoison, level)
+
     
 init
     initialize()
