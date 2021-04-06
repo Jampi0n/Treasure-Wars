@@ -10,6 +10,25 @@ class HeroPythonWarrioress extends HeroTemplate
     use HeroTemplateModule
     
     override function objectDefinition()
+        this.castBackswing = 0.2
+        this.castPoint = 0.65
+        this.icon = "BTNGreenViper"
+        this.model = "Models\\PythonWarrioress_noCrawl.mdl"
+        this.scalingValue = 1.2
+        this.selectionScale = 1.9
+        this.shadowX = 80
+        this.shadowY = 80
+        this.shadowH = 200
+        this.shadowW = 200
+        this.armorSoundType = ArmorSoundType.Flesh
+        this.backswingPoint = 0.35
+        this.damagePoint = 0.4
+        this.cooldownTime = 1.8
+        this.range = 100
+        this.weaponSound = weaponSound.MetalMediumSlice
+        this.unitSoundSet = "Demoness"
+        this.name = "Python Warriores"
+        this.properName = "Lady Serpentra"
 
     static constant SOUND_PARALYZING_STRIKE = new SoundDefinition(Sounds.shadowStrikeBirth1, false, true)
     static constant SOUND_POISON_SPIT = new SoundDefinition(Sounds.corrosiveBreathMissileTarget1, false, true)

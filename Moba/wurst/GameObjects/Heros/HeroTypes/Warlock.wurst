@@ -7,13 +7,67 @@ int HERO_ORDER = 5
 class HeroWarlock extends HeroTemplate
     use HeroTemplateModule
     
-    override function objectDefinition()
+    static constant int array FEL_MAGIC_INTEL = [5, 10, 15, 20, 25]
 
+    static constant real array FIREBOLT_DAMAGE = [100, 150, 200, 250, 300]
+    static constant real FIREBOLT_DAMAGE_BONUS = 140
+
+    static constant real array METEOR_DAMAGE = [70, 110, 150, 190, 230]
+    static constant real METEOR_DAMAGE_BONUS = 100
+    static constant real array METEOR_AOE = [200, 225, 250, 275, 300]
+    static constant real array METEOR_STUN_DURATION = [1, 1.25, 1.5, 1.75, 2]
+
+    static constant real array SOUL_BURN_DURATION = [6, 7, 8, 9, 10]
+    static constant real array SOUL_BURN_DAMAGE = [20, 26, 32, 38, 44]
+    static constant real SOUL_BURN_DAMAGE_BONUS = 20
+    static constant real array SOUL_BURN_SILENCE = [2, 2.25, 2.5, 2.75, 3]
+    static constant real SOUL_BURN_AOE = 700
+    static constant BUFF_ID_SOUL_BURN = compiletime(createAuraBuff("Soul Burn", "This unit is under the effect of Soulburn; it takes damage over time.", "BTNSoulBurn2"))
+    static constant ABILITY_ID_SOUL_BURN = compiletime(createNegativeBuffAbility(5, BUFF_ID_SOUL_BURN, Abilities.immolationDamage, "head"))
+    static BuffType buffSoulBurn
+
+    static constant BUFF_ID_RAY_OF_DEATH = compiletime(createBasicBuff("Ray of Death", "This unit is under the effect of Ray of Death; it is disabled and takes damage over time.", "BTNNetherBolt", "", ""))
+    static constant real array RAY_OF_DEATH_DURATION = [2, 2.25, 2.5, 2.75, 3]
+    static constant real array RAY_OF_DEATH_DAMAGE = [60, 80, 100, 120, 140]
+    static constant real RAY_OF_DEATH_DAMAGE_BONUS = 90
+    static constant real array RAY_OF_DEATH_AFTER_DAMAGE = [150, 175, 200, 225, 250]
+    static constant real RAY_OF_DEATH_AFTER_DAMAGE_BONUS = 125
+    static constant real RAY_OF_DEATH_AFTER_AOE = 250
     static BuffType buffRayOfDeath
+
+    override function objectDefinition()
+        this.castBackswing = 0.5
+        this.castPoint = 0.5
+        this.icon = "BTNGuldan"
+        this.model = "Models\\Guldan.mdl"
+        this.launchX = -20
+        this.launchY = 76
+        this.launchZ = 105
+        this.scalingValue = 1.2
+        this.selectionScale = 1.9
+        this.shadowX = 70
+        this.shadowY = 70
+        this.shadowH = 180
+        this.shadowW = 180
+        this.armorSoundType = ArmorSoundType.Flesh
+        this.backswingPoint = 0.3
+        this.damagePoint = 0.3
+        this.cooldownTime = 1.8
+        this.projectileArc = 0.0
+        this.projectileArt = "Abilities\\Weapons\\NecromancerMissile\\NecromancerMissile.mdl"
+        this.projectileHoming = true
+        this.projectileSpeed = 900
+        this.range = 600
+        this.weaponSound = weaponSound.Nothing
+        this.weaponType = WeaponType.Missile
+        this.unitSoundSet = "DrekThar"
+        this.name = "Warlock"
+        this.properName = "Nazgrel"
+
+    
 
     override function stats(IHeroType heroType)
         heroType
-            
             ..setStat(Stat.AR, 26, 37)
             ..setStat(Stat.AS, 8, 18)
             ..setStat(Stat.HP, 9, 29)
@@ -27,10 +81,6 @@ class HeroWarlock extends HeroTemplate
 
 
             
-
-            
-    static constant int array FEL_MAGIC_INTEL = [5, 10, 15, 20, 25]
-
 
     override function setupPassive(int abilityId, IHeroType heroType)
 
@@ -50,10 +100,6 @@ class HeroWarlock extends HeroTemplate
                 FEL_MAGIC_INTEL[lvl-1].str())
             )        
         addDynamicTooltipIntelligence(heroType, tooltip)
-
-    static constant real array FIREBOLT_DAMAGE = [100, 150, 200, 250, 300]
-    static constant real FIREBOLT_DAMAGE_BONUS = 140
-
 
     override function setupQ(int abilityId, IHeroType heroType)
 
@@ -82,14 +128,6 @@ class HeroWarlock extends HeroTemplate
             tooltip.setNormalString(true, lvl, "Summons a ball of fire to fly to the target direction, dealing {0}{I0} magic damage to the first unit it hits.".format(
                 FIREBOLT_DAMAGE[lvl-1].str()))         
         addDynamicTooltipIntelligence(heroType, tooltip)
-
-    static constant real array METEOR_DAMAGE = [70, 110, 150, 190, 230]
-    static constant real METEOR_DAMAGE_BONUS = 100
-
-    static constant real array METEOR_AOE = [200, 225, 250, 275, 300]
-
-    static constant real array METEOR_STUN_DURATION = [1, 1.25, 1.5, 1.75, 2]
-
 
     override function setupW(int abilityId, IHeroType heroType)
 
@@ -125,21 +163,6 @@ class HeroWarlock extends HeroTemplate
 
 
 
-
-    static constant real array SOUL_BURN_DURATION = [6, 7, 8, 9, 10]
-    static constant real array SOUL_BURN_DAMAGE = [20, 26, 32, 38, 44]
-    static constant real SOUL_BURN_DAMAGE_BONUS = 20
-
-    static constant real array SOUL_BURN_SILENCE = [2, 2.25, 2.5, 2.75, 3]
-
-    static constant real SOUL_BURN_AOE = 700
-
-    static constant BUFF_ID_SOUL_BURN = compiletime(createAuraBuff("Soul Burn", "This unit is under the effect of Soulburn; it takes damage over time.", "BTNSoulBurn2"))
-    static constant ABILITY_ID_SOUL_BURN = compiletime(createNegativeBuffAbility(5, BUFF_ID_SOUL_BURN, Abilities.immolationDamage, "head"))
-
-    static BuffType buffSoulBurn
-
-
     override function setupE(int abilityId, IHeroType heroType)
 
         if compiletime
@@ -170,16 +193,8 @@ class HeroWarlock extends HeroTemplate
                 SOUL_BURN_DAMAGE[lvl-1].str(), SOUL_BURN_DURATION[lvl-1].toExactString(), SOUL_BURN_SILENCE[lvl-1].toExactString()))
         addDynamicTooltipIntelligence(heroType, tooltip)
 
-    static constant BUFF_ID_RAY_OF_DEATH = compiletime(createBasicBuff("Ray of Death", "This unit is under the effect of Ray of Death; it is disabled and takes damage over time.", "BTNNetherBolt", "", ""))
 
-    static constant real array RAY_OF_DEATH_DURATION = [2, 2.25, 2.5, 2.75, 3]
-    static constant real array RAY_OF_DEATH_DAMAGE = [60, 80, 100, 120, 140]
-    static constant real RAY_OF_DEATH_DAMAGE_BONUS = 90
-
-    static constant real array RAY_OF_DEATH_AFTER_DAMAGE = [150, 175, 200, 225, 250]
-    static constant real RAY_OF_DEATH_AFTER_DAMAGE_BONUS = 125
-
-    static constant real RAY_OF_DEATH_AFTER_AOE = 250
+    
 
 
     override function setupR(int abilityId, IHeroType heroType)

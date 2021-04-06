@@ -10,6 +10,31 @@ class HeroVoodooArcher extends HeroTemplate
     use HeroTemplateModule
 
     override function objectDefinition()
+        this.icon = "BTNShadowHunter"
+        this.model = "Models\\ShadowhunterLujka.mdl"
+        this.castBackswing = 0.5
+        this.castPoint = 0.5
+        this.launchZ = 80
+        this.scalingValue = 1
+        this.selectionScale = 1.25
+        this.shadowX = 80
+        this.shadowY = 80
+        this.shadowH = 200
+        this.shadowW = 200
+        this.armorSoundType = ArmorSoundType.Flesh
+        this.backswingPoint = 0.3
+        this.damagePoint = 0.5
+        this.cooldownTime = 1.8
+        this.projectileArc = 0.1
+        this.projectileArt = "Models\\LujkaArrow.mdl"
+        this.projectileHoming = true
+        this.projectileSpeed = 1200
+        this.range = 600
+        this.weaponSound = weaponSound.Nothing
+        this.weaponType = WeaponType.Missile
+        this.unitSoundSet = "HeroShadowHunter"
+        this.name = "Voodoo Archer"
+        this.properName = "Jo Jo Headshrinker"
 
     static constant real array VOODOO_ARROW_DAMAGE = [5, 10, 15, 20, 25]
 

@@ -62,25 +62,45 @@ class AttackOrderTrack
 
 class HeroInfernalMachine extends HeroTemplate
     use HeroTemplateModule
-    constant MELEE = compiletime(UNIT_ID_GEN.next())
     static constant HERO_INFERNAL_MACHINE_MORPH = compiletime(HERO_ID_GEN.next())
 
     override function customDefintions(HeroDefinition def)
-        new UnitDefinition(MELEE, 'hfoo')
-            ..setNormalAbilities("Aloc")
-            ..setModelFile("")
-            ..setShadowImageUnit("")
-            ..setAttacksEnabled(0)
-            ..setMovementType(MovementType.Fly)
-            ..setCollisionSize(0)
-            ..setFoodCost(0)
-            ..setSightRadiusDay(0)
-            ..setSightRadiusNight(0)
-            ..setUpgradesUsed("")
-            ..setUnitSoundSet("")
-            ..setName("Melee")
+        let morph = defaultHero(HERO_INFERNAL_MACHINE_MORPH)
+        applyObjectDefinition(morph)
+        morph
+        ..setRequiredAnimationNames("two")
+        ..setAttack1ProjectileArc(0.05)
+        ..setAttack1ProjectileHomingEnabled(true)
+        ..setAttack1ProjectileSpeed(1000)
+        ..setAttack1ProjectileArt("Abilities\\Weapons\\FireBallMissile\\FireBallMissile.mdl")
+        ..setAttack1Range(600)
+        ..setAttack1WeaponSound(WeaponSound.Nothing)
+        ..setAttack1WeaponType(WeaponType.Missile)
 
     override function objectDefinition()
+        this.model = "Models\\InfernalWheeledWarrior.mdl"
+        this.icon = "BTNInfernalCannon"
+        this.castBackswing = 0.5
+        this.castPoint = 0.5
+        this.impactZ = 60
+        this.launchX = 30
+        this.launchY = 20
+        this.launchZ = 200
+        this.selectionScale = 2.5
+        this.scalingValue = 0.8
+        this.shadowX = 70
+        this.shadowY = 70
+        this.shadowH = 210
+        this.shadowW = 210
+        this.armorSoundType = ArmorSoundType.Metal
+        this.backswingPoint = 0.74
+        this.damagePoint = 0.26
+        this.cooldownTime = 1.8
+        this.range = 100
+        this.weaponSound = weaponSound.RockHeavyBash
+        this.unitSoundSet = "InfernalMachine"
+        this.name = "Infernal Machine"
+        this.properName = "Hellbourne"
             
     static constant real FIERY_HANDS_AOE = 250
     static constant real array FIERY_HANDS_DMG = [15, 25, 35, 45, 55]
@@ -130,8 +150,6 @@ class HeroInfernalMachine extends HeroTemplate
                 ..setMissileArt("")
                 ..setArtSpecial("")
                 ..setLightningEffects("")
-                ..setCheckDependencies(true)
-                ..setRequirements(MELEE.toRawCode())
                 ..targetSelf()
                 ..setSkillData(COOLDOWN, MANA, 0)
 
@@ -306,9 +324,6 @@ class HeroInfernalMachine extends HeroTemplate
             ))
         addDynamicTooltipIntelligence(heroType, tooltip)
 
-                
-    static unit array melee_dummy
-
         
     override function castQ()
         let spellId = GetSpellAbilityId()
@@ -363,7 +378,7 @@ class HeroInfernalMachine extends HeroTemplate
             addEffect(Abilities.demolisherFireMissile, impact.getPos()).destr()
 
     static function onRapidStats(unit caster, int level) // add bonus
-        caster.wrapper().modAttackSpeed( RAPID_FIRE_ATTACK_SPEED[level-1] - 80)
+        caster.wrapper().modAttackSpeed( RAPID_FIRE_ATTACK_SPEED[level-1])
         caster.wrapper().modMoveSpeed( 0)
 
     static function onRapid(unit caster, int level) // add bonus
@@ -378,12 +393,12 @@ class HeroInfernalMachine extends HeroTemplate
                     caster.issueImmediateOrder("stop")
                     doAfter(0, () -> caster.issueTargetOrder("attack", target))
         end))
-        melee_dummy[caster.getOwner().getId()].setOwner(Player(PLAYER_NEUTRAL_PASSIVE), false)
+        caster.disableAbility(HeroInfernalMachine.instance.ABILITY_ID_Q, true, false)
         if BuffList.hasBuffType(caster, buffBash)
             BuffList.getBuffOfType(caster, buffBash).dispel()
 
     static function onRapidEndStats(unit caster, int level) // remove bonus
-        caster.wrapper().modAttackSpeed( -RAPID_FIRE_ATTACK_SPEED[level-1] + 80)
+        caster.wrapper().modAttackSpeed( -RAPID_FIRE_ATTACK_SPEED[level-1])
         caster.wrapper().modMoveSpeed( 0)
 
 
@@ -393,7 +408,7 @@ class HeroInfernalMachine extends HeroTemplate
             onRapidEndStats(caster, level)
             DamageEvent.useAlternate(caster, false)
         end))
-        melee_dummy[caster.getOwner().getId()].setOwner(Player(caster.getOwner().getId()), false)
+        caster.disableAbility(HeroInfernalMachine.instance.ABILITY_ID_Q, false, false)
 
     override function castR()
         let spellId = GetSpellAbilityId()
@@ -465,6 +480,30 @@ class HeroInfernalMachine extends HeroTemplate
     override function recommendedItems(LinkedList<int> list)
         list.add(ITEM_ID_BOOTS_BASE)
 
+    override function onCreate(IHeroType heroType, IHero hero)
+        let heroUnit = hero.toUnit()
+        new AttackOrderTrack(heroUnit)
+
+
+        CreateTrigger()
+        ..registerUnitEvent(heroUnit, EVENT_UNIT_DEATH)
+        ..addAction(() -> (begin
+            if GetTriggerUnit().getTypeId() == HERO_INFERNAL_MACHINE_MORPH
+                let u = GetTriggerUnit()
+                onRapidEnd(u, u.getAbilityLevel(HeroInfernalMachine.instance.ABILITY_ID_R))
+        end))
+
+        CreateTrigger()
+        ..registerUnitEvent(heroUnit, EVENT_UNIT_HERO_SKILL)
+        ..addAction(() -> (begin
+            let u = GetTriggerUnit()
+
+            if GetLearnedSkill() == HeroInfernalMachine.instance.ABILITY_ID_R and u.getTypeId() == HERO_INFERNAL_MACHINE_MORPH
+                let newLevel = u.getAbilityLevel(HeroInfernalMachine.instance.ABILITY_ID_R)
+                onRapidEndStats(u, newLevel - 1)
+                onRapidStats(u, newLevel)
+        end))
+
     override function onInitDelayed(IHeroType heroType)
         heroType.addMorph(HERO_INFERNAL_MACHINE_MORPH)
         heroType
@@ -526,32 +565,6 @@ class HeroInfernalMachine extends HeroTemplate
                 g.destr()
         end))
 
-            
-
-    function createHeroType(IHero hero)
-        let heroUnit = hero.toUnit()
-        melee_dummy[heroUnit.getOwner().getId()] = createUnit(heroUnit.getOwner(), MELEE, heroUnit.getPos(), angle(0))
-        new AttackOrderTrack(hero.toUnit())
-
-
-        CreateTrigger()
-        ..registerUnitEvent(heroUnit, EVENT_UNIT_DEATH)
-        ..addAction(() -> (begin
-            if GetTriggerUnit().getTypeId() == HERO_INFERNAL_MACHINE_MORPH
-                let u = GetTriggerUnit()
-                onRapidEnd(u, u.getAbilityLevel(HeroInfernalMachine.instance.ABILITY_ID_R))
-        end))
-
-        CreateTrigger()
-        ..registerUnitEvent(heroUnit, EVENT_UNIT_HERO_SKILL)
-        ..addAction(() -> (begin
-            let u = GetTriggerUnit()
-
-            if GetLearnedSkill() == HeroInfernalMachine.instance.ABILITY_ID_R and u.getTypeId() == HERO_INFERNAL_MACHINE_MORPH
-                let newLevel = u.getAbilityLevel(HeroInfernalMachine.instance.ABILITY_ID_R)
-                onRapidEndStats(u, newLevel - 1)
-                onRapidStats(u, newLevel)
-        end))
 
 init
     initialize()

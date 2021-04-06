@@ -10,8 +10,40 @@ class HeroTrollBerserker extends HeroTemplate
     use HeroTemplateModule
 
     override function customDefintions(HeroDefinition def)
+        let melee = defaultHero(HERO_TROLL_BERSERKER_MELEE)
+        applyObjectDefinition(melee)
+        melee
+        ..setAttack1ProjectileArt("")
+        ..setAttack1Range(100)
+        ..setAttack1WeaponType(WeaponType.Normal)
+        ..setAttack1WeaponSound(weaponSound.MetalHeavySlice)
+
 
     override function objectDefinition()
+        this.icon = "BTNForestTroll"
+        this.model = "Models\\Zuljin.mdl"
+        this.castBackswing = 0.5
+        this.castPoint = 0.5
+        this.scalingValue = 1.3
+        this.selectionScale = 1.9
+        this.shadowX = 80
+        this.shadowY = 80
+        this.shadowH = 200
+        this.shadowW = 200
+        this.armorSoundType = ArmorSoundType.Flesh
+        this.backswingPoint = 0.3
+        this.damagePoint = 0.3
+        this.cooldownTime = 1.8
+        this.projectileArc = 0.15
+        this.projectileArt = "Models\\ZuljinProjectile.mdl"
+        this.projectileHoming = true
+        this.projectileSpeed = 1200
+        this.range = 600
+        this.weaponSound = weaponSound.Nothing
+        this.weaponType = WeaponType.Missile
+        this.unitSoundSet = "ForestTroll"
+        this.name = "Troll Berserker"
+        this.properName = "Shaka-zahn"
 
     static constant HERO_TROLL_BERSERKER_MELEE = compiletime(HERO_ID_GEN.next())
 
@@ -278,7 +310,7 @@ class HeroTrollBerserker extends HeroTemplate
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
-        if caster.getTypeId() == 'H00X'
+        if caster.getTypeId() == UNIT_ID_HERO
             doAfter( SWITCH_DURATION, () -> onSwitchToMelee(caster, level))
         else
             doAfter( SWITCH_DURATION, () -> onSwitchToRanged(caster, level))

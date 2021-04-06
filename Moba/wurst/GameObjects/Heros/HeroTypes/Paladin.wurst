@@ -71,6 +71,25 @@ class HeroPaladin extends HeroTemplate
     use HeroTemplateModule
 
     override function objectDefinition()
+        this.castBackswing = 0.5
+        this.castPoint = 0.4
+        this.icon = "BTNHeroPaladin"
+        this.model = "Models\\AnduinLothar.mdl"
+        this.selectionScale = 2.2
+        this.scalingValue = 1.3
+        this.shadowX = 80
+        this.shadowY = 80
+        this.shadowH = 200
+        this.shadowW = 200
+        this.armorSoundType = ArmorSoundType.Metal
+        this.backswingPoint = 0.4
+        this.damagePoint = 0.6
+        this.cooldownTime = 1.8
+        this.range = 100
+        this.weaponSound = weaponSound.MetalHeavySlice
+        this.unitSoundSet = "HeroPaladin"
+        this.name = "Paladin"
+        this.properName = "Agamand the True"
 
     static constant BUFF_HOLY_SHIELD = new BuffType(true, DispelLevel.NONE)
 

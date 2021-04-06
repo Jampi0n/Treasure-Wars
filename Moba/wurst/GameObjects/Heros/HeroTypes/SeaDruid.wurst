@@ -77,6 +77,25 @@ class HeroSeaDruid extends HeroTemplate
     use HeroTemplateModule
 
     override function objectDefinition()
+        this.castBackswing = 0.75
+        this.castPoint = 0.4
+        this.icon = "BTNSeaDruid"
+        this.model = "Models\\SeaDruid.mdl"
+        this.scalingValue = 0.8
+        this.selectionScale = 2.5
+        this.shadowX = 100
+        this.shadowY = 100
+        this.shadowH = 250
+        this.shadowW = 250
+        this.armorSoundType = ArmorSoundType.Flesh
+        this.backswingPoint = 0.56
+        this.damagePoint = 0.6
+        this.cooldownTime = 1.8
+        this.range = 100
+        this.weaponSound = weaponSound.WoodHeavyBash
+        this.unitSoundSet = "NagaRoyalGuard"
+        this.name = "Sea Druid"
+        this.properName = "Ohtan Tideseeker"
 
     static constant real array ANCIENT_KNOWLEDGE_HP_BONUS = [6, 5.5, 5, 4.5, 4]
     static constant real array ANCIENT_KNOWLEDGE_MP_BONUS = [12, 11, 10, 9, 8]

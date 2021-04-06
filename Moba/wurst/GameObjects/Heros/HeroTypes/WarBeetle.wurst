@@ -70,6 +70,25 @@ class HeroWarBeetle extends HeroTemplate
     use HeroTemplateModule
 
     override function objectDefinition()
+        this.castBackswing = 0.51
+        this.castPoint = 0.75
+        this.icon = "BTNWarBeetle"
+        this.model = "Models\\GeneralVezax.mdl"
+        this.scalingValue = 0.9
+        this.selectionScale = 2.4
+        this.shadowX = 100
+        this.shadowY = 100
+        this.shadowH = 250
+        this.shadowW = 250
+        this.armorSoundType = ArmorSoundType.Flesh
+        this.backswingPoint = 0.3
+        this.damagePoint = 0.3
+        this.cooldownTime = 1.8
+        this.range = 100
+        this.weaponSound = weaponSound.WoodHeavyBash
+        this.unitSoundSet = "HeroCryptLord"
+        this.name = "War Beetle"
+        this.properName = "Anubiros"
 
     static constant int array HARD_SHELL_ARMOR = [12, 18, 24, 30, 36]
 
