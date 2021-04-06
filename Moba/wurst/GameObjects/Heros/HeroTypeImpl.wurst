@@ -442,18 +442,17 @@ public module HeroTemplateModule
         ..registerUnitEvent(hero, EVENT_UNIT_SPELL_EFFECT)
         ..addAction() ->
             let abilityId = GetSpellAbilityId()
-            if HeroTemplate.SPELL_TO_SLOT.has(abilityId)
-                let slot = HeroTemplate.SPELL_TO_SLOT.get(abilityId)
-                switch slot
-                    case Q
-                        castQ()
-                    case W
-                        castW()
-                    case E
-                        castE()
-                    case R
-                        castR()
-                    default
+            let lastChar = abilityId mod 256
+            switch lastChar
+                case 'Q'
+                    castQ()
+                case 'W'
+                    castW()
+                case 'E'
+                    castE()
+                case 'R'
+                    castR()
+                default
         return onCastTrigger
 
 
