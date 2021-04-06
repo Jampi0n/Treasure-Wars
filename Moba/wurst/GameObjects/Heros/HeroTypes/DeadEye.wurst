@@ -11,7 +11,6 @@ class DeadEyInstance
     int skeletonCount = 0
 
     construct()
-        print(this castTo int)
 
     ondestroy
         skeletons.destr()
@@ -303,8 +302,6 @@ class HeroDeadEye extends HeroTemplate
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let instance = DeadEyInstance.fromUnit(caster)
-        print("pact: " + (instance castTo int).toString())
-        print(instance.skeletons.size())
         let level = caster.getAbilityLevel(spellId)
         var skeleton = FirstOfGroup(instance.skeletons)
         var count = 0
@@ -386,8 +383,6 @@ class HeroDeadEye extends HeroTemplate
         BUFF_TERROR.setupBuffWithIcon(TERROR_BUFF_ID, TERROR_ABILITY_ID)
         onImpact(BUFF_ID_ON_DEATH_COIL) (unit source, unit target) ->
             let instance = DeadEyInstance.fromUnit(source)
-            print("coil: " + (instance castTo int).toString())
-            print(instance.skeletons.size())
             if target.isTargetable(source.getOwner(), false, true)
                 let level = source.getAbilityLevel(ABILITY_ID_R)
                 GetEventDamageSource().dealDamage(target, 
@@ -395,12 +390,10 @@ class HeroDeadEye extends HeroTemplate
                 instance.skeletonCount*DEATH_COIL_DMG_FACTOR[level-1].bonus(source.getHeroInt(), DEATH_COIL_DMG_FACTOR_BONUS), ReductionType.MAGIC)
             doAfter(1, () -> (begin
                 source.removeAbility(ABILITY_DEATH_COIL)
-                source.getOwner().setAbilityAvailable(ABILITY_ID_R, true)
+                source.hideAbility(ABILITY_ID_R, false)
             end))
         heroType.setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
             let instance = DeadEyInstance.fromUnit(source)
-            print("attack: " + (instance castTo int).toString())
-            print(instance.skeletons.size())
             let level = source.getAbilityLevel(ABILITY_ID_PASSIVE)
             if level!=0 and target.isTargetable(source.getOwner(), false, true) and target.isVisible(source.getOwner()) and not target.isType(UNIT_TYPE_STRUCTURE) and not target.isType(UNIT_TYPE_HERO)
                 doAfter(0, () -> (begin
@@ -420,8 +413,6 @@ class HeroDeadEye extends HeroTemplate
             let owningHero = iUnit.getOwningHero()
             if owningHero != null
                 let instance = DeadEyInstance.fromUnit(owningHero.toUnit())
-                print("leave: " + (instance castTo int).toString())
-                print(instance.skeletons.size())
                 if instance != null
                     instance.skeletons.removeUnit(u)
 
