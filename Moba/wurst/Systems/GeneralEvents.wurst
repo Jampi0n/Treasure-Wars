@@ -21,21 +21,6 @@ function getAnimationSpeed(int abilityId) returns real
         return 1.0
 
 
-// Cast
-
-constant CAST_MAP = new HashMap<int,OnCast>
-
-public interface OnCast
-    function onCast()
-
-public function onCast(int abilityID, OnCast onCast)
-    CAST_MAP.put(abilityID, onCast)
-
-function onCastTrigger()
-    let key = GetSpellAbilityId()
-    if CAST_MAP.has(key)
-        CAST_MAP.get(key).onCast()
-
 // Impact
 
 int array impactBuffId
@@ -59,17 +44,9 @@ function onImpactTrigger()
             target.removeAbility(impactBuffId[i])
             impactFunction[i].onImpact(source, target)
 
-        
-    
-    
-
 
 init
     addOnDamageFunc(function onImpactTrigger)
-
-    CreateTrigger()
-    ..addAction(function onCastTrigger)
-    ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_SPELL_EFFECT)
 
     CreateTrigger()
     ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_SPELL_CAST)
