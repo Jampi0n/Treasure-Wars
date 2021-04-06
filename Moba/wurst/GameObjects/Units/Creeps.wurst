@@ -6,7 +6,7 @@ import ClosureTimers
 import Assets
 import AbilityObjEditing
 import ObjectEditingPreset
-import DamageDetection
+import GeneralEvents
 import StandardTextTags
 import Buff
 import UnitLib
@@ -331,14 +331,6 @@ public class CreepCamp
                     else
                         error("A player owned unit that is not owned by a hero killed a creep")
 
-
-
-
-    private static function onDamage()
-        let target = GetTriggerUnit()
-        if(target.hasAbility(HEAL_BUFF_ID))
-            target.removeAbility(HEAL_BUFF_ID)
-
     private static function initCreep(unit creepUnit, CreepCamp camp) returns CreepCamp
         CreepCamp ret = null
         if not allCreeps.contains(creepUnit)
@@ -381,7 +373,8 @@ public class CreepCamp
         ..registerPlayerUnitEvent(players[CREEP_NORMAL_OWNER], EVENT_PLAYER_UNIT_DEATH, null)
         ..addAction(function onDeath)
 
-        addOnDamageFunc(Condition(function onDamage))
+        onImpact(HEAL_BUFF_ID) (unit source, unit target) ->
+            skip
 
         DUMMY_HEALER = createUnit(DUMMY_PLAYER, DUMMY_CASTER, gg_rct_CenterMid.getCenter(), angle(0))
 
