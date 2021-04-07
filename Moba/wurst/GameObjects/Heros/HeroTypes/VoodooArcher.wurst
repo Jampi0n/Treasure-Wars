@@ -306,6 +306,11 @@ class HeroVoodooArcher extends HeroTemplate
         wrapper.setOwningHero(caster.toHero())
         wrapper.modHealth( SERPEND_WARD_HP[level-1] )
 
+        DamageEventUnit.fromUnit(ward).attackDamageNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+            let hero = source.wrapper().getOwningHero().toUnit()
+            if not target.isType(UNIT_TYPE_STRUCTURE)
+                target.addBuffReduced(hero, SERPENT_POISON_DURATION[level-1], buffSerpentPoison, level)
+
     override static function castR()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
@@ -338,12 +343,12 @@ class HeroVoodooArcher extends HeroTemplate
     override function recommendedItems(LinkedList<int> list)
         list.add(ITEM_ID_BOOTS_BASE)
         
-    override function onInitDelayed(IHeroType heroType)
-        heroType
-        ..setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean advanced) ->
+    override function onInit(IHeroType heroType)
+        heroType.setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean advanced) ->
             let level = source.getAbilityLevel(ABILITY_ID_Q)
             source.dealDamage(target, VOODOO_ARROW_DAMAGE[level-1], ReductionType.NONE)
 
+    override function onInitDelayed(IHeroType heroType)
         buffMindCurseTarget = new BuffType(false, DispelLevel.DISPEL)
         buffMindCurseTarget.setupBuffWithIcon(MIND_CURSE_BUFF_ID, MIND_CURSE_ABILITY_ID)
 
@@ -393,12 +398,6 @@ class HeroVoodooArcher extends HeroTemplate
                 ..modArmor( -SERPENT_POISON_ARMOR * stackDiff)
         end))
 
-        
-        DamageEventUnitType.fromUnitTypeId(SERPENT_WARD).attackDamageNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
-            let hero = source.wrapper().getOwningHero().toUnit()
-            let level = hero.getAbilityLevel(ABILITY_ID_E)
-            if not target.isType(UNIT_TYPE_STRUCTURE)
-                target.addBuffReduced(hero, SERPENT_POISON_DURATION[level-1], buffSerpentPoison, level)
 
     
 init

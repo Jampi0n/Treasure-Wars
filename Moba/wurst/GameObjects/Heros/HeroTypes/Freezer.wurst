@@ -519,14 +519,13 @@ class HeroFreezer extends HeroTemplate
     override function onCreate(IHeroType heroType, IHero hero)
         new FreezerInstance()
 
-    override function onInitDelayed(IHeroType heroType)
-        heroType
-        ..setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean advanced) ->
+    override function onInit(IHeroType heroType)
+        heroType.setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean advanced) ->
             if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(source.getOwner(), false, true)
                 let level = source.getAbilityLevel(ABILITY_ID_PASSIVE)
                 if level != 0
                     source.healMana(source, COLD_HAND_MP[level-1].toReal())
-
+    override function onInitDelayed(IHeroType heroType)
         buffFrostNova = new BuffType(false, DispelLevel.DISPEL)
         buffFrostNova.setupBuffWithIcon(NOVA_BUFF_ID, NOVA_ABILTIY_ID)
         buffFrostNova.addSetupFunction() (Buff thisBuff, int factor) ->

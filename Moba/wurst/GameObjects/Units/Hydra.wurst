@@ -77,6 +77,9 @@ function onHydraDeath()
             ..modWillpower(WILLPOWER[lvl])
             ..modAttackSpeed(ATTACK_SPEED[lvl])
 
+            DamageEventUnit.fromUnit(udg_Hydra).attackDamageNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+                target.addBuffReduced(source, ACID_BREATH_DUR, buffAcidBreath, 1)
+
         end))
 
 function unit.hydraBonus()
@@ -141,8 +144,3 @@ init
         ..modArmor(-ACID_BREATH_ARMOR)
     end))
 
-
-
-
-    DamageEventUnitType.fromUnitTypeId(HYDRA).attackDamageNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
-        target.addBuffReduced(source, ACID_BREATH_DUR, buffAcidBreath, 1)

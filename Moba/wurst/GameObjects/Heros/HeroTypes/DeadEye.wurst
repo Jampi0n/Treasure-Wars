@@ -379,19 +379,7 @@ class HeroDeadEye extends HeroTemplate
             if not ai.getAttacking()
                 ai.attack(target)
 
-    override function onInitDelayed(IHeroType heroType)
-        BUFF_TERROR.setupBuffWithIcon(TERROR_BUFF_ID, TERROR_ABILITY_ID)
-        onImpact(BUFF_ID_ON_DEATH_COIL) (unit source, unit target) ->
-            let instance = DeadEyInstance.fromUnit(source)
-            if target.isTargetable(source.getOwner(), false, true)
-                let level = source.getAbilityLevel(ABILITY_ID_R)
-                GetEventDamageSource().dealDamage(target, 
-                DEATH_COIL_DMG_BASE[level-1].bonus(source.getHeroInt(), DEATH_COIL_DMG_BASE_BONUS)+
-                instance.skeletonCount*DEATH_COIL_DMG_FACTOR[level-1].bonus(source.getHeroInt(), DEATH_COIL_DMG_FACTOR_BONUS), ReductionType.MAGIC)
-            doAfter(1, () -> (begin
-                source.removeAbility(ABILITY_DEATH_COIL)
-                source.hideAbility(ABILITY_ID_R, false)
-            end))
+    override function onInit(IHeroType heroType)
         heroType.setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
             let instance = DeadEyInstance.fromUnit(source)
             let level = source.getAbilityLevel(ABILITY_ID_PASSIVE)
@@ -408,6 +396,19 @@ class HeroDeadEye extends HeroTemplate
                             SOUND_BLACK_ARROW.playOnPoint(pos.toVec3()).snd.setVolume(150)
                         end))
                 end))
+    override function onInitDelayed(IHeroType heroType)
+        BUFF_TERROR.setupBuffWithIcon(TERROR_BUFF_ID, TERROR_ABILITY_ID)
+        onImpact(BUFF_ID_ON_DEATH_COIL) (unit source, unit target) ->
+            let instance = DeadEyInstance.fromUnit(source)
+            if target.isTargetable(source.getOwner(), false, true)
+                let level = source.getAbilityLevel(ABILITY_ID_R)
+                GetEventDamageSource().dealDamage(target, 
+                DEATH_COIL_DMG_BASE[level-1].bonus(source.getHeroInt(), DEATH_COIL_DMG_BASE_BONUS)+
+                instance.skeletonCount*DEATH_COIL_DMG_FACTOR[level-1].bonus(source.getHeroInt(), DEATH_COIL_DMG_FACTOR_BONUS), ReductionType.MAGIC)
+            doAfter(1, () -> (begin
+                source.removeAbility(ABILITY_DEATH_COIL)
+                source.hideAbility(ABILITY_ID_R, false)
+            end))
 
         addPreDestroyEvent() (unit u, IUnit iUnit) ->
             let owningHero = iUnit.getOwningHero()

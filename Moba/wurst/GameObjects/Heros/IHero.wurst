@@ -25,6 +25,7 @@ public interface IHeroType
     function setStat(Stat stat, integer min, integer max)
     function getUnitId() returns integer
     function setOnAttackFunc(DamageFunction onAttack)
+    function getOnAttackFunction() returns DamageFunction
     function calculateStat(Stat stat, integer level) returns integer
     function setBonusCalculation(CalculateTotalBonus bonusCalculation)
     function getBonusCalculation() returns CalculateTotalBonus

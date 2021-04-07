@@ -425,13 +425,11 @@ class HeroTrollBerserker extends HeroTemplate
                 onMeleeStats(u, newLevel)
         end))
 
-    override function onInitDelayed(IHeroType heroType)
-        
-        heroType
-        ..addMorph(HERO_TROLL_BERSERKER_MELEE)
-        ..setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean advanced) ->
+    override function onInit(IHeroType heroType)
+        heroType.setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean advanced) ->
             onAttack(source, target, active)
-
+    override function onInitDelayed(IHeroType heroType)
+        heroType.addMorph(HERO_TROLL_BERSERKER_MELEE)
         buffCriticalStrike = new BuffType(true, DispelLevel.NONE)
 
         buffCriticalStrike.setupBuffWithIcon(CRITICAL_BUFF_ID, CRITICAL_ABILITY_ID)

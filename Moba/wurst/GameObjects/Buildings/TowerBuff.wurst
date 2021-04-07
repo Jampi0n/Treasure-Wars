@@ -10,7 +10,7 @@ import Buff
 import UnitLib
 import UnitImpl
 import FastDamageEvent
-
+import BuildingIds
 
 constant int TOWER_FOCUS_MAX_STACKS = 5
 constant int TOWER_FOCUS_ARMOR = 20
@@ -46,6 +46,8 @@ init
 	let g = CreateGroup()
 	g.enumUnitsAll(null)
 	for u in g
-		DamageEventUnit.fromUnit(u).attackHitNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
-			if target.isType(UNIT_TYPE_HERO)
-				target.addBuffReduced(source, TOWER_FOCUS_DUR, buffTowerFocus, 1)
+		let id = u.getTypeId()
+		if id == HERO_TOWER or id == BASE_TOWER or id == GATE_TOWER or id == OUTER_TOWER
+			DamageEventUnit.fromUnit(u).attackDamageNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+				if target.isType(UNIT_TYPE_HERO)
+					target.addBuffReduced(source, TOWER_FOCUS_DUR, buffTowerFocus, 1)

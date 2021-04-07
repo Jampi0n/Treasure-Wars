@@ -347,13 +347,13 @@ class HeroPythonWarrioress extends HeroTemplate
     override function recommendedItems(LinkedList<int> list)
         list.add(ITEM_ID_BOOTS_BASE)
 
-    override function onInitDelayed(IHeroType heroType)
-        heroType
-        ..setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean advanced) ->
+    override function onInit(IHeroType heroType)
+        heroType.setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean advanced) ->
             let level = source.getAbilityLevel(ABILITY_ID_PASSIVE)
             if level != 0 and target.isTargetable(source.getOwner(), false, true) and not target.isType(UNIT_TYPE_STRUCTURE)
                 target.addBuffReduced( source, ENVENOMED_BLADES_DURATION[level-1], BUFF_ENVENOMED_BLADES, level)
 
+    override function onInitDelayed(IHeroType heroType)
         BUFF_ENVENOMED_BLADES.setupBuffWithIcon(ENVENOMED_BLADES_BUFF_ID, ENVENOMED_BLADES_ABILITY_ID)
         BUFF_ENVENOMED_BLADES.setPeriodicTime(1)
         BUFF_ENVENOMED_BLADES.addPeriodicFunction((Buff thisBuff)-> (begin

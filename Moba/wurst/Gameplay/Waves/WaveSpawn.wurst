@@ -63,10 +63,12 @@ class Spawner
             end))
             counter++
 
-    function spawn(int uType)
+    function spawn(int uType) returns unit
         if this.enabled
             let spawnedUnit = spawnUnit(this.team, uType, this.spawnPos)
             new PathUnitNew(spawnedUnit, this.path)
+            return spawnedUnit
+        return null
 
 public function startSpawning()
     if spawnStarted

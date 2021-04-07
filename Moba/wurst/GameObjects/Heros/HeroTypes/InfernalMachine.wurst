@@ -503,11 +503,8 @@ class HeroInfernalMachine extends HeroTemplate
                 onRapidEndStats(u, newLevel - 1)
                 onRapidStats(u, newLevel)
         end))
-
-    override function onInitDelayed(IHeroType heroType)
-        heroType.addMorph(HERO_INFERNAL_MACHINE_MORPH)
-        heroType
-        ..setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean advanced) ->
+    override function onInit(IHeroType heroType)
+        heroType.setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean advanced) ->
             if target.isTargetable(source.getOwner(), false, true) and not target.isType(UNIT_TYPE_STRUCTURE)
                 if source.getTypeId() == UNIT_ID_HERO and BuffList.hasBuffType(source, buffBash)
                     let bash = BuffList.getBuffOfType(source, buffBash)
@@ -516,7 +513,8 @@ class HeroInfernalMachine extends HeroTemplate
                     bash.dispel()
                 else if advanced
                     target.addBuffReduced(source, RAPID_FIRE_STUN_DURATION[source.getAbilityLevel(ABILITY_ID_R)-1], STUNNED, 1).setDispelLevel(DispelLevel.DISPEL)
-
+    override function onInitDelayed(IHeroType heroType)
+        heroType.addMorph(HERO_INFERNAL_MACHINE_MORPH)
         buffBash = new BuffType(true, DispelLevel.DISPEL)
 
         buffBash.setupBuffWithIcon(BASH_BUFF_ID, BASH_ABILITY_ID)

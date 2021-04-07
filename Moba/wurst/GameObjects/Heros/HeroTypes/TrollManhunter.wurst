@@ -384,15 +384,14 @@ class HeroTrollManHunter extends HeroTemplate
     override function recommendedItems(LinkedList<int> list)
         list.add(ITEM_ID_BOOTS_BASE)
 
-    override function onInitDelayed(IHeroType heroType)
-        heroType
-        ..setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean advanced) ->
+    override function onInit(IHeroType heroType)
+        heroType.setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean advanced) ->
             let level = source.getAbilityLevel(this.ABILITY_ID_PASSIVE)
             if level != 0 and target.isTargetable(source.getOwner(), false, true) and not target.isType(UNIT_TYPE_STRUCTURE)
                 let b = target.addBuffReduced( source, BLEEDING_WOUND_DURATION, buffBleedingWound, level)
                 b.setData(b.getData()+3)
 
-
+    override function onInitDelayed(IHeroType heroType)
         /*  bleeding wound: every attack increases actual stacks by 4, so bladestorm can increase by 1 every 0.25 seconds
             So dmg is 0.25 * 1/4 -> (interval) * (4 stacks)  */
         buffBleedingWound = new BuffType(false, DispelLevel.DISPEL)

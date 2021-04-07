@@ -33,7 +33,19 @@ public class Workshop extends Rebuildable
 			SOUND_SIEGE_ENGINE.playOnPoint(heroPos).snd.setVolume(150)
 			for i = 0 to 3
 				if building == workshop[i]
-					workshopSpawner[i].spawn(TANK)
+					let tank = workshopSpawner[i].spawn(TANK)
+					DamageEventUnit.fromUnit(tank).anyDamage.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
+						if attack
+							let nearby = CreateGroup()
+							nearby.enumUnitsInRange(target.getPos(), 250)
+
+							while(not nearby.isEmpty())
+								let u = FirstOfGroup(nearby)
+								nearby.removeUnit(u)
+								if u.isTargetable(source.getOwner(), false, true) and u != target
+									source.dealDamage(u, 75, ReductionType.PHYSICAL)
+
+							nearby.destr()
 					break
 		else if itemId == 'I007' //Mortar Team
 			SOUND_MORTAR_TEAM.playOnPoint(heroPos).snd.setVolume(150)

@@ -363,7 +363,8 @@ class HeroDestroyer extends HeroTemplate
 
     override function onCreate(IHeroType heroType, IHero hero)
         new DestroyerInstance()
-    override function onInitDelayed(IHeroType heroType)
+
+    override function onInit(IHeroType heroType)
         heroType.setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
             let prey = BuffList.getBuffOfType(target, buffPreyTarget)
             if prey != null
@@ -371,7 +372,7 @@ class HeroDestroyer extends HeroTemplate
                 source.dealDamage(target, PREY_BONUS_DAMAGE[level-1], ReductionType.PHYSICAL)
                 target.addBuffReduced(source, PREY_SLOW_DURATION, buffPreySlow, 1)
                 target.addEffect(Abilities.stampedeMissileDeath, "origin")
-        
+    override function onInitDelayed(IHeroType heroType)
         onImpact(BUFF_ID_ON_BREATH) (unit source, unit target) ->
             let instance = DestroyerInstance.fromUnit(source)
             if target.isTargetable(source.getOwner(), false, true) and not instance.hitByBreath.contains(target)

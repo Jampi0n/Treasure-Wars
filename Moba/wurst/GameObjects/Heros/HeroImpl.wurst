@@ -214,6 +214,10 @@ public class HeroImpl implements IHero
 
         HeroTemplate.lastCreatedHero = this
         (this.heroType castTo HeroTypeImpl).TEMPLATE.onCreate(this.heroType, this)
+        let onAttack = this.heroType.getOnAttackFunction()
+        if onAttack != null
+            DamageEventUnit.fromUnit(this.hero).attackDamageNoBuilding.add(onAttack)
+            
                 
 
         if updateTooltips   

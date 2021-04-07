@@ -74,6 +74,8 @@ public class HeroTypeImpl implements IHeroType
 
     private bool array [4] allowCooldownChange
 
+    private DamageFunction onHeroAttack = null
+
     protected constant dynamicIntelligence = new LinkedList<DynamicTooltip>
     protected constant dynamicStrength = new LinkedList<DynamicTooltip>
 
@@ -143,9 +145,10 @@ public class HeroTypeImpl implements IHeroType
 
 
     override function setOnAttackFunc(DamageFunction onAttack)
-        DamageEventUnitType.fromUnitTypeId(this.unitId).attackDamageNoBuilding.add(onAttack)
-        for unitTypeId in alternateUnitTypeIds
-            DamageEventUnitType.fromUnitTypeId(unitTypeId).attackDamageNoBuilding.add(onAttack)
+        this.onHeroAttack = onAttack
+
+    override function getOnAttackFunction() returns DamageFunction
+        return this.onHeroAttack
 
     /** Calulates the stat of the hero type for a given level */
     override function calculateStat(Stat stat, integer level) returns integer
