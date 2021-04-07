@@ -40,6 +40,17 @@ BuffType buffAcidBreath
 constant int ACID_BREATH_BUFF_ID = compiletime(createAuraBuff("Acid Breath", "This unit was hit by a Hydra; it moves and attacks slower and has reduced armor.", Icons.bTNCorrosiveBreath))
 constant int ACID_BREATH_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, ACID_BREATH_BUFF_ID, Abilities.bottleImpact, "chest"))
 
+function hydraStats(unit u, int lvl)
+    u.wrapper()
+    ..modStrength(DMG[lvl])
+    ..modHealth(HP[lvl])
+    ..modArmor(ARMOR[lvl])
+    ..modWillpower(WILLPOWER[lvl])
+    ..modAttackSpeed(ATTACK_SPEED[lvl])
+
+    DamageEventUnit.fromUnit(u).attackDamageNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
+        target.addBuffReduced(source, ACID_BREATH_DUR, buffAcidBreath, 1)
+
 function onHydraDeath()
     let target = GetTriggerUnit()
     if target == udg_Hydra
@@ -61,26 +72,14 @@ function onHydraDeath()
 
             PlayerWrapper.statHydrasKilled[killerId]++
 
-        doAfter(REVIVE_TIME, () -> (begin
+        doAfter(REVIVE_TIME) ->
             udg_Hydra = createUnit(players[CREEP_NORMAL_OWNER], HYDRA, spawnPos, facing)
             hydraIcon.show()
             SetUnitAcquireRange(udg_Hydra, 200)
             if creepLevel < MAX_LEVEL
                 creepLevel++
 
-
-            let lvl = creepLevel
-            udg_Hydra.wrapper()
-            ..modStrength(DMG[lvl])
-            ..modHealth(HP[lvl])
-            ..modArmor(ARMOR[lvl])
-            ..modWillpower(WILLPOWER[lvl])
-            ..modAttackSpeed(ATTACK_SPEED[lvl])
-
-            DamageEventUnit.fromUnit(udg_Hydra).attackDamageNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
-                target.addBuffReduced(source, ACID_BREATH_DUR, buffAcidBreath, 1)
-
-        end))
+            hydraStats(udg_Hydra, creepLevel)
 
 function unit.hydraBonus()
     this.wrapper()
@@ -104,16 +103,9 @@ init
     facing = udg_Hydra.getFacingAngle()
     creepLevel = 0
 
-
-
-    let lvl = creepLevel
     doAfter(0) ->
-        udg_Hydra.wrapper()
-        ..modStrength(DMG[lvl])
-        ..modHealth(HP[lvl])
-        ..modArmor(ARMOR[lvl])
-        ..modWillpower(WILLPOWER[lvl])
-        ..modAttackSpeed(ATTACK_SPEED[lvl])
+        hydraStats(udg_Hydra, creepLevel)
+
 
     CreateTrigger()
         ..registerPlayerUnitEvent(players[CREEP_NORMAL_OWNER], EVENT_PLAYER_UNIT_DEATH, null)
