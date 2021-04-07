@@ -552,18 +552,22 @@ class HeroInfernalMachine extends HeroTemplate
         CreateTrigger()
         ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
         ..addAction(() -> (begin
-            let killer = GetKillingUnit()
-            if killer.hasAbility(HeroInfernalMachine.instance.ABILITY_ID_PASSIVE)
-                let dyingUnit = GetTriggerUnit()
-                if not dyingUnit.isType(UNIT_TYPE_STRUCTURE) 
-                    addEffect(Abilities.fireLordDeathExplode, dyingUnit.getPos()).destr()
-                    let g = CreateGroup()
-                    g.enumUnitsInRange(dyingUnit.getPos(), FIERY_HANDS_AOE)
-                    let dmg = FIERY_HANDS_DMG[killer.getAbilityLevel(HeroInfernalMachine.instance.ABILITY_ID_PASSIVE)-1].bonus(killer.getHeroInt(), FIERY_HANDS_DMG_BONUS)
-                    for unit u in g
-                        if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(killer.getOwner(), false, true)
-                            killer.dealDamage(u, dmg, ReductionType.MAGIC)
-                    g.destr()
+            var killer = GetKillingUnit()
+            if killer != null
+                let killingHero = killer.wrapper().getOwningHero()
+                if killingHero != null
+                    killer = killingHero.toUnit()
+                    if killer.hasAbility(HeroInfernalMachine.instance.ABILITY_ID_PASSIVE)
+                        let dyingUnit = GetTriggerUnit()
+                        if not dyingUnit.isType(UNIT_TYPE_STRUCTURE) 
+                            addEffect(Abilities.fireLordDeathExplode, dyingUnit.getPos()).destr()
+                            let g = CreateGroup()
+                            g.enumUnitsInRange(dyingUnit.getPos(), FIERY_HANDS_AOE)
+                            let dmg = FIERY_HANDS_DMG[killer.getAbilityLevel(HeroInfernalMachine.instance.ABILITY_ID_PASSIVE)-1].bonus(killer.getHeroInt(), FIERY_HANDS_DMG_BONUS)
+                            for unit u in g
+                                if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(killer.getOwner(), false, true)
+                                    killer.dealDamage(u, dmg, ReductionType.MAGIC)
+                            g.destr()
         end))
 
 
