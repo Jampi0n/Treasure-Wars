@@ -33,6 +33,7 @@ class TowerPos
 
 public class TowerAI
 
+    private trigger onDeathTrigger
     private unit tower
     private unit currentTarget = null
     private boolean heroFocus = false
@@ -44,21 +45,6 @@ public class TowerAI
     private static LinkedList<TowerPos> array towerPos = [new LinkedList<TowerPos>, new LinkedList<TowerPos>]
 
     static function classInit()
-
-        CreateTrigger()
-        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_ATTACKED)
-        ..addAction() ->
-            if towerGroup.contains(GetAttacker())
-                towerMap.get(GetAttacker()).onAttack(GetTriggerUnit())
-
-        CreateTrigger()
-        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
-        ..addAction() ->
-            if towerGroup.contains(GetTriggerUnit())
-                destroy towerMap.get(GetTriggerUnit())
-
-        
-
         let g = CreateGroup()
         unit u
 
@@ -88,6 +74,13 @@ public class TowerAI
 
         g.destr()
 
+    @inline
+    static function onAttackStart(unit attacker, unit _target)
+        if attacker.isType(UNIT_TYPE_STRUCTURE)
+            if towerGroup.contains(attacker)
+                towerMap.get(attacker).onAttack(GetTriggerUnit())
+
+
     construct(unit tower)
         this.tower = tower
         towerList.add(this)
@@ -98,11 +91,18 @@ public class TowerAI
 
         towerPos[Players.team(tower.getOwner().getId())].add(this.pos)
 
+        this.onDeathTrigger = CreateTrigger()
+        ..registerUnitEvent(this.tower, EVENT_UNIT_DEATH)
+        ..addAction() ->
+            let u = GetTriggerUnit()
+            if towerGroup.contains(u)
+                destroy towerMap.get(u)
     ondestroy
         towerGroup.removeUnit(this.tower)
         towerList.remove(this)
         towerMap.remove(this.tower)
         towerPos[Players.team(tower.getOwner().getId())].remove(this.pos)
+        this.onDeathTrigger.destr()
 
 
     static function onDamage(unit source, unit _target, real damage)
@@ -134,7 +134,7 @@ public class TowerAI
                 if currentTarget.isType(UNIT_TYPE_HERO)
                     let ai = attacked.toHeroAI()
                     if ai != null
-                        ai.attackedByTower()
+                        ai.attackedByTower(this.tower)
 
     //a hero inside the tower range damages an allied hero
     function attackHero(unit targetHero)

@@ -244,7 +244,7 @@ public function AbilityDefinition.targetAlliedHeroes()
 
 public function AbilityDefinition.targetEnemyHeroes()
     for i = 1 to this.getLevels()
-        this.setTargetsAllowed(i, "enemy,nonsapper,nonancient,hero,self")
+        this.setTargetsAllowed(i, "enemy,nonsapper,nonancient,hero")
 
 public function AbilityDefinition.targetNone()
     for i = 1 to this.getLevels()

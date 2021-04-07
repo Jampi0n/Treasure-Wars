@@ -77,7 +77,6 @@ public class HeroImpl implements IHero
     private IHeroType heroType
     private unit hero
     private integer level
-    private static constant onDamageTrigger = CreateTrigger()
     private static constant onDeathTrigger = CreateTrigger()
     private static constant onLevelUpTrigger = CreateTrigger()
     //protected static Hero array heroes
@@ -116,7 +115,6 @@ public class HeroImpl implements IHero
 
 
     protected static function classInit()
-        onDamageTrigger.addAction(function onDamageStatic)
         onDeathTrigger.addAction(function onDeathStatic)
         onLevelUpTrigger.addAction(function onLevelUpStatic)
         
@@ -182,7 +180,6 @@ public class HeroImpl implements IHero
         wrapper.initAsHero(this)
 
         if this.permanent
-            onDamageTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DAMAGED)
             onDeathTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DEATH)
             this.reviveTimer = getTimer()
             ..setData(this castTo int)
@@ -230,6 +227,8 @@ public class HeroImpl implements IHero
 
         this.anyHitPointer = DamageEventUnit.fromUnit(this.hero).anyHit.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
             TowerAI.onDamage(source, target, damage)
+            if this.permanent
+                this.onDamage(source)
 
 
 
@@ -309,8 +308,8 @@ public class HeroImpl implements IHero
         this.assistMap.put(playerId ,getElapsedGameTime() + assistDuration)
         this.lastAssistant = playerId
 
-    private function onDamage()
-        let damageSource = GetEventDamageSource().getOwner()
+    private function onDamage(unit source)
+        let damageSource = source.getOwner()
         let damageSourceId = damageSource.getId()
         if damageSource != null
             if team == TEAM_1
@@ -319,9 +318,6 @@ public class HeroImpl implements IHero
             else
                 if Teams.first1() <= damageSourceId and damageSourceId <= Teams.last1()
                     this.addAssistDuration(damageSource.getId())
-
-    private static function onDamageStatic()
-        unitToHero.get( GetTriggerUnit()).onDamage()
 
     private function revive()
         TimerDialogDisplay(this.reviveWindow, false)

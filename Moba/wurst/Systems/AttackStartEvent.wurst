@@ -1,0 +1,15 @@
+package AttackStartEvent
+
+import HeroAIImpl
+import TowerAI
+import PathUnit
+
+init
+    CreateTrigger()
+    ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_ATTACKED)
+    ..addAction() ->
+        let attacker = GetAttacker()
+        let target = GetTriggerUnit()
+        HeroAIImpl.onAttackStart(attacker, target)
+        TowerAI.onAttackStart(attacker, target)
+        PathUnitNew.onAttackStart(attacker, target)

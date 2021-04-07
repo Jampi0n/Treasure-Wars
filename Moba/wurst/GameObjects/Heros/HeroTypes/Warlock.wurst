@@ -1,6 +1,7 @@
 package Warlock
 
 import HeroInclude
+import Reference
 
 int HERO_ORDER = 5
 
@@ -402,29 +403,33 @@ class HeroWarlock extends HeroTemplate
                 caster.dealDamage(target, 0.5 * SOUL_BURN_DAMAGE[caster.getAbilityLevel(ABILITY_ID_E)-1].bonus(caster.getHeroInt(), SOUL_BURN_DAMAGE_BONUS), ReductionType.MAGIC)
         end))
 
-        CreateTrigger()
-        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
-        ..addAction(() ->(begin
-            let u = GetTriggerUnit()
-            if BuffList.hasBuffType(u, buffSoulBurn)
-                let pos = u.getPos()
-                let whichBuff = BuffList.getBuffOfType(u, buffSoulBurn)
-                let caster = whichBuff.getCaster()
-                let level = whichBuff.getLevel()
+        buffSoulBurn.addSetupFunction() (Buff thisBuff, int factor) ->
+            if factor == 1
+                let trg = CreateTrigger()
+                trg.registerUnitEvent(thisBuff.getTarget(), EVENT_UNIT_DEATH)
+                trg.addAction() -> 
+                    let u = GetTriggerUnit()
+                    let pos = u.getPos()
+                    let whichBuff = BuffList.getBuffOfType(u, buffSoulBurn)
+                    let caster = whichBuff.getCaster()
+                    let level = whichBuff.getLevel()
 
-                let nearby = CreateGroup()
-                nearby.enumUnitsInRange(pos, SOUL_BURN_AOE)
+                    let nearby = CreateGroup()
+                    nearby.enumUnitsInRange(pos, SOUL_BURN_AOE)
 
-                let dur = whichBuff.getRemaining()
+                    let dur = whichBuff.getRemaining()
 
-                while(not nearby.isEmpty())
-                    let target = FirstOfGroup(nearby)
-                    nearby.removeUnit(target)
-                    if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true) and not BuffList.hasBuffType(target, buffSoulBurn)
-                        target.addBuffReduced(caster, dur, buffSoulBurn, level)
-            
-                nearby.destr()
-        end))
+                    while(not nearby.isEmpty())
+                        let target = FirstOfGroup(nearby)
+                        nearby.removeUnit(target)
+                        if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true) and not BuffList.hasBuffType(target, buffSoulBurn)
+                            target.addBuffReduced(caster, dur, buffSoulBurn, level)
+                
+                    nearby.destr()
+                thisBuff.setData(new Reference(trg) castTo int)
+            else
+                let trg = (thisBuff.getData() castTo Reference<trigger>).into()
+                trg.destr()
 
 init
     initialize()

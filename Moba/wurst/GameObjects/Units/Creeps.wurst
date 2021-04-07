@@ -117,7 +117,8 @@ function initCreepBuffs()
     REVENANT_BUFF.addSetupFunction() (Buff thisBuff, int factor) ->
         if factor == 1
             let pointer = DamageEventUnit.fromUnit(thisBuff.getTarget()).anyDamage.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
-                target.addBuffReduced(source, 2, REVENANT_SLOW_BUFF, 1)
+                if damage > 0.1
+                    target.addBuffReduced(source, 2, REVENANT_SLOW_BUFF, 1)
             thisBuff.setData(pointer)
         else
             DamageEventUnit.fromUnit(thisBuff.getTarget()).anyDamage.remove(thisBuff.getData())

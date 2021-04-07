@@ -115,7 +115,7 @@ public interface IHeroAI
     function getAttacking() returns boolean
     function getTeamFightLoc() returns vec2
     function getTeamFightTarget() returns unit
-    function attackedByTower()
+    function attackedByTower(unit tower)
     function buyItems()
     function issue(string order) returns boolean
     function issue(string order, vec2 target) returns boolean

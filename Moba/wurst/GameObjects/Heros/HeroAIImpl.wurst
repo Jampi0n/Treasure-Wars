@@ -285,7 +285,6 @@ public class HeroAIImpl implements IHeroAI
 
     private int retreatCounter = 0
 
-    private static trigger attackedByHeroTower
     private static constant updateTimer = getTimer()
     
 
@@ -349,6 +348,12 @@ public class HeroAIImpl implements IHeroAI
     private static function onAttackTimer()
         (GetExpiredTimer().getData() castTo HeroAIImpl).attacking = false
 
+    @inline
+    static function onAttackStart(unit attacker, unit _target)
+        let ai = HeroAIImpl.getAI(attacker)
+        if ai != null
+            ai.attackFor(2)
+
     protected function attackFor(real time)
         attacking = true
         attackTimer.start(time, function onAttackTimer)
@@ -379,8 +384,10 @@ public class HeroAIImpl implements IHeroAI
         else
             currentRetreatLoc = this.homeLoc
 
-    override function attackedByTower()
-        if (this.state == AIState.ATTACK or this.state == AIState.RETREAT_TEMP)
+    override function attackedByTower(unit tower)
+        if tower.getTypeId() == HERO_TOWER
+            this.retreatTemporarily(25, false)
+        else if this.state == AIState.ATTACK or this.state == AIState.RETREAT_TEMP
             let g = CreateGroup()
             unit u
             int count = 0
@@ -413,17 +420,6 @@ public class HeroAIImpl implements IHeroAI
             if ai != null
                 ai.levelUp()
         end))
-
-        attackedByHeroTower = CreateTrigger()
-            ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_ATTACKED)
-            ..addAction(() ->(begin
-            let ai = getAI(GetTriggerUnit())
-            if ai != null
-                let attacker = GetAttacker()
-                if (ai.state == AIState.ATTACK or ai.state == AIState.RETREAT_TEMP or ai.state == AIState.RETREAT_TEMP_AI or ai.state == AIState.TEAM_FIGHT)  and attacker.getTypeId() == HERO_TOWER
-                    ai.retreatTemporarily(25, false)
-        end))
-    
 
     construct(IHero hero, aidifficulty diff)
         this.owningPlayer =  hero.toUnit().getOwner()
@@ -1031,11 +1027,3 @@ public abstract class HeroAI
 init
     HeroAIImpl.classInit()
     TeamFight.classInit()
-
-    CreateTrigger()
-        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_ATTACKED)
-        ..addAction(() -> (begin
-        let ai = HeroAIImpl.getAI(GetTriggerUnit())
-        if ai != null
-            ai.attackFor(2)
-    end))

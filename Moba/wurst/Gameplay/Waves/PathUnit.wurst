@@ -298,6 +298,13 @@ public class PathUnitNew
         allPathUnits[staticArrayIndex] = this
         numPathUnits += 1
 
+    @inline
+    static function onAttackStart(unit attacker, unit _target)
+        if PathUnitNew.unitToPathUnit.has(attacker)
+            let pathUnit = PathUnitNew.unitToPathUnit.get(attacker)
+            if pathUnit != null
+                pathUnit.attacking = true
+
     ondestroy
         unitToPathUnit.remove(this.whichUnit)
         allPathUnits[staticArrayIndex] = allPathUnits[numPathUnits-1]
@@ -325,11 +332,4 @@ init
                     let _end = p.direction?targetPoint[stage*2+1]:targetPoint[stage*2]
                     p.currentLineSegment.move(false, start, _end)
     
-        
 
-    CreateTrigger()..registerAnyUnitEvent(EVENT_PLAYER_UNIT_ATTACKED)..addAction() ->
-        let u = GetAttacker()
-        if PathUnitNew.unitToPathUnit.has(u)
-            let pathUnit = PathUnitNew.unitToPathUnit.get(u)
-            if pathUnit != null
-                pathUnit.attacking = true

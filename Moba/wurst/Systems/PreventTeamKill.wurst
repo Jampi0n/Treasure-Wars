@@ -4,6 +4,8 @@ package PreventTeamKill
 import ClosureTimers
 import Constants
 
+constant ATTACK_ORDER = OrderId("attack")
+
 init
     //prevent teamkill
     let trg = CreateTrigger()
@@ -11,7 +13,7 @@ init
         trg.registerPlayerUnitEvent(Player(i), EVENT_PLAYER_UNIT_ISSUED_UNIT_ORDER, null)
 
     trg.addAction(() ->(begin
-        if GetIssuedOrderId() == OrderId("attack")
+        if GetIssuedOrderId() == ATTACK_ORDER
             let attacker = GetTriggerUnit()
             let target = GetOrderTargetUnit()
             if target != null and attacker.getOwner().isAllyOf(target.getOwner())

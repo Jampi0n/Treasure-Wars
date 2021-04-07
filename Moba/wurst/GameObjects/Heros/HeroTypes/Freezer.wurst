@@ -8,6 +8,7 @@ int HERO_ORDER = 9
 class FreezerInstance
     use HeroInstance
     unit frostWyrm = null
+    trigger onDeathTrigger = CreateTrigger()
 
 class FrostArmor
     int intelligence
@@ -398,6 +399,13 @@ class HeroFreezer extends HeroTemplate
         let instance = FreezerInstance.fromUnit(caster)
         instance.frostWyrm.kill()
         instance.frostWyrm = createUnit(caster.getOwner(), FROST_WYRM, caster.getPos(), angle(0))
+        instance.onDeathTrigger.destr()
+        instance.onDeathTrigger = CreateTrigger()
+        instance.onDeathTrigger.registerUnitEvent(instance.frostWyrm, EVENT_UNIT_DEATH)
+        instance.onDeathTrigger.addAction() ->
+            let trgCaster = GetTriggerUnit().wrapper().getOwningHero().toUnit()
+            let trgInstance = FreezerInstance.fromUnit(trgCaster)
+            trgInstance.frostWyrm = null
 
         let wrapper = instance.frostWyrm.wrapper()
         wrapper.setOwningHero(caster.toHero())
@@ -609,14 +617,6 @@ class HeroFreezer extends HeroTemplate
                 whichBuff.dispel()
         end))
 
-        CreateTrigger()
-        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
-        ..addAction() ->
-            if GetTriggerUnit().getTypeId() == FROST_WYRM
-                let u = GetTriggerUnit()
-                let caster = u.wrapper().getOwningHero().toUnit()
-                let instance = FreezerInstance.fromUnit(caster)
-                instance.frostWyrm = null
 
    
 
