@@ -448,7 +448,7 @@ class HeroWarBeetle extends HeroTemplate
             else
                 target.setScale(0.9)
 
-    function createHeroType(IHero hero)
+    override function onCreate(IHeroType heroType, IHero hero)
         let heroUnit = hero.toUnit()
         CreateTrigger()
         ..registerUnitEvent(heroUnit, EVENT_UNIT_HERO_SKILL)
