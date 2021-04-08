@@ -66,18 +66,17 @@ public class HeroWarlock extends HeroTemplate
 
     
 
-    override function stats(IHeroType heroType)
-        heroType
-            ..setStat(Stat.AR, 26, 37)
-            ..setStat(Stat.AS, 8, 18)
-            ..setStat(Stat.HP, 9, 29)
-            ..setStat(Stat.HR, 11, 21)
-            ..setStat(Stat.MP, 21, 68)
-            ..setStat(Stat.MR, 17, 59)
-            ..setStat(Stat.MS, 8, 17)
-            ..setStat(Stat.STR, 9, 43)
-            ..setStat(Stat.AGI, 29, 49)
-            ..setStat(Stat.INT, 16, 87)
+    override function stats()
+        setStat(Stat.AR, 26, 37)
+        setStat(Stat.AS, 8, 18)
+        setStat(Stat.HP, 9, 29)
+        setStat(Stat.HR, 11, 21)
+        setStat(Stat.MP, 21, 68)
+        setStat(Stat.MR, 17, 59)
+        setStat(Stat.MS, 8, 17)
+        setStat(Stat.STR, 9, 43)
+        setStat(Stat.AGI, 29, 49)
+        setStat(Stat.INT, 16, 87)
 
 
             

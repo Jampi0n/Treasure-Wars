@@ -88,8 +88,8 @@ public class HeroSeaDruid extends HeroTemplate
         this.shadowH = 250
         this.shadowW = 250
         this.armorSoundType = ArmorSoundType.Flesh
-        this.backswingPoint = 0.56
-        this.damagePoint = 0.6
+        this.backswingPoint = 0.5
+        this.damagePoint = 0.5
         this.range = 100
         this.weaponSound = weaponSound.WoodHeavyBash
         this.unitSoundSet = "NagaRoyalGuard"
@@ -317,18 +317,17 @@ public class HeroSeaDruid extends HeroTemplate
                 RITUAL_HP_DRAIN[lvl-1].str(), RITUAL_MANA_DRAIN[lvl-1].str(), RITUAL_WAVE_COUNT[lvl-1].str(), RITUAL_MOVEMENT_SLOW[lvl-1].str(),RITUAL_HP_RATIO.str(), RITUAL_MANA_RATIO.str()))
         addDynamicTooltipIntelligence(heroType, tooltip)
 
-    override function stats(IHeroType heroType)
-        heroType
-            ..setStat(Stat.AR, 32, 51)
-            ..setStat(Stat.AS, 23, 32)
-            ..setStat(Stat.HP, 14, 61)
-            ..setStat(Stat.HR, 14, 42)
-            ..setStat(Stat.MP, 19, 84)
-            ..setStat(Stat.MR, 18, 75)
-            ..setStat(Stat.MS, 25, 42)
-            ..setStat(Stat.STR, 20, 74)
-            ..setStat(Stat.AGI, 35, 59)
-            ..setStat(Stat.INT, 13, 47)
+    override function stats()
+        setStat(Stat.AR, 32, 51)
+        setStat(Stat.AS, 23, 32)
+        setStat(Stat.HP, 14, 61)
+        setStat(Stat.HR, 14, 42)
+        setStat(Stat.MP, 19, 84)
+        setStat(Stat.MR, 18, 75)
+        setStat(Stat.MS, 25, 42)
+        setStat(Stat.STR, 20, 74)
+        setStat(Stat.AGI, 35, 59)
+        setStat(Stat.INT, 13, 47)
 
     override static function castQ()
         let spellId = GetSpellAbilityId()

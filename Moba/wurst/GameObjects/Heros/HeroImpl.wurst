@@ -29,8 +29,6 @@ string array assistStringListTeam2
 
 constant int array LIST_ID_POW_2 = [1, 2, 4, 8, 16, 1, 2, 4, 8, 16]
 
-function convertAttackSpeed(real defaultAttackCooldown, int statValue) returns real
-    return defaultAttackCooldown / (1.0 + statValue/100.0)
 
 function initAssistLists()
     for i = 0 to 30 // 31 would be all 5, which is not needed

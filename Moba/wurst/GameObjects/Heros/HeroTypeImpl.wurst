@@ -21,6 +21,9 @@ import UpgradeObjEditing
 int array SLOT_ID
 string array BUTTON_ORDER_STRING
 
+public function convertAttackSpeed(real defaultAttackCooldown, int statValue) returns real
+    return defaultAttackCooldown / (1.0 + statValue/100.0)
+
 public constant ATTACK_ANIMATION_OFFSET = compiletime(generateAttackAnimationOffset())
 function generateAttackAnimationOffset() returns int
     let id = UPGD_ID_GEN.next()
@@ -47,9 +50,6 @@ public function getHeroFromButton(int index) returns IHeroType
 
 
 public class HeroTypeImpl implements IHeroType
-
-    int array[STAT_COUNT] statsBase
-    int array[STAT_COUNT] statsMax
 
     private static constant unitIdToHeroType = new HashMap<integer, HeroTypeImpl>
     private static constant heroIdToHeroType = new HashMap<integer, HeroTypeImpl>
@@ -90,9 +90,6 @@ public class HeroTypeImpl implements IHeroType
         this.heroId = template.HERO_INDEX
         unitIdToHeroType.put(unitId, this)
         heroIdToHeroType.put(heroId, this)
-        for i = 0 to STAT_COUNT-1
-            statsBase[i]=0
-            statsMax[i]=0
         
         this.icon = smartIcon(template.icon)
         this.hasAI = template.skillBuild() != ""
@@ -115,7 +112,6 @@ public class HeroTypeImpl implements IHeroType
     override function initialize()
         if not this.initialized
             this.initialized = true
-            TEMPLATE.stats(this)
             TEMPLATE.onInit(this)
             delayInit(5) -> 
                 TEMPLATE.onInitDelayed(this)
@@ -124,21 +120,12 @@ public class HeroTypeImpl implements IHeroType
         unitIdToHeroType.put(id, this)
         this.alternateUnitTypeIds.add(id)
 
-    override function setBase(Stat stat, integer value)
-        this.statsBase[stat.toInt()] = value
 
     override function getBase(Stat stat) returns integer
-        return this.statsBase[stat.toInt()]
-
-    override function setMax(Stat stat, integer value)
-        this.statsMax[stat.toInt()] = value
+        return this.TEMPLATE.getStatMin(stat)
 
     override function getMax(Stat stat) returns integer
-        return this.statsMax[stat.toInt()]
-
-    override function setStat(Stat stat, integer min, integer max)
-        this.statsBase[stat.toInt()] = min
-        this.statsMax[stat.toInt()] = max
+        return this.TEMPLATE.getStatMax(stat)
 
     override function getUnitId() returns integer
         return this.unitId
@@ -469,6 +456,8 @@ public abstract class HeroTemplate
     static IHero lastCreatedHero
     static constant SPELL_TO_TEMPLATE = new HashMap<int, HeroTemplate>()
     static constant SPELL_TO_SLOT = new HashMap<int, AbilitySlot>() 
+    static int array statMin
+    static int array statMax
     static int numInstances = 0
     constant int HERO_INDEX
     constant int ABILITY_ID_Q 
@@ -502,7 +491,7 @@ public abstract class HeroTemplate
     ArmorSoundType armorSoundType = ArmorSoundType.Metal
     real backswingPoint = 0.65
     real damagePoint = 0.35
-    real cooldownTime = 2.0
+    real cooldownTime = HERO_BASE_ATTACK_COOLDOWN
     WeaponSound weaponSound = WeaponSound.MetalHeavyBash
     WeaponType weaponType = WeaponType.Normal
     string projectileArt = ""
@@ -535,6 +524,14 @@ public abstract class HeroTemplate
         SPELL_TO_SLOT.put(this.ABILITY_ID_W, AbilitySlot.W)
         SPELL_TO_SLOT.put(this.ABILITY_ID_E, AbilitySlot.E)
         SPELL_TO_SLOT.put(this.ABILITY_ID_R, AbilitySlot.R)
+        this.objectDefinition()
+        this.stats()
+
+        if compiletime
+            let minAttackCooldown = convertAttackSpeed(this.cooldownTime, this.getStatMax(Stat.AS)) * ATTACK_ANIMATION_FACTOR
+            let attackAnimationTime = this.damagePoint + this.backswingPoint
+            if minAttackCooldown < attackAnimationTime
+                compileError(this.name + " base attack cooldown is too low. Min CD: " + minAttackCooldown.toString() + " Animation: " + attackAnimationTime.toString())
 
     /*
     Called after the constructor. This needs to be outside of the constructor, because subclasses need to be initialized.
@@ -550,7 +547,6 @@ public abstract class HeroTemplate
         this.setupW(this.ABILITY_ID_W, heroType)
         this.setupE(this.ABILITY_ID_E, heroType)
         this.setupR(this.ABILITY_ID_R, heroType)
-        this.objectDefinition()
         if compiletime
             let def = this.defaultHero(this.UNIT_ID_HERO)
             this.applyObjectDefinition(def)
@@ -674,7 +670,14 @@ public abstract class HeroTemplate
     abstract function setupW(int abilityId, IHeroType heroType)
     abstract function setupE(int abilityId, IHeroType heroType)
     abstract function setupR(int abilityId, IHeroType heroType)
-    abstract function stats(IHeroType _heroType)
+    abstract function stats()
+    function setStat(Stat whichStat, int min, int max)
+        statMin[(this castTo int) * STAT_COUNT + whichStat castTo int] = min
+        statMax[(this castTo int) * STAT_COUNT + whichStat castTo int] = max
+    function getStatMin(Stat whichStat) returns int
+        return statMin[(this castTo int) * STAT_COUNT + whichStat castTo int]
+    function getStatMax(Stat whichStat) returns int
+        return statMax[(this castTo int) * STAT_COUNT + whichStat castTo int]
     function skillBuild() returns string
         return ""
     function retreatAI(IHeroAI _ai)

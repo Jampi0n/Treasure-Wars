@@ -119,18 +119,17 @@ public class HeroDrillmo extends HeroTemplate
         this.shadowW = 180
         this.range = 100
 
-    override function stats(IHeroType heroType)
-        heroType
-            ..setStat(Stat.AR, 33, 57)
-            ..setStat(Stat.AS, 11, 24)
-            ..setStat(Stat.HP, 13, 62)
-            ..setStat(Stat.HR, 7, 36)
-            ..setStat(Stat.MP, 17, 44)
-            ..setStat(Stat.MR, 14, 31)
-            ..setStat(Stat.MS, 12, 34)
-            ..setStat(Stat.STR, 20, 58)
-            ..setStat(Stat.AGI, 32, 45)
-            ..setStat(Stat.INT, 6, 21)
+    override function stats()
+        setStat(Stat.AR, 33, 57)
+        setStat(Stat.AS, 11, 24)
+        setStat(Stat.HP, 13, 62)
+        setStat(Stat.HR, 7, 36)
+        setStat(Stat.MP, 17, 44)
+        setStat(Stat.MR, 14, 31)
+        setStat(Stat.MS, 12, 34)
+        setStat(Stat.STR, 20, 58)
+        setStat(Stat.AGI, 32, 45)
+        setStat(Stat.INT, 6, 21)
 
     static constant int array OVERCHARGE_ATTACK_SPEED = [20, 30, 40, 50, 60]
 

@@ -106,18 +106,17 @@ public class HeroTrollManHunter extends HeroTemplate
         this.shadowW = 180
 
 
-    override function stats(IHeroType heroType)
-        heroType
-        ..setStat(Stat.AR, 26, 41)
-        ..setStat(Stat.AS, 63, 97)
-        ..setStat(Stat.HP, 12, 33)
-        ..setStat(Stat.HR, 16, 32)
-        ..setStat(Stat.MP, 17, 32)
-        ..setStat(Stat.MR, 18, 30)
-        ..setStat(Stat.MS, 34, 64)
-        ..setStat(Stat.STR, 12, 35)
-        ..setStat(Stat.AGI, 28, 46)
-        ..setStat(Stat.INT, 12, 25)
+    override function stats()
+        setStat(Stat.AR, 26, 41)
+        setStat(Stat.AS, 63, 97)
+        setStat(Stat.HP, 12, 33)
+        setStat(Stat.HR, 16, 32)
+        setStat(Stat.MP, 17, 32)
+        setStat(Stat.MR, 18, 30)
+        setStat(Stat.MS, 34, 64)
+        setStat(Stat.STR, 12, 35)
+        setStat(Stat.AGI, 28, 46)
+        setStat(Stat.INT, 12, 25)
 
     override function setupPassive(int abilityId, IHeroType heroType)
         if compiletime

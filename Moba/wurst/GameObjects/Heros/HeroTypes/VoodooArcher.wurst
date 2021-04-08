@@ -245,19 +245,18 @@ public class HeroVoodooArcher extends HeroTemplate
         addDynamicTooltipIntelligence(heroType, tooltip)
 
 
-    override function stats(IHeroType heroType)
-        heroType
+    override function stats()
             
-            ..setStat(Stat.AR, 31, 47)
-            ..setStat(Stat.AS, 14, 48)
-            ..setStat(Stat.HP, 11, 39)
-            ..setStat(Stat.HR, 11, 29)
-            ..setStat(Stat.MP, 17, 33)
-            ..setStat(Stat.MR, 15, 29)
-            ..setStat(Stat.MS, 31, 51)
-            ..setStat(Stat.STR, 13, 61)
-            ..setStat(Stat.AGI, 28, 43)
-            ..setStat(Stat.INT, 9, 33)
+        setStat(Stat.AR, 31, 47)
+        setStat(Stat.AS, 14, 48)
+        setStat(Stat.HP, 11, 39)
+        setStat(Stat.HR, 11, 29)
+        setStat(Stat.MP, 17, 33)
+        setStat(Stat.MR, 15, 29)
+        setStat(Stat.MS, 31, 51)
+        setStat(Stat.STR, 13, 61)
+        setStat(Stat.AGI, 28, 43)
+        setStat(Stat.INT, 9, 33)
 
     override static function castQ()
         let spellId = GetSpellAbilityId()

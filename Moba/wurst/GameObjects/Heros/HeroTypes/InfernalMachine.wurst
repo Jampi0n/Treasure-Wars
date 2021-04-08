@@ -419,18 +419,17 @@ public class HeroInfernalMachine extends HeroTemplate
             doAfter( 0, () -> onRapidEnd(caster, level))
 
 
-    override function stats(IHeroType heroType)
-        heroType
-        ..setStat(Stat.AR, 31, 59)
-        ..setStat(Stat.AS, 7, 22)
-        ..setStat(Stat.HP, 13, 52)
-        ..setStat(Stat.HR, 17, 34)
-        ..setStat(Stat.MP, 15, 41)
-        ..setStat(Stat.MR, 13, 28)
-        ..setStat(Stat.MS, 18, 41)
-        ..setStat(Stat.STR, 17, 52)
-        ..setStat(Stat.AGI, 30, 55)
-        ..setStat(Stat.INT, 6, 16)
+    override function stats()
+        setStat(Stat.AR, 31, 59)
+        setStat(Stat.AS, 7, 22)
+        setStat(Stat.HP, 13, 52)
+        setStat(Stat.HR, 17, 34)
+        setStat(Stat.MP, 15, 41)
+        setStat(Stat.MR, 13, 28)
+        setStat(Stat.MS, 18, 41)
+        setStat(Stat.STR, 17, 52)
+        setStat(Stat.AGI, 30, 55)
+        setStat(Stat.INT, 6, 16)
 
 
 

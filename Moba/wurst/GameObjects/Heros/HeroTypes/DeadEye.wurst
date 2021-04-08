@@ -68,18 +68,17 @@ public class HeroDeadEye extends HeroTemplate
         this.projectileHoming = true
         this.weaponType = WeaponType.Missile 
 
-    override function stats(IHeroType heroType)
-        heroType
-        ..setStat(Stat.AR, 24, 36)
-        ..setStat(Stat.AS, 34, 88)
-        ..setStat(Stat.HP, 7, 32)
-        ..setStat(Stat.HR, 4, 19)
-        ..setStat(Stat.MP, 12, 29)
-        ..setStat(Stat.MR, 7, 22)
-        ..setStat(Stat.MS, 6, 21)
-        ..setStat(Stat.STR, 16, 91)
-        ..setStat(Stat.AGI, 24, 31)
-        ..setStat(Stat.INT, 6, 23)
+    override function stats()
+        setStat(Stat.AR, 24, 36)
+        setStat(Stat.AS, 34, 88)
+        setStat(Stat.HP, 7, 32)
+        setStat(Stat.HR, 4, 19)
+        setStat(Stat.MP, 12, 29)
+        setStat(Stat.MR, 7, 22)
+        setStat(Stat.MS, 6, 21)
+        setStat(Stat.STR, 16, 91)
+        setStat(Stat.AGI, 24, 31)
+        setStat(Stat.INT, 6, 23)
     override function setupPassive(int abilityId, IHeroType heroType)
         if compiletime
             createNoEffectAbiltiy(abilityId)

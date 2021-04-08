@@ -18,11 +18,8 @@ public interface AIBehaviour
 public interface IHeroType
     function initialize()
     function addMorph(int id)
-    function setBase(Stat stat, integer value)
     function getBase(Stat stat) returns integer
-    function setMax(Stat stat, integer value)
     function getMax(Stat stat) returns integer
-    function setStat(Stat stat, integer min, integer max)
     function getUnitId() returns integer
     function setOnAttackFunc(DamageFunction onAttack)
     function getOnAttackFunction() returns DamageFunction

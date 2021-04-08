@@ -114,18 +114,17 @@ public class HeroFreezer extends HeroTemplate
         this.weaponType = WeaponType.Missile
 
 
-    override function stats(IHeroType heroType)
-        heroType
-        ..setStat(Stat.AR, 27, 38)
-        ..setStat(Stat.AS, 0, 26)
-        ..setStat(Stat.HP, 7, 29)
-        ..setStat(Stat.HR, 4, 12)
-        ..setStat(Stat.MP, 25, 78)
-        ..setStat(Stat.MR, 19, 63)
-        ..setStat(Stat.MS, 7, 43)
-        ..setStat(Stat.STR, 3, 21)
-        ..setStat(Stat.AGI, 31, 43)
-        ..setStat(Stat.INT, 18, 63)
+    override function stats()
+        setStat(Stat.AR, 27, 38)
+        setStat(Stat.AS, 0, 26)
+        setStat(Stat.HP, 7, 29)
+        setStat(Stat.HR, 4, 12)
+        setStat(Stat.MP, 25, 78)
+        setStat(Stat.MR, 19, 63)
+        setStat(Stat.MS, 7, 43)
+        setStat(Stat.STR, 3, 21)
+        setStat(Stat.AGI, 31, 43)
+        setStat(Stat.INT, 18, 63)
 
     static constant int array COLD_HAND_MP = [2, 3, 4, 5, 6]
 
