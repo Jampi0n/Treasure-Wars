@@ -1,5 +1,7 @@
 package Constants
 
+import UnitIds
+
 public constant MAGIC_REDUCTION = 0.01
 public constant ARMOR_REDUCTION = 0.01
 public constant DEBUG_MODE = true
@@ -28,7 +30,8 @@ function getIsReplay() returns bool
     while firstPlayer.getController() != MAP_CONTROL_USER or firstPlayer.getSlotState() != PLAYER_SLOT_STATE_PLAYING
         firstPlayer = players[firstPlayer.getId() + 1]
 
-    let u = createUnit(firstPlayer, 'hfoo', vec2(0,0), angle(0))
+    // do not use footman, as units with defend can trigger leave events twice
+    let u = createUnit(firstPlayer, UnitIds.rifleman, vec2(0,0), angle(0))
     SelectUnit(u, true)
     let selected = IsUnitSelected(u, firstPlayer)
     u.remove()

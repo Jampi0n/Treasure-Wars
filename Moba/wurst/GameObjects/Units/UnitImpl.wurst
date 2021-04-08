@@ -7,13 +7,11 @@ import Constants
 import Buff
 import BonusMod
 import ErrorHandling
-import ObjectIds
 import OnUnitEnterLeave
 import Missile
 import IHero
 import TeamUtil
 import IUnit
-import UnitTypeImpl
 import HeroTypeImpl
 
 function unit.setBaseAttackSpeed(real value)
@@ -29,7 +27,6 @@ function unit.getBaseDamage() returns int
 This file is huge. The end is mostly optimized convenience functions.
 */
 function initAtTop()
-
     onEnter() ->
         let u = getEnterLeaveUnit()
         runPreConstructEvents(u)
@@ -53,13 +50,14 @@ function initAtTop()
     end))
 
     setHitBoxFunction( (unit u) -> (begin
-        real ret = 32
+        real ret
         if u.isType(UNIT_TYPE_HERO)
             ret = 64
         else
-            let unitType = UnitType.get(u.getTypeId())
-            if unitType!=null
-                ret = unitType.getHitBox().toReal()
+            // 128 is a large grid (human tower)
+            // large grid has selection scale 2 -> factor 64
+            // hitbox size is radius -> factor 32
+            ret = u.getField(UNIT_RF_SELECTION_SCALE) * 32
         return ret
     end))
 
@@ -78,7 +76,6 @@ public class UnitImpl implements IUnit
     private int ownerId
     private IHero hero = null
     private IHeroType heroType = null
-    private IUnitType unitType = null
     private IHero owningHero = null
 
     //protected real currentMovementSpeed
@@ -101,8 +98,6 @@ public class UnitImpl implements IUnit
     */
     static int array statsTotalBonus_static //default = 0
     // total = (base + absolute) * (1 + relative/1000)
-
-    private static constant unknownUnitTypes = new LinkedList<int>()
 
     protected BuffList buffList
 
@@ -142,11 +137,6 @@ public class UnitImpl implements IUnit
                 this.heroType = HeroType.get(this.assocUnit.getTypeId())
                 if this.heroType == null
                     error("HeroType could not be resolved: " + this.assocUnit.getName())
-            else
-                this.unitType = UnitType.get(this.unitTypeId)
-                if this.unitType != null
-                    if this.unitType.getScaleAttackAnimation()
-                        this.scaleAttackAnimation = ATTACK_ANIMATION_FACTOR
 
             allUnits[unitWrapperCount] = this.assocUnit
             this.index = unitWrapperCount
@@ -178,12 +168,6 @@ public class UnitImpl implements IUnit
             statBaseValue_static[this.arrayOffset + Stat.MP.toInt()] = this.assocUnit.getMaxMana().toInt()
             statBaseValue_static[this.arrayOffset + Stat.CD.toInt()] = 0
             applyBaseStats()
-            if this.unitType == null and this.heroType == null
-                if not this.assocUnit.isType(UNIT_TYPE_STRUCTURE)
-                    if this.assocUnit.getAbilityLevel('Aloc') == 0
-                        if not unknownUnitTypes.has(this.assocUnit.getTypeId())
-                            unknownUnitTypes.add(this.assocUnit.getTypeId())
-                            Log.warn("Warning unknown unit type: ("+GetUnitName(this.assocUnit) + ")_" + this.assocUnit.getTypeId().toRawCode() + "_" + this.assocUnit.getTypeId().toString())
 
     @inline
     override function getBaseAttackCooldown() returns real

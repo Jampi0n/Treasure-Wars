@@ -16,7 +16,6 @@ import TeamUtil
 import FastDamageEvent
 import UnitImpl
 import IHero
-import UnitTypeImpl
 import Blacksmith
 
 enum AIState
@@ -116,11 +115,7 @@ public function unit.findTarget(real range, AbilityTargetFocus focus, AbilityTar
             else if priority == AbilityTargetPriority.LOW_DISTANCE
                 newPrio = 1/u.getPos().distanceTo(pos)
             else if priority == AbilityTargetPriority.HIGH_VALUE
-                let uType = UnitType.get(u.getTypeId())
-                if uType != null
-                    newPrio = uType.getBounty().toReal()
-                else
-                    newPrio = 0
+                newPrio = u.getField(UNIT_IF_GOLD_BOUNTY_AWARDED_BASE).toReal()
             else if priority == AbilityTargetPriority.HIGH_HEALTH
                 newPrio = u.getHP()
 
