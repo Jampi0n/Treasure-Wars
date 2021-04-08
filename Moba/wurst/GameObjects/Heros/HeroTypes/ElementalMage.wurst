@@ -9,7 +9,7 @@ constant int HERO_ORDER = 11
 
 
 
-class HeroElementalMage extends HeroTemplate
+public class HeroElementalMage extends HeroTemplate
     use HeroTemplateModule
     static BuffType buffFrenzy
     static constant FRENZY_BUFF_ID = compiletime(createAuraBuff("Frenzy", "This unit is under the effect of Frenzy; it attacks faster.", "PASFrostFireFrenzy"))

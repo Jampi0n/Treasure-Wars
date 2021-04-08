@@ -5,7 +5,7 @@ import Reference
 
 int HERO_ORDER = 5
 
-class HeroWarlock extends HeroTemplate
+public class HeroWarlock extends HeroTemplate
     use HeroTemplateModule
     
     static constant int array FEL_MAGIC_INTEL = [5, 10, 15, 20, 25]

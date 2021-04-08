@@ -66,7 +66,7 @@ class VenoumosBeetle
         this.onBite.destr()
 
 
-class HeroWarBeetle extends HeroTemplate
+public class HeroWarBeetle extends HeroTemplate
     use HeroTemplateModule
 
     override function objectDefinition()

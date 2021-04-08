@@ -73,7 +73,7 @@ class RitualOfTheSeas
 
         this.checkTimer.release()
 
-class HeroSeaDruid extends HeroTemplate
+public class HeroSeaDruid extends HeroTemplate
     use HeroTemplateModule
 
     override function objectDefinition()

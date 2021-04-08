@@ -94,7 +94,7 @@ class Pull
         if this.pulledUnit != null
             this.pulledUnit.setPos(this.pulledUnit.getPos())
 
-class HeroDrillmo extends HeroTemplate
+public class HeroDrillmo extends HeroTemplate
     use HeroTemplateModule
     override function objectDefinition()
         this.model = "Models\\Drillmo.mdl"
@@ -111,7 +111,8 @@ class HeroDrillmo extends HeroTemplate
         this.unitSoundSet = "Gyrocopter"
         this.name = "Dwarven Robot"
         this.properName = "Rhokky"
-        this.selectionScale = 1.35
+        this.scalingValue = 1.35
+        this.selectionScale = 2.2
         this.shadowX = 70
         this.shadowY = 70
         this.shadowH = 180

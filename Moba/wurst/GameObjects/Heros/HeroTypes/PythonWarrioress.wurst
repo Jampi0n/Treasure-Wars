@@ -6,7 +6,7 @@ import HeroInclude
 
 int HERO_ORDER = 0
 
-class HeroPythonWarrioress extends HeroTemplate
+public class HeroPythonWarrioress extends HeroTemplate
     use HeroTemplateModule
     
     override function objectDefinition()

@@ -12,7 +12,7 @@ class DestroyerInstance
 
 
 
-class HeroDestroyer extends HeroTemplate
+public class HeroDestroyer extends HeroTemplate
     use HeroTemplateModule
     override function objectDefinition()
         this.model = "Models\\Eligoropt.mdl"

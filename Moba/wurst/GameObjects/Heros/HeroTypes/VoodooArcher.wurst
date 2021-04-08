@@ -6,7 +6,7 @@ import HeroInclude
 
 int HERO_ORDER = 12
 
-class HeroVoodooArcher extends HeroTemplate
+public class HeroVoodooArcher extends HeroTemplate
     use HeroTemplateModule
 
     override function objectDefinition()

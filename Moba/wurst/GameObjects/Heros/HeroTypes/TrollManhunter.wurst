@@ -15,7 +15,7 @@ class TrollManHunterInstance
         notSpinning = createUnit(this.owner, HeroTrollManHunter.NOT_SPINNING, u.getPos(), angle(0))
         mirrorImage = null
 
-class HeroTrollManHunter extends HeroTemplate
+public class HeroTrollManHunter extends HeroTemplate
     use HeroTemplateModule
     
     static constant SOUND_SHADOW_STRIKE = new SoundDefinition(Sounds.metalHeavySliceFlesh2, false, true)

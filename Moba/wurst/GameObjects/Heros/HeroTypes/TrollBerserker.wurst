@@ -6,7 +6,7 @@ import HeroInclude
 
 int HERO_ORDER = 7
 
-class HeroTrollBerserker extends HeroTemplate
+public class HeroTrollBerserker extends HeroTemplate
     use HeroTemplateModule
 
     override function customDefintions(HeroDefinition def)

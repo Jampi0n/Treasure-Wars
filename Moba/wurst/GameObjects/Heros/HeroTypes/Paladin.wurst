@@ -67,7 +67,7 @@ class DivinePunishment
         this.checkTimer.release()
 
 
-class HeroPaladin extends HeroTemplate
+public class HeroPaladin extends HeroTemplate
     use HeroTemplateModule
 
     override function objectDefinition()

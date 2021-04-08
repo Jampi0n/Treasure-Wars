@@ -56,7 +56,7 @@ class Freeze
 
         g.destr()
 
-class HeroFreezer extends HeroTemplate
+public class HeroFreezer extends HeroTemplate
     use HeroTemplateModule
     static constant int FREEZE_EFFECT = compiletime(UNIT_ID_GEN.next())
 

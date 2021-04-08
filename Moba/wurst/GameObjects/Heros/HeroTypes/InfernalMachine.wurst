@@ -60,7 +60,7 @@ class AttackOrderTrack
         this.trackTrigger.destr()
         attackTracks.remove(this)
 
-class HeroInfernalMachine extends HeroTemplate
+public class HeroInfernalMachine extends HeroTemplate
     use HeroTemplateModule
     static constant HERO_INFERNAL_MACHINE_MORPH = compiletime(HERO_ID_GEN.next())
 

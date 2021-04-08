@@ -410,7 +410,7 @@ The unit type id is stored in a global to avoid additional parameters.
 
 The module also offers an instance variable, which can be used as a singleton to access instance data from static context:
 
-class MyHero extends HeroTemplate
+public class MyHero extends HeroTemplate
     use HeroTemplateModule
 
     int instanceVar = 0
@@ -461,7 +461,7 @@ public module HeroTemplateModule
 
 /**
 Must be used together with HeroTemplateModule:
-class MyHero extends HeroTemplate
+public class MyHero extends HeroTemplate
     use HeroTemplateModule
     ...
 **/

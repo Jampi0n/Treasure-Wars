@@ -16,7 +16,7 @@ class DeadEyInstance
         skeletons.destr()
 
 
-class HeroDeadEye extends HeroTemplate
+public class HeroDeadEye extends HeroTemplate
     use HeroTemplateModule
     static constant SOUND_BLACK_ARROW = new SoundDefinition(Sounds.raiseSkeleton1, false, true)
 
