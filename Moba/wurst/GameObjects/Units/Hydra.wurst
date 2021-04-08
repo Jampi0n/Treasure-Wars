@@ -64,12 +64,6 @@ function onHydraDeath()
         if not Players.isTeamNeutral(killerId)
             printTimed("Team "+teamName+" has killed a Hydra. Their heroes gain 3 stat upgrades for every stat. The Hydra will respawn in "+REVIVE_TIME.toInt().toString()+" seconds.", 10)
             PingMinimap(target.getX(), target.getY(), 3)
-
-            for p in Teams.HERO_PLAYERS[killingTeam]
-                for hero in Players.heroList(p)
-                    hero.toUnit().hydraBonus()
-                    hero.addXp(250)
-
             PlayerWrapper.statHydrasKilled[killerId]++
 
         doAfter(REVIVE_TIME) ->

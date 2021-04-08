@@ -555,6 +555,7 @@ endfunction
 //===========================================================================
 function Trig_Init_Func056A takes nothing returns nothing
     call SetPlayerTechResearchedSwap('R004', 1, GetEnumPlayer())
+    call SetPlayerFlagBJ(PLAYER_STATE_GIVES_BOUNTY, true, GetEnumPlayer())
 endfunction
 
 function Trig_Init_Actions takes nothing returns nothing
@@ -628,7 +629,6 @@ function Trig_Init_Actions takes nothing returns nothing
     call CreateFogModifierRectBJ(true, Player(10), FOG_OF_WAR_VISIBLE, gg_rct_GreenBaseVision2)
     call CreateFogModifierRectBJ(true, Player(11), FOG_OF_WAR_VISIBLE, gg_rct_BrownBaseVision1)
     call CreateFogModifierRectBJ(true, Player(11), FOG_OF_WAR_VISIBLE, gg_rct_BrownBaseVision2)
-    call SetPlayerFlagBJ(PLAYER_STATE_GIVES_BOUNTY, false, Player(PLAYER_NEUTRAL_AGGRESSIVE))
     call SetPlayerColorBJ(Player(10), PLAYER_COLOR_AQUA, true)
     call SetPlayerColorBJ(Player(11), PLAYER_COLOR_BROWN, true)
 endfunction

@@ -47,10 +47,8 @@ function onDragonTurtleDeath()
             
 
             for p in Teams.HERO_PLAYERS[killingTeam]
-                for hero in Players.heroList(p)
-                    dragonTurtleBonus(p)
-                    hero.addXp(150)
-                    createGoldBountyTextTag(target, TEAM_REWARD, players[p])
+                dragonTurtleBonus(p)
+                createGoldBountyTextTag(target, TEAM_REWARD, players[p])
 
             PlayerWrapper.statDragonTurtlesKilled[killerId]++
 

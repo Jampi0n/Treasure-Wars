@@ -425,8 +425,6 @@ public class HeroImpl implements IHero
                         PlayerWrapper.addAssist(p)
                     PlayerWrapper.addGoldEx(killingId, killBounty)
                     PlayerWrapper.addHeroKill(killingId, killingId <= Teams.last2())
-                    let xp = (this.level + 5) * 10.
-                    Teams.rewardXp(Teams.invert(this.team), this.hero.getPos(), xp)
                     destroy assistList
             else
                 printTimed(Players.coloredName(this.ownerId) + " was killed by " + killingPlayer.getName() + ".", 10)
