@@ -185,7 +185,7 @@ public class UnitImpl implements IUnit
         else
             this.assocUnit.setBaseDamage(this.getStrengthBase() - 1) // -1 because 1 damage is added by damage dice roll
         this.assocUnit.setBaseAttackSpeed(this.baseAttackCooldown * this.scaleAttackAnimation)
-        this.assocUnit.setArmor(this.getArmorBase().toReal())
+        this.assocUnit.setField(UNIT_RF_DEFENSE, this.getArmorBase().toReal())
         this.updateAll()
         this.applyAll()
     /**
