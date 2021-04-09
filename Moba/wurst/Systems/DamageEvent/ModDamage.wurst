@@ -78,7 +78,7 @@ public abstract class ModDamage
                 if targetWrapper.loadIntFast(D_HEART_AMULET) > 0
                     let remainingHp = target.getHP() - currentDamage
                     if remainingHp < 0.5
-                        if tryStartCooldown(target, HEART_AMULET_PASSIVE, HEART_AMULET_COOLDOWN * 1.0) or BuffList.hasBuffType(target, HEART_AMULET_BUFF)
+                        if PassiveItemCooldown.tryStartCooldown(target, ITEM_ID_HEART_AMULET, HEART_AMULET_PASSIVE, HEART_AMULET_COOLDOWN * 1.0) or BuffList.hasBuffType(target, HEART_AMULET_BUFF)
                             currentDamage += remainingHp - 0.5
                             target.addBuff(target, HEART_AMULET_DURATION * 1.0, HEART_AMULET_BUFF, 1)
                             // delay invulnerable

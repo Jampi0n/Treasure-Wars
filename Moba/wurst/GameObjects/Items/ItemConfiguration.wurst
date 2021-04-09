@@ -24,17 +24,105 @@ import public IUnit
 import public ChannelTeleport
 import public BuffTypeConfig
 import ErrorHandling
+import GameTimer
+
+class PassiveItemCooldownElement
+    int itm
+    real cd
+    construct(int itm, real cd)
+        this.itm = itm
+        this.cd = cd
+
+public class PassiveItemCooldown
+    protected static constant table = InitHashtable()
+    protected static constant ITEM_LOCKED_UNTIL = 0
+    protected static constant ITEM_ABILITY_ID = 1
+    protected static constant UNIT_NUM_LOCKS = 0
+    protected static constant ITEM_TYPE_ABILITY_ID = 0
+
+    protected static function lockItem(item itm, int abil, real cd)
+        print("lock item")
+        let h = itm.getHandleId()
+        table.saveReal(h, ITEM_LOCKED_UNTIL, getElapsedGameTime() + cd)
+        table.saveInt(h, ITEM_ABILITY_ID, abil)
+        doAfter(cd + 1) ->
+            checkLockItem(h)
+
+    protected static function checkLockItem(int h) returns real
+        print("checkLockItem " + h.toString())
+        if table.hasReal(h, 0)
+            print("item has lock")
+            let lockedUntil = table.loadReal(h, ITEM_LOCKED_UNTIL)
+            print("locked until = " + lockedUntil.toString())
+            if lockedUntil < getElapsedGameTime()
+                print("lock expired = " + getElapsedGameTime().toString())
+                unlockItem(h)
+                return -1
+            print("lock active")
+            return lockedUntil
+        print("item has not lock")
+        return -1
+
+    protected static function unlockItem(int h)
+        print("unlock item")
+        PassiveItemCooldown.table.flushChild(h)
+
+    protected static function lockUnit(unit u, int itm, int abil, real cd)
+        print("lock unit")
+
+        BlzStartUnitAbilityCooldown(u, abil, cd)
+
+        let h = u.getHandleId()
+        let current = table.hasReal(h, itm) ? table.loadReal(h, itm) : 0
+        if current == 0.0 // previously no lock for this item type
+            table.saveInt(h, UNIT_NUM_LOCKS, table.hasInt(h, UNIT_NUM_LOCKS) ? table.loadInt(h, UNIT_NUM_LOCKS) + 1 : 1)
+        table.saveReal(h, itm, max(current, getElapsedGameTime() + cd))
+        table.saveInt(itm, ITEM_TYPE_ABILITY_ID, abil)
+
+        ItemEffect.doItemEvents = false
+        for i = 0 to 5
+            var itmInSlot = u.itemInSlot(i)
+            if itmInSlot.getTypeId() == itm
+                itmInSlot.remove()
+                u.addItemToSlot(itm, i)
+                itmInSlot = u.itemInSlot(i)
+                lockItem(itmInSlot, abil, cd)
+        ItemEffect.doItemEvents = true
+
+        doAfter(cd + 1) -> 
+            checkLockUnit(h, itm)
+
+
+    protected static function checkLockUnit(int h, int itm) returns real
+        if table.hasReal(h, itm)
+            let lockedUntil = table.loadReal(h, itm)
+            if lockedUntil < getElapsedGameTime()
+                unlockUnit(h, itm)
+                return -1
+            return lockedUntil
+        return -1
+
+    protected static function unlockUnit(int h, int itm)
+        print("unlock unit")
+        table.removeReal(h, itm)
+        let locks = table.loadInt(h, UNIT_NUM_LOCKS)
+        if locks == 1
+            table.flushChild(h)
+            print("flush unit")
+        else
+            table.saveInt(h, UNIT_NUM_LOCKS, locks - 1)
+
+    static function tryStartCooldown(unit u, int itm, int abil, real cd) returns bool
+        print(u.getAbilityCooldownRemaining(abil))
+        if u.getAbilityCooldownRemaining(abil) == 0.0
+            lockUnit(u, itm, abil, cd)
+            return true
+        return false
 
 public function generateCooldownAbility() returns int
     let id = ABIL_ID_GEN.next()
     new AbilityDefinitionAnimateDead(id)
     return id
-
-public function tryStartCooldown(unit u, int id, real cd) returns bool
-    if u.getAbilityCooldownRemaining(id) == 0.0
-        BlzStartUnitAbilityCooldown(u, id, cd)
-        return true
-    return false
 
 public class IntToTrigger
     trigger trg
@@ -65,6 +153,8 @@ public function getItemSign() returns int
 public class ItemEffect
 
     private int itemId
+
+    protected static bool doItemEvents = true
 
     protected static item triggerItem
     protected static unit triggerUnit
@@ -99,25 +189,50 @@ public class ItemEffect
 
     static function onItemPickUp()
         triggerItem = GetManipulatedItem()
-        if itemIdToEffect.has(triggerItem.getTypeId())
-            triggerUnit = GetTriggerUnit()
-            triggerWrapper = triggerUnit.wrapper()
-            inventoryChangeDirection = 1
-            let itemType = itemIdToEffect.get(triggerItem.getTypeId())
-            itemType.useCount++
-            if itemType.onDropOrPickUp != null
-                itemType.onDropOrPickUp.dropOrPickUp(1)
+        let itemTypeId = triggerItem.getTypeId()
+        triggerUnit = GetTriggerUnit()
+        // item is locked
+        let itemHandleId = triggerItem.getHandleId()
+        let lockedUntilItem = PassiveItemCooldown.checkLockItem(itemHandleId)
+            
+        // hero is locked for item type
+        let unitHandleId = triggerUnit.getHandleId()
+        let lockedUntilUnit = PassiveItemCooldown.checkLockUnit(unitHandleId, itemTypeId)
+
+        if lockedUntilItem > lockedUntilUnit and lockedUntilItem >= 0
+            let abil = PassiveItemCooldown.table.loadInt(itemHandleId, PassiveItemCooldown.ITEM_ABILITY_ID)
+            let cd = lockedUntilItem - getElapsedGameTime()
+            // the item is locked, but the unit x item type may not be locked yet
+            PassiveItemCooldown.lockUnit(triggerUnit, itemTypeId, abil, cd)
+            print("onItemPickUp - lock item")
+        else if lockedUntilUnit >= 0
+            let abil = PassiveItemCooldown.table.loadInt(itemTypeId, PassiveItemCooldown.ITEM_TYPE_ABILITY_ID)
+            let cd = lockedUntilUnit - getElapsedGameTime()
+            // the unit x item type is locked, but the item may not be locked yet
+            PassiveItemCooldown.lockItem(triggerItem, abil, cd)
+            BlzStartUnitAbilityCooldown(triggerUnit, abil, cd)
+            print("onItemPickUp - lock unit")
+
+        if doItemEvents
+            if itemIdToEffect.has(itemTypeId)
+                triggerWrapper = triggerUnit.wrapper()
+                inventoryChangeDirection = 1
+                let itemType = itemIdToEffect.get(itemTypeId)
+                itemType.useCount++
+                if itemType.onDropOrPickUp != null
+                    itemType.onDropOrPickUp.dropOrPickUp(1)
 
     static function onItemDrop()
-        triggerItem = GetManipulatedItem()
-        if itemIdToEffect.has(triggerItem.getTypeId())
-            triggerUnit = GetTriggerUnit()
-            triggerWrapper = triggerUnit.wrapper()
-            inventoryChangeDirection = -1
-            let itemType = itemIdToEffect.get(triggerItem.getTypeId())
-            itemType.useCount--
-            if itemType.onDropOrPickUp != null
-                itemType.onDropOrPickUp.dropOrPickUp(-1)
+        if doItemEvents
+            triggerItem = GetManipulatedItem()
+            if itemIdToEffect.has(triggerItem.getTypeId())
+                triggerUnit = GetTriggerUnit()
+                triggerWrapper = triggerUnit.wrapper()
+                inventoryChangeDirection = -1
+                let itemType = itemIdToEffect.get(triggerItem.getTypeId())
+                itemType.useCount--
+                if itemType.onDropOrPickUp != null
+                    itemType.onDropOrPickUp.dropOrPickUp(-1)
 
 
 int currentItemId

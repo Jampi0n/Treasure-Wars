@@ -75,11 +75,9 @@ function fireHandGauntlet()
     setInfo("Fire Hand Gauntlet")
     setPassiveAbility(FIRE_HAND_GAUNTLET_PASSIVE)
     onEither() (int factor) ->
-        attackHitFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
-            if tryStartCooldown(target, FIRE_HAND_GAUNTLET_PASSIVE, 10)
 
 public constant HEART_AMULET_PASSIVE = compiletime(generateCooldownAbility())
-public constant HEART_AMULET_COOLDOWN = 300
+public constant HEART_AMULET_COOLDOWN = 30
 public constant HEART_AMULET_DURATION = 4
 
 public constant HEART_AMULET_BUFF = compiletime(setupBuff("Heart Amulet", "This unit is under the effect of Heart Amulet and is invulnerable.", "BTNHeartAmulet", true, 1, Abilities.divineShieldTarget, "origin", DispelLevel.BREAK))
