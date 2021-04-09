@@ -33,7 +33,7 @@ class Freeze
         g.enumUnitsInRange(this.caster.getPos(), HeroFreezer.FREEZE_AOE)
         for unit u in g
             if u.isTargetable(this.caster.getOwner(), false, true) and not u.isType(UNIT_TYPE_STRUCTURE)
-                u.addBuff(this.caster, -1, HeroFreezer.buffFreeze, this.level)
+                u.addBuff(this.caster, -1, HeroFreezer.BUFF_FREEZE, this.level)
         g.destr()
 
     function update()
@@ -49,7 +49,7 @@ class Freeze
         let g = CreateGroup()
         g.enumUnitsInRect(playableMapRect)
         for unit u in g
-            let freezeBuff = BuffList.getBuffOfType(u, HeroFreezer.buffFreeze)
+            let freezeBuff = BuffList.getBuffOfType(u, HeroFreezer.BUFF_FREEZE)
             if freezeBuff != null
                 if freezeBuff.getCaster() == this.caster
                     freezeBuff.dispel()
@@ -162,11 +162,7 @@ public class HeroFreezer extends HeroTemplate
     static constant int array NOVA_MS = [30, 30, 30, 30, 30]
     static constant int array NOVA_AS = [20, 20, 20, 20, 20]
 
-    static BuffType buffFrostNova
-
-    static constant int NOVA_BUFF_ID = compiletime(createAuraBuff("Frost Nova", "This unit was hit by Frost Nova; its movement and attack speed are slowed.", Icons.bTNGlacier))
-    static constant int NOVA_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, NOVA_BUFF_ID, Abilities.frostDamage, "chest"))
-
+    static constant BUFF_FROST_NOVA = compiletime(setupBuff("Frost Nova", "This unit was hit by Frost Nova; its movement and attack speed are slowed.", Icons.bTNGlacier, false, 5, Abilities.frostDamage, "chest", DispelLevel.DISPEL))
 
     override function setupQ(int abilityId, IHeroType heroType)
 
@@ -211,15 +207,8 @@ public class HeroFreezer extends HeroTemplate
     static constant real array ARMOR_SLOW_DURATION = [1, 1.25, 1.5, 1.75, 2]
     static constant real ARMOR_SLOW_DURATION_BONUS = 1
 
-    static BuffType buffFrostArmor
-    static BuffType buffFrostArmorSlow
-
-    static constant int ARMOR_BUFF_ID = compiletime(createAuraBuff("Frost Armor", "This unit has Frost Armor; its armor is increased and units that attack it will have their movement speed and attack rate reduced for a short duration.", "BTNSpell_Frost_ChillingArmor"))
-    static constant int ARMOR_ABILTIY_ID = compiletime(createPositiveBuffAbility(5, ARMOR_BUFF_ID, Abilities.frostArmorTarget, "chest"))
-
-    static constant int ARMOR_SLOW_BUFF_ID = compiletime(createAuraBuff("Slowed", "This unit attacked a unit with Frost Armor; its movement and attack speed are slowed.", Icons.bTNFrost))
-    static constant int ARMOR_SLOW_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, ARMOR_SLOW_BUFF_ID, Abilities.frostDamage, "chest"))
-
+    static constant BUFF_FROST_ARMOR = compiletime(setupBuff("Frost Armor", "This unit has Frost Armor; its armor is increased and units that attack it will have their movement speed and attack rate reduced for a short duration.", "BTNSpell_Frost_ChillingArmor", true, 5, Abilities.frostArmorTarget, "chest", DispelLevel.DISPEL))
+    static constant BUFF_FROST_ARMOR_SLOW = compiletime(setupBuff("Slowed", "This unit attacked a unit with Frost Armor; its movement and attack speed are slowed.", Icons.bTNFrost, false, 5, Abilities.frostDamage, "chest", DispelLevel.DISPEL))
 
     override function setupW(int abilityId, IHeroType heroType)
 
@@ -266,11 +255,7 @@ public class HeroFreezer extends HeroTemplate
     static constant int array FROST_BREATH_SLOW = [20, 20, 20, 20, 20]
     static constant real array FROST_BREATH_DUR = [2, 2.25, 2.5, 2.75, 3]
 
-    static BuffType buffFrostBreath
-
-    static constant int FROST_BREATH_BUFF_ID = compiletime(createAuraBuff("Frost Breath", "This unit was hit by a Frost Wyrm; its movement and attack speed are slowed.", Icons.bTNBreathOfFrost))
-    static constant int FROST_BREATH_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, FROST_BREATH_BUFF_ID, Abilities.frostDamage, "chest"))
-            
+    static constant BUFF_FROST_BREATH = compiletime(setupBuff("Frost Breath", "This unit was hit by a Frost Wyrm; its movement and attack speed are slowed.", Icons.bTNBreathOfFrost, false, 5, Abilities.frostDamage, "chest", DispelLevel.DISPEL))
 
     override function setupE(int abilityId, IHeroType heroType)
 
@@ -316,13 +301,7 @@ public class HeroFreezer extends HeroTemplate
 
     static constant int FREEZE_DEF = 100
 
-    static BuffType buffFreeze
-
-    static int lastFrostBreathLevel = 1
-
-    static constant int FREEZE_BUFF_ID = compiletime(createAuraBuff("Freeze", "This unit is under the effect of freeze; it is stunned; but has increased armor and willpower.", Icons.bTNFreezingBreath))
-    static constant int FREEZE_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, FREEZE_BUFF_ID, "", ""))
-
+    static constant BUFF_FREEZE = compiletime(setupBuff("Freeze", "This unit is under the effect of freeze; it is stunned; but has increased armor and willpower.", Icons.bTNFreezingBreath, false, 5, "", "", DispelLevel.BREAK))
 
     override function setupR(int abilityId, IHeroType heroType)
 
@@ -378,7 +357,7 @@ public class HeroFreezer extends HeroTemplate
             nearby.removeUnit(u)
             if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(caster.getOwner(), false, true)
                 caster.dealDamage(u, dmg, ReductionType.MAGIC)
-                u.addBuffReduced(caster, dur, buffFrostNova, level)
+                u.addBuffReduced(caster, dur, BUFF_FROST_NOVA, level)
 
         nearby.destr()
 
@@ -388,7 +367,7 @@ public class HeroFreezer extends HeroTemplate
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
-        GetSpellTargetUnit().addBuff( caster, ARMOR_DURATION, buffFrostArmor, level)
+        GetSpellTargetUnit().addBuff( caster, ARMOR_DURATION, BUFF_FROST_ARMOR, level)
 
     override static function castE()
         let spellId = GetSpellAbilityId()
@@ -418,13 +397,13 @@ public class HeroFreezer extends HeroTemplate
             let dmg = source.wrapper().getStrength() * 0.5
         
             if not target.isType(UNIT_TYPE_STRUCTURE)
-                target.addBuffReduced(source, FROST_BREATH_DUR[level-1], buffFrostBreath, level)
+                target.addBuffReduced(source, FROST_BREATH_DUR[level-1], BUFF_FROST_BREATH, level)
 
             while(not nearby.isEmpty())
                 let u = FirstOfGroup(nearby)
                 nearby.removeUnit(u)
                 if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(source.getOwner(), false, true) and u != target
-                    u.addBuffReduced(source, FROST_BREATH_DUR[level-1], buffFrostBreath, level)
+                    u.addBuffReduced(source, FROST_BREATH_DUR[level-1], BUFF_FROST_BREATH, level)
                     source.dealDamage(u, dmg, ReductionType.PHYSICAL)
 
             nearby.destr()
@@ -493,7 +472,7 @@ public class HeroFreezer extends HeroTemplate
 
             
         unit target = hero.findTarget(600, AbilityTargetFocus.FRIEND_HERO, AbilityTargetPriority.HIGH_HEALTH, (unit u) -> (begin
-            return not BuffList.hasBuffType(u, buffFrostArmor)
+            return not BuffList.hasBuffType(u, BUFF_FROST_ARMOR)
         end))
         if target.isTargetable(hero.getOwner(), true, false)
             ai.issue("frostarmor", target)
@@ -524,20 +503,15 @@ public class HeroFreezer extends HeroTemplate
                 if level != 0
                     source.healMana(source, COLD_HAND_MP[level-1].toReal())
     override function onInitDelayed(IHeroType heroType)
-        buffFrostNova = new BuffType(false, DispelLevel.DISPEL)
-        buffFrostNova.setupBuffWithIcon(NOVA_BUFF_ID, NOVA_ABILTIY_ID)
-        buffFrostNova.addSetupFunction() (Buff thisBuff, int factor) ->
+        BUFF_FROST_NOVA.addSetupFunction() (Buff thisBuff, int factor) ->
             thisBuff.getTarget().wrapper().modBlue(factor)
-        buffFrostNova.addLevelFunction() (Buff thisBuff, int factor) ->
+        BUFF_FROST_NOVA.addLevelFunction() (Buff thisBuff, int factor) ->
             let level = thisBuff.getLevel()
             thisBuff.getTarget().wrapper()
             ..modAttackSpeed( -factor * NOVA_AS[level - 1])
             ..modMoveSpeedRelative( -factor * NOVA_MS[level - 1]*10)
 
-
-        buffFrostArmor = new BuffType(true, DispelLevel.DISPEL)
-        buffFrostArmor.setupBuffWithIcon(ARMOR_BUFF_ID, ARMOR_ABILTIY_ID)
-        buffFrostArmor.addLevelFunction() (Buff thisBuff, int factor) ->
+        BUFF_FROST_ARMOR.addLevelFunction() (Buff thisBuff, int factor) ->
             if factor == 1
                 let target = thisBuff.getTarget()
                 let level = thisBuff.getLevel()
@@ -547,8 +521,8 @@ public class HeroFreezer extends HeroTemplate
                 forstArmor.intelligence = intel
                 forstArmor.damageEventPointer = DamageEventUnit.fromUnit(target).attackHitNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
                     if source.isTargetable(target.getOwner(), false, true)
-                        let armorBuff = BuffList.getBuffOfType(target, buffFrostArmor)
-                        source.addBuffReduced(armorBuff.getCaster(), ARMOR_SLOW_DURATION[level-1].bonus(armorBuff.getData(), ARMOR_SLOW_DURATION_BONUS), buffFrostArmorSlow, level)
+                        let armorBuff = BuffList.getBuffOfType(target, BUFF_FROST_ARMOR)
+                        source.addBuffReduced(armorBuff.getCaster(), ARMOR_SLOW_DURATION[level-1].bonus(armorBuff.getData(), ARMOR_SLOW_DURATION_BONUS), BUFF_FROST_ARMOR_SLOW, level)
                 thisBuff.setData(forstArmor castTo int)
             else
                 let target = thisBuff.getTarget()
@@ -559,31 +533,22 @@ public class HeroFreezer extends HeroTemplate
                 DamageEventUnit.fromUnit(target).attackHitNoBuilding.remove(frostArmor.damageEventPointer)
                 destroy frostArmor
 
-
-        buffFrostArmorSlow = new BuffType(false, DispelLevel.DISPEL)
-        buffFrostArmorSlow.setupBuffWithIcon(ARMOR_SLOW_BUFF_ID, ARMOR_SLOW_ABILTIY_ID)
-        buffFrostArmorSlow.addSetupFunction() (Buff thisBuff, int factor) ->
+        BUFF_FROST_ARMOR_SLOW.addSetupFunction() (Buff thisBuff, int factor) ->
             thisBuff.getTarget().wrapper().modBlue(factor)
-        buffFrostArmorSlow.addLevelFunction() (Buff thisBuff, int factor) ->
+        BUFF_FROST_ARMOR_SLOW.addLevelFunction() (Buff thisBuff, int factor) ->
             let level = thisBuff.getLevel()
             thisBuff.getTarget().wrapper()
             ..modAttackSpeed( -factor * ARMOR_SLOW[level - 1])
             ..modMoveSpeedRelative( -factor * ARMOR_SLOW[level - 1]*10)
 
-
-
-        buffFrostBreath = new BuffType(false, DispelLevel.DISPEL)
-        buffFrostBreath.setupBuffWithIcon(FROST_BREATH_BUFF_ID, FROST_BREATH_ABILTIY_ID)
-        buffFrostBreath.addSetupFunction() (Buff thisBuff, int factor) ->
+        BUFF_FROST_BREATH.addSetupFunction() (Buff thisBuff, int factor) ->
             thisBuff.getTarget().wrapper().modBlue(factor)
-            buffFrostBreath.addLevelFunction() (Buff thisBuff, int factor) ->
+            BUFF_FROST_BREATH.addLevelFunction() (Buff thisBuff, int factor) ->
             let level = thisBuff.getLevel()
             thisBuff.getTarget().wrapper()
             ..modMoveSpeedRelative( -factor * FROST_BREATH_SLOW[level - 1]*10)
 
-        buffFreeze= new BuffType(false, DispelLevel.BREAK)
-        buffFreeze.setupBuffWithIcon(FREEZE_BUFF_ID, FREEZE_ABILTIY_ID)
-        buffFreeze.addSetupFunction() (Buff thisBuff, int factor) ->
+        BUFF_FREEZE.addSetupFunction() (Buff thisBuff, int factor) ->
             if factor == 1
                 thisBuff.getTarget().addBuff(thisBuff.getCaster(), 0.1, STUNNED, 1).setDispelLevel(DispelLevel.BREAK)
                 let fx = createUnit(Player(PLAYER_NEUTRAL_PASSIVE), FREEZE_EFFECT, thisBuff.getTarget().getPos(), angle(GetRandomReal(0, 2 * bj_PI)))
@@ -600,8 +565,8 @@ public class HeroFreezer extends HeroTemplate
                 wrapper.modArmor( -FREEZE_DEF)
                 wrapper.modWillpower( -FREEZE_DEF)
 
-        buffFreeze.setPeriodicTime(0.05)
-        buffFreeze.addPeriodicFunction( (Buff whichBuff) -> (begin
+        BUFF_FREEZE.setPeriodicTime(0.05)
+        BUFF_FREEZE.addPeriodicFunction( (Buff whichBuff) -> (begin
             let target = whichBuff.getTarget()
             let caster = whichBuff.getCaster()
             let level = whichBuff.getLevel()

@@ -45,8 +45,8 @@ function woodenBow()
     onEither() (int factor) ->
         modStrength(str)
             
-constant ARMOR_BREAKER_BUFF_ID = compiletime(createAuraBuff("Armor Breaker", "This unit's armor is broken; it has reduced armor.", "BTNHammer1"))
-constant ARMOR_BREAKER_ABILITY_ID = compiletime(createNegativeBuffAbility(1, ARMOR_BREAKER_BUFF_ID, "", ""))
+/*constant ARMOR_BREAKER_BUFF_ID = compiletime(createAuraBuff("Armor Breaker", "This unit's armor is broken; it has reduced armor.", "BTNHammer1"))
+constant ARMOR_BREAKER_ABILITY_ID = compiletime(createNegativeBuffAbility(1, ARMOR_BREAKER_BUFF_ID, "", ""))*/
             
 constant ABILITY_ARMOR_BREAKER_SLAM = compiletime(ABIL_ID_GEN.next())
 
@@ -76,14 +76,14 @@ function itemArmorBreaker()
         ) )
 
     if not compiletime
-        let hammerBuff = new BuffType(false, DispelLevel.DISPEL)
+        /*let hammerBuff = new BuffType(false, DispelLevel.DISPEL)
         hammerBuff.setupBuffWithIcon(ARMOR_BREAKER_BUFF_ID, ARMOR_BREAKER_ABILITY_ID)
         hammerBuff.addSetupFunction() (Buff thisBuff, int factor) ->
-            thisBuff.getTarget().wrapper().modArmorRelative(-factor * armorDmg*10)
+            thisBuff.getTarget().wrapper().modArmorRelative(-factor * armorDmg*10)*/
         onEither() (int factor) ->
             modStrength(str)
             attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
-                target.addBuffReduced( source, armorDuration.toReal(), hammerBuff, 1)
+                //target.addBuffReduced( source, armorDuration.toReal(), hammerBuff, 1)
                 target.addEffect(Abilities.bloodElfSpellThiefMISSILE, "chest").destr()
 
             let trg = itemTrigger(-1)
@@ -96,8 +96,8 @@ function itemArmorBreaker()
                         addEffect(Abilities.thunderclapCaster, pos).destr()
 
 
-constant CHILLING_BLADE_BUFF_ID = compiletime(createAuraBuff("Chilling Blade", "This unit was hit by Chilling Blade; it has reduced movement speed.", "BTNMysticDagger"))
-constant CHILLING_BLADE_ABILITY_ID = compiletime(createNegativeBuffAbility(1, CHILLING_BLADE_BUFF_ID, Abilities.frostDamage, "chest"))
+/*constant CHILLING_BLADE_BUFF_ID = compiletime(createAuraBuff("Chilling Blade", "This unit was hit by Chilling Blade; it has reduced movement speed.", "BTNMysticDagger"))
+constant CHILLING_BLADE_ABILITY_ID = compiletime(createNegativeBuffAbility(1, CHILLING_BLADE_BUFF_ID, Abilities.frostDamage, "chest"))*/
 
 real lastAttack = 0.0
 
@@ -111,12 +111,12 @@ function itemChillingBlade()
         )+ "|n|cffffcc00Active:|r|nasd" )
 
     if not compiletime
-        let slowBuff = new BuffType(false, DispelLevel.DISPEL)
+        /*let slowBuff = new BuffType(false, DispelLevel.DISPEL)
         slowBuff.setupBuffWithIcon(CHILLING_BLADE_BUFF_ID, CHILLING_BLADE_ABILITY_ID)
         slowBuff.addSetupFunction() (Buff thisBuff, int factor) ->
             let wrapper = thisBuff.getTarget().wrapper()
             wrapper.modMoveSpeedRelative(-factor * slowAmount*10)
-            wrapper.modBlue(factor)
+            wrapper.modBlue(factor)*/
         onEither() (int factor) ->
             modStrength(str)
             attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->

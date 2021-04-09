@@ -2,9 +2,8 @@ package Altar
 
 import BuildingsInclude
 
-constant HOME_BUFF_ID = compiletime(createAuraBuff("Protected", "This unit is protected; it is invulnerable and is being healed.", Icons.bTNInvulnerable))
-constant HOME_ABILTIY_ID = compiletime(createPositiveBuffAbility(1, HOME_BUFF_ID, "Abilities\\Spells\\Human\\DivineShield\\DivineShieldTarget.mdl", ""))
-constant BUFF_HOME = new BuffType(true, DispelLevel.NONE) // this buff cannot be dispelled, because it depends on the position, so it would be reapplied immediately
+constant BUFF_HOME = compiletime(setupBuff("Protected", "This unit is protected; it is invulnerable and is being healed.", Icons.bTNInvulnerable, true, 1, Abilities.divineShieldTarget, "origin", DispelLevel.NONE)) // this buff cannot be dispelled, because it depends on the position, so it would be reapplied immediately
+
 
 function homeInvulnerability()
 	group nearby = CreateGroup()
@@ -36,8 +35,6 @@ public class Altar extends Building
 		super(ALTAR, 0, 0)
 
 init
-	BUFF_HOME.setupBuffWithIcon(HOME_BUFF_ID, HOME_ABILTIY_ID)
-
 	CreateTrigger()
 	..registerTimerEvent(0.2, true)
 	..addAction(function homeInvulnerability)

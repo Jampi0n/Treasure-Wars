@@ -128,10 +128,7 @@ public class HeroInfernalMachine extends HeroTemplate
     static constant real BASH_BUFF_DURATION = 4
     static constant int array BASH_MOVEMENT_SPEED = [100, 125, 150, 175, 200]
 
-    static constant int BASH_BUFF_ID = compiletime(createAuraBuff("Bash", "This unit's movement speed is increased and its next attack will stun the opponent.", "BTNFistOfFire"))
-    static constant int BASH_ABILITY_ID = compiletime(createPositiveBuffAbility(5, BASH_BUFF_ID, "", ""))
-
-    static BuffType buffBash
+    static constant BUFF_BASH = compiletime(setupBuff("Bash", "This unit's movement speed is increased and its next attack will stun the opponent.", "BTNFistOfFire", true, 5, "", "", DispelLevel.BREAK))
 
 
     override function setupQ(int abilityId, IHeroType heroType)
@@ -157,7 +154,7 @@ public class HeroInfernalMachine extends HeroTemplate
                     ..setAttackSpeedIncrease(lvl, 0)
                     ..setDamageTakenIncrease(lvl, 0)
                     ..setMovementSpeedIncrease(lvl, 0)
-                    ..setBuffs(lvl, BASH_BUFF_ID.toRawCode())
+                    ..setBuffs(lvl, BUFF_BASH.getBuffId().toRawCode())
                     ..setDurationHero(lvl, 0.01)
 
         let tooltip = new DynamicTooltip(abilityId)
@@ -182,12 +179,9 @@ public class HeroInfernalMachine extends HeroTemplate
 
     static constant real INNER_FIRE_DURATION = 12
 
-    static constant int INNER_FIRE_BUFF_ID = compiletime(createAuraBuff("Inner Fire", "This unit's strength and armor and willpower are increased.", Icons.bTNInnerFire))
-    static constant int INNER_FIRE_ABILITY_ID = compiletime(createPositiveBuffAbility(5, INNER_FIRE_BUFF_ID, Abilities.innerFireTarget, "overhead"))
-
     static constant real INNER_FIRE_AOE = 900
 
-    static BuffType buffInnerFire
+    static constant BUFF_INNER_FIRE = compiletime(setupBuff("Inner Fire", "This unit's strength and armor and willpower are increased.", Icons.bTNInnerFire, true, 5, Abilities.innerFireTarget, "overhead", DispelLevel.DISPEL))
 
 
     override function setupW(int abilityId, IHeroType heroType)
@@ -232,13 +226,10 @@ public class HeroInfernalMachine extends HeroTemplate
 
     static constant real array FLAME_THROWER_AOE = [350, 350, 350, 350, 350]
 
-    static constant int FLAME_THROWER_BUFF_ID = compiletime(createAuraBuff("Flame Thrower", "This unit was hit by Flame Thrower; it takes damage over time.", Icons.bTNWallOfFire))
-    static constant int FLAME_THROWER_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, FLAME_THROWER_BUFF_ID, Abilities.breathOfFireDamage, "origin"))
-
     static constant int FLAME_THROWER_ARTILLERY = compiletime(ArtilleryDetection.createArtilleryDummy(30, 20, 210, 2.5, Abilities.redDragonMissile, 900, 0.3))
 
 
-    static BuffType buffFlameThrower
+    static constant BUFF_FLAME_THROWER = compiletime(setupBuff("Flame Thrower", "This unit was hit by Flame Thrower; it takes damage over time.", Icons.bTNWallOfFire, false, 5, Abilities.breathOfFireDamage, "origin", DispelLevel.DISPEL))
 
 
 
@@ -328,7 +319,7 @@ public class HeroInfernalMachine extends HeroTemplate
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
-        caster.addBuff(caster, 4, buffBash, level)
+        caster.addBuff(caster, 4, BUFF_BASH, level)
 
     override static function castW()
         let spellId = GetSpellAbilityId()
@@ -341,7 +332,7 @@ public class HeroInfernalMachine extends HeroTemplate
             let target = FirstOfGroup(nearby)
             nearby.removeUnit(target)
             if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), true, false)
-                target.addBuff( caster, INNER_FIRE_DURATION, buffInnerFire, level)
+                target.addBuff( caster, INNER_FIRE_DURATION, BUFF_INNER_FIRE, level)
 
         nearby.destr()
 
@@ -370,7 +361,7 @@ public class HeroInfernalMachine extends HeroTemplate
                 if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(impact.getOwner(), false, true)
 
                     caster.dealDamage(target, dmg, ReductionType.MAGIC)
-                    target.addBuffReduced(caster, FLAME_THROWER_DURATION[level-1], buffFlameThrower, level)
+                    target.addBuffReduced(caster, FLAME_THROWER_DURATION[level-1], BUFF_FLAME_THROWER, level)
 
             nearby.destr()
 
@@ -393,8 +384,8 @@ public class HeroInfernalMachine extends HeroTemplate
                     doAfter(0, () -> caster.issueTargetOrder("attack", target))
         end))
         caster.disableAbility(HeroInfernalMachine.instance.ABILITY_ID_Q, true, false)
-        if BuffList.hasBuffType(caster, buffBash)
-            BuffList.getBuffOfType(caster, buffBash).dispel()
+        if BuffList.hasBuffType(caster, BUFF_BASH)
+            BuffList.getBuffOfType(caster, BUFF_BASH).dispel()
 
     static function onRapidEndStats(unit caster, int level) // remove bonus
         caster.wrapper().modAttackSpeed( -RAPID_FIRE_ATTACK_SPEED[level-1])
@@ -504,8 +495,8 @@ public class HeroInfernalMachine extends HeroTemplate
     override function onInit(IHeroType heroType)
         heroType.setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean advanced) ->
             if target.isTargetable(source.getOwner(), false, true) and not target.isType(UNIT_TYPE_STRUCTURE)
-                if source.getTypeId() == UNIT_ID_HERO and BuffList.hasBuffType(source, buffBash)
-                    let bash = BuffList.getBuffOfType(source, buffBash)
+                if source.getTypeId() == UNIT_ID_HERO and BuffList.hasBuffType(source, BUFF_BASH)
+                    let bash = BuffList.getBuffOfType(source, BUFF_BASH)
                     target.addBuffReduced(source, BASH_STUN_DURATION[bash.getLevel()-1], STUNNED, 1).setDispelLevel(DispelLevel.DISPEL)
                     source.dealDamage(target, BASH_DAMAGE_BONUS[bash.getLevel()-1].toReal(), ReductionType.PHYSICAL)
                     bash.dispel()
@@ -513,15 +504,10 @@ public class HeroInfernalMachine extends HeroTemplate
                     target.addBuffReduced(source, RAPID_FIRE_STUN_DURATION[source.getAbilityLevel(ABILITY_ID_R)-1], STUNNED, 1).setDispelLevel(DispelLevel.DISPEL)
     override function onInitDelayed(IHeroType heroType)
         heroType.addMorph(HERO_INFERNAL_MACHINE_MORPH)
-        buffBash = new BuffType(true, DispelLevel.DISPEL)
-
-        buffBash.setupBuffWithIcon(BASH_BUFF_ID, BASH_ABILITY_ID)
-        buffBash.addLevelFunction() (Buff thisBuff, int factor) ->
+        BUFF_BASH.addLevelFunction() (Buff thisBuff, int factor) ->
             thisBuff.getTarget().wrapper().modMoveSpeed( factor * BASH_MOVEMENT_SPEED[thisBuff.getLevel()-1])
 
-        buffInnerFire = new BuffType(true, DispelLevel.DISPEL)
-        buffInnerFire.setupBuffWithIcon(INNER_FIRE_BUFF_ID, INNER_FIRE_ABILITY_ID)
-        buffInnerFire.addLevelFunction() (Buff thisBuff, int factor) ->
+        BUFF_INNER_FIRE.addLevelFunction() (Buff thisBuff, int factor) ->
             let level = thisBuff.getLevel()
             let wrapper = thisBuff.getTarget().wrapper()
             int intel
@@ -534,10 +520,8 @@ public class HeroInfernalMachine extends HeroTemplate
             wrapper.modArmor( factor * INNER_FIRE_DEF[level-1].bonus(intel, INNER_FIRE_DEF_BONUS).toInt() )
             wrapper.modWillpower( factor * INNER_FIRE_DEF[level-1].bonus(intel, INNER_FIRE_DEF_BONUS).toInt() )
 
-        buffFlameThrower = new BuffType(false, DispelLevel.DISPEL)
-        buffFlameThrower.setupBuffWithIcon(FLAME_THROWER_BUFF_ID, FLAME_THROWER_ABILTIY_ID)
-        buffFlameThrower.setPeriodicTime(0.25)
-        buffFlameThrower.addPeriodicFunction((Buff whichBuff) -> (begin
+        BUFF_FLAME_THROWER.setPeriodicTime(0.25)
+        BUFF_FLAME_THROWER.addPeriodicFunction((Buff whichBuff) -> (begin
             let caster = whichBuff.getCaster()
             let target = whichBuff.getTarget()
             if target.isTargetable(caster.getOwner(), false, true)

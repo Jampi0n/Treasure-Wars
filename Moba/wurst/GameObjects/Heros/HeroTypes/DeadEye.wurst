@@ -29,9 +29,8 @@ public class HeroDeadEye extends HeroTemplate
     static constant real array TERROR_DURATION = [2, 2.6, 3.2, 3.8, 4.4]
     static constant real TERROR_DURATION_BONUS = 2
     static real array TERROR_AOE = [700, 750, 800, 850, 900]
-    static constant BUFF_TERROR = new BuffType(false, DispelLevel.DISPEL)
-    static constant TERROR_BUFF_ID = compiletime(createAuraBuff("Terror", "This unit was hit by Terror; its attacks will miss.", Icons.bTNHowlOfTerror))
-    static constant TERROR_ABILITY_ID = compiletime(createNegativeBuffAbility(5, TERROR_BUFF_ID, Abilities.howlTarget, ""))
+    static constant BUFF_TERROR = compiletime(setupBuff("Terror", "This unit was hit by Terror; its attacks will miss.", Icons.bTNHowlOfTerror, true, 5, Abilities.howlTarget, "", DispelLevel.DISPEL ))
+
 
     static constant real array DEATH_COIL_DMG_BASE = [200, 250, 300, 350, 400]
     static constant real array DEATH_COIL_DMG_FACTOR = [15, 20, 25, 30, 35]
@@ -395,7 +394,6 @@ public class HeroDeadEye extends HeroTemplate
                         end))
                 end))
     override function onInitDelayed(IHeroType heroType)
-        BUFF_TERROR.setupBuffWithIcon(TERROR_BUFF_ID, TERROR_ABILITY_ID)
         onImpact(BUFF_ID_ON_DEATH_COIL) (unit source, unit target) ->
             let instance = DeadEyInstance.fromUnit(source)
             if target.isTargetable(source.getOwner(), false, true)

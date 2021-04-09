@@ -48,7 +48,7 @@ class VenoumosBeetle
     function onBite(unit biteTarget)
         if biteTarget == this.target
             owner.dealDamage(target, HeroWarBeetle.BITE_DAMAGE[level-1].bonus(ownerIntelligence, HeroWarBeetle.BITE_DAMAGEL_BONUS), ReductionType.MAGIC)
-            target.addBuffReduced(this.owner, HeroWarBeetle.BITE_SLOW_DURATION[level-1].bonus(ownerIntelligence, HeroWarBeetle.BITE_SLOW_DURATION_BONUS), HeroWarBeetle.buffBite, level)
+            target.addBuffReduced(this.owner, HeroWarBeetle.BITE_SLOW_DURATION[level-1].bonus(ownerIntelligence, HeroWarBeetle.BITE_SLOW_DURATION_BONUS), HeroWarBeetle.BUFF_BITE, level)
         else
             error("Bitten target is wrong!")
 
@@ -121,10 +121,7 @@ public class HeroWarBeetle extends HeroTemplate
     static constant real array BITE_SLOW_DURATION = [1.4, 1.8, 2.2, 2.6, 3.0]
     static constant real BITE_SLOW_DURATION_BONUS = 0.9
 
-    static BuffType buffBite
-    static constant BITE_BUFF_ID = compiletime(createAuraBuff("Venomous Beetle", "This unit was bitten by a Venomous Beetle; it is slowed.", Icons.bTNCarrionScarabs))
-    static constant BITE_ABILITY_ID = compiletime(createNegativeBuffAbility(5, BITE_BUFF_ID, Abilities.poisonStingTarget, "chest"))
-
+    static constant BUFF_BITE = compiletime(setupBuff("Venomous Beetle", "This unit was bitten by a Venomous Beetle; it is slowed.", Icons.bTNCarrionScarabs, false, 5, Abilities.poisonStingTarget, "chest", DispelLevel.DISPEL))
 
     override function setupQ(int abilityId, IHeroType heroType)
 
@@ -239,14 +236,11 @@ public class HeroWarBeetle extends HeroTemplate
     static constant real UNBREAKABLE_DURATION = 20
 
 
-    static constant int UNBREAKABLE_BUFF_ID = compiletime(createAuraBuff("Unbreakable", "This unit's maximum hit points; armor; willpower and strength are increased.", Icons.bTNAdvancedCreatureCarapace))
-    static constant int UNBREAKABLE_ABILITY_ID = compiletime(createPositiveBuffAbility(5, UNBREAKABLE_BUFF_ID, "", "chest"))
-
     static constant real UNBREAKABLE_SCALE = 1.25
 
     static constant int UNBREAKABLE_DUMMY_BUFF = compiletime(createDummyBuff())
 
-    static BuffType buffUnbreakable
+    static constant BUFF_UNBREAKABLE = compiletime(setupBuff("Unbreakable", "This unit's maximum hit points; armor; willpower and strength are increased.", Icons.bTNAdvancedCreatureCarapace, true, 5, "", "", DispelLevel.BREAK))
 
 
     override function setupR(int abilityId, IHeroType heroType)
@@ -324,7 +318,7 @@ public class HeroWarBeetle extends HeroTemplate
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
         caster.removeAbility(UNBREAKABLE_DUMMY_BUFF)
-        caster.addBuff(caster, UNBREAKABLE_DURATION, buffUnbreakable, level)
+        caster.addBuff(caster, UNBREAKABLE_DURATION, BUFF_UNBREAKABLE, level)
         caster.addEffect(Units.wispExplode, "chest").destr()
 
     override function stats()
@@ -424,17 +418,10 @@ public class HeroWarBeetle extends HeroTemplate
         heroType
         ..useHeroGlow()
     override function onInitDelayed(IHeroType heroType)
-        buffBite = new BuffType(false, DispelLevel.DISPEL)
-
-        buffBite.setupBuffWithIcon(BITE_BUFF_ID, BITE_ABILITY_ID)
-
-        buffBite.addLevelFunction() (Buff thisBuff, int factor) ->
+        BUFF_BITE.addLevelFunction() (Buff thisBuff, int factor) ->
             thisBuff.getTarget().wrapper().modMoveSpeedRelative( -factor * BITE_SLOW * 10)
 
-        buffUnbreakable = new BuffType(true, DispelLevel.NONE)
-
-        buffUnbreakable.setupBuffWithIcon(UNBREAKABLE_BUFF_ID, UNBREAKABLE_ABILITY_ID)
-        buffUnbreakable.addLevelFunction() (Buff thisBuff, int factor) ->
+        BUFF_UNBREAKABLE.addLevelFunction() (Buff thisBuff, int factor) ->
             let level = thisBuff.getLevel()
             let target = thisBuff.getTarget()
             target.wrapper()

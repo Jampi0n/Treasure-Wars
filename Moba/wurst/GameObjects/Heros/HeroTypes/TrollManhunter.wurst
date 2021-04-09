@@ -25,36 +25,28 @@ public class HeroTrollManHunter extends HeroTemplate
 
     static constant real array BLEEDING_WOUND_DMG = [4, 6, 8, 10, 12]
     static constant real BLEEDING_WOUND_DURATION = 6.0
-    static BuffType buffBleedingWound
-    static constant int BLEEDING_WOUND_BUFF_ID = compiletime(createAuraBuff("Bleeding Wound", "This is under the effect of Bleeding Wound; it takes damage over time.", "BTNBloodSpike"))
-    static constant int BLEEDING_WOUND_ABILITY_ID = compiletime(createNegativeBuffAbility(5, BLEEDING_WOUND_BUFF_ID, "FatalWoundV2.mdx", "chest"))
+    static constant BUFF_BLEEDING_WOUND = compiletime(setupBuff("Bleeding Wound", "This is under the effect of Bleeding Wound; it takes damage over time.", "BTNBloodSpike", false, 5, "FatalWoundV2.mdx", "chest", DispelLevel.DISPEL))
 
     static constant int SHADOW_STRIKE_SHADOW_UNIT = compiletime(UNIT_ID_GEN.next())
     static constant real array SHADOW_STRIKE_DAMAGE = [75, 125, 175, 225, 275]
     static constant real SHADOW_STRIKE_DAMAGE_BONUS = 80
     static constant real array SHADOW_STRIKE_SLOW_DURATION = [1, 1.25, 1.5, 1.75, 2]
     static constant int SHADOW_STRIKE_SLOW = 200
-    static BuffType buffShadowStrike
-    static constant SHADOW_STRIKE_BUFF_ID = compiletime(createAuraBuff("Shadow Strike", "This unit was hit by Shadow Strike; it is slowed.", Icons.bTNBerserkForTrolls))
-    static constant SHADOW_STRIKE_ABILITY_ID = compiletime(createNegativeBuffAbility(5, SHADOW_STRIKE_BUFF_ID, Abilities.shadowstrike, "overhead"))
+    static constant BUFF_SHADOW_STRIKE = compiletime(setupBuff("Shadow Strike", "This unit was hit by Shadow Strike; it is slowed.", Icons.bTNBerserkForTrolls, false, 5, Abilities.shadowstrike, "overhead", DispelLevel.DISPEL))
 
     static constant real array DEATH_SPIN_DAMAGE = [50, 75, 100, 125, 150]
     static constant real DEATH_SPIN_DAMAGE_BONUS = 50
     static constant int array DEATH_SPIN_DEFENSE = [20, 25, 30, 35, 40]
     static constant real DEATH_SPIN_DURATION = 3.0
     static constant real DEATH_SPIN_AOE = 250
-    static BuffType buffDeathSpin
-    static constant int DEATH_SPIN_BUFF_ID = compiletime(createAuraBuff("Death Spin", "This unit is under the effect of Death Spin; it cannot attack.", Icons.bTNWhirlwind))
-    static constant int DEATH_SPIN_ABILITY_ID = compiletime(createNegativeBuffAbility(5, DEATH_SPIN_BUFF_ID, Abilities.lordofFlameMissile, "chest"))
     static constant int DEATH_SPIN_DISABLE_ATTACK = compiletime(ABIL_ID_GEN.next())
+    static constant BUFF_DEATH_SPIN = compiletime(setupBuff("Death Spin", "This unit is under the effect of Death Spin; it cannot attack.", Icons.bTNWhirlwind, true, 5, "", "", DispelLevel.BREAK))
 
     static constant real array CRIPPLING_PAIN_DAMAGE = [20, 30, 40, 50, 60]
     static constant real CRIPPLING_PAIN_DAMAGE_BONUS = 30
     static constant int array CRIPPLING_PAIN_SLOW = [8, 10, 12, 14, 16]
     static constant real array CRIPPLING_PAIN_DURATION= [3, 3.5, 4, 4.5, 5]
-    static BuffType buffCripplingPain
-    static constant int CRIPPLING_PAIN_BUFF_ID = compiletime(createAuraBuff("Crippling Pain", "This unit is under the effect of Crippling Pain; it has reduced movement speed.", "BTNTorment"))
-    static constant int CRIPPLING_PAIN_ABILITY_ID = compiletime(createNegativeBuffAbility(5, CRIPPLING_PAIN_BUFF_ID, Abilities.crippleTarget, "chest"))
+    static constant BUFF_CRIPPLING_PAIN = compiletime(setupBuff("Crippling Pain", "This unit is under the effect of Crippling Pain; it has reduced movement speed.", "BTNTorment", false, 5, Abilities.crippleTarget, "chest", DispelLevel.DISPEL))
     static constant real CRIPPLING_PAIN_AOE = 1500
 
     static constant real array MIRROR_IMAGE_DURATION = [18, 21, 24, 27, 30]
@@ -292,10 +284,10 @@ public class HeroTrollManHunter extends HeroTemplate
                 SOUND_SHADOW_STRIKE.playOnPoint(caster.getPos().toVec3()).snd.setVolume(150)
                 let bleedingWoundLevel = caster.getAbilityLevel(instance.ABILITY_ID_PASSIVE)
                 if bleedingWoundLevel > 0
-                    let b = target.addBuffReduced(caster, BLEEDING_WOUND_DURATION, buffBleedingWound, bleedingWoundLevel)
+                    let b = target.addBuffReduced(caster, BLEEDING_WOUND_DURATION, BUFF_BLEEDING_WOUND, bleedingWoundLevel)
                     b.setData(b.getData()+3)
 
-                target.addBuffReduced(caster, SHADOW_STRIKE_SLOW_DURATION[level-1], buffShadowStrike, level)
+                target.addBuffReduced(caster, SHADOW_STRIKE_SLOW_DURATION[level-1], BUFF_SHADOW_STRIKE, level)
                 caster.dealDamage(target, SHADOW_STRIKE_DAMAGE[level-1].bonus(caster.getHeroStr(), SHADOW_STRIKE_DAMAGE_BONUS), ReductionType.PHYSICAL)
         doAfter(0.85) ->
             addEffect(Abilities.mirrorImageDeathCaster, spawnPos).destr()
@@ -305,7 +297,7 @@ public class HeroTrollManHunter extends HeroTemplate
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
         caster.removeAbility('Bbsk')
-        caster.addBuff(caster, DEATH_SPIN_DURATION, buffDeathSpin, level)
+        caster.addBuff(caster, DEATH_SPIN_DURATION, BUFF_DEATH_SPIN, level)
 
     override static function castE()
         let spellId = GetSpellAbilityId()
@@ -321,10 +313,10 @@ public class HeroTrollManHunter extends HeroTemplate
             if u == null
                 break
             g.removeUnit(u)
-            if BuffList.hasBuffType(u, buffBleedingWound)
-                let bleedingWound = BuffList.getBuffOfType(u, buffBleedingWound)
+            if BuffList.hasBuffType(u, BUFF_BLEEDING_WOUND)
+                let bleedingWound = BuffList.getBuffOfType(u, BUFF_BLEEDING_WOUND)
                 let stacks = bleedingWound.getData() div 4
-                u.addBuffReduced(caster, CRIPPLING_PAIN_DURATION[level-1], buffCripplingPain, level)
+                u.addBuffReduced(caster, CRIPPLING_PAIN_DURATION[level-1], BUFF_CRIPPLING_PAIN, level)
 
                 caster.dealDamage(u, stacks * CRIPPLING_PAIN_DAMAGE[level-1].bonus(caster.getHeroInt(), CRIPPLING_PAIN_DAMAGE_BONUS), ReductionType.MAGIC)
         g.destr()
@@ -386,41 +378,29 @@ public class HeroTrollManHunter extends HeroTemplate
         heroType.setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean advanced) ->
             let level = source.getAbilityLevel(this.ABILITY_ID_PASSIVE)
             if level != 0 and target.isTargetable(source.getOwner(), false, true) and not target.isType(UNIT_TYPE_STRUCTURE)
-                let b = target.addBuffReduced( source, BLEEDING_WOUND_DURATION, buffBleedingWound, level)
+                let b = target.addBuffReduced( source, BLEEDING_WOUND_DURATION, BUFF_BLEEDING_WOUND, level)
                 b.setData(b.getData()+3)
 
     override function onInitDelayed(IHeroType heroType)
         /*  bleeding wound: every attack increases actual stacks by 4, so bladestorm can increase by 1 every 0.25 seconds
             So dmg is 0.25 * 1/4 -> (interval) * (4 stacks)  */
-        buffBleedingWound = new BuffType(false, DispelLevel.DISPEL)
-        buffBleedingWound.setupBuffWithIcon(BLEEDING_WOUND_BUFF_ID, BLEEDING_WOUND_ABILITY_ID)
-
-        buffBleedingWound.addSetupFunction() (Buff thisBuff, int factor) ->
+        BUFF_BLEEDING_WOUND.addSetupFunction() (Buff thisBuff, int factor) ->
             if factor == 1
                 thisBuff.setData(1)
 
-        buffBleedingWound.addStackFunction( (Buff whichBuff) -> (begin
+        BUFF_BLEEDING_WOUND.addStackFunction( (Buff whichBuff) -> (begin
             whichBuff.setData(whichBuff.getData()+1)
         end))
 
-        buffBleedingWound.setPeriodicTime(0.25)
-        buffBleedingWound.addPeriodicFunction( (Buff whichBuff) -> (begin
+        BUFF_BLEEDING_WOUND.setPeriodicTime(0.25)
+        BUFF_BLEEDING_WOUND.addPeriodicFunction( (Buff whichBuff) -> (begin
             let level = whichBuff.getLevel()
             whichBuff.getCaster().dealDamage(whichBuff.getTarget(), 1.0/16.0 * whichBuff.getData() * BLEEDING_WOUND_DMG[level-1], ReductionType.PHYSICAL)
         end))
-
-        buffShadowStrike = new BuffType(false, DispelLevel.DISPEL)
-
-        buffShadowStrike.setupBuffWithIcon(SHADOW_STRIKE_BUFF_ID, SHADOW_STRIKE_ABILITY_ID)
-
-        buffShadowStrike.addLevelFunction() (Buff thisBuff, int factor) ->
+        BUFF_SHADOW_STRIKE.addLevelFunction() (Buff thisBuff, int factor) ->
             thisBuff.getTarget().wrapper().modMoveSpeedRelative( -factor * SHADOW_STRIKE_SLOW * 10)
 
-
-        buffDeathSpin = new BuffType(false, DispelLevel.NONE)
-        buffDeathSpin.setupBuffWithIcon(DEATH_SPIN_BUFF_ID, DEATH_SPIN_ABILITY_ID)
-
-        buffDeathSpin.addSetupFunction() (Buff thisBuff, int factor) ->
+        BUFF_DEATH_SPIN.addSetupFunction() (Buff thisBuff, int factor) ->
             let target = thisBuff.getTarget()
             let instance = TrollManHunterInstance.fromUnit(target)
             if factor == 1
@@ -432,14 +412,14 @@ public class HeroTrollManHunter extends HeroTemplate
                 target.removeAbility(DEATH_SPIN_DISABLE_ATTACK)
                 AddUnitAnimationProperties(target, "spin", false)
 
-        buffDeathSpin.addLevelFunction() (Buff thisBuff, int factor) ->
+        BUFF_DEATH_SPIN.addLevelFunction() (Buff thisBuff, int factor) ->
             let level = thisBuff.getLevel()
             thisBuff.getTarget().wrapper()
             ..modArmor( factor * DEATH_SPIN_DEFENSE[level-1])
             ..modWillpower( factor * DEATH_SPIN_DEFENSE[level-1])
 
-        buffDeathSpin.setPeriodicTime(0.25)
-        buffDeathSpin.addPeriodicFunction( (Buff whichBuff) -> (begin
+        BUFF_DEATH_SPIN.setPeriodicTime(0.25)
+        BUFF_DEATH_SPIN.addPeriodicFunction( (Buff whichBuff) -> (begin
             let caster = whichBuff.getCaster()
             let instance = TrollManHunterInstance.fromUnit(caster)
             let g = CreateGroup()
@@ -454,22 +434,19 @@ public class HeroTrollManHunter extends HeroTemplate
                 if u.isTargetable(instance.owner, false, true) and not u.isType(UNIT_TYPE_STRUCTURE)
                     let bleedingWoundLevel = caster.getAbilityLevel(this.ABILITY_ID_PASSIVE)
                     if bleedingWoundLevel > 0
-                        u.addBuffReduced(caster, BLEEDING_WOUND_DURATION, buffBleedingWound, bleedingWoundLevel)
+                        u.addBuffReduced(caster, BLEEDING_WOUND_DURATION, BUFF_BLEEDING_WOUND, bleedingWoundLevel)
                     caster.dealDamage(u, 0.25 * DEATH_SPIN_DAMAGE[level-1].bonus(caster.getHeroStr(), DEATH_SPIN_DAMAGE_BONUS), ReductionType.PHYSICAL)
             g.destr()
         end))
-
-        buffCripplingPain = new BuffType(false, DispelLevel.DISPEL)
-        buffCripplingPain.setupBuffWithIcon(CRIPPLING_PAIN_BUFF_ID, CRIPPLING_PAIN_ABILITY_ID)
-
+        
         // store number of stacks of bleeding wound
-        buffCripplingPain.addSetupFunction() (Buff thisBuff, int factor) ->
-            let bleedingWound = BuffList.getBuffOfType(thisBuff.getTarget(), buffBleedingWound)
+        BUFF_CRIPPLING_PAIN.addSetupFunction() (Buff thisBuff, int factor) ->
+            let bleedingWound = BuffList.getBuffOfType(thisBuff.getTarget(), BUFF_BLEEDING_WOUND)
             if bleedingWound != null
                 thisBuff.setData(bleedingWound.getData() div 4)
                 bleedingWound.dispel()
             
-        buffCripplingPain.addLevelFunction() (Buff thisBuff, int factor) ->
+        BUFF_CRIPPLING_PAIN.addLevelFunction() (Buff thisBuff, int factor) ->
             let level = thisBuff.getLevel()
             let stacks = thisBuff.getData()
             thisBuff.getTarget().wrapper().modMoveSpeedRelative(-factor * CRIPPLING_PAIN_SLOW[level - 1] * 10 * stacks)

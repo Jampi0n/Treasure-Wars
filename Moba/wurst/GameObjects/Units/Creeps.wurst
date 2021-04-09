@@ -28,57 +28,27 @@ constant int MAX_CAMP_LEVEL = 20
     Instead an icon dummy owned by neutral passive shows the creep camp.*/
 constant BUFF_MAP = new HashMap<int, BuffConfiguration>
 
-constant BuffType TURTLE_BUFF = new BuffType(true, DispelLevel.BREAK) //return dmg
-constant BuffType JUNGLE_STALKER_BUFF = new BuffType(true, DispelLevel.BREAK) //hp reg bonus
-constant BuffType MURGUL_BUFF = new BuffType(true, DispelLevel.BREAK) //attack speed bonus
-constant BuffType SEA_GIANT_BUFF = new BuffType(true, DispelLevel.BREAK) //str bonus
-constant BuffType MAKRURA_BUFF = new BuffType(true, DispelLevel.BREAK) //armor bonus
-constant BuffType SEA_ELEMENTAL_BUFF = new BuffType(true, DispelLevel.BREAK) //mana reg bonus
-constant BuffType REVENANT_BUFF = new BuffType(true, DispelLevel.BREAK) //dealing damage slows
-public constant BuffType REVENANT_SLOW_BUFF = new BuffType(false, DispelLevel.DISPEL) //dealing damage slows
-
 constant TURTLE_RETURN_RATIO = 25
-public constant TURTLE_BUFF_ID = compiletime(createAuraBuff("Turtle Shell", "Returns "+TURTLE_RETURN_RATIO.toString()+"% of the damage the unit takes from attacks to the attacker.", Icons.bTNSeaTurtleGreen))
-constant TURTLE_ABILITY_ID = compiletime(createPositiveBuffAbility(1, TURTLE_BUFF_ID, "", ""))
-
 constant JUNGLE_STALKER_HP_REG = 20
-constant JUNGLE_STALKER_BUFF_ID = compiletime(createAuraBuff("Jungle Blood", "Heals "+JUNGLE_STALKER_HP_REG.toString()+" hit points per second.", Icons.bTNJungleBeast))
-constant JUNGLE_STALKER_ABILITY_ID = compiletime(createPositiveBuffAbility(1, JUNGLE_STALKER_BUFF_ID, "", ""))
-
 constant MURGUL_AS = 30
-constant MURGUL_BUFF_ID = compiletime(createAuraBuff("Mur'gul Frenzy", "Increases attack speed by "+MURGUL_AS.toString()+"%.", Icons.bTNMurgulShadowCaster))
-constant MURGUL_ABILITY_ID = compiletime(createPositiveBuffAbility(1, MURGUL_BUFF_ID, "", ""))
-
 constant SEA_GIANT_STR = 20
-constant SEA_GIANT_BUFF_ID = compiletime(createAuraBuff("Giant Strength", "Increases strength by "+SEA_GIANT_STR.toString()+"%.", Icons.bTNSeaGiantGreen))
-constant SEA_GIANT_ABILITY_ID = compiletime(createPositiveBuffAbility(1, SEA_GIANT_BUFF_ID, "", ""))
-
 constant MAKRURA_AR = 40
-constant MAKRURA_BUFF_ID = compiletime(createAuraBuff("Makrura Carapace", "Increases armor by "+MAKRURA_AR.toString()+".", Icons.bTNLobstrokkGreen))
-constant MAKRURA_ABILITY_ID = compiletime(createPositiveBuffAbility(1, MAKRURA_BUFF_ID, "", ""))
-
 constant SEA_ELEMENTAL_MP_REG = 3
-constant SEA_ELEMENTAL_BUFF_ID = compiletime(createAuraBuff("Liquid Energy", "Restores "+SEA_ELEMENTAL_MP_REG.toString()+" mana points per second.", Icons.bTNSeaElemental))
-constant SEA_ELEMENTAL_ABILITY_ID = compiletime(createPositiveBuffAbility(1, SEA_ELEMENTAL_BUFF_ID, "", ""))
-
 constant REVENANT_SLOW = 30
-public constant REVENANT_BUFF_ID = compiletime(createAuraBuff("Death Curse", "Slows movement speed of all targets damaged by this unit by "+REVENANT_SLOW.toString()+"%.", Icons.bTNDeepLordRevenant))
-constant REVENANT_ABILITY_ID = compiletime(createPositiveBuffAbility(1, REVENANT_BUFF_ID, Abilities.unholyAura, "origin"))
 
-public constant REVENANT_SLOW_BUFF_ID = compiletime(createAuraBuff("Death Curse", "This unit is slowed by "+REVENANT_SLOW.toString()+"%.", Icons.bTNCripple))
-constant REVENANT_SLOW_ABILITY_ID = compiletime(createPositiveBuffAbility(1, REVENANT_SLOW_BUFF_ID, Abilities.crippleTarget, ""))
+constant TURTLE_BUFF = compiletime(setupBuff("Turtle Shell", "Returns "+TURTLE_RETURN_RATIO.toString()+"% of the damage the unit takes from attacks to the attacker.", Icons.bTNSeaTurtleGreen, true, 1, "", "", DispelLevel.BREAK)) //return dmg
+constant JUNGLE_STALKER_BUFF = compiletime(setupBuff("Jungle Blood", "Heals "+JUNGLE_STALKER_HP_REG.toString()+" hit points per second.", Icons.bTNJungleBeast, true, 1, "", "", DispelLevel.BREAK)) //hp reg bonus
+constant MURGUL_BUFF = compiletime(setupBuff("Mur'gul Frenzy", "Increases attack speed by "+MURGUL_AS.toString()+"%.", Icons.bTNMurgulShadowCaster, true, 1, "", "", DispelLevel.BREAK)) //attack speed bonus
+constant SEA_GIANT_BUFF = compiletime(setupBuff("Giant Strength", "Increases strength by "+SEA_GIANT_STR.toString()+"%.", Icons.bTNSeaGiantGreen, true, 1, "", "", DispelLevel.BREAK)) //str bonus
+constant MAKRURA_BUFF = compiletime(setupBuff("Makrura Carapace", "Increases armor by "+MAKRURA_AR.toString()+".", Icons.bTNLobstrokkGreen, true, 1, "", "", DispelLevel.BREAK)) //armor bonus
+constant SEA_ELEMENTAL_BUFF = compiletime(setupBuff("Liquid Energy", "Restores "+SEA_ELEMENTAL_MP_REG.toString()+" mana points per second.", Icons.bTNSeaElemental, true, 1, "", "", DispelLevel.BREAK)) //mana reg bonus
+constant REVENANT_BUFF = compiletime(setupBuff("Death Curse", "Slows movement speed of all targets damaged by this unit by "+REVENANT_SLOW.toString()+"%.", Icons.bTNDeepLordRevenant, true, 1, Abilities.unholyAura, "", DispelLevel.BREAK)) //dealing damage slows
+public constant REVENANT_SLOW_BUFF = compiletime(setupBuff("Death Curse", "This unit is slowed by "+REVENANT_SLOW.toString()+"%.", Icons.bTNCripple, false, 1, Abilities.crippleTarget, "", DispelLevel.DISPEL)) //dealing damage slows
+
+
 
 
 function initCreepBuffs()
-    TURTLE_BUFF.setupBuffWithIcon(TURTLE_BUFF_ID, TURTLE_ABILITY_ID)
-    JUNGLE_STALKER_BUFF.setupBuffWithIcon(JUNGLE_STALKER_BUFF_ID, JUNGLE_STALKER_ABILITY_ID)
-    MURGUL_BUFF.setupBuffWithIcon(MURGUL_BUFF_ID, MURGUL_ABILITY_ID)
-    SEA_GIANT_BUFF.setupBuffWithIcon(SEA_GIANT_BUFF_ID, SEA_GIANT_ABILITY_ID)
-    MAKRURA_BUFF.setupBuffWithIcon(MAKRURA_BUFF_ID, MAKRURA_ABILITY_ID)
-    SEA_ELEMENTAL_BUFF.setupBuffWithIcon(SEA_ELEMENTAL_BUFF_ID, SEA_ELEMENTAL_ABILITY_ID)
-    REVENANT_BUFF.setupBuffWithIcon(REVENANT_BUFF_ID, REVENANT_ABILITY_ID)
-    REVENANT_SLOW_BUFF.setupBuffWithIcon(REVENANT_SLOW_BUFF_ID, REVENANT_SLOW_ABILITY_ID)
-
     JUNGLE_STALKER_BUFF.setPeriodicTime(0.25)
     JUNGLE_STALKER_BUFF.addPeriodicFunction((Buff whichBuff) -> begin
         let target = whichBuff.getTarget()

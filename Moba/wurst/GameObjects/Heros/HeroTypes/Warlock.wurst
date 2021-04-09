@@ -23,9 +23,7 @@ public class HeroWarlock extends HeroTemplate
     static constant real SOUL_BURN_DAMAGE_BONUS = 20
     static constant real array SOUL_BURN_SILENCE = [2, 2.25, 2.5, 2.75, 3]
     static constant real SOUL_BURN_AOE = 700
-    static constant BUFF_ID_SOUL_BURN = compiletime(createAuraBuff("Soul Burn", "This unit is under the effect of Soulburn; it takes damage over time.", "BTNSoulBurn2"))
-    static constant ABILITY_ID_SOUL_BURN = compiletime(createNegativeBuffAbility(5, BUFF_ID_SOUL_BURN, Abilities.immolationDamage, "head"))
-    static BuffType buffSoulBurn
+    static constant BUFF_SOUL_BURN = compiletime(setupBuff("Soul Burn", "This unit is under the effect of Soulburn; it takes damage over time.", "BTNSoulBurn2", false, 5, Abilities.immolationDamage, "head", DispelLevel.DISPEL))
 
     static constant BUFF_ID_RAY_OF_DEATH = compiletime(createBasicBuff("Ray of Death", "This unit is under the effect of Ray of Death; it is disabled and takes damage over time.", "BTNNetherBolt", "", ""))
     static constant real array RAY_OF_DEATH_DURATION = [2, 2.25, 2.5, 2.75, 3]
@@ -278,7 +276,7 @@ public class HeroWarlock extends HeroTemplate
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
         let target = GetSpellTargetUnit()
-        target.addBuffReduced(caster, SOUL_BURN_DURATION[level-1], buffSoulBurn, level)
+        target.addBuffReduced(caster, SOUL_BURN_DURATION[level-1], BUFF_SOUL_BURN, level)
         target.addBuffReduced(caster, SOUL_BURN_SILENCE[level-1], SILENCED, 1).setDispelLevel(DispelLevel.DISPEL)
 
     override static function castR()
@@ -390,25 +388,21 @@ public class HeroWarlock extends HeroTemplate
                 target.addEffect(Abilities.illidanMissile, "chest").destr()
         end))
 
-        buffSoulBurn = new BuffType(false, DispelLevel.DISPEL)
-        buffSoulBurn
-        ..setupBuffWithIcon(BUFF_ID_SOUL_BURN, ABILITY_ID_SOUL_BURN)
-        ..setPeriodicTime(0.5)
-        ..addPeriodicFunction((Buff whichBuff) ->(begin
+        BUFF_SOUL_BURN..setPeriodicTime(0.5)..addPeriodicFunction((Buff whichBuff) ->(begin
             let target = whichBuff.getTarget()
             let caster = whichBuff.getCaster()
             if target.isTargetable(caster.getOwner(), false, true)
                 caster.dealDamage(target, 0.5 * SOUL_BURN_DAMAGE[caster.getAbilityLevel(ABILITY_ID_E)-1].bonus(caster.getHeroInt(), SOUL_BURN_DAMAGE_BONUS), ReductionType.MAGIC)
         end))
 
-        buffSoulBurn.addSetupFunction() (Buff thisBuff, int factor) ->
+        BUFF_SOUL_BURN.addSetupFunction() (Buff thisBuff, int factor) ->
             if factor == 1
                 let trg = CreateTrigger()
                 trg.registerUnitEvent(thisBuff.getTarget(), EVENT_UNIT_DEATH)
                 trg.addAction() -> 
                     let u = GetTriggerUnit()
                     let pos = u.getPos()
-                    let whichBuff = BuffList.getBuffOfType(u, buffSoulBurn)
+                    let whichBuff = BuffList.getBuffOfType(u, BUFF_SOUL_BURN)
                     let caster = whichBuff.getCaster()
                     let level = whichBuff.getLevel()
 
@@ -420,8 +414,8 @@ public class HeroWarlock extends HeroTemplate
                     while(not nearby.isEmpty())
                         let target = FirstOfGroup(nearby)
                         nearby.removeUnit(target)
-                        if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true) and not BuffList.hasBuffType(target, buffSoulBurn)
-                            target.addBuffReduced(caster, dur, buffSoulBurn, level)
+                        if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true) and not BuffList.hasBuffType(target, BUFF_SOUL_BURN)
+                            target.addBuffReduced(caster, dur, BUFF_SOUL_BURN, level)
                 
                     nearby.destr()
                 thisBuff.setData(new Reference(trg) castTo int)

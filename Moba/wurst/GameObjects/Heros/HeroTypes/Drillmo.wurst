@@ -155,10 +155,7 @@ public class HeroDrillmo extends HeroTemplate
     static constant real array PULL_DAMAGE = [50, 100, 150, 200, 250]
     static constant real PULL_DAMAGE_BONUS = 90
 
-    static constant int PULL_BUFF_ID = compiletime(createAuraBuff("Pull", "This unit is being pulled.", "BTNTitansGrip"))
-    static constant int PULL_ABILITY_ID = compiletime(createPositiveBuffAbility(5, PULL_BUFF_ID, "", ""))
-
-    static BuffType buffPull
+    static constant BUFF_PULL = compiletime(setupBuff("Pull", "This unit is being pulled.", "BTNTitansGrip", false, 5, "", "", DispelLevel.NONE))
 
     override function setupQ(int abilityId, IHeroType heroType)
         let COOLDOWN = skillData(18, 16, 14, 12, 10)
@@ -201,10 +198,7 @@ public class HeroDrillmo extends HeroTemplate
     static constant real array SPIKE_BALL_DOT_DMG = [40, 70, 100, 130, 160]
     static constant real SPIKE_BALL_DOT_DMG_BONUS = 60
 
-    static BuffType buffSpikeBall
-
-    static constant int SPIKE_BALL_BUFF_ID = compiletime(createAuraBuff("Spike Ball", "This unit is taking damage over time.", "BTNSpikeBall"))
-    static constant int SPIKE_BALL_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, SPIKE_BALL_BUFF_ID, "FatalWoundV2.mdx", "chest"))
+    static constant BUFF_SPIKE_BALL = compiletime(setupBuff("Spike Ball", "This unit is taking damage over time.", "BTNSpikeBall", false, 5, "FatalWoundV2.mdx", "chest", DispelLevel.DISPEL))
 
 
     override function setupW(int abilityId, IHeroType heroType)
@@ -248,10 +242,7 @@ public class HeroDrillmo extends HeroTemplate
     static constant int SPEED_BOOST_BONUS = 40
     static constant real array SPEED_BOOST_DURATION = [6, 8, 10, 12, 14]
 
-    static constant int SPEED_BOOST_BUFF_ID = compiletime(createAuraBuff("Speed Boost", "This unit has increased movement speed.", "BTNGoblinRocketBoots"))
-    static constant int SPEED_BOOST_ABILITY_ID = compiletime(createPositiveBuffAbility(5, SPEED_BOOST_BUFF_ID, "", ""))
-
-    static BuffType buffSpeedBoost
+    static constant BUFF_SPEED_BOOST = compiletime(setupBuff("Speed Boost", "This unit has increased movement speed.", "BTNGoblinRocketBoots", true, 5, "", "", DispelLevel.BREAK))
 
     override function setupE(int abilityId, IHeroType heroType)
 
@@ -339,7 +330,7 @@ public class HeroDrillmo extends HeroTemplate
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
 
-        let b = caster.addBuff(caster, 10, buffPull, level)
+        let b = caster.addBuff(caster, 10, BUFF_PULL, level)
         let pull = new Pull(caster, level, vec2(GetSpellTargetX(), GetSpellTargetY()), b)
         b.setData(pull castTo int)
 
@@ -361,7 +352,7 @@ public class HeroDrillmo extends HeroTemplate
                     if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
                         caster.dealDamage(target, dmg, ReductionType.PHYSICAL)
                         target.addBuffReduced( caster, SPIKE_BALL_STUN[level-1], STUNNED, 1).setDispelLevel(DispelLevel.DISPEL)
-                        target.addBuffReduced( caster, SPIKE_BALL_DOT_DURATION[level-1], buffSpikeBall, level)
+                        target.addBuffReduced( caster, SPIKE_BALL_DOT_DURATION[level-1], BUFF_SPIKE_BALL, level)
                 nearby.destr()
         end))
 
@@ -369,7 +360,7 @@ public class HeroDrillmo extends HeroTemplate
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
-        caster.addBuff(caster, SPEED_BOOST_DURATION[level-1], buffSpeedBoost, level)
+        caster.addBuff(caster, SPEED_BOOST_DURATION[level-1], BUFF_SPEED_BOOST, level)
         caster.removeAbility('Bbsk')
 
     override static function castR()
@@ -445,29 +436,21 @@ public class HeroDrillmo extends HeroTemplate
                     source.dealDamage(target, dmg, ReductionType.PHYSICAL)
             nearby.destr()
     
-        buffPull = new BuffType(false, DispelLevel.BREAK)
-        buffPull.setupBuffWithIcon(PULL_BUFF_ID, PULL_ABILITY_ID)
-        buffPull.addDispelFunction() (Buff whichBuff) ->
+        BUFF_PULL.addDispelFunction() (Buff whichBuff) ->
             let data = whichBuff.getData()
             if data != -1
                 destroy data castTo Pull
             
-
-
-        buffSpikeBall = new BuffType(false, DispelLevel.DISPEL)
-        buffSpikeBall.setupBuffWithIcon(SPIKE_BALL_BUFF_ID, SPIKE_BALL_ABILTIY_ID)
-        buffSpikeBall.setPeriodicTime(0.25)
-        buffSpikeBall.addPeriodicFunction((Buff whichBuff) -> (begin
+        BUFF_SPIKE_BALL.setPeriodicTime(0.25)
+        BUFF_SPIKE_BALL.addPeriodicFunction((Buff whichBuff) -> (begin
             let caster = whichBuff.getCaster()
             let level = whichBuff.getLevel()
             caster.dealDamage(whichBuff.getTarget(), 0.25 * SPIKE_BALL_DOT_DMG[level-1].bonus(caster.getHeroStr(), SPIKE_BALL_DOT_DMG_BONUS) / SPIKE_BALL_DOT_DURATION[level-1] , ReductionType.PHYSICAL)
         end))
 
-        buffSpeedBoost = new BuffType(true, DispelLevel.NONE)
-        buffSpeedBoost.setupBuffWithIcon(SPEED_BOOST_BUFF_ID, SPEED_BOOST_ABILITY_ID)
-        buffSpeedBoost.addSetupFunction() (Buff thisBuff, int factor) ->
+        BUFF_SPEED_BOOST.addSetupFunction() (Buff thisBuff, int factor) ->
             AddUnitAnimationProperties(thisBuff.getTarget(), "fast", factor == 1)
-        buffSpeedBoost.addLevelFunction() (Buff thisBuff, int factor) ->
+        BUFF_SPEED_BOOST.addLevelFunction() (Buff thisBuff, int factor) ->
             let target = thisBuff.getTarget()
             target.wrapper().modMoveSpeedRelative( factor * ((SPEED_BOOST[thisBuff.getLevel()-1].bonus(target.getHeroInt(), SPEED_BOOST_BONUS)) * 10).toInt() )
 

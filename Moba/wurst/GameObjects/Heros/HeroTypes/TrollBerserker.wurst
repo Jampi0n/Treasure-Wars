@@ -72,10 +72,7 @@ public class HeroTrollBerserker extends HeroTemplate
 
     static constant real array CRITICAL_DAMAGE_MULT = [65, 80, 95, 110, 125]
 
-    static constant int CRITICAL_BUFF_ID = compiletime(createAuraBuff("Critical Strike", "This unit's next attack will deal more damage.", "BTN_CR_BLOOD"))
-    static constant int CRITICAL_ABILITY_ID = compiletime(createPositiveBuffAbility(5, CRITICAL_BUFF_ID, "", ""))
-
-    static BuffType buffCriticalStrike
+    static constant BUFF_CRITICAL_STRIKE = compiletime(setupBuff("Critical Strike", "This unit's next attack will deal more damage.", "BTN_CR_BLOOD", true, 5, "", "", DispelLevel.BREAK))
 
 
 
@@ -102,7 +99,7 @@ public class HeroTrollBerserker extends HeroTemplate
                     ..setAttackSpeedIncrease(lvl, 0)
                     ..setDamageTakenIncrease(lvl, 0)
                     ..setMovementSpeedIncrease(lvl, 0)
-                    ..setBuffs(lvl, CRITICAL_BUFF_ID.toRawCode())
+                    ..setBuffs(lvl, BUFF_CRITICAL_STRIKE.getBuffId().toRawCode())
                     ..setDurationHero(lvl, 0.01)
 
         let tooltip = new DynamicTooltip(abilityId)
@@ -205,16 +202,12 @@ public class HeroTrollBerserker extends HeroTemplate
     static constant real array GROWTH_FEAR_DURATION = [1.5, 1.75, 2, 2.25 ,2.5]
     static constant real GROWTH_FEAR_AOE = 900
 
-    static constant int GROWTH_BUFF_ID = compiletime(createAuraBuff("Berserk", "This unit's maximum hit points and hit point regeneration are increased.", "BTNDireGrowth"))
     static constant int GROWTH_ABILITY_ID = compiletime(ABIL_ID_GEN.next())
-
-    static constant int GROWTH_FEAR_BUFF_ID = compiletime(createAuraBuff("Berserk- Fear", "This unit is under the effect of Fear; it cannot move.", "BTNDireGrowth"))
-    static constant int GROWTH_FEAR_ABILTIY_ID = compiletime( createNegativeBuffAbility(5, GROWTH_FEAR_BUFF_ID, "FearEffect2.mdx", "overhead") )
 
     static constant real GROWTH_SCALE = 1.7
 
-    static BuffType buffGrowth
-    static BuffType buffGrowthFear
+    static constant BUFF_GROWTH = compiletime(setupBuff("Berserk", "This unit's maximum hit points and hit point regeneration are increased.", "BTNDireGrowth", true, GROWTH_ABILITY_ID, DispelLevel.BREAK))
+    static constant BUFF_GROWTH_FEAR = compiletime(setupBuff("Berserk- Fear", "This unit is under the effect of Fear; it cannot move.", "BTNDireGrowth", false, 5, "FearEffect2.mdx", "overhead", DispelLevel.DISPEL))
 
 
     override function setupR(int abilityId, IHeroType heroType)
@@ -235,7 +228,7 @@ public class HeroTrollBerserker extends HeroTemplate
                     ..setAreaofEffect(i, 1)
                     ..setMovementSpeedIncrease(i, 0)
                     ..setLifeRegenerationIncrease(i, 0)
-                    ..setBuffs(i, GROWTH_BUFF_ID.toRawCode())
+                    ..setBuffs(i, BUFF_GROWTH.getBuffId().toRawCode())
 
 
             new AbilityDefinitionRoar(abilityId)
@@ -271,7 +264,7 @@ public class HeroTrollBerserker extends HeroTemplate
         doAfter(0, () -> (begin
             caster.toHero().morph()
             onMeleeStats(caster, level)
-            if BuffList.hasBuffType(caster, buffGrowth)
+            if BuffList.hasBuffType(caster, BUFF_GROWTH)
                 caster.setScale(GROWTH_SCALE)
         end))
 
@@ -284,7 +277,7 @@ public class HeroTrollBerserker extends HeroTemplate
         doAfter(0, () -> (begin
             caster.toHero().morph()
             onRangedStats(caster, level)
-            if BuffList.hasBuffType(caster, buffGrowth)
+            if BuffList.hasBuffType(caster, BUFF_GROWTH)
                 caster.setScale(GROWTH_SCALE)
         end))
 
@@ -301,7 +294,7 @@ public class HeroTrollBerserker extends HeroTemplate
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
-        caster.addBuff(caster, 4, buffCriticalStrike, level)
+        caster.addBuff(caster, 4, BUFF_CRITICAL_STRIKE, level)
 
     override static function castW()
 
@@ -318,7 +311,7 @@ public class HeroTrollBerserker extends HeroTemplate
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
-        caster.addBuff(caster, GROWTH_DURATION[level-1], buffGrowth, level)
+        caster.addBuff(caster, GROWTH_DURATION[level-1], BUFF_GROWTH, level)
         let nearby = CreateGroup()
 
         nearby.enumUnitsInRange(caster.getPos(), GROWTH_FEAR_AOE)
@@ -329,7 +322,7 @@ public class HeroTrollBerserker extends HeroTemplate
             nearby.removeUnit(target)
             if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
 
-                target.addBuffReduced(caster, GROWTH_FEAR_DURATION[level-1], buffGrowthFear, level)
+                target.addBuffReduced(caster, GROWTH_FEAR_DURATION[level-1], BUFF_GROWTH_FEAR, level)
                 target.addBuffReduced(caster, GROWTH_FEAR_DURATION[level-1], ENSNARED, level).setDispelLevel(DispelLevel.DISPEL)
 
 
@@ -428,15 +421,11 @@ public class HeroTrollBerserker extends HeroTemplate
             onAttack(source, target, active)
     override function onInitDelayed(IHeroType heroType)
         heroType.addMorph(HERO_TROLL_BERSERKER_MELEE)
-        buffCriticalStrike = new BuffType(true, DispelLevel.NONE)
 
-        buffCriticalStrike.setupBuffWithIcon(CRITICAL_BUFF_ID, CRITICAL_ABILITY_ID)
-        buffCriticalStrike.addSetupFunction() (Buff thisBuff, int factor) ->
+        BUFF_CRITICAL_STRIKE.addSetupFunction() (Buff thisBuff, int factor) ->
             DamageEvent.useAlternate( thisBuff.getTarget(), factor == 1)
 
-        buffGrowth = new BuffType(true, DispelLevel.NONE)
-        buffGrowth.setupBuffWithIcon(GROWTH_BUFF_ID, GROWTH_ABILITY_ID)
-        buffGrowth.addLevelFunction() (Buff thisBuff, int factor) ->
+        BUFF_GROWTH.addLevelFunction() (Buff thisBuff, int factor) ->
             let level = thisBuff.getLevel()
             let caster = thisBuff.getCaster()
             let target = thisBuff.getTarget()
@@ -452,8 +441,6 @@ public class HeroTrollBerserker extends HeroTemplate
             ..modHealth( factor * hpBonus)
             ..modHealthRegen( factor * GROWTH_HP_REGEN[level-1]*10)
 
-        buffGrowthFear = new BuffType(false, DispelLevel.DISPEL)
-        buffGrowthFear.setupBuffWithIcon(GROWTH_FEAR_BUFF_ID, GROWTH_FEAR_ABILTIY_ID)
 
 init
     initialize()

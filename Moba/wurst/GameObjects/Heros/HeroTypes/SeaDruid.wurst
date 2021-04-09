@@ -52,7 +52,7 @@ class RitualOfTheSeas
                                 caster.damageMana(target, manaDrain.reduceMagic(target.getUnitWp()), ReductionType.NONE)
                                 caster.dealDamage(target, hpDrain, ReductionType.MAGIC)
 
-                            target.addBuffReduced( caster, HeroSeaDruid.RITUAL_SLOW_DURATION, HeroSeaDruid.ritualBuff, level)
+                            target.addBuffReduced( caster, HeroSeaDruid.RITUAL_SLOW_DURATION, HeroSeaDruid.RITUAL_BUFF, level)
 
 
                     end))
@@ -171,14 +171,11 @@ public class HeroSeaDruid extends HeroTemplate
 
     static constant int FISH_SPEED = 1000
 
-    static constant int FISH_BUFF_ID = compiletime(createAuraBuff("Giant Fish", "This unit was hit by a giant fish; its movement and attack speed are slowed.", "BTNDeepseaMurloc"))
-    static constant int FISH_ABILTIY_ID = compiletime(createNegativeBuffAbility(5, FISH_BUFF_ID, Abilities.stasisTotemTarget, "overhead"))
-
     static constant int FISH_ARTILLERY = compiletime(ArtilleryDetection.createArtilleryDummy(0, 0, 50, 3, "Fesh_Final2.mdx", FISH_SPEED, 0.3))
 
     static constant SOUND_FISH_IMPACT = new SoundDefinition(Sounds.artilleryCorpseExplodeDeath1, false, true)
 
-    static BuffType buffFish
+    static constant BUFF_FISH = compiletime(setupBuff("Giant Fish", "This unit was hit by a giant fish; its movement and attack speed are slowed.", "BTNDeepseaMurloc", false, 5, Abilities.stasisTotemTarget, "overhead", DispelLevel.DISPEL))
 
 
 
@@ -279,12 +276,9 @@ public class HeroSeaDruid extends HeroTemplate
     static constant int RITUAL_HP_RATIO = 50
     static constant int RITUAL_MANA_RATIO = 25
 
-    static constant RITUAL_SLOW_BUFF_ID = compiletime(createAuraBuff("Ritual of the Sea", "This unit's movement speed is reduced.", "BTNGuardianofTheSea"))
-    static constant RITUAL_SLOW_ABILITY_ID = compiletime(createNegativeBuffAbility(1, RITUAL_SLOW_BUFF_ID, "", ""))
-
     static constant real RITUAL_SLOW_DURATION = 2.5
 
-    static BuffType ritualBuff
+    static constant RITUAL_BUFF = compiletime(setupBuff("Ritual of the Sea", "This unit's movement speed is reduced.", "BTNGuardianofTheSea", false, 5, "", "", DispelLevel.DISPEL))
 
     override function setupR(int abilityId, IHeroType heroType)
         if compiletime
@@ -377,7 +371,7 @@ public class HeroSeaDruid extends HeroTemplate
                 if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(detectionUnit.getOwner(), false, true)
 
                     caster.dealDamage(target, dmg, ReductionType.MAGIC)
-                    target.addBuffReduced(caster, FISH_SLOW_DURATION[level-1], buffFish, level)
+                    target.addBuffReduced(caster, FISH_SLOW_DURATION[level-1], BUFF_FISH, level)
 
             nearby.destr()
 
@@ -526,16 +520,14 @@ public class HeroSeaDruid extends HeroTemplate
                     whichWrapper.defaultBonusCalcualtion(whichStat)
         end))
     override function onInitDelayed(IHeroType heroType)
-        buffFish = new BuffType(false, DispelLevel.DISPEL)
-        buffFish.setupBuffWithIcon(FISH_BUFF_ID, FISH_ABILTIY_ID)
-        buffFish.addLevelFunction() (Buff thisBuff, int factor) ->
+        BUFF_FISH.addLevelFunction() (Buff thisBuff, int factor) ->
             let level = thisBuff.getLevel()
             thisBuff.getTarget().wrapper()
             ..modAttackSpeed( -factor * FISH_ATTACK_SPEED[level - 1])
             ..modMoveSpeedRelative( -factor * FISH_MOVE_SPEED[level - 1]*10)
 
 
-        buffManaShield = new BuffType(true, DispelLevel.NONE) // the actual effect is in OnAttack
+        buffManaShield = new BuffType(true, DispelLevel.BREAK) // the actual effect is in OnAttack
             ..setPeriodicTime(0.1)
         buffManaShield.addPeriodicFunction( (Buff whichBuff) -> (begin
             let caster = whichBuff.getCaster()
@@ -543,9 +535,7 @@ public class HeroSeaDruid extends HeroTemplate
                 whichBuff.dispel()
         end))
 
-        ritualBuff = new BuffType(false, DispelLevel.DISPEL)
-        ritualBuff.setupBuffWithIcon(RITUAL_SLOW_BUFF_ID, RITUAL_SLOW_ABILITY_ID)
-        ritualBuff.addLevelFunction() (Buff thisBuff, int factor) ->
+        RITUAL_BUFF.addLevelFunction() (Buff thisBuff, int factor) ->
             thisBuff.getTarget().wrapper().modMoveSpeedRelative( -factor * RITUAL_MOVEMENT_SLOW[thisBuff.getLevel()-1]*10)
 
 

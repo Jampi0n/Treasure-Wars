@@ -11,9 +11,7 @@ constant int HERO_ORDER = 11
 
 public class HeroElementalMage extends HeroTemplate
     use HeroTemplateModule
-    static BuffType buffFrenzy
-    static constant FRENZY_BUFF_ID = compiletime(createAuraBuff("Frenzy", "This unit is under the effect of Frenzy; it attacks faster.", "PASFrostFireFrenzy"))
-    static constant FRENZY_ABILITY_ID = compiletime(createPositiveBuffAbility(5, FRENZY_BUFF_ID, "", ""))
+    static constant BUFF_FRENZY = compiletime(setupBuff("Frenzy", "This unit is under the effect of Frenzy; it attacks faster.", "PASFrostFireFrenzy", true, 5, "", "", DispelLevel.BREAK))
 
     static constant real FRENZY_DURATION = 3.
     static constant real array FRENZY_BONUS = [2, 2.5, 3, 3.5, 4]
@@ -65,9 +63,7 @@ public class HeroElementalMage extends HeroTemplate
         addDynamicTooltipIntelligence(heroType, tooltip)
 
 
-    static BuffType buffFrostBolt
-    static constant FROST_BOLT_BUFF_ID = compiletime(createAuraBuff("Frost Attack", "This unit was hit by a Frost Attack; it is slowed.", Icons.bTNOrbOfFrost))
-    static constant FROST_BOLT_ABILITY_ID = compiletime(createNegativeBuffAbility(5, FROST_BOLT_BUFF_ID, Abilities.frostDamage, "chest"))
+    static constant BUFF_FROST_BOLT = compiletime(setupBuff("Frost Attack", "This unit was hit by a Frost Attack; it is slowed.", Icons.bTNOrbOfFrost, false, 5, Abilities.frostDamage, "chest", DispelLevel.DISPEL))
 
     static constant int array FROST_BOLT_SLOW = [40, 45, 50, 55, 60]
     static constant real array FROST_BOLT_DURATION = [2.5, 3, 3.5, 4, 4.5]
@@ -157,10 +153,7 @@ public class HeroElementalMage extends HeroTemplate
 
     static constant int MARK_REQUIRED_STACKS = 4
 
-    static BuffType buffElementalMark
-    static constant MARK_BUFF_ID = compiletime(createAuraBuff("Elemental Mark", "This unit is under the effect of Elemental Mark; it has reduced willpower and it will take additional magic damage when attacked by the Elemental Mage. The unit will be stunned after "+MARK_REQUIRED_STACKS.str()+" attacks.", "BTNElementalMark"))
-    static constant MARK_ABILITY_ID = compiletime(createNegativeBuffAbility(5, MARK_BUFF_ID, "ElementalMark2.mdx", "overhead"))
-
+    static constant BUFF_ELEMENTAL_MARK = compiletime(setupBuff("Elemental Mark", "This unit is under the effect of Elemental Mark; it has reduced willpower and it will take additional magic damage when attacked by the Elemental Mage. The unit will be stunned after "+MARK_REQUIRED_STACKS.str()+" attacks.", "BTNElementalMark", false, 5, "ElementalMark2.mdx", "overhead", DispelLevel.DISPEL))
 
     override function setupE(int abilityId, IHeroType heroType)
         if compiletime
@@ -205,10 +198,10 @@ public class HeroElementalMage extends HeroTemplate
     static constant real FF_BUFF_DURATION_BONUS = 1
 
     static constant real FF_AOE = 400
-
-    static BuffType buffFFBuff
-    static constant FF_BUFF_ID = compiletime(createAuraBuff("Frost and Flame", "This unit was hit by Frost and Flame; it is slowed and takes damage over time.", "BTNMageOrb"))
     static constant FF_ABILITY_ID = compiletime(ABIL_ID_GEN.next())
+
+    static constant FF_BUFF = compiletime(setupBuff("Frost and Flame", "This unit was hit by Frost and Flame; it is slowed and takes damage over time.", "BTNMageOrb", false, FF_ABILITY_ID, DispelLevel.DISPEL))
+    
 
     override function setupR(int abilityId, IHeroType heroType)
         if compiletime
@@ -226,7 +219,7 @@ public class HeroElementalMage extends HeroTemplate
                     ..setAreaofEffect(i, 1)
                     ..setMovementSpeedFactor(i, 0)
                     ..setAttackSpeedFactor(i, 0)
-                    ..setBuffs(i, FF_BUFF_ID.toRawCode())
+                    ..setBuffs(i, FF_BUFF.getBuffId().toRawCode())
 
             let aDef = new AbilityDefinitionIllidanChannel(abilityId)
                 ..setupIcon("BTNMageOrb")
@@ -274,7 +267,7 @@ public class HeroElementalMage extends HeroTemplate
         ..setHitFunction((Missile missile, unit target) -> (begin
             let missileCaster = missile.getOwner()
             missileCaster.dealDamage(Missile.getMissileTarget(), (FROST_BOLT_DAMAGE[level-1]).bonus(missileCaster.getHeroInt(), FROST_BOLT_DAMAGE_BONUS), ReductionType.MAGIC)
-            Missile.getMissileTarget().addBuffReduced(missileCaster, FROST_BOLT_DURATION[level-1], buffFrostBolt, level)
+            Missile.getMissileTarget().addBuffReduced(missileCaster, FROST_BOLT_DURATION[level-1], BUFF_FROST_BOLT, level)
         end) )
             
 
@@ -302,7 +295,7 @@ public class HeroElementalMage extends HeroTemplate
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
         let target = GetSpellTargetUnit()
-        target.addBuffReduced(caster, MARK_DURATION, buffElementalMark, level)
+        target.addBuffReduced(caster, MARK_DURATION, BUFF_ELEMENTAL_MARK, level)
 
     override static function castR()
         let caster = GetTriggerUnit()
@@ -338,7 +331,7 @@ public class HeroElementalMage extends HeroTemplate
                 nearby.removeUnit(target)
                 if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(impact.getOwner(), false, true)
                     caster.dealDamage(target, dmg, ReductionType.MAGIC)
-                    target.addBuffReduced(caster, dur, buffFFBuff, level)
+                    target.addBuffReduced(caster, dur, FF_BUFF, level)
 
             nearby.destr()
 
@@ -362,10 +355,10 @@ public class HeroElementalMage extends HeroTemplate
         heroType.setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean advanced) ->
             let level = source.getAbilityLevel(ABILITY_ID_PASSIVE)
             if level > 0
-                source.addBuff(source, FRENZY_DURATION, buffFrenzy, level)
+                source.addBuff(source, FRENZY_DURATION, BUFF_FRENZY, level)
 
-            if BuffList.hasBuffType(target, buffElementalMark)
-                let mark = BuffList.getBuffOfType(target, buffElementalMark)
+            if BuffList.hasBuffType(target, BUFF_ELEMENTAL_MARK)
+                let mark = BuffList.getBuffOfType(target, BUFF_ELEMENTAL_MARK)
                 let markLevel = mark.getLevel()
                 int stacks = mark.getData() + 1
                 if stacks >= MARK_REQUIRED_STACKS
@@ -374,35 +367,29 @@ public class HeroElementalMage extends HeroTemplate
                 mark.setData(stacks)
                 source.dealDamage(target, MARK_DMG[markLevel-1].bonus(source.getHeroInt(), MARK_DMG_BONUS), ReductionType.MAGIC)
     override function onInitDelayed(IHeroType heroType)
-        buffFFBuff = new BuffType(false, DispelLevel.DISPEL)
-        buffFFBuff.setupBuffWithIcon(FF_BUFF_ID, FF_ABILITY_ID)
-        buffFFBuff.addSetupFunction() (Buff thisBuff, int factor) ->
+        FF_BUFF.addSetupFunction() (Buff thisBuff, int factor) ->
             thisBuff.getTarget().wrapper().modBlue(factor)
-        buffFFBuff.addLevelFunction() (Buff thisBuff, int factor) ->
+        FF_BUFF.addLevelFunction() (Buff thisBuff, int factor) ->
             thisBuff.getTarget().wrapper().modMoveSpeedRelative( -factor * FF_SLOW[thisBuff.getLevel() - 1]*10)
 
-        buffFFBuff.setPeriodicTime(0.25)
-        buffFFBuff.addPeriodicFunction((Buff whichBuff) -> (begin
+        FF_BUFF.setPeriodicTime(0.25)
+        FF_BUFF.addPeriodicFunction((Buff whichBuff) -> (begin
             let caster = whichBuff.getCaster()
             let target = whichBuff.getTarget()
             if target.isTargetable(caster.getOwner(), false, true)
                 caster.dealDamage(target, 0.25 * FF_DOT[whichBuff.getLevel()-1].bonus(caster.getHeroInt(), FF_DOT_BONUS), ReductionType.MAGIC)
         end))
 
-        buffFrostBolt = new BuffType(false, DispelLevel.DISPEL)
-        buffFrostBolt.setupBuffWithIcon(FROST_BOLT_BUFF_ID, FROST_BOLT_ABILITY_ID)
-        buffFrostBolt.addSetupFunction() (Buff thisBuff, int factor) ->
+        BUFF_FROST_BOLT.addSetupFunction() (Buff thisBuff, int factor) ->
             thisBuff.getTarget().wrapper().modBlue(factor)
 
-        buffFrostBolt.addLevelFunction() (Buff thisBuff, int factor) ->
+        BUFF_FROST_BOLT.addLevelFunction() (Buff thisBuff, int factor) ->
             let level = thisBuff.getLevel()
             thisBuff.getTarget().wrapper()
                 ..modMoveSpeedRelative( -factor * FROST_BOLT_SLOW[level - 1]*10)
                 ..modAttackSpeed( -factor * FROST_BOLT_SLOW[level - 1])
 
-        buffFrenzy = new BuffType(true, DispelLevel.NONE)
-        buffFrenzy.setupBuffWithIcon(FRENZY_BUFF_ID, FRENZY_ABILITY_ID)
-        buffFrenzy.addSetupFunction() (Buff thisBuff, int factor) ->
+        BUFF_FRENZY.addSetupFunction() (Buff thisBuff, int factor) ->
             if factor == 1
                 let level = thisBuff.getLevel() - 1
                 let stacks = (FRENZY_BONUS[level]*10).toInt()
@@ -414,7 +401,7 @@ public class HeroElementalMage extends HeroTemplate
                 thisBuff.getTarget().wrapper()
                 ..modAttackSpeed( -(stacks div 10))
 
-        buffFrenzy.addStackFunction( (Buff whichBuff) -> (begin
+        BUFF_FRENZY.addStackFunction( (Buff whichBuff) -> (begin
             let level = whichBuff.getLevel() - 1
             let oldStacks = whichBuff.getData()
             let newStacks = min(oldStacks + (FRENZY_BONUS[level]*10).toInt(), 1000)
@@ -425,9 +412,7 @@ public class HeroElementalMage extends HeroTemplate
         end))
 
 
-        buffElementalMark = new BuffType(false, DispelLevel.DISPEL)
-        buffElementalMark.setupBuffWithIcon(MARK_BUFF_ID, MARK_ABILITY_ID)
-        buffElementalMark.addLevelFunction() (Buff thisBuff, int factor) ->
+        BUFF_ELEMENTAL_MARK.addLevelFunction() (Buff thisBuff, int factor) ->
             let level = thisBuff.getLevel()
             thisBuff.getTarget().wrapper().modWillpower( -factor * MARK_WP_REDUCTION[level - 1])
 

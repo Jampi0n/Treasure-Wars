@@ -38,12 +38,7 @@ public class HeroPythonWarrioress extends HeroTemplate
     static constant real ENVENOMED_BLADES_DAMAGE_BONUS = 20
     static constant real array ENVENOMED_BLADES_DURATION = [5, 5 ,5 ,5 ,5 ]
 
-    static constant BUFF_ENVENOMED_BLADES = new BuffType(false, DispelLevel.DISPEL)
-    static constant ENVENOMED_BLADES_BUFF_ID = compiletime(createAuraBuff("Envenomed Blades", "This unit was hit by Envenomed Blades; it is slowed and takes damage over time.", "BTNPoisonBlades"))
-    static constant ENVENOMED_BLADES_ABILITY_ID = compiletime(createNegativeBuffAbility(5, ENVENOMED_BLADES_BUFF_ID, Abilities.poisonStingTarget, "chest"))
-
-
-
+    static constant BUFF_ENVENOMED_BLADES = compiletime(setupBuff("Envenomed Blades", "This unit was hit by Envenomed Blades; it is slowed and takes damage over time.", "BTNPoisonBlades", false, 5, Abilities.poisonStingTarget, "chest", DispelLevel.DISPEL))
 
     override function setupPassive(int abilityId, IHeroType heroType)
         if compiletime
@@ -109,10 +104,7 @@ public class HeroPythonWarrioress extends HeroTemplate
 
     static constant POISON_SPIT_ARTILLERY = compiletime(ArtilleryDetection.createArtilleryDummy(0, 120, 160, 1, "Models\\GreatElderHydraAcidSpewV.153.mdl", 500, 0.3))
 
-    static constant POISON_SPIT_BUFF_ID = compiletime(createAuraBuff("Poison Spit", "This unit stands inside Poison Spit. It has slowed movement speed reduced armor. The poison deals damage over time.", "BTNSlowSpellGreen"))
-    static constant POISON_SPIT_ABILITY_ID = compiletime(createNegativeBuffAbility(5, POISON_SPIT_BUFF_ID, "Units\\Undead\\PlagueCloud\\PlagueCloudtarget.mdl", "chest"))
-
-    static constant BUFF_POISON_SPIT = new BuffType(false, DispelLevel.DISPEL)
+    static constant BUFF_POISON_SPIT = compiletime(setupBuff("Poison Spit", "This unit stands inside Poison Spit. It has slowed movement speed reduced armor. The poison deals damage over time.", "BTNSlowSpellGreen", false, 5, "Units\\Undead\\PlagueCloud\\PlagueCloudtarget.mdl", "chest", DispelLevel.DISPEL))
 
 
     override function setupW(int abilityId, IHeroType heroType)
@@ -352,7 +344,6 @@ public class HeroPythonWarrioress extends HeroTemplate
                 target.addBuffReduced( source, ENVENOMED_BLADES_DURATION[level-1], BUFF_ENVENOMED_BLADES, level)
 
     override function onInitDelayed(IHeroType heroType)
-        BUFF_ENVENOMED_BLADES.setupBuffWithIcon(ENVENOMED_BLADES_BUFF_ID, ENVENOMED_BLADES_ABILITY_ID)
         BUFF_ENVENOMED_BLADES.setPeriodicTime(1)
         BUFF_ENVENOMED_BLADES.addPeriodicFunction((Buff thisBuff)-> (begin
             let target = thisBuff.getTarget()
@@ -365,7 +356,6 @@ public class HeroPythonWarrioress extends HeroTemplate
         
 
         //Poison Spit
-        BUFF_POISON_SPIT.setupBuffWithIcon(POISON_SPIT_BUFF_ID, POISON_SPIT_ABILITY_ID)
         BUFF_POISON_SPIT.addApplyFunction( (Buff thisBuff) -> (begin
             thisBuff.getCaster().dealDamage(thisBuff.getTarget(), 
             (POISON_SPIT_DOT[thisBuff.getLevel()-1]).bonus(thisBuff.getCaster().getHeroInt(), POISON_SPIT_DOT_BONUS)/4

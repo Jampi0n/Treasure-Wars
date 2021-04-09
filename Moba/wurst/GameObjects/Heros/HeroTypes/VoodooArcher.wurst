@@ -97,10 +97,7 @@ public class HeroVoodooArcher extends HeroTemplate
     static constant real array MIND_CURSE_DURATION = [2.4, 2.8, 3.2, 3.6, 4]
     static constant real MIND_CURSE_DURATION_BONUS = 4
 
-    static BuffType buffMindCurseTarget
-
-    static constant MIND_CURSE_BUFF_ID = compiletime(createAuraBuff("Mind Curse", "This unit is under the effect of Mind Curse; it loses mana over time and cannot cast spells.", "BTNWitchDoctorRitual"))
-    static constant MIND_CURSE_ABILITY_ID = compiletime(createNegativeBuffAbility(5, MIND_CURSE_BUFF_ID, Abilities.manaDrainTarget, "origin"))
+    static constant BUFF_MIND_CURSE_TARGET = compiletime(setupBuff("Mind Curse", "This unit is under the effect of Mind Curse; it loses mana over time and cannot cast spells.", "BTNWitchDoctorRitual", false, 5, Abilities.manaDrainTarget, "origin", DispelLevel.DISPEL))
 
 
     override function setupW(int abilityId, IHeroType heroType)
@@ -145,10 +142,7 @@ public class HeroVoodooArcher extends HeroTemplate
 
     static constant int SERPENT_POSION_MAX_STACKS = 15
 
-    static BuffType buffSerpentPoison
-    static constant SERPENT_POISON_BUFF_ID = compiletime(createAuraBuff("Serpent Poison", "This unit was hit by Serpent Ward; it is slowed and has reduced armor.", Icons.bTNSerpentWard))
-    static constant SERPENT_POISON_ABILITY_ID = compiletime(createNegativeBuffAbility(5, SERPENT_POISON_BUFF_ID, Abilities.poisonStingTarget, "chest"))
-
+    static constant BUFF_SERPENT_POISON = compiletime(setupBuff("Serpent Poison", "This unit was hit by Serpent Ward; it is slowed and has reduced armor.", Icons.bTNSerpentWard, false, 5, Abilities.poisonStingTarget, "chest", DispelLevel.DISPEL))
 
     override function setupE(int abilityId, IHeroType heroType)
 
@@ -291,7 +285,7 @@ public class HeroVoodooArcher extends HeroTemplate
         let level = caster.getAbilityLevel(spellId)
         let target = GetSpellTargetUnit()
         let dur = MIND_CURSE_DURATION[level-1].bonus(caster.getHeroInt(), MIND_CURSE_DURATION_BONUS)
-        target.addBuffReduced(caster, dur, buffMindCurseTarget, level)
+        target.addBuffReduced(caster, dur, BUFF_MIND_CURSE_TARGET, level)
         target.addBuffReduced(caster, dur, SILENCED, 1).setDispelLevel(DispelLevel.DISPEL)
 
     override static function castE()
@@ -307,7 +301,7 @@ public class HeroVoodooArcher extends HeroTemplate
         DamageEventUnit.fromUnit(ward).attackDamageNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
             let hero = source.wrapper().getOwningHero().toUnit()
             if not target.isType(UNIT_TYPE_STRUCTURE)
-                target.addBuffReduced(hero, SERPENT_POISON_DURATION[level-1], buffSerpentPoison, level)
+                target.addBuffReduced(hero, SERPENT_POISON_DURATION[level-1], BUFF_SERPENT_POISON, level)
 
     override static function castR()
         let spellId = GetSpellAbilityId()
@@ -347,20 +341,13 @@ public class HeroVoodooArcher extends HeroTemplate
             source.dealDamage(target, VOODOO_ARROW_DAMAGE[level-1], ReductionType.NONE)
 
     override function onInitDelayed(IHeroType heroType)
-        buffMindCurseTarget = new BuffType(false, DispelLevel.DISPEL)
-        buffMindCurseTarget.setupBuffWithIcon(MIND_CURSE_BUFF_ID, MIND_CURSE_ABILITY_ID)
-
-        buffMindCurseTarget.setPeriodicTime(0.25)
-        buffMindCurseTarget.addPeriodicFunction((whichBuff) -> begin
+        BUFF_MIND_CURSE_TARGET.setPeriodicTime(0.25)
+        BUFF_MIND_CURSE_TARGET.addPeriodicFunction((whichBuff) -> begin
             let target = whichBuff.getTarget()
             let caster = whichBuff.getCaster()
             let level = whichBuff.getLevel()
             caster.damageMana(target, 0.25 * MIND_CURSE_MANA_DRAIN[level-1].bonus(caster.getHeroInt(), MIND_CURSE_MANA_DRAIN_BONUS), ReductionType.MAGIC)
         end)
-
-        buffSerpentPoison = new BuffType(false, DispelLevel.DISPEL)
-        buffSerpentPoison.setupBuffWithIcon(SERPENT_POISON_BUFF_ID, SERPENT_POISON_ABILITY_ID)
-
         /*
             About stacks:
             Stacks are used, so the buff is level independent.
@@ -376,7 +363,7 @@ public class HeroVoodooArcher extends HeroTemplate
             Stacks SERPENT_POSION_MAX_STACKS times. In reality the total stack count is capped at
             SERPENT_POSION_MAX_STACKS * SERPENT_POISON_STACKS[level-1]
         */
-        buffSerpentPoison.addSetupFunction() (Buff thisBuff, int factor) ->
+        BUFF_SERPENT_POISON.addSetupFunction() (Buff thisBuff, int factor) ->
             let level = thisBuff.getLevel()
             let target = thisBuff.getTarget().wrapper()
             if factor == 1
@@ -385,7 +372,7 @@ public class HeroVoodooArcher extends HeroTemplate
             target.modMoveSpeedRelative( -factor * 10 * SERPENT_POISON_SLOW * (stacks))
             target.modArmor( -factor * SERPENT_POISON_ARMOR * (stacks))
 
-        buffSerpentPoison.addStackFunction( (Buff whichBuff) -> (begin
+        BUFF_SERPENT_POISON.addStackFunction( (Buff whichBuff) -> (begin
             let level = whichBuff.getLevel()
             let prevStacks = whichBuff.getData()
             let newStacks = min(prevStacks + SERPENT_POISON_STACKS[level-1], SERPENT_POISON_STACKS[level-1]*SERPENT_POSION_MAX_STACKS)

@@ -90,8 +90,6 @@ public class HeroPaladin extends HeroTemplate
         this.name = "Paladin"
         this.properName = "Agamand the True"
 
-    static constant BUFF_HOLY_SHIELD = new BuffType(true, DispelLevel.NONE)
-
     static constant SOUND_SHIELD_BASH = new SoundDefinition(Sounds.metalHeavyBashMetal2, false, true)
 
     static constant SOUND_DIVINE_PUNISHMENT = new SoundDefinition(Sounds.holyBolt, false, true)
@@ -161,10 +159,7 @@ public class HeroPaladin extends HeroTemplate
     static constant real array BATTLE_ROAR_DURATION = [5, 6, 7, 8, 9]
     static constant real BATTLE_ROAR_DURATION_BONUS = 2
 
-    static constant integer BUFF_ID_BATTLE_ROAR = compiletime(createAuraBuff("Battle Roar", "This unit is under the effect of Battle Roar; it attacks and moves faster.", "BTNBattleRoar"))
-    static constant integer ABILITY_BATTLE_ROAR_BUFF = compiletime(createPositiveBuffAbility(5, BUFF_ID_BATTLE_ROAR, Abilities.roarTarget, "overhead"))
-
-    static constant BATTLE_ROAR = new BuffType(true, DispelLevel.DISPEL)
+    static constant BATTLE_ROAR = compiletime(setupBuff("Battle Roar", "This unit is under the effect of Battle Roar; it attacks and moves faster.", "BTNBattleRoar", true, 5, Abilities.roarTarget, "overhead", DispelLevel.DISPEL))
 
 
 
@@ -199,11 +194,7 @@ public class HeroPaladin extends HeroTemplate
 
     static constant real array HOLY_SHIELD_DURATION = [2, 2.25, 2.5, 2.75, 3]
     static constant real HOLY_SHIELD_DURATION_BONUS = 2
-
-    static constant int BUFF_ID_HOLY_SHIELD = compiletime(createAuraBuff("Holy Shield", "This unit is protected by Holy Shield; it is untargetable.", "BTNAngelicShield"))
-    static constant int ABILITY_HOLY_SHIELD_BUFF = compiletime(createPositiveBuffAbility(5, BUFF_ID_HOLY_SHIELD, "Abilities\\Spells\\Human\\DivineShield\\DivineShieldTarget.mdl", "origin"))
-
-
+    static constant BUFF_HOLY_SHIELD = compiletime(setupBuff("Holy Shield", "This unit is protected by Holy Shield; it is untargetable.", "BTNAngelicShield", true, 5, Abilities.divineShieldTarget, "origin", DispelLevel.BREAK))
 
     override function setupE(int abilityId, IHeroType heroType)
         let COOLDOWN = skillData(17, 15, 13, 11, 9)
@@ -443,9 +434,6 @@ public class HeroPaladin extends HeroTemplate
 
 
     override function onInitDelayed(IHeroType heroType)
-        BUFF_HOLY_SHIELD.setupBuffWithIcon(BUFF_ID_HOLY_SHIELD, ABILITY_HOLY_SHIELD_BUFF)
-        
-        BATTLE_ROAR.setupBuffWithIcon(BUFF_ID_BATTLE_ROAR, ABILITY_BATTLE_ROAR_BUFF)
         BATTLE_ROAR.addLevelFunction() (Buff thisBuff, int factor) ->
             thisBuff.getTarget().wrapper()
             ..modMoveSpeedRelative( factor * BATTLE_ROAR_MS[thisBuff.getLevel()-1]*10 )

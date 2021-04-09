@@ -3,7 +3,6 @@ package Hydra
 import ClosureTimers
 import Assets
 import SoundUtils
-import ObjectEditingPreset
 import PlayerControl
 import Constants
 import UnitTypeConfig
@@ -35,10 +34,7 @@ constant int ACID_BREATH_ARMOR = 20
 constant int ACID_BREATH_SLOW = 40
 constant real ACID_BREATH_DUR = 5
 
-BuffType buffAcidBreath
-
-constant int ACID_BREATH_BUFF_ID = compiletime(createAuraBuff("Acid Breath", "This unit was hit by a Hydra; it moves and attacks slower and has reduced armor.", Icons.bTNCorrosiveBreath))
-constant int ACID_BREATH_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, ACID_BREATH_BUFF_ID, Abilities.bottleImpact, "chest"))
+constant BUFF_ACID_BREATH = compiletime(setupBuff("Acid Breath", "This unit was hit by a Hydra; it moves and attacks slower and has reduced armor.", Icons.bTNCorrosiveBreath, false, 1, Abilities.bottleImpact, "chest", DispelLevel.DISPEL))
 
 function hydraStats(unit u, int lvl)
     u.wrapper()
@@ -49,7 +45,7 @@ function hydraStats(unit u, int lvl)
     ..modAttackSpeed(ATTACK_SPEED[lvl])
 
     DamageEventUnit.fromUnit(u).attackDamageNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
-        target.addBuffReduced(source, ACID_BREATH_DUR, buffAcidBreath, 1)
+        target.addBuffReduced(source, ACID_BREATH_DUR, BUFF_ACID_BREATH, 1)
 
 function onHydraDeath()
     let target = GetTriggerUnit()
@@ -105,11 +101,7 @@ init
         ..registerPlayerUnitEvent(players[CREEP_NORMAL_OWNER], EVENT_PLAYER_UNIT_DEATH, null)
         ..addAction(function onHydraDeath)
 
-    buffAcidBreath = new BuffType(false, DispelLevel.BREAK)
-
-    buffAcidBreath.setupBuffWithIcon(ACID_BREATH_BUFF_ID, ACID_BREATH_ABILTIY_ID)
-
-    buffAcidBreath.addSetupFunction() (Buff thisBuff, int factor) ->
+    BUFF_ACID_BREATH.addSetupFunction() (Buff thisBuff, int factor) ->
         if factor == 1
             thisBuff.getTarget().wrapper()
             ..modAttackSpeed( -ACID_BREATH_SLOW)
@@ -123,7 +115,7 @@ init
             ..modMoveSpeedRelative(ACID_BREATH_SLOW*10)
             ..modArmor(ACID_BREATH_ARMOR * stacks)
 
-    buffAcidBreath.addStackFunction( (Buff whichBuff) -> (begin
+    BUFF_ACID_BREATH.addStackFunction( (Buff whichBuff) -> (begin
         let stacks = whichBuff.getData() + 1
         whichBuff.setData(stacks)
         whichBuff.getTarget().wrapper()

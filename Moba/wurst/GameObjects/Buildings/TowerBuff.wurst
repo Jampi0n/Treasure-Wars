@@ -4,7 +4,6 @@ package TowerBuff
 	Tower attacks reduce the armor of heros in order to punish long tower dives and prevent towers from dealing almost no damage against very tanky heros.
 */
 
-import ObjectEditingPreset
 import Assets
 import Buff
 import UnitLib
@@ -17,17 +16,11 @@ constant int TOWER_FOCUS_ARMOR = 20
 constant real TOWER_FOCUS_DUR = 5
 constant int TOWER_FOCUS_ABILITY_ID = 'A00O'
 
-BuffType buffTowerFocus
-
-constant int TOWER_FOCUS_BUFF_ID = compiletime(createAuraBuff("Tower Focus", "This unit was hit by a Tower; it has reduced armor.", Icons.bTNHumanWatchTower))
-constant int TOWER_FOCUS_ABILTIY_ID = compiletime(createNegativeBuffAbility(1, TOWER_FOCUS_BUFF_ID, "", "chest"))
+constant BUFF_TOWER_FOCUS = compiletime(setupBuff("Tower Focus", "This unit was hit by a Tower; it has reduced armor.", Icons.bTNHumanWatchTower, false, 1, "", "", DispelLevel.DISPEL))
 
 
 init
-	buffTowerFocus = new BuffType(false, DispelLevel.DISPEL)
-	buffTowerFocus.setupBuffWithIcon(TOWER_FOCUS_BUFF_ID, TOWER_FOCUS_ABILTIY_ID)
-
-	buffTowerFocus.addSetupFunction() (Buff thisBuff, int factor) ->
+	BUFF_TOWER_FOCUS.addSetupFunction() (Buff thisBuff, int factor) ->
 		if factor == 1
 			thisBuff.getTarget().wrapper().modArmorRelative(-TOWER_FOCUS_ARMOR * 10)
 			thisBuff.setData(1)
@@ -35,7 +28,7 @@ init
 			let stacks = thisBuff.getData()
 			thisBuff.getTarget().wrapper().modArmorRelative(TOWER_FOCUS_ARMOR * 10 * stacks)
 
-	buffTowerFocus.addStackFunction( (Buff whichBuff) -> (begin
+	BUFF_TOWER_FOCUS.addStackFunction( (Buff whichBuff) -> (begin
 		let stacks = whichBuff.getData() + 1
 		if stacks <= TOWER_FOCUS_MAX_STACKS
 			whichBuff.setData(stacks)
@@ -50,4 +43,4 @@ init
 		if id == HERO_TOWER or id == BASE_TOWER or id == GATE_TOWER or id == OUTER_TOWER
 			DamageEventUnit.fromUnit(u).attackDamageNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
 				if target.isType(UNIT_TYPE_HERO)
-					target.addBuffReduced(source, TOWER_FOCUS_DUR, buffTowerFocus, 1)
+					target.addBuffReduced(source, TOWER_FOCUS_DUR, BUFF_TOWER_FOCUS, 1)
