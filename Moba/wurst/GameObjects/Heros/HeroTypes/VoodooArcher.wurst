@@ -317,7 +317,7 @@ public class HeroVoodooArcher extends HeroTemplate
                 for p in enemyList
                     for IHero hero in Players.heroList(p)
                         let target = hero.toUnit()
-                        if target.isTargetable(caster.getOwner(), false, true)
+                        if target.isTargetableEnemy(caster)
                             caster.dealDamage(target, 0.1 * BBV_DAMAGE[level-1].bonus(caster.getHeroInt(), BBV_DAMAGE_BONUS), ReductionType.NONE)
                             target.addEffect(Abilities.vengeanceMissile, "overhead").destr()
                     

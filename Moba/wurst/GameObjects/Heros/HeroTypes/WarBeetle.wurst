@@ -302,7 +302,7 @@ public class HeroWarBeetle extends HeroTemplate
         while(not nearby.isEmpty())
             let target = FirstOfGroup(nearby)
             nearby.removeUnit(target)
-            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
+            if target.isTargetableEnemyUnit(caster)
                 caster.dealDamage(target, dmg, ReductionType.PHYSICAL)
                 target.addBuffReduced( caster, dur, STUNNED, 1).setDispelLevel(DispelLevel.DISPEL)
 
@@ -344,7 +344,7 @@ public class HeroWarBeetle extends HeroTemplate
         unit target
         if hero.getMana()/hero.getMaxMana() > 0.5
             target = hero.findTarget(600, AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
-            if target.isTargetable(hero.getOwner(), false, true)
+            if target.isTargetableEnemy(hero)
                 ai.issue("chainlightning", target)
 
             let g = CreateGroup()
@@ -356,7 +356,7 @@ public class HeroWarBeetle extends HeroTemplate
                 if u == null
                     break
                 g.removeUnit(u)
-                if u.isTargetable(hero.getOwner(), false, true) and not u.isType(UNIT_TYPE_STRUCTURE)
+                if u.isTargetableEnemyUnit(hero)
                     if u.isType(UNIT_TYPE_HERO)
                         count += 3
                     else
@@ -368,11 +368,11 @@ public class HeroWarBeetle extends HeroTemplate
                     return
 
         target = hero.findTarget(250, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_HEALTH, null)
-        if target.isTargetable(hero.getOwner(), false, true)
+        if target.isTargetableEnemy(hero)
             ai.attack(target)
 
         target = hero.findTarget(500, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_DISTANCE, null)
-        if target.isTargetable(hero.getOwner(), false, true)
+        if target.isTargetableEnemy(hero)
             ai.attack(target)
 
 
@@ -391,7 +391,7 @@ public class HeroWarBeetle extends HeroTemplate
             if u == null
                 break
             g.removeUnit(u)
-            if u.isTargetable(hero.getOwner(), false, true)
+            if u.isTargetableEnemy(hero)
                 if u.isType(UNIT_TYPE_HERO)
                     count++
         g.destr()
@@ -403,7 +403,7 @@ public class HeroWarBeetle extends HeroTemplate
         
 
         let target = ai.getTeamFightTarget()
-        if target.isTargetable(hero.getOwner(), false, true)
+        if target.isTargetableEnemy(hero)
             ai.issue("chainlightning", target)
             if not ai.getAttacking()
                 ai.attack(target)

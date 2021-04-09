@@ -320,7 +320,7 @@ public class HeroTrollBerserker extends HeroTemplate
         while(not nearby.isEmpty())
             let target = FirstOfGroup(nearby)
             nearby.removeUnit(target)
-            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
+            if target.isTargetableEnemyUnit(caster)
 
                 target.addBuffReduced(caster, GROWTH_FEAR_DURATION[level-1], BUFF_GROWTH_FEAR, level)
                 target.addBuffReduced(caster, GROWTH_FEAR_DURATION[level-1], ENSNARED, level).setDispelLevel(DispelLevel.DISPEL)
@@ -348,11 +348,11 @@ public class HeroTrollBerserker extends HeroTemplate
         let hero = ai.getHeroUnit()
 
         unit target = hero.findTarget(700, AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
-        if target.isTargetable(hero.getOwner(), false, true)
+        if target.isTargetableEnemy(hero)
             ai.issue("attackonce", target)
 
         target = hero.findTarget(600, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_HEALTH, null)
-        if target.isTargetable(hero.getOwner(), false, true)
+        if target.isTargetableEnemy(hero)
             if not ai.getAttacking()
                 ai.attack(target)
 
@@ -369,7 +369,7 @@ public class HeroTrollBerserker extends HeroTemplate
                 if u == null
                     break
                 g.removeUnit(u)
-                if u.isTargetable(hero.getOwner(), false, true)
+                if u.isTargetableEnemy(hero)
                     if u.isType(UNIT_TYPE_HERO)
                         count++
 
@@ -380,8 +380,7 @@ public class HeroTrollBerserker extends HeroTemplate
 
             
         let target = ai.getTeamFightTarget()
-        if target.isTargetable(hero.getOwner(), false, true)
-
+        if target.isTargetableEnemy(hero)
             hero.issueImmediateOrder("berserk")
 
             if not ai.getAttacking()

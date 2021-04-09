@@ -42,7 +42,7 @@ public class Workshop extends Rebuildable
 							while(not nearby.isEmpty())
 								let u = FirstOfGroup(nearby)
 								nearby.removeUnit(u)
-								if u.isTargetable(source.getOwner(), false, true) and u != target
+								if u.isTargetableEnemyUnit(source) and u != target
 									source.dealDamage(u, 75, ReductionType.PHYSICAL)
 
 							nearby.destr()

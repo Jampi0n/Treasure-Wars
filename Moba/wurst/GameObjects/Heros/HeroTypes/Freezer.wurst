@@ -32,7 +32,7 @@ class Freeze
         let g = CreateGroup()
         g.enumUnitsInRange(this.caster.getPos(), HeroFreezer.FREEZE_AOE)
         for unit u in g
-            if u.isTargetable(this.caster.getOwner(), false, true) and not u.isType(UNIT_TYPE_STRUCTURE)
+            if u.isTargetableEnemyUnit(this.caster)
                 u.addBuff(this.caster, -1, HeroFreezer.BUFF_FREEZE, this.level)
         g.destr()
 
@@ -355,7 +355,7 @@ public class HeroFreezer extends HeroTemplate
         while(not nearby.isEmpty())
             let u = FirstOfGroup(nearby)
             nearby.removeUnit(u)
-            if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(caster.getOwner(), false, true)
+            if u.isTargetableEnemyUnit(caster)
                 caster.dealDamage(u, dmg, ReductionType.MAGIC)
                 u.addBuffReduced(caster, dur, BUFF_FROST_NOVA, level)
 
@@ -402,7 +402,7 @@ public class HeroFreezer extends HeroTemplate
             while(not nearby.isEmpty())
                 let u = FirstOfGroup(nearby)
                 nearby.removeUnit(u)
-                if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(source.getOwner(), false, true) and u != target
+                if u.isTargetableEnemyUnit(source) and u != target
                     u.addBuffReduced(source, FROST_BREATH_DUR[level-1], BUFF_FROST_BREATH, level)
                     source.dealDamage(u, dmg, ReductionType.PHYSICAL)
 
@@ -427,11 +427,11 @@ public class HeroFreezer extends HeroTemplate
         unit target
         if hero.getMana()/hero.getMaxMana() > 0.5
             target = hero.findTarget(800, AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
-            if target.isTargetable(hero.getOwner(), false, true)
+            if target.isTargetableEnemy(hero)
                 ai.issue("frostnova", target)
 
         target = hero.findTarget(600, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_HEALTH, null)
-        if target.isTargetable(hero.getOwner(), false, true)
+        if target.isTargetableEnemy(hero)
             if not ai.getAttacking()
                 ai.attack(target)
 
@@ -461,7 +461,7 @@ public class HeroFreezer extends HeroTemplate
                 if u == null
                     break
                 g.removeUnit(u)
-                if u.isTargetable(hero.getOwner(), false, true)
+                if u.isTargetableEnemy(hero)
                     if u.isType(UNIT_TYPE_HERO)
                         count++
 
@@ -474,11 +474,11 @@ public class HeroFreezer extends HeroTemplate
         unit target = hero.findTarget(600, AbilityTargetFocus.FRIEND_HERO, AbilityTargetPriority.HIGH_HEALTH, (unit u) -> (begin
             return not BuffList.hasBuffType(u, BUFF_FROST_ARMOR)
         end))
-        if target.isTargetable(hero.getOwner(), true, false)
+        if target.isTargetableAllied(hero)
             ai.issue("frostarmor", target)
 
         target = ai.getTeamFightTarget()
-        if target.isTargetable(hero.getOwner(), false, true)
+        if target.isTargetableEnemy(hero)
 
 
             if not ai.getAttacking()
@@ -498,10 +498,9 @@ public class HeroFreezer extends HeroTemplate
 
     override function onInit(IHeroType heroType)
         heroType.setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean advanced) ->
-            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(source.getOwner(), false, true)
-                let level = source.getAbilityLevel(ABILITY_ID_PASSIVE)
-                if level != 0
-                    source.healMana(source, COLD_HAND_MP[level-1].toReal())
+            let level = source.getAbilityLevel(ABILITY_ID_PASSIVE)
+            if level != 0
+                source.healMana(source, COLD_HAND_MP[level-1].toReal())
     override function onInitDelayed(IHeroType heroType)
         BUFF_FROST_NOVA.addSetupFunction() (Buff thisBuff, int factor) ->
             thisBuff.getTarget().wrapper().modBlue(factor)
@@ -520,7 +519,7 @@ public class HeroFreezer extends HeroTemplate
                 target.wrapper().modArmor( ARMOR_AR[level - 1].bonus(intel, ARMOR_AR_BONUS).round())
                 forstArmor.intelligence = intel
                 forstArmor.damageEventPointer = DamageEventUnit.fromUnit(target).attackHitNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
-                    if source.isTargetable(target.getOwner(), false, true)
+                    if source.isTargetableEnemy(target)
                         let armorBuff = BuffList.getBuffOfType(target, BUFF_FROST_ARMOR)
                         source.addBuffReduced(armorBuff.getCaster(), ARMOR_SLOW_DURATION[level-1].bonus(armorBuff.getData(), ARMOR_SLOW_DURATION_BONUS), BUFF_FROST_ARMOR_SLOW, level)
                 thisBuff.setData(forstArmor castTo int)
@@ -571,7 +570,7 @@ public class HeroFreezer extends HeroTemplate
             let caster = whichBuff.getCaster()
             let level = whichBuff.getLevel()
             let fx = Freeze.effectMap.get(whichBuff.getData())
-            if target.isTargetable(caster.getOwner(), false, true)
+            if target.isTargetableEnemy(caster)
                 fx.setXY(target.getPos())
                 target.addBuff(whichBuff.getCaster(), 0.1, STUNNED, 1).setDispelLevel(DispelLevel.BREAK)
                 caster.dealDamage(target, 0.05 * FREEZE_DMG[level-1].bonus(caster.getHeroInt(), FREEZE_DMG_BONUS), ReductionType.MAGIC)

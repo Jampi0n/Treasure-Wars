@@ -280,7 +280,7 @@ public class HeroTrollManHunter extends HeroTemplate
         illusion.setAnimation("attack")
         illusion.setVertexColor(255, 255, 255, 200)
         doAfter(0.3) ->
-            if target.isTargetable(caster.getOwner(), false, true)
+            if target.isTargetableEnemy(caster)
                 SOUND_SHADOW_STRIKE.playOnPoint(caster.getPos().toVec3()).snd.setVolume(150)
                 let bleedingWoundLevel = caster.getAbilityLevel(instance.ABILITY_ID_PASSIVE)
                 if bleedingWoundLevel > 0
@@ -377,7 +377,7 @@ public class HeroTrollManHunter extends HeroTemplate
     override function onInit(IHeroType heroType)
         heroType.setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean advanced) ->
             let level = source.getAbilityLevel(this.ABILITY_ID_PASSIVE)
-            if level != 0 and target.isTargetable(source.getOwner(), false, true) and not target.isType(UNIT_TYPE_STRUCTURE)
+            if level != 0 and target.isTargetableEnemyUnit(source)
                 let b = target.addBuffReduced( source, BLEEDING_WOUND_DURATION, BUFF_BLEEDING_WOUND, level)
                 b.setData(b.getData()+3)
 
@@ -431,7 +431,7 @@ public class HeroTrollManHunter extends HeroTemplate
                 if u == null
                     break
                 g.removeUnit(u)
-                if u.isTargetable(instance.owner, false, true) and not u.isType(UNIT_TYPE_STRUCTURE)
+                if u.isTargetableEnemyUnit(instance.owner)
                     let bleedingWoundLevel = caster.getAbilityLevel(this.ABILITY_ID_PASSIVE)
                     if bleedingWoundLevel > 0
                         u.addBuffReduced(caster, BLEEDING_WOUND_DURATION, BUFF_BLEEDING_WOUND, bleedingWoundLevel)

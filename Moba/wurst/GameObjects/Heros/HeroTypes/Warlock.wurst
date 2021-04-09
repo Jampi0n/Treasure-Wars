@@ -240,7 +240,7 @@ public class HeroWarlock extends HeroTemplate
         ..hitOnce()
         ..setSize(40)
         ..setHitCondition((Missile missile, unit target) -> (begin
-            return not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(missile.getOwner().getOwner(), false, true)
+            return target.isTargetableEnemyUnit(missile.getOwner())
         end) )
         ..setHitFunction((Missile missile, unit target) -> (begin
             let missileCaster = missile.getOwner()
@@ -265,7 +265,7 @@ public class HeroWarlock extends HeroTemplate
             while(not nearby.isEmpty())
                 let target = FirstOfGroup(nearby)
                 nearby.removeUnit(target)
-                if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
+                if target.isTargetableEnemyUnit(caster)
                     caster.dealDamage(target, dmg, ReductionType.MAGIC)
                     target.addBuffReduced(caster, METEOR_STUN_DURATION[level-1], STUNNED, 1).setDispelLevel(DispelLevel.DISPEL)
             nearby.destr()
@@ -299,15 +299,15 @@ public class HeroWarlock extends HeroTemplate
                 ai.issue("inferno", targetPos.getPos())
 
             target = hero.findTarget(800, AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
-            if target.isTargetable(hero.getOwner(), false, true)
+            if target.isTargetableEnemy(hero)
                 ai.issue("soulburn", target)
 
             target = hero.findTarget(800, AbilityTargetFocus.ENEMY_UNIT, AbilityTargetPriority.LOW_HEALTH, null)
-            if target.isTargetable(hero.getOwner(), false, true)
+            if target.isTargetableEnemy(hero)
                 ai.issue("soulburn", target)
 
         target = hero.findTarget(600, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_HEALTH, null)
-        if target.isTargetable(hero.getOwner(), false, true)
+        if target.isTargetableEnemy(hero)
             ai.attack(target)
 
     override function teamFightAI(IHeroAI ai)
@@ -315,7 +315,7 @@ public class HeroWarlock extends HeroTemplate
 
         let target = ai.getTeamFightTarget()
 
-        if target.isTargetable(hero.getOwner(), false, true)
+        if target.isTargetableEnemy(hero)
 
             ai.issue("soulburn", target)
             ai.issue("magicleash", target)
@@ -366,7 +366,7 @@ public class HeroWarlock extends HeroTemplate
             while(not nearby.isEmpty())
                 let target = FirstOfGroup(nearby)
                 nearby.removeUnit(target)
-                if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
+                if target.isTargetableEnemyUnit(caster)
                     caster.dealDamage(target, dmg, ReductionType.MAGIC)
         
             nearby.destr()
@@ -381,7 +381,7 @@ public class HeroWarlock extends HeroTemplate
         buffRayOfDeath.addPeriodicFunction((Buff whichBuff) ->(begin
             let target = whichBuff.getTarget()
             let caster = whichBuff.getCaster()
-            if not caster.getCurrentOrder() == OrderId("magicleash") or not target.isTargetable(caster.getOwner(), false, true)
+            if not caster.getCurrentOrder() == OrderId("magicleash") or not target.isTargetableEnemy(caster)
                 whichBuff.dispel()
             else
                 caster.dealDamage(target, 0.1 * RAY_OF_DEATH_DAMAGE[caster.getAbilityLevel(ABILITY_ID_R)-1].bonus(caster.getHeroInt(), RAY_OF_DEATH_DAMAGE_BONUS), ReductionType.MAGIC)
@@ -391,7 +391,7 @@ public class HeroWarlock extends HeroTemplate
         BUFF_SOUL_BURN..setPeriodicTime(0.5)..addPeriodicFunction((Buff whichBuff) ->(begin
             let target = whichBuff.getTarget()
             let caster = whichBuff.getCaster()
-            if target.isTargetable(caster.getOwner(), false, true)
+            if target.isTargetableEnemy(caster)
                 caster.dealDamage(target, 0.5 * SOUL_BURN_DAMAGE[caster.getAbilityLevel(ABILITY_ID_E)-1].bonus(caster.getHeroInt(), SOUL_BURN_DAMAGE_BONUS), ReductionType.MAGIC)
         end))
 
@@ -414,7 +414,7 @@ public class HeroWarlock extends HeroTemplate
                     while(not nearby.isEmpty())
                         let target = FirstOfGroup(nearby)
                         nearby.removeUnit(target)
-                        if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true) and not BuffList.hasBuffType(target, BUFF_SOUL_BURN)
+                        if target.isTargetableEnemyUnit(caster) and not BuffList.hasBuffType(target, BUFF_SOUL_BURN)
                             target.addBuffReduced(caster, dur, BUFF_SOUL_BURN, level)
                 
                     nearby.destr()

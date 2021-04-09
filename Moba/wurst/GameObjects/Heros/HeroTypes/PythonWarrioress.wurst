@@ -262,7 +262,7 @@ public class HeroPythonWarrioress extends HeroTemplate
                 while(not nearby.isEmpty())
                     let target = FirstOfGroup(nearby)
                     nearby.removeUnit(target)
-                    if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
+                    if target.isTargetableEnemyUnit(caster)
                         target.addBuff( caster, 0.5, BUFF_POISON_SPIT, level)
             
                 nearby.destr()
@@ -305,15 +305,15 @@ public class HeroPythonWarrioress extends HeroTemplate
                 ai.issue("silence", targetPos.getPos())
 
             target = hero.findTarget(300, AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
-            if target.isTargetable(hero.getOwner(), false, true)
+            if target.isTargetableEnemy(hero)
                 ai.issue("forkedlightning", target)
 
         target = hero.findTarget(250, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_HEALTH, null)
-        if target.isTargetable(hero.getOwner(), false, true)
+        if target.isTargetableEnemy(hero)
             ai.attack(target)
 
         target = hero.findTarget(500, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_DISTANCE, null)
-        if target.isTargetable(hero.getOwner(), false, true)
+        if target.isTargetableEnemy(hero)
             ai.attack(target)
 
     override function teamFightAI(IHeroAI ai)
@@ -321,7 +321,7 @@ public class HeroPythonWarrioress extends HeroTemplate
 
         let target = ai.getTeamFightTarget()
 
-        if target.isTargetable(hero.getOwner(), false, true)
+        if target.isTargetableEnemy(hero)
 
             ai.issue("silence", target.getPos())
             ai.issue("chainlightning", target)
@@ -340,7 +340,7 @@ public class HeroPythonWarrioress extends HeroTemplate
     override function onInit(IHeroType heroType)
         heroType.setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean advanced) ->
             let level = source.getAbilityLevel(ABILITY_ID_PASSIVE)
-            if level != 0 and target.isTargetable(source.getOwner(), false, true) and not target.isType(UNIT_TYPE_STRUCTURE)
+            if level != 0 and target.isTargetableEnemyUnit(source)
                 target.addBuffReduced( source, ENVENOMED_BLADES_DURATION[level-1], BUFF_ENVENOMED_BLADES, level)
 
     override function onInitDelayed(IHeroType heroType)
@@ -348,7 +348,7 @@ public class HeroPythonWarrioress extends HeroTemplate
         BUFF_ENVENOMED_BLADES.addPeriodicFunction((Buff thisBuff)-> (begin
             let target = thisBuff.getTarget()
             let caster = thisBuff.getCaster()
-            if target.isTargetable(caster.getOwner(), false, true)
+            if target.isTargetableEnemy(caster)
                 caster.dealDamage(target, 
                 (ENVENOMED_BLADES_DAMAGE[thisBuff.getLevel()-1]).bonus(caster.getHeroInt(), ENVENOMED_BLADES_DAMAGE_BONUS)
                 , ReductionType.MAGIC)

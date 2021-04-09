@@ -262,7 +262,7 @@ public class HeroElementalMage extends HeroTemplate
         ..setScale(2)
         ..setMaxRange(800)
         ..setHitCondition((Missile missile, unit target) -> (begin
-            return not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(missile.getOwner().getOwner(), false, true)
+            return target.isTargetableEnemyUnit(missile.getOwner())
         end) )
         ..setHitFunction((Missile missile, unit target) -> (begin
             let missileCaster = missile.getOwner()
@@ -283,8 +283,7 @@ public class HeroElementalMage extends HeroTemplate
         while(not nearby.isEmpty())
             let target = FirstOfGroup(nearby)
             nearby.removeUnit(target)
-            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
-
+            if target.isTargetableEnemyUnit(caster)
                 caster.dealDamage(target, dmg, ReductionType.MAGIC)
                 target.addEffect(Abilities.redDragonMissile, "chest").destr()
 
@@ -329,7 +328,7 @@ public class HeroElementalMage extends HeroTemplate
             while(not nearby.isEmpty())
                 let target = FirstOfGroup(nearby)
                 nearby.removeUnit(target)
-                if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(impact.getOwner(), false, true)
+                if target.isTargetableEnemyUnit(impact)
                     caster.dealDamage(target, dmg, ReductionType.MAGIC)
                     target.addBuffReduced(caster, dur, FF_BUFF, level)
 
@@ -376,7 +375,7 @@ public class HeroElementalMage extends HeroTemplate
         FF_BUFF.addPeriodicFunction((Buff whichBuff) -> (begin
             let caster = whichBuff.getCaster()
             let target = whichBuff.getTarget()
-            if target.isTargetable(caster.getOwner(), false, true)
+            if target.isTargetableEnemy(caster)
                 caster.dealDamage(target, 0.25 * FF_DOT[whichBuff.getLevel()-1].bonus(caster.getHeroInt(), FF_DOT_BONUS), ReductionType.MAGIC)
         end))
 

@@ -37,7 +37,7 @@ class RitualOfTheSeas
             while(not nearby.isEmpty())
                 let target = FirstOfGroup(nearby)
                 nearby.removeUnit(target)
-                if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(this.caster.getOwner(), false, true) and target.isVisible(this.caster.getOwner())
+                if target.isTargetableEnemyUnit(this.caster.getOwner()) and target.isVisible(this.caster)
                     doAfter(target.getPos().distanceTo(caster.getPos())/1000 , () -> (begin
 
                         if target.isAlive() and target.wrapper() != null
@@ -336,7 +336,7 @@ public class HeroSeaDruid extends HeroTemplate
         while(not nearby.isEmpty())
             let target = FirstOfGroup(nearby)
             nearby.removeUnit(target)
-            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
+            if target.isTargetableEnemyUnit(caster)
                 caster.dealDamage(target, hitDmg, ReductionType.PHYSICAL)
                 if target.isMovable() and not target.isType(UNIT_TYPE_FLYING)
                     Knockback2d.knockback(target, caster.getPos().polarOffset(caster.getPos().angleTo(target.getPos()), 500), 1000)
@@ -346,7 +346,7 @@ public class HeroSeaDruid extends HeroTemplate
                     ..hitOnce()
                     ..setSize(125)
                     ..setHitCondition((Missile missile, unit target) -> (begin
-                    return not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(missile.getOwner().getOwner(), false, true)
+                    return target.isTargetableEnemyUnit(missile.getOwner())
                 end) )
                     ..setHitFunction((Missile missile, unit target) -> (begin
                     let missileCaster = missile.getOwner()
@@ -368,7 +368,7 @@ public class HeroSeaDruid extends HeroTemplate
             while(not nearby.isEmpty())
                 let target = FirstOfGroup(nearby)
                 nearby.removeUnit(target)
-                if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(detectionUnit.getOwner(), false, true)
+                if target.isTargetableEnemyUnit(detectionUnit)
 
                     caster.dealDamage(target, dmg, ReductionType.MAGIC)
                     target.addBuffReduced(caster, FISH_SLOW_DURATION[level-1], BUFF_FISH, level)
@@ -417,7 +417,7 @@ public class HeroSeaDruid extends HeroTemplate
                 if u == null
                     break
                 g.removeUnit(u)
-                if u.isTargetable(hero.getOwner(), false, true) and not u.isType(UNIT_TYPE_STRUCTURE)
+                if u.isTargetableEnemyUnit(hero)
                     if u.isType(UNIT_TYPE_HERO)
                         count += 3
                     else
@@ -429,11 +429,11 @@ public class HeroSeaDruid extends HeroTemplate
                     return
 
         unit target = hero.findTarget(250, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_HEALTH, null)
-        if target.isTargetable(hero.getOwner(), false, true)
+        if target.isTargetableEnemy(hero)
             ai.attack(target)
 
         target = hero.findTarget(500, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_DISTANCE, null)
-        if target.isTargetable(hero.getOwner(), false, true)
+        if target.isTargetableEnemy(hero)
             ai.attack(target)
 
     override function teamFightAI(IHeroAI ai)
@@ -453,7 +453,7 @@ public class HeroSeaDruid extends HeroTemplate
             if u == null
                 break
             g.removeUnit(u)
-            if u.isTargetable(hero.getOwner(), false, true)
+            if u.isTargetableEnemy(hero)
                 if u.isType(UNIT_TYPE_HERO)
                     count++
 
@@ -469,7 +469,7 @@ public class HeroSeaDruid extends HeroTemplate
             if u == null
                 break
             g.removeUnit(u)
-            if u.isTargetable(hero.getOwner(), false, true)
+            if u.isTargetableEnemy(hero)
                 if u.isType(UNIT_TYPE_HERO)
                     count++
 
@@ -480,7 +480,7 @@ public class HeroSeaDruid extends HeroTemplate
 
             
         let target = ai.getTeamFightTarget()
-        if target.isTargetable(hero.getOwner(), false, true)
+        if target.isTargetableEnemy(hero)
             ai.issue("shockwave", target.getPos())
             if not ai.getAttacking()
                 ai.attack(target)

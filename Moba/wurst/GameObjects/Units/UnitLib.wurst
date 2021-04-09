@@ -20,20 +20,54 @@ public enum ReductionType
     NONE
 
 
-public function unit.isTargetable(player source, boolean allowFriends, boolean allowEnemies) returns boolean
-    boolean ret = true
-    if this == null
-        ret = false
-    else if not this.isAlive()
-        ret = false
-    else if IsUnitEnemy(this, source) 
-        ret = allowEnemies and not IsUnitType(this, UNIT_TYPE_ANCIENT) and not IsUnitType(this, UNIT_TYPE_MAGIC_IMMUNE)
-    else if IsUnitAlly(this, source) 
-        ret = allowFriends and not IsUnitType(this, UNIT_TYPE_MAGIC_IMMUNE)
-    return ret
+public function unit.isBuilding() returns boolean
+    return IsUnitType(this, UNIT_TYPE_STRUCTURE)
+
 
 public function unit.isVisible(player source) returns boolean
     return IsUnitVisible(this, source)
+public function unit.isTargetable() returns boolean
+    return this != null and this.isAlive() and not IsUnitType(this, UNIT_TYPE_SAPPER)
+public function unit.isTargetableEnemy(player source) returns boolean
+    return this.isTargetable() and IsUnitEnemy(this, source) and not IsUnitType(this, UNIT_TYPE_ANCIENT)
+public function unit.isTargetableEnemyUnit(player source) returns boolean
+    return this.isTargetable() and IsUnitEnemy(this, source) and not IsUnitType(this, UNIT_TYPE_ANCIENT) and not this.isBuilding()
+public function unit.isTargetableAllied(player source) returns boolean
+    return this.isTargetable() and IsUnitAlly(this, source)
+public function unit.isTargetableAlliedUnit(player source) returns boolean
+    return this.isTargetable() and IsUnitAlly(this, source) and not this.isBuilding()
+public function unit.isTargetableAny(player source) returns boolean
+    if this.isTargetable()
+        if IsUnitAlly(this, source)
+            return true
+        else
+            return not IsUnitType(this, UNIT_TYPE_ANCIENT)
+    return false
+public function unit.isTargetableAnyUnit(player source) returns boolean
+    if this.isTargetable() and not this.isBuilding()
+        if IsUnitAlly(this, source)
+            return true
+        else
+            return not IsUnitType(this, UNIT_TYPE_ANCIENT)
+    return false
+
+public function unit.isVisible(unit source) returns boolean
+    return this.isVisible(source.getOwner())
+public function unit.isTargetableEnemy(unit source) returns boolean
+    return this.isTargetableEnemy(source.getOwner())
+public function unit.isTargetableEnemyUnit(unit source) returns boolean
+    return this.isTargetableEnemyUnit(source.getOwner())
+public function unit.isTargetableAllied(unit source) returns boolean
+    return this.isTargetableAllied(source.getOwner())
+public function unit.isTargetableAlliedUnit(unit source) returns boolean
+    return this.isTargetableAlliedUnit(source.getOwner())
+public function unit.isTargetableAny(unit source) returns boolean
+    return this.isTargetableAny(source.getOwner())
+public function unit.isTargetableAnyUnit(unit source) returns boolean
+    return this.isTargetableAnyUnit(source.getOwner())
+
+
+
 
 public function unit.isMovable() returns boolean
     if GetUnitPropWindow(this) < 0.00001

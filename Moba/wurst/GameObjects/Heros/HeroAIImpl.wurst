@@ -226,7 +226,7 @@ class TeamFight
 
         for hero in Teams.HEROES[Teams.invert(team)]
             let heroUnit = hero.toUnit()
-            if hero.toUnit().getPos().distanceTo(this.teamFightLoc) < TEAM_FIGHT_RANGE and hero.toUnit().isAlive() and hero.toUnit().isTargetable(players[Teams.army(team)], false, true)
+            if hero.toUnit().isTargetableEnemy(players[Teams.army(team)]) and hero.toUnit().getPos().distanceTo(this.teamFightLoc) < TEAM_FIGHT_RANGE
                 if hero.toUnit().isVisible(players[Teams.army(team)])
                     let nextValue = determineHeroOffensiveStrength(heroUnit)/determineHeroDefensiveStrength(heroUnit)
                     if nextValue > currentValue
@@ -713,7 +713,7 @@ public class HeroAIImpl implements IHeroAI
                         if u == null
                             break
                         g.removeUnit(u)
-                        if u.isTargetable(this.getOwningPlayer(), false, true)
+                        if u.isTargetableEnemy(this.getOwningPlayer())
                             if u.isType(UNIT_TYPE_HERO)
                                 heroNearby = true
                                 break

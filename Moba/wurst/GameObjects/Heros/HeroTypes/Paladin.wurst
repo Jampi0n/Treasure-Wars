@@ -40,7 +40,7 @@ class DivinePunishment
             while(not nearby.isEmpty())
                 let target = FirstOfGroup(nearby)
                 nearby.removeUnit(target)
-                if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(this.caster.getOwner(), false, true) and target.isVisible(this.caster.getOwner())
+                if target.isTargetableEnemyUnit(this.caster.getOwner()) and target.isVisible(this.caster)
                     
                     target.addEffect("Abilities\\Spells\\Human\\Resurrect\\ResurrectTarget.mdl", "origin").destr()
                     doAfter(0.4, () -> (begin
@@ -298,7 +298,7 @@ public class HeroPaladin extends HeroTemplate
         while(not nearby.isEmpty())
             let target = FirstOfGroup(nearby)
             nearby.removeUnit(target)
-            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
+            if target.isTargetableEnemyUnit(caster)
                 caster.dealDamage(target, dmg, ReductionType.PHYSICAL)
                 target.addBuffReduced( caster, dur, STUNNED, 1).setDispelLevel(DispelLevel.DISPEL)
 
@@ -316,7 +316,7 @@ public class HeroPaladin extends HeroTemplate
         while(not nearby.isEmpty())
             let target = FirstOfGroup(nearby)
             nearby.removeUnit(target)
-            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), true, false)
+            if target.isTargetableAlliedUnit(caster)
                 target.addBuff( caster, dur, BATTLE_ROAR, level)
 
         nearby.destr()
@@ -353,7 +353,7 @@ public class HeroPaladin extends HeroTemplate
                 if u == null
                     break
                 g.removeUnit(u)
-                if u.isTargetable(hero.getOwner(), false, true) and not u.isType(UNIT_TYPE_STRUCTURE)
+                if u.isTargetableEnemyUnit(hero)
                     if u.isType(UNIT_TYPE_HERO)
                         count += 5
                     else
@@ -366,11 +366,11 @@ public class HeroPaladin extends HeroTemplate
             g.destr()
 
         unit target = hero.findTarget(250, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_HEALTH, null)
-        if target.isTargetable(hero.getOwner(), false, true)
+        if target.isTargetableEnemy(hero)
             ai.attack(target)
 
         target = hero.findTarget(500, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_DISTANCE, null)
-        if target.isTargetable(hero.getOwner(), false, true)
+        if target.isTargetableEnemy(hero)
             ai.attack(target)
 
     override function teamFightAI(IHeroAI ai)
@@ -382,7 +382,7 @@ public class HeroPaladin extends HeroTemplate
         unit target = hero.findTarget(800, AbilityTargetFocus.ALLY_HERO, AbilityTargetPriority.LOW_HEALTH, (unit u) -> (begin
             return not BuffList.hasBuffType(u, BUFF_HOLY_SHIELD)
         end))
-        if target.isTargetable(hero.getOwner(), true, false)
+        if target.isTargetableAllied(hero)
             ai.issue("channel", target)
 
         
@@ -395,7 +395,7 @@ public class HeroPaladin extends HeroTemplate
             if u == null
                 break
             g.removeUnit(u)
-            if u.isTargetable(hero.getOwner(), false, true)
+            if u.isTargetableEnemy(hero)
                 if u.isType(UNIT_TYPE_HERO)
                     count++
 
@@ -411,7 +411,7 @@ public class HeroPaladin extends HeroTemplate
             if u == null
                 break
             g.removeUnit(u)
-            if u.isTargetable(hero.getOwner(), false, true)
+            if u.isTargetableEnemy(hero)
                 if u.isType(UNIT_TYPE_HERO)
                     count++
 
@@ -422,7 +422,7 @@ public class HeroPaladin extends HeroTemplate
 
             
         target = ai.getTeamFightTarget()
-        if target.isTargetable(hero.getOwner(), false, true)
+        if target.isTargetableEnemy(hero)
             if not ai.getAttacking()
                 ai.attack(target)
 

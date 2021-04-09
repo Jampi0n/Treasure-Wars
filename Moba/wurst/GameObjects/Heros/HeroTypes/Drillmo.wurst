@@ -63,7 +63,7 @@ class Pull
                     while(not nearby.isEmpty())
                         let target = FirstOfGroup(nearby)
                         nearby.removeUnit(target)
-                        if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true) and target.isMovable()
+                        if target.isTargetableEnemyUnit(caster) and target.isMovable()
                             let distance = target.getPos().distanceTo(pos)
                             if distance < minDistance
                                 minDistance = distance
@@ -349,7 +349,7 @@ public class HeroDrillmo extends HeroTemplate
                 while(not nearby.isEmpty())
                     let target = FirstOfGroup(nearby)
                     nearby.removeUnit(target)
-                    if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
+                    if target.isTargetableEnemyUnit(caster)
                         caster.dealDamage(target, dmg, ReductionType.PHYSICAL)
                         target.addBuffReduced( caster, SPIKE_BALL_STUN[level-1], STUNNED, 1).setDispelLevel(DispelLevel.DISPEL)
                         target.addBuffReduced( caster, SPIKE_BALL_DOT_DURATION[level-1], BUFF_SPIKE_BALL, level)
@@ -369,7 +369,7 @@ public class HeroDrillmo extends HeroTemplate
         let hero = ai.getHeroUnit()
         let target = hero.findTarget(ROCKET_RANGE[hero.getAbilityLevel(ABILITY_ID_R)-1], AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
         let rocketLvl = hero.getAbilityLevel(ABILITY_ID_R)-1
-        if target.isTargetable(hero.getOwner(), false, true) and target.getHP()*(1+ARMOR_REDUCTION*target.getArmor()) <= 0.9 * ROCKET_DMG[rocketLvl].bonus(hero.getHeroStr(), ROCKET_DMG_BONUS)
+        if target.isTargetableEnemy(hero) and target.getHP()*(1+ARMOR_REDUCTION*target.getArmor()) <= 0.9 * ROCKET_DMG[rocketLvl].bonus(hero.getHeroStr(), ROCKET_DMG_BONUS)
             ai.issue("acidbomb", target)
 
         ai.issue("berserk")
@@ -381,16 +381,17 @@ public class HeroDrillmo extends HeroTemplate
         if hero.getMana()/hero.getMaxMana() > 0.5
             let rocketLvl = hero.getAbilityLevel(ABILITY_ID_R)-1
             target = hero.findTarget(ROCKET_RANGE[rocketLvl], AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
-            if target.isTargetable(hero.getOwner(), false, true) and target.getHP()*(1+ARMOR_REDUCTION*target.getArmor()) <= 0.9 * ROCKET_DMG[rocketLvl].bonus(hero.getHeroStr(), ROCKET_DMG_BONUS)
+            if target.isTargetableEnemy(hero) and target.getHP()*(1+ARMOR_REDUCTION*target.getArmor()) <= 0.9 * ROCKET_DMG[rocketLvl].bonus(hero.getHeroStr(), ROCKET_DMG_BONUS)
                 ai.issue("acidbomb", target)
 
         target = hero.findTarget(250, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_HEALTH, null)
-        if target.isTargetable(hero.getOwner(), false, true)
+        if target.isTargetableEnemy(hero)
             ai.attack(target)
 
-        target = hero.findTarget(500, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_DISTANCE, null)
-        if target.isTargetable(hero.getOwner(), false, true)
-            ai.attack(target)
+        if target == null
+            target = hero.findTarget(500, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_DISTANCE, null)
+            if target.isTargetableEnemy(hero)
+                ai.attack(target)
 
     override function teamFightAI(IHeroAI ai)
         let ulti = ABILITY_ID_R
@@ -398,7 +399,7 @@ public class HeroDrillmo extends HeroTemplate
 
         let target = ai.getTeamFightTarget()
 
-        if target.isTargetable(hero.getOwner(), false, true)
+        if target.isTargetableEnemyUnit(hero)
 
             if hero.getAbilityLevel(ulti) > 0
                 ai.issue("acidbomb", target)
@@ -432,7 +433,7 @@ public class HeroDrillmo extends HeroTemplate
             while(not nearby.isEmpty())
                 let target = FirstOfGroup(nearby)
                 nearby.removeUnit(target)
-                if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(source.getOwner(), false, true)
+                if target.isTargetableEnemyUnit(source)
                     source.dealDamage(target, dmg, ReductionType.PHYSICAL)
             nearby.destr()
     

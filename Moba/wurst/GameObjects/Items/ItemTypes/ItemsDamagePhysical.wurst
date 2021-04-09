@@ -140,7 +140,7 @@ function axeOfEmbers()
                 if u == null
                     break
                 g.removeUnit(u)
-                if u.isTargetable(source.getOwner(), false, true)
+                if u.isTargetableEnemy(source)
                     source.dealDamage(u, aoeDmg * 1.0, ReductionType.MAGIC)
                     u.addEffect(Abilities.fireBallMissile, "chest").destr()
             g.destr()

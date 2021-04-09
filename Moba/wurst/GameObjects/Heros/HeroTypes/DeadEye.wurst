@@ -257,7 +257,7 @@ public class HeroDeadEye extends HeroTemplate
             ..setScale(1.2)
             ..addModel(Abilities.avengerMissile)
             ..setHitCondition((Missile missile, unit target) -> (begin
-            return not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(missile.getOwner().getOwner(), false, true)
+            return target.isTargetableEnemyUnit(missile.getOwner())
         end) )
             ..setHitFunction((Missile missile, unit target) -> (begin
             let missileCaster = missile.getOwner()
@@ -277,7 +277,7 @@ public class HeroDeadEye extends HeroTemplate
         while(not nearby.isEmpty())
             let target = FirstOfGroup(nearby)
             nearby.removeUnit(target)
-            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), false, true)
+            if target.isTargetableEnemyUnit(caster)
                 target.addBuffReduced( caster, dur, MISS, 1).setDispelLevel(DispelLevel.DISPEL)
                 target.addBuffReduced( caster, dur, BUFF_TERROR, level)
 
@@ -331,11 +331,11 @@ public class HeroDeadEye extends HeroTemplate
         unit target
         if hero.getMana()/hero.getMaxMana() > 0.5
             target = hero.findTarget(500, AbilityTargetFocus.ENEMY_HERO, AbilityTargetPriority.LOW_HEALTH, null)
-            if target.isTargetable(hero.getOwner(), false, true)
+            if target.isTargetableEnemy(hero)
                 ai.issue("channel", target.getPos())
 
         target = hero.findTarget(600, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_HEALTH, null)
-        if target.isTargetable(hero.getOwner(), false, true)
+        if target.isTargetableEnemy(hero)
 
             if not ai.getAttacking()
                 ai.attack(target)
@@ -359,7 +359,7 @@ public class HeroDeadEye extends HeroTemplate
             if u == null
                 break
             g.removeUnit(u)
-            if u.isTargetable(hero.getOwner(), false, true)
+            if u.isTargetableEnemy(hero)
                 if u.isType(UNIT_TYPE_HERO)
                     count++
 
@@ -370,9 +370,7 @@ public class HeroDeadEye extends HeroTemplate
 
             
         let target = ai.getTeamFightTarget()
-        if target.isTargetable(hero.getOwner(), false, true)
-
-
+        if target.isTargetableEnemy(hero)
             if not ai.getAttacking()
                 ai.attack(target)
 
@@ -380,7 +378,7 @@ public class HeroDeadEye extends HeroTemplate
         heroType.setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
             let instance = DeadEyInstance.fromUnit(source)
             let level = source.getAbilityLevel(ABILITY_ID_PASSIVE)
-            if level!=0 and target.isTargetable(source.getOwner(), false, true) and target.isVisible(source.getOwner()) and not target.isType(UNIT_TYPE_STRUCTURE) and not target.isType(UNIT_TYPE_HERO)
+            if level!=0 and target.isTargetableEnemyUnit(source.getOwner()) and target.isVisible(source) and not target.isType(UNIT_TYPE_HERO)
                 doAfter(0, () -> (begin
                     if(target.getHP() <= BLACK_ARROW_THRESHOLD[level-1])
                         let pos =  target.getPos()
@@ -396,7 +394,7 @@ public class HeroDeadEye extends HeroTemplate
     override function onInitDelayed(IHeroType heroType)
         onImpact(BUFF_ID_ON_DEATH_COIL) (unit source, unit target) ->
             let instance = DeadEyInstance.fromUnit(source)
-            if target.isTargetable(source.getOwner(), false, true)
+            if target.isTargetableEnemy(source)
                 let level = source.getAbilityLevel(ABILITY_ID_R)
                 GetEventDamageSource().dealDamage(target, 
                 DEATH_COIL_DMG_BASE[level-1].bonus(source.getHeroInt(), DEATH_COIL_DMG_BASE_BONUS)+

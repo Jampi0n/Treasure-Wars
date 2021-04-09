@@ -44,7 +44,7 @@ class AttackOrderTrack
             thisTrack.targetedAttack = true
             thisTrack.target = GetOrderTargetUnit()
         else
-            if GetIssuedOrderId() == OrderId("smart") and orderTarget.isTargetable(thisTrack.trackUnit.getOwner(), false, true)
+            if GetIssuedOrderId() == OrderId("smart") and orderTarget.isTargetableEnemy(thisTrack.trackUnit)
                 thisTrack.targetedAttack = true
                 thisTrack.target = GetOrderTargetUnit()
             else
@@ -331,7 +331,7 @@ public class HeroInfernalMachine extends HeroTemplate
         while not nearby.isEmpty()
             let target = FirstOfGroup(nearby)
             nearby.removeUnit(target)
-            if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(caster.getOwner(), true, false)
+            if target.isTargetableEnemyUnit(caster)
                 target.addBuff( caster, INNER_FIRE_DURATION, BUFF_INNER_FIRE, level)
 
         nearby.destr()
@@ -358,7 +358,7 @@ public class HeroInfernalMachine extends HeroTemplate
             while not nearby.isEmpty()
                 let target = FirstOfGroup(nearby)
                 nearby.removeUnit(target)
-                if not target.isType(UNIT_TYPE_STRUCTURE) and target.isTargetable(impact.getOwner(), false, true)
+                if target.isTargetableEnemyUnit(impact)
 
                     caster.dealDamage(target, dmg, ReductionType.MAGIC)
                     target.addBuffReduced(caster, FLAME_THROWER_DURATION[level-1], BUFF_FLAME_THROWER, level)
@@ -437,11 +437,11 @@ public class HeroInfernalMachine extends HeroTemplate
                 ai.issue("shockwave", targetPos.getPos())
 
         unit target = hero.findTarget(250, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_HEALTH, null)
-        if target.isTargetable(hero.getOwner(), false, true)
+        if target.isTargetableEnemy(hero)
             ai.attack(target)
 
         target = hero.findTarget(500, AbilityTargetFocus.ENEMY, AbilityTargetPriority.LOW_DISTANCE, null)
-        if target.isTargetable(hero.getOwner(), false, true)
+        if target.isTargetableEnemy(hero)
             ai.attack(target)
 
     override function teamFightAI(IHeroAI ai)
@@ -450,7 +450,7 @@ public class HeroInfernalMachine extends HeroTemplate
         let target = ai.getTeamFightTarget()
 
 
-        if target.isTargetable(hero.getOwner(), false, true)
+        if target.isTargetableEnemy(hero)
 
             if hero.getTypeId() == this.UNIT_ID_HERO
                 if target.getPos().distanceTo(hero.getPos()) < 600
@@ -494,7 +494,7 @@ public class HeroInfernalMachine extends HeroTemplate
         end))
     override function onInit(IHeroType heroType)
         heroType.setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean advanced) ->
-            if target.isTargetable(source.getOwner(), false, true) and not target.isType(UNIT_TYPE_STRUCTURE)
+            if target.isTargetableEnemyUnit(source)
                 if source.getTypeId() == UNIT_ID_HERO and BuffList.hasBuffType(source, BUFF_BASH)
                     let bash = BuffList.getBuffOfType(source, BUFF_BASH)
                     target.addBuffReduced(source, BASH_STUN_DURATION[bash.getLevel()-1], STUNNED, 1).setDispelLevel(DispelLevel.DISPEL)
@@ -524,7 +524,7 @@ public class HeroInfernalMachine extends HeroTemplate
         BUFF_FLAME_THROWER.addPeriodicFunction((Buff whichBuff) -> (begin
             let caster = whichBuff.getCaster()
             let target = whichBuff.getTarget()
-            if target.isTargetable(caster.getOwner(), false, true)
+            if target.isTargetableEnemy(caster)
                 caster.dealDamage(target, 0.25 * FLAME_THROWER_DOT[whichBuff.getLevel()-1].bonus(caster.getHeroInt(), FLAME_THROWER_DOT_BONUS), ReductionType.MAGIC)
         end))
 
@@ -545,7 +545,7 @@ public class HeroInfernalMachine extends HeroTemplate
                             g.enumUnitsInRange(dyingUnit.getPos(), FIERY_HANDS_AOE)
                             let dmg = FIERY_HANDS_DMG[killer.getAbilityLevel(HeroInfernalMachine.instance.ABILITY_ID_PASSIVE)-1].bonus(killer.getHeroInt(), FIERY_HANDS_DMG_BONUS)
                             for unit u in g
-                                if not u.isType(UNIT_TYPE_STRUCTURE) and u.isTargetable(killer.getOwner(), false, true)
+                                if u.isTargetableEnemyUnit(killer)
                                     killer.dealDamage(u, dmg, ReductionType.MAGIC)
                             g.destr()
         end))
