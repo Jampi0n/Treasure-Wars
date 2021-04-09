@@ -22,7 +22,19 @@ import public DamageIds
 import public UnitImpl
 import public IUnit
 import public ChannelTeleport
+import public BuffTypeConfig
 import ErrorHandling
+
+public function generateCooldownAbility() returns int
+    let id = ABIL_ID_GEN.next()
+    new AbilityDefinitionAnimateDead(id)
+    return id
+
+public function tryStartCooldown(unit u, int id, real cd) returns bool
+    if u.getAbilityCooldownRemaining(id) == 0.0
+        BlzStartUnitAbilityCooldown(u, id, cd)
+        return true
+    return false
 
 public class IntToTrigger
     trigger trg
@@ -268,6 +280,12 @@ public function addUnique(string desc)
     currentDescription += COLOR_GOLD.toColorString() + "Unique:|r|n" + desc + "|n"
 public function addActive(string name, string desc)
     currentDescription += COLOR_GOLD.toColorString() + name + " (Active):|r|n" + desc + "|n"
+
+public function setPassiveAbility(int id)
+    if compiletime
+        currentItemDefinition.setAbilities(id.toRawCode())
+        currentItemDefinition.setActivelyUsed(false)
+        setCooldownGroup(id)
 
 public function setAbilities(vararg int ids)
     if compiletime

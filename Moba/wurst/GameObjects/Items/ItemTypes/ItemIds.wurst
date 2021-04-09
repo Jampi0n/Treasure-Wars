@@ -5,25 +5,56 @@ import Icons
 
 //base
 public constant ITEM_ID_BOOTS_BASE = compiletime(newItem("BTNNatureSlippers"))
-public constant ITEM_ID_HAMMER_OF_STRENGTH = compiletime(newItem("BTNINV_Hammer_15"))
-public constant ITEM_ID_GLOVES_OF_HASTE = compiletime(newItem("BTNLeatherGloves"))
 public constant ITEM_ID_MAGE_AMULET = compiletime(newItem("BTNEmptyAmulet"))
 public constant ITEM_ID_MANA_RING = compiletime(newItem("BTNINV_Jewelry_Ring_10"))
 public constant ITEM_ID_SPELL_TOME = compiletime(newItem("BTNbook"))
 public constant ITEM_ID_GEM_OF_MANA = compiletime(newItem("BTNINV_Misc_Gem_Sapphire_02"))
 public constant ITEM_ID_GEM_OF_HEALTH = compiletime(newItem("BTNINV_Misc_Gem_Ruby_02"))
 public constant ITEM_ID_RING_OF_HEALTH = compiletime(newItem("BTNINV_Jewelry_Ring_09"))
+public constant ITEM_ID_VOID_CRYSTAL = compiletime(newItem("BTNJewelOfDarkness"))
+public constant ITEM_ID_PLATED_GAUNTLETS = compiletime(newItem("BTNPlatedGauntlet2"))
+public constant ITEM_ID_LEATHER_ARMOR = compiletime(newItem("BTNLeatherArmor"))
+public constant ITEM_ID_SHIELD = compiletime(newItem("BTNRuinedShield"))
+public constant ITEM_ID_HAMMER_OF_STRENGTH = compiletime(newItem("BTNINV_Hammer_15"))
+public constant ITEM_ID_WAR_AXE = compiletime(newItem("BTNINV_Axe_18"))
+public constant ITEM_ID_BOW = compiletime(newItem("BTNGoldenWoodBow"))
+public constant ITEM_ID_DAGGER = compiletime(newItem("BTNBoneDagger"))
+public constant ITEM_ID_GLOVES_OF_HASTE = compiletime(newItem("BTNLeatherGloves"))
 
-//stuff
+//defense
+public constant ITEM_ID_ARCANE_SHIELD = compiletime(newItem("BTNArcanumProtector"))
+public constant ITEM_ID_ENCHANTED_ARMOR = compiletime(newItem("BTNSuperiorMageRobe"))
+public constant ITEM_ID_VOID_ARMOR  = compiletime(newItem("BTNHalfArmorOfDarkness"))
+public constant ITEM_ID_ARMOR_OF_COURAGE = compiletime(newItem("BTNINV_Chest_Plate09"))
+public constant ITEM_ID_SPIKED_ARMOR = compiletime(newItem("BTNSpikedArmor"))
+public constant ITEM_ID_RUNIC_ARMOR = compiletime(newItem("BTNRunestoneBreastplate"))
+public constant ITEM_ID_FIRE_HAND_GAUNTLET = compiletime(newItem("BTNPlateGauntlet"))
+public constant ITEM_ID_HEART_AMULET = compiletime(newItem("BTNHeartAmulet"))
+public constant ITEM_ID_DRAGON_RING = compiletime(newItem("BTNRing"))
+//attack
 public constant ITEM_ID_AXE_OF_EMBERS = compiletime(newItem("BTN_AxeOfAshes"))
-public constant ITEM_ID_ARMOR_BREAKER = compiletime(newItem("BTNHammer1"))
+public constant ITEM_ID_ARMOR_BREAKER = compiletime(newItem("BTNAzureCrystalHammerV2"))
 public constant ITEM_ID_RUNE_BLADE = compiletime(newItem("BTN_RunicBlade_CR"))
 public constant ITEM_ID_SOUL_TORMENTOR = compiletime(newItem("BTNCursedSword"))
 public constant ITEM_ID_SWORD_OF_THE_BLOOD_STEALER = compiletime(newItem("BTNBarbarianBrutalSlasher"))
 public constant ITEM_ID_CHILLING_DAGGER = compiletime(newItem("BTNMysticDagger"))
+public constant ITEM_ID_AXE_OF_DECAY = compiletime(newItem("BTNINV_Axe_15"))
+public constant ITEM_ID_ARCANE_BLADE = compiletime(newItem("BTNScarabusEdgeV2"))
+public constant ITEM_ID_BLOOD_STINGER = compiletime(newItem("BTNBloodStinger"))
+//casting
+public constant ITEM_ID_CURSED_MASK = compiletime(newItem("BTNLugubriousMask"))
+public constant ITEM_ID_NERUBIAN_SCEPTER = compiletime(newItem("BTN_NerubianScepter"))
+public constant ITEM_ID_ARCANITE_RING = compiletime(newItem("BTNArcaniteRing"))
+public constant ITEM_ID_WAND_OF_DEATH = compiletime(newItem("BTNINV_Wand_12"))
+public constant ITEM_ID_WAND_OF_BLOOD = compiletime(newItem("BTNINV_Wand_09"))
+public constant ITEM_ID_ARCANE_NECKLACE = compiletime(newItem("BTNSultanCharmV2"))
+public constant ITEM_ID_GOBLET_OF_VAMPIRES = compiletime(newItem("BTNGobletOfVampires"))
+public constant ITEM_ID_BRACER_OF_ABJURATION = compiletime(newItem("BTNBracerOfAbjuration"))
+public constant ITEM_ID_BLESSED_GOBLET = compiletime(newItem("BTNBless"))
+public constant ITEM_ID_EMERALD_PENDANT = compiletime(newItem("BTNAmulet"))
+public constant ITEM_ID_SCROLL_OF_CONJURATION = compiletime(newItem("BTNAdept003"))
 
-
-//new
+//utility
 public constant ITEM_ID_STAFF_OF_TELEPORTATION = compiletime(newItem(Icons.bTNStaffOfTeleportation))
 public constant ITEM_ID_BOOTS_GUARDIAN = compiletime(newItem("BTNHeavyBoots"))
 public constant ITEM_ID_BOOTS_WIZARD = compiletime(newItem("BTNWalkersOfDarkness"))

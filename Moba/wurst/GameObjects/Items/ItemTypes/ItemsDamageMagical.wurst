@@ -13,13 +13,13 @@ function itemMageAmulet()
         modCooldown(cd)
 
 function itemManaRing()
-    let mr = 10
+    let mr = 1
     
     setupItem(ITEM_ID_MANA_RING, CATEGORY, 500)
-    setInfo("Ring of Mana", "+ {0} mana point regeneration per 10 seconds".format(mr.toString()))
+    setInfo("Ring of Mana", "+ {0} mana point regeneration per second".format(mr.toString()))
 
     onEither() (int factor) ->
-        modManaRegen(mr)
+        modManaRegen(mr*10)
 
 
 
@@ -34,14 +34,37 @@ function itemSpellTome()
 
             
 function itemGemOfMana()
-    let mp = 100
+    let mp = 75
     
     setupItem(ITEM_ID_GEM_OF_MANA, CATEGORY, 500)
     setInfo("Gem of Mana", "+ {0} mana points".format(mp.toString()))
     
     onEither() (int factor) ->
         modMana(mp)
-       
+
+
+function cursedMask()
+    setupItem(ITEM_ID_CURSED_MASK, CATEGORY, 3000)
+function nerubianScepter()
+    setupItem(ITEM_ID_NERUBIAN_SCEPTER, CATEGORY, 3000)
+function arcaniteRing()
+    setupItem(ITEM_ID_ARCANITE_RING, CATEGORY, 3000)
+function wandOfDeath()
+    setupItem(ITEM_ID_WAND_OF_DEATH, CATEGORY, 3000)
+function wandOfBlood()
+    setupItem(ITEM_ID_WAND_OF_BLOOD, CATEGORY, 3000)
+function arcaneNecklace()
+    setupItem(ITEM_ID_ARCANE_NECKLACE, CATEGORY, 3000)
+function gobletOfVampires()
+    setupItem(ITEM_ID_GOBLET_OF_VAMPIRES, CATEGORY, 3000)
+function bracerOfAbjuration()
+    setupItem(ITEM_ID_BRACER_OF_ABJURATION, CATEGORY, 3000)
+function blessedGoblet()
+    setupItem(ITEM_ID_BLESSED_GOBLET, CATEGORY, 3000)
+function emeraldPendant()
+    setupItem(ITEM_ID_EMERALD_PENDANT, CATEGORY, 3000)
+function scrollOfConjuration()
+    setupItem(ITEM_ID_SCROLL_OF_CONJURATION, CATEGORY, 3000)   
 
 
 @compiletime
@@ -60,7 +83,17 @@ function initItems2()
 
 @compiletime
 function initItems3()
-
+    cursedMask()
+    nerubianScepter()
+    arcaniteRing()
+    wandOfDeath()
+    wandOfBlood()
+    arcaneNecklace()
+    gobletOfVampires()
+    bracerOfAbjuration()
+    blessedGoblet()
+    emeraldPendant()
+    scrollOfConjuration()
 
 init
     execute() ->

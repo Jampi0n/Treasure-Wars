@@ -7,11 +7,8 @@ import Destroyer
 import StandardTextTags
 //import ItemIds
 import Gameplay
-import UnitLib
-import Buff
-import FastDamageEvent
-import DamageIds
-
+import ItemConfiguration
+import ItemsDefense
 /*
 Optimized damage modification function.
 Items are handled by using DamageIds.
@@ -64,8 +61,7 @@ public abstract class ModDamage
                         //currentDamage = currentDamage - 20 * target.countItemsOfType(ITEM_ID_HOLY_SHIELD)
 
 
-                //the following effects make use of the final damage
-                
+
                 // mana shield - SEA DRUID
                 if targetTypeId == HeroSeaDruid.UNIT_TYPE_ID
                     if BuffList.hasBuffType(target, HeroSeaDruid.buffManaShield)
@@ -79,4 +75,11 @@ public abstract class ModDamage
                     target.healMana(target, currentDamage * 0.1)
                     currentDamage *= 0.9
 
+                if targetWrapper.loadIntFast(D_HEART_AMULET) > 0
+                    let remainingHp = target.getHP() - currentDamage
+                    if remainingHp < 0.5
+                        if tryStartCooldown(target, HEART_AMULET_PASSIVE, HEART_AMULET_COOLDOWN * 1.0)
+                            currentDamage += remainingHp - 0.5
+                            target.addBuff(target, HEART_AMULET_DURATION * 1.0, INVULERNABLE, 1)
+                            target.addBuff(target, HEART_AMULET_DURATION * 1.0, HEART_AMULET_BUFF, 1)
         return currentDamage

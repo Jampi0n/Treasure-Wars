@@ -7,11 +7,20 @@ import HashList
 import ObjectIdGenerator
 import ItemObjEditing
 import ObjectIds
+import JStringUtils
 
 public constant SHOP_NUM_CATEGORIES = 7
 
 public constant MAX_ITEMS_IN_LIST = 30
 constant ITEM_DEFINITIONS = new HashMap<int, ItemDefinition>
+
+
+function LinkedList<ItemInShop>.sortItemList()
+    this.sortWith() (a, b) ->
+        int ret = a.getTotalCost() - b.getTotalCost()
+        if ret == 0
+            ret = a.getName() - b.getName()
+        return ret
 
 public function getIconPath(string icon) returns string
     string s = icon
@@ -175,7 +184,7 @@ public class ItemInShop
             for ItemInShop b in itm.buildsIntoDirectly
                 sortingList.add(b)
                
-            sortingList.sortWith((a,b) -> ( a.getTotalCost() - b.getTotalCost() ) )
+            sortingList.sortItemList()
             for ItemInShop b in sortingList
                 itm.buildsIntoCombined.add(b)
 
@@ -183,7 +192,7 @@ public class ItemInShop
             for ItemInShop b in itm.buildsIntoTransitively
                 sortingList.add(b)
 
-            sortingList.sortWith((a,b) -> ( a.getTotalCost() - b.getTotalCost() ) )
+            sortingList.sortItemList()
             for ItemInShop b in sortingList
                 itm.buildsIntoCombined.add(b)
 
@@ -191,7 +200,7 @@ public class ItemInShop
 
 
         for i = 0 to SHOP_NUM_CATEGORIES-1
-            itemsInCategory[i].sortWith((a,b) -> ( a.getTotalCost() - b.getTotalCost() ) )
+            itemsInCategory[i].sortItemList()
 
         for i = 0 to SHOP_NUM_CATEGORIES-1
             itemsPerCategory[i] = itemsInCategory[i].size()

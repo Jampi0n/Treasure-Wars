@@ -16,14 +16,34 @@ function itemHammerOfStrength()
 
 function itemGlovesOfHaste()
     let as = 12
-    
     setupItem(ITEM_ID_GLOVES_OF_HASTE, CATEGORY, 500)
     setInfo("Gloves of Haste", "+ {0}% attack speed".format(as.toString()))
     onEither() (int factor) ->
         modAttackSpeed(as)
 
+function warAxe()
+    let str = 16
+    setupItem(ITEM_ID_WAR_AXE, CATEGORY, 1000)
+    setInfo("War Axe", "+ {0} strength".format(str.toString()))
+    onEither() (int factor) ->
+        modStrength(str)
 
 
+function dagger()
+    let str = 5
+    let as = 10
+    setupItem(ITEM_ID_DAGGER, CATEGORY, 700)
+    setInfo("Dagger", "+ {0} strength|n +{1}% attack speed".format(str.toString(), as.toString()))
+    onEither() (int factor) ->
+        modStrength(str)
+        modAttackSpeed(as)
+
+function woodenBow()
+    let str = 12
+    setupItem(ITEM_ID_BOW, CATEGORY, 750)
+    setInfo("Wooden Bow", "+ {0} strength".format(str.toString()))
+    onEither() (int factor) ->
+        modStrength(str)
             
 constant ARMOR_BREAKER_BUFF_ID = compiletime(createAuraBuff("Armor Breaker", "This unit's armor is broken; it has reduced armor.", "BTNHammer1"))
 constant ARMOR_BREAKER_ABILITY_ID = compiletime(createNegativeBuffAbility(1, ARMOR_BREAKER_BUFF_ID, "", ""))
@@ -105,11 +125,52 @@ function itemChillingBlade()
                 lastAttack = getElapsedGameTime()
                 print(diff)
 
+function axeOfEmbers()
+    let aoeDmg = 20
+    let aoeRange = 150.0
+    setupItem(ITEM_ID_AXE_OF_EMBERS, CATEGORY, 3000)
+    addUnique("Attacks deal " + aoeDmg.toString() + " magic damage to enemy units around the target.")
+    setInfo("Axe of Embers")
+    onEither() (int factor) ->
+        attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
+            let g = CreateGroup()
+            g.enumUnitsInRange(target.getPos(), aoeRange)
+            while true
+                let u = FirstOfGroup(g)
+                if u == null
+                    break
+                g.removeUnit(u)
+                if u.isTargetable(source.getOwner(), false, true)
+                    source.dealDamage(u, aoeDmg * 1.0, ReductionType.MAGIC)
+                    u.addEffect(Abilities.fireBallMissile, "chest").destr()
+            g.destr()
+function runeBlade()
+    setupItem(ITEM_ID_RUNE_BLADE, CATEGORY, 3000)
+function cursedSword()
+    setupItem(ITEM_ID_SOUL_TORMENTOR, CATEGORY, 3000)
+function bloodSword()
+    setupItem(ITEM_ID_SWORD_OF_THE_BLOOD_STEALER, CATEGORY, 3000)
+function axeOfDecay()
+    setupItem(ITEM_ID_AXE_OF_DECAY, CATEGORY, 3000)
+function arcaneBlade()
+    setupItem(ITEM_ID_ARCANE_BLADE, CATEGORY, 3000)
+function bloodStinger()
+    let lifeSteal = 20
+    setupItem(ITEM_ID_BLOOD_STINGER, CATEGORY, 3000)
+    addPassive("Lifesteal","Attacks restore " + lifeSteal.toString() + "% of the damage dealt as hit points.")
+    setInfo("Sacrificial Dagger")
+    onEither() (int factor) ->
+        attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
+            source.healHP(source, lifeSteal * 0.01 * damage)
+            source.addEffect(Abilities.vampiricAuraTarget, "origin").destr()
 
 @compiletime
 function initItems1()
     itemGlovesOfHaste()
     itemHammerOfStrength()
+    woodenBow()
+    warAxe()
+    dagger()
 
 @compiletime
 function initItems2()
@@ -119,6 +180,13 @@ function initItems2()
 function initItems3()
     itemArmorBreaker()
     itemChillingBlade()
+    axeOfEmbers()
+    runeBlade()
+    cursedSword()
+    bloodSword()
+    axeOfDecay()
+    arcaneBlade()
+    bloodStinger()
 
 
 init

@@ -5,7 +5,7 @@ import ItemConfiguration
 constant CATEGORY = 5
 
 function gemOfHealth()
-    let hp = 150
+    let hp = 100
     setupItem(ITEM_ID_GEM_OF_HEALTH, CATEGORY, 500)
     setInfo("Gem Of Health","+ {0} hit points"
     .format(hp.toString()))
@@ -13,17 +13,99 @@ function gemOfHealth()
         modHealth(hp)
 
 function ringOfHealth()
-    let hr = 30
+    let hr = 3
     setupItem(ITEM_ID_RING_OF_HEALTH, CATEGORY, 500)
-    setInfo("Ring of Health", "+ {0} hit point regeneration per 10 seconds"
+    setInfo("Ring of Health", "+ {0} hit point regeneration per second"
     .format(hr.toString()))
     onEither() (int factor) ->
-        modHealthRegen(hr)
+        modHealthRegen(hr*10)
+
+function voidCrystal()
+    let wp = 12
+    setupItem(ITEM_ID_VOID_CRYSTAL, CATEGORY, 500)
+    setInfo("Void Crystal","+ {0} magic resistance"
+    .format(wp.toString()))
+    onEither() (int factor) ->
+        modWillpower(wp)
+
+function basicShield()
+    let ar = 12
+    setupItem(ITEM_ID_SHIELD, CATEGORY, 500)
+    setInfo("Wooden Shield","+ {0} armor"
+    .format(ar.toString()))
+    onEither() (int factor) ->
+        modArmor(ar)
+
+function heavyGauntlets()
+    let ar = 18
+    setupItem(ITEM_ID_PLATED_GAUNTLETS, CATEGORY, 750)
+    setInfo("Plated Gauntlets","+ {0} armor"
+    .format(ar.toString()))
+    onEither() (int factor) ->
+        modArmor(ar)
+
+function leatherArmor()
+    let ar = 10
+    let hp = 85
+    setupItem(ITEM_ID_LEATHER_ARMOR, CATEGORY, 800)
+    setInfo("Leather Armor","+ {0} armor|n + {1} hit points"
+    .format(ar.toString(), hp.toString()))
+    onEither() (int factor) ->
+        modArmor(ar)
+        modHealth(hp)
+
+function arcaneShield()
+    setupItem(ITEM_ID_ARCANE_SHIELD, CATEGORY, 3000)
+function enchantedArmor()
+    setupItem(ITEM_ID_ENCHANTED_ARMOR, CATEGORY, 3000)
+function voidArmor()
+    setupItem(ITEM_ID_VOID_ARMOR, CATEGORY, 3000)
+function armorOfCourage()
+    setupItem(ITEM_ID_ARMOR_OF_COURAGE, CATEGORY, 3000)
+function spikedArmor()
+    setupItem(ITEM_ID_SPIKED_ARMOR, CATEGORY, 3000)
+function runicArmor()
+    setupItem(ITEM_ID_RUNIC_ARMOR, CATEGORY, 3000)
+
+constant FIRE_HAND_GAUNTLET_PASSIVE = compiletime(generateCooldownAbility())
+
+function fireHandGauntlet()
+    setupItem(ITEM_ID_FIRE_HAND_GAUNTLET, CATEGORY, 3000)
+    addUnique("hdht")
+    setInfo("Fire Hand Gauntlet")
+    setPassiveAbility(FIRE_HAND_GAUNTLET_PASSIVE)
+    onEither() (int factor) ->
+        attackHitFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
+            if tryStartCooldown(target, FIRE_HAND_GAUNTLET_PASSIVE, 10)
+
+public constant HEART_AMULET_PASSIVE = compiletime(generateCooldownAbility())
+public constant HEART_AMULET_COOLDOWN = 300
+public constant HEART_AMULET_DURATION = 4
+
+public constant HEART_AMULET_BUFF = compiletime(setupBuff("Heart Amulet", "This unit is under the effect of Heart Amulet and is invulnerable.", "BTNHeartAmulet", true, 1, Abilities.divineShieldTarget, "origin", DispelLevel.BREAK))
+
+function heartAmulet()
+    setupItem(ITEM_ID_HEART_AMULET, CATEGORY, 3000)
+    addUnique("When taking lethal damage, the hero survives with 1 hit point and is rendered invulnerable for " + HEART_AMULET_DURATION.toString() + " seconds. This effect has a " + HEART_AMULET_COOLDOWN.toString() + " seconds cooldown.")
+    setInfo("Heart  Amulet")
+    setPassiveAbility(HEART_AMULET_PASSIVE)
+    onEither() (int factor) ->
+        damageEventInt(D_HEART_AMULET)
+
+            
+    
+function dragonRing()
+    setupItem(ITEM_ID_DRAGON_RING, CATEGORY, 3000)
 
 @compiletime
 function initItems1()
     gemOfHealth()
     ringOfHealth()
+    voidCrystal()
+    basicShield()
+    heavyGauntlets()
+    leatherArmor()
+
 
 @compiletime
 function initItems2()
@@ -31,6 +113,15 @@ function initItems2()
 
 @compiletime
 function initItems3()
+    arcaneShield()
+    enchantedArmor()
+    voidArmor()
+    armorOfCourage()
+    spikedArmor()
+    runicArmor()
+    fireHandGauntlet()
+    heartAmulet()
+    dragonRing()
 
 
 
