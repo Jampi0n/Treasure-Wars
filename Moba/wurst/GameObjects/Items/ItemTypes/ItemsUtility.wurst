@@ -83,7 +83,7 @@ function itemBootsRunner()
     if not compiletime
         BUFF_RUNNER_ACTIVE.addLevelFunction() (Buff thisBuff, int factor) ->
             thisBuff.getTarget().wrapper().modMoveSpeed(factor * extraMs)
-            BUFF_RUNNER_ACTIVE.addDispelFunction() (Buff thisBuff) ->
+        BUFF_RUNNER_ACTIVE.addDispelFunction() (Buff thisBuff) ->
             // if active is dispelled externally, add inactive
             if thisBuff.getData() == 0
                 let target = thisBuff.getTarget()
