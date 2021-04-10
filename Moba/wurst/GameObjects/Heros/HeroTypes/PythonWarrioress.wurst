@@ -86,12 +86,12 @@ public class HeroPythonWarrioress extends HeroTemplate
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceIntelligence(MISTWALK_DURATION_BONUS)
         tooltip.setLearnString("Turns the Python Warrioress invisibile.", (int lvl) -> (begin
-            return "{0}{I0} seconds.".format( MISTWALK_DURATION[lvl-1].toExactString())
+            return "{0}{I0} seconds.".format( MISTWALK_DURATION[lvl-1].str())
         end) )
         
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, "Turns the Python Warrioress invisibile for {0}{I0} seconds.".format(
-                MISTWALK_DURATION[lvl-1].toExactString()))
+                MISTWALK_DURATION[lvl-1].str()))
         addDynamicTooltipIntelligence(heroType, tooltip)
 
     static constant int array POISON_SPIT_SLOW_MS = [30, 35, 40, 45, 50]
@@ -215,12 +215,12 @@ public class HeroPythonWarrioress extends HeroTemplate
         tooltip.setLearnString("Deals massive magical damage to the target, stunning it and teleports the Python Warrioress behind the target.", (int lvl) -> (begin
             return "{0}{I0} damage, {1}{I1} seconds stun.".format(
             PARALYZING_STRIKE_DAMAGE[lvl-1].str(),
-            PARALYZING_STRIKE_DURATION[lvl-1].toExactString())
+            PARALYZING_STRIKE_DURATION[lvl-1].str())
         end) )
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, "Deals {0}{I0} magical damage to the target, stunning it for {1}{I1} seconds and teleports the Python Warrioress behind the target.".format(
                 PARALYZING_STRIKE_DAMAGE[lvl-1].str(),
-                PARALYZING_STRIKE_DURATION[lvl-1].toExactString()))
+                PARALYZING_STRIKE_DURATION[lvl-1].str()))
         addDynamicTooltipIntelligence(heroType, tooltip)
 
 

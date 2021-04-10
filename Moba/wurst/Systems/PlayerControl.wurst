@@ -4,7 +4,7 @@ import LinkedList
 import TeamUtil
 import Constants
 import Assets
-import UtilityFunctions
+import JStringUtils
 import ClosureTimers
 
 import IHero
@@ -495,6 +495,43 @@ public class ScoreTable
             mBoard.setRowCount(mBoard.getRowCount()+1)
             update()
 
+
+public function int.toStatString() returns string
+    string ret
+    if this < 1000
+        ret= this.toString()
+    else
+        ret = this.toReal().toStatString()
+    return ret
+
+
+public function real.toStatString() returns string
+    real amount = this
+    int prec
+    if amount >= 1000000000
+        amount /= 1000000000
+        prec = amount.getPrecision()
+        if prec > 0
+            return amount.toString(amount.getPrecision())+"G"
+        return amount.round().toString()+"G"
+    if amount >= 1000000
+        amount /= 1000000
+        prec = amount.getPrecision()
+        if prec > 0
+            return amount.toString(prec)+"M"
+        return amount.round().toString()+"M"
+        
+    if amount >= 1000
+        amount /= 1000
+        prec = amount.getPrecision()
+        if prec > 0
+            return amount.toString(amount.getPrecision())+"k"
+        return amount.round().toString()+"k"
+
+    prec = amount.getPrecision()
+    if prec > 0
+        return amount.toString(prec)
+    return amount.round().toString()
 
 init
     initPlayers()

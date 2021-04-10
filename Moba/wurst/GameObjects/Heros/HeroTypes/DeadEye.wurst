@@ -149,7 +149,7 @@ public class HeroDeadEye extends HeroTemplate
         tooltip.setReplaceIntelligence(TERROR_DURATION_BONUS)
         tooltip.setLearnString("Terrifies nearby enemies, making them miss on their attacks.", (int lvl) -> (begin
             return "{0}{I0} seconds, {1} area of effect.".format(
-            TERROR_DURATION[lvl-1].toExactString(),
+            TERROR_DURATION[lvl-1].str(),
             TERROR_AOE[lvl-1].str())
         end) )
         for lvl = 1 to 5

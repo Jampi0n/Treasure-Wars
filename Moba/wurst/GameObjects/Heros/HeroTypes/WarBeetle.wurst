@@ -152,12 +152,12 @@ public class HeroWarBeetle extends HeroTemplate
         tooltip.setLearnString("Sends out a venomous beetle to bite the target enemy unit, dealing damage and slowing it.", (int lvl) -> (begin
             return "{0}{I0} damage, lasts {1}{I1} seconds.".format(
                 BITE_DAMAGE[lvl-1].str(),
-                BITE_SLOW_DURATION[lvl-1].toExactString())
+                BITE_SLOW_DURATION[lvl-1].str())
         end) )
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, "Sends out a venomous beetle to bite the target enemy unit, dealing {0}{I0} damage and slowing it for {1}{I1} seconds.".format(
                 BITE_DAMAGE[lvl-1].str(),
-                BITE_SLOW_DURATION[lvl-1].toExactString()
+                BITE_SLOW_DURATION[lvl-1].str()
             ))
         addDynamicTooltipIntelligence(heroType, tooltip)
 
@@ -185,12 +185,12 @@ public class HeroWarBeetle extends HeroTemplate
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceStrength(WAR_STOMP_DAMAGE_BONUS, WAR_STOMP_DURATION_BONUS)
         tooltip.setLearnString("Slams the ground, stunning and damaging nearby enemy land units.", (int lvl) -> (begin
-            return "{0}{S0} damage, {1}{S1} second.".format( WAR_STOMP_DAMAGE[lvl-1].str(), WAR_STOMP_DURATION[lvl-1].toExactString() )
+            return "{0}{S0} damage, {1}{S1} second.".format( WAR_STOMP_DAMAGE[lvl-1].str(), WAR_STOMP_DURATION[lvl-1].str() )
         end) )
 
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, "Slams the ground, dealing {0}{S0} damage to nearby enemy land units and stunning them for {1}{S1} seconds.".format(
-                WAR_STOMP_DAMAGE[lvl-1].str(), WAR_STOMP_DURATION[lvl-1].toExactString()
+                WAR_STOMP_DAMAGE[lvl-1].str(), WAR_STOMP_DURATION[lvl-1].str()
             ))
         addDynamicTooltipStrength(heroType, tooltip)
 
@@ -222,7 +222,7 @@ public class HeroWarBeetle extends HeroTemplate
         tooltip.setReplaceIntelligence(0)
         tooltip.setLearnString("Dashes towards the target point.", (int lvl) -> (begin
             return "{0} range, {1} mana, {2} seconds cooldown".format( 
-                JUMP_RANGE[lvl-1].str(), JUMP_MANA[lvl-1].str(), JUMP_COOLDOWN[lvl-1].toExactString()
+                JUMP_RANGE[lvl-1].str(), JUMP_MANA[lvl-1].str(), JUMP_COOLDOWN[lvl-1].str()
             )
         end) )
         for lvl = 1 to 5

@@ -183,12 +183,12 @@ public class HeroDestroyer extends HeroTemplate
         tooltip.setReplaceIntelligence(0)
         tooltip.setLearnString("Summons a wall of bones at the target location, blocking the way for the Destroyer's victims to flee. The wall gets bigger on higher levels.", (int lvl) -> (begin
             return "Lasts {0} seconds.".format(
-                WALL_DURATION[lvl-1].toExactString())
+                WALL_DURATION[lvl-1].str())
         end) )
         
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, "Summons a wall of bones at the target location, blocking the way for the Destroyer's victims to flee. Lasts {0} seconds.".format(
-                WALL_DURATION[lvl-1].toExactString()
+                WALL_DURATION[lvl-1].str()
             ))
         addDynamicTooltipIntelligence(heroType, tooltip)
 
@@ -232,7 +232,7 @@ public class HeroDestroyer extends HeroTemplate
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceIntelligence(0)
         tooltip.setSummary("Increases the Destroyer's movement speed when chasing the targeted unit and causes his attacks against the target to deal more damage and slow.")
-        tooltip.setLearnString("Marks the target enemy unit as his prey. The Destroyer will have increased movmement speed when moving towards the prey. Every attack against the prey deals bonus damage and slows the prey. Lasts {0} seconds.".format(PREY_DURATION.toExactString()), (int lvl) -> (begin
+        tooltip.setLearnString("Marks the target enemy unit as his prey. The Destroyer will have increased movmement speed when moving towards the prey. Every attack against the prey deals bonus damage and slows the prey. Lasts {0} seconds.".format(PREY_DURATION.str()), (int lvl) -> (begin
             return "{0} damage, {1}% movement speed".format(
                 PREY_BONUS_DAMAGE[lvl-1].str(),
                 PREY_MOVE_SPEED[lvl-1].str())

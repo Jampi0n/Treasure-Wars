@@ -54,12 +54,6 @@ public function createSkillData(real data) returns skillData
 public interface LevelString
     function getString(int level) returns string
 
-public function real.str() returns string
-    return this.toInt().toString()
-
-public function int.str() returns string
-    return this.toString()
-
 public function AbilityDefinition.setLearnString(string intro, LevelString levelString)
     string learnString = intro+"\n"
     for i = 1 to 5

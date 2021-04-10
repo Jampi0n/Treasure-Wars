@@ -1,12 +1,12 @@
 package DynamicTooltips
 
-import UtilityFunctions
 import LinkedList
 //import UnitLib
 import AbilityObjEditing
 import HashMap
 import HeroObjectEditing
 import ObjectIds
+import JStringUtils
 
 /*  This flag can be set to false to disable setting tooltips at compiletime
 **  Could speed up compiling the map. For the moment it is required due to a bug in 1.30 */
@@ -38,9 +38,9 @@ class DynamicStrength extends DynamicElement
 
     override function evaluate(int strength, int intelligence, real cooldown, bool const) returns string
         if const
-            return C_STR.toColorString()+" (+"+(factor).toSmartString()+"% str)|r "
+            return C_STR.toColorString()+" (+"+(factor).str()+"% str)|r "
         else
-            return C_STR.toColorString()+" (+"+(strength * factor/100).toSmartString()+")|r "
+            return C_STR.toColorString()+" (+"+(strength * factor/100).str()+")|r "
 
 class DynamicIntelligence extends DynamicElement
     real factor
@@ -49,15 +49,15 @@ class DynamicIntelligence extends DynamicElement
 
     override function evaluate(int strength, int intelligence, real cooldown, bool const) returns string
         if const
-            return C_INT.toColorString()+" (+"+(factor).toSmartString()+"% int)|r "
+            return C_INT.toColorString()+" (+"+(factor).str()+"% int)|r "
         else
-            return C_INT.toColorString()+" (+"+(intelligence * factor/100).toSmartString()+")|r "
+            return C_INT.toColorString()+" (+"+(intelligence * factor/100).str()+")|r "
 
 class DynamicCooldown extends DynamicElement
     construct()
 
     override function evaluate(int strength, int intelligence, real cooldown, bool const) returns string
-        return cooldown.toSmartString()
+        return cooldown.str()
 
 public class DynamicTooltip
     

@@ -223,17 +223,17 @@ public class HeroDrillmo extends HeroTemplate
         tooltip.setLearnString(CHANNELING_SPELL + "Slams the ground with a massive spike ball, dealing damage stunning targets in an area in front of the hero. After that targets will be bleeding and take additional damage.", (int lvl) -> (begin
             return "{0}{S0} instant damage, {1} seconds stun, {2}{S1} damage over {3} seconds.".format(
                 SPIKE_BALL_DMG[lvl-1].str(),
-                SPIKE_BALL_STUN[lvl-1].toSmartString(),
+                SPIKE_BALL_STUN[lvl-1].str(),
                 SPIKE_BALL_DOT_DMG[lvl-1].str(),
-                SPIKE_BALL_DOT_DURATION[lvl-1].toSmartString()
+                SPIKE_BALL_DOT_DURATION[lvl-1].str()
             )
         end) )
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, CHANNELING_SPELL + "Slams the ground with a massive spike ball, dealing {0}{S0} damage stunning targets in an area in front of the hero for {1} seconds. After that targets will be bleeding and take additional {2}{S1} damage over {3} seconds.".format(
                 SPIKE_BALL_DMG[lvl-1].str(),
-                SPIKE_BALL_STUN[lvl-1].toSmartString(),
+                SPIKE_BALL_STUN[lvl-1].str(),
                 SPIKE_BALL_DOT_DMG[lvl-1].str(),
-                SPIKE_BALL_DOT_DURATION[lvl-1].toSmartString()
+                SPIKE_BALL_DOT_DURATION[lvl-1].str()
             ))
         addDynamicTooltipStrength(heroType, tooltip)
         setAnimationSpeed(abilityId, 2)
