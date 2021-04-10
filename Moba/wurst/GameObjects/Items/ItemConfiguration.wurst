@@ -6,7 +6,7 @@ import public Icons
 import ItemObjEditing
 import HashMap
 import public Execute
-import public ItemIds
+import public ItemIdDefinitions
 import public Assets
 import public ObjectEditingPreset
 import public ClosureTimers
@@ -23,6 +23,7 @@ import public UnitImpl
 import public IUnit
 import public ChannelTeleport
 import public BuffTypeConfig
+import JItemUtils
 import ErrorHandling
 import GameTimer
 
@@ -41,7 +42,6 @@ public class PassiveItemCooldown
     protected static constant ITEM_TYPE_ABILITY_ID = 0
 
     protected static function lockItem(item itm, int abil, real cd)
-        print("lock item")
         let h = itm.getHandleId()
         table.saveReal(h, ITEM_LOCKED_UNTIL, getElapsedGameTime() + cd)
         table.saveInt(h, ITEM_ABILITY_ID, abil)
@@ -49,27 +49,18 @@ public class PassiveItemCooldown
             checkLockItem(h)
 
     protected static function checkLockItem(int h) returns real
-        print("checkLockItem " + h.toString())
         if table.hasReal(h, 0)
-            print("item has lock")
             let lockedUntil = table.loadReal(h, ITEM_LOCKED_UNTIL)
-            print("locked until = " + lockedUntil.toString())
             if lockedUntil < getElapsedGameTime()
-                print("lock expired = " + getElapsedGameTime().toString())
                 unlockItem(h)
                 return -1
-            print("lock active")
             return lockedUntil
-        print("item has not lock")
         return -1
 
     protected static function unlockItem(int h)
-        print("unlock item")
         PassiveItemCooldown.table.flushChild(h)
 
     protected static function lockUnit(unit u, int itm, int abil, real cd)
-        print("lock unit")
-
         BlzStartUnitAbilityCooldown(u, abil, cd)
 
         let h = u.getHandleId()
@@ -83,8 +74,8 @@ public class PassiveItemCooldown
         for i = 0 to 5
             var itmInSlot = u.itemInSlot(i)
             if itmInSlot.getTypeId() == itm
-                itmInSlot.remove()
-                u.addItemToSlot(itm, i)
+                u.removeItem(itmInSlot)
+                u.addItemHandleToSlot(itmInSlot, i)
                 itmInSlot = u.itemInSlot(i)
                 lockItem(itmInSlot, abil, cd)
         ItemEffect.doItemEvents = true
@@ -103,17 +94,14 @@ public class PassiveItemCooldown
         return -1
 
     protected static function unlockUnit(int h, int itm)
-        print("unlock unit")
         table.removeReal(h, itm)
         let locks = table.loadInt(h, UNIT_NUM_LOCKS)
         if locks == 1
             table.flushChild(h)
-            print("flush unit")
         else
             table.saveInt(h, UNIT_NUM_LOCKS, locks - 1)
 
     static function tryStartCooldown(unit u, int itm, int abil, real cd) returns bool
-        print(u.getAbilityCooldownRemaining(abil))
         if u.getAbilityCooldownRemaining(abil) == 0.0
             lockUnit(u, itm, abil, cd)
             return true
@@ -204,14 +192,12 @@ public class ItemEffect
             let cd = lockedUntilItem - getElapsedGameTime()
             // the item is locked, but the unit x item type may not be locked yet
             PassiveItemCooldown.lockUnit(triggerUnit, itemTypeId, abil, cd)
-            print("onItemPickUp - lock item")
         else if lockedUntilUnit >= 0
             let abil = PassiveItemCooldown.table.loadInt(itemTypeId, PassiveItemCooldown.ITEM_TYPE_ABILITY_ID)
             let cd = lockedUntilUnit - getElapsedGameTime()
             // the unit x item type is locked, but the item may not be locked yet
             PassiveItemCooldown.lockItem(triggerItem, abil, cd)
             BlzStartUnitAbilityCooldown(triggerUnit, abil, cd)
-            print("onItemPickUp - lock unit")
 
         if doItemEvents
             if itemIdToEffect.has(itemTypeId)
