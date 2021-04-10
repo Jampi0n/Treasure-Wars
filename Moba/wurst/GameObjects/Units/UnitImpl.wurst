@@ -185,7 +185,9 @@ public class UnitImpl implements IUnit
         else
             this.assocUnit.setBaseDamage(this.getStrengthBase() - 1) // -1 because 1 damage is added by damage dice roll
         this.assocUnit.setBaseAttackSpeed(this.baseAttackCooldown * this.scaleAttackAnimation)
-        this.assocUnit.setField(UNIT_RF_DEFENSE, this.getArmorBase().toReal())
+        this.assocUnit.setBonusArmor(0) // remove bonus armor
+        this.assocUnit.setArmor(this.getArmorBase().toReal()) // set base armor (does not work correctly while bonus armor is on the unit)
+        this.applyArmor() // add bonus armor
         this.updateAll()
         this.applyAll()
     /**
