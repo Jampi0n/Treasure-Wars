@@ -183,7 +183,7 @@ public class UnitImpl implements IUnit
             this.assocUnit.setAgi(this.getWillpowerBase())
             this.assocUnit.setInt(this.getIntelligenceBase())
         else
-            this.assocUnit.setBaseDamage(this.getStrengthBase() - 1) // -1 because 1 damage is added by damage dice roll
+            this.assocUnit.setBaseDamage(this.getStrengthBase()) // this seems to set the minimum damage, rather than the base danage. Minimum damage is higher than base damage by number of dice.
         this.assocUnit.setBaseAttackSpeed(this.baseAttackCooldown * this.scaleAttackAnimation)
         this.assocUnit.setBonusArmor(0) // remove bonus armor
         this.assocUnit.setArmor(this.getArmorBase().toReal()) // set base armor (does not work correctly while bonus armor is on the unit)
