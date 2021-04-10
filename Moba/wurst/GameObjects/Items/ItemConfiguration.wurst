@@ -355,7 +355,7 @@ public function setupItem(int itemId, int category, int goldCost)
     else
         currentItemId = itemId
         currentItemInShop = ItemInShop.retrieveItemFromId(itemId)
-        currentItemInShop.setupItem(category, iconFromItem(itemId), goldCost)
+        currentItemInShop.setupItem(category, goldCost)
         currentItemEffect = ItemEffect.retrieveItemEffect(itemId)
 
 public function setInfo(string name, string desc)

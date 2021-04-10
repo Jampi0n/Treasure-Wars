@@ -3,6 +3,7 @@ package FastDamageEvent
 import OnUnitEnterLeave
 import ErrorHandling
 import DamageDetection
+import HashMap
 
 public interface DamageFunction
     function damage(unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool _active, bool advanced)
@@ -138,43 +139,24 @@ There are no null checks necessary, because a default object without events will
 */
 
 /**
-Damage events for unit types based on unit type id.
-For permanent effects from certain unit types.
-**/
-public class DamageEventUnitType
-    static function fromUnitTypeId(int unitTypeId) returns DamageEventUnitType
-        var d = (DamageEvent.damageEventTable.loadInt(unitTypeId, 0) + 1) castTo DamageEventUnitType
-        if d == DamageEvent.nullUnitType
-            d = new DamageEventUnitType(unitTypeId)
-        return d
-
-    protected static function get(int unitTypeId) returns DamageEventUnitType
-        return (DamageEvent.damageEventTable.loadInt(unitTypeId, 0) + 1) castTo DamageEventUnitType
-
-    private int unitTypeId
-
-    DamageEventGroup anyDamage = new DamageEventGroup()
-    DamageEventGroup anyHit = new DamageEventGroup()
-    DamageEventGroup attackDamageNoBuilding = new DamageEventGroup()
-    DamageEventGroup attackHitNoBuilding = new DamageEventGroup()
-
-    construct(int unitTypeId)
-        this.unitTypeId = unitTypeId
-        DamageEvent.damageEventTable.saveInt(unitTypeId, 0, this castTo int - 1)
-
-/**
 Damage events for units.
 For temporary effects, e.g. based on items, spells, ...
 **/
 public class DamageEventUnit
+    static constant unitMap = new HashMap<unit, DamageEventUnit>()
+
     static function fromUnit(unit u) returns DamageEventUnit
-        var d = (1 + DamageEvent.damageEventTable.loadInt(u.getHandleId(), 0)) castTo DamageEventUnit
-        if d == DamageEvent.nullUnit
-            d = new DamageEventUnit(u)
-        return d
+        if unitMap.has(u)
+            return unitMap.get(u)
+        else
+            return new DamageEventUnit(u)
 
     protected static function get(unit u) returns DamageEventUnit
-        return (1 + DamageEvent.damageEventTable.loadInt(u.getHandleId(), 0)) castTo DamageEventUnit
+        if unitMap.has(u)
+            return unitMap.get(u)
+        else
+            return DamageEvent.nullUnit
+
     protected static function classInit()
         onLeave() ->
             let d = DamageEventUnit.get(getEnterLeaveUnit())
@@ -193,8 +175,9 @@ public class DamageEventUnit
     construct(unit u)
         this.u = u
         this.h = u.getHandleId()
-        DamageEvent.damageEventTable.saveInt(h, 0, this castTo int - 1)
+        unitMap.put(this.u, this)
     ondestroy
+        unitMap.remove(this.u)
         DamageEvent.damageEventTable.flushChild(h)
         for i = 0 to FAST_DATA_SIZE-1
             this.saveIntFast(i, 0)
@@ -220,7 +203,6 @@ public class DamageEventUnit
 public abstract class DamageEvent
     protected static hashtable damageEventTable = InitHashtable()
     protected static DamageEventUnit nullUnit = new DamageEventUnit(null)
-    protected static DamageEventUnitType nullUnitType = new DamageEventUnitType(0)
 
     /*
     This function runs when a unit takes damage and should be optimized as best as possible.
@@ -247,24 +229,18 @@ public abstract class DamageEvent
 
         let sourceTypeId = source.getTypeId()
         let sourceWrapper = DamageEventUnit.get(source)
-        let sourceType = DamageEventUnitType.get(sourceTypeId)
 
         let targetTypeId = target.getTypeId()
         let targetWrapper = DamageEventUnit.get(target)
-        let targetType = DamageEventUnitType.get(targetTypeId)
         
         damage = modDamage(source, target, sourceWrapper, targetWrapper, sourceTypeId, targetTypeId, damage, attack, arrow, alternate)
         sourceWrapper.anyDamage.runEvents(source, target, sourceWrapper, targetWrapper, damage, attack, arrow, alternate)
-        sourceType.anyDamage.runEvents(source, target, sourceWrapper, targetWrapper, damage, attack, arrow, alternate)
         targetWrapper.anyHit.runEvents(source, target, sourceWrapper, targetWrapper, damage, attack, arrow, alternate)
-        targetType.anyHit.runEvents(source, target, sourceWrapper, targetWrapper, damage, attack, arrow, alternate)
         if attack
             if not target.isType(UNIT_TYPE_STRUCTURE)
                 sourceWrapper.attackDamageNoBuilding.runEvents(source, target, sourceWrapper, targetWrapper, damage, attack, arrow, alternate)
-                sourceType.attackDamageNoBuilding.runEvents(source, target, sourceWrapper, targetWrapper, damage, attack, arrow, alternate)
             if not source.isType(UNIT_TYPE_STRUCTURE)
                 targetWrapper.attackHitNoBuilding.runEvents(source, target, sourceWrapper, targetWrapper, damage, attack, arrow, alternate)
-                targetType.attackHitNoBuilding.runEvents(source, target, sourceWrapper, targetWrapper, damage, attack, arrow, alternate)
         damage = max(0, damage)
         BlzSetEventDamage(damage)
 
@@ -280,10 +256,6 @@ public abstract class DamageEvent
                 ..addAbility(ON_HIT_ABILITY)
         
 init
-    if DamageEvent.nullUnit castTo int != 1
-        error("Null unit is not mapped to index 1: " + (DamageEvent.nullUnit castTo int).toString())
-    if DamageEvent.nullUnitType castTo int != 1
-        error("Null unit type is not mapped to index 1: " + (DamageEvent.nullUnitType castTo int).toString())
     DamageEventUnit.classInit()
     addOnDamageFunc() -> 
         DamageEvent.onDamage()
