@@ -368,9 +368,6 @@ public class HeroTrollManHunter extends HeroTemplate
                 SelectUnit(u1, true)
                 SelectUnit(u2, true)
 
-    override function skillBuild() returns string
-        return "QWQWQWQWQWEEEEE"
-
     override function recommendedItems(LinkedList<int> list)
         list.add(ITEM_ID_BOOTS_BASE)
 

@@ -8,6 +8,7 @@ import ObjectIdGenerator
 import ItemObjEditing
 import ObjectIds
 import JStringUtils
+import FileLog
 
 public constant SHOP_NUM_CATEGORIES = 7
 
@@ -248,7 +249,10 @@ public class ItemInShop
         return itemsInCategory[category]
 
     static function getItemFromId(int itemId) returns ItemInShop
-        return itemIdToItemInShop.get(itemId)
+        if itemIdToItemInShop.has(itemId)
+            return itemIdToItemInShop.get(itemId)
+        else
+            return null
 
 init
     ItemInShop.classInit()

@@ -488,11 +488,12 @@ public class HeroAIImpl implements IHeroAI
 
 
         //should not happen for everyone at the same time (lag)
-        doAfter(GetRandomReal(0.1, 0.3), () -> (begin
+        doAfter(GetRandomReal(0.1, 1.0)) ->
             if not this.paused
                 this.buyItems()
-                this.selectSkills()
-        end))
+        // wait until hero skill is available
+        doAfter(GetRandomReal(5.5, 7)) ->
+            this.selectSkills()
 
         DamageEventUnit.fromUnit(this.heroUnit).anyHit.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
             this.onDamage(damage)
@@ -539,24 +540,25 @@ public class HeroAIImpl implements IHeroAI
         SelectHeroSkill(this.heroUnit, abilcode)
 
     private function selectSkills()
-        int skillPoints
-        while true
-            skillPoints = GetHeroSkillPoints(this.heroUnit)
-            if skillPoints <= 0
-                if this.heroUnit.getLevel() == HERO_MAX_LEVEL
-                    return
+        if not this.paused
+            int skillPoints
+            while true
+                skillPoints = GetHeroSkillPoints(this.heroUnit)
+                if skillPoints <= 0
+                    if this.heroUnit.getLevel() == HERO_MAX_LEVEL
+                        return
+                    else
+                        break
+
+                selectSingleSkill(this.skillBuild.charAt(0))
+
+                //now the hero should have spent one skill point
+                if GetHeroSkillPoints(this.heroUnit) == skillPoints-1
+                    this.skillBuild = this.skillBuild.substring(1)
                 else
+                    //hero could not learn skill
+                    error("Unable to learn skill "+this.skillBuild.charAt(0)+" for hero "+this.heroUnit.getName())
                     break
-
-            selectSingleSkill(this.skillBuild.charAt(0))
-
-            //now the hero should have spent one skill point
-            if GetHeroSkillPoints(this.heroUnit) == skillPoints-1
-                this.skillBuild = this.skillBuild.substring(1)
-            else
-                //hero could not learn skill
-                error("Unable to learn skill "+this.skillBuild.charAt(0)+" for hero "+this.heroUnit.getName())
-                break
         doAfter(GetRandomReal(30, 40)) -> 
             this.selectSkills()
             

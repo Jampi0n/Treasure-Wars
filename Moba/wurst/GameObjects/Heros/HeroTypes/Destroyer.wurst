@@ -340,9 +340,6 @@ public class HeroDestroyer extends HeroTemplate
 
     override function teamFightAI(IHeroAI _ai)
 
-    override function skillBuild() returns string
-        return "QWQWQWQWQWEEEEE"
-
     override function recommendedItems(LinkedList<int> list)
         list.add(ITEM_ID_BOOTS_BASE)
 

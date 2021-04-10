@@ -3,6 +3,7 @@ package RecommendedItems
 import HashMap
 import ItemInShop
 import ErrorHandling
+import LinkedList
 
 constant MAX_RECOMMENDED_ITEMS = 6
 
@@ -25,6 +26,10 @@ public class RecommendedItems
             this.recommended[this.count] = ItemInShop.getItemFromId(itemId)
             itemToIndex.put(this.recommended[this.count], this.count)
             this.count++
+
+    function addList(LinkedList<int> list)
+        for i in list
+            this.addItem(i)
 
     static function getCount(int unitId) returns int
         if unitToRecommended.has(unitId)

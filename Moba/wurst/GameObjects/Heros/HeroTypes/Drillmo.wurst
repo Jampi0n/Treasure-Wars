@@ -421,6 +421,17 @@ public class HeroDrillmo extends HeroTemplate
 
     override function onCreate(IHeroType heroType, IHero hero)
         new DrillmoInstance()
+        CreateTrigger()
+        ..registerUnitEvent(hero.toUnit(), EVENT_UNIT_HERO_SKILL)
+        ..addAction(() -> (begin
+            let u = GetTriggerUnit()
+            if GetLearnedSkill() == instance.ABILITY_ID_PASSIVE
+                let newLevel = u.getAbilityLevel(instance.ABILITY_ID_PASSIVE)
+                if newLevel!= 1
+                    u.wrapper().modAttackSpeed( -OVERCHARGE_ATTACK_SPEED[newLevel-2])
+    
+                u.wrapper().modAttackSpeed( OVERCHARGE_ATTACK_SPEED[newLevel-1])
+        end))
 
     override function onInitDelayed(IHeroType heroType)
         onImpact(ROCKET_BUFF_ID) (unit source, unit target) ->

@@ -34,7 +34,6 @@ public interface IHeroType
     function teamFightAI(IHeroAI ai)
     function getItemBuild() returns LinkedList<int>
     function getSkillBuild() returns string
-    function addItem(int itemId)
     function setSkillBuild(string skillBuild)
     function updateTooltipsStr(unit whichUnit)
     function updateTooltipsInt(unit whichUnit)

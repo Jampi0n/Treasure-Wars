@@ -15,6 +15,8 @@ constant SOUND_RECIPE_TOO_EXPENSIVE = new SoundDefinition(Sounds.error, false, f
 
 constant SHOP_POSITION = [gg_rct_GreenAltar.getCenter(), gg_rct_BrownAltar.getCenter()]
 
+public bool itemsFinalized = false
+
 GUI array gui
 
 public function getGUI(int i) returns GUI
@@ -61,6 +63,7 @@ function buyCondition(unit hero, int team, bool showMessage) returns bool
 init
 
     itemFinalize()
+    itemsFinalized = true
     execute() ->
         for i = Teams.first1() to Teams.last2()
             gui[i] = new GUI(players[i], null)

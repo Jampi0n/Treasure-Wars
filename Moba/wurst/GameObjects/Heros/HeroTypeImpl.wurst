@@ -17,6 +17,7 @@ import ClosureTimers
 import ObjectIdGenerator
 import ObjectIds
 import UpgradeObjEditing
+import FileLog
 
 int array SLOT_ID
 string array BUTTON_ORDER_STRING
@@ -103,6 +104,14 @@ public class HeroTypeImpl implements IHeroType
             preloadUnit(this.getUnitId())
 
             this.recommendedItems = new RecommendedItems(unitId)
+            let recommendedItemList = new LinkedList<int>()
+            template.recommendedItems(recommendedItemList)
+            this.recommendedItems.addList(recommendedItemList)
+            destroy recommendedItemList
+            if this.hasAI
+                this.setSkillBuild(template.skillBuild())
+            else
+                this.setSkillBuild("QWEQWEQWEQWEQWE")
 
             for i = 0 to 3
                 allowCooldownChange[i] = true
@@ -189,10 +198,6 @@ public class HeroTypeImpl implements IHeroType
     override function getSkillBuild() returns string
         return this.skillBuild
 
-    override function addItem(int itemId)
-        this.recommendedItems.addItem(itemId)
-        //this.itemBuild.add(itemId)
-
     override function setSkillBuild(string skillBuild)
         if skillBuild.length() != 25
             if skillBuild.length() == 15
@@ -200,9 +205,9 @@ public class HeroTypeImpl implements IHeroType
                 // XXXPP RXXRP XRXPR XXRPX XXXXX
                 this.skillBuild = skillBuild.substring(0, 3) + "PPR" + skillBuild.substring(3, 5) + "RP" + skillBuild.substring(5, 6) + "R" + skillBuild.substring(6, 7) + "PR" + skillBuild.substring(7, 9) + "RP" +skillBuild.substring(9)
             else
-                Log.error("SkillBuild must contain 25 or 15 skills: "+this.getHeroId().toString())
+                FileLog.writeLine("SkillBuild must contain 25 or 15 skills: " + skillBuild + " " +this.TEMPLATE.name)
         else
-            this.skillBuild = skillBuild
+            this.skillBuild = skillBuild    
             
 
     override function updateTooltipsStr(unit whichUnit)
