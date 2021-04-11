@@ -1,0 +1,79 @@
+package ItemsTomes
+
+import ItemConfiguration
+
+constant CATEGORY = 6
+
+
+@compiletime
+function initItems1()
+    let tomeCost = 1000
+    let str = ItemBalance.STRENGTH
+    let wp = ItemBalance.WILLPOWER
+    let intel = ItemBalance.INTELLIGENCE
+    let ar = ItemBalance.ARMOR
+    let as = ItemBalance.ATTACK_SPEED
+    let hp = ItemBalance.HEALTH
+    let hpReg = ItemBalance.HEALTH_REG
+    let mp = ItemBalance.MANA
+    let mpReg = ItemBalance.MANA_REG
+    setupItem(ITEM_ID_TOME_STRENGTH, CATEGORY, tomeCost)
+    setInfo("Tome of Strength", "+{0} strength".format(str.toString()))
+    tomeModStat(Stat.STR, str)
+    setupItem(ITEM_ID_TOME_ATTACK_SPEED, CATEGORY, tomeCost)
+    setInfo("Tome of Attack Speed", "+{0}% attack speed".format(as.toString()))
+    tomeModStat(Stat.AS, as)
+    setupItem(ITEM_ID_TOME_ARMOR, CATEGORY, tomeCost)
+    setInfo("Tome of Armor", "+{0} armor".format(ar.toString()))
+    tomeModStat(Stat.AR, ar)
+    setupItem(ITEM_ID_TOME_INTELLIGENCE, CATEGORY, tomeCost)
+    setInfo("Tome of Intelligence", "+{0} intelligence".format(intel.toString()))
+    tomeModStat(Stat.INT, intel)
+    setupItem(ITEM_ID_TOME_WILLPOWER, CATEGORY, tomeCost)
+    setInfo("Tome of Magic Resistance", "+{0} magic resistance".format(wp.toString()))
+    tomeModStat(Stat.AGI, wp)
+    setupItem(ITEM_ID_TOME_HEALTH, CATEGORY, tomeCost)
+    setInfo("Tome of Health", "+{0} hit points".format(hp.toString()))
+    tomeModStat(Stat.HP, hp)
+    setupItem(ITEM_ID_TOME_HEALTH_REG, CATEGORY, tomeCost)
+    setInfo("Tome of Health Regeneration", "+{0} hit point regeneration per second".format(hpReg.toString()))
+    tomeModStat(Stat.HR, hpReg)
+    setupItem(ITEM_ID_TOME_MANA, CATEGORY, tomeCost)
+    setInfo("Tome of Mana", "+{0} mana".format(mp.toString()))
+    tomeModStat(Stat.MP, mp)
+    setupItem(ITEM_ID_TOME_MANA_REG, CATEGORY, tomeCost)
+    setInfo("Tome of Mana Regeneration", "+{0} mana regeneration per second".format(mpReg.toString()))
+    tomeModStat(Stat.MR, mpReg)
+
+    if DEBUG_MODE // buy 10 tomes at once
+        setupItem(ITEM_ID_TOME_STRENGTH_X10, CATEGORY, tomeCost*10)
+        setInfo("Tome of Strength x10", "+{0} strength".format((str*10).toString()))
+        tomeModStat(Stat.STR, str*10)
+        setupItem(ITEM_ID_TOME_ATTACK_SPEED_X10, CATEGORY, tomeCost*10)
+        setInfo("Tome of Attack Speed x10", "+{0}% attack speed".format((as*10).toString()))
+        tomeModStat(Stat.AS, as*10)
+        setupItem(ITEM_ID_TOME_ARMOR_X10, CATEGORY, tomeCost*10)
+        setInfo("Tome of Armor x10", "+{0} armor".format((ar*10).toString()))
+        tomeModStat(Stat.AR, ar*10)
+        setupItem(ITEM_ID_TOME_INTELLIGENCE_X10, CATEGORY, tomeCost*10)
+        setInfo("Tome of Intelligence x10", "+{0} intelligence".format((intel*10).toString()))
+        tomeModStat(Stat.INT, intel*10)
+        setupItem(ITEM_ID_TOME_WILLPOWER_X10, CATEGORY, tomeCost*10)
+        setInfo("Tome of Magic Resistance x10", "+{0} magic resistance".format((wp*10).toString()))
+        tomeModStat(Stat.AGI, wp*10)
+        setupItem(ITEM_ID_TOME_HEALTH_X10, CATEGORY, tomeCost*10)
+        setInfo("Tome of Health x10", "+{0} hit points".format((hp*10).toString()))
+        tomeModStat(Stat.HP, hp*10)
+        setupItem(ITEM_ID_TOME_HEALTH_REG_X10, CATEGORY, tomeCost*10)
+        setInfo("Tome of Health Regeneration x10", "+{0} hit point regeneration per second".format((hpReg*10).toString()))
+        tomeModStat(Stat.HR, hpReg*10)
+        setupItem(ITEM_ID_TOME_MANA_X10, CATEGORY, tomeCost*10)
+        setInfo("Tome of Mana x10", "+{0} mana".format((mp*10).toString()))
+        tomeModStat(Stat.MP, mp*10)
+        setupItem(ITEM_ID_TOME_MANA_REG_X10, CATEGORY, tomeCost*10)
+        setInfo("Tome of Mana Regeneration x10", "+{0} mana regeneration per second".format((mpReg*10).toString()))
+        tomeModStat(Stat.MR, mpReg*10)
+
+init
+    execute() ->
+        initItems1()

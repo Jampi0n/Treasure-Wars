@@ -1,0 +1,30 @@
+package ItemBalance
+
+import Stats
+
+abstract class ItemBalance
+    static constant STRENGTH = 8
+    static constant ATTACK_SPEED = 12
+    static constant INTELLIGENCE = 8 
+    static constant HEALTH = 100
+    static constant HEALTH_REG = 3
+    static constant MANA = 75
+    static constant MANA_REG = 1
+    static constant WILLPOWER = 12
+    static constant ARMOR = 12
+    static constant COOLDOWN = 8
+    static constant MOVEMENT_SPEED = 40
+
+    static int array STAT
+
+init
+    ItemBalance.STAT[Stat.STR] = ItemBalance.STRENGTH
+    ItemBalance.STAT[Stat.INT] = ItemBalance.INTELLIGENCE
+    ItemBalance.STAT[Stat.HP] = ItemBalance.HEALTH
+    ItemBalance.STAT[Stat.HR] = ItemBalance.HEALTH_REG
+    ItemBalance.STAT[Stat.MP] = ItemBalance.MANA
+    ItemBalance.STAT[Stat.MR] = ItemBalance.MANA_REG
+    ItemBalance.STAT[Stat.AGI] = ItemBalance.WILLPOWER
+    ItemBalance.STAT[Stat.AR] = ItemBalance.ARMOR
+    ItemBalance.STAT[Stat.CD] = ItemBalance.COOLDOWN
+    ItemBalance.STAT[Stat.MS] = ItemBalance.MOVEMENT_SPEED

@@ -23,6 +23,8 @@ import public UnitImpl
 import public IUnit
 import public ChannelTeleport
 import public BuffTypeConfig
+import public ItemBalance
+import public Constants
 import JItemUtils
 import ErrorHandling
 import GameTimer
@@ -141,6 +143,9 @@ public function getItemSign() returns int
 public class ItemEffect
 
     private int itemId
+
+    protected static constant tomeToStat = new HashMap<int,Stat>()
+    protected static constant tomeToValue = new HashMap<int,int>()
 
     protected static bool doItemEvents = true
 
@@ -419,6 +424,18 @@ public function addRequirement(int itemId)
     if not compiletime
         let child = ItemInShop.retrieveItemFromId(itemId)
         currentItemInShop.addRequirement(child)
+
+public function tomeModStat(Stat whichStat, int modValue)
+    if not compiletime
+        let itemTypeId = currentItemInShop.getItemId()
+        ItemEffect.tomeToStat.put(itemTypeId, whichStat)
+        ItemEffect.tomeToValue.put(itemTypeId, modValue)
+    else
+        currentItemDefinition.setClassification("PowerUp")
+
+public function onTomePickUp(unit hero, int itemTypeId)
+    if ItemEffect.tomeToStat.has(itemTypeId)
+        hero.wrapper().modStatDispatch(ItemEffect.tomeToStat.get(itemTypeId), ItemEffect.tomeToValue.get(itemTypeId))
 
 //returns if the picked up item is the first of its type and if the dropped item is the last of its type
 public function isUnique() returns boolean

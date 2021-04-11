@@ -3,6 +3,27 @@ package ItemIdDefinitions
 import ItemInShop
 import Icons
 
+//tomes
+public constant ITEM_ID_TOME_STRENGTH = compiletime(newItem(Icons.bTNGolemThunderClap))
+public constant ITEM_ID_TOME_ATTACK_SPEED = compiletime(newItem(Icons.bTNAdvancedUnholyStrength))
+public constant ITEM_ID_TOME_ARMOR = compiletime(newItem(Icons.bTNHumanArmorUpThree))
+public constant ITEM_ID_TOME_INTELLIGENCE = compiletime(newItem(Icons.bTNMagicalSentry))
+public constant ITEM_ID_TOME_WILLPOWER = compiletime(newItem("BTNThickFur"))
+public constant ITEM_ID_TOME_HEALTH = compiletime(newItem(Icons.bTNHealthStone))
+public constant ITEM_ID_TOME_HEALTH_REG = compiletime(newItem(Icons.bTNScrollOfRegenerationGreen))
+public constant ITEM_ID_TOME_MANA = compiletime(newItem(Icons.bTNManaStone))
+public constant ITEM_ID_TOME_MANA_REG = compiletime(newItem(Icons.bTNScrollOfRegeneration))
+
+public constant ITEM_ID_TOME_STRENGTH_X10 = compiletime(newItem(Icons.bTNGolemThunderClap))
+public constant ITEM_ID_TOME_ATTACK_SPEED_X10 = compiletime(newItem(Icons.bTNAdvancedUnholyStrength))
+public constant ITEM_ID_TOME_ARMOR_X10 = compiletime(newItem(Icons.bTNHumanArmorUpThree))
+public constant ITEM_ID_TOME_INTELLIGENCE_X10 = compiletime(newItem(Icons.bTNMagicalSentry))
+public constant ITEM_ID_TOME_WILLPOWER_X10 = compiletime(newItem("BTNThickFur"))
+public constant ITEM_ID_TOME_HEALTH_X10 = compiletime(newItem(Icons.bTNHealthStone))
+public constant ITEM_ID_TOME_HEALTH_REG_X10 = compiletime(newItem(Icons.bTNScrollOfRegenerationGreen))
+public constant ITEM_ID_TOME_MANA_X10 = compiletime(newItem(Icons.bTNManaStone))
+public constant ITEM_ID_TOME_MANA_REG_X10 = compiletime(newItem(Icons.bTNScrollOfRegeneration))
+
 //base
 public constant ITEM_ID_BOOTS_BASE = compiletime(newItem("BTNNatureSlippers"))
 public constant ITEM_ID_MAGE_AMULET = compiletime(newItem("BTNEmptyAmulet"))

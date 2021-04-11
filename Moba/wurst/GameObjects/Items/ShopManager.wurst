@@ -1,11 +1,11 @@
 package ShopManager
 
-import Execute
 import ShopGUI
 import ItemFinalize
 import SoundUtils
 import StandardTextTags
 import TeamUtil
+import ItemConfiguration
 
 constant BUY_RANGE = 900
 
@@ -28,11 +28,14 @@ function buyFailed(unit hero, int _itemId, int _cost, int _gold)
     SOUND_RECIPE_TOO_EXPENSIVE.playForPlayer(hero.getOwner())
 
 function buySuccess(unit hero, item itm, int totalCost)
-    if hero.hasItem(itm) // success
+    if hero.hasItem(itm) or itm.getItemtype() == ITEM_TYPE_POWERUP// success
         SOUND_ITEM_BUY_3D.playOnPoint(hero.getPos3Zero())
         SOUND_ITEM_BUY.playForPlayer(hero.getOwner())
         standardTextTag(hero.getPos(), itm.getName())
             ..setColor(255, 220, 0, 255)
+        if itm.getItemtype() == ITEM_TYPE_POWERUP
+            onTomePickUp(hero, itm.getTypeId())
+            itm.remove()
     else // not enough space
         // refund total cost
         // no item was used as recipe, otherwise there would be space
