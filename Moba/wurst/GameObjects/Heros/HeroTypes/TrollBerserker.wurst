@@ -152,7 +152,7 @@ public class HeroTrollBerserker extends HeroTemplate
             tooltip.setNormalString(true, lvl, "Teleports the Troll Berserker a short distance.")
         addDynamicTooltipStrength(heroType, tooltip)
 
-    static constant int array SWITCH_DMG = [12, 16, 22, 30, 40]
+    static constant int array SWITCH_DMG = [12, 18, 26, 36, 48]
     static constant int array SWITCH_MOVE_SPEED = [20, 25, 30, 35, 40]
 
     static constant real SWITCH_DURATION = 1.67
@@ -248,11 +248,11 @@ public class HeroTrollBerserker extends HeroTemplate
         tooltip.setReplaceIntelligence(GROWTH_HP_BONUS)
         tooltip.setLearnString("Increases the Troll Berserker's maximum hit points and hit point regeneration. When activated, the Troll Berserker petrifies nearby enemies making them unable to move for a short time.", (int lvl) -> (begin
             return "{0}{I0} hit points, {1} hit point regeneration per second, lasts {2} seconds, {3} seconds fear.".format(
-                GROWTH_HP[lvl-1].str(), GROWTH_HP_REGEN[lvl-1].str(), GROWTH_DURATION[lvl-1].str(), GROWTH_FEAR_DURATION[lvl-1].toExactString())
+                GROWTH_HP[lvl-1].str(), GROWTH_HP_REGEN[lvl-1].str(), GROWTH_DURATION[lvl-1].str(), GROWTH_FEAR_DURATION[lvl-1].str())
         end) )
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, "Increases the Troll Berserker's maximum hit points by {0}{I0} and hit point regeneration by {1} hit points per second for {2} seconds. When activated, the Troll Berserker petrifies nearby enemies making them unable to move for {3} seconds.".format(
-                GROWTH_HP[lvl-1].str(), GROWTH_HP_REGEN[lvl-1].str(), GROWTH_DURATION[lvl-1].str(), GROWTH_FEAR_DURATION[lvl-1].toExactString()))
+                GROWTH_HP[lvl-1].str(), GROWTH_HP_REGEN[lvl-1].str(), GROWTH_DURATION[lvl-1].str(), GROWTH_FEAR_DURATION[lvl-1].str()))
         addDynamicTooltipIntelligence(heroType, tooltip)
                 
 
@@ -330,15 +330,15 @@ public class HeroTrollBerserker extends HeroTemplate
 
 
     override function stats()
-        setStat(Stat.AR, 28, 44)
-        setStat(Stat.AS, 16, 48)
-        setStat(Stat.HP, 11, 34)
+        setStat(Stat.AR, 28, 54)
+        setStat(Stat.AS, 18, 56)
+        setStat(Stat.HP, 14, 44)
         setStat(Stat.HR, 15, 34)
         setStat(Stat.MP, 10, 27)
         setStat(Stat.MR, 12, 37)
         setStat(Stat.MS, 12, 31)
-        setStat(Stat.STR, 12, 59)
-        setStat(Stat.AGI, 27, 39)
+        setStat(Stat.STR, 11, 48)
+        setStat(Stat.AGI, 28, 46)
         setStat(Stat.INT, 4, 11)
 
     override function retreatAI(IHeroAI ai)
