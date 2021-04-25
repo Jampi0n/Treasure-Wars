@@ -111,8 +111,8 @@ public function unit.addBuff(unit caster, real duration, BuffType buffType, int 
 public function unit.addBuffReduced(unit caster, real duration, BuffType buffType, int level) returns Buff
     //buff reduction only uses 1/4 of the wp, so it reduces duration not as much as it reduces damage
     real realDuration =  duration.reduce( (this.getUnitWp()/4).toInt() , 0.01 )
-    //if this.hasItemById(ITEM_ID_ARCANE_SHIELD)
-        //realDuration = realDuration * 0.85
+    if this.hasItemById(ITEM_ID_ARCANE_SHIELD)
+        realDuration = realDuration * 0.85
     Buff ret = null
     if (realDuration <= 0 and realDuration > -0.5) or realDuration > 600
         error("addBuffReduced add buff with unusual duration: " + realDuration.toString() + " " + (buffType castTo int).toString())

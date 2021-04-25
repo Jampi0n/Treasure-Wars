@@ -9,6 +9,6 @@ import public ItemsDamageMagical
 import public ItemsDefense
 import public ItemsTomes
 
-public function itemFinalize()
+init
     execute() ->
         ItemInShop.finalize()

@@ -1,12 +1,17 @@
 package ItemsPotions
 
-import ItemConfiguration
+import ItemInclude
 
 constant CATEGORY = 1
 
 
+function healingSalve()
+    setupItem(ITEM_ID_HEALING_SALVE, CATEGORY, 100)
+    setInfo("Healing Salve","placeholder")
+
 @compiletime
 function initItems()
+    healingSalve()
 
 
 init

@@ -7,8 +7,15 @@ import Destroyer
 import StandardTextTags
 //import ItemIds
 import Gameplay
-import ItemConfiguration
+import FastDamageEvent
+import Buff
+import UnitLib
+import DamageIds
+import PassiveItemCooldown
+import ItemIdDefinitions
 import ItemsDefense
+import ClosureTimers
+import StandardBuffs
 /*
 Optimized damage modification function.
 Items are handled by using DamageIds.

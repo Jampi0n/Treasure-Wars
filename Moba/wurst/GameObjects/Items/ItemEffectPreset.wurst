@@ -1,0 +1,117 @@
+package ItemEffectPreset
+
+import ItemEffect
+import FastDamageEvent
+import Reference
+
+/**
+Adds a trigger which is active while the item is carried by the hero.
+The trigger is returned only if the item is unique and the item was picked up.
+Check if the trigger is null:
+
+onEither() (int factor) ->
+    let trg = itemTrigger()
+    if trg != null
+        trg.register...
+        trg.addAction...
+        ...
+**/
+public function itemTrigger() returns trigger
+    return itemTrigger(1)
+
+public function itemTrigger(int factor) returns trigger
+    if isUnique()
+        if getItemSign() == 1
+            let trg = new Reference<trigger>(CreateTrigger())
+            DamageEventUnit.fromUnit(getItemUnit()).saveIntSlow(factor * getItemItemType(), trg castTo int)
+            return trg.val
+        else
+            (DamageEventUnit.fromUnit(getItemUnit()).loadIntSlow(factor * getItemItemType()) castTo Reference<trigger>).into().destr()
+            return null
+    return null
+
+public function anyDamageFunction(DamageFunction f)
+    anyDamageFunction(1, f)
+public function anyDamageFunction(int factor, DamageFunction f)
+    if isUnique()
+        let u = DamageEventUnit.fromUnit(getItemUnit())
+        if getItemSign() == 1
+            u.saveIntSlow(factor * getItemItemType(), u.anyDamage.add(f))
+        else
+            u.anyDamage.remove(u.loadIntSlow(factor * getItemItemType()))
+
+public function anyHitFunction(DamageFunction f)
+    anyHitFunction(1, f)
+public function anyHitFunction(int factor, DamageFunction f)
+    if isUnique()
+        let u = DamageEventUnit.fromUnit(getItemUnit())
+        if getItemSign() == 1
+            u.saveIntSlow(factor * getItemItemType(), u.anyHit.add(f))
+        else
+            u.anyHit.remove(u.loadIntSlow(factor * getItemItemType()))
+
+public function attackDamageFunction(DamageFunction f)
+    attackDamageFunction(1, f)
+public function attackDamageFunction(int factor, DamageFunction f)
+    if isUnique()
+        let u = DamageEventUnit.fromUnit(getItemUnit())
+        if getItemSign() == 1
+            u.saveIntSlow(factor * getItemItemType(), u.attackDamageNoBuilding.add(f))
+        else
+            u.attackDamageNoBuilding.remove(u.loadIntSlow(factor * getItemItemType()))
+
+public function attackHitFunction(DamageFunction f)
+    attackHitFunction(1, f)
+public function attackHitFunction(int factor, DamageFunction f)
+    if isUnique()
+        let u = DamageEventUnit.fromUnit(getItemUnit())
+        if getItemSign() == 1
+            u.saveIntSlow(factor * getItemItemType(), u.attackHitNoBuilding.add(f))
+        else
+            u.attackHitNoBuilding.remove(u.loadIntSlow(factor * getItemItemType()))
+
+public function damageEventInt(int key)
+    let u = DamageEventUnit.fromUnit(getItemUnit())
+    u.saveIntFast(key, u.loadIntFast(key) + getItemSign())
+
+public function modArmor(int modifier)
+    getItemUnitWrapper().modArmor(modifier * getItemSign())
+public function modAttackSpeed(int modifier)
+    getItemUnitWrapper().modAttackSpeed(modifier * getItemSign())
+public function modStrength(int modifier)
+    getItemUnitWrapper().modStrength(modifier * getItemSign())
+public function modWillpower(int modifier)
+    getItemUnitWrapper().modWillpower(modifier * getItemSign())
+public function modIntelligence(int modifier)
+    getItemUnitWrapper().modIntelligence(modifier * getItemSign())
+public function modMoveSpeed(int modifier)
+    getItemUnitWrapper().modMoveSpeed(modifier * getItemSign())
+public function modHealth(int modifier)
+    getItemUnitWrapper().modHealth(modifier * getItemSign())
+public function modMana(int modifier)
+    getItemUnitWrapper().modMana(modifier * getItemSign())
+public function modHealthRegen(int modifier)
+    getItemUnitWrapper().modHealthRegen(modifier * getItemSign())
+public function modManaRegen(int modifier)
+    getItemUnitWrapper().modManaRegen(modifier * getItemSign())
+public function modCooldown(int modifier)
+    getItemUnitWrapper().modCooldown(modifier * getItemSign())
+
+public function modArmorRelative(int modifier)
+    getItemUnitWrapper().modArmorRelative(modifier * getItemSign())
+public function modStrengthRelative(int modifier)
+    getItemUnitWrapper().modStrengthRelative(modifier * getItemSign())
+public function modWillpowerRelative(int modifier)
+    getItemUnitWrapper().modWillpowerRelative(modifier * getItemSign())
+public function modIntelligenceRelative(int modifier)
+    getItemUnitWrapper().modIntelligenceRelative(modifier * getItemSign())
+public function modMoveSpeedRelative(int modifier)
+    getItemUnitWrapper().modMoveSpeedRelative(modifier * getItemSign())
+public function modHealthRelative(int modifier)
+    getItemUnitWrapper().modHealthRelative(modifier * getItemSign())
+public function modManaRelative(int modifier)
+    getItemUnitWrapper().modManaRelative(modifier * getItemSign())
+public function modHealthRegenRelative(int modifier)
+    getItemUnitWrapper().modHealthRegenRelative(modifier * getItemSign())
+public function modManaRegenRelative(int modifier)
+    getItemUnitWrapper().modManaRegenRelative(modifier * getItemSign())

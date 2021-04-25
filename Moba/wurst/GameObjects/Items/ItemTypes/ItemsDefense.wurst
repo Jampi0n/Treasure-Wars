@@ -1,6 +1,6 @@
 package ItemsDefense
 
-import ItemConfiguration
+import ItemInclude
 
 constant CATEGORY = 5
 
@@ -73,7 +73,7 @@ function fireHandGauntlet()
     setupItem(ITEM_ID_FIRE_HAND_GAUNTLET, CATEGORY, 3000)
     addUnique("hdht")
     setInfo("Fire Hand Gauntlet")
-    setPassiveAbility(FIRE_HAND_GAUNTLET_PASSIVE)
+    setPassiveAbilities(FIRE_HAND_GAUNTLET_PASSIVE)
     onEither() (int factor) ->
 
 public constant HEART_AMULET_PASSIVE = compiletime(generateCooldownAbility())
@@ -86,7 +86,7 @@ function heartAmulet()
     setupItem(ITEM_ID_HEART_AMULET, CATEGORY, 3000)
     addUnique("When taking lethal damage, the hero survives with 1 hit point and is rendered invulnerable for " + HEART_AMULET_DURATION.toString() + " seconds. This effect has a " + HEART_AMULET_COOLDOWN.toString() + " seconds cooldown.")
     setInfo("Heart  Amulet")
-    setPassiveAbility(HEART_AMULET_PASSIVE)
+    setPassiveAbilities(HEART_AMULET_PASSIVE)
     onEither() (int factor) ->
         damageEventInt(D_HEART_AMULET)
 

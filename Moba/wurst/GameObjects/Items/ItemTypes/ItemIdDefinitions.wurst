@@ -3,6 +3,9 @@ package ItemIdDefinitions
 import ItemInShop
 import Icons
 
+//potions
+public constant ITEM_ID_HEALING_SALVE = compiletime(newItem(Icons.bTNHealingSalve))
+
 //tomes
 public constant ITEM_ID_TOME_STRENGTH = compiletime(newItem(Icons.bTNGolemThunderClap))
 public constant ITEM_ID_TOME_ATTACK_SPEED = compiletime(newItem(Icons.bTNAdvancedUnholyStrength))

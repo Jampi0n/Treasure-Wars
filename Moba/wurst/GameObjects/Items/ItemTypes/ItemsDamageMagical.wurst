@@ -1,12 +1,12 @@
 package ItemsDamageMagical
 
-import ItemConfiguration
+import ItemInclude
 
 constant CATEGORY = 4
 
 
 function itemMageAmulet()
-    let cd = 10
+    let cd = 8
     setupItem(ITEM_ID_MAGE_AMULET, CATEGORY, 500)
     setInfo("Mage Amulet", "+ {0}% cooldown recovery".format(cd.toString()))
     onEither() (int factor) ->

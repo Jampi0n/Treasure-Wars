@@ -1,0 +1,62 @@
+package ShopFunctionConfig_config
+
+import initlater ItemInShop
+import initlater ShopAPI
+
+import SoundUtils
+import StandardTextTags
+import TeamUtil
+import ItemEffect
+import PlayerControl
+
+constant BUY_RANGE = 900
+
+bool multiboardMinimized = false
+
+constant SOUND_ITEM_BUY = new SoundDefinition(Sounds.receiveGold, false, false)
+constant SOUND_ITEM_BUY_3D = new SoundDefinition(Sounds.receiveGold, false, true)
+constant SOUND_RECIPE_TOO_EXPENSIVE = new SoundDefinition(Sounds.error, false, false)
+
+constant SHOP_POSITION = [gg_rct_GreenAltar.getCenter(), gg_rct_BrownAltar.getCenter()]
+
+@config public function shopConfig_shopClickBuy(unit u, ItemInShop itm)
+    if shopConfig_shopCanBuy(u, itm)
+        let boughtItem = tryBuy(u, itm)
+        if boughtItem != null
+            if itm.isPowerUp()
+                onTomePickUp(u, boughtItem.getTypeId())
+                boughtItem.remove()
+            SOUND_ITEM_BUY_3D.playOnPoint(u.getPos3Zero())
+            SOUND_ITEM_BUY.playForPlayer(u.getOwner())
+            standardTextTag(u.getPos(), itm.getName())
+                ..setColor(255, 220, 0, 255)
+
+
+@config public function shopConfig_shopCanBuy(unit u, ItemInShop itm) returns bool
+    let cost = getItemCostForHero(u, itm)
+    if u.getOwner().getGold() >= cost
+        if u.isAlive() and (hasSpaceForItem(u, itm) or itm.isPowerUp())
+            let team = Players.team(u.getOwner().getId())
+            let shopCenter = SHOP_POSITION[team]
+            let dist = u.getPos().distanceTo(shopCenter)
+            if dist < BUY_RANGE
+                return true
+    return false
+
+@config public function shopConfig_onOpenShop(player p)
+    if p == GetLocalPlayer()
+        multiboardMinimized = ScoreTable.isMinimized()
+        ScoreTable.minimize()
+
+@config public function shopConfig_onCloseShop(player p)
+    if p == GetLocalPlayer()
+        if not multiboardMinimized
+            ScoreTable.maximize()
+
+@config public function shopConfig_sortItems(ItemInShop a, ItemInShop b) returns int
+    return a.getTotalCost() - b.getTotalCost()
+
+@config public function shopConfig_sortBuildsInto(ItemInShop a, ItemInShop b) returns int
+    return shopConfig_sortItems(a,b)
+
+@config public constant PRIORITIZE_DIRECT_PARENTS = true

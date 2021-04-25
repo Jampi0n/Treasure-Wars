@@ -6,7 +6,7 @@ import ItemInShop
 import BuildingIds
 import ErrorHandling
 import RecommendedItems
-import ShopGUI
+import ShopAPI
 import HashMap
 import Constants
 import LinkedList
@@ -516,7 +516,7 @@ public class HeroAIImpl implements IHeroAI
         for i = 0 to RecommendedItems.getCount(unitTypeId) - 1
             let itm = RecommendedItems.getItem(unitTypeId, i)
             if not this.heroUnit.hasItemById(itm.getItemId())
-                let bought = heroTryBuy(this.heroUnit, itm)
+                let bought = tryBuyPartially(this.heroUnit, itm)
                 if bought == 0
                     break
                 else

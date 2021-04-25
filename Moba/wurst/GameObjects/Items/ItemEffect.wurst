@@ -1,0 +1,151 @@
+package ItemEffect
+
+import ItemObjEditing
+import HashMap
+import ErrorHandling
+import Stats
+import IUnit
+import UnitImpl
+import UnitLib
+import ItemIdDefinitions
+import ItemConfiguration
+import PassiveItemCooldown
+
+public interface ItemDropOrPickUp
+    function dropOrPickUp(int factor)
+
+public function getItemItem() returns item
+    return ItemEffect.triggerItem
+
+public function getItemItemType() returns int
+    return ItemEffect.triggerItem.getTypeId()
+
+public function getItemUnit() returns unit
+    return ItemEffect.triggerUnit
+
+public function getItemUnitWrapper() returns IUnit
+    return ItemEffect.triggerWrapper
+
+public function getItemSign() returns int
+    return ItemEffect.inventoryChangeDirection
+
+public class ItemEffect
+
+    private int itemId
+
+    protected static constant tomeToStat = new HashMap<int,Stat>()
+    protected static constant tomeToValue = new HashMap<int,int>()
+
+    protected static bool doItemEvents = true
+
+    protected static item triggerItem
+    protected static unit triggerUnit
+    protected static IUnit triggerWrapper
+    protected static int inventoryChangeDirection
+
+    private static constant itemIdToEffect = new HashMap<int, ItemEffect>
+    private static trigger onItemPickUp = CreateTrigger()
+    private static trigger onItemDrop = CreateTrigger()
+    protected ItemDropOrPickUp onDropOrPickUp = null
+
+    private int useCount = 0
+
+    construct(int itemId)
+        this.itemId = itemId
+        itemIdToEffect.put(itemId, this)
+
+    static function retrieveItemEffect(int itemId) returns ItemEffect
+        if itemIdToEffect.has(itemId)
+            return itemIdToEffect.get(itemId)
+        else
+            return new ItemEffect(itemId)
+
+
+    static function classInit()
+        onItemPickUp = CreateTrigger()
+            ..addAction(function onItemPickUp)
+            ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_PICKUP_ITEM)
+        onItemDrop = CreateTrigger()
+            ..addAction(function onItemDrop)
+            ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DROP_ITEM)
+
+    static function onItemPickUp()
+        triggerItem = GetManipulatedItem()
+        triggerUnit = GetTriggerUnit()
+        let itemTypeId = triggerItem.getTypeId()
+        PassiveItemCooldown.onItemPickUp(triggerUnit, triggerItem, itemTypeId)
+
+        if doItemEvents
+            if itemIdToEffect.has(itemTypeId)
+                triggerWrapper = triggerUnit.wrapper()
+                inventoryChangeDirection = 1
+                let itemType = itemIdToEffect.get(itemTypeId)
+                itemType.useCount++
+                if itemType.onDropOrPickUp != null
+                    itemType.onDropOrPickUp.dropOrPickUp(1)
+
+    static function onItemDrop()
+        if doItemEvents
+            triggerItem = GetManipulatedItem()
+            if itemIdToEffect.has(triggerItem.getTypeId())
+                triggerUnit = GetTriggerUnit()
+                triggerWrapper = triggerUnit.wrapper()
+                inventoryChangeDirection = -1
+                let itemType = itemIdToEffect.get(triggerItem.getTypeId())
+                itemType.useCount--
+                if itemType.onDropOrPickUp != null
+                    itemType.onDropOrPickUp.dropOrPickUp(-1)
+
+public function onEither(ItemDropOrPickUp onDropOrPickUp)
+    if compiletime
+        return
+    if getCurrentItemEffect().onDropOrPickUp != null
+        error("The item already has an effect!")
+    getCurrentItemEffect().onDropOrPickUp = onDropOrPickUp
+
+public function getCurrentItemEffect() returns ItemEffect
+    return ItemEffect.retrieveItemEffect(currentItemInShop.getItemId())
+
+public function tomeModStat(Stat whichStat, int modValue)
+    if not compiletime
+        let itemTypeId = currentItemInShop.getItemId()
+        ItemEffect.tomeToStat.put(itemTypeId, whichStat)
+        ItemEffect.tomeToValue.put(itemTypeId, modValue)
+    else
+        currentItemDefinition.setClassification("PowerUp")
+
+public function onTomePickUp(unit hero, int itemTypeId)
+    if ItemEffect.tomeToStat.has(itemTypeId)
+        hero.wrapper().modStatDispatch(ItemEffect.tomeToStat.get(itemTypeId), ItemEffect.tomeToValue.get(itemTypeId))
+
+//returns if the picked up item is the first of its type and if the dropped item is the last of its type
+public function isUnique() returns boolean
+    return getItemUnit().countItemsOfType(getItemItemType()) == 1
+
+//returns if the the hero has not this item
+public function hasNot(int itemTypeId) returns boolean
+    return getItemUnit().countItemsOfType(itemTypeId) == 0
+
+public function isUniqueExt(vararg int itemTypeIds) returns boolean
+    let u = getItemUnit()
+    int sum = 0
+    for int id in itemTypeIds
+        sum += u.countItemsOfType(id)
+    return sum == 1
+
+public function isFirstBoots() returns bool
+    return isUniqueExt(ITEM_ID_BOOTS_BASE, ITEM_ID_BOOTS_GUARDIAN, ITEM_ID_BOOTS_HUNTER, ITEM_ID_BOOTS_RUNNER, ITEM_ID_BOOTS_WIZARD)
+
+init
+    ItemEffect.classInit()
+    PassiveItemCooldown.setup() (bool flag) ->
+        ItemEffect.doItemEvents = flag
+    /*
+    Drop items before the unit wrapper is destroyed.
+    The item drop event for removed units happens after the unit removal event, so if there are still items left when the unit wrapper is destroyed, the onDrop functions can no longer access the unit wrapper. To fix this, all items are dropped before the unit wrapper is destroyed.
+    */
+    addPreDestroyEvent() (unit u, IUnit iUnit) ->
+        for i = 0 to u.inventorySize() - 1
+            let itm = u.itemInSlot(i)
+            if itm != null
+                itm.remove()

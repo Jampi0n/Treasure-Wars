@@ -1,0 +1,15 @@
+package ShopConfig_config
+
+import ShopConfig
+
+@config public constant NUM_CATEGORIES = 7
+
+// set the category names for your categories
+@config public function configShopCategories()
+    CATEGORY_NAMES[0] = "Recommended"
+    CATEGORY_NAMES[1] = "Potions"
+    CATEGORY_NAMES[2] = "Utility"
+    CATEGORY_NAMES[3] = "Attack"
+    CATEGORY_NAMES[4] = "Spell Casting"
+    CATEGORY_NAMES[5] = "Defense"
+    CATEGORY_NAMES[6] = "Tomes"

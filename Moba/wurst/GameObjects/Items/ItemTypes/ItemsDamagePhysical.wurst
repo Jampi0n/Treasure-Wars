@@ -1,6 +1,6 @@
 package ItemsDamagePhysical
 
-import ItemConfiguration
+import ItemInclude
 import GameTimer
 
 constant CATEGORY = 3
@@ -68,7 +68,7 @@ function itemArmorBreaker()
         ..setManaCost(1, 0)
 
     setupItem(ITEM_ID_ARMOR_BREAKER, CATEGORY, 3325)
-    setAbilities(ABILITY_ARMOR_BREAKER_SLAM)
+    setActiveAbilities(ABILITY_ARMOR_BREAKER_SLAM)
     setInfo("Armor Breaker", "+ {0} strength|n|cffffcc00Passive:|r|nAttacks reduce the target's armor by {1}% for {2} seconds.".format(
             str.toString(), armorDmg.toString(), armorDuration.toString()
         )+ "|n|cffffcc00Active:|r|nSlams the ground, dealing {0} damage and reducing the armor of affected units by {1}% for {2} seconds.".format(
@@ -157,6 +157,10 @@ function arcaneBlade()
 function bloodStinger()
     let lifeSteal = 20
     setupItem(ITEM_ID_BLOOD_STINGER, CATEGORY, 3000)
+    addRequirement(ITEM_ID_DAGGER)
+    addRequirement(ITEM_ID_WAR_AXE)
+    addRequirement(ITEM_ID_GLOVES_OF_HASTE)
+    addRequirement(ITEM_ID_HAMMER_OF_STRENGTH)
     addPassive("Lifesteal","Attacks restore " + lifeSteal.toString() + "% of the damage dealt as hit points.")
     setInfo("Sacrificial Dagger")
     onEither() (int factor) ->
