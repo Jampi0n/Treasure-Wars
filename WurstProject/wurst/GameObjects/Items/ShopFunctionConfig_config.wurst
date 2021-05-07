@@ -53,10 +53,13 @@ constant SHOP_POSITION = [gg_rct_GreenAltar.getCenter(), gg_rct_BrownAltar.getCe
         if not multiboardMinimized
             ScoreTable.maximize()
 
-@config public function shopConfig_sortItems(ItemInShop a, ItemInShop b) returns int
+@config public function shopConfig_sortItems(ItemInShop a, ItemInShop b, int _page) returns int
     return a.getTotalCost() - b.getTotalCost()
 
+/**
+Sort items in the builds into list.
+**/
 @config public function shopConfig_sortBuildsInto(ItemInShop a, ItemInShop b) returns int
-    return shopConfig_sortItems(a,b)
+    return a.getTotalCost() - b.getTotalCost()
 
 @config public constant PRIORITIZE_DIRECT_PARENTS = true

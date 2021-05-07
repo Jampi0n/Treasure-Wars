@@ -111,6 +111,7 @@ public function tomeModStat(Stat whichStat, int modValue)
         let itemTypeId = currentItemInShop.getItemId()
         ItemEffect.tomeToStat.put(itemTypeId, whichStat)
         ItemEffect.tomeToValue.put(itemTypeId, modValue)
+        makePowerUp()
     else
         currentItemDefinition.setClassification("PowerUp")
 
