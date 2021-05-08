@@ -1,0 +1,544 @@
+package UnitStats
+
+import BonusMod
+import UnitWrapper
+
+
+public interface CalculateTotalBonus
+    function calculate(unit u, Stat whichStat)
+
+function unit.setBaseAttackSpeed(real value)
+    this.setAttackCooldown( value , 0)
+function unit.getBaseAttackSpeed() returns real
+    return this.getAttackCooldown(0)
+
+function unit.setBaseDamage(int value)
+    this.setBaseDamage(value, 0)
+function unit.getBaseDamage() returns int
+    return this.getBaseDamage(0)
+/*
+This file is huge. The end is mostly optimized convenience functions.
+*/
+
+
+public module UnitStats
+
+    private CalculateTotalBonus bonusCalculation = null
+
+    private real scaleAttackAnimation = 1.0
+    private real baseAttackCooldown
+    private static int array statBaseValue_static
+    private static int array statsAbsoluteBonus_static //default = 0
+    private static int array statsAbsoluteBonusReal_static //default = 0
+    private static int array statsRelativeBonus_static //default = 0.00
+
+    int arrayOffset
+
+    /*
+        Use integer to avoid rounding errors. 1000 means 100% or 1
+    */
+    static int array statsTotalBonus_static //default = 0
+    private unit assocUnit
+
+    construct()
+        assocUnit = getWrappedUnit()
+        this.arrayOffset = (this castTo int) * STAT_COUNT
+        
+        for int i = 0 to STAT_COUNT-1
+            statsAbsoluteBonus_static[this.arrayOffset + i] = 0
+            statsAbsoluteBonusReal_static[this.arrayOffset + i] = 0
+            statsRelativeBonus_static[this.arrayOffset + i] = 0
+            statsTotalBonus_static[this.arrayOffset + i] = 0
+
+        // Init base values
+        baseAttackCooldown = this.assocUnit.getBaseAttackSpeed()
+        statBaseValue_static[this.arrayOffset + Stat.MS.toInt()] = GetUnitDefaultMoveSpeed(this.assocUnit).toInt()
+        statBaseValue_static[this.arrayOffset + Stat.STR.toInt()] = this.assocUnit.getStr(false)
+        statBaseValue_static[this.arrayOffset + Stat.AGI.toInt()] = this.assocUnit.getAgi(false)
+        statBaseValue_static[this.arrayOffset + Stat.INT.toInt()] = this.assocUnit.getInt(false)
+        statBaseValue_static[this.arrayOffset + Stat.AR.toInt()] = this.assocUnit.getArmor().toInt()
+        statBaseValue_static[this.arrayOffset + Stat.AD.toInt()] = this.assocUnit.getBaseDamage()
+        statBaseValue_static[this.arrayOffset + Stat.AS.toInt()] = 0
+        statBaseValue_static[this.arrayOffset + Stat.HR.toInt()] = 0
+        statBaseValue_static[this.arrayOffset + Stat.MR.toInt()] = 0
+        statBaseValue_static[this.arrayOffset + Stat.HP.toInt()] = this.assocUnit.getMaxHP().toInt()
+        statBaseValue_static[this.arrayOffset + Stat.MP.toInt()] = this.assocUnit.getMaxMana().toInt()
+        statBaseValue_static[this.arrayOffset + Stat.CD.toInt()] = 0
+        applyBaseStats()
+
+    @inline
+    function getBaseAttackCooldown() returns real
+        return this.baseAttackCooldown
+
+    @inline
+    function setBaseAttackCooldown(real value)
+        this.baseAttackCooldown = value
+
+    function applyBaseStats()
+        if this.assocUnit.isType(UNIT_TYPE_HERO)
+            this.assocUnit.setStr(this.getStrengthBase())
+            this.assocUnit.setAgi(this.getAgilityBase())
+            this.assocUnit.setInt(this.getIntelligenceBase())
+        else
+            this.assocUnit.setBaseDamage(this.getStrengthBase()) // this seems to set the minimum damage, rather than the base danage. Minimum damage is higher than base damage by number of dice.
+        this.assocUnit.setBaseAttackSpeed(this.baseAttackCooldown * this.scaleAttackAnimation)
+        this.assocUnit.setBonusArmor(0) // remove bonus armor
+        this.assocUnit.setArmor(this.getArmorBase().toReal()) // set base armor (does not work correctly while bonus armor is on the unit)
+        this.applyArmor() // add bonus armor
+        this.updateAll()
+        this.applyAll()
+    /**
+    Copies base stats from one unit to another.
+    This is intended for unit copies of heroes.
+    **/
+    function copyBaseStats(thistype copyFrom)
+        this.setBaseAttackCooldown(copyFrom.getBaseAttackCooldown())
+        for int i = 0 to STAT_COUNT-1
+            let stat = i castTo Stat
+            this.setStatBaseInternal(stat, copyFrom.getStatBase(stat))
+        this.applyBaseStats()
+
+    ondestroy
+        for int i = 0 to STAT_COUNT-1
+            statsAbsoluteBonus_static[this.arrayOffset + i] = 0
+            statsRelativeBonus_static[this.arrayOffset + i] = 0
+            statsTotalBonus_static[this.arrayOffset + i] = 0
+
+    function setBonusCalculation(CalculateTotalBonus bonusCalculation)
+        this.bonusCalculation = bonusCalculation
+
+    function getBonusCalculation() returns CalculateTotalBonus
+        return this.bonusCalculation
+
+    function defaultBonusCalcualtion(Stat whichStat)
+        let factor = this.getStatRelativeBonus(whichStat) / 1000
+        setStatBonusInternal(whichStat, (this.getStatAbsoluteBonus(whichStat) * (1+factor) + this.getStatBase(whichStat) * factor).round() )
+
+    function printStats()
+        for i = 0 to STAT_COUNT-1
+            printStat(i castTo Stat)
+
+    function printStat(Stat whichStat)
+        let stat = whichStat.toInt()
+        Log.debug(whichStat.toString()+" ( "+statBaseValue_static[this.arrayOffset + stat].toString()+" + "+statsAbsoluteBonus_static[this.arrayOffset + stat].toString()+" ) * "+statsRelativeBonus_static[this.arrayOffset + stat].toString() + "->" +statsTotalBonus_static[this.arrayOffset + stat].toString() )
+
+
+    function copyBaseStatsFrom(thistype wrapper)
+        for i = 0 to STAT_COUNT - 1
+            statBaseValue_static[this.arrayOffset + i] = statBaseValue_static[wrapper.arrayOffset + i]
+            this.updateStat(i castTo Stat)
+
+    function applyAll()
+        this
+        ..applyDamage()
+        ..applyHealth()
+        ..applyMana()
+        ..applyHealthRegen()
+        ..applyManaRegen()
+        ..applyStrength()
+        ..applyAgility()
+        ..applyIntelligence()
+        ..applyAttackSpeed()
+        ..applyArmor()
+        ..applyMoveSpeed()
+        ..applyCooldown()
+
+    function applyStatDispatch(Stat whichStat)
+        switch whichStat
+            case AD
+                this.applyDamage()
+            case AR
+                this.applyArmor()
+            case AS
+                this.applyAttackSpeed()
+            case AGI
+                this.applyAgility()
+            case STR
+                this.applyStrength()
+            case INT
+                this.applyIntelligence()
+            case MS
+                this.applyMoveSpeed()
+            case HP
+                this.applyHealth()
+            case MP
+                this.applyMana()
+            case CD
+                this.applyCooldown()
+            default
+
+    @inline function applyDamage()
+    @inline function applyArmor()
+    @inline function applyAttackSpeed()
+    @inline function applyStrength()
+    @inline function applyAgility()
+    @inline function applyIntelligence()
+    @inline function applyMoveSpeed()
+    @inline function applyHealth()
+    @inline function applyMana()
+    @inline function applyHealthRegen()
+    @inline function applyManaRegen()
+    @inline function applyCooldown()
+
+    function updateAll()
+        this
+        ..updateDamage()
+        ..updateHealth()
+        ..updateMana()
+        ..updateHealthRegen()
+        ..updateManaRegen()
+        ..updateStrength()
+        ..updateAgility()
+        ..updateIntelligence()
+        ..updateAttackSpeed()
+        ..updateArmor()
+        ..updateMoveSpeed()
+        ..updateCooldown()
+
+    function updateStat(Stat whichStat)
+        if this.bonusCalculation != null
+            this.bonusCalculation.calculate(this.assocUnit, whichStat)
+        else
+            this.defaultBonusCalcualtion(whichStat)
+
+    @inline function updateDamage()
+        updateStat(Stat.AD)
+    @inline function updateArmor()
+        updateStat(Stat.AR)
+    @inline function updateAttackSpeed()
+        updateStat(Stat.AS)
+    @inline function updateStrength()
+        updateStat(Stat.STR)
+    @inline function updateAgility()
+        updateStat(Stat.AGI)
+    @inline function updateIntelligence()
+        updateStat(Stat.INT)
+    @inline function updateMoveSpeed()
+        updateStat(Stat.MS)
+    @inline function updateHealth()
+        updateStat(Stat.HP)
+    @inline function updateMana()
+        updateStat(Stat.MP)
+    @inline function updateHealthRegen()
+        updateStat(Stat.HR)
+    @inline function updateManaRegen()
+        updateStat(Stat.MR)
+    @inline function updateCooldown()
+        updateStat(Stat.CD)
+
+    @inline private function modStatHelper(Stat whichStat, int modifier)
+        setStatAbsoluteBonusInternal(whichStat, getStatAbsoluteBonus(whichStat) + modifier)
+    @inline function modStatDispatch(Stat whichStat, int modifier)
+        modStatHelper(whichStat, modifier)
+        updateStat(whichStat)
+        applyStatDispatch(whichStat)
+    @inline function modDamage(int modifier)
+        modStatHelper(Stat.AR, modifier)
+        updateDamage()
+        applyDamage()
+    @inline function modArmor(int modifier)
+        modStatHelper(Stat.AR, modifier)
+        updateArmor()
+        applyArmor()
+    @inline function modAttackSpeed(int modifier)
+        modStatHelper(Stat.AS, modifier)
+        updateAttackSpeed()
+        applyAttackSpeed()
+    @inline function modStrength(int modifier)
+        modStatHelper(Stat.STR, modifier)
+        updateStrength()
+        applyStrength()
+    @inline function modAgility(int modifier)
+        modStatHelper(Stat.AGI, modifier)
+        updateAgility()
+        applyAgility()
+    @inline function modIntelligence(int modifier)
+        modStatHelper(Stat.INT, modifier)
+        updateIntelligence()
+        applyIntelligence()
+    @inline function modMoveSpeed(int modifier)
+        modStatHelper(Stat.MS, modifier)
+        updateMoveSpeed()
+        applyMoveSpeed()
+    @inline function modHealth(int modifier)
+        modStatHelper(Stat.HP, modifier)
+        updateHealth()
+        applyHealth()
+    @inline function modMana(int modifier)
+        modStatHelper(Stat.MP, modifier)
+        updateMana()
+        applyMana()
+    @inline function modHealthRegen(int modifier)
+        modStatHelper(Stat.HR, modifier)
+        updateHealthRegen()
+        applyHealthRegen()
+    @inline function modManaRegen(int modifier)
+        modStatHelper(Stat.MR, modifier)
+        updateManaRegen()
+        applyManaRegen()
+    @inline function modCooldown(int modifier)
+        modStatHelper(Stat.CD, modifier)
+        updateCooldown()
+        applyCooldown()
+
+    @inline private function modStatRelativeHelper(Stat whichStat, int modifier)
+        setStatRelativeBonusInternal(whichStat, getStatRelativeBonus(whichStat) + modifier)
+    @inline function modStatRelativeDispatch(Stat whichStat, int modifier)        
+        modStatRelativeHelper(whichStat, modifier)
+        updateStat(whichStat)
+        applyStatDispatch(whichStat)
+    @inline function modDamageRelative(int modifier)
+        modStatRelativeHelper(Stat.AD, modifier)
+        updateDamage()
+        applyDamage()
+    @inline function modArmorRelative(int modifier)
+        modStatRelativeHelper(Stat.AR, modifier)
+        updateArmor()
+        applyArmor()
+    @inline function modAttackSpeedRelative(int modifier)
+        modStatRelativeHelper(Stat.AS, modifier)
+        updateAttackSpeed()
+        applyAttackSpeed()
+    @inline function modStrengthRelative(int modifier)
+        modStatRelativeHelper(Stat.STR, modifier)
+        updateStrength()
+        applyStrength()
+    @inline function modAgilityRelative(int modifier)
+        modStatRelativeHelper(Stat.AGI, modifier)
+        updateAgility()
+        applyAgility()
+    @inline function modIntelligenceRelative(int modifier)
+        modStatRelativeHelper(Stat.INT, modifier)
+        updateIntelligence()
+        applyIntelligence()
+    @inline function modMoveSpeedRelative(int modifier)
+        modStatRelativeHelper(Stat.MS, modifier)
+        updateMoveSpeed()
+        applyMoveSpeed()
+    @inline function modHealthRelative(int modifier)
+        modStatRelativeHelper(Stat.HP, modifier)
+        updateHealth()
+        applyHealth()
+    @inline function modManaRelative(int modifier)
+        modStatRelativeHelper(Stat.MP, modifier)
+        updateMoveSpeed()
+        applyMoveSpeed()
+    @inline function modHealthRegenRelative(int modifier)
+        modStatRelativeHelper(Stat.HR, modifier)
+        updateHealthRegen()
+        applyHealthRegen()
+    @inline function modManaRegenRelative(int modifier)
+        modStatRelativeHelper(Stat.MR, modifier)
+        updateManaRegen()
+        applyManaRegen()
+    @inline function modCooldownRelative(int modifier)
+        modStatRelativeHelper(Stat.CD, modifier)
+        updateCooldown()
+        applyCooldown()
+
+    private function modStatFractionHelper(Stat whichStat, int modifier)
+        let arrayIndex = this.arrayOffset + whichStat.toInt()
+        statsAbsoluteBonusReal_static[arrayIndex] += modifier
+        if statsAbsoluteBonusReal_static[arrayIndex].abs() >= 1000
+            modStatHelper(whichStat, (statsAbsoluteBonusReal_static[arrayIndex]/1000).toInt() )
+            statsAbsoluteBonusReal_static[arrayIndex] -= (statsAbsoluteBonusReal_static[arrayIndex]/1000).toInt()*1000
+    @inline function modStatFractionDispatch(Stat whichStat, int modifier)
+        modStatFractionHelper(whichStat, modifier)
+        updateStat(whichStat)
+        applyStatDispatch(whichStat)
+    @inline function modDamageFraction(int modifier)
+        modStatFractionHelper(Stat.AD, modifier)
+        updateDamage()
+        applyDamage()
+    @inline function modArmorFraction(int modifier)
+        modStatFractionHelper(Stat.AR, modifier)
+        updateArmor()
+        applyArmor()
+    @inline function modAttackSpeedFraction(int modifier)
+        modStatFractionHelper(Stat.AS, modifier)
+        updateAttackSpeed()
+        applyAttackSpeed()
+    @inline function modStrengthFraction(int modifier)
+        modStatFractionHelper(Stat.STR, modifier)
+        updateStrength()
+        applyStrength()
+    @inline function modAgilityFraction(int modifier)
+        modStatFractionHelper(Stat.AGI, modifier)
+        updateAgility()
+        applyAgility()
+    @inline function modIntelligenceFraction(int modifier)
+        modStatFractionHelper(Stat.INT, modifier)
+        updateIntelligence()
+        applyIntelligence()
+    @inline function modMoveSpeedFraction(int modifier)
+        modStatFractionHelper(Stat.MS, modifier)
+        updateMoveSpeed()
+        applyMoveSpeed()
+    @inline function modHealthFraction(int modifier)
+        modStatFractionHelper(Stat.HP, modifier)
+        updateHealth()
+        applyHealth()
+    @inline function modManaFraction(int modifier)
+        modStatFractionHelper(Stat.MP, modifier)
+        updateMana()
+        applyMana()
+    @inline function modHealthRegenFraction(int modifier)
+        modStatFractionHelper(Stat.HR, modifier)
+        updateHealthRegen()
+        applyHealthRegen()
+    @inline function modManaRegenFraction(int modifier)
+        modStatFractionHelper(Stat.MR, modifier)
+        updateManaRegen()
+        applyManaRegen()
+    @inline function modCooldownFraction(int modifier)
+        modStatFractionHelper(Stat.CD, modifier)
+        updateCooldown()
+        applyCooldown()
+
+    @inline function getStat(Stat whichStat) returns int
+        return this.getStatBase(whichStat) + this.getStatBonus(whichStat)
+    @inline function getDamage() returns int
+        return this.getDamageBase() + this.getDamageBonus()
+    @inline function getArmor() returns int
+        return this.getArmorBase() + this.getArmorBonus()
+    @inline function getAttackSpeed() returns int
+        return this.getAttackSpeedBase() + this.getAttackSpeedBonus()
+    @inline function getStrength() returns int
+        return this.getStrengthBase() + this.getStrengthBonus()
+    @inline function getAgility() returns int
+        return this.getAgilityBase() + this.getAgilityBonus()
+    @inline function getIntelligence() returns int
+        return this.getIntelligenceBase() + this.getIntelligenceBonus()
+    @inline function getMoveSpeed() returns int
+        return this.getMoveSpeedBase() + this.getMoveSpeedBonus()
+    @inline function getHealth() returns int
+        return this.getHealthBase() + this.getHealthBonus()
+    @inline function getMana() returns int
+        return this.getManaBase() + this.getManaBonus()
+    @inline function getHealthRegen() returns int
+        return this.getHealthRegenBase() + this.getHealthRegenBonus()
+    @inline function getManaRegen() returns int
+        return this.getManaRegenBase() + this.getManaRegenBonus()
+    @inline function getCooldown() returns int
+        return this.getCooldownBase() + this.getCooldownBonus()
+
+    @inline function getStatBonus(Stat whichStat) returns int
+        return statsTotalBonus_static[this.arrayOffset + whichStat.toInt()]
+    @inline function getDamageBonus() returns int
+        return getStatBonus(Stat.AD)
+    @inline function getArmorBonus() returns int
+        return getStatBonus(Stat.AR)
+    @inline function getAttackSpeedBonus() returns int
+        return getStatBonus(Stat.AS)
+    @inline function getStrengthBonus() returns int
+        return getStatBonus(Stat.STR)
+    @inline function getAgilityBonus() returns int
+        return getStatBonus(Stat.AGI)
+    @inline function getIntelligenceBonus() returns int
+        return getStatBonus(Stat.INT)
+    @inline function getMoveSpeedBonus() returns int
+        return getStatBonus(Stat.MS)
+    @inline function getHealthBonus() returns int
+        return getStatBonus(Stat.HP)
+    @inline function getManaBonus() returns int
+        return getStatBonus(Stat.MP)
+    @inline function getHealthRegenBonus() returns int
+        return getStatBonus(Stat.HR)
+    @inline function getManaRegenBonus() returns int
+        return getStatBonus(Stat.MR)
+    @inline function getCooldownBonus() returns int
+        return getStatBonus(Stat.CD)
+
+    @inline function getStatBase(Stat whichStat) returns int
+        return statBaseValue_static[this.arrayOffset + whichStat.toInt()]
+    @inline function getDamageBase() returns int
+        return getStatBase(Stat.AD)
+    @inline function getArmorBase() returns int
+        return getStatBase(Stat.AR)
+    @inline function getAttackSpeedBase() returns int
+        return getStatBase(Stat.AS)
+    @inline function getStrengthBase() returns int
+        return getStatBase(Stat.STR)
+    @inline function getAgilityBase() returns int
+        return getStatBase(Stat.AGI)
+    @inline function getIntelligenceBase() returns int
+        return getStatBase(Stat.INT)
+    @inline function getMoveSpeedBase() returns int
+        return getStatBase(Stat.MS)
+    @inline function getHealthBase() returns int
+        return getStatBase(Stat.HP)
+    @inline function getManaBase() returns int
+        return getStatBase(Stat.MP)
+    @inline function getHealthRegenBase() returns int
+        return getStatBase(Stat.HR)
+    @inline function getManaRegenBase() returns int
+        return getStatBase(Stat.MR)
+    @inline function getCooldownBase() returns int
+        return getStatBase(Stat.CD)
+
+    @inline function getStatAbsoluteBonus(Stat whichStat) returns int
+        return statsAbsoluteBonus_static[this.arrayOffset + whichStat.toInt()]
+    @inline function getDamageAbsoluteBonus() returns int
+        return getStatAbsoluteBonus(Stat.AD)
+    @inline function getArmorAbsoluteBonus() returns int
+        return getStatAbsoluteBonus(Stat.AR)
+    @inline function getAttackSpeedAbsoluteBonus() returns int
+        return getStatAbsoluteBonus(Stat.AS)
+    @inline function getStrengthAbsoluteBonus() returns int
+        return getStatAbsoluteBonus(Stat.STR)
+    @inline function getAgilityAbsoluteBonus() returns int
+        return getStatAbsoluteBonus(Stat.AGI)
+    @inline function getIntelligenceAbsoluteBonus() returns int
+        return getStatAbsoluteBonus(Stat.INT)
+    @inline function getMoveSpeedAbsoluteBonus() returns int
+        return getStatAbsoluteBonus(Stat.MS)
+    @inline function getHealthAbsoluteBonus() returns int
+        return getStatAbsoluteBonus(Stat.HP)
+    @inline function getManaAbsoluteBonus() returns int
+        return getStatAbsoluteBonus(Stat.MP)
+    @inline function getHealthRegenAbsoluteBonus() returns int
+        return getStatAbsoluteBonus(Stat.HR)
+    @inline function getManaRegenAbsoluteBonus() returns int
+        return getStatAbsoluteBonus(Stat.MR)
+    @inline function getCooldownAbsoluteBonus() returns int
+        return getStatAbsoluteBonus(Stat.CD)
+
+    @inline function getStatRelativeBonus(Stat whichStat) returns int
+        return statsRelativeBonus_static[this.arrayOffset + whichStat.toInt()]
+    @inline function getDamageRelativeBonus() returns int
+        return getStatRelativeBonus(Stat.AD)
+    @inline function getArmorRelativeBonus() returns int
+        return getStatRelativeBonus(Stat.AR)
+    @inline function getAttackSpeedRelativeBonus() returns int
+        return getStatRelativeBonus(Stat.AS)
+    @inline function getStrengthRelativeBonus() returns int
+        return getStatRelativeBonus(Stat.STR)
+    @inline function getAgilityRelativeBonus() returns int
+        return getStatRelativeBonus(Stat.AGI)
+    @inline function getIntelligenceRelativeBonus() returns int
+        return getStatRelativeBonus(Stat.INT)
+    @inline function getMoveSpeedRelativeBonus() returns int
+        return getStatRelativeBonus(Stat.MS)
+    @inline function getHealthRelativeBonus() returns int
+        return getStatRelativeBonus(Stat.HP)
+    @inline function getManaRelativeBonus() returns int
+        return getStatRelativeBonus(Stat.MP)
+    @inline function getHealthRegenRelativeBonus() returns int
+        return getStatRelativeBonus(Stat.HR)
+    @inline function getManaRegenRelativeBonus() returns int
+        return getStatRelativeBonus(Stat.MR)
+    @inline function getCooldownRelativeBonus() returns int
+        return getStatRelativeBonus(Stat.CD)
+
+    @inline function setStatBonusInternal(Stat whichStat, int value)
+        statsTotalBonus_static[this.arrayOffset + whichStat.toInt()] = value
+    @inline function setStatBaseInternal(Stat whichStat, int value)
+        statBaseValue_static[this.arrayOffset + whichStat.toInt()] = value
+    @inline function setStatAbsoluteBonusInternal(Stat whichStat, int value)
+        statsAbsoluteBonus_static[this.arrayOffset + whichStat.toInt()] = value
+    @inline function setStatAbsoluteBonusRealInternal(Stat whichStat, int value)
+        statsAbsoluteBonusReal_static[this.arrayOffset + whichStat.toInt()] = value
+    @inline function setStatRelativeBonusInternal(Stat whichStat, int value)
+        statsRelativeBonus_static[this.arrayOffset + whichStat.toInt()] = value
+
+

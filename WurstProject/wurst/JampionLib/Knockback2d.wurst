@@ -1,0 +1,122 @@
+package Knockback2d
+
+import HashMap
+import TerrainUtils
+import TimerUtils
+
+public interface KnockbackUpdateFunction
+    function knockbackUpdate(Knockback2d kb, vec2 pos)
+
+public interface KnockbackFinishFunction
+    function knockbackFinish(Knockback2d kb, vec2 pos, bool reachedDestination)
+
+/**
+    Simple Knockbacks from a units current position to a different position using constant speed.
+    Movement speed is disabled during knockback.
+*/
+public class Knockback2d
+
+    private static constant UPDATE_INTERVAL = 1.0/32.0
+    private static constant UNIT_MAP = new HashMap<unit,Knockback2d>
+
+
+    private unit affectedUnit
+    private vec2 startPosition
+    private vec2 targetPosition
+    private real time
+    private real speed
+    private real distance
+    private boolean failed
+    private int steps
+    private int maxSteps
+    private angle knockbackAngle
+    private timer updateTimer
+
+    private KnockbackUpdateFunction knockbackUpdateFunction = null
+    private int updateSteps = -1
+    private KnockbackFinishFunction knockbackFinishFunction = null
+
+    construct(unit whichUnit, vec2 targetPosition, real time)
+        if UNIT_MAP.has(whichUnit)
+            this.failed = true
+        else
+            this.failed = false
+            UNIT_MAP.put(whichUnit, this)
+
+            this.affectedUnit = whichUnit
+            this.startPosition = whichUnit.getPos()
+            this.targetPosition = targetPosition
+            this.distance = startPosition.distanceTo(targetPosition)
+            this.time = (time/0.03).ceil() * 0.03
+            this.speed = distance/this.time
+            this.steps = 0
+            this.maxSteps = (this.time/UPDATE_INTERVAL).ceil()
+            this.knockbackAngle = this.startPosition.angleTo(targetPosition)
+
+            this.affectedUnit.setPropWindow(angle(0))
+
+            this.updateTimer = getTimer()
+            this.updateTimer.setData(this castTo int)
+            this.updateTimer.startPeriodic(UPDATE_INTERVAL, function updateStatic)
+
+    private function update()
+        this.steps++
+        let newPos = startPosition.polarOffset(this.knockbackAngle, steps * UPDATE_INTERVAL * speed )
+        bool walkable = true
+
+        let checkDist = 16.0
+
+        walkable = walkable and newPos.isTerrainWalkable()
+        walkable = walkable and newPos.polarOffset(this.knockbackAngle, checkDist).isTerrainWalkable()
+        walkable = walkable and newPos.polarOffset(this.knockbackAngle - 90. .fromDeg(), checkDist).isTerrainWalkable()
+        walkable = walkable and newPos.polarOffset(this.knockbackAngle + 90. .fromDeg(), checkDist).isTerrainWalkable()
+
+        if walkable
+            this.affectedUnit.setXY(newPos)
+            if this.steps >= this.maxSteps
+                this.finish(true)
+            else
+                if updateSteps != -1 and steps mod updateSteps == 0
+                    this.knockbackUpdateFunction.knockbackUpdate(this, newPos)
+        else
+            this.finish(false)
+        
+    private static function updateStatic()
+        let updateTimer = GetExpiredTimer()
+        let kb = updateTimer.getData() castTo Knockback2d
+        kb.update()
+
+
+    private function finish(bool reachedDestination)
+        let pos = this.affectedUnit.getPos()
+        //this.affectedUnit.setPos(pos)
+        if this.knockbackFinishFunction != null
+            this.knockbackFinishFunction.knockbackFinish(this, pos, reachedDestination)
+        destroy this
+
+    ondestroy
+        if not this.failed
+            UNIT_MAP.remove(this.affectedUnit)
+            this.affectedUnit.setPropWindow(this.affectedUnit.getDefaultPropWindow())
+            this.updateTimer.release()
+
+    static function knockback(unit whichUnit, vec2 targetPosition, real speed) returns Knockback2d
+        let distance = whichUnit.getPos().distanceTo(targetPosition)
+        return Knockback2d.knockbackTimed(whichUnit, targetPosition, distance/speed)
+
+    static function knockbackTimed(unit whichUnit, vec2 targetPosition, real time) returns Knockback2d
+        let kb = new Knockback2d(whichUnit, targetPosition, time)
+        if kb.failed
+            destroy kb
+            return null
+        return kb
+
+    
+    function setUpdateFunction(real interval, KnockbackUpdateFunction f)
+        this.knockbackUpdateFunction = f
+        this.updateSteps = (interval/UPDATE_INTERVAL).ceil()
+    function setFinishFunction(KnockbackFinishFunction f)
+        this.knockbackFinishFunction = f
+
+    function getAffectedUnit() returns unit
+        return this.affectedUnit

@@ -1,0 +1,117 @@
+package JStringUtils
+
+import StringUtils
+import LinkedList
+
+@configurable public constant DEFAULT_PRECISION = 2
+
+function LinkedList<string>.sortAlphabetically(bool reversed)
+    this.sortWith() (string o1, string o2) ->
+        return reversed?o2-o1:o1-o2
+
+function LinkedList<string>.sortAlphabetically()
+    this.sortAlphabetically(false)
+
+
+function string.op_minus(string other) returns int
+    let aCharList = this.toLowerCase().toCharList()
+    let bCharList = other.toLowerCase().toCharList()
+    int i = 0
+    int ret = 0
+    while true
+
+        if aCharList.size() <= i
+            if bCharList.size() <= i
+                ret = 0
+            else
+                ret = -1
+            break
+        if bCharList.size() <= i
+            ret = 1
+            break
+        let aInt = aCharList.get(i).toInt()
+        let bInt = bCharList.get(i).toInt()
+        if aInt != bInt
+            if aInt > bInt
+                ret = 1
+            if aInt < bInt
+                ret = -1
+            break
+        i++
+    destroy aCharList
+    destroy bCharList
+    return ret
+
+function string.cutOffZeroes() returns string
+    string str = this
+    if str.contains(".")
+        while true
+            let strEnd = str.charAt(str.length()-1)
+            if strEnd != "0"
+                if strEnd == "."
+                    str = str.substring(0, str.length()-1)
+                break
+            str = str.substring(0, str.length()-1)
+    return str
+
+public function real.getPrecision(int maxPrec) returns int
+    int ret
+    if this >= 99.95
+        ret = -3
+    else if this >= 9.995
+        ret = -2
+    else if this >= 0.995
+        ret = -1
+    else
+        ret = 0
+    return max(0,ret + maxPrec)
+
+public function real.getPrecision() returns int
+    return this.getPrecision(DEFAULT_PRECISION)
+
+public function real.str(int precision) returns string
+    let prec = this.abs().getPrecision(precision)
+    string ret
+    if prec == 0
+        ret = this.round().toString()
+    else
+        ret = this.toString(prec).cutOffZeroes()
+
+    return ret
+public function real.str() returns string
+    return this.str(DEFAULT_PRECISION)
+
+public function int.str() returns string
+    return this.toString()
+     
+
+@Test function testStringCompare()
+    let list = new LinkedList<string>()..add("b", "aa", "c", "bac", " bba", "a b c", "aa ")
+    let compareList = new LinkedList<string>()..add(" bba", "a b c", "aa", "aa ", "b", "bac", "c")
+    list.sortAlphabetically()
+
+    // sorting
+    assertTrue(list.join() == compareList.join())
+
+    // same string
+    assertTrue("this is a string" - "this is a string" == 0)
+
+    // ignore case
+    assertTrue("A" - "a" == 0)
+
+    // compare length
+    assertTrue("aAa" - "A" == 1)
+    assertTrue("A" - "aAa" == -1)
+
+    // normal
+    assertTrue("aaaa" - "bbbb" == -1)
+    assertTrue("bbbb" - "aaaa" == 1)
+
+
+@Test function testRealToString()
+    print((0.0010203040506).str())
+    print((0.1111111).str(3))
+    print((1.1111111).str(3))
+    print((11.111111).str(3))
+    print((111.11111).str(3))
+    print((1111.1111).str(3))

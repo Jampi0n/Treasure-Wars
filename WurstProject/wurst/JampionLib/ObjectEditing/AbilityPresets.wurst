@@ -1,0 +1,99 @@
+package AbilityPresets
+
+import AbilityObjEditing
+import BuffObjEditing
+import ObjectIds
+import ObjectIdGenerator
+
+public function AbilityDefinition.hideIcon()
+    this..setButtonPositionNormalX(0)
+    ..setButtonPositionNormalY(-11)
+
+public function createNoEffectAbiltiy(int newId) returns AbilityDefinition
+    let aDef = new AbilityDefinition(newId, 'Amgl')
+        ..setCheckDependencies(false)
+        ..setRequirements("")
+    return aDef
+
+public function createTargetMissile(int newId, int buffId) returns AbilityDefinitionAlchemistAcidBomb
+    let aDef = new AbilityDefinitionAlchemistAcidBomb(newId)
+    for i = 1 to 5
+        aDef.setBuffs(i, buffId.toRawCode())
+        aDef.setArmorPenalty(i, 0)
+        aDef.setPrimaryDamage(i, 0)
+        aDef.setSecondaryDamage(i, 0)
+        aDef.setDamageInterval(i, 10)
+        aDef.setDurationHero(i, 1)
+        aDef.setDurationNormal(i, 1)
+        aDef.setAreaofEffect(i, 0)
+    return aDef
+
+public function createDummyBuff() returns int
+    let buffId = BUFF_ID_GEN.next()
+    new BuffDefinition(buffId, 'BHwe')
+        ..setName(1, "Dummy_"+buffId.toRawCode())
+    return buffId
+
+public function createDummyBuff(string name) returns int
+    let buffId = BUFF_ID_GEN.next()
+    new BuffDefinition(buffId, 'BHwe')
+        ..setTooltipNormal(1, name)
+    return buffId
+
+public function createBasicBuff(string name, string desc, string icon, string model, string attachment) returns int
+    assertTrue(desc != "", "No description set for buff "+name+".")
+    assertTrue(name != "", "No name set for buff.")
+    assertTrue(not desc.contains(","), ", cannot be displayed in buffs. Use ‚ instead (U+201A)")
+    let buffId = BUFF_ID_GEN.next()
+    new BuffDefinition(buffId, 'BHwe')
+        ..setTooltipNormal(1, name)
+        ..setTooltipNormalExtended(1, desc)
+        ..setIcon(icon)
+        ..setArtTarget(1, model)
+        ..setTargetAttachmentPoint0(1, attachment)
+    return buffId
+
+public function createAuraBuff(string name, string desc, string icon) returns int
+    assertTrue(desc != "", "No description set for buff "+name+".")
+    assertTrue(name != "", "No name set for buff.")
+    assertTrue(not desc.contains(","), ", cannot be displayed in buffs. Use this instead: >‚< (U+201A)")
+
+    let buffId = BUFF_ID_GEN.next()
+    new BuffDefinition(buffId, 'BHwe')
+        ..setTooltipNormal(1, name)
+        ..setTooltipNormalExtended(1, desc)
+        ..setIcon(icon)
+    return buffId
+
+public function createNegativeBuffAbility(int levels, int buffId, string model, string attachment) returns integer
+    let abilityId = ABIL_ID_GEN.next()
+    let aDef = new AbilityDefinitionAuraSlow(abilityId)
+        ..setArtTarget(model)
+        ..setTargetAttachmentPoint(attachment)
+        ..hideIcon()
+        ..setLevels(levels)
+    for i = 1 to levels
+        aDef
+            ..setTargetsAllowed(i, "invulnerable,self,vulnerable")
+            ..setAreaofEffect(i, 1)
+            ..setMovementSpeedFactor(i, 0)
+            ..setAttackSpeedFactor(i, 0)
+            ..setBuffs(i, buffId.toRawCode())
+    return abilityId
+
+public function createPositiveBuffAbility(int levels, int buffId, string model, string attachment) returns integer
+    let abilityId = ABIL_ID_GEN.next()
+    let aDef = new AbilityDefinitionUnholyAuracreep(abilityId)
+        ..setArtTarget(model)
+        ..setTargetAttachmentPoint(attachment)
+        ..hideIcon()
+        ..setLevels(levels)
+    for i = 1 to levels
+        aDef
+            ..setTargetsAllowed(i, "invulnerable,self,vulnerable")
+            ..setAreaofEffect(i, 1)
+            ..setMovementSpeedIncrease(i, 0)
+            ..setLifeRegenerationIncrease(i, 0)
+            ..setBuffs(i, buffId.toRawCode())
+    return abilityId
+

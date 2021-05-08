@@ -1,0 +1,39 @@
+package UnitColor
+
+import UnitWrapper
+
+public module UnitColor
+    private unit u
+    private color defaultColor
+    private int blueCount = 0
+
+    construct()
+        this.u = getWrappedUnit()
+        this.defaultColor = color(u.getField(UNIT_IF_TINTING_COLOR_RED), u.getField(UNIT_IF_TINTING_COLOR_GREEN), u.getField(UNIT_IF_TINTING_COLOR_BLUE))
+
+    function setDefaultColor(color c)
+        this.defaultColor = c
+        if blueCount <= 0
+            this.u.setVertexColor(this.defaultColor)
+
+    function incBlue()
+        blueCount++
+        if blueCount == 1
+            this.u.setVertexColor(140, 220, 255, 255)
+
+    function decBlue()
+        blueCount--
+        if blueCount == 0
+            this.u.setVertexColor(this.defaultColor)
+
+    function modBlue(int value)
+        blueCount += value
+        if blueCount > 0
+            this.u.setVertexColor(140, 220, 255, 255)
+        else
+            this.u.setVertexColor(this.defaultColor)
+
+
+
+
+

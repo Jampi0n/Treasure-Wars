@@ -502,8 +502,9 @@ public class HeroSeaDruid extends HeroTemplate
 
     override function onInit(IHeroType heroType)
         heroType
-        ..setBonusCalculation((IUnit whichWrapper, Stat whichStat) -> (begin
-            let lvl = whichWrapper.toUnit().getAbilityLevel(ABILITY_ID_PASSIVE)
+        ..setBonusCalculation((unit u, Stat whichStat) -> (begin
+            let whichWrapper = u.wrapper()
+            let lvl = u.getAbilityLevel(ABILITY_ID_PASSIVE)
             if lvl == 0
                 whichWrapper.defaultBonusCalcualtion(whichStat)
             else

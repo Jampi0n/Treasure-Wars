@@ -1,0 +1,35 @@
+package UnitInfo
+
+import UnitWrapper
+
+public module UnitInfo
+    private unit u
+    private player owner
+    private int ownerId
+    private int unitTypeId
+
+    construct()
+        this.u = getWrappedUnit()
+        this.owner = getWrappedUnit().getOwner()
+        this.ownerId = this.owner.getId()
+        this.unitTypeId = getWrappedUnit().getTypeId()
+
+    function getOwner() returns player
+        return this.owner
+
+    function getOwnerId() returns int
+        return this.ownerId
+
+    function getTypeId() returns int
+        return this.unitTypeId
+
+    function setOwner(player p, bool changeColor)
+        this.owner = p
+        this.ownerId = p.getId()
+        this.u.setOwner(p, changeColor)
+
+    function setOwnerId(int id, bool changeColor)
+        setOwner(players[id], changeColor)
+
+
+

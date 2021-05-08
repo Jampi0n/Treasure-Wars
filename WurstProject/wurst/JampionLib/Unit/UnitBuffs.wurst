@@ -1,0 +1,27 @@
+package UnitBuffs
+
+import Buff
+import ErrorHandling
+
+public module UnitBuffs
+    protected BuffList buffList
+
+    construct()
+        this.buffList = null
+
+    function getBuffList() returns BuffList
+        return this.buffList
+
+    ondestroy
+        //the dispel function must be executed before the unit wrapper is destroyed
+        if this.buffList != null
+            for Buff b in this.buffList.getLinkedList()
+                b.dispel()
+
+            destroy this.buffList
+
+    function createBuffList()
+        if this.buffList == null
+            this.buffList = new BuffList()
+        else
+            error("This unit wrapper already has a buffList")

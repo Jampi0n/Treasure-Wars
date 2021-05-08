@@ -14,7 +14,7 @@ import PlayerControl
 import UnitLib
 import TeamUtil
 import FastDamageEvent
-import UnitImpl
+import IUnit
 import IHero
 import Blacksmith
 
@@ -464,7 +464,7 @@ public class HeroAIImpl implements IHeroAI
             wrapper.modManaRelative(100)
             wrapper.modManaRegenRelative(100)
             wrapper.modStrengthRelative(100)
-            wrapper.modWillpowerRelative(100)
+            wrapper.modAgilityRelative(100)
             wrapper.modIntelligenceRelative(100)
 
             wrapper.modHealthRegen(30)
@@ -480,7 +480,7 @@ public class HeroAIImpl implements IHeroAI
             wrapper.modManaRelative(200)
             wrapper.modManaRegenRelative(200)
             wrapper.modStrengthRelative(200)
-            wrapper.modWillpowerRelative(200)
+            wrapper.modAgilityRelative(200)
             wrapper.modIntelligenceRelative(200)
 
             wrapper.modHealthRegen(60)

@@ -7,7 +7,7 @@ import ClosureTimers
 import SoundUtils
 import TeamUtil
 import StandardTextTags
-import UnitImpl
+import IUnit
 
 constant REVIVE_TIME = 150.
 constant MAX_LEVEL = 5
@@ -64,7 +64,7 @@ function onDragonTurtleDeath()
             ..modStrength(DMG[lvl])
             ..modHealth(HP[lvl])
             ..modArmor(ARMOR[lvl])
-            ..modWillpower(WILLPOWER[lvl])
+            ..modAgility(WILLPOWER[lvl])
             ..modAttackSpeed(ATTACK_SPEED[lvl])
 
         end))
@@ -87,7 +87,7 @@ init
         ..modStrength(DMG[lvl])
         ..modHealth(HP[lvl])
         ..modArmor(ARMOR[lvl])
-        ..modWillpower(WILLPOWER[lvl])
+        ..modAgility(WILLPOWER[lvl])
         ..modAttackSpeed(ATTACK_SPEED[lvl])
 
     CreateTrigger()

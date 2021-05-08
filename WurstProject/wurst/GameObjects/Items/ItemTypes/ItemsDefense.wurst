@@ -26,7 +26,7 @@ function voidCrystal()
     setInfo("Void Crystal","+ {0} magic resistance"
     .format(wp.toString()))
     onEither() (int factor) ->
-        modWillpower(wp)
+        modAgility(wp)
 
 function basicShield()
     let ar = 12

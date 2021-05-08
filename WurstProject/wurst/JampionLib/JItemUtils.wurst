@@ -1,0 +1,29 @@
+package JItemUtils
+
+import ObjectIdGenerator
+import ItemObjEditing
+import ItemIds
+
+public constant PLACE_HOLDER_ITEM = compiletime(generatePlaceHolderItem())
+
+function generatePlaceHolderItem() returns int
+    let id = ITEM_ID_GEN.next()
+    new ItemDefinition(id, ItemIds.phatLewt)
+    return id
+
+/**
+Adds the item handle to a specific slot in the inventory of the unit.
+This assumes that the slot is not occupied. Otherwise the item is added to a later slot or not at all!
+Earlier slots are temporarily filled with a place holder item, so item events will be triggered.
+You can use PLACE_HOLDER_ITEM to filter for the place holder item if necessary.
+**/
+public function unit.addItemHandleToSlot(item itm, int slot)
+    for i = 0 to slot - 1
+        if this.itemInSlot(i) == null
+            this.addItemToSlot(PLACE_HOLDER_ITEM, i)
+    this.addItemHandle(itm)
+    for i = 0 to slot - 1
+        let placeHolder = this.itemInSlot(i)
+        if placeHolder.getTypeId() == PLACE_HOLDER_ITEM
+            placeHolder.remove()
+

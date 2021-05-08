@@ -45,7 +45,7 @@ public class Blacksmith extends Building
                         ..setStatBaseInternal(Stat.AGI, u.getArmor().round())
                         ..modArmor(0)
                         ..modStrength(0)
-                        ..modWillpower(0)
+                        ..modAgility(0)
                 g.destr()
 
     static function findNextUpgrade(int team) returns int

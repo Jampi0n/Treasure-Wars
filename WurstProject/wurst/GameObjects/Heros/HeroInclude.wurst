@@ -12,7 +12,6 @@ import public IHero
 import public HeroImpl
 import public HeroTypeImpl
 import public IUnit
-import public UnitImpl
 import public HeroAIImpl
 import public ItemIdDefinitions
 import public GeneralEvents
@@ -30,13 +29,15 @@ import public Buff
 import public StandardBuffs
 import public UnitLib
 import public AbilityScaling
-import public BuffTypeConfig
+import public CommonBuffs
 import public UnitTypeConfig
 import public Constants
 import public TeamUtil
-import public ObjectEditingPreset
+import public AbilityPresets
 import public ObjectIds
 import public ObjectIdGenerator
 import public FastDamageEvent
 import public DynamicTooltips
 import public JStringUtils
+import public Artillery
+import public UnitWrapper

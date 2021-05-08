@@ -5,7 +5,8 @@ import HashMap
 import ClosureTimers
 import Assets
 import AbilityObjEditing
-import ObjectEditingPreset
+import AbilityPresets
+import ObjectIdGenerator
 import GeneralEvents
 import Buff
 import UnitLib
@@ -13,9 +14,10 @@ import UnitTypeConfig
 import Constants
 import PlayerControl
 import TeamUtil
-import UnitImpl
+import IUnit
 import FastDamageEvent
 import ErrorHandling
+import ObjectIds
 
 constant int DUMMY_CASTER = compiletime(UNIT_ID_GEN.next())
 constant int HEAL_BUFF_ID = compiletime(createDummyBuff())

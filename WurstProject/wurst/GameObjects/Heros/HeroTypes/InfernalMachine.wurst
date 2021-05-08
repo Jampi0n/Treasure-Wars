@@ -518,7 +518,7 @@ public class HeroInfernalMachine extends HeroTemplate
                 intel = thisBuff.getData()
             wrapper.modStrengthRelative( factor * 10 * INNER_FIRE_DMG[level-1].bonus(intel, INNER_FIRE_DMG_BONUS).toInt() )
             wrapper.modArmor( factor * INNER_FIRE_DEF[level-1].bonus(intel, INNER_FIRE_DEF_BONUS).toInt() )
-            wrapper.modWillpower( factor * INNER_FIRE_DEF[level-1].bonus(intel, INNER_FIRE_DEF_BONUS).toInt() )
+            wrapper.modAgility( factor * INNER_FIRE_DEF[level-1].bonus(intel, INNER_FIRE_DEF_BONUS).toInt() )
 
         BUFF_FLAME_THROWER.setPeriodicTime(0.25)
         BUFF_FLAME_THROWER.addPeriodicFunction((Buff whichBuff) -> (begin

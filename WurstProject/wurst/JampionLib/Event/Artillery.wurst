@@ -1,0 +1,171 @@
+package Artillery
+
+import Allocator
+import AbilityObjEditing
+import HashMap
+import ObjectIds
+import ObjectIdGenerator
+import ClosureTimers
+import ErrorHandling
+import OnUnitEnterLeave
+import Preloader
+
+constant MAX_ARTILLERY_MISSILES = 64
+constant MAX_ARTILLERY_AIR_TIME = 32.0
+
+int firstArtilleryTypeId = compiletime(createArtilleryTypeIds())
+int artilleryAbility = compiletime(generateArtilleryAbility())
+int array artilleryIndexToTypeId
+constant artilleryTypeIdToIndex = new HashMap<int,int>
+
+function createArtilleryTypeIds() returns int
+    let first = UNIT_ID_GEN.next()
+    for i = 1 to MAX_ARTILLERY_MISSILES
+        let unitTypeId = UNIT_ID_GEN.next()
+        new UnitDefinition(unitTypeId, 'hfoo')
+        ..setName("Detection_" + i.toString())
+        ..setNormalAbilities("Aloc")
+        ..setModelFile("")
+        ..setShadowImageUnit("")
+        ..setAttacksEnabled(0)
+        ..setMovementType(MovementType.Fly)
+        ..setCollisionSize(0)
+        ..setFoodCost(0)
+        ..setSightRadiusDay(0)
+        ..setSightRadiusNight(0)
+        ..setUpgradesUsed("")
+        ..setUnitSoundSet("")
+        artilleryIndexToTypeId[i] = unitTypeId
+    return first
+
+function setupArtilleryTypeIds()
+    let gen = new IdGenerator(firstArtilleryTypeId)
+    
+    for i = 1 to MAX_ARTILLERY_MISSILES
+        let unitTypeId = gen.next()
+        artilleryTypeIdToIndex.put(unitTypeId, i)
+        artilleryIndexToTypeId[i] = unitTypeId
+
+function generateArtilleryAbility() returns int
+    let abilId = ABIL_ID_GEN.next()
+    let aDef = new AbilityDefinitionPlagueToss(abilId)
+    aDef..setRequirements("")
+    ..setLevels(MAX_ARTILLERY_MISSILES)
+    for int i = 1 to MAX_ARTILLERY_MISSILES
+        aDef
+        ..setWardUnitType(i, artilleryIndexToTypeId[i].toRawCode() )
+        ..setTargetsAllowed(i, "ground,enemy,structure,debris,tree,wall,organic,neutral")
+        ..setDurationHero(i, 10.0)
+        ..setDurationNormal(i, 10.0)
+    return abilId
+
+public interface OnArtilleryHit
+    function hit(unit detectionUnit, unit caster, int data)
+
+public class ArtilleryDetection
+
+    private int random = -1
+    private unit caster
+    private int data
+    private OnArtilleryHit onHit
+
+    private static Allocator alloc = new Allocator(1)
+    private static ArtilleryDetection array indexToObject
+    private int index
+
+    construct(unit caster, int data, OnArtilleryHit onHit)
+        this.index = alloc.allocate()
+        indexToObject[this.index] = this
+
+        if this.index > MAX_ARTILLERY_MISSILES
+            error("Too many missiles active at the same time. Increase MAX_ARTILLERY_MISSILES (=" + MAX_ARTILLERY_MISSILES.toString() + ")")
+            destroy this
+        else
+            this.caster = caster
+            this.data = data
+            this.onHit = onHit
+
+            let random = GetRandomInt(0, 1000000)
+            this.random = random
+    
+            doAfter(MAX_ARTILLERY_AIR_TIME) -> 
+                if this.random == random
+                    Log.warn("Artillery detection expired")
+                    destroy this
+
+    function getIndex() returns int
+        return this.index
+
+    function impact(unit detectionUnit)
+        this.onHit.hit(detectionUnit, this.caster, this.data)
+        detectionUnit.remove()
+        destroy this
+
+    ondestroy
+        this.random = -1
+        destroy this.onHit
+        indexToObject[this.index] = null
+        alloc.deallocate(this.index)
+
+    private static function onImpact()
+        let key = getEnterLeaveUnit().getTypeId()
+        if artilleryTypeIdToIndex.has(key)
+            let id = artilleryTypeIdToIndex.get(key)
+            let artilleryDetection = indexToObject[id]
+            if artilleryDetection != null
+                artilleryDetection.impact(getEnterLeaveUnit())
+            else
+                Log.warn("index error for ArtilleryDetection")
+
+    protected static function classInit()
+        for i = 0 to MAX_ARTILLERY_MISSILES
+            indexToObject[i] = null
+            
+        onEnter( -> onImpact())
+      
+    static function fireArtillery(unit caster, int artilleyTypeId, vec2 start, vec2 target, OnArtilleryHit onHit)
+        fireArtillery(caster, artilleyTypeId, start, target, 0, onHit)
+            
+    static function fireArtillery(unit caster, int artilleyTypeId, vec2 start, vec2 target, int data, OnArtilleryHit onHit)
+        let artillery = createUnit(caster.getOwner(), artilleyTypeId, start, start.angleTo(target))
+        let detection = new ArtilleryDetection(caster, data, onHit)
+        artillery.setAbilityLevel(artilleryAbility, detection.getIndex())
+        artillery.issuePointOrder("attackground", target)
+        artillery.setTimedLife(1)
+
+    static function createArtilleryDummy(real launchX, real launchY, real launchZ, real scale, string projectile, int missileSpeed, real arc) returns int
+        let dummyId = UNIT_ID_GEN.next()
+        new UnitDefinition(dummyId, 'umtw')
+            ..setNormalAbilities("Aloc,"+artilleryAbility.toRawCode())
+            ..setModelFile("")
+            ..setProjectileLaunchX(launchX)
+            ..setProjectileLaunchY(launchY)
+            ..setProjectileLaunchZ(launchZ)
+            ..setShadowImageUnit("")
+            ..setAttack1AnimationBackswingPoint(0)
+            ..setAttack1AnimationDamagePoint(0)
+            ..setAttack1AreaofEffectTargets("none")
+            ..setAttack1CooldownTime(MAX_ARTILLERY_AIR_TIME+1)
+            ..setAttack1ProjectileSpeed(missileSpeed)
+            ..setAttack1ProjectileArt(projectile)
+            ..setAttack1ProjectileArc(arc)
+            ..setAcquisitionRange(100000)
+            ..setAttack1Range(100000)
+            ..setAttacksEnabled(1)
+            ..setMinimumAttackRange(0)
+            ..setMovementType(MovementType.Fly)
+            ..setCollisionSize(0)
+            ..setFoodCost(0)
+            ..setSightRadiusDay(0)
+            ..setSightRadiusNight(0)
+            ..setUpgradesUsed("")
+            ..setUnitSoundSet("")
+            ..setScaleProjectiles(true)
+            ..setScalingValue(scale)
+
+        return dummyId
+
+init
+    preloadAbility(artilleryAbility)
+    setupArtilleryTypeIds()
+    ArtilleryDetection.classInit()

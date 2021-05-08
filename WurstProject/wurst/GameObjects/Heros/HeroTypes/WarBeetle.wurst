@@ -428,7 +428,7 @@ public class HeroWarBeetle extends HeroTemplate
                 ..modHealth( factor * UNBREAKABLE_HP[level-1])
                 ..modStrength( factor * UNBREAKABLE_STR[level-1])
                 ..modArmor( factor * UNBREAKABLE_DEF[level-1])
-                ..modWillpower( factor * UNBREAKABLE_DEF[level-1])
+                ..modAgility( factor * UNBREAKABLE_DEF[level-1])
             if factor == 1
                 target.setScale(UNBREAKABLE_SCALE)
             else

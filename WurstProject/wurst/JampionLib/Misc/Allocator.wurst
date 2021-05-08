@@ -1,0 +1,71 @@
+package Allocator
+
+public class Allocator
+
+    private static hashtable HT = InitHashtable()
+
+    private int allocated = 0
+    private int recycle = 0
+    private int minValue
+
+    construct(int minValue)
+        this.minValue = minValue
+
+    construct()
+        this.minValue = 0
+
+    function allocate() returns int
+        if recycle == 0
+            allocated++
+            return allocated - 1 + minValue
+        else
+            let tmp = recycle
+            recycle = HT.loadInt(this castTo int, recycle)
+            return tmp - 1 + minValue
+
+    function deallocate(int index)
+        let internalIndex = index + 1 - minValue
+        HT.saveInt(this castTo int, internalIndex, recycle)
+        recycle = internalIndex
+
+
+@Test public function testAllocator()
+    let alloc1 = new Allocator()
+    let alloc2 = new Allocator(10)
+
+    alloc1.allocate().assertEquals(0)
+    alloc2.allocate().assertEquals(10)
+
+    alloc1.allocate().assertEquals(1)
+    alloc2.allocate().assertEquals(11)
+
+    alloc1.allocate().assertEquals(2)
+    alloc2.allocate().assertEquals(12)
+
+    alloc1.deallocate(1)
+    alloc1.allocate().assertEquals(1)
+
+    alloc1.deallocate(1)
+    alloc1.deallocate(2)
+    alloc1.allocate().assertEquals(2)
+    alloc1.allocate().assertEquals(1)
+    alloc1.allocate().assertEquals(3)
+
+    alloc2.deallocate(12)
+    alloc2.deallocate(10)
+    alloc2.allocate().assertEquals(10)
+    alloc2.allocate().assertEquals(12)
+    alloc2.allocate().assertEquals(13)
+    alloc2.deallocate(12)
+    alloc2.deallocate(13)
+    alloc2.deallocate(10)
+    alloc2.allocate().assertEquals(10)
+    alloc2.allocate().assertEquals(13)
+    alloc2.deallocate(11)
+    alloc2.allocate().assertEquals(11)
+    alloc2.allocate().assertEquals(12)
+    alloc2.allocate().assertEquals(14)
+
+
+
+    

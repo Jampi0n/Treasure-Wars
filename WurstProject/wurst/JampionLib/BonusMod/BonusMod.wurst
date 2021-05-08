@@ -1,0 +1,272 @@
+package BonusMod
+
+import AbilityObjEditing
+import ObjectIdGenerator
+import public Stats
+import Preloader
+
+/*
+This system is based on Bonus Mod by
+    Earth-Fury
+based on the work of
+    weaaddar
+*/
+
+@configurable constant int MAX_LEVEL_ATTRIBUTE = 10
+@configurable constant int MAX_LEVEL_DAMAGE = 10
+@configurable constant int MAX_LEVEL_ARMOR = 10
+@configurable constant int MAX_LEVEL_ATTACK_SPEED = 10
+/*
+0...MAX_LEVEL-1 positive -> MAX_LEVEL positive abilities
+MAX_LEVEL negative
+*/
+constant int MAX_BONUS_ATTRIBUTE = (2).pow(MAX_LEVEL_ATTRIBUTE)-1
+constant int MIN_BONUS_ATTRIBUTE = -MAX_BONUS_ATTRIBUTE-1
+constant int MAX_BONUS_DAMAGE = (2).pow(MAX_LEVEL_DAMAGE)-1
+constant int MIN_BONUS_DAMAGE = -MAX_BONUS_DAMAGE-1
+constant int MAX_BONUS_ARMOR = (2).pow(MAX_LEVEL_ARMOR)-1
+constant int MIN_BONUS_ARMOR = -MAX_BONUS_ARMOR-1
+constant int MAX_BONUS_ATTACK_SPEED = (2).pow(MAX_LEVEL_ATTACK_SPEED)-1
+constant int MIN_BONUS_ATTACK_SPEED = -MAX_BONUS_ATTACK_SPEED-1
+
+//movement speed is also handled via trigger
+constant BM_ATTACK_SPEED = compiletime(generateIds(MAX_LEVEL_ATTACK_SPEED))
+constant BM_ATTACK_DAMAGE = compiletime(generateIds(MAX_LEVEL_DAMAGE))
+constant BM_ARMOR = compiletime(generateIds(MAX_LEVEL_ARMOR))
+
+constant BM_STRENGTH = compiletime(generateIds(MAX_LEVEL_ATTRIBUTE))
+constant BM_AGILITY = compiletime(generateIds(MAX_LEVEL_ATTRIBUTE))
+constant BM_INTELLIGENCE = compiletime(generateIds(MAX_LEVEL_ATTRIBUTE))
+
+int array abilityIds
+
+int indexAD
+int indexAS
+int indexAR
+
+int indexSTR
+int indexAGI
+int indexINT
+
+
+int array powersOfTwo
+
+int offset = 0
+function fillArray(int baseId, int maxLevel) returns int
+    abilityIds[offset] = baseId
+    let gen = new IdGenerator(baseId)
+    for i = 1 to maxLevel
+        abilityIds[offset + i] = gen.next()
+    offset += maxLevel + 1
+    destroy gen
+    return offset - maxLevel - 1
+
+function createAbilityIdArray()
+    indexAD = fillArray(BM_ATTACK_DAMAGE, MAX_LEVEL_DAMAGE)
+    indexAS = fillArray(BM_ATTACK_SPEED, MAX_LEVEL_ATTACK_SPEED)
+    indexAR = fillArray(BM_ARMOR, MAX_LEVEL_ARMOR)
+    indexSTR = fillArray(BM_STRENGTH, MAX_LEVEL_ATTRIBUTE)
+    indexAGI = fillArray(BM_AGILITY, MAX_LEVEL_ATTRIBUTE)
+    indexINT = fillArray(BM_INTELLIGENCE, MAX_LEVEL_ATTRIBUTE)
+
+function generateIds(int maxLevel) returns int
+    let first = ABIL_ID_GEN.next()
+    for i = 0 to maxLevel
+        ABIL_ID_GEN.next()
+
+    return first
+
+
+function statToBonusAbiltiy(Stat whichStat) returns integer
+    
+    switch whichStat.toInt()
+        case Stat.AD.toInt()
+            return indexAD
+        case Stat.AS.toInt()
+            return indexAS
+        case Stat.AR.toInt()
+            return indexAR
+        case Stat.STR.toInt()
+            return indexSTR
+        case Stat.AGI.toInt()
+            return indexAGI
+        case Stat.INT.toInt()
+            return indexINT
+        default
+            print("Error. This stat does not use abilities.")
+            return -1
+            
+
+@inline public function unit.setBonusDamage(int bonus)
+    this.setBonus(indexAD, MAX_BONUS_DAMAGE, MIN_BONUS_DAMAGE, MAX_LEVEL_DAMAGE, bonus)
+@inline public function unit.setBonusAttackSpeed(int bonus)
+    this.setBonus(indexAS, MAX_BONUS_ATTACK_SPEED, MIN_BONUS_ATTACK_SPEED, MAX_LEVEL_ATTACK_SPEED, bonus)
+@inline public function unit.setBonusArmor(int bonus)
+    this.setBonus(indexAR, MAX_BONUS_ARMOR, MIN_BONUS_ARMOR, MAX_LEVEL_ARMOR, bonus)
+@inline public function unit.setBonusStrength(int bonus)
+    this.setBonus(indexSTR, MAX_BONUS_ATTRIBUTE, MIN_BONUS_ATTRIBUTE, MAX_LEVEL_ATTRIBUTE, bonus)
+@inline public function unit.setBonusAgility(int bonus)
+    this.setBonus(indexAGI, MAX_BONUS_ATTRIBUTE, MIN_BONUS_ATTRIBUTE, MAX_LEVEL_ATTRIBUTE, bonus)
+@inline public function unit.setBonusIntelligence(int bonus)
+    this.setBonus(indexINT, MAX_BONUS_ATTRIBUTE, MIN_BONUS_ATTRIBUTE, MAX_LEVEL_ATTRIBUTE, bonus)
+
+public function unit.setBonusDispatchStat(Stat whichStat, int bonus)
+    //AD
+    //AS
+    //AR
+    //STR
+    //AGI
+    //INT
+    // Binary search to find the correct stat
+    if whichStat.toInt() <= Stat.STR.toInt()
+        if whichStat.toInt() <= Stat.AS.toInt()
+            if whichStat.toInt() == Stat.AD.toInt()
+                //AD
+                this.setBonusDamage(bonus)
+            else
+                //AS
+                this.setBonusAttackSpeed(bonus)
+        else
+            if whichStat.toInt() == Stat.AR.toInt()
+                //AR
+                this.setBonusArmor(bonus)
+            else
+                //STR
+                this.setBonusStrength(bonus)
+    else
+        if whichStat.toInt() == Stat.AGI.toInt()
+            //AGI
+            this.setBonusAgility(bonus)
+        else
+            //INT
+            this.setBonusIntelligence(bonus)
+        
+@deprecated("Dispatching the stat is slower than directly modifying a stat. Use setBonusDispatchStat if it is on purpose.")
+public function unit.setBonus(Stat whichStat, int bonus)
+    this.setBonusDispatchStat(whichStat, bonus)
+
+            
+function unit.setBonus(int abilityIndex, int maxBonus, int minBonus, int maxLevel, int bonus)
+    if(bonus > maxBonus)
+        print("Error. This Bonus is too high." + bonus.toString() + "/" + maxBonus.toString())
+        this.setBonus(abilityIndex, maxBonus, minBonus, maxLevel, maxBonus)
+        return
+
+    if(bonus < minBonus)
+        print("Error. This Bonus is too low:" + bonus.toString() + "/" + minBonus.toString())
+        this.setBonus(abilityIndex, maxBonus, minBonus, maxLevel, minBonus)
+        return
+
+    var remainingBonus = bonus
+    if( bonus < 0)
+        remainingBonus = maxBonus + bonus + 1
+        this.addAbility(abilityIds[abilityIndex + maxLevel])
+        this.makeAbilityPermanent(abilityIds[abilityIndex + maxLevel], true)
+    else
+        this.removeAbility(abilityIds[abilityIndex + maxLevel])
+
+    for i = maxLevel-1 downto 0
+        let iBonus = powersOfTwo[i]
+        if remainingBonus >= iBonus
+            this.addAbility(abilityIds[abilityIndex + i])
+            this.makeAbilityPermanent(abilityIds[abilityIndex + i], true)
+            remainingBonus -= iBonus
+        else
+            this.removeAbility(abilityIds[abilityIndex + i])
+
+public function unit.getBonus(int abilityIndex, int _maxBonus, int minBonus, int maxLevel) returns int
+    int amount = 0
+
+    if this.hasAbility(abilityIds[abilityIndex])
+        amount = minBonus
+
+    for i = 0 to maxLevel-1
+        if this.hasAbility(abilityIds[abilityIndex + i])
+            amount += powersOfTwo[i]
+
+    return amount
+
+public function unit.addBonus(int abilityIndex, int maxBonus, int minBonus, int maxLevel, int bonus)
+    this.setBonus(abilityIndex, maxBonus, minBonus, maxLevel, this.getBonus(abilityIndex, maxBonus, minBonus, maxLevel)+bonus)
+
+init
+    for i = 0 to max(MAX_LEVEL_ATTRIBUTE, MAX_LEVEL_ATTACK_SPEED, MAX_LEVEL_DAMAGE, MAX_LEVEL_ARMOR)
+        powersOfTwo[i] = (2).pow(i)
+
+    for i = 0 to offset - 1
+        preloadAbility(abilityIds[i])
+
+@compiletime
+function generateAttackSpeedBonus()
+    let gen = new IdGenerator(BM_ATTACK_SPEED)
+    AbilityDefinitionAttackSpeedIncrease aDef
+    for i = 0 to MAX_LEVEL_ATTACK_SPEED-1
+        aDef = new AbilityDefinitionAttackSpeedIncrease(gen.next())
+        aDef.setAttackSpeedIncrease(1, (2).pow(i)/100 )
+
+    aDef = new AbilityDefinitionAttackSpeedIncrease(gen.next())
+    aDef.setAttackSpeedIncrease(1, -(2).pow(MAX_LEVEL_ATTACK_SPEED)/100 )
+    destroy gen
+
+@compiletime
+function generateAttackDamageBonus()
+    let gen = new IdGenerator(BM_ATTACK_DAMAGE)
+    AbilityDefinitionAttackBonus aDef
+    for i = 0 to MAX_LEVEL_DAMAGE-1
+        aDef = new AbilityDefinitionAttackBonus(gen.next())
+        aDef.setAttackBonus(1, (2).pow(i) )
+
+    aDef = new AbilityDefinitionAttackBonus(gen.next())
+    aDef.setAttackBonus(1, -(2).pow(MAX_LEVEL_DAMAGE) )
+    destroy gen
+                
+@compiletime
+function generateArmorBonus()
+    let gen = new IdGenerator(BM_ARMOR)
+    AbilityDefinitionDefenseBonusPlus1 aDef
+    for i = 0 to MAX_LEVEL_ARMOR-1
+        aDef = new AbilityDefinitionDefenseBonusPlus1(gen.next())
+        aDef.setDefenseBonus(1, (2).pow(i) )
+
+    aDef = new AbilityDefinitionDefenseBonusPlus1(gen.next())
+    aDef.setDefenseBonus(1, -(2).pow(MAX_LEVEL_ARMOR) )
+    destroy gen
+     
+@compiletime
+function generateStrengthBonus()
+    let gen = new IdGenerator(BM_STRENGTH)
+    AbilityDefinitionStrengthBonusPlus1 aDef
+    for i = 0 to MAX_LEVEL_ATTRIBUTE-1
+        aDef = new AbilityDefinitionStrengthBonusPlus1(gen.next())
+        aDef.setStrengthBonus(1, (2).pow(i) )
+
+    aDef = new AbilityDefinitionStrengthBonusPlus1(gen.next())
+    aDef.setStrengthBonus(1, -(2).pow(MAX_LEVEL_ATTRIBUTE) )
+    destroy gen
+             
+@compiletime
+function generateAgilityBonus()
+    let gen = new IdGenerator(BM_AGILITY)
+    AbilityDefinitionAgilityBonusPlus1 aDef
+    for i = 0 to MAX_LEVEL_ATTRIBUTE-1
+        aDef = new AbilityDefinitionAgilityBonusPlus1(gen.next())
+        aDef.setAgilityBonus(1, (2).pow(i) )
+
+    aDef = new AbilityDefinitionAgilityBonusPlus1(gen.next())
+    aDef.setAgilityBonus(1, -(2).pow(MAX_LEVEL_ATTRIBUTE) )
+    destroy gen
+             
+@compiletime
+function generateIntelligenceBonus()
+    let gen = new IdGenerator(BM_INTELLIGENCE)
+    AbilityDefinitionIntelligenceBonusPlus1 aDef
+    for i = 0 to MAX_LEVEL_ATTRIBUTE-1
+        aDef = new AbilityDefinitionIntelligenceBonusPlus1(gen.next())
+        aDef.setIntelligenceBonus(1, (2).pow(i) )
+
+    aDef = new AbilityDefinitionIntelligenceBonusPlus1(gen.next())
+    aDef.setIntelligenceBonus(1, -(2).pow(MAX_LEVEL_ATTRIBUTE) )
+    destroy gen
+
+init
+    createAbilityIdArray()

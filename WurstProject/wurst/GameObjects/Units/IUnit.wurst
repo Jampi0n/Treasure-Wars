@@ -1,258 +1,136 @@
 package IUnit
 
-import Stats
-import initlater IHero
+import ErrorHandling
+import Constants
+import HeroTypeImpl
+import TeamUtil
+import IHero
+import UnitWrapper
+import UnitInfo
+import UnitBuffs
+import UnitColor
+import UnitStats
+import BonusMod
+import Buff
 
-int numPreConstructEvents = 0
-PreConstructEvent array preConstructEvents
-int numPostConstructEvents = 0
-PostConstructEvent array postConstructEvents
-int numPreDestroyEvents = 0
-PreDestroyEvent array preDestroyEvents
-int numPostDestroyEvents = 0
-PostDestroyEvent array postDestroyEvents
+public class IUnit
+    use UnitWrapper
+    use UnitInfo
+    use UnitBuffs
+    use UnitColor
+    use UnitStats
+    IHero hero
+    IHeroType heroType
+    IHero owningHero
+    int revealCount = 0
+    int team
+    bool isHero
+    real scaleAttackAnimation
 
-public function addPreConstructEvent(PreConstructEvent c)
-    preConstructEvents[numPreConstructEvents] = c
-    numPreConstructEvents++
+    override static function callChildConstructor(unit u) returns IUnit
+        return new IUnit(u)
 
-public function runPreConstructEvents(unit u)
-    for i = 0 to numPreConstructEvents - 1
-        preConstructEvents[i].run(u)
+    override function callChildDestructor()
+        destroy this
 
-public function addPostConstructEvent(PostConstructEvent c)
-    postConstructEvents[numPostConstructEvents] = c
-    numPostConstructEvents++
+    construct(unit u)
+        this.setStatBaseInternal(Stat.STR, this.getDamageBase())
+        this.setStatBaseInternal(Stat.AD, 0)
+        this.team = Players.team(this.getOwnerId())
 
-public function runPostConstructEvents(unit u, IUnit iUnit)
-    for i = 0 to numPostConstructEvents - 1
-        postConstructEvents[i].run(u, iUnit)
-
-public function addPreDestroyEvent(PreDestroyEvent c)
-    preDestroyEvents[numPreDestroyEvents] = c
-    numPreDestroyEvents++
-
-public function runPreDestroyEvents(unit u, IUnit iUnit)
-    for i = 0 to numPreDestroyEvents - 1
-        preDestroyEvents[i].run(u, iUnit)
-
-public function addPostDestroyEvent(PostDestroyEvent c)
-    postDestroyEvents[numPostDestroyEvents] = c
-    numPostDestroyEvents++
-
-public function runPostDestroyEvents(unit u)
-    for i = 0 to numPostDestroyEvents - 1
-        postDestroyEvents[i].run(u)
-    
-
-public interface PreConstructEvent
-    function run(unit u)
-
-public interface PostConstructEvent
-    function run(unit u, IUnit iUnit)
-
-public interface PreDestroyEvent
-    function run(unit u, IUnit iUnit)
-
-public interface PostDestroyEvent
-    function run(unit u)
-
-public interface CalculateTotalBonus
-    function calculate(IUnit u, Stat whichStat)
-
-public interface IUnit
-    function createBuffList()
-    function setBonusCalculation(CalculateTotalBonus bonusCalculation)
-    function getBonusCalculation() returns CalculateTotalBonus
-    function defaultBonusCalcualtion(Stat whichStat)
-    
-    function printStats()
-    function printStat(Stat whichStat)
-    function toUnit() returns unit
+        this.isHero = u.isType(UNIT_TYPE_HERO)
+        if this.isHero
+            this.scaleAttackAnimation = ATTACK_ANIMATION_FACTOR
+            this.heroType = HeroType.get(this.getTypeId())
+            if this.heroType == null
+                error("HeroType could not be resolved: " + u.getName())
 
     function initAsHero(IHero hero)
+        this.hero = hero
+
     function getHeroType() returns IHeroType
+        return this.heroType
+
     function toHero() returns IHero
+        return this.hero
+
     function isHero() returns bool
-    function getTypeId() returns int
+        return this.isHero
 
-    function copyBaseStatsFrom(IUnit wrapper)
-    function setDefaultColor(color c)
-    function incBlue()
-    function decBlue()
-    function modBlue(int value)
-    function incReveal()
-    function decReveal()
-    function modReveal(int value)
     function getOwningHero() returns IHero
+        return this.owningHero
+
     function setOwningHero(IHero owningHero)
-    // new stat API
-    // functions with Dispatch need to do branching based on the stat, which is inefficient
+        this.owningHero = owningHero
 
-    function getBaseAttackCooldown() returns real
-    function setBaseAttackCooldown(real value)
-    function applyBaseStats()
-    function copyBaseStats(IUnit copyFrom)
-    // modify stat by absolute value
-    function modStatDispatch(Stat whichStat, int modifier)
-    function modArmor(int modifier)
-    function modAttackSpeed(int modifier)
-    function modStrength(int modifier)
-    function modWillpower(int modifier)
-    function modIntelligence(int modifier)
-    function modMoveSpeed(int modifier)
-    function modHealth(int modifier)
-    function modMana(int modifier)
-    function modHealthRegen(int modifier)
-    function modManaRegen(int modifier)
-    function modCooldown(int modifier)
+    function incReveal()
+        revealCount++
+        if revealCount == 1
+            if this.team == TEAM_1
+                UnitShareVision(this.toUnit(), players[Teams.army2()], true)
+            else if this.team == TEAM_2
+                UnitShareVision(this.toUnit(), players[Teams.army1()], true)
 
-    // modify stat by changing the stat multiplier (in 1/1000)
-    // e.g. modifier=100 means +10%
-    // Multiple relative modifiers stack additively
-    // Absolute modifiers are also multiplied
-    function modStatRelativeDispatch(Stat whichStat, int modifier)        
-    function modArmorRelative(int modifier)
-    @deprecated("Attack speed only has an absolute modifier (which works as a relative one)")
-    function modAttackSpeedRelative(int modifier)
-    function modStrengthRelative(int modifier)
-    function modWillpowerRelative(int modifier)
-    function modIntelligenceRelative(int modifier)
-    function modMoveSpeedRelative(int modifier)
-    function modHealthRelative(int modifier)
-    function modManaRelative(int modifier)
-    function modHealthRegenRelative(int modifier)
-    function modManaRegenRelative(int modifier)
-    @deprecated("Cooldown only has an absolute modifier (which works as a relative one)")
-    function modCooldownRelative(int modifier)
+    function decReveal()
+        revealCount--
+        if revealCount == 0
+            if this.team == TEAM_1
+                UnitShareVision(this.toUnit(), players[Teams.army2()], false)
+            else if this.team == TEAM_2
+                UnitShareVision(this.toUnit(), players[Teams.army1()], false)
 
-    // modify stat by fractional value (in 1/1000)
-    // e.g. modifier = 1000 is equivlent to using modStatDispatch() with modifier = 1
-    // This is useful, when many small effects are stacked and rounding each of them would result in too large errors
-    function modStatFractionDispatch(Stat whichStat, int modifier)
-    function modArmorFraction(int modifier)
-    function modAttackSpeedFraction(int modifier)
-    function modStrengthFraction(int modifier)
-    function modWillpowerFraction(int modifier)
-    function modIntelligenceFraction(int modifier)
-    function modMoveSpeedFraction(int modifier)
-    function modHealthFraction(int modifier)
-    function modManaFraction(int modifier)
-    function modHealthRegenFraction(int modifier)
-    function modManaRegenFraction(int modifier)
-    function modCooldownFraction(int modifier)
+    function modReveal(int value)
+        revealCount += value
+        if revealCount > 0
+            if this.team == TEAM_1
+                UnitShareVision(this.toUnit(), players[Teams.army2()], true)
+            else if this.team == TEAM_2
+                UnitShareVision(this.toUnit(), players[Teams.army1()], true)
+        else
+            if this.team == TEAM_1
+                UnitShareVision(this.toUnit(), players[Teams.army2()], false)
+            else if this.team == TEAM_2
+                UnitShareVision(this.toUnit(), players[Teams.army1()], false)
+                
+    override function applyDamage()
+    override function applyArmor()
+        this.toUnit().setBonusArmor(this.getArmorBonus())
+    override function applyAttackSpeed()
+        this.toUnit().setBonusAttackSpeed((this.getAttackSpeedBonus() * this.scaleAttackAnimation).round())
+    override function applyStrength()
+        if this.isHero
+            this.toUnit().setBonusStrength(this.getStrengthBonus())
+            if this.hero != null
+                this.hero.updateTooltipsStr()
+        else
+            this.toUnit().setBonusDamage(this.getStrengthBonus())
+    override function applyAgility()
+        this.toUnit().setBonusAgility(this.getAgilityBonus())
+    override function applyIntelligence()
+        this.toUnit().setBonusIntelligence(this.getIntelligenceBonus())
+        if this.isHero
+            if this.hero != null
+                this.hero.updateTooltipsInt()
+    override function applyMoveSpeed()
+        this.toUnit().setMoveSpeed(this.getMoveSpeed().toReal())
+    override function applyHealth()
+        this.toUnit().setMaxHP(this.getHealth(), true)
+    override function applyMana()
+        this.toUnit().setMaxMana(this.getMana(), true)
+    override function applyHealthRegen()
+    override function applyManaRegen()
+    override function applyCooldown()
+        if this.isHero
+            if this.hero != null // when the hero us created, the unit wrapper exists before the hero, so hero may still be null
+                this.hero.updateCooldowns()
 
-    // get current stat value
-    function getStat(Stat whichStat) returns int
-    function getArmor() returns int
-    function getAttackSpeed() returns int
-    function getStrength() returns int
-    function getWillpower() returns int
-    function getIntelligence() returns int
-    function getMoveSpeed() returns int
-    function getHealth() returns int
-    function getMana() returns int
-    function getHealthRegen() returns int
-    function getManaRegen() returns int
-    function getCooldown() returns int
+public function unit.wrapper() returns IUnit
+    return IUnit.getWrapper(this)
 
-    // get total bonus value
-    function getStatBonus(Stat whichStat) returns int
-    function getArmorBonus() returns int
-    function getAttackSpeedBonus() returns int
-    function getStrengthBonus() returns int
-    function getWillpowerBonus() returns int
-    function getIntelligenceBonus() returns int
-    function getMoveSpeedBonus() returns int
-    function getHealthBonus() returns int
-    function getManaBonus() returns int
-    function getHealthRegenBonus() returns int
-    function getManaRegenBonus() returns int
-    function getCooldownBonus() returns int
+init
+    IUnit.initWrapper()
+    BuffConfiguration.setGetBuffListFunction() (unit u) ->
+        return u.wrapper().getBuffList()
 
-    // get base value
-    function getStatBase(Stat whichStat) returns int
-    function getArmorBase() returns int
-    function getAttackSpeedBase() returns int
-    function getStrengthBase() returns int
-    function getWillpowerBase() returns int
-    function getIntelligenceBase() returns int
-    function getMoveSpeedBase() returns int
-    function getHealthBase() returns int
-    function getManaBase() returns int
-    function getHealthRegenBase() returns int
-    function getManaRegenBase() returns int
-    function getCooldownBase() returns int
-
-    // get absolute bonus value
-    function getStatAbsoluteBonus(Stat whichStat) returns int
-    function getArmorAbsoluteBonus() returns int
-    function getAttackSpeedAbsoluteBonus() returns int
-    function getStrengthAbsoluteBonus() returns int
-    function getWillpowerAbsoluteBonus() returns int
-    function getIntelligenceAbsoluteBonus() returns int
-    function getMoveSpeedAbsoluteBonus() returns int
-    function getHealthAbsoluteBonus() returns int
-    function getManaAbsoluteBonus() returns int
-    function getHealthRegenAbsoluteBonus() returns int
-    function getManaRegenAbsoluteBonus() returns int
-    function getCooldownAbsoluteBonus() returns int
-
-    // get realtive bonus value (in 1/1000)
-    function getStatRelativeBonus(Stat whichStat) returns int
-    function getArmorRelativeBonus() returns int
-    function getAttackSpeedRelativeBonus() returns int
-    function getStrengthRelativeBonus() returns int
-    function getWillpowerRelativeBonus() returns int
-    function getIntelligenceRelativeBonus() returns int
-    function getMoveSpeedRelativeBonus() returns int
-    function getHealthRelativeBonus() returns int
-    function getManaRelativeBonus() returns int
-    function getHealthRegenRelativeBonus() returns int
-    function getManaRegenRelativeBonus() returns int
-    function getCooldownRelativeBonus() returns int
-
-
-    // The following functions offer low level access
-    // They are automatically executed for the "mod" functions 
-
-    // update stats
-    // recaluclates the total bonus value
-    function updateAll()
-    function updateStat(Stat whichStat)
-    function updateArmor()
-    function updateAttackSpeed()
-    function updateStrength()
-    function updateWillpower()
-    function updateIntelligence()
-    function updateMoveSpeed()
-    function updateHealth()
-    function updateMana()
-    function updateHealthRegen()
-    function updateManaRegen()
-    function updateCooldown()
-
-    // apply stats
-    // applies the current array values to the unit
-    function applyAll()
-    function applyStatDispatch(Stat whichStat)
-    function applyArmor()
-    function applyAttackSpeed()
-    function applyStrength()
-    function applyWillpower()
-    function applyIntelligence()
-    function applyMoveSpeed()
-    function applyHealth()
-    function applyMana()
-    function applyHealthRegen()
-    function applyManaRegen()
-    function applyCooldown()
-
-    // These functions only update the arrays but do not update the stats. Be careful when using them.
-    function setStatBonusInternal(Stat whichStat, int value)
-    function setStatBaseInternal(Stat whichStat, int value)
-    function setStatAbsoluteBonusInternal(Stat whichStat, int value)
-    function setStatAbsoluteBonusRealInternal(Stat whichStat, int value)
-    function setStatRelativeBonusInternal(Stat whichStat, int value)
-
-
+    BuffConfiguration.setCreateBuffListFunction() (unit u)  ->
+        u.wrapper().createBuffList()

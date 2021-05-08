@@ -1,7 +1,7 @@
 package UnitLib
 
 import Buff
-import BuffTypeConfig
+import CommonBuffs
 import AbilityScaling
 import ErrorHandling
 import Execute
@@ -10,9 +10,7 @@ import ItemIdDefinitions
 import Missile
 import Constants
 import IUnit
-import UnitImpl
 import DamageDetection
-
 
 public enum ReductionType
     PHYSICAL
@@ -84,7 +82,7 @@ public function unit.getUnitStr() returns int
     return this.wrapper().getStrength()
 
 public function unit.getUnitWp() returns int
-    return this.wrapper().getWillpower()
+    return this.wrapper().getAgility()
 
 public function unit.getUnitInt() returns int
     return this.wrapper().getIntelligence()
@@ -179,7 +177,7 @@ public function unit.healMana(unit target, real amount)
     PlayerWrapper.statManaHealed[target.getOwner().getId()] += realAmount
 
 public function unit.dispelPositiveBuffs(DispelLevel dispelLevel)
-    let buffList = this.getBuffList()
+    let buffList = this.wrapper().getBuffList()
     if buffList != null
         for Buff currentBuff in buffList.getLinkedList()
             let buffType =currentBuff.getBuffType()
@@ -187,7 +185,7 @@ public function unit.dispelPositiveBuffs(DispelLevel dispelLevel)
                 currentBuff.dispel()
 
 public function unit.dispelNegativeBuffs(DispelLevel dispelLevel)
-    let buffList = this.getBuffList()
+    let buffList = this.wrapper().getBuffList()
     if buffList != null
         for Buff currentBuff in buffList.getLinkedList()
             let buffType =currentBuff.getBuffType()
@@ -196,7 +194,7 @@ public function unit.dispelNegativeBuffs(DispelLevel dispelLevel)
 
 
 public function unit.dispelBuffs(DispelLevel dispelLevel)
-    let buffList = this.getBuffList()
+    let buffList = this.wrapper().getBuffList()
     if buffList != null
         for Buff currentBuff in buffList.getLinkedList()
             if currentBuff.getDispelLevel() castTo int <= dispelLevel castTo int

@@ -413,7 +413,7 @@ public class HeroElementalMage extends HeroTemplate
 
         BUFF_ELEMENTAL_MARK.addLevelFunction() (Buff thisBuff, int factor) ->
             let level = thisBuff.getLevel()
-            thisBuff.getTarget().wrapper().modWillpower( -factor * MARK_WP_REDUCTION[level - 1])
+            thisBuff.getTarget().wrapper().modAgility( -factor * MARK_WP_REDUCTION[level - 1])
 
 
 init

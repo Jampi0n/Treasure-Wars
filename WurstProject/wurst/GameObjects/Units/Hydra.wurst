@@ -10,7 +10,7 @@ import UnitLib
 import TeamUtil
 import Buff
 import FastDamageEvent
-import UnitImpl
+import IUnit
 
 constant REVIVE_TIME = 300.
 constant MAX_LEVEL = 5
@@ -41,7 +41,7 @@ function hydraStats(unit u, int lvl)
     ..modStrength(DMG[lvl])
     ..modHealth(HP[lvl])
     ..modArmor(ARMOR[lvl])
-    ..modWillpower(WILLPOWER[lvl])
+    ..modAgility(WILLPOWER[lvl])
     ..modAttackSpeed(ATTACK_SPEED[lvl])
 
     DamageEventUnit.fromUnit(u).attackDamageNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
@@ -75,7 +75,7 @@ function unit.hydraBonus()
     this.wrapper()
     ..modAttackSpeed(6)
     ..modStrength(3)
-    ..modWillpower(3)
+    ..modAgility(3)
     ..modIntelligence(3)
     ..modArmor(3)
     ..modHealth(45)

@@ -1,0 +1,549 @@
+package Buff
+
+import TimerUtils
+import LinkedList
+import InstantDummyCaster
+import OnUnitEnterLeave
+import HashMap
+import ErrorHandling
+import ClosureTimers
+import Execute
+import AbilityPresets
+
+int buffCount = 0
+int buffListCount = 0
+int buffTypeCount = 0
+
+public enum DispelLevel
+    DISPEL // standard dispel is enough: Curse, Faerie Fire, Slow, ...
+    BREAK // cannot be dispelled, but can be stopped (e.g. turning the target invulnerable): Aerial Shackles, Life Drain
+    NONE // cannot be removed at all
+
+
+public interface GetBuffListFunction
+    function getBuffList(unit u) returns BuffList
+public interface CreaetBuffListFunction
+    function createBuffList(unit u)
+
+GetBuffListFunction getBuffListFunction = null
+CreaetBuffListFunction createBuffListFunction = null
+
+public abstract class BuffConfiguration
+    static function setGetBuffListFunction(GetBuffListFunction getBuffList)
+        if getBuffListFunction != null
+            error("The getBuffListFunction was already configured. If you use useNativeBuffListAllocation, you must not use setGetBuffListFunction.")
+        else
+            getBuffListFunction = getBuffList
+    static function setCreateBuffListFunction(CreaetBuffListFunction createBuffList)
+        if createBuffListFunction != null
+            error("The createBuffListFunction was already configured. If you use useNativeBuffListAllocation, you must not use setCreateBuffListFunction.")
+        else
+            createBuffListFunction = createBuffList
+
+
+/*
+    configuration: useNativeBuffListAllocation
+    autoamtically allocates buff lists when units are created and removes the list when the unit is removed
+    If you use this method, setGetBuffListFunction must not be used by the user.
+*/
+
+constant unitToBuffList = new HashMap<unit, BuffList>()
+
+public function useNativeBuffListAllocation()
+    onLeave( () -> (begin
+        if not getEnterLeaveUnit().hasAbility('Aloc')
+            let bList = getBuffListFunction.getBuffList(getEnterLeaveUnit())
+
+            if bList != null
+                for Buff b in bList.getLinkedList()
+                    b.dispel()
+
+                destroy bList
+                unitToBuffList.remove(getEnterLeaveUnit())
+    end))
+
+    BuffConfiguration.setCreateBuffListFunction( (unit u) -> (begin
+        let bList = new BuffList
+        unitToBuffList.put(u, bList)
+        return bList
+    end))
+
+    BuffConfiguration.setGetBuffListFunction( (unit u) -> (begin
+        let bList = unitToBuffList.get(u)
+        return bList
+    end))
+
+/*
+    configuration: dispelBuffsOnDeath
+    autoamtically dispels buffs when a unit dies
+*/
+
+public function dispelBuffsOnDeath()
+    CreateTrigger()
+    ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
+    ..addAction(() -> (begin
+        //delay, so in case the unit dies inside a BuffEventClosure, the buff does not get destroyed.
+        let u = GetTriggerUnit()
+        doAfter(0, () ->(begin
+        
+            let bList = getBuffListFunction.getBuffList(u)
+
+            if bList != null
+                for Buff b in bList.getLinkedList()
+                    b.dispel()
+        end))
+    end))
+        
+
+
+
+
+public interface BuffEventClosure
+    function run(Buff whichBuff)
+
+public interface BuffFunction
+    function run(Buff thisBuff, int factor)
+
+public class BuffType
+    protected constant onStack = new LinkedList<BuffEventClosure>
+    protected constant onApply = new LinkedList<BuffEventClosure>
+    protected constant onExpire = new LinkedList<BuffEventClosure>
+    protected constant onDispel = new LinkedList<BuffEventClosure>
+    protected constant onPeriodic = new LinkedList<BuffEventClosure>
+    protected constant onSetup = new LinkedList<BuffFunction>
+    protected constant onLevel = new LinkedList<BuffFunction>
+
+    private real periodicTime = 1
+
+    private constant int dummyAbilityId
+    private constant int dummyOrderId
+
+    private DispelLevel dispelLevel
+    private boolean positive
+    protected int buffId = -1
+    protected LinkedList<int> abilities = null
+
+    /** This buff is applied by using a dummy caster to cast the ability on the target. */
+    construct(int abilityId, string orderString, int buffId, boolean positive, DispelLevel dispelLevel)
+        buffTypeCount++
+
+        //onFirst -> cast the spell
+        //onEnd -> dispel the buff
+        this.positive = positive
+        this.dispelLevel = dispelLevel
+
+        this.dummyAbilityId = abilityId
+        this.buffId = buffId
+        this.dummyOrderId = OrderId(orderString)
+        this.addSetupFunction() (Buff thisBuff, int factor) ->
+            if factor == 1
+                castDummySpell(thisBuff)
+            else
+                removeDummyBuff(thisBuff)
+
+
+    /* empty constructor, to be able to use constants */
+    construct(boolean positive, DispelLevel dispel)
+        this.positive = positive
+        this.dispelLevel = dispel
+
+    function setupBuffWithIcon(int buffId, LinkedList<int> abilities)
+        //onFirst -> add the aura
+        //onEnd -> remove aura and buff
+        this.buffId = buffId
+        this.abilities = abilities
+
+    function setupBuffWithIcon(int buffId, int abilityId)
+        let list = new LinkedList<int>()
+        list.add(abilityId)
+        this.setupBuffWithIcon(buffId, list)
+
+    function setupBuffWithIcon(int buffId, int abilityId1, int abilityId2)
+        let list = new LinkedList<int>()
+        list.add(abilityId1)
+        list.add(abilityId2)
+        this.setupBuffWithIcon(buffId, list)
+
+    function setupBuffWithIcon(int buffId, int abilityId1, int abilityId2, int abilityId3)
+        let list = new LinkedList<int>()
+        list.add(abilityId1)
+        list.add(abilityId2)
+        list.add(abilityId3)
+        this.setupBuffWithIcon(buffId, list)
+
+
+    static function castDummySpell(Buff whichBuff)
+        let buffType = whichBuff.getBuffType()
+        let target = whichBuff.getTarget()
+        InstantDummyCaster.castTarget(DUMMY_PLAYER, buffType.dummyAbilityId, 1, buffType.dummyOrderId, target, target.getPos())
+
+
+    static function removeDummyBuff(Buff whichBuff)
+        let buffType = whichBuff.getBuffType()
+        let target = whichBuff.getTarget()
+        target.removeAbility(buffType.buffId)
+
+
+    static function addAuraAbility(Buff whichBuff)
+        let buffType = whichBuff.getBuffType()
+        let target = whichBuff.getTarget()
+        buffType.abilities.forEach( (int abilityId ) -> (begin
+            target.addAbility(abilityId)
+            target.setAbilityLevel(abilityId, whichBuff.getLevel())
+            target.makeAbilityPermanent(abilityId, true)
+        end) )
+
+    static function removeAuraAbility(Buff whichBuff)
+        let buffType = whichBuff.getBuffType()
+        let target = whichBuff.getTarget()
+        buffType.abilities.forEach( (int abilityId ) -> target.removeAbility(abilityId))
+        target.removeAbility(buffType.buffId)
+
+    function setPeriodicTime(real newTime)
+        this.periodicTime = newTime
+
+    function getPeriodicTime() returns real
+        return this.periodicTime
+
+    function getDispelLevel() returns DispelLevel
+        return this.dispelLevel
+
+    function getAbilities() returns LinkedList<int>
+        return this.abilities
+    
+    function getAbilityFirst() returns int
+        return this.abilities.getFirst()
+
+    function getBuffId() returns int
+        return this.buffId
+
+    function isPositive() returns boolean
+        return this.positive
+
+    /**
+    The setup function runs with factor 1, when the buff is first added to a unit and with -1 when the buff is removed from the unit.
+    At least for factor == -1, actions that add or remove buffs should be avoided or delayed.
+    This extends to damage events, as they frequently trigger these effects.
+    **/
+    function addSetupFunction(BuffFunction cb)
+        this.onSetup.add(cb)
+    /**
+    This function is run when the buff is created and destroyed and also whenever it is reapplied.
+    When the buff is reapplied, the function is first run to remove the old level and then again to add the new level.
+    Use it for level dependent things that need to be updated when the level is changed.
+    At least for factor == -1, actions that add or remove buffs should be avoided or delayed.
+    This extends to damage events, as they frequently trigger these effects.
+    **/
+    function addLevelFunction(BuffFunction cb)
+        this.onLevel.add(cb)
+
+    function addStackFunction(BuffEventClosure cb)
+        this.onStack.add(cb)
+
+    function addApplyFunction(BuffEventClosure cb)
+        this.onApply.add(cb)
+
+    /**
+    Actions that add or remove buffs should be avoided or delayed.
+    This extends to damage events, as they frequently trigger these effects.
+    **/
+    function addExpireFunction(BuffEventClosure cb)
+        this.onExpire.add(cb)
+
+    /**
+    Actions that add or remove buffs should be avoided or delayed.
+    This extends to damage events, as they frequently trigger these effects.
+    **/
+    function addDispelFunction(BuffEventClosure cb)
+        this.onDispel.add(cb)
+
+    function addPeriodicFunction(BuffEventClosure cb)
+        this.onPeriodic.add(cb)
+
+/** Keeps track of the buffs a certain unit has.
+*/
+public class BuffList 
+
+    private LinkedList<Buff> linkedList
+
+    construct()
+        buffListCount++
+        linkedList = new LinkedList<Buff>
+
+
+    function add(Buff newBuff)
+        this.linkedList.add(newBuff)
+
+    function remove(Buff removeBuff)
+        this.linkedList.remove(removeBuff)
+
+    static function getBuffOfType(unit target, BuffType buffType) returns Buff
+        Buff retBuff = null
+        let buffList = getBuffListFunction.getBuffList(target)
+        if buffType != null
+            if buffList != null
+                for Buff currentBuff in buffList.getLinkedList()
+                    if(currentBuff.getBuffType() == buffType)
+                        retBuff = currentBuff
+                        break
+        return retBuff
+
+    static function hasBuffType(unit target, BuffType buffType) returns boolean
+        return getBuffOfType(target, buffType) != null
+
+    static function hasBuff(unit target, Buff whichBuff) returns boolean
+        let buffList = getBuffListFunction.getBuffList(target)
+        boolean ret = false
+        if buffList != null
+            for Buff bf in buffList.getLinkedList()
+                if bf == whichBuff
+                    ret = true
+                    break
+
+        return ret
+
+    function getLinkedList() returns LinkedList<Buff>
+        return this.linkedList
+
+    ondestroy
+        buffListCount--
+        destroy linkedList
+
+public function Buff.setDispelLevel(DispelLevel dispelLevel)
+    if this != null
+        this.dispelLevel = dispelLevel
+
+public class Buff
+
+    private unit caster
+    private unit target
+    private int level
+    private BuffType buffType
+    private timer expireTimer
+    private LinkedList<BuffEventClosure> onStack
+    private LinkedList<BuffEventClosure> onApply
+    private LinkedList<BuffEventClosure> onExpire
+    private LinkedList<BuffEventClosure> onDispel
+    private LinkedList<BuffEventClosure> onPeriodic
+    private LinkedList<BuffFunction> onSetup
+    private LinkedList<BuffFunction> onLevel
+    private timer periodicTimer = null
+    protected DispelLevel dispelLevel
+
+    private boolean toBeRemoved = false
+    private boolean reapplyAfterRemoval = false
+    private unit reapplyCaster
+    private real reapplyDuration
+    private int reapplyLevel
+    private string sourceStackTrace = ""
+
+    private int customData = 0
+
+    private construct(unit target, unit caster, real duration, BuffType buffType, int level)
+        buffCount++
+       
+        this.expireTimer = getTimer()
+            ..setData(this castTo int)
+        if duration > -0.5
+            this.expireTimer.start(duration, function expireStatic)
+
+        if getBuffListFunction.getBuffList(target) == null //allocate new buffList
+            createBuffListFunction.createBuffList(target)
+
+        this.caster = caster
+        this.target = target
+        this.level = level
+        this.buffType = buffType
+        this.onStack = buffType.onStack
+        this.onApply = buffType.onApply
+        this.onExpire = buffType.onExpire
+        this.onDispel = buffType.onDispel
+        this.onPeriodic = buffType.onPeriodic
+        this.onSetup = buffType.onSetup
+        this.onLevel = buffType.onLevel
+
+        this.dispelLevel = buffType.getDispelLevel()
+
+        if(this.onPeriodic!=null)
+            this.periodicTimer = getTimer()
+                ..setData(this castTo int)
+                ..startPeriodic(buffType.getPeriodicTime(), function onPeriodicStatic)
+        else
+            this.periodicTimer = null
+
+        getBuffListFunction.getBuffList(target).add(this)
+        if this.buffType.abilities != null
+            for abil in this.buffType.abilities
+                target.addAbility(abil)
+        if this.onSetup != null
+            for BuffFunction cb in this.onSetup
+                cb.run(this, 1)
+        if this.onLevel != null
+            for BuffFunction cb in this.onLevel
+                cb.run(this, 1)
+        if this.onApply!=null
+            for BuffEventClosure cb in this.onApply
+                cb.run(this)
+
+    static function applyBuff(unit target, unit caster, real duration, BuffType buffType, int level)
+        let oldBuff = BuffList.getBuffOfType(target, buffType)
+        if oldBuff != null
+            if oldBuff.toBeRemoved
+                oldBuff.reapplyAfterRemoval = true
+                oldBuff.reapplyCaster = caster
+                oldBuff.reapplyDuration = duration
+                oldBuff.reapplyLevel = level
+            else
+                oldBuff.update(caster, duration, level)
+        else
+            new Buff(target, caster, duration, buffType, level)
+        
+
+    private function onPeriodic()
+        if(this.onPeriodic!=null)
+            for BuffEventClosure cb in this.onPeriodic
+                cb.run(this)
+
+    private static function onPeriodicStatic()
+        let t = GetExpiredTimer()
+        let thisBuff = t.getData() castTo Buff
+        if thisBuff != null
+            thisBuff.onPeriodic()
+        
+    
+    private function expire()
+        if this.toBeRemoved
+            return
+        this.toBeRemoved = true
+        this.sourceStackTrace = getStackTraceString()
+        if(this.onExpire!=null)
+            for BuffEventClosure cb in this.onExpire
+                cb.run(this)
+        if this.onLevel != null
+            for BuffFunction cb in this.onLevel
+                cb.run(this, -1)
+        if this.onSetup != null
+            for BuffFunction cb in this.onSetup
+                cb.run(this, -1)
+        if this.buffType.abilities != null
+            for abil in this.buffType.abilities
+                target.removeAbility(abil)
+        if this.buffType.buffId != -1
+            target.removeAbility(this.buffType.buffId)
+        destroy this
+
+    function dispel()
+        if this.toBeRemoved
+            return
+        this.toBeRemoved = true
+        this.sourceStackTrace = getStackTraceString()
+        execute() () ->
+            if(this.onDispel!=null)
+                for BuffEventClosure cb in this.onDispel
+                    cb.run(this)
+            if this.onLevel != null
+                for BuffFunction cb in this.onLevel
+                    cb.run(this, -1)
+            if this.onSetup != null
+                for BuffFunction cb in this.onSetup
+                    cb.run(this, -1)
+            if this.buffType.abilities != null
+                for abil in this.buffType.abilities
+                    target.removeAbility(abil)
+            if this.buffType.buffId != -1
+                target.removeAbility(this.buffType.buffId)
+            destroy this
+
+
+    private static function expireStatic()
+        let t = GetExpiredTimer()
+        let thisBuff = t.getData() castTo Buff
+        if thisBuff != null
+            thisBuff.expire()
+        
+    private function update(unit newCaster, real newDuration, int newLevel)
+        if this.toBeRemoved
+            Log.error("original dispel or expire call:|n" + this.sourceStackTrace)
+            error("The buff was updated in dispel or expire callbacks. Delay functions that apply the buff until the buff is fully removed (0 delay)")
+        this.caster = newCaster
+        // remove old level
+        if this.onLevel != null
+            for BuffFunction cb in this.onLevel
+                cb.run(this, -1)
+        this.level = newLevel
+        // add new level
+        if this.onLevel != null
+            for BuffFunction cb in this.onLevel
+                cb.run(this, 1)
+        if this.onApply!=null
+            for BuffEventClosure cb in this.onApply
+                cb.run(this)
+        if this.onStack!=null
+            for BuffEventClosure cb in this.onStack
+                cb.run(this)
+        if newDuration < -0.5 or newDuration > this.expireTimer.getRemaining()
+            this.expireTimer.release()
+            this.expireTimer = getTimer()
+                ..setData(this castTo int)
+            if newDuration > -0.5
+                this.expireTimer.start(newDuration, function expireStatic)
+
+    function getDispelLevel() returns DispelLevel
+        return this.dispelLevel
+
+    function getCaster() returns unit
+        return this.caster
+
+    function getTarget() returns unit
+        return this.target
+
+    function getBuffType() returns BuffType
+        return this.buffType
+
+    function getRemaining() returns real
+        return this.expireTimer.getRemaining()
+
+    function getLevel() returns int
+        return this.level
+
+    function getData() returns int
+        return this.customData
+
+    function setData(int data)
+        this.customData = data
+
+    ondestroy
+        buffCount--
+
+        let buffList = getBuffListFunction.getBuffList(target)
+
+        if buffList!=null
+            buffList.remove(this)
+
+        this.expireTimer.release()
+        if this.periodicTimer != null
+            this.periodicTimer.release()
+
+        this.customData = 0
+        //do not modify triggers. They belong to the BuffType
+
+        if this.reapplyAfterRemoval
+            applyBuff(this.target, this.reapplyCaster, this.reapplyDuration, this.buffType, this.reapplyLevel)
+
+public function debugBuff()
+    print("BuffTypeCount = "+buffTypeCount.toString())
+    print("BuffListCount = "+buffListCount.toString())
+    print("BuffCount = "+buffCount.toString())
+
+public function setupBuff(string name, string description, string icon, bool positive, int levels, string model, string attachmentPoint, DispelLevel dispelLevel) returns BuffType
+    let buffId = createAuraBuff(name, description, icon)
+    let abilityId = positive?createPositiveBuffAbility(levels, buffId, model, attachmentPoint):createNegativeBuffAbility(levels, buffId, model, attachmentPoint)
+    let buffType = new BuffType(positive, dispelLevel)
+    buffType.setupBuffWithIcon(buffId, abilityId)
+    return buffType
+
+public function setupBuff(string name, string description, string icon, bool positive, int abilityId, DispelLevel dispelLevel) returns BuffType
+    let buffId = createAuraBuff(name, description, icon)
+    let buffType = new BuffType(positive, dispelLevel)
+    buffType.setupBuffWithIcon(buffId, abilityId)
+    return buffType

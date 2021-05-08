@@ -1,0 +1,30 @@
+package FileLog
+
+public abstract class FileLog
+    private static constant fileName = "FileLog.txt"
+    private static int lineCount = 0
+    private static string array lines
+
+    static function writeLine(string line)
+        lines[lineCount] = line
+        lineCount++
+        writePreload()
+
+    static function write(string text)
+        lines[lineCount] += text
+        writePreload()
+
+    static function clear()
+        lineCount = 0
+        writePreload()
+
+    private static function writePreload()
+        PreloadGenClear()
+        PreloadGenStart()
+        for i = 0 to lineCount - 1
+            Preload(lines[i])
+
+        PreloadGenEnd(fileName)
+
+init
+    FileLog.clear()

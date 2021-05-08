@@ -1,0 +1,108 @@
+package UnitWrapper
+
+import OnUnitEnterLeave
+import ErrorHandling
+import HashMap
+import ObjectIds
+
+int numPreConstructEvents = 0
+PreConstructEvent array preConstructEvents
+int numPostConstructEvents = 0
+PostConstructEvent array postConstructEvents
+int numPreDestroyEvents = 0
+PreDestroyEvent array preDestroyEvents
+int numPostDestroyEvents = 0
+PostDestroyEvent array postDestroyEvents
+
+public function addPreConstructEvent(PreConstructEvent c)
+    preConstructEvents[numPreConstructEvents] = c
+    numPreConstructEvents++
+
+public function runPreConstructEvents(unit u)
+    for i = 0 to numPreConstructEvents - 1
+        preConstructEvents[i].run(u)
+
+public function addPostConstructEvent(PostConstructEvent c)
+    postConstructEvents[numPostConstructEvents] = c
+    numPostConstructEvents++
+
+public function runPostConstructEvents(unit u)
+    for i = 0 to numPostConstructEvents - 1
+        postConstructEvents[i].run(u)
+
+public function addPreDestroyEvent(PreDestroyEvent c)
+    preDestroyEvents[numPreDestroyEvents] = c
+    numPreDestroyEvents++
+
+public function runPreDestroyEvents(unit u)
+    for i = 0 to numPreDestroyEvents - 1
+        preDestroyEvents[i].run(u)
+
+public function addPostDestroyEvent(PostDestroyEvent c)
+    postDestroyEvents[numPostDestroyEvents] = c
+    numPostDestroyEvents++
+
+public function runPostDestroyEvents(unit u)
+    for i = 0 to numPostDestroyEvents - 1
+        postDestroyEvents[i].run(u)
+    
+
+public interface PreConstructEvent
+    function run(unit u)
+
+public interface PostConstructEvent
+    function run(unit u)
+
+public interface PreDestroyEvent
+    function run(unit u)
+
+public interface PostDestroyEvent
+    function run(unit u)
+
+unit wrappedUnit = null
+
+public function getWrappedUnit() returns unit
+    return wrappedUnit
+
+public module UnitWrapper
+    private static constant unitMap = new HashMap<unit, thistype>()
+    private unit assocUnit
+
+    static abstract function callChildConstructor(unit u) returns thistype
+    abstract function callChildDestructor()
+
+    function toUnit() returns unit
+        return this.assocUnit
+
+    private construct()
+        this.assocUnit = wrappedUnit
+        unitMap.put(wrappedUnit, this)
+
+    static function getWrapper(unit u) returns thistype
+        if u == null or u.getTypeId() == 0
+            error("Requesting wrapper for null unit.")
+            return null
+        let w = unitMap.get(u)
+        if w == null
+            error("The unit " + u.getName() + "(" + u.getTypeId().toRawCode() + ") has no wrapper.")
+        return w
+
+    ondestroy
+        unitMap.remove(this.assocUnit)
+
+    static function initWrapper()
+        onEnter() ->
+            let u = getEnterLeaveUnit()
+            if u != null and u.getTypeId() != 0 and u.getAbilityLevel(LOCUST_ID) == 0
+                runPreConstructEvents(u)
+                wrappedUnit = u
+                callChildConstructor(u)
+                wrappedUnit = null
+                runPostConstructEvents(u)
+        onLeave() ->
+            let u = getEnterLeaveUnit()
+            if u.getAbilityLevel(LOCUST_ID) == 0
+                let wrapper = getWrapper(u)
+                runPreDestroyEvents(u)
+                wrapper.callChildDestructor()
+                runPostDestroyEvents(u)

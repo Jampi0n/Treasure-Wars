@@ -413,7 +413,7 @@ public class HeroTrollManHunter extends HeroTemplate
             let level = thisBuff.getLevel()
             thisBuff.getTarget().wrapper()
             ..modArmor( factor * DEATH_SPIN_DEFENSE[level-1])
-            ..modWillpower( factor * DEATH_SPIN_DEFENSE[level-1])
+            ..modAgility( factor * DEATH_SPIN_DEFENSE[level-1])
 
         BUFF_DEATH_SPIN.setPeriodicTime(0.25)
         BUFF_DEATH_SPIN.addPeriodicFunction( (Buff whichBuff) -> (begin
