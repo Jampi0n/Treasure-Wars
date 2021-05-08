@@ -16,9 +16,9 @@ import Buff
 public class IUnit
     use UnitWrapper
     use UnitInfo
-    use UnitBuffs
     use UnitColor
     use UnitStats
+    use UnitBuffs
     IHero hero
     IHeroType heroType
     IHero owningHero
@@ -26,6 +26,13 @@ public class IUnit
     int team
     bool isHero
     real scaleAttackAnimation
+
+    ondestroy
+        destroyBuffs()
+        destroyStats()
+        destroyColor()
+        destroyInfo()
+        destroyWrapper()
 
     override static function callChildConstructor(unit u) returns IUnit
         return new IUnit(u)

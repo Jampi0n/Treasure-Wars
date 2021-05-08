@@ -1,0 +1,39 @@
+package FileLog
+
+import LinkedList
+
+public constant FILE_LOG = new FileLog("FileLog.txt", true)
+
+public class FileLog
+    private bool autoSave 
+    private string fileName
+    private LinkedList<string> lines
+
+    construct(string fileName, bool autoSave)
+        this.fileName = fileName
+        this.autoSave = autoSave
+        this.lines = new LinkedList<string>
+        writePreload()
+
+    function writeLine(string line)
+        lines.add(line)
+        if autoSave
+            writePreload()
+
+    function write(string text)
+        lines.add(lines.pop() + text)
+        if autoSave
+            writePreload()
+
+    function clear()
+        lines.clear()
+        if autoSave
+            writePreload()
+
+    function writePreload()
+        PreloadGenClear()
+        PreloadGenStart()
+        for line in this.lines
+            Preload(line)
+
+        PreloadGenEnd(fileName)

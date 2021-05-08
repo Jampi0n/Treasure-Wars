@@ -2,6 +2,10 @@ package UnitColor
 
 import UnitWrapper
 
+/**
+Adds basic unit coloring to the unit wrapper.
+This is mainly for implementing the blue coloring of frost spells.
+**/
 public module UnitColor
     private unit u
     private color defaultColor
@@ -32,6 +36,8 @@ public module UnitColor
             this.u.setVertexColor(140, 220, 255, 255)
         else
             this.u.setVertexColor(this.defaultColor)
+
+    function destroyColor()
 
 
 

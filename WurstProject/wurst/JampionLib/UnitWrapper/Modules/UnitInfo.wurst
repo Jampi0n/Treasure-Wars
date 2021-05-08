@@ -2,6 +2,9 @@ package UnitInfo
 
 import UnitWrapper
 
+/**
+Caches information about the unit.
+**/
 public module UnitInfo
     private unit u
     private player owner
@@ -30,6 +33,8 @@ public module UnitInfo
 
     function setOwnerId(int id, bool changeColor)
         setOwner(players[id], changeColor)
+
+    function destroyInfo()
 
 
 

@@ -205,7 +205,7 @@ public class HeroTypeImpl implements IHeroType
                 // XXXPP RXXRP XRXPR XXRPX XXXXX
                 this.skillBuild = skillBuild.substring(0, 3) + "PPR" + skillBuild.substring(3, 5) + "RP" + skillBuild.substring(5, 6) + "R" + skillBuild.substring(6, 7) + "PR" + skillBuild.substring(7, 9) + "RP" +skillBuild.substring(9)
             else
-                FileLog.writeLine("SkillBuild must contain 25 or 15 skills: " + skillBuild + " " +this.TEMPLATE.name)
+                FILE_LOG.writeLine("SkillBuild must contain 25 or 15 skills: " + skillBuild + " " +this.TEMPLATE.name)
         else
             this.skillBuild = skillBuild    
             

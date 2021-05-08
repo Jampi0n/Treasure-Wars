@@ -16,11 +16,11 @@ function unit.setBaseDamage(int value)
     this.setBaseDamage(value, 0)
 function unit.getBaseDamage() returns int
     return this.getBaseDamage(0)
-/*
-This file is huge. The end is mostly optimized convenience functions.
-*/
 
-
+/**
+Adds unit stats functionality to the unit wrapper.
+The apply<Stat> functions need to be overridden to have an effect.
+**/
 public module UnitStats
 
     private CalculateTotalBonus bonusCalculation = null
@@ -98,7 +98,7 @@ public module UnitStats
             this.setStatBaseInternal(stat, copyFrom.getStatBase(stat))
         this.applyBaseStats()
 
-    ondestroy
+    function destroyStats()
         for int i = 0 to STAT_COUNT-1
             statsAbsoluteBonus_static[this.arrayOffset + i] = 0
             statsRelativeBonus_static[this.arrayOffset + i] = 0

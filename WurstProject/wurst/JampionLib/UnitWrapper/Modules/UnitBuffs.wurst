@@ -3,6 +3,10 @@ package UnitBuffs
 import Buff
 import ErrorHandling
 
+/**
+Adds a buff system to the unit wrapper.
+The buff functions need to be registered according to the Buff package.
+**/
 public module UnitBuffs
     protected BuffList buffList
 
@@ -12,7 +16,7 @@ public module UnitBuffs
     function getBuffList() returns BuffList
         return this.buffList
 
-    ondestroy
+    function destroyBuffs()
         //the dispel function must be executed before the unit wrapper is destroyed
         if this.buffList != null
             for Buff b in this.buffList.getLinkedList()
@@ -20,8 +24,9 @@ public module UnitBuffs
 
             destroy this.buffList
 
-    function createBuffList()
+    function createBuffList() returns BuffList
         if this.buffList == null
             this.buffList = new BuffList()
         else
             error("This unit wrapper already has a buffList")
+        return this.buffList

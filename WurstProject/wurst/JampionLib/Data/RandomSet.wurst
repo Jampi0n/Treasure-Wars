@@ -1,0 +1,56 @@
+package RandomSet
+
+import NoWurst
+import HashMap
+import LinkedList
+
+public class RandomSet<T>
+    private int size = 0
+    private constant toData = new HashMap<int,T>
+    private constant toIndex = new HashMap<T,int>
+
+    private function addSingle(T elem)
+        toData.put(size, elem)
+        toIndex.put(elem, size)
+        size++
+
+    function size() returns int
+        return this.size
+
+    function add(vararg T elems)
+        for elem in elems
+            addSingle(elem)
+
+    function add(LinkedList<T> elems)
+        for elem in elems
+            addSingle(elem)
+
+    function contains(T elem) returns bool
+        return toIndex.has(elem)
+
+    function remove(T elem) returns bool
+        if contains(elem)
+            let index = toIndex.get(elem)
+            let lastElem = toData.get(size-1)
+            toData.put(index, lastElem)
+            toIndex.put(lastElem, index)
+            toData.remove(size - 1)
+            toIndex.remove(elem)
+            size--
+            return true
+        else
+            return false
+
+    function getRandom() returns T
+        let randomIndex = GetRandomInt(0, size-1)
+        return toData.get(randomIndex)
+    
+    function removeRandom() returns T
+        let data = getRandom()
+        remove(data)
+        return data
+
+    ondestroy
+        destroy this.toData
+        destroy this.toIndex
+

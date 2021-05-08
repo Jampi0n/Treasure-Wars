@@ -1,0 +1,18 @@
+package JItem
+
+import public Item
+import NoWurst
+import MagicFunctions
+import ObjectIdGenerator
+import ItemObjEditing
+import ItemIds
+
+public constant PLACE_HOLDER_ITEM = compiletime(generatePlaceHolderItem())
+
+function generatePlaceHolderItem() returns int
+    let id = ITEM_ID_GEN.next()
+    new ItemDefinition(id, ItemIds.phatLewt)
+    return id
+
+
+
