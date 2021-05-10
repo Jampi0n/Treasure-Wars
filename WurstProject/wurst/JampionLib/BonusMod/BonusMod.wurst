@@ -198,9 +198,11 @@ init
 
 @compiletime
 function generateAttackSpeedBonus()
-    let gen = new IdGenerator(BM_ATTACK_SPEED)
     AbilityDefinitionAttackSpeedIncrease aDef
-    for i = 0 to MAX_LEVEL_ATTACK_SPEED-1
+    aDef = new AbilityDefinitionAttackSpeedIncrease(BM_ATTACK_SPEED)
+    aDef.setAttackSpeedIncrease(1, 0.01 )
+    let gen = new IdGenerator(BM_ATTACK_SPEED)
+    for i = 1 to MAX_LEVEL_ATTACK_SPEED-1
         aDef = new AbilityDefinitionAttackSpeedIncrease(gen.next())
         aDef.setAttackSpeedIncrease(1, (2).pow(i)/100 )
 
@@ -210,9 +212,11 @@ function generateAttackSpeedBonus()
 
 @compiletime
 function generateAttackDamageBonus()
-    let gen = new IdGenerator(BM_ATTACK_DAMAGE)
     AbilityDefinitionAttackBonus aDef
-    for i = 0 to MAX_LEVEL_DAMAGE-1
+    aDef = new AbilityDefinitionAttackBonus(BM_ATTACK_DAMAGE)
+    aDef.setAttackBonus(1, 1 )
+    let gen = new IdGenerator(BM_ATTACK_DAMAGE)
+    for i = 1 to MAX_LEVEL_DAMAGE-1
         aDef = new AbilityDefinitionAttackBonus(gen.next())
         aDef.setAttackBonus(1, (2).pow(i) )
 
@@ -222,9 +226,11 @@ function generateAttackDamageBonus()
                 
 @compiletime
 function generateArmorBonus()
-    let gen = new IdGenerator(BM_ARMOR)
     AbilityDefinitionDefenseBonusPlus1 aDef
-    for i = 0 to MAX_LEVEL_ARMOR-1
+    aDef = new AbilityDefinitionDefenseBonusPlus1(BM_ARMOR)
+    aDef.setDefenseBonus(1, 1 )
+    let gen = new IdGenerator(BM_ARMOR)
+    for i = 1 to MAX_LEVEL_ARMOR-1
         aDef = new AbilityDefinitionDefenseBonusPlus1(gen.next())
         aDef.setDefenseBonus(1, (2).pow(i) )
 
@@ -234,9 +240,11 @@ function generateArmorBonus()
      
 @compiletime
 function generateStrengthBonus()
-    let gen = new IdGenerator(BM_STRENGTH)
     AbilityDefinitionStrengthBonusPlus1 aDef
-    for i = 0 to MAX_LEVEL_ATTRIBUTE-1
+    aDef = new AbilityDefinitionStrengthBonusPlus1(BM_STRENGTH)
+    aDef.setStrengthBonus(1, 1 )
+    let gen = new IdGenerator(BM_STRENGTH)
+    for i = 1 to MAX_LEVEL_ATTRIBUTE-1
         aDef = new AbilityDefinitionStrengthBonusPlus1(gen.next())
         aDef.setStrengthBonus(1, (2).pow(i) )
 
@@ -246,9 +254,11 @@ function generateStrengthBonus()
              
 @compiletime
 function generateAgilityBonus()
-    let gen = new IdGenerator(BM_AGILITY)
     AbilityDefinitionAgilityBonusPlus1 aDef
-    for i = 0 to MAX_LEVEL_ATTRIBUTE-1
+    aDef = new AbilityDefinitionAgilityBonusPlus1(BM_AGILITY)
+    aDef.setAgilityBonus(1, 1 )
+    let gen = new IdGenerator(BM_AGILITY)
+    for i = 1 to MAX_LEVEL_ATTRIBUTE-1
         aDef = new AbilityDefinitionAgilityBonusPlus1(gen.next())
         aDef.setAgilityBonus(1, (2).pow(i) )
 
@@ -258,9 +268,11 @@ function generateAgilityBonus()
              
 @compiletime
 function generateIntelligenceBonus()
-    let gen = new IdGenerator(BM_INTELLIGENCE)
     AbilityDefinitionIntelligenceBonusPlus1 aDef
-    for i = 0 to MAX_LEVEL_ATTRIBUTE-1
+    aDef = new AbilityDefinitionIntelligenceBonusPlus1(BM_INTELLIGENCE)
+    aDef.setIntelligenceBonus(1, 1 )
+    let gen = new IdGenerator(BM_INTELLIGENCE)
+    for i = 1 to MAX_LEVEL_ATTRIBUTE-1
         aDef = new AbilityDefinitionIntelligenceBonusPlus1(gen.next())
         aDef.setIntelligenceBonus(1, (2).pow(i) )
 
