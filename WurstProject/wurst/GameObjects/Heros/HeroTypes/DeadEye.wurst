@@ -403,7 +403,7 @@ public class HeroDeadEye extends HeroTemplate
                 source.hideAbility(ABILITY_ID_R, false)
             
 
-        addPreDestroyEvent() (unit u) ->
+        UnitWrapper.addPreDestroyEvent() (unit u) ->
             let owningHero = u.wrapper().getOwningHero()
             if owningHero != null
                 let instance = DeadEyInstance.fromUnit(owningHero.toUnit())

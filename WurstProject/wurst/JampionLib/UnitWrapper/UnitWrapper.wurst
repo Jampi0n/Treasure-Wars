@@ -12,32 +12,24 @@ The wrapper is created and destroyed automatically.
 Additional functionality can be added by using modules from the Modules sub directory.
 
 Usage:
-Create a class, use the module and call the init function:
+Create a sub class of UnitWrapper:
 ==================================================
-class MyUnitWrapper
-    use UnitWrapper
+class MyUnitWrapper extends UnitWrapper
 
-init
-    IUnit.initWrapper()
 ==================================================
 Add create and destroy functions:
 ==================================================
 class MyUnitWrapper
     use UnitWrapper
 
+    construct(unit u)
+        super(u)
+
     ondestroy
         destroyWrapper()
 
-    override static function callChildConstructor(unit u) returns MyUnitWrapper
-        return new MyUnitWrapper(u)
-
-    override function callChildDestructor()
-        destroy this
-init
-    IUnit.initWrapper()
 ==================================================
-These functions are required so the UnitWrapper module can create and destroy itself, since destroy and construct cannot be called from the module.
-The ondestroy functions should call the destroy functions from all modules. This function allows you to define the destroy order and execute additional code at the right time.
+The ondestroy functions should call the destroy functions from all modules.
 
 Additional modules can be used from the Modules sub directory.
 The destroy order in ondestroy should be opposite to the use order.
@@ -61,49 +53,17 @@ This ensures that the outer modules have longer lifespans than inner modules.
 UnitWrapper should always be the outermost module, so that other modules can rely on it.
 In this example UnitBuffs is the innermost module, because Buff functions frequently rely on the data of other modules (e.g. changing color).
 When adding more modules read their instructions and think about their dependencies.
+
+Finally define the UnitWrapper creation function by overriding UnitWrapperSingleton and create it:
+==================================================
+class MyUnitWrapperSingleton extends UnitWrapperSingleton
+    override function createNew(unit u)
+        new MyUnitWrapper(u)
+
+init
+    new MyUnitWrapperSingleton()
+==================================================
 */
-
-int numPreConstructEvents = 0
-PreConstructEvent array preConstructEvents
-int numPostConstructEvents = 0
-PostConstructEvent array postConstructEvents
-int numPreDestroyEvents = 0
-PreDestroyEvent array preDestroyEvents
-int numPostDestroyEvents = 0
-PostDestroyEvent array postDestroyEvents
-
-public function addPreConstructEvent(PreConstructEvent c)
-    preConstructEvents[numPreConstructEvents] = c
-    numPreConstructEvents++
-
-public function runPreConstructEvents(unit u)
-    for i = 0 to numPreConstructEvents - 1
-        preConstructEvents[i].run(u)
-
-public function addPostConstructEvent(PostConstructEvent c)
-    postConstructEvents[numPostConstructEvents] = c
-    numPostConstructEvents++
-
-public function runPostConstructEvents(unit u)
-    for i = 0 to numPostConstructEvents - 1
-        postConstructEvents[i].run(u)
-
-public function addPreDestroyEvent(PreDestroyEvent c)
-    preDestroyEvents[numPreDestroyEvents] = c
-    numPreDestroyEvents++
-
-public function runPreDestroyEvents(unit u)
-    for i = 0 to numPreDestroyEvents - 1
-        preDestroyEvents[i].run(u)
-
-public function addPostDestroyEvent(PostDestroyEvent c)
-    postDestroyEvents[numPostDestroyEvents] = c
-    numPostDestroyEvents++
-
-public function runPostDestroyEvents(unit u)
-    for i = 0 to numPostDestroyEvents - 1
-        postDestroyEvents[i].run(u)
-    
 
 public interface PreConstructEvent
     function run(unit u)
@@ -117,13 +77,6 @@ public interface PreDestroyEvent
 public interface PostDestroyEvent
     function run(unit u)
 
-unit wrappedUnit = null
-
-public function getWrappedUnit() returns unit
-    return wrappedUnit
-
-
-
 public abstract class UnitWrapperSingleton
     protected static UnitWrapperSingleton singleton
     abstract function createNew(unit u)
@@ -132,7 +85,7 @@ public abstract class UnitWrapperSingleton
 
 public abstract class UnitWrapper
     private unit assocUnit
-    static constant toWrapper = new HashMap<unit, UnitWrapper>()
+    private static constant toWrapper = new HashMap<unit, UnitWrapper>()
 
     function toUnit() returns unit
         return this.assocUnit
@@ -153,14 +106,53 @@ public abstract class UnitWrapper
     function destroyWrapper()
         toWrapper.remove(this.assocUnit)
 
-    static function initWrapper()
+    static int numPreConstructEvents = 0
+    static PreConstructEvent array preConstructEvents
+    static int numPostConstructEvents = 0
+    static PostConstructEvent array postConstructEvents
+    static int numPreDestroyEvents = 0
+    static PreDestroyEvent array preDestroyEvents
+    static int numPostDestroyEvents = 0
+    static PostDestroyEvent array postDestroyEvents
+
+    static function addPreConstructEvent1(PreConstructEvent c)
+        preConstructEvents[numPreConstructEvents] = c
+        numPreConstructEvents++
+
+    static function runPreConstructEvents(unit u)
+        for i = 0 to numPreConstructEvents - 1
+            preConstructEvents[i].run(u)
+
+    static function addPostConstructEvent(PostConstructEvent c)
+        postConstructEvents[numPostConstructEvents] = c
+        numPostConstructEvents++
+
+    static function runPostConstructEvents(unit u)
+        for i = 0 to numPostConstructEvents - 1
+            postConstructEvents[i].run(u)
+
+    static function addPreDestroyEvent(PreDestroyEvent c)
+        preDestroyEvents[numPreDestroyEvents] = c
+        numPreDestroyEvents++
+
+    static function runPreDestroyEvents(unit u)
+        for i = 0 to numPreDestroyEvents - 1
+            preDestroyEvents[i].run(u)
+
+    static function addPostDestroyEvent(PostDestroyEvent c)
+        postDestroyEvents[numPostDestroyEvents] = c
+        numPostDestroyEvents++
+
+    static function runPostDestroyEvents(unit u)
+        for i = 0 to numPostDestroyEvents - 1
+            postDestroyEvents[i].run(u)
+
+    protected static function initWrapper()
         onEnter() ->
             let u = getEnterLeaveUnit()
             if u != null and u.getTypeId() != 0 and u.getAbilityLevel(LOCUST_ID) == 0
                 runPreConstructEvents(u)
-                wrappedUnit = u
                 UnitWrapperSingleton.singleton.createNew(u)
-                wrappedUnit = null
                 runPostConstructEvents(u)
         onLeave() ->
             let u = getEnterLeaveUnit()
