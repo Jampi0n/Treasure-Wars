@@ -52,10 +52,10 @@ public class HeroElementalMage extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceIntelligence(0)
-        tooltip.setLearnString("Increases the Elemental Mage's attack speed everytime he attacks. If he does not attack for {0} seconds, the bonus is gone.".format(FRENZY_DURATION.str()), (int lvl) -> (begin
+        tooltip.setLearnString("Increases the Elemental Mage's attack speed everytime he attacks. If he does not attack for {0} seconds, the bonus is gone.".format(FRENZY_DURATION.str())) (int lvl) ->
             return "{0}% attack speed bonus".format(
                 FRENZY_BONUS[lvl-1].str())
-        end) )
+        
         for lvl = 1 to 5
             tooltip.setNormalString(false, lvl, "Increases the Elemental Mage's attack speed by {1}% everytime he attacks. If he does not attack for {0} seconds, the bonus is gone.".format(
                 FRENZY_DURATION.str(), FRENZY_BONUS[lvl-1].str())
@@ -91,10 +91,10 @@ public class HeroElementalMage extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceIntelligence(FROST_BOLT_DAMAGE_BONUS)
-        tooltip.setLearnString("Summons an orb of frost that damages and slows all enemies close to it.", (int lvl) -> (begin
+        tooltip.setLearnString("Summons an orb of frost that damages and slows all enemies close to it.") (int lvl) ->
             return "{0}{I0} damage, {1}% slow for {2} seconds.".format(
                 FROST_BOLT_DAMAGE[lvl-1].str(), FROST_BOLT_SLOW[lvl-1].str(), FROST_BOLT_DURATION[lvl-1].str())
-        end) )
+        
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, "Summons an orb of frost that deals {0}{I0} magic damage to all enemies close to it and slows them by {1}% for {2} seconds.".format(
                 FROST_BOLT_DAMAGE[lvl-1].str(), FROST_BOLT_SLOW[lvl-1].str(), FROST_BOLT_DURATION[lvl-1].str()
@@ -134,10 +134,10 @@ public class HeroElementalMage extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceIntelligence(FIRE_BLINK_DAMAGE_BONUS)
-        tooltip.setLearnString("Teleports the Elemental Mage to the target location, dealing fire damage to nearby enemy units.", (int lvl) -> (begin
+        tooltip.setLearnString("Teleports the Elemental Mage to the target location, dealing fire damage to nearby enemy units.") (int lvl) ->
             return "{0}{I0} damage.".format(
                 FIRE_BLINK_DAMAGE[lvl-1].str())
-        end) )
+        
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, "Teleports the Elemental Mage to the target location, dealing {0}{I0} fire damage to nearby enemy units.".format(
                 FIRE_BLINK_DAMAGE[lvl-1].str()
@@ -172,11 +172,11 @@ public class HeroElementalMage extends HeroTemplate
         tooltip.setReplaceIntelligence(MARK_DMG_BONUS)
         tooltip.setLearnString("Reduces the target unit's willpower and makes it take additional magic damage, when the Elemental Mage attacks. After {2} attacks the target is stunned for {0} seconds. Lasts {1} seconds.".format(
             MARK_STUN.str(), MARK_DURATION.str(), MARK_REQUIRED_STACKS.str()
-        ), (int lvl) -> (begin
+        )) (int lvl) ->
             return "-{0} willpower, {1}{I0} magic damage.".format(
                 MARK_WP_REDUCTION[lvl-1].toString(), MARK_DMG[lvl-1].str()
             )
-        end) )
+        
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, "Reduces the target unit's willpower by {2} and makes it take {3}{I0} additional magic damage, when the Elemental Mage attacks. After {4} attacks the target is stunned for {0} seconds. Lasts {1} seconds.".format(
                 MARK_STUN.str(), MARK_DURATION.str(), MARK_WP_REDUCTION[lvl-1].toString(), MARK_DMG[lvl-1].str(), MARK_REQUIRED_STACKS.str()
@@ -236,11 +236,11 @@ public class HeroElementalMage extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceIntelligence(FF_IMPACT_DAMAGE_BONUS, FF_DOT_BONUS, FF_BUFF_DURATION_BONUS)
-        tooltip.setLearnString("Calls the power of Frost and Flame to fall from the sky at the target location to slow down and ignite nearby enemies.", (int lvl) -> (begin
+        tooltip.setLearnString("Calls the power of Frost and Flame to fall from the sky at the target location to slow down and ignite nearby enemies.") (int lvl) ->
             return "{0}{I0} impact damage, {1}{I1} damage per second, {2}% slow, lasts {3}{I2} seconds.".format(
                 FF_IMPACT_DAMAGE[lvl-1].str(), FF_DOT[lvl-1].str(), FF_SLOW[lvl-1].str(), FF_BUFF_DURATION[lvl-1].str()
             )
-        end) )
+        
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, "Calls the power of Frost and Flame to fall from the sky at the target location to slow down and ignite nearby enemies. "+
             "Deals {0}{I0} impact damage, {1}{I1} damage per second and slows movement speed by {2}%. Lasts {3}{I2} seconds.".format(

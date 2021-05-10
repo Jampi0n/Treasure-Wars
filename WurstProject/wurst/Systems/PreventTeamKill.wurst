@@ -17,10 +17,10 @@ init
             let attacker = GetTriggerUnit()
             let target = GetOrderTargetUnit()
             if target != null and attacker.getOwner().isAllyOf(target.getOwner())
-                doAfter(0, () -> (begin
+                doAfter(0) () ->
                     if not attacker.issuePointOrder("attack", target.getPos())
                         attacker.issueImmediateOrder("stop")
-                end))
+                
     end))
 
 

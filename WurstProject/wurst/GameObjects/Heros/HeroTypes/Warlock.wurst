@@ -88,10 +88,10 @@ public class HeroWarlock extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceIntelligence(0)    
-        tooltip.setLearnString("Increases the Warlock's intelligence.", (int lvl) -> (begin
+        tooltip.setLearnString("Increases the Warlock's intelligence.") (int lvl) ->
             return "{0}% bonus intelligence".format(
                 FEL_MAGIC_INTEL[lvl-1].str())
-        end) )
+        
         for lvl = 1 to 5
             tooltip.setNormalString(false, lvl, "Increases the Warlock's intelligence by {0}%.".format(
                 FEL_MAGIC_INTEL[lvl-1].str())
@@ -118,9 +118,9 @@ public class HeroWarlock extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceIntelligence(FIREBOLT_DAMAGE_BONUS)   
-        tooltip.setLearnString("Summons a ball of fire to fly to the target direction, dealing magic damage to the first unit it hits.", (int lvl) -> (begin
+        tooltip.setLearnString("Summons a ball of fire to fly to the target direction, dealing magic damage to the first unit it hits.") (int lvl) ->
             return "{0}{I0} damage.".format(FIREBOLT_DAMAGE[lvl-1].str())
-        end) )
+        
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, "Summons a ball of fire to fly to the target direction, dealing {0}{I0} magic damage to the first unit it hits.".format(
                 FIREBOLT_DAMAGE[lvl-1].str()))         
@@ -150,9 +150,9 @@ public class HeroWarlock extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceIntelligence(METEOR_DAMAGE_BONUS)
-        tooltip.setLearnString("Calls down a burning meteor from the sky dealing magic damage and stunning enemies in the target area.", (int lvl) -> (begin
+        tooltip.setLearnString("Calls down a burning meteor from the sky dealing magic damage and stunning enemies in the target area.") (int lvl) ->
             return "{0}{I0} damage, {1} seconds stun.".format(METEOR_DAMAGE[lvl-1].str(), METEOR_STUN_DURATION[lvl-1].str())
-        end))
+        
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, "Calls down a burning meteor from the sky dealing {0}{I0} magic damage and stunning enemies in the target area for {1} seconds.".format(
                 METEOR_DAMAGE[lvl-1].str(), METEOR_STUN_DURATION[lvl-1].str()))
@@ -181,10 +181,10 @@ public class HeroWarlock extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceIntelligence(SOUL_BURN_DAMAGE_BONUS)
-        tooltip.setLearnString("Deals damage over time to the target enemy unit. If the unit dies, while under the effect of Soul Burn, nearby enemy units will be affected by Soul Burn. The initial target is silenced for a short time.", (int lvl) -> (begin
+        tooltip.setLearnString("Deals damage over time to the target enemy unit. If the unit dies, while under the effect of Soul Burn, nearby enemy units will be affected by Soul Burn. The initial target is silenced for a short time.") (int lvl) ->
             return "{0}{I0} damage per second, {1} seconds.".format(
                 SOUL_BURN_DAMAGE[lvl-1].str(), SOUL_BURN_DURATION[lvl-1].str(), SOUL_BURN_SILENCE[lvl-1].str())
-        end))
+        
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, "Deals {0}{I0} damage per second to the target enemy unit for {1} seconds. If the unit dies, while under the effect of Soul Burn, nearby enemy units will be affected by Soul Burn. The initial target is silenced for {2} seconds.".format(
                 SOUL_BURN_DAMAGE[lvl-1].str(), SOUL_BURN_DURATION[lvl-1].str(), SOUL_BURN_SILENCE[lvl-1].str()))
@@ -222,10 +222,10 @@ public class HeroWarlock extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceIntelligence(RAY_OF_DEATH_DAMAGE_BONUS, RAY_OF_DEATH_AFTER_DAMAGE_BONUS)
-        tooltip.setLearnString(CHANNELING_SPELL + "Channels a powerful ray at the target enemy hero, disabling the target and dealing damage over time. If he channels for the full duration, he summons an explosion at the target's location dealing additional damage.", (int lvl) -> (begin
+        tooltip.setLearnString(CHANNELING_SPELL + "Channels a powerful ray at the target enemy hero, disabling the target and dealing damage over time. If he channels for the full duration, he summons an explosion at the target's location dealing additional damage.") (int lvl) ->
             return "{0}{I0} damage per second, {1}{I1} explosion damage, {2} seconds".format(
             RAY_OF_DEATH_DAMAGE[lvl-1].str(), RAY_OF_DEATH_AFTER_DAMAGE[lvl-1].str(), RAY_OF_DEATH_DURATION[lvl-1].str())
-        end))
+        
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, CHANNELING_SPELL + "Channels a powerful ray at the target enemy hero, disabling the target and dealing {0}{I0} damage per second. If he channels for the full duration, he summons an explosion at the target's location dealing {1}{I1} additional damage.|nLasts {2} seconds.".format(
                 RAY_OF_DEATH_DAMAGE[lvl-1].str(), RAY_OF_DEATH_AFTER_DAMAGE[lvl-1].str(), RAY_OF_DEATH_DURATION[lvl-1].str()
@@ -256,7 +256,7 @@ public class HeroWarlock extends HeroTemplate
         let level = caster.getAbilityLevel(spellId)
         let pos = vec2(GetSpellTargetX(), GetSpellTargetY())
         addEffect(Units.infernalBirth, pos).destr()
-        doAfter(1, () -> (begin
+        doAfter(1) () ->
             let nearby = CreateGroup()
             nearby.enumUnitsInRange(pos, METEOR_AOE[level-1])
         
@@ -269,7 +269,7 @@ public class HeroWarlock extends HeroTemplate
                     caster.dealDamage(target, dmg, ReductionType.MAGIC)
                     target.addBuffReduced(caster, METEOR_STUN_DURATION[level-1], STUNNED, 1).setDispelLevel(DispelLevel.DISPEL)
             nearby.destr()
-        end))
+        
 
     override static function castE()
         let spellId = GetSpellAbilityId()

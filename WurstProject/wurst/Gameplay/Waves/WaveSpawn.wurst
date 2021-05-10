@@ -55,12 +55,12 @@ class Spawner
     function spawn()
         var counter = 0
         for int unitId in this.unitTypes
-            doAfter(counter*0.25, () -> (begin
+            doAfter(counter*0.25) () ->
                 if this.enabled
                     let spawnedUnit = spawnUnit(this.team, unitId, this.spawnPos)
                     new PathUnitNew(spawnedUnit, this.path)
 
-            end))
+            
             counter++
 
     function spawn(int uType) returns unit
@@ -90,12 +90,12 @@ public function startSpawning()
                 PingMinimap(udg_BrownBarracks[1].getX(), udg_BrownBarracks[1].getY(), 5)
                 PingMinimap(udg_BrownBarracks[2].getX(), udg_BrownBarracks[2].getY(), 5)
 
-        doPeriodically(SPAWN_INTERVAL, (CallbackPeriodic cb) -> (begin
+        doPeriodically(SPAWN_INTERVAL) (CallbackPeriodic cb) ->
             if spawnStopped
                 destroy cb
             else
                 spawnWave()
-        end))
+        
         spawnStarted = true
 
 
@@ -150,10 +150,10 @@ function spawnWave()
     for i=0 to 5
         barracksSpawner[i].spawn()
 
-    doAfter(6, () -> (begin
+    doAfter(6) () ->
         for i=0 to 3
             workshopSpawner[i].spawn()
-    end))
+    
 
 
 

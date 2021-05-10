@@ -121,10 +121,10 @@ public class HeroTrollManHunter extends HeroTemplate
         tooltip.setReplaceStrength(0)
         tooltip.setSummary("Damaging an enemy with an attack or a spell causes the target to bleed and take damage over time.")
         tooltip.setLearnString( ("Attacking an enemy unit or damaging it with a spell applies one stack of Bleeding Wound. If the target was not attacked for {0} seconds, "+
-                                "all stacks are lost. Each stack deals physical damage over time:").format(BLEEDING_WOUND_DURATION.str()), (int lvl) -> (begin
+                                "all stacks are lost. Each stack deals physical damage over time:").format(BLEEDING_WOUND_DURATION.str())) (int lvl) ->
             return "{0} damage per second.".format(
                 BLEEDING_WOUND_DMG[lvl-1].str())
-        end) )
+        
         
         for lvl = 1 to 5
             tooltip.setNormalString(false, lvl, ("Attacking an enemy unit or damaging it with a spell applies one stack of Bleeding Wound. If the target was not attacked for {0} seconds, "+
@@ -157,11 +157,11 @@ public class HeroTrollManHunter extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceStrength(SHADOW_STRIKE_DAMAGE_BONUS)
-        tooltip.setLearnString("Summons an illusion of the Troll Headhunter to attack the target from behind, dealing physical damage and slowing it for a short time.", (int lvl) -> (begin
+        tooltip.setLearnString("Summons an illusion of the Troll Headhunter to attack the target from behind, dealing physical damage and slowing it for a short time.") (int lvl) ->
             return "{0}{S0} damage, {1} seconds slow.".format(
                 SHADOW_STRIKE_DAMAGE[lvl-1].str(),
                 SHADOW_STRIKE_SLOW_DURATION[lvl-1].str())
-        end) )
+        
         
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, "Summons an illusion of the Troll Headhunter to attack the target from behind, dealing {0}{S0} damage and slowing it for {1} seconds.".format(
@@ -192,11 +192,11 @@ public class HeroTrollManHunter extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceStrength(DEATH_SPIN_DAMAGE_BONUS)
-        tooltip.setLearnString("Causes a bladestorm of destructive force around the Troll Headhunter, increasing armor and willpower and dealing damage per second to nearby enemy units.\nLasts {0} seconds.".format(DEATH_SPIN_DURATION.str()), (int lvl) -> (begin
+        tooltip.setLearnString("Causes a bladestorm of destructive force around the Troll Headhunter, increasing armor and willpower and dealing damage per second to nearby enemy units.\nLasts {0} seconds.".format(DEATH_SPIN_DURATION.str())) (int lvl) ->
             return "{0}{S0} damage per second, {1} armor and willpower.".format(
                 DEATH_SPIN_DAMAGE[lvl-1].str(),
                 DEATH_SPIN_DEFENSE[lvl-1].toString())
-        end) )
+        
         for lvl = 1 to 5
             tooltip.setNormalString(false, lvl, "Causes a bladestorm of destructive force around the Troll Headhunter, increasing armor and willpower by {0} and dealing {1}{S0} damage per second to nearby enemy units.\nLasts {2} seconds.".format(
                 DEATH_SPIN_DEFENSE[lvl-1].toString(),
@@ -221,12 +221,12 @@ public class HeroTrollManHunter extends HeroTemplate
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceIntelligence(CRIPPLING_PAIN_DAMAGE_BONUS)
         tooltip.setLearnString(("Damages and slows enemies affected by Bleeding Wound."+
-        " Deals damage and slows for every stack of Bleeding Wound, but consumes all stacks."), (int lvl) -> (begin
+        " Deals damage and slows for every stack of Bleeding Wound, but consumes all stacks.")) (int lvl) ->
             return "{0}{I0} damage, {1}% slow, {2} seconds.".format(
                 CRIPPLING_PAIN_DAMAGE[lvl-1].str(),
                 CRIPPLING_PAIN_SLOW[lvl-1].toString(),
                 CRIPPLING_PAIN_DURATION[lvl-1].str())
-        end) )
+        
         
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, ("Damages and slows enemies affected by Bleeding Wound."+
@@ -253,10 +253,10 @@ public class HeroTrollManHunter extends HeroTemplate
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceIntelligence(0)
         tooltip.setSummary("Dispels all buffs and summons a mirror image. The mirror image can attack, but cannot use active items or cast spells.")
-        tooltip.setLearnString("Dispels all buffs and summons a mirror image. The mirror image can attack, but cannot use active items or cast spells.", (int lvl) -> (begin
+        tooltip.setLearnString("Dispels all buffs and summons a mirror image. The mirror image can attack, but cannot use active items or cast spells.") (int lvl) ->
             return "Lasts {0} seconds".format(
                 MIRROR_IMAGE_DURATION[lvl-1].str())
-        end) )
+        
         
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, ("Dispels all buffs and summons a mirror image. The mirror image can attack, cast spells and use items, but cannot drop or sell items.|nLasts {0} seconds.").format(

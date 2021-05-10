@@ -49,10 +49,10 @@ public class HeroDestroyer extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceIntelligence(0)
-        tooltip.setLearnString("The Destroyer deals increased damage from all sources, the more injured he becomes.", (int lvl) -> (begin
+        tooltip.setLearnString("The Destroyer deals increased damage from all sources, the more injured he becomes.") (int lvl) ->
             return "up to {0}% increased damage.".format(
                 DEATH_FRENZY_BONUS[lvl-1].str())
-        end) )
+        
         
         for lvl = 1 to 5
             tooltip.setNormalString(false, lvl, "The Destroyer deals up to {0}% increased damage from all sources, the more injured he becomes".format( 
@@ -99,10 +99,10 @@ public class HeroDestroyer extends HeroTemplate
         tooltip.setReplaceIntelligence(BREATH_DAMAGE_BONUS)
         tooltip.setLearnString("Breathes a cone of fire at enemy units, dealing magic damage. The heat melts the target's armor, reducing it for {0} seconds.".format(
             BREATH_DURATION.str()
-        ), (int lvl) -> (begin
+        )) (int lvl) ->
             return "{0}{I0} damage, {1}% armor reduction.".format(
             BREATH_DAMAGE[lvl-1].str(), BREATH_ARMOR_REDUCTION[lvl-1].str())
-        end) )
+        
         
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, "Breathes a cone of fire at enemy units, dealing {0}{I0} magic damage. The heat melts the target's armor, reducing it by {1}% for {2} seconds.".format(
@@ -150,11 +150,11 @@ public class HeroDestroyer extends HeroTemplate
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setSummary("Damages nearby enemy units and increases the Destroyer's attack speed at the cost of mana and health. Can be turned off.")
         tooltip.setReplaceIntelligence(IMMOLATION_DAMAGE_BONUS)
-        tooltip.setLearnString("Engulfs the Destroyer in flames, damaging nearby enemies and the Destroyer himself. Heroes take double damage. Also increases the Destroyer's attack speed.|nDrains mana until deactivated.", (int lvl) -> (begin
+        tooltip.setLearnString("Engulfs the Destroyer in flames, damaging nearby enemies and the Destroyer himself. Heroes take double damage. Also increases the Destroyer's attack speed.|nDrains mana until deactivated.") (int lvl) ->
             return "{0}{I0} damage per second, {1}% attack speed.".format(
             IMMOLATION_DAMAGE[lvl-1].str(),
             IMMOLATION_ATTACK_SPEED[lvl-1].str())
-        end) )
+        
         for lvl = 1 to 5
             tooltip.setNormalString(false, lvl, "Engulfs the Destroyer in flames, dealing {0}{I0} damage per second to nearby enemies and the Destroyer himself. Heroes take double damage. Also increases the Destroyer's attack speed by {1}%.|nDrains mana until deactivated.".format(
                 IMMOLATION_DAMAGE[lvl-1].str(),
@@ -181,10 +181,10 @@ public class HeroDestroyer extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceIntelligence(0)
-        tooltip.setLearnString("Summons a wall of bones at the target location, blocking the way for the Destroyer's victims to flee. The wall gets bigger on higher levels.", (int lvl) -> (begin
+        tooltip.setLearnString("Summons a wall of bones at the target location, blocking the way for the Destroyer's victims to flee. The wall gets bigger on higher levels.") (int lvl) ->
             return "Lasts {0} seconds.".format(
                 WALL_DURATION[lvl-1].str())
-        end) )
+        
         
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, "Summons a wall of bones at the target location, blocking the way for the Destroyer's victims to flee. Lasts {0} seconds.".format(
@@ -232,11 +232,11 @@ public class HeroDestroyer extends HeroTemplate
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceIntelligence(0)
         tooltip.setSummary("Increases the Destroyer's movement speed when chasing the targeted unit and causes his attacks against the target to deal more damage and slow.")
-        tooltip.setLearnString("Marks the target enemy unit as his prey. The Destroyer will have increased movmement speed when moving towards the prey. Every attack against the prey deals bonus damage and slows the prey. Lasts {0} seconds.".format(PREY_DURATION.str()), (int lvl) -> (begin
+        tooltip.setLearnString("Marks the target enemy unit as his prey. The Destroyer will have increased movmement speed when moving towards the prey. Every attack against the prey deals bonus damage and slows the prey. Lasts {0} seconds.".format(PREY_DURATION.str())) (int lvl) ->
             return "{0} damage, {1}% movement speed".format(
                 PREY_BONUS_DAMAGE[lvl-1].str(),
                 PREY_MOVE_SPEED[lvl-1].str())
-        end) )
+        
         
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, "Marks the target enemy unit as his prey. The Destroyer will have move {2}% faster when moving towards the prey. Every attack against the prey deals {1} bonus damage and slows the prey. Lasts {0} seconds.".format(

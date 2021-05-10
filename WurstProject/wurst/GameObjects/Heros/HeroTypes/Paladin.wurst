@@ -43,9 +43,9 @@ class DivinePunishment
                 if target.isTargetableEnemyUnit(this.caster.getOwner()) and target.isVisible(this.caster)
                     
                     target.addEffect("Abilities\\Spells\\Human\\Resurrect\\ResurrectTarget.mdl", "origin").destr()
-                    doAfter(0.4, () -> (begin
+                    doAfter(0.4) () ->
                         this.caster.dealDamage(target, dmg, ReductionType.MAGIC)
-                    end) )
+                    
 
             nearby.destr()
             return
@@ -107,10 +107,10 @@ public class HeroPaladin extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceStrength(0)
-        tooltip.setLearnString("Reduces damage from incoming attacks.", (int lvl) -> (begin
+        tooltip.setLearnString("Reduces damage from incoming attacks.") (int lvl) ->
             return "{0} damage reduction.".format(
             HEAVY_ARMOED_REDUCTION[lvl-1].str())
-        end) )
+        
         for lvl = 1 to 5
             tooltip.setNormalString(false, lvl, "Reduces damage from incoming attacks by {0}.".format(
                 HEAVY_ARMOED_REDUCTION[lvl-1].str())
@@ -141,12 +141,12 @@ public class HeroPaladin extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceStrength(SHIELD_BASH_DMG_BONUS)
-        tooltip.setLearnString("Bashes enemies in front of him with his shield, dealing physical damage and stunning them.", (int lvl) -> (begin
+        tooltip.setLearnString("Bashes enemies in front of him with his shield, dealing physical damage and stunning them.") (int lvl) ->
             return "{0}{S0} damage, {1} seconds stun.".format(
             SHIELD_BASH_DMG[lvl-1].str(),
             SHIELD_BASH_DURATION[lvl-1].str()
             )
-        end) )
+        
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, "Bashes enemies in front of him with his shield, dealing {0}{S0} physical damage and stunning them for {1} seconds.".format(
                 SHIELD_BASH_DMG[lvl-1].str(),
@@ -179,12 +179,12 @@ public class HeroPaladin extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceIntelligence(BATTLE_ROAR_DURATION_BONUS)
-        tooltip.setLearnString("Increases nearby units' attack and movement speed.", (int lvl) -> (begin
+        tooltip.setLearnString("Increases nearby units' attack and movement speed.") (int lvl) ->
             return "{0} attack speed, {1} movement speed, {2}{I0} seconds".format(
             BATTLE_ROAR_AS[lvl-1].str()+"%",
             BATTLE_ROAR_MS[lvl-1].str()+"%",
             BATTLE_ROAR_DURATION[lvl-1].str())
-        end) )
+        
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, "Increases nearby units' attack speed by {0} and movement speed by {1} for {2}{I0} seconds.".format(
                 BATTLE_ROAR_AS[lvl-1].str()+"%",
@@ -222,10 +222,10 @@ public class HeroPaladin extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceIntelligence(HOLY_SHIELD_DURATION_BONUS)
-        tooltip.setLearnString("Turns the target frendly hero untargetable.", (int lvl) -> (begin
+        tooltip.setLearnString("Turns the target frendly hero untargetable.") (int lvl) ->
             return "{0}{I0} seconds, {1} seconds cooldown.".format(
             HOLY_SHIELD_DURATION[lvl-1].str(), COOLDOWN.data(lvl).str())
-        end) )
+        
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, "Turns the target frendly hero untargetable for {0}{I0} seconds.".format(
                 HOLY_SHIELD_DURATION[lvl-1].str()
@@ -259,10 +259,10 @@ public class HeroPaladin extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceIntelligence(DIVINE_PUNISHMENT_DMG_BONUS)
-        tooltip.setLearnString(CHANNELING_SPELL + "Calls upon the power of the gods. After two seconds of channeling nearby enemies will be struck by divine magic.", (int lvl) -> (begin
+        tooltip.setLearnString(CHANNELING_SPELL + "Calls upon the power of the gods. After two seconds of channeling nearby enemies will be struck by divine magic.") (int lvl) ->
             return "{0}{I0} damage.".format(
             DIVINE_PUNISHMENT_DMG[lvl-1].str())
-        end) )
+        
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, CHANNELING_SPELL + "Calls upon the power of the gods. After two seconds of channeling nearby enemies will be struck by divine magic and take {0}{I0} damage.".format(
                 DIVINE_PUNISHMENT_DMG[lvl-1].str()
@@ -379,9 +379,9 @@ public class HeroPaladin extends HeroTemplate
 
         ai.issue("roar")
 
-        unit target = hero.findTarget(800, AbilityTargetFocus.ALLY_HERO, AbilityTargetPriority.LOW_HEALTH, (unit u) -> (begin
+        unit target = hero.findTarget(800, AbilityTargetFocus.ALLY_HERO, AbilityTargetPriority.LOW_HEALTH) (unit u) ->
             return not u.wrapper().hasBuffOfType(BUFF_HOLY_SHIELD)
-        end))
+        
         if target.isTargetableAllied(hero)
             ai.issue("channel", target)
 

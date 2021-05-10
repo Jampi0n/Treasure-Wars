@@ -138,10 +138,10 @@ public class HeroFreezer extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceIntelligence(0)
-        tooltip.setLearnString("Attacking restores mana points.", (int lvl) -> (begin
+        tooltip.setLearnString("Attacking restores mana points.") (int lvl) ->
             return "{0} mana points per attack".format(
                 COLD_HAND_MP[lvl-1].str())
-        end) )
+        
         for lvl = 1 to 5
             tooltip.setNormalString(false, lvl, "Attacking restores {0} mana points.".format(
                 COLD_HAND_MP[lvl-1].str())
@@ -186,12 +186,12 @@ public class HeroFreezer extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceIntelligence(NOVA_TARGET_DMG_BONUS, NOVA_AOE_DMG_BONUS, NOVA_DURATION_BONUS)
-        tooltip.setLearnString("Blasts enemy units around a target enemy unit with a wave of damaging frost that slows movement and attack rate.", (int lvl) -> (begin
+        tooltip.setLearnString("Blasts enemy units around a target enemy unit with a wave of damaging frost that slows movement and attack rate.") (int lvl) ->
             return "{0}{I0} target damage, {1}{I1} nova damage, {2}{I2} seconds.".format(
                 NOVA_TARGET_DMG[lvl-1].str(),
                 NOVA_AOE_DMG[lvl-1].str(),
                 NOVA_DURATION[lvl-1].str())
-        end) )
+        
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, "Blasts enemy units with a wave of frost that deals {0}{I0} damage to the target, and {1}{I1} nova damage. Cold damage slows units' movement and attack rate for {2}{I2} seconds.".format(
                 NOVA_TARGET_DMG[lvl-1].str(),
@@ -230,12 +230,12 @@ public class HeroFreezer extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceIntelligence(ARMOR_AR_BONUS.toReal(), ARMOR_SLOW_DURATION_BONUS)
-        tooltip.setLearnString("Creates a shield of frost around a target friendly unit. The shield adds armor and slows units that attack it. Lasts {0} seconds.".format(ARMOR_DURATION.str()), (int lvl) -> (begin
+        tooltip.setLearnString("Creates a shield of frost around a target friendly unit. The shield adds armor and slows units that attack it. Lasts {0} seconds.".format(ARMOR_DURATION.str())) (int lvl) ->
             return "{0}{I0} armor, {1} slow for {2}{I1} seconds.".format(
                 ARMOR_AR[lvl-1].str(),
                 ARMOR_SLOW[lvl-1].str(),
                 ARMOR_SLOW_DURATION[lvl-1].str())
-        end) )
+        
 
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, "Creates a shield of frost around a target friendly unit. The shield adds {0}{I0} armor and slows units that attack it by {1}% for {2}{I1} seconds. Lasts {3} seconds.".format(
@@ -274,14 +274,14 @@ public class HeroFreezer extends HeroTemplate
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceIntelligence(FROST_WYRM_INT_FACTOR.toReal())  
         tooltip.setSummary("Summons a powerful Frost Wyrm, that slows enemies it attacks.")
-        tooltip.setLearnString("Summons a powerful Frost Wyrm. The Frost Wyrm's attack speed and hit points scale with the respective stats of the Hero. The Frost Wyrm's attacks slow the targets.", (int lvl) -> (begin
+        tooltip.setLearnString("Summons a powerful Frost Wyrm. The Frost Wyrm's attack speed and hit points scale with the respective stats of the Hero. The Frost Wyrm's attacks slow the targets.") (int lvl) ->
             return "{0}{I0} bonus damage, {1} bonus hit points, {2}% slow for {3} seconds.".format(
                 FROST_WYRM_DMG[lvl-1].str(),
                 FROST_WYRM_HP[lvl-1].str(),
                 FROST_BREATH_SLOW[lvl-1].str(),
                 FROST_BREATH_DUR[lvl-1].str()
             )
-        end) )
+        
         
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, "Summons a powerful Frost Wyrm. The Frost Wyrm's attack speed and hit points scale with the respective stats of the Hero. Deals {0}{I0} bonus damage and has {1} additional hit points. The Frost Wyrm's attacks slow the targets by {2}% for {3} seconds.".format(
@@ -324,12 +324,12 @@ public class HeroFreezer extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceIntelligence(FREEZE_DMG_BONUS)
-        tooltip.setLearnString(CHANNELING_SPELL + "Freezes nearby enemies, disabling them and dealing damage over time. However, targets covered with ice have their armor and willpower increased by {0}.".format(FREEZE_DEF.str()), (int lvl) -> (begin
+        tooltip.setLearnString(CHANNELING_SPELL + "Freezes nearby enemies, disabling them and dealing damage over time. However, targets covered with ice have their armor and willpower increased by {0}.".format(FREEZE_DEF.str())) (int lvl) ->
             return "{0}{I0} damage per second, lasts {1} seconds.".format(
                 FREEZE_DMG[lvl-1].str(),
                 FREEZE_DURATION[lvl-1].str()
                 )
-        end) )
+        
         
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, CHANNELING_SPELL + "Freezes nearby enemies, disabling them for up to {1} seconds and dealing {0}{I0} damage per second. However, targets covered with ice have their armor and willpower increased by {2}.".format(
@@ -471,9 +471,9 @@ public class HeroFreezer extends HeroTemplate
                     return
 
             
-        unit target = hero.findTarget(600, AbilityTargetFocus.FRIEND_HERO, AbilityTargetPriority.HIGH_HEALTH, (unit u) -> (begin
+        unit target = hero.findTarget(600, AbilityTargetFocus.FRIEND_HERO, AbilityTargetPriority.HIGH_HEALTH) (unit u) ->
             return not u.wrapper().hasBuffOfType(BUFF_FROST_ARMOR)
-        end))
+        
         if target.isTargetableAllied(hero)
             ai.issue("frostarmor", target)
 

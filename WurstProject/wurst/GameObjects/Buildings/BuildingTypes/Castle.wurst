@@ -100,7 +100,7 @@ public class Castle extends Building
 			for i = 0 to 15
 				let spawnedUnit = spawnUnit(TEAM_1, MILITIA_DEFEND, militaSpawn[team])
 				militia[team].add(spawnedUnit)
-			doAfter(45, () -> (begin
+			doAfter(45) () ->
 				removeMilitaTimer[team].startPeriodic(0.1, ()->onMilitiaDespawn())
 				for u in militia[team]
 					u.addBuff(u, -1, DISARMED, 1)
@@ -108,19 +108,19 @@ public class Castle extends Building
 					if militiaDespawn[team].contains(u.getPos())
 						militia[team].remove(u)
 						u.remove()
-			end))
-			doAfter(50, () -> (begin
+			
+			doAfter(50) () ->
 				for u in militia[team]
 					u.addBuff(u, -1, DISARMED, 1)
 					u.issuePointOrder("move", militaSpawn[team])
 					if militiaDespawn[team].contains(u.getPos())
 						militia[team].remove(u)
 						u.remove()
-			end))
-			doAfter(89, () -> (begin
+			
+			doAfter(89) () ->
 				removeMilitaTimer[team].pause()
 				for u in militia[team]
 					militia[team].remove(u)
 					u.remove()
-			end))
+			
 

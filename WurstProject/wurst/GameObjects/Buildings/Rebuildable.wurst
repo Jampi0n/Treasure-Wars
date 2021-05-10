@@ -59,7 +59,7 @@ public abstract class Rebuildable extends Building
 
 		building.setTimeScale(60/this.rebuildTime)
 
-		doPeriodicallyCounted(0.1, count, (CallbackCounted cb) -> (begin
+		doPeriodicallyCounted(0.1, count) (CallbackCounted cb) ->
 			if cb.isLast()
 				let owner = building.getOwner()
 				let pos = building.getPos()
@@ -67,7 +67,7 @@ public abstract class Rebuildable extends Building
 				this.onRebuildFinish(createUnit(owner, this.unitTypeId, pos, (270).fromDeg()))
 			else
 				building.setHP(max(0.5, (1-cb.getCount()/count) * building.getMaxHP() ) )
-		end))
+		
 
 	function onRebuildStart(unit _building)
 	function onRebuildFinish(unit _building)

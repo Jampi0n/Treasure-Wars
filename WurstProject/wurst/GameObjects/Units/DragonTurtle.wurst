@@ -52,7 +52,7 @@ function onDragonTurtleDeath()
 
             PlayerWrapper.statDragonTurtlesKilled[killerId]++
 
-        doAfter(REVIVE_TIME, () -> (begin
+        doAfter(REVIVE_TIME) () ->
             udg_DragonTurtle = createUnit(players[CREEP_NORMAL_OWNER], DRAGON_TURTLE, spawnPos, facing)
             turtleIcon.show()
             SetUnitAcquireRange(udg_DragonTurtle, 200)
@@ -67,7 +67,7 @@ function onDragonTurtleDeath()
             ..modAgility(WILLPOWER[lvl])
             ..modAttackSpeed(ATTACK_SPEED[lvl])
 
-        end))
+        
 
 function dragonTurtleBonus(int id)
     PlayerWrapper.addGoldEx(id, TEAM_REWARD)

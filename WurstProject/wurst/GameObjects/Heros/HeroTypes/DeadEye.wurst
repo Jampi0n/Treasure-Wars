@@ -86,11 +86,11 @@ public class HeroDeadEye extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceStrength(0)
-        tooltip.setLearnString("Increases the damage of killing attacks against enemies and spawns a skeleton.", (int lvl) -> (begin
+        tooltip.setLearnString("Increases the damage of killing attacks against enemies and spawns a skeleton.") (int lvl) ->
             return "{0} damage, lasts {1} seconds.".format(
             BLACK_ARROW_THRESHOLD[lvl-1].str(), 
             BLACK_ARROW_DURATION[lvl-1].str())
-        end) )
+        
         
         for lvl = 1 to 5
             tooltip.setNormalString(false, lvl, "Increases the damage of killing attacks against enemies by {0} and spawns a skeleton for {1} seconds.".format( 
@@ -124,10 +124,10 @@ public class HeroDeadEye extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceStrength(PIERCING_SHOT_DAMAGE_BONUS)
-        tooltip.setLearnString("Shoots an arrow towards the target direction, dealing damage to enemies it strikes through.", (int lvl) -> (begin
+        tooltip.setLearnString("Shoots an arrow towards the target direction, dealing damage to enemies it strikes through.") (int lvl) ->
             return "{0}{S0} damage.".format(
             PIERCING_SHOT_DAMAGE[lvl-1].str())
-        end) )
+        
         
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, "Shoots an arrow towards the target direction, dealing {0}{S0} damage to enemies it strikes through.".format(
@@ -147,11 +147,11 @@ public class HeroDeadEye extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceIntelligence(TERROR_DURATION_BONUS)
-        tooltip.setLearnString("Terrifies nearby enemies, making them miss on their attacks.", (int lvl) -> (begin
+        tooltip.setLearnString("Terrifies nearby enemies, making them miss on their attacks.") (int lvl) ->
             return "{0}{I0} seconds, {1} area of effect.".format(
             TERROR_DURATION[lvl-1].str(),
             TERROR_AOE[lvl-1].str())
-        end) )
+        
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, "Terrifies enemies within {0} range, making them miss on their attacks for {1}{I0} seconds.".format(
                 TERROR_AOE[lvl-1].str(), TERROR_DURATION[lvl-1].toString()))
@@ -179,9 +179,9 @@ public class HeroDeadEye extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceIntelligence(TERROR_DURATION_BONUS)
-        tooltip.setLearnString("Swaps position with one of his skeletons.", (lvl) -> (begin
+        tooltip.setLearnString("Swaps position with one of his skeletons.") (lvl) ->
             return "{0} range, {1} seconds cooldown.".format( RANGE.data(lvl).str(), COOLDOWN.data(lvl).str())
-        end))
+        
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, "Swaps position with one of his skeletons.")
         addDynamicTooltipIntelligence(heroType, tooltip)
@@ -223,11 +223,11 @@ public class HeroDeadEye extends HeroTemplate
 
         var tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceIntelligence(DEATH_COIL_DMG_BASE_BONUS, DEATH_COIL_DMG_FACTOR_BONUS)
-        tooltip.setLearnString("Sacrifices all his skeletons to unlock the power of Death Coil for "+DEATH_COIL_DURATION.str()+" seconds.|nDeath Coil deals massive magic damage at the target enemy hero. Sacrificing more skeletons increases the damage of Death Coil.", (int lvl) -> (begin
+        tooltip.setLearnString("Sacrifices all his skeletons to unlock the power of Death Coil for "+DEATH_COIL_DURATION.str()+" seconds.|nDeath Coil deals massive magic damage at the target enemy hero. Sacrificing more skeletons increases the damage of Death Coil.") (int lvl) ->
             return "{0}{I0} base damage, {1}{I1} damage per sacrificed skeleton.".format(
             DEATH_COIL_DMG_BASE[lvl-1].str(),
             DEATH_COIL_DMG_FACTOR[lvl-1].str())
-        end) )
+        
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, "Sacrifices all his skeletons to unlock the power of Death Coil for {0} seconds.|nDeath Coil deals {1}{I0} plus {2}{I1} for every sacrificed skeleton magic damage to the target enemy hero.".format(
                 DEATH_COIL_DURATION.str(),
@@ -310,16 +310,16 @@ public class HeroDeadEye extends HeroTemplate
                 count++
             skeleton = FirstOfGroup(instance.skeletons)
         instance.skeletonCount = count
-        doAfter(0.25, () -> (begin
+        doAfter(0.25) () ->
             caster.hideAbility(spellId, true)
             caster.addAbility(ABILITY_DEATH_COIL)
             caster.setAbilityLevel(ABILITY_DEATH_COIL, level)
             caster.toHero().updateTooltipsInt()
-        end))
-        doAfter(DEATH_COIL_DURATION+1, () -> (begin
+        
+        doAfter(DEATH_COIL_DURATION+1) () ->
             caster.removeAbility(ABILITY_DEATH_COIL)
             caster.hideAbility(spellId, false)
-        end))
+        
     override function skillBuild() returns string
         return "QWQWQWQWQWEEEEE"
     override function recommendedItems(LinkedList<int> list)
@@ -379,18 +379,17 @@ public class HeroDeadEye extends HeroTemplate
             let instance = DeadEyInstance.fromUnit(source)
             let level = source.getAbilityLevel(ABILITY_ID_PASSIVE)
             if level!=0 and target.isTargetableEnemyUnit(source.getOwner()) and target.isVisible(source) and not target.isType(UNIT_TYPE_HERO)
-                doAfter(0, () -> (begin
+                doAfter(0) () ->
                     if(target.getHP() <= BLACK_ARROW_THRESHOLD[level-1])
                         let pos =  target.getPos()
                         source.dealDamage(target, BLACK_ARROW_THRESHOLD[level-1]+1, ReductionType.NONE)
-                        doAfter(0.1, () -> (begin
+                        doAfter(0.1) ->
                             let skeleton = createUnit(source.getOwner(), 'n00B'+level, pos, source.getPos().angleTo(target.getPos()))
                             skeleton.wrapper().setOwningHero(source.toHero())
                             skeleton.setTimedLife(BLACK_ARROW_DURATION[level-1])
                             instance.skeletons.addUnit(skeleton)
                             SOUND_BLACK_ARROW.playOnPoint(pos.toVec3()).snd.setVolume(150)
-                        end))
-                end))
+                            
     override function onInitDelayed(IHeroType heroType)
         onImpact(BUFF_ID_ON_DEATH_COIL) (unit source, unit target) ->
             let instance = DeadEyInstance.fromUnit(source)
@@ -399,10 +398,10 @@ public class HeroDeadEye extends HeroTemplate
                 GetEventDamageSource().dealDamage(target, 
                 DEATH_COIL_DMG_BASE[level-1].bonus(source.getHeroInt(), DEATH_COIL_DMG_BASE_BONUS)+
                 instance.skeletonCount*DEATH_COIL_DMG_FACTOR[level-1].bonus(source.getHeroInt(), DEATH_COIL_DMG_FACTOR_BONUS), ReductionType.MAGIC)
-            doAfter(1, () -> (begin
+            doAfter(1) () ->
                 source.removeAbility(ABILITY_DEATH_COIL)
                 source.hideAbility(ABILITY_ID_R, false)
-            end))
+            
 
         addPreDestroyEvent() (unit u) ->
             let owningHero = u.wrapper().getOwningHero()

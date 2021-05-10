@@ -161,11 +161,11 @@ function allPick()
     pickTimer = getTimer()
     ..start(pickTime.toReal(), function allPickEnd)
 
-    doAfter(1, () -> (begin
+    doAfter(1) () ->
         timerWindow = CreateTimerDialog(pickTimer)
         TimerDialogSetTitle(timerWindow,"Pick hero:")
         TimerDialogDisplay(timerWindow, true)
-    end))
+    
 
 function onClick()
     if locked
@@ -287,12 +287,12 @@ function startPickMode()
     chooseModeTimer= getTimer()
     ..start(30, function endPickMode)
 
-    doAfter(1, () -> (begin
+    doAfter(1) () ->
         if pickMode == PickMode.UNDECIDED
             timerWindow = CreateTimerDialog(chooseModeTimer)
             TimerDialogSetTitle(timerWindow,"Choose pick mode:")
             TimerDialogDisplay(timerWindow, true)
-    end))
+    
 
     print("|cffffcc00"+players[adminPlayer].getName()+" has 30 seconds to pick a mode!|r")
     print("|cffffcc00Available modes are all random (-ar) and all pick (-ap).|r")
@@ -305,10 +305,10 @@ init
 
     // DEBUG_MODE automatically chooses all pick
     if DEBUG_MODE
-        doAfter(0.1, () -> (begin
+        doAfter(0.1) () ->
             pickMode = PickMode.ALLPICK
             endPickMode()
-        end))
+        
 
     
     if DEBUG_MODE
