@@ -2,6 +2,7 @@ package StandardBuffs
 
 import Buff
 import UnitLib
+import IUnit
 
 /*
     Cannot be targeted by negative spells or attacks.
@@ -13,7 +14,7 @@ public constant INVULERNABLE = new BuffType(true, DispelLevel.NONE)
 public constant UNTARGETABLE = new BuffType(true, DispelLevel.NONE)
 
 init
-    dispelBuffsOnDeath()
+    IUnit.dispelBuffsOnDeath()
     INVULERNABLE.addSetupFunction() (Buff thisBuff, int factor) -> 
         if factor == 1
             let target = thisBuff.getTarget()

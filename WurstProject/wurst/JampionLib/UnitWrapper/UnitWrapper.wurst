@@ -122,31 +122,36 @@ unit wrappedUnit = null
 public function getWrappedUnit() returns unit
     return wrappedUnit
 
-public module UnitWrapper
-    private static constant unitMap = new HashMap<unit, thistype>()
-    private unit assocUnit
 
-    static abstract function callChildConstructor(unit u) returns thistype
-    abstract function callChildDestructor()
+
+public abstract class UnitWrapperSingleton
+    protected static UnitWrapperSingleton singleton
+    abstract function createNew(unit u)
+    construct()
+        singleton = this
+
+public abstract class UnitWrapper
+    private unit assocUnit
+    static constant toWrapper = new HashMap<unit, UnitWrapper>()
 
     function toUnit() returns unit
         return this.assocUnit
 
-    private construct()
-        this.assocUnit = wrappedUnit
-        unitMap.put(wrappedUnit, this)
+    private construct(unit u)
+        this.assocUnit = u
+        toWrapper.put(u, this)
 
     static function getWrapper(unit u) returns thistype
         if u == null or u.getTypeId() == 0
             error("Requesting wrapper for null unit.")
             return null
-        let w = unitMap.get(u)
+        let w = toWrapper.get(u)
         if w == null
             error("The unit " + u.getName() + "(" + u.getTypeId().toRawCode() + ") has no wrapper.")
         return w
 
     function destroyWrapper()
-        unitMap.remove(this.assocUnit)
+        toWrapper.remove(this.assocUnit)
 
     static function initWrapper()
         onEnter() ->
@@ -154,7 +159,7 @@ public module UnitWrapper
             if u != null and u.getTypeId() != 0 and u.getAbilityLevel(LOCUST_ID) == 0
                 runPreConstructEvents(u)
                 wrappedUnit = u
-                callChildConstructor(u)
+                UnitWrapperSingleton.singleton.createNew(u)
                 wrappedUnit = null
                 runPostConstructEvents(u)
         onLeave() ->
@@ -162,5 +167,8 @@ public module UnitWrapper
             if u.getAbilityLevel(LOCUST_ID) == 0
                 let wrapper = getWrapper(u)
                 runPreDestroyEvents(u)
-                wrapper.callChildDestructor()
+                destroy wrapper
                 runPostDestroyEvents(u)
+
+init
+    UnitWrapper.initWrapper()

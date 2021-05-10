@@ -380,7 +380,7 @@ public class HeroPaladin extends HeroTemplate
         ai.issue("roar")
 
         unit target = hero.findTarget(800, AbilityTargetFocus.ALLY_HERO, AbilityTargetPriority.LOW_HEALTH, (unit u) -> (begin
-            return not BuffList.hasBuffType(u, BUFF_HOLY_SHIELD)
+            return not u.wrapper().hasBuffOfType(BUFF_HOLY_SHIELD)
         end))
         if target.isTargetableAllied(hero)
             ai.issue("channel", target)

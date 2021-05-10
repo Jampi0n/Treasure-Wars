@@ -402,7 +402,7 @@ public class HeroWarlock extends HeroTemplate
                 trg.addAction() -> 
                     let u = GetTriggerUnit()
                     let pos = u.getPos()
-                    let whichBuff = BuffList.getBuffOfType(u, BUFF_SOUL_BURN)
+                    let whichBuff = u.wrapper().getBuffOfType(BUFF_SOUL_BURN)
                     let caster = whichBuff.getCaster()
                     let level = whichBuff.getLevel()
 
@@ -414,7 +414,7 @@ public class HeroWarlock extends HeroTemplate
                     while(not nearby.isEmpty())
                         let target = FirstOfGroup(nearby)
                         nearby.removeUnit(target)
-                        if target.isTargetableEnemyUnit(caster) and not BuffList.hasBuffType(target, BUFF_SOUL_BURN)
+                        if target.isTargetableEnemyUnit(caster) and not target.wrapper().hasBuffOfType(BUFF_SOUL_BURN)
                             target.addBuffReduced(caster, dur, BUFF_SOUL_BURN, level)
                 
                     nearby.destr()

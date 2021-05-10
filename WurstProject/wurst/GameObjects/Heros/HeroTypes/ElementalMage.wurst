@@ -356,8 +356,8 @@ public class HeroElementalMage extends HeroTemplate
             if level > 0
                 source.addBuff(source, FRENZY_DURATION, BUFF_FRENZY, level)
 
-            if BuffList.hasBuffType(target, BUFF_ELEMENTAL_MARK)
-                let mark = BuffList.getBuffOfType(target, BUFF_ELEMENTAL_MARK)
+            let mark = target.wrapper().getBuffOfType(BUFF_ELEMENTAL_MARK)
+            if mark != null
                 let markLevel = mark.getLevel()
                 int stacks = mark.getData() + 1
                 if stacks >= MARK_REQUIRED_STACKS

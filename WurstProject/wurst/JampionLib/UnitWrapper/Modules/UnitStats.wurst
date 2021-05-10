@@ -22,7 +22,6 @@ Adds unit stats functionality to the unit wrapper.
 The apply<Stat> functions need to be overridden to have an effect.
 **/
 public module UnitStats
-
     private CalculateTotalBonus bonusCalculation = null
 
     private real scaleAttackAnimation = 1.0

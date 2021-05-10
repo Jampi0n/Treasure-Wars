@@ -70,9 +70,9 @@ public function unit.isTargetableAnyUnit(unit source) returns boolean
 public function unit.isMovable() returns boolean
     if GetUnitPropWindow(this) < 0.00001
         return false
-    if BuffList.hasBuffType(this, ENSNARED)
+    if this.wrapper().hasBuffOfType(ENSNARED)
         return false
-    if BuffList.hasBuffType(this, ENTANGLED)
+    if this.wrapper().hasBuffOfType(ENTANGLED)
         return false
     if this.getDefaultMovespeed() == 0
         return false
@@ -102,8 +102,8 @@ public function unit.addBuff(unit caster, real duration, BuffType buffType, int 
         error("addBuff add buff with unusual duration: " + duration.toString())
     if this.isAlive()
         execute() () ->
-            Buff.applyBuff(this, caster, duration, buffType, level)
-        ret = BuffList.getBuffOfType(this, buffType)
+            this.wrapper().addBuff(caster, buffType, duration, level)
+        ret = this.wrapper().getBuffOfType(buffType)
     return ret
 
 public function unit.addBuffReduced(unit caster, real duration, BuffType buffType, int level) returns Buff
@@ -116,8 +116,8 @@ public function unit.addBuffReduced(unit caster, real duration, BuffType buffTyp
         error("addBuffReduced add buff with unusual duration: " + realDuration.toString() + " " + (buffType castTo int).toString())
     if this.isAlive()
         execute() () ->
-            Buff.applyBuff(this, caster, realDuration, buffType, level)
-        ret = BuffList.getBuffOfType(this, buffType)
+            this.wrapper().addBuff(caster, buffType, realDuration, level)
+        ret = this.wrapper().getBuffOfType(buffType)
     return ret
 
 

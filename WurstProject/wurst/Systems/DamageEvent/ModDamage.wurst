@@ -16,6 +16,7 @@ import ItemIdDefinitions
 import ItemsDefense
 import ClosureTimers
 import StandardBuffs
+import IUnit
 /*
 Optimized damage modification function.
 Items are handled by using DamageIds.
@@ -40,7 +41,7 @@ public abstract class ModDamage
                 if advanced
                     if sourceTypeId == HeroTrollBerserker.UNIT_TYPE_ID or sourceTypeId == HeroTrollBerserker.HERO_TROLL_BERSERKER_MELEE
                         if not target.isType(UNIT_TYPE_STRUCTURE)
-                            let critical = BuffList.getBuffOfType(source, HeroTrollBerserker.BUFF_CRITICAL_STRIKE)
+                            let critical = source.wrapper().getBuffOfType(HeroTrollBerserker.BUFF_CRITICAL_STRIKE)
                             currentDamage = currentDamage * (100 + HeroTrollBerserker.CRITICAL_DAMAGE_MULT[critical.getLevel()-1])/100
                             createCriticalStrikeTextTag(target, currentDamage.toInt())
                             critical.dispel()
@@ -71,8 +72,8 @@ public abstract class ModDamage
 
                 // mana shield - SEA DRUID
                 if targetTypeId == HeroSeaDruid.UNIT_TYPE_ID
-                    if BuffList.hasBuffType(target, HeroSeaDruid.buffManaShield)
-                        let manaShield = BuffList.getBuffOfType(target, HeroSeaDruid.buffManaShield)
+                    if target.wrapper().hasBuffOfType(HeroSeaDruid.buffManaShield)
+                        let manaShield = target.wrapper().getBuffOfType(HeroSeaDruid.buffManaShield)
                         let level = manaShield.getLevel()
                         manaShield.getTarget().damageMana(manaShield.getTarget(), HeroSeaDruid.MANA_SHIELD_REDUCTION[level-1] * HeroSeaDruid.MANA_PER_DAMAGE[level-1] * currentDamage, ReductionType.NONE)
                         currentDamage = currentDamage * (1.-HeroSeaDruid.MANA_SHIELD_REDUCTION[level-1])
@@ -85,7 +86,7 @@ public abstract class ModDamage
                 if targetWrapper.loadIntFast(D_HEART_AMULET) > 0
                     let remainingHp = target.getHP() - currentDamage
                     if remainingHp < 0.5
-                        if PassiveItemCooldown.tryStartCooldown(target, ITEM_ID_HEART_AMULET, HEART_AMULET_PASSIVE, HEART_AMULET_COOLDOWN * 1.0) or BuffList.hasBuffType(target, HEART_AMULET_BUFF)
+                        if PassiveItemCooldown.tryStartCooldown(target, ITEM_ID_HEART_AMULET, HEART_AMULET_PASSIVE, HEART_AMULET_COOLDOWN * 1.0) or target.wrapper().hasBuffOfType(HEART_AMULET_BUFF)
                             currentDamage += remainingHp - 0.5
                             target.addBuff(target, HEART_AMULET_DURATION * 1.0, HEART_AMULET_BUFF, 1)
                             // delay invulnerable

@@ -13,8 +13,11 @@ import UnitStats
 import BonusMod
 import Buff
 
-public class IUnit
-    use UnitWrapper
+class IUnitSingleton extends UnitWrapperSingleton
+    override function createNew(unit u)
+        new IUnit(u)
+
+public class IUnit extends UnitWrapper
     use UnitInfo
     use UnitColor
     use UnitStats
@@ -34,15 +37,11 @@ public class IUnit
         destroyInfo()
         destroyWrapper()
 
-    override static function callChildConstructor(unit u) returns IUnit
-        return new IUnit(u)
-
-    override function callChildDestructor()
-        destroy this
-
     construct(unit u)
+        super(u)
         this.setStatBaseInternal(Stat.STR, this.getDamageBase())
         this.setStatBaseInternal(Stat.AD, 0)
+        this.applyBaseStats()
         this.team = Players.team(this.getOwnerId())
 
         this.isHero = u.isType(UNIT_TYPE_HERO)
@@ -132,12 +131,7 @@ public class IUnit
                 this.hero.updateCooldowns()
 
 public function unit.wrapper() returns IUnit
-    return IUnit.getWrapper(this)
+    return IUnit.getWrapper(this) castTo IUnit
 
 init
-    IUnit.initWrapper()
-    BuffConfiguration.setGetBuffListFunction() (unit u) ->
-        return u.wrapper().getBuffList()
-
-    BuffConfiguration.setCreateBuffListFunction() (unit u)  ->
-        u.wrapper().createBuffList()
+    new IUnitSingleton()

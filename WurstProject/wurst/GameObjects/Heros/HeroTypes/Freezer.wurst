@@ -49,7 +49,7 @@ class Freeze
         let g = CreateGroup()
         g.enumUnitsInRect(playableMapRect)
         for unit u in g
-            let freezeBuff = BuffList.getBuffOfType(u, HeroFreezer.BUFF_FREEZE)
+            let freezeBuff = u.wrapper().getBuffOfType(HeroFreezer.BUFF_FREEZE)
             if freezeBuff != null
                 if freezeBuff.getCaster() == this.caster
                     freezeBuff.dispel()
@@ -472,7 +472,7 @@ public class HeroFreezer extends HeroTemplate
 
             
         unit target = hero.findTarget(600, AbilityTargetFocus.FRIEND_HERO, AbilityTargetPriority.HIGH_HEALTH, (unit u) -> (begin
-            return not BuffList.hasBuffType(u, BUFF_FROST_ARMOR)
+            return not u.wrapper().hasBuffOfType(BUFF_FROST_ARMOR)
         end))
         if target.isTargetableAllied(hero)
             ai.issue("frostarmor", target)
@@ -520,7 +520,7 @@ public class HeroFreezer extends HeroTemplate
                 forstArmor.intelligence = intel
                 forstArmor.damageEventPointer = DamageEventUnit.fromUnit(target).attackHitNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
                     if source.isTargetableEnemy(target)
-                        let armorBuff = BuffList.getBuffOfType(target, BUFF_FROST_ARMOR)
+                        let armorBuff = target.wrapper().getBuffOfType(BUFF_FROST_ARMOR)
                         source.addBuffReduced(armorBuff.getCaster(), ARMOR_SLOW_DURATION[level-1].bonus(armorBuff.getData(), ARMOR_SLOW_DURATION_BONUS), BUFF_FROST_ARMOR_SLOW, level)
                 thisBuff.setData(forstArmor castTo int)
             else

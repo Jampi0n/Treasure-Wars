@@ -3,10 +3,8 @@ package Buff
 import TimerUtils
 import LinkedList
 import InstantDummyCaster
-import OnUnitEnterLeave
 import HashMap
 import ErrorHandling
-import ClosureTimers
 import Execute
 import AbilityPresets
 
@@ -20,26 +18,6 @@ public enum DispelLevel
     NONE // cannot be removed at all
 
 
-public interface GetBuffListFunction
-    function getBuffList(unit u) returns BuffList
-public interface CreaetBuffListFunction
-    function createBuffList(unit u)
-
-GetBuffListFunction getBuffListFunction = null
-CreaetBuffListFunction createBuffListFunction = null
-
-public abstract class BuffConfiguration
-    static function setGetBuffListFunction(GetBuffListFunction getBuffList)
-        if getBuffListFunction != null
-            error("The getBuffListFunction was already configured. If you use useNativeBuffListAllocation, you must not use setGetBuffListFunction.")
-        else
-            getBuffListFunction = getBuffList
-    static function setCreateBuffListFunction(CreaetBuffListFunction createBuffList)
-        if createBuffListFunction != null
-            error("The createBuffListFunction was already configured. If you use useNativeBuffListAllocation, you must not use setCreateBuffListFunction.")
-        else
-            createBuffListFunction = createBuffList
-
 
 /*
     configuration: useNativeBuffListAllocation
@@ -49,54 +27,11 @@ public abstract class BuffConfiguration
 
 constant unitToBuffList = new HashMap<unit, BuffList>()
 
-public function useNativeBuffListAllocation()
-    onLeave( () -> (begin
-        if not getEnterLeaveUnit().hasAbility('Aloc')
-            let bList = getBuffListFunction.getBuffList(getEnterLeaveUnit())
-
-            if bList != null
-                for Buff b in bList.getLinkedList()
-                    b.dispel()
-
-                destroy bList
-                unitToBuffList.remove(getEnterLeaveUnit())
-    end))
-
-    BuffConfiguration.setCreateBuffListFunction( (unit u) -> (begin
-        let bList = new BuffList
-        unitToBuffList.put(u, bList)
-        return bList
-    end))
-
-    BuffConfiguration.setGetBuffListFunction( (unit u) -> (begin
-        let bList = unitToBuffList.get(u)
-        return bList
-    end))
-
 /*
     configuration: dispelBuffsOnDeath
     autoamtically dispels buffs when a unit dies
 */
-
-public function dispelBuffsOnDeath()
-    CreateTrigger()
-    ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
-    ..addAction(() -> (begin
-        //delay, so in case the unit dies inside a BuffEventClosure, the buff does not get destroyed.
-        let u = GetTriggerUnit()
-        doAfter(0, () ->(begin
         
-            let bList = getBuffListFunction.getBuffList(u)
-
-            if bList != null
-                for Buff b in bList.getLinkedList()
-                    b.dispel()
-        end))
-    end))
-        
-
-
-
 
 public interface BuffEventClosure
     function run(Buff whichBuff)
@@ -277,30 +212,23 @@ public class BuffList
     function remove(Buff removeBuff)
         this.linkedList.remove(removeBuff)
 
-    static function getBuffOfType(unit target, BuffType buffType) returns Buff
-        Buff retBuff = null
-        let buffList = getBuffListFunction.getBuffList(target)
-        if buffType != null
-            if buffList != null
-                for Buff currentBuff in buffList.getLinkedList()
-                    if(currentBuff.getBuffType() == buffType)
-                        retBuff = currentBuff
-                        break
-        return retBuff
+    function hasBuff(Buff b) returns bool
+        for Buff bf in this.getLinkedList()
+            if bf == b
+                return true
+        return false
 
-    static function hasBuffType(unit target, BuffType buffType) returns boolean
-        return getBuffOfType(target, buffType) != null
+    function hasBuffOfType(BuffType bType) returns bool
+        return getBuffOfType(bType) != null
 
-    static function hasBuff(unit target, Buff whichBuff) returns boolean
-        let buffList = getBuffListFunction.getBuffList(target)
-        boolean ret = false
-        if buffList != null
-            for Buff bf in buffList.getLinkedList()
-                if bf == whichBuff
-                    ret = true
-                    break
+    function getBuffOfType(BuffType bType) returns Buff
+        if bType != null
+            if bType != null
+                for Buff currentBuff in this.getLinkedList()
+                    if(currentBuff.getBuffType() == bType)
+                        return currentBuff
+        return null
 
-        return ret
 
     function getLinkedList() returns LinkedList<Buff>
         return this.linkedList
@@ -319,6 +247,7 @@ public class Buff
     private unit target
     private int level
     private BuffType buffType
+    private BuffList buffList
     private timer expireTimer
     private LinkedList<BuffEventClosure> onStack
     private LinkedList<BuffEventClosure> onApply
@@ -339,7 +268,7 @@ public class Buff
 
     private int customData = 0
 
-    private construct(unit target, unit caster, real duration, BuffType buffType, int level)
+    private construct(BuffList buffList, unit target, unit caster, real duration, BuffType buffType, int level)
         buffCount++
        
         this.expireTimer = getTimer()
@@ -347,13 +276,11 @@ public class Buff
         if duration > -0.5
             this.expireTimer.start(duration, function expireStatic)
 
-        if getBuffListFunction.getBuffList(target) == null //allocate new buffList
-            createBuffListFunction.createBuffList(target)
-
         this.caster = caster
         this.target = target
         this.level = level
         this.buffType = buffType
+        this.buffList = buffList
         this.onStack = buffType.onStack
         this.onApply = buffType.onApply
         this.onExpire = buffType.onExpire
@@ -371,7 +298,7 @@ public class Buff
         else
             this.periodicTimer = null
 
-        getBuffListFunction.getBuffList(target).add(this)
+        buffList.add(this)
         if this.buffType.abilities != null
             for abil in this.buffType.abilities
                 target.addAbility(abil)
@@ -385,8 +312,8 @@ public class Buff
             for BuffEventClosure cb in this.onApply
                 cb.run(this)
 
-    static function applyBuff(unit target, unit caster, real duration, BuffType buffType, int level)
-        let oldBuff = BuffList.getBuffOfType(target, buffType)
+    static function addBuff(BuffList buffList, unit target, unit caster, BuffType buffType, real duration, int level)
+        let oldBuff = buffList.getBuffOfType(buffType)
         if oldBuff != null
             if oldBuff.toBeRemoved
                 oldBuff.reapplyAfterRemoval = true
@@ -396,7 +323,7 @@ public class Buff
             else
                 oldBuff.update(caster, duration, level)
         else
-            new Buff(target, caster, duration, buffType, level)
+            new Buff(buffList, target, caster, duration, buffType, level)
         
 
     private function onPeriodic()
@@ -515,8 +442,6 @@ public class Buff
     ondestroy
         buffCount--
 
-        let buffList = getBuffListFunction.getBuffList(target)
-
         if buffList!=null
             buffList.remove(this)
 
@@ -528,7 +453,7 @@ public class Buff
         //do not modify triggers. They belong to the BuffType
 
         if this.reapplyAfterRemoval
-            applyBuff(this.target, this.reapplyCaster, this.reapplyDuration, this.buffType, this.reapplyLevel)
+            addBuff(buffList, this.target, this.reapplyCaster, this.buffType, this.reapplyDuration, this.reapplyLevel)
 
 public function debugBuff()
     print("BuffTypeCount = "+buffTypeCount.toString())

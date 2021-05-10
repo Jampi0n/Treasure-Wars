@@ -313,8 +313,8 @@ public class HeroTrollManHunter extends HeroTemplate
             if u == null
                 break
             g.removeUnit(u)
-            if BuffList.hasBuffType(u, BUFF_BLEEDING_WOUND)
-                let bleedingWound = BuffList.getBuffOfType(u, BUFF_BLEEDING_WOUND)
+            if u.wrapper().hasBuffOfType(BUFF_BLEEDING_WOUND)
+                let bleedingWound = u.wrapper().getBuffOfType(BUFF_BLEEDING_WOUND)
                 let stacks = bleedingWound.getData() div 4
                 u.addBuffReduced(caster, CRIPPLING_PAIN_DURATION[level-1], BUFF_CRIPPLING_PAIN, level)
 
@@ -438,7 +438,7 @@ public class HeroTrollManHunter extends HeroTemplate
         
         // store number of stacks of bleeding wound
         BUFF_CRIPPLING_PAIN.addSetupFunction() (Buff thisBuff, int factor) ->
-            let bleedingWound = BuffList.getBuffOfType(thisBuff.getTarget(), BUFF_BLEEDING_WOUND)
+            let bleedingWound = thisBuff.getTarget().wrapper().getBuffOfType(BUFF_BLEEDING_WOUND)
             if bleedingWound != null
                 thisBuff.setData(bleedingWound.getData() div 4)
                 bleedingWound.dispel()

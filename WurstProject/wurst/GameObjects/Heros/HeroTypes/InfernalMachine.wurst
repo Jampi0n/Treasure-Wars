@@ -384,8 +384,9 @@ public class HeroInfernalMachine extends HeroTemplate
                     doAfter(0, () -> caster.issueTargetOrder("attack", target))
         end))
         caster.disableAbility(HeroInfernalMachine.instance.ABILITY_ID_Q, true, false)
-        if BuffList.hasBuffType(caster, BUFF_BASH)
-            BuffList.getBuffOfType(caster, BUFF_BASH).dispel()
+        let w = caster.wrapper()
+        if w.hasBuffOfType(BUFF_BASH)
+            w.getBuffOfType(BUFF_BASH).dispel()
 
     static function onRapidEndStats(unit caster, int level) // remove bonus
         caster.wrapper().modAttackSpeed( -RAPID_FIRE_ATTACK_SPEED[level-1])
@@ -495,8 +496,8 @@ public class HeroInfernalMachine extends HeroTemplate
     override function onInit(IHeroType heroType)
         heroType.setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean advanced) ->
             if target.isTargetableEnemyUnit(source)
-                if source.getTypeId() == UNIT_ID_HERO and BuffList.hasBuffType(source, BUFF_BASH)
-                    let bash = BuffList.getBuffOfType(source, BUFF_BASH)
+                if source.getTypeId() == UNIT_ID_HERO and source.wrapper().hasBuffOfType(BUFF_BASH)
+                    let bash = source.wrapper().getBuffOfType(BUFF_BASH)
                     target.addBuffReduced(source, BASH_STUN_DURATION[bash.getLevel()-1], STUNNED, 1).setDispelLevel(DispelLevel.DISPEL)
                     source.dealDamage(target, BASH_DAMAGE_BONUS[bash.getLevel()-1].toReal(), ReductionType.PHYSICAL)
                     bash.dispel()

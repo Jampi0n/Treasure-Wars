@@ -2,13 +2,20 @@ package UnitBuffs
 
 import Buff
 import ErrorHandling
+import UnitWrapper
+import ClosureTimers
 
 /**
 Adds a buff system to the unit wrapper.
 The buff functions need to be registered according to the Buff package.
 **/
 public module UnitBuffs
-    protected BuffList buffList
+    private BuffList buffList
+
+    private function wrapper() returns UnitWrapper
+        return (this castTo int) castTo UnitWrapper
+    private static function fromUnit(unit u) returns thistype
+        return (UnitWrapper.getWrapper(u) castTo int) castTo thistype
 
     construct()
         this.buffList = null
@@ -24,9 +31,45 @@ public module UnitBuffs
 
             destroy this.buffList
 
-    function createBuffList() returns BuffList
+    private function createBuffList() returns BuffList
         if this.buffList == null
             this.buffList = new BuffList()
         else
             error("This unit wrapper already has a buffList")
         return this.buffList
+
+    function hasBuff(Buff b) returns bool
+        if this.buffList != null
+            return this.buffList.hasBuff(b)
+        else
+            return false
+
+    function hasBuffOfType(BuffType bType) returns bool
+        if this.buffList != null
+            return this.buffList.hasBuffOfType(bType)
+        else
+            return false
+
+    function getBuffOfType(BuffType bType) returns Buff
+        if this.buffList != null
+            return this.buffList.getBuffOfType(bType)
+        else
+            return null
+
+    function addBuff(unit caster, BuffType buffType, real duration, int level) returns Buff
+        if this.buffList == null
+            this.createBuffList()
+        Buff.addBuff(this.buffList, wrapper().toUnit(), caster, buffType, duration, level)
+        return this.getBuffOfType(buffType)
+
+    static function dispelBuffsOnDeath()
+        CreateTrigger()
+        ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
+        ..addAction() ->
+            //delay, so in case the unit dies inside a BuffEventClosure, the buff does not get destroyed.
+            let u = GetTriggerUnit()
+            nullTimer() ->
+                let bList = fromUnit(u).buffList
+                if bList != null
+                    for Buff b in bList.getLinkedList()
+                        b.dispel()

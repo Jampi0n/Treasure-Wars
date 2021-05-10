@@ -259,8 +259,7 @@ public class HeroDestroyer extends HeroTemplate
         setStat(Stat.INT, 13, 34)
 
     function onAttack(unit attacker, unit target, boolean _isActive)
-
-        let prey = BuffList.getBuffOfType(target, BUFF_PREY_TARGET)
+        let prey = target.wrapper().getBuffOfType(BUFF_PREY_TARGET)
         if prey != null
             let level = prey.getLevel()
             attacker.dealDamage(target, PREY_BONUS_DAMAGE[level-1], ReductionType.PHYSICAL)
@@ -348,7 +347,7 @@ public class HeroDestroyer extends HeroTemplate
 
     override function onInit(IHeroType heroType)
         heroType.setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
-            let prey = BuffList.getBuffOfType(target, BUFF_PREY_TARGET)
+            let prey = target.wrapper().getBuffOfType(BUFF_PREY_TARGET)
             if prey != null
                 let level = prey.getLevel()
                 source.dealDamage(target, PREY_BONUS_DAMAGE[level-1], ReductionType.PHYSICAL)
@@ -397,7 +396,7 @@ public class HeroDestroyer extends HeroTemplate
                 if thisBuff.getData()==1
                     caster.wrapper().modMoveSpeedRelative( -PREY_MOVE_SPEED[level-1]*10)
 
-                let casterBuff = BuffList.getBuffOfType(caster, BUFF_PREY_CASTER)
+                let casterBuff = caster.wrapper().getBuffOfType(BUFF_PREY_CASTER)
                 if casterBuff!= null
                     casterBuff.dispel()
 

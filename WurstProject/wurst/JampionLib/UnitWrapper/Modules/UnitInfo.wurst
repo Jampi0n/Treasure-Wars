@@ -6,16 +6,19 @@ import UnitWrapper
 Caches information about the unit.
 **/
 public module UnitInfo
-    private unit u
     private player owner
     private int ownerId
     private int unitTypeId
 
+    private function wrapper() returns UnitWrapper
+        return (this castTo int) castTo UnitWrapper
+    private static function fromUnit(unit u) returns thistype
+        return (UnitWrapper.getWrapper(u) castTo int) castTo thistype
+
     construct()
-        this.u = getWrappedUnit()
-        this.owner = getWrappedUnit().getOwner()
+        this.owner = wrapper().toUnit().getOwner()
         this.ownerId = this.owner.getId()
-        this.unitTypeId = getWrappedUnit().getTypeId()
+        this.unitTypeId = wrapper().toUnit().getTypeId()
 
     function getOwner() returns player
         return this.owner
@@ -29,7 +32,7 @@ public module UnitInfo
     function setOwner(player p, bool changeColor)
         this.owner = p
         this.ownerId = p.getId()
-        this.u.setOwner(p, changeColor)
+        wrapper().toUnit().setOwner(p, changeColor)
 
     function setOwnerId(int id, bool changeColor)
         setOwner(players[id], changeColor)

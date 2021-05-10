@@ -91,7 +91,7 @@ function itemBootsRunner()
         runnerInactive.addSetupFunction() (Buff thisBuff, int factor) ->
             if factor == 1
                 // remove active when inactive starts
-                let active = BuffList.getBuffOfType(thisBuff.getTarget(), BUFF_RUNNER_ACTIVE)
+                let active = thisBuff.getTarget().wrapper().getBuffOfType(BUFF_RUNNER_ACTIVE)
                 if active != null
                     active.setData(1) // removes active without reapplying inactive
                     active.dispel()
@@ -111,10 +111,10 @@ function itemBootsRunner()
                 getItemUnit().addBuff(getItemUnit(), dur.toReal(), runnerInactive, 1)
             else
                 let u = getItemUnit()
-                let inactive = BuffList.getBuffOfType(u, runnerInactive)
+                let inactive = u.wrapper().getBuffOfType(runnerInactive)
                 if inactive != null
                     inactive.dispel()
-                let active = BuffList.getBuffOfType(u, BUFF_RUNNER_ACTIVE)
+                let active = u.wrapper().getBuffOfType(BUFF_RUNNER_ACTIVE)
                 if active != null
                     active.setData(1) // removes active without reapplying inactive
                     active.dispel()

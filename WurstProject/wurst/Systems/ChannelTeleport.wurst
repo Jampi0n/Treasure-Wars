@@ -10,6 +10,7 @@ import ObjectIdGenerator
 import UnitObjEditing
 import TimerUtils
 import FastDamageEvent
+import IUnit
 
 function generateProgressDummy() returns int
     let id = UNIT_ID_GEN.next()
@@ -84,7 +85,8 @@ public class ChannelTeleport
             destroy this
         else
             let u = GetTriggerUnit()
-            if BuffList.hasBuffType(u, STUNNED) or BuffList.hasBuffType(u, SILENCED) or not u.isMovable()
+            let w = u.wrapper()
+            if w.hasBuffOfType(STUNNED) or w.hasBuffOfType(SILENCED) or not u.isMovable()
                 destroy this
 
     private function onTeleport()

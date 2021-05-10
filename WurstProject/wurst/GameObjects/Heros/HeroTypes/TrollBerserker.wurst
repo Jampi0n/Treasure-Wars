@@ -264,7 +264,7 @@ public class HeroTrollBerserker extends HeroTemplate
         doAfter(0, () -> (begin
             caster.toHero().morph()
             onMeleeStats(caster, level)
-            if BuffList.hasBuffType(caster, BUFF_GROWTH)
+            if caster.wrapper().hasBuffOfType(BUFF_GROWTH)
                 caster.setScale(GROWTH_SCALE)
         end))
 
@@ -277,7 +277,7 @@ public class HeroTrollBerserker extends HeroTemplate
         doAfter(0, () -> (begin
             caster.toHero().morph()
             onRangedStats(caster, level)
-            if BuffList.hasBuffType(caster, BUFF_GROWTH)
+            if caster.wrapper().hasBuffOfType(BUFF_GROWTH)
                 caster.setScale(GROWTH_SCALE)
         end))
 
