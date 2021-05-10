@@ -50,7 +50,38 @@ public class RandomSet<T>
         remove(data)
         return data
 
+    protected function getAt(int index) returns T
+        return toData.get(index)
+
+    function hasNext() returns bool
+        return size > 0
+
+    function next() returns T
+        return removeRandom()
+
+    function iterator() returns RandomSetIterator<T>
+        return new RandomSetIterator<T>(this)
+
+    function close()
+        destroy this
+
     ondestroy
         destroy this.toData
         destroy this.toIndex
 
+class RandomSetIterator<T>
+    RandomSet<T> randomSet
+    int position = 0
+    construct(RandomSet<T> randomSet)
+        this.randomSet = randomSet
+
+    function hasNext() returns bool
+        return position < randomSet.size() - 1
+
+    function next() returns T
+        let elem =  randomSet.getAt(position)
+        position++
+        return elem
+
+    function close()
+        destroy this

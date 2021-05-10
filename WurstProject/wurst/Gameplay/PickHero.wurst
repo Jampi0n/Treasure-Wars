@@ -2,7 +2,6 @@ package PickHero
 import TimerUtils
 import ClosureTimers
 import Gameplay
-import HashMap
 import ShopUI
 import ShopManager
 import ErrorHandling
@@ -16,6 +15,7 @@ import IHero
 import HeroImpl
 import HeroTypeImpl
 import IUnit
+import RandomSet
 
 public PickMode pickMode
 timer chooseModeTimer
@@ -33,10 +33,7 @@ unit array tavern
 unit array patron
 fogmodifier array tavernVision
 bool array playerHasPicked
-
-IHeroType array remainingHeroTypes
-int remainingHeroTypesCount
-constant heroTypeIndex = new HashMap<IHeroType, int>()
+constant randomHeroes = new RandomSet<IHeroType>()
 
 enum PickMode
     UNDECIDED
@@ -66,15 +63,12 @@ function setupCreatedHero(IHero hero)
         pos = gg_rct_BrownAltar.getCenter()-vec2(128,128)
 
     if owner.getController() == MAP_CONTROL_COMPUTER and owner.getSlotState() == PLAYER_SLOT_STATE_PLAYING
-        doAfter(GetRandomReal(1, 3), () -> ( begin
+        doAfter(GetRandomReal(1, 3)) ->
             let ai = HeroAI.create(hero, GetAIDifficulty(owner))
             ai.togglePause()
-            doAfter(GetRandomReal(48, 52), () -> (begin
+            doAfter(GetRandomReal(48, 52)) ->
                 ai.togglePause()
-            end))
-        end))
 
-    
     heroUnit.setPos(pos)
     getGUI(owner.getId())
     ..start(heroUnit)
@@ -95,53 +89,27 @@ function setupCreatedHero(IHero hero)
 
 
 function createRandomHeroForAI(int id, boolean removeFromTavern) returns IHero
-    int random
-
-
+    IHeroType random
     while(true)
-        random = GetRandomInt(0, remainingHeroTypesCount-1)
-        if remainingHeroTypes[random].hasAI()
+        random = randomHeroes.getRandom()
+        if random.hasAI()
             break
-
-    let hero = Hero.create(id, remainingHeroTypes[random].getUnitId() , gg_rct_CenterMid.getCenter(), angle(0))
+    let hero = Hero.create(id, random.getUnitId() , gg_rct_CenterMid.getCenter(), angle(0))
     setupCreatedHero(hero)
-
-
-
-
-
-
-
-    removeHeroType(remainingHeroTypes[random], removeFromTavern)
+    removeHeroType(random, removeFromTavern)
     return hero
 
 
 //creates a random hero for a player
 function createRandomHero(int id, boolean removeFromTavern)
-    let random = GetRandomInt(0, remainingHeroTypesCount-1)
-
-    let hero = Hero.create(id, remainingHeroTypes[random].getUnitId() , gg_rct_CenterMid.getCenter(), angle(0))
+    let random = randomHeroes.getRandom()
+    let hero = Hero.create(id, random.getUnitId() , gg_rct_CenterMid.getCenter(), angle(0))
     setupCreatedHero(hero)
+    removeHeroType(random, removeFromTavern)
 
 
-
-
-
-
-
-    removeHeroType(remainingHeroTypes[random], removeFromTavern)
-
-
-function removeHeroType(IHeroType herotype, boolean _removeFromTavern)
-    let index = heroTypeIndex.get(herotype)
-
-
-    heroTypeIndex.put(remainingHeroTypes[remainingHeroTypesCount-1], index)
-    heroTypeIndex.remove(remainingHeroTypes[index])
-
-    remainingHeroTypes[index] = remainingHeroTypes[remainingHeroTypesCount-1]
-    remainingHeroTypes[remainingHeroTypesCount-1]=null
-    remainingHeroTypesCount--
+function removeHeroType(IHeroType heroType, boolean _removeFromTavern)
+    randomHeroes.remove(heroType)
 
 
 function allRandom()
@@ -170,9 +138,6 @@ function allPick()
     for i = 0 to 47
         tavern[i div 12].addAbility(getTavernButton(i))
     
-
-
-
     for i = 0 to MAX_HERO_COUNT-1
         if PlayerWrapper.getPlayerType(i) == PlayerType.HERO
             players[i].setGold(HERO_GOLD_COST)
@@ -181,9 +146,6 @@ function allPick()
             tavernVision[i] = CreateFogModifierRadius(players[i], FOG_OF_WAR_VISIBLE,
                                 gg_rct_CenterMid.getCenterX(),  gg_rct_CenterMid.getCenterX(), 900, true, false)
             FogModifierStart(tavernVision[i])
-
-
-   
 
     pickRegion = CreateRegion()
     ..addRect(bj_mapInitialPlayableArea)
@@ -309,11 +271,9 @@ function startPickMode()
         playerHasPicked[i] = false
 
     //copies the array of hero types
-    remainingHeroTypesCount = HeroType.getNumberOfTypes()
-
-    for i = 0 to remainingHeroTypesCount-1
-        remainingHeroTypes[i] = HeroType.getNthType(i)
-        heroTypeIndex.put(HeroType.getNthType(i), i)
+    
+    for i = 0 to HeroType.getNumberOfTypes()
+        randomHeroes.add(HeroType.getNthType(i))
 
     PanCameraToTimed(gg_rct_CenterMid.getCenterX(), gg_rct_CenterMid.getCenterY(), 0)
     
