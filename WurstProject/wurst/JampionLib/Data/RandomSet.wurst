@@ -76,7 +76,7 @@ class RandomSetIterator<T>
         this.randomSet = randomSet
 
     function hasNext() returns bool
-        return position < randomSet.size() - 1
+        return position < randomSet.size()
 
     function next() returns T
         let elem =  randomSet.getAt(position)
