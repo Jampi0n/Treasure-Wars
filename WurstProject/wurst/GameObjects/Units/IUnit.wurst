@@ -51,7 +51,7 @@ public class IUnit extends UnitWrapper
             if this.heroType == null
                 error("HeroType could not be resolved: " + u.getName())
 
-    function initAsHero(IHero hero)
+    function setHero(IHero hero)
         this.hero = hero
 
     function getHeroType() returns IHeroType

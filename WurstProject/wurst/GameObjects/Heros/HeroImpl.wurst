@@ -175,7 +175,7 @@ public class HeroImpl implements IHero
             Players.addHero(this.ownerId, this)
 
         let wrapper = this.hero.wrapper()
-        wrapper.initAsHero(this)
+        wrapper.setHero(this)
 
         if this.permanent
             onDeathTrigger.registerUnitEvent(this.hero, EVENT_UNIT_DEATH)
