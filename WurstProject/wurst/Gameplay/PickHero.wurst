@@ -107,10 +107,10 @@ function createRandomHero(int id, boolean removeFromTavern)
     setupCreatedHero(hero)
     removeHeroType(random, removeFromTavern)
 
-
-function removeHeroType(IHeroType heroType, boolean _removeFromTavern)
+function removeHeroType(IHeroType heroType, boolean removeFromTavern)
     randomHeroes.remove(heroType)
-
+    if removeFromTavern
+        tavern[getTavernFromHero(heroType)].removeAbility(getButtonFromHero(heroType))
 
 function allRandom()
     for i = 0 to MAX_HERO_COUNT-1
@@ -174,7 +174,6 @@ function onClick()
 
     locked = true
     clickedButtonId = GetSpellAbilityId()
-    let triggerTavern = GetTriggerUnit()
     for i = Teams.first1() to Teams.last2()
         playerGoldArray[i] = players[i].getGold()
 
@@ -184,8 +183,6 @@ function onClick()
             if playerGoldArray[i] - players[i].getGold() == HERO_GOLD_COST
                 triggerPlayer = players[i]
                 break
-
-        triggerTavern.removeAbility(clickedButtonId)
         createUnit(triggerPlayer, getHeroFromButton(clickedButtonId).getUnitId() , tavern[0].getPos(), angle(0))
 
         locked = false

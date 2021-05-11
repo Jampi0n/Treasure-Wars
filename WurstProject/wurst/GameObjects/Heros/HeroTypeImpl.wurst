@@ -42,12 +42,20 @@ function smartIcon(string icon) returns string
 
 int array tavernButtons
 HashMap<int, IHeroType> buttonToHeroType
+HashMap<IHeroType, int> heroTypeToButton
+HashMap<IHeroType, int> heroTypeToTavern
 
 public function getTavernButton(int index) returns int
     return tavernButtons[index]
 
 public function getHeroFromButton(int index) returns IHeroType
     return buttonToHeroType.get(index)
+
+public function getButtonFromHero(IHeroType heroType) returns int
+    return heroTypeToButton.get(heroType)
+
+public function getTavernFromHero(IHeroType heroType) returns int
+    return heroTypeToTavern.get(heroType)
 
 
 public class HeroTypeImpl implements IHeroType
@@ -343,7 +351,10 @@ public function addButtonToTavern(int heroId, int buttonPos, IHeroType heroType,
         error("tavernButtons["+(12 * tavernId + buttonPos).toString()+"] = " + tavernButtons[12 * tavernId + buttonPos].toString())
     else
         tavernButtons[12 * tavernId + buttonPos] = buttonId
-        buttonToHeroType.put(HeroType.getAbilityOffset(heroId) + 66, heroType)
+        let buttonAbilityId = HeroType.getAbilityOffset(heroId) + 66
+        buttonToHeroType.put(buttonAbilityId, heroType)
+        heroTypeToButton.put(heroType, buttonAbilityId)
+        heroTypeToTavern.put(heroType, tavernId)
         BlzSetAbilityTooltip(buttonId, GetObjectName(heroType.getUnitId()), 0)
         let tooltip = namePassive + "|n" + tooltipPassive + "|n|n" + 
         nameQ + "|n" + tooltipQ + "|n|n" + 
@@ -722,6 +733,8 @@ public module HeroInstance
 function initialize()
     if not compiletime
         buttonToHeroType = new HashMap<int, IHeroType>()
+        heroTypeToButton = new HashMap<IHeroType, int>()
+        heroTypeToTavern = new HashMap<IHeroType, int>()
         for i = 0 to 47
             tavernButtons[i] = -1
 
