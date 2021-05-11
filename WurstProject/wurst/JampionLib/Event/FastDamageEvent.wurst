@@ -1,9 +1,13 @@
 package FastDamageEvent
 
+import NoWurst
 import OnUnitEnterLeave
 import ErrorHandling
 import DamageDetection
 import HashMap
+import Annotations
+import Unit
+import Maths
 
 public interface DamageFunction
     function damage(unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool _active, bool advanced)

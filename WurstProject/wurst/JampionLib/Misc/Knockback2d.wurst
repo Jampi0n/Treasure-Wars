@@ -1,8 +1,10 @@
 package Knockback2d
 
+import NoWurst
 import HashMap
 import TerrainUtils
 import TimerUtils
+import Unit
 
 public interface KnockbackUpdateFunction
     function knockbackUpdate(Knockback2d kb, vec2 pos)

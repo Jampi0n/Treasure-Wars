@@ -1,6 +1,8 @@
 package FileLog
 
+import NoWurst
 import LinkedList
+import TypeCasting
 
 public constant FILE_LOG = new FileLog("FileLog.txt", true)
 
@@ -37,3 +39,6 @@ public class FileLog
             Preload(line)
 
         PreloadGenEnd(fileName)
+
+init
+    realToIndex(0)

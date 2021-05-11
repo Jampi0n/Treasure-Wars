@@ -1,7 +1,16 @@
 package JString
 
+import NoWurst
+import public String
+import TypeCasting
 import StringUtils
 import LinkedList
+import Annotations
+import Maths
+import Real
+import Integer
+import Wurstunit
+import Printing
 
 @configurable public constant DEFAULT_PRECISION = 2
 
@@ -83,6 +92,9 @@ public function real.str() returns string
 
 public function int.str() returns string
     return this.toString()
+
+init
+    realToIndex(0)
      
 
 @Test function testStringCompare()

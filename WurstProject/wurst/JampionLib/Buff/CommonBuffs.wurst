@@ -1,5 +1,8 @@
 package CommonBuffs
 
+import NoWurst
+import Annotations
+import MagicFunctions
 import Buff
 import ObjectIdGenerator
 import AbilityObjEditing
@@ -7,6 +10,9 @@ import BuffObjEditing
 import ObjectIds
 import InstantDummyCaster
 import MapBounds
+import Unit
+import Fogmodifier
+import Basics
 
 constant MAP_HACK = compiletime(UNIT_ID_GEN.next())
 constant MAP_HACK_ABILITY = compiletime(ABIL_ID_GEN.next())

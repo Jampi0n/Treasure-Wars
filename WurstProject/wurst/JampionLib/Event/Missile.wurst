@@ -1,9 +1,15 @@
 package Missile
 
+import NoWurst
 import DummyRecycler
 import TimerUtils
 import ClosureTimers
 import LinkedList
+import TypeCasting
+import Annotations
+import Effect
+import Widget
+import Group
 
 real UPDATE_INTERVAL = 0.03
 int MAX_HITBOX_SIZE = 128
@@ -216,3 +222,6 @@ public class Missile
         if(this.onDestroyFunction!=null)
             this.onDestroyFunction.missileEnd(this)
             destroy this.onDestroyFunction
+
+init
+    realToIndex(0)

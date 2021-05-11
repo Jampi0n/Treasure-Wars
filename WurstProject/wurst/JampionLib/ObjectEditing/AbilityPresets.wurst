@@ -1,9 +1,12 @@
 package AbilityPresets
 
+import NoWurst
 import AbilityObjEditing
 import BuffObjEditing
 import ObjectIds
 import ObjectIdGenerator
+import Wurstunit
+import String
 
 public function AbilityDefinition.hideIcon()
     this..setButtonPositionNormalX(0)

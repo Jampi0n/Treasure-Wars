@@ -1,5 +1,6 @@
 package Artillery
 
+import NoWurst
 import Allocator
 import AbilityObjEditing
 import HashMap
@@ -9,6 +10,7 @@ import ClosureTimers
 import ErrorHandling
 import OnUnitEnterLeave
 import Preloader
+import Unit
 
 constant MAX_ARTILLERY_MISSILES = 64
 constant MAX_ARTILLERY_AIR_TIME = 32.0
