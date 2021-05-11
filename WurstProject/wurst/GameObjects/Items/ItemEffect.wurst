@@ -73,16 +73,20 @@ public class ItemEffect
         triggerItem = GetManipulatedItem()
         triggerUnit = GetTriggerUnit()
         let itemTypeId = triggerItem.getTypeId()
-        PassiveItemCooldown.onItemPickUp(triggerUnit, triggerItem, itemTypeId)
-
-        if doItemEvents
-            if itemIdToEffect.has(itemTypeId)
-                triggerWrapper = triggerUnit.wrapper()
-                inventoryChangeDirection = 1
-                let itemType = itemIdToEffect.get(itemTypeId)
-                itemType.useCount++
-                if itemType.onDropOrPickUp != null
-                    itemType.onDropOrPickUp.dropOrPickUp(1)
+        if triggerUnit.wrapper().getAllowItemPickup()
+            PassiveItemCooldown.onItemPickUp(triggerUnit, triggerItem, itemTypeId)
+            if doItemEvents
+                if itemIdToEffect.has(itemTypeId)
+                    triggerWrapper = triggerUnit.wrapper()
+                    inventoryChangeDirection = 1
+                    let itemType = itemIdToEffect.get(itemTypeId)
+                    itemType.useCount++
+                    if itemType.onDropOrPickUp != null
+                        itemType.onDropOrPickUp.dropOrPickUp(1)
+        else
+            doItemEvents = false
+            triggerUnit.removeItem(triggerItem)
+            doItemEvents = true
 
     static function onItemDrop()
         if doItemEvents

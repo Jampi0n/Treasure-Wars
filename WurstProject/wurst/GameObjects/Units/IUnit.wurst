@@ -29,6 +29,7 @@ public class IUnit extends UnitWrapper
     int team
     bool isHero
     real scaleAttackAnimation
+    bool allowItemPickUp = true
 
     ondestroy
         destroyBuffs()
@@ -50,6 +51,12 @@ public class IUnit extends UnitWrapper
             this.heroType = HeroType.get(this.getTypeId())
             if this.heroType == null
                 error("HeroType could not be resolved: " + u.getName())
+
+    function setAllowItemPickup(bool flag)
+        allowItemPickUp = flag
+
+    function getAllowItemPickup() returns bool
+        return allowItemPickUp
 
     function setHero(IHero hero)
         this.hero = hero

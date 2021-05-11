@@ -233,15 +233,7 @@ function unit.toggleItemDrop(bool flag)
             itm.setPawnable(flag)
 
 function unit.toggleItemPickup(bool flag)
-    for i = 0 to 5
-        let itm = this.itemInSlot(i)
-        let id = itm.getTypeId()
-        if flag == false
-            if id == 0
-                this.addItemById('phlt')
-        else
-            if id == 'phlt'
-                itm.remove()
+    this.wrapper().setAllowItemPickup(flag)
 
 function unit.toggleItemAbilities(bool flag)
     for i = 0 to 5
