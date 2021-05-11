@@ -269,7 +269,7 @@ function startPickMode()
 
     //copies the array of hero types
     
-    for i = 0 to HeroType.getNumberOfTypes()
+    for i = 0 to HeroType.getNumberOfTypes() - 1
         randomHeroes.add(HeroType.getNthType(i))
 
     PanCameraToTimed(gg_rct_CenterMid.getCenterX(), gg_rct_CenterMid.getCenterY(), 0)
