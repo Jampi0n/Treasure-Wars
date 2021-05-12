@@ -1,3 +1,16 @@
+/**
+    This package implements passive item cooldowns.
+    Cooldowns applied with standard ability cooldown functions are lost when the item is dropped.
+    This package stores the cooldown on units and items and reapplies it when the item is picked up.
+    Cooldowns are stored on both the item and the unit:
+    The unit will not be able to use the same item type during the cooldown.
+    The item will not be able to be used by any unit during the cooldown.
+    
+    Note:
+    Cooldowns are per unit, not per item. This is a limitation of the ability cooldown functions.
+    This means, if a unit picks up the same item type, once with cooldown and once without cooldown, both items will have cooldown and the unit will also get the cooldown.
+
+**/
 package PassiveItemCooldown
 
 import ClosureTimers
@@ -6,8 +19,14 @@ import AbilityObjEditing
 import GameTimer
 import ObjectIdGenerator
 
+
 public interface ToggleItemTriggers
     function toggle(bool enable)
+
+public function generateCooldownAbility() returns int
+    let id = ABIL_ID_GEN.next()
+    new AbilityDefinitionAnimateDead(id)
+    return id
 
 
 public class PassiveItemCooldown
@@ -125,7 +144,3 @@ public class PassiveItemCooldown
         else
             table.saveInt(h, UNIT_NUM_LOCKS, locks - 1)
 
-public function generateCooldownAbility() returns int
-    let id = ABIL_ID_GEN.next()
-    new AbilityDefinitionAnimateDead(id)
-    return id
