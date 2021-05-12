@@ -1,3 +1,62 @@
+/**
+    UnitWrapper offers additional methods for units by using a wrapper class.
+    The wrapper is created and destroyed automatically.
+
+    Additional functionality can be added by using modules from the Modules sub directory.
+
+    Usage:
+    Create a sub class of UnitWrapper:
+    ==================================================
+    class MyUnitWrapper extends UnitWrapper
+
+    ==================================================
+    Add create and destroy functions:
+    ==================================================
+    class MyUnitWrapper
+        use UnitWrapper
+
+        construct(unit u)
+            super(u)
+
+        ondestroy
+            destroyWrapper()
+
+    ==================================================
+    The ondestroy functions should call the destroy functions from all modules.
+
+    Additional modules can be used from the Modules sub directory.
+    The destroy order in ondestroy should be opposite to the use order.
+    For example:
+    ==================================================
+    public class MyUnitWrapper
+        use UnitWrapper
+        use UnitInfo
+        use UnitColor
+        use UnitStats
+        use UnitBuffs
+
+        ondestroy
+            destroyBuffs()
+            destroyStats()
+            destroyColor()
+            destroyInfo()
+            destroyWrapper()
+    ==================================================
+    This ensures that the outer modules have longer lifespans than inner modules.
+    UnitWrapper should always be the outermost module, so that other modules can rely on it.
+    In this example UnitBuffs is the innermost module, because Buff functions frequently rely on the data of other modules (e.g. changing color).
+    When adding more modules read their instructions and think about their dependencies.
+
+    Finally define the UnitWrapper creation function by overriding UnitWrapperSingleton and create it:
+    ==================================================
+    class MyUnitWrapperSingleton extends UnitWrapperSingleton
+        override function createNew(unit u)
+            new MyUnitWrapper(u)
+
+    init
+        new MyUnitWrapperSingleton()
+    ==================================================
+**/
 package UnitWrapper
 
 import NoWurst
@@ -7,66 +66,6 @@ import HashMap
 import ObjectIds
 import Unit
 import Basics
-
-/*
-UnitWrapper offers additional methods for units by using a wrapper class.
-The wrapper is created and destroyed automatically.
-
-Additional functionality can be added by using modules from the Modules sub directory.
-
-Usage:
-Create a sub class of UnitWrapper:
-==================================================
-class MyUnitWrapper extends UnitWrapper
-
-==================================================
-Add create and destroy functions:
-==================================================
-class MyUnitWrapper
-    use UnitWrapper
-
-    construct(unit u)
-        super(u)
-
-    ondestroy
-        destroyWrapper()
-
-==================================================
-The ondestroy functions should call the destroy functions from all modules.
-
-Additional modules can be used from the Modules sub directory.
-The destroy order in ondestroy should be opposite to the use order.
-For example:
-==================================================
-public class MyUnitWrapper
-    use UnitWrapper
-    use UnitInfo
-    use UnitColor
-    use UnitStats
-    use UnitBuffs
-
-    ondestroy
-        destroyBuffs()
-        destroyStats()
-        destroyColor()
-        destroyInfo()
-        destroyWrapper()
-==================================================
-This ensures that the outer modules have longer lifespans than inner modules.
-UnitWrapper should always be the outermost module, so that other modules can rely on it.
-In this example UnitBuffs is the innermost module, because Buff functions frequently rely on the data of other modules (e.g. changing color).
-When adding more modules read their instructions and think about their dependencies.
-
-Finally define the UnitWrapper creation function by overriding UnitWrapperSingleton and create it:
-==================================================
-class MyUnitWrapperSingleton extends UnitWrapperSingleton
-    override function createNew(unit u)
-        new MyUnitWrapper(u)
-
-init
-    new MyUnitWrapperSingleton()
-==================================================
-*/
 
 public interface PreConstructEvent
     function run(unit u)

@@ -1,3 +1,11 @@
+/**
+    Artillery offers detection of missiles that hit the ground.
+    API:
+        ArtilleryDetection.createArtilleryDummy
+        ArtilleryDetection.fireArtillery
+
+    The artillery dummy is for visuals: launch position and projectile.
+**/
 package Artillery
 
 import NoWurst
@@ -11,9 +19,10 @@ import ErrorHandling
 import OnUnitEnterLeave
 import Preloader
 import Unit
+import Annotations
 
-constant MAX_ARTILLERY_MISSILES = 64
-constant MAX_ARTILLERY_AIR_TIME = 32.0
+@configurable constant MAX_ARTILLERY_MISSILES = 64
+@configurable constant MAX_ARTILLERY_AIR_TIME = 32.0
 
 int firstArtilleryTypeId = compiletime(createArtilleryTypeIds())
 int artilleryAbility = compiletime(generateArtilleryAbility())

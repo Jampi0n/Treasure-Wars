@@ -199,7 +199,7 @@ public class HeroDeadEye extends HeroTemplate
                 ..targetNone()
                 ..setSkillData(COOLDOWN, MANA, 0)
 
-            let aDefDeathCoil = createTargetMissile(ABILITY_DEATH_COIL, BUFF_ID_ON_DEATH_COIL)
+            let aDefDeathCoil = createTargetMissile(ABILITY_DEATH_COIL, BUFF_ID_ON_DEATH_COIL, 5)
                 ..setLevels(5)
                 ..setButtonPositionNormalX(3)
                 ..setButtonPositionNormalY(2)

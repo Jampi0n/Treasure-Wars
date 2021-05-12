@@ -1,3 +1,48 @@
+/**
+    This package implements efficient dynamic tooltips.
+    Dynamic tooltips consist of static text and dynamic elements such as stat based value.
+
+    To setup, create a DynamicStatType for every stat used as dynamic element.
+    For example:
+===================================================================
+    new DynamicStatType("S", COLOR_GOLD, "strength") (unit u) ->
+        return u.getStr(true).toReal()
+    new DynamicStatType("A", COLOR_GOLD, "agility") (unit u) ->
+        return u.getAgi(true).toReal()
+    new DynamicStatType("I", COLOR_GOLD, "intelligence") (unit u) ->
+        return u.getInt(true).toReal()
+
+    Dynamic tooltips can then be created like this:
+
+    let tooltip = new DynamicTooltip(abilityId)
+    tooltip.setSummary("Deals damage to the target and stuns it.")
+    tooltip.setReplaceStats(75, 1)
+    tooltip.setLearnString("Deals damage to the target and stuns it.") (int lvl) ->
+        return "{0}{S0} damage , {1}{I1} seconds stun.".format(
+            (100 * level).toString(), (2 + 1 * level).toString()
+        )
+    
+    for lvl = 1 to 3
+        tooltip.setNormalString(true, lvl, "Deals {0}{S0} damage to the target and stuns it for {1}{I1} seconds.")
+===================================================================
+    
+    The {0} and {1} fields are replaced by the format function and are not related to dynamic tooltips.
+    The {S0} and {I1} fields are dynamic.
+    The character "S" was registered for strength and "I" for intelligence.
+    The index 0 and 1 belong to the factors in setReplaceStats:
+     - damage is 100*level + 0.75 * strength
+     - stun duration is 2 + 1 * level + 0.01 * intelligence
+
+    Since setNormalString(true, ...) was called, the ability will also contain the cooldown value at the end.
+
+    To update the tooltip, use:
+    tooltip.update(unit u)
+
+    This can be done when the unit's stats change.
+
+    Note:
+    Ability tooltips are global, so dynamic tooltips should only be used on unique units.
+**/
 package DynamicTooltips
 
 import LinkedList

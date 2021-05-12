@@ -355,7 +355,7 @@ function objectData()
     let rootId = ABIL_ID_GEN.next()
     let root = new AbilityDefinitionRootAncientProtector(rootId)
     let missileId = ABIL_ID_GEN.next()
-    let healMissile = createTargetMissile(missileId, HEAL_BUFF_ID)
+    let healMissile = createTargetMissile(missileId, HEAL_BUFF_ID, 1)
 
     dummy
         ..setNormalAbilities(commaList('Aloc', rootId, missileId))

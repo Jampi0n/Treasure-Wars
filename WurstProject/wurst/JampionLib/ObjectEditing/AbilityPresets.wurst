@@ -28,9 +28,9 @@ public function createNoEffectAbiltiy(int newId) returns AbilityDefinition
         ..setRequirements("")
     return aDef
 
-public function createTargetMissile(int newId, int buffId) returns AbilityDefinitionAlchemistAcidBomb
+public function createTargetMissile(int newId, int buffId, int levels) returns AbilityDefinitionAlchemistAcidBomb
     let aDef = new AbilityDefinitionAlchemistAcidBomb(newId)
-    for i = 1 to 5
+    for i = 1 to levels
         aDef.setBuffs(i, buffId.toRawCode())
         aDef.setArmorPenalty(i, 0)
         aDef.setPrimaryDamage(i, 0)

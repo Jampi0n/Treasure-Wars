@@ -1,3 +1,11 @@
+/**
+    This package implements a text file based log.
+    The ingame log is limited in its size and cannot be searched.
+
+    The default FileLog FILE_LOG can be used without having to create a new one.
+    It uses autoSave, which means the log is rewritten whenever something is logged.
+    This is very inefficient, if the log becomes large. This is mainly useful for debugging.
+**/
 package FileLog
 
 import NoWurst

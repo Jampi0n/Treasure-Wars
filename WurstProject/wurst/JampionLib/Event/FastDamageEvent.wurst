@@ -1,3 +1,61 @@
+/**
+    FastDamageEvent aims to offer efficient damage detection and damage events.
+
+    Feature Overview:
+
+        Unit specific damage events:
+
+            Every unit has an individual list of damage events. This reduces the number of condition, since the list can already be built based on the conditions.
+
+            The following lists exist per unit:
+             -anyDamage: any damage dealt by the unit
+             -anyHit: any damage taken by the unit
+             -attackDamageNoBuilding: attacks done by the unit against units that are no building
+             -attackHitNoBuilding: attacks suffered by the unit against units that are no building
+
+            Everything can be implemented using the first two groups. The other groups are for convenience and efficiency. The attack and building conditions are very common and the two last groups avoid having to use them on every damage function.
+
+            API:
+                DamageEventUnit.DamageEventGroup.add(...)
+                DamageEventUnit.DamageEventGroup.remove(...)
+
+            Note:
+                The pointer returned by DamageEventUnit.DamageEventGroup.add(...) is used to remove the damage function with DamageEventUnit.DamageEventGroup.remove(...).
+
+
+        Global damage modification function:
+
+            To give full control over the order of damage modifiers, a single global damage modification function is used.
+
+        Unit specific integer storage:
+
+            Since the damage modification function runs for every damage event, its speed is important.
+            Instead of checking for buffs or items directly in the function fast integer access can be used instead.
+            When the buff or item is added to the unit, an integer is saved, which can be used inside the damage modification function.
+
+            The fast storage can only save a few integers. For additional storage, slower hashtable based functions can be used instead.
+
+            API:
+                DamageEventUnit.saveIntFast(...)
+                DamageEventUnit.saveIntSlow(...)
+                DamageEventUnit.loadIntFast(...)
+                DamageEventUnit.loadIntSlow(...)
+
+        Alternate attacks:
+
+            Offers additional on hit detection for alternate and arrow attacks.
+            This is implemented by having two additional buffs.
+
+            The arrow buff can be used on arrow abilities like Frost Arrow in order to detect them.
+            The alternate buff can be toggled for units individually.
+            This is only useful for ranged units, where the damage event does not happen at the same time as the attack.
+            For example, an active attack modifying ability should only work, if it is used before the attack is launched. Otherwise players could use the ability shortly before the missile lands, giving the opponent no chance to react.
+            This can be implemented by using the alternate attack after using the attack modifying ability. Then only attacks launched afterwars will use the alternate buff and can be detected.
+
+            API:
+                DamageEvent.useAlternate(...)
+                DamageFunction.damage(..., bool active, bool alternate)
+**/
 package FastDamageEvent
 
 import NoWurst
@@ -10,7 +68,7 @@ import Unit
 import Maths
 
 public interface DamageFunction
-    function damage(unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool _active, bool advanced)
+    function damage(unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool active, bool alternate)
 
 /** This ability is used during regular attacks and every attacking unit should have it. **/
 @configurable public var ON_HIT_ABILITY = 0

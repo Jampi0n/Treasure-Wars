@@ -292,7 +292,7 @@ public class HeroDrillmo extends HeroTemplate
         let COOLDOWN = skillData(44, 40, 36, 32, 28)
         if compiletime
             let MANA = skillData(150, 150, 150, 150, 150)
-            let aDef = createTargetMissile(abilityId, ROCKET_BUFF_ID)
+            let aDef = createTargetMissile(abilityId, ROCKET_BUFF_ID, 5)
                 ..setAnimationNames("spell,throw")
                 ..setupIcon(Icons.bTNHumanArtilleryUpOne)
                 ..setupWithHotKey("Homing Missile", "R")
