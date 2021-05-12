@@ -192,13 +192,13 @@ public class HeroTrollManHunter extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceStats(DEATH_SPIN_DAMAGE_BONUS)
-        tooltip.setLearnString("Causes a bladestorm of destructive force around the Troll Headhunter, increasing armor and willpower and dealing damage per second to nearby enemy units.\nLasts {0} seconds.".format(DEATH_SPIN_DURATION.str())) (int lvl) ->
-            return "{0}{S0} damage per second, {1} armor and willpower.".format(
+        tooltip.setLearnString("Causes a bladestorm of destructive force around the Troll Headhunter, increasing armor and magic resistance and dealing damage per second to nearby enemy units.\nLasts {0} seconds.".format(DEATH_SPIN_DURATION.str())) (int lvl) ->
+            return "{0}{S0} damage per second, {1} armor and magic resistance.".format(
                 DEATH_SPIN_DAMAGE[lvl-1].str(),
                 DEATH_SPIN_DEFENSE[lvl-1].toString())
         
         for lvl = 1 to 5
-            tooltip.setNormalString(false, lvl, "Causes a bladestorm of destructive force around the Troll Headhunter, increasing armor and willpower by {0} and dealing {1}{S0} damage per second to nearby enemy units.\nLasts {2} seconds.".format(
+            tooltip.setNormalString(false, lvl, "Causes a bladestorm of destructive force around the Troll Headhunter, increasing armor and magic resistance by {0} and dealing {1}{S0} damage per second to nearby enemy units.\nLasts {2} seconds.".format(
                 DEATH_SPIN_DEFENSE[lvl-1].toString(),
                 DEATH_SPIN_DAMAGE[lvl-1].str(),
                 DEATH_SPIN_DURATION.str()))

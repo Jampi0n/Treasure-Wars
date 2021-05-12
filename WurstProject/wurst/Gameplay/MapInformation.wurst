@@ -30,7 +30,7 @@ function gameMechanics()
         "Heroes improve stats by leveling up. Items can also increase stats.\n" +
         "Special Stats:\n\n"+
         "Strength increases attack damage and improves the power of some abilities. This is indicated by an "+C_STR.toColorString()+"orange|r number telling how much the value is increased with your current strength.\n\n"+
-        "Willpower increases your resistance against spell damage and reduces the duration of most negative buffs. Willpower works as armor against spell damage.\n\n"+
+        "Magic resistance increases your resistance against spell damage and reduces the duration of most negative buffs. Magic resistance acts as armor against spell damage.\n\n"+
         "Intelligence increases improves the power of some abilities. This is indicated by a "+C_INT.toColorString()+"blue|r number telling how much the value is increased with your current intelligence.\n\n"
         )
     ..setIcon(Icons.bTNEngineeringUpgrade)

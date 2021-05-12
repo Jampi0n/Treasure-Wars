@@ -240,7 +240,7 @@ public class HeroWarBeetle extends HeroTemplate
 
     static constant int UNBREAKABLE_DUMMY_BUFF = compiletime(createDummyBuff())
 
-    static constant BUFF_UNBREAKABLE = compiletime(setupBuff("Unbreakable", "This unit's maximum hit points; armor; willpower and strength are increased.", Icons.bTNAdvancedCreatureCarapace, true, 5, "", "", DispelLevel.BREAK))
+    static constant BUFF_UNBREAKABLE = compiletime(setupBuff("Unbreakable", "This unit's maximum hit points; armor; magic resistance and strength are increased.", Icons.bTNAdvancedCreatureCarapace, true, 5, "", "", DispelLevel.BREAK))
 
 
     override function setupR(int abilityId, IHeroType heroType)
@@ -273,13 +273,13 @@ public class HeroWarBeetle extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceStats(0)
-        tooltip.setLearnString("Increases the War Beetle's strength, armor, willpower and hit points for {0} seconds.".format(UNBREAKABLE_DURATION.str())) (int lvl) ->
-            return "{0} strength, {1} armor and willpower, {2} hit points".format( 
+        tooltip.setLearnString("Increases the War Beetle's strength, armor, magic resistance and hit points for {0} seconds.".format(UNBREAKABLE_DURATION.str())) (int lvl) ->
+            return "{0} strength, {1} armor and magic resistance, {2} hit points".format( 
                 UNBREAKABLE_STR[lvl-1].str(), UNBREAKABLE_DEF[lvl-1].str(), UNBREAKABLE_HP[lvl-1].str()
             )
         
         for lvl = 1 to 5
-            tooltip.setNormalString(true, lvl, "Increases the War Beetle's strength by {0}, armor and willpower by {1} and hit points by {2} for {3} seconds.".format(
+            tooltip.setNormalString(true, lvl, "Increases the War Beetle's strength by {0}, armor and magic resistance by {1} and hit points by {2} for {3} seconds.".format(
                 UNBREAKABLE_STR[lvl-1].str(), UNBREAKABLE_DEF[lvl-1].str(), UNBREAKABLE_HP[lvl-1].str(), UNBREAKABLE_DURATION.str()
             ))
         addDynamicTooltipIntelligence(heroType, tooltip)

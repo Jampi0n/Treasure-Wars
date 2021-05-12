@@ -153,7 +153,7 @@ public class HeroElementalMage extends HeroTemplate
 
     static constant int MARK_REQUIRED_STACKS = 4
 
-    static constant BUFF_ELEMENTAL_MARK = compiletime(setupBuff("Elemental Mark", "This unit is under the effect of Elemental Mark; it has reduced willpower and it will take additional magic damage when attacked by the Elemental Mage. The unit will be stunned after "+MARK_REQUIRED_STACKS.str()+" attacks.", "BTNElementalMark", false, 5, "ElementalMark2.mdx", "overhead", DispelLevel.DISPEL))
+    static constant BUFF_ELEMENTAL_MARK = compiletime(setupBuff("Elemental Mark", "This unit is under the effect of Elemental Mark; it has reduced magic resistance and it will take additional magic damage when attacked by the Elemental Mage. The unit will be stunned after "+MARK_REQUIRED_STACKS.str()+" attacks.", "BTNElementalMark", false, 5, "ElementalMark2.mdx", "overhead", DispelLevel.DISPEL))
 
     override function setupE(int abilityId, IHeroType heroType)
         if compiletime
@@ -168,17 +168,17 @@ public class HeroElementalMage extends HeroTemplate
                 ..setSkillData(COOLDOWN, MANA, 600)
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setSummary("Reduces the target's willpower and attacks against it will deal additional magic damage. After {0} attacks the target is stunned.".format(MARK_REQUIRED_STACKS.str()))
+        tooltip.setSummary("Reduces the target's magic resistance and attacks against it will deal additional magic damage. After {0} attacks the target is stunned.".format(MARK_REQUIRED_STACKS.str()))
         tooltip.setReplaceStats(MARK_DMG_BONUS)
-        tooltip.setLearnString("Reduces the target unit's willpower and makes it take additional magic damage, when the Elemental Mage attacks. After {2} attacks the target is stunned for {0} seconds. Lasts {1} seconds.".format(
+        tooltip.setLearnString("Reduces the target unit's magic resistance and makes it take additional magic damage, when the Elemental Mage attacks. After {2} attacks the target is stunned for {0} seconds. Lasts {1} seconds.".format(
             MARK_STUN.str(), MARK_DURATION.str(), MARK_REQUIRED_STACKS.str()
         )) (int lvl) ->
-            return "-{0} willpower, {1}{I0} magic damage.".format(
+            return "-{0} magic resistance, {1}{I0} magic damage.".format(
                 MARK_WP_REDUCTION[lvl-1].toString(), MARK_DMG[lvl-1].str()
             )
         
         for lvl = 1 to 5
-            tooltip.setNormalString(true, lvl, "Reduces the target unit's willpower by {2} and makes it take {3}{I0} additional magic damage, when the Elemental Mage attacks. After {4} attacks the target is stunned for {0} seconds. Lasts {1} seconds.".format(
+            tooltip.setNormalString(true, lvl, "Reduces the target unit's magic resistance by {2} and makes it take {3}{I0} additional magic damage, when the Elemental Mage attacks. After {4} attacks the target is stunned for {0} seconds. Lasts {1} seconds.".format(
                 MARK_STUN.str(), MARK_DURATION.str(), MARK_WP_REDUCTION[lvl-1].toString(), MARK_DMG[lvl-1].str(), MARK_REQUIRED_STACKS.str()
             ))
         addDynamicTooltipIntelligence(heroType, tooltip)

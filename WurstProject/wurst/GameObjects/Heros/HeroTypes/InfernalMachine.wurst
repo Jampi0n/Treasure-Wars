@@ -181,7 +181,7 @@ public class HeroInfernalMachine extends HeroTemplate
 
     static constant real INNER_FIRE_AOE = 900
 
-    static constant BUFF_INNER_FIRE = compiletime(setupBuff("Inner Fire", "This unit's strength and armor and willpower are increased.", Icons.bTNInnerFire, true, 5, Abilities.innerFireTarget, "overhead", DispelLevel.DISPEL))
+    static constant BUFF_INNER_FIRE = compiletime(setupBuff("Inner Fire", "This unit's strength and armor and magic resistance are increased.", Icons.bTNInnerFire, true, 5, Abilities.innerFireTarget, "overhead", DispelLevel.DISPEL))
 
 
     override function setupW(int abilityId, IHeroType heroType)
@@ -200,15 +200,15 @@ public class HeroInfernalMachine extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceStats(INNER_FIRE_DMG_BONUS.toReal(), INNER_FIRE_DEF_BONUS.toReal())
-        tooltip.setLearnString("Increases nearby units strength, armor and willpower.") (int lvl) ->
-            return "+{0}{I0}% strength, +{1}{I1} armor and willpower, {2} seconds".format(
+        tooltip.setLearnString("Increases nearby units strength, armor and magic resistance.") (int lvl) ->
+            return "+{0}{I0}% strength, +{1}{I1} armor and magic resistance, {2} seconds".format(
             INNER_FIRE_DMG[lvl-1].str(),
             INNER_FIRE_DEF[lvl-1].str(),
             INNER_FIRE_DURATION.str()
             )
         
         for lvl = 1 to 5
-            tooltip.setNormalString(true, lvl, "Increases nearby units' strength by {0}{I0}% and armor and willpower by {1}{I1} for {2} seconds.".format(
+            tooltip.setNormalString(true, lvl, "Increases nearby units' strength by {0}{I0}% and armor and magic resistance by {1}{I1} for {2} seconds.".format(
                 INNER_FIRE_DMG[lvl-1].str(),
                 INNER_FIRE_DEF[lvl-1].str(),
                 INNER_FIRE_DURATION.str()

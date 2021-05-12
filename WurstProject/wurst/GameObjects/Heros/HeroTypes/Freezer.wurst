@@ -301,7 +301,7 @@ public class HeroFreezer extends HeroTemplate
 
     static constant int FREEZE_DEF = 100
 
-    static constant BUFF_FREEZE = compiletime(setupBuff("Freeze", "This unit is under the effect of freeze; it is stunned; but has increased armor and willpower.", Icons.bTNFreezingBreath, false, 5, "", "", DispelLevel.BREAK))
+    static constant BUFF_FREEZE = compiletime(setupBuff("Freeze", "This unit is under the effect of freeze; it is stunned; but has increased armor and magic resistance.", Icons.bTNFreezingBreath, false, 5, "", "", DispelLevel.BREAK))
 
     override function setupR(int abilityId, IHeroType heroType)
 
@@ -324,7 +324,7 @@ public class HeroFreezer extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceStats(FREEZE_DMG_BONUS)
-        tooltip.setLearnString(CHANNELING_SPELL + "Freezes nearby enemies, disabling them and dealing damage over time. However, targets covered with ice have their armor and willpower increased by {0}.".format(FREEZE_DEF.str())) (int lvl) ->
+        tooltip.setLearnString(CHANNELING_SPELL + "Freezes nearby enemies, disabling them and dealing damage over time. However, targets covered with ice have their armor and magic resistance increased by {0}.".format(FREEZE_DEF.str())) (int lvl) ->
             return "{0}{I0} damage per second, lasts {1} seconds.".format(
                 FREEZE_DMG[lvl-1].str(),
                 FREEZE_DURATION[lvl-1].str()
@@ -332,7 +332,7 @@ public class HeroFreezer extends HeroTemplate
         
         
         for lvl = 1 to 5
-            tooltip.setNormalString(true, lvl, CHANNELING_SPELL + "Freezes nearby enemies, disabling them for up to {1} seconds and dealing {0}{I0} damage per second. However, targets covered with ice have their armor and willpower increased by {2}.".format(
+            tooltip.setNormalString(true, lvl, CHANNELING_SPELL + "Freezes nearby enemies, disabling them for up to {1} seconds and dealing {0}{I0} damage per second. However, targets covered with ice have their armor and magic resistance increased by {2}.".format(
                 FREEZE_DMG[lvl-1].str(),
                 FREEZE_DURATION[lvl-1].str(),
                 FREEZE_DEF.str()
