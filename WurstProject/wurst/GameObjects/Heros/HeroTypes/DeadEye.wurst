@@ -251,20 +251,17 @@ public class HeroDeadEye extends HeroTemplate
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
         let facing = caster.getPos().angleTo(vec2(GetSpellTargetX(), GetSpellTargetY()))
-        new Missile(caster, caster.getPos().withZ(80), 1500, facing, "Abilities\\Weapons\\BallistaMissile\\BallistaMissile.mdl")
-            ..hitOnce()
-            ..setSize(75)
-            ..setScale(1.2)
-            ..addModel(Abilities.avengerMissile)
-            ..setHitCondition((Missile missile, unit target) -> (begin
+        let missile = new Missile(caster, caster.getPos().withZ(80), 1500, facing, "Abilities\\Weapons\\BallistaMissile\\BallistaMissile.mdl")
+        ..hitOnce()
+        ..setSize(75)
+        ..setScale(1.2)
+        ..addModel(Abilities.avengerMissile)
+        ..setMaxRange(1000)
+        missile.setHitCondition() (Missile missile, unit target) ->
             return target.isTargetableEnemyUnit(missile.getOwner())
-        end) )
-            ..setHitFunction((Missile missile, unit target) -> (begin
+        missile.setHitFunction() (Missile missile, unit target) ->
             let missileCaster = missile.getOwner()
             missileCaster.dealDamage(Missile.getMissileTarget(), (PIERCING_SHOT_DAMAGE[level-1]).bonus(missileCaster.getHeroStr(), PIERCING_SHOT_DAMAGE_BONUS), ReductionType.PHYSICAL)
-
-        end) )
-            ..setMaxRange(1000)
     override static function castW()
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()

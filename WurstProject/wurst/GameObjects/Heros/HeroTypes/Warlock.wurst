@@ -236,19 +236,17 @@ public class HeroWarlock extends HeroTemplate
         let spellId = GetSpellAbilityId()
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
-        new Missile(caster, caster.getPos().withZ(80), 1000, caster.getPos().angleTo(vec2(GetSpellTargetX(), GetSpellTargetY())), Abilities.demonHunterMissile)
+        let missile = new Missile(caster, caster.getPos().withZ(80), 1000, caster.getPos().angleTo(vec2(GetSpellTargetX(), GetSpellTargetY())), Abilities.demonHunterMissile)
         ..hitOnce()
         ..setSize(40)
-        ..setHitCondition((Missile missile, unit target) -> (begin
+        ..setMaxRange(800)
+        missile.setHitCondition() (Missile missile, unit target) ->
             return target.isTargetableEnemyUnit(missile.getOwner())
-        end) )
-        ..setHitFunction((Missile missile, unit target) -> (begin
+        
+        missile.setHitFunction() (Missile missile, unit target) ->
             let missileCaster = missile.getOwner()
             missileCaster.dealDamage(Missile.getMissileTarget(), (FIREBOLT_DAMAGE[level-1]).bonus(missileCaster.getHeroInt(), FIREBOLT_DAMAGE_BONUS), ReductionType.MAGIC)
             missile.destr()
-
-        end) )
-        ..setMaxRange(800)
 
     override static function castW()
         let spellId = GetSpellAbilityId()
@@ -336,7 +334,7 @@ public class HeroWarlock extends HeroTemplate
         let heroUnit = hero.toUnit()
         CreateTrigger()
         ..registerUnitEvent(heroUnit, EVENT_UNIT_HERO_SKILL)
-        ..addAction(() -> (begin
+        ..addAction() () ->
             let u = GetTriggerUnit()
             if GetLearnedSkill() == HeroWarlock.instance.ABILITY_ID_PASSIVE
                 let newLevel = u.getAbilityLevel(HeroWarlock.instance.ABILITY_ID_PASSIVE)
@@ -344,7 +342,7 @@ public class HeroWarlock extends HeroTemplate
                     u.wrapper().modIntelligenceRelative( -FEL_MAGIC_INTEL[newLevel-2]*10)
 
                 u.wrapper().modIntelligenceRelative( FEL_MAGIC_INTEL[newLevel-1]*10)
-        end))
+        
 
     override function onInitDelayed(IHeroType heroType)
         buffRayOfDeath = new BuffType(false, DispelLevel.BREAK)
@@ -352,7 +350,7 @@ public class HeroWarlock extends HeroTemplate
             if factor == -1
                 thisBuff.getTarget().removeAbility(BUFF_ID_RAY_OF_DEATH)
 
-        buffRayOfDeath.addExpireFunction((Buff whichBuff) ->(begin
+        buffRayOfDeath.addExpireFunction() (Buff whichBuff) ->
             let caster = whichBuff.getCaster()
             let pos = whichBuff.getTarget().getPos()
 
@@ -371,14 +369,13 @@ public class HeroWarlock extends HeroTemplate
         
             nearby.destr()
 
-        end))
         buffRayOfDeath.addDispelFunction() (Buff whichBuff) ->
             let caster = whichBuff.getCaster()
             if caster.getCurrentOrder() == OrderId("magicleash")
                 caster.issueImmediateOrder("stop")
 
         buffRayOfDeath.setPeriodicTime(0.1)
-        buffRayOfDeath.addPeriodicFunction((Buff whichBuff) ->(begin
+        buffRayOfDeath.addPeriodicFunction() (Buff whichBuff) ->
             let target = whichBuff.getTarget()
             let caster = whichBuff.getCaster()
             if not caster.getCurrentOrder() == OrderId("magicleash") or not target.isTargetableEnemy(caster)
@@ -386,14 +383,12 @@ public class HeroWarlock extends HeroTemplate
             else
                 caster.dealDamage(target, 0.1 * RAY_OF_DEATH_DAMAGE[caster.getAbilityLevel(ABILITY_ID_R)-1].bonus(caster.getHeroInt(), RAY_OF_DEATH_DAMAGE_BONUS), ReductionType.MAGIC)
                 target.addEffect(Abilities.illidanMissile, "chest").destr()
-        end))
 
-        BUFF_SOUL_BURN..setPeriodicTime(0.5)..addPeriodicFunction((Buff whichBuff) ->(begin
+        BUFF_SOUL_BURN..setPeriodicTime(0.5)..addPeriodicFunction() (Buff whichBuff) ->
             let target = whichBuff.getTarget()
             let caster = whichBuff.getCaster()
             if target.isTargetableEnemy(caster)
                 caster.dealDamage(target, 0.5 * SOUL_BURN_DAMAGE[caster.getAbilityLevel(ABILITY_ID_E)-1].bonus(caster.getHeroInt(), SOUL_BURN_DAMAGE_BONUS), ReductionType.MAGIC)
-        end))
 
         BUFF_SOUL_BURN.addSetupFunction() (Buff thisBuff, int factor) ->
             if factor == 1

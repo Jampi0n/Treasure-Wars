@@ -255,20 +255,19 @@ public class HeroElementalMage extends HeroTemplate
         let caster = GetTriggerUnit()
         let level = caster.getAbilityLevel(spellId)
         let facing = caster.getPos().angleTo(vec2(GetSpellTargetX(), GetSpellTargetY()))
-        new Missile(caster, caster.getPos().withZ(80), 900, facing, Abilities.frostBoltMissile)
+        let missile = new Missile(caster, caster.getPos().withZ(80), 900, facing, Abilities.frostBoltMissile)
         ..hitOnce()
         ..setSize(100)
         ..addModel(Abilities.zigguratFrostMissile)
         ..setScale(2)
         ..setMaxRange(800)
-        ..setHitCondition((Missile missile, unit target) -> (begin
+        missile.setHitCondition() (Missile missile, unit target) ->
             return target.isTargetableEnemyUnit(missile.getOwner())
-        end) )
-        ..setHitFunction((Missile missile, unit target) -> (begin
+        missile.setHitFunction() (Missile missile, unit target) ->
             let missileCaster = missile.getOwner()
             missileCaster.dealDamage(Missile.getMissileTarget(), (FROST_BOLT_DAMAGE[level-1]).bonus(missileCaster.getHeroInt(), FROST_BOLT_DAMAGE_BONUS), ReductionType.MAGIC)
             Missile.getMissileTarget().addBuffReduced(missileCaster, FROST_BOLT_DURATION[level-1], BUFF_FROST_BOLT, level)
-        end) )
+        
             
 
     override static function castW()
@@ -372,12 +371,12 @@ public class HeroElementalMage extends HeroTemplate
             thisBuff.getTarget().wrapper().modMoveSpeedRelative( -factor * FF_SLOW[thisBuff.getLevel() - 1]*10)
 
         FF_BUFF.setPeriodicTime(0.25)
-        FF_BUFF.addPeriodicFunction((Buff whichBuff) -> (begin
+        FF_BUFF.addPeriodicFunction() (Buff whichBuff) ->
             let caster = whichBuff.getCaster()
             let target = whichBuff.getTarget()
             if target.isTargetableEnemy(caster)
                 caster.dealDamage(target, 0.25 * FF_DOT[whichBuff.getLevel()-1].bonus(caster.getHeroInt(), FF_DOT_BONUS), ReductionType.MAGIC)
-        end))
+        
 
         BUFF_FROST_BOLT.addSetupFunction() (Buff thisBuff, int factor) ->
             thisBuff.getTarget().wrapper().modBlue(factor)
@@ -400,7 +399,7 @@ public class HeroElementalMage extends HeroTemplate
                 thisBuff.getTarget().wrapper()
                 ..modAttackSpeed( -(stacks div 10))
 
-        BUFF_FRENZY.addStackFunction( (Buff whichBuff) -> (begin
+        BUFF_FRENZY.addStackFunction() (Buff whichBuff) ->
             let level = whichBuff.getLevel() - 1
             let oldStacks = whichBuff.getData()
             let newStacks = min(oldStacks + (FRENZY_BONUS[level]*10).toInt(), 1000)
@@ -408,7 +407,7 @@ public class HeroElementalMage extends HeroTemplate
             whichBuff.setData(newStacks)
             whichBuff.getTarget().wrapper()
                 ..modAttackSpeed( (newStacks div 10) - (oldStacks div 10))
-        end))
+        
 
 
         BUFF_ELEMENTAL_MARK.addLevelFunction() (Buff thisBuff, int factor) ->

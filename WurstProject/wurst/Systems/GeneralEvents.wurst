@@ -50,15 +50,15 @@ init
 
     CreateTrigger()
     ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_SPELL_CAST)
-    ..addAction(() -> (begin
+    ..addAction() () ->
         GetTriggerUnit().setTimeScale(getAnimationSpeed(GetSpellAbilityId()))
-    end))
+    
 
     CreateTrigger()
     ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_SPELL_ENDCAST)
-    ..addAction(() -> (begin
+    ..addAction() () ->
         GetTriggerUnit().setTimeScale(1)
-    end))
+    
 
    
     

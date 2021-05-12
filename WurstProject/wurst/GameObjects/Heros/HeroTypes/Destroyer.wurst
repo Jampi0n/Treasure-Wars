@@ -290,9 +290,8 @@ public class HeroDestroyer extends HeroTemplate
         var model = addEffect(modelPath, pos)
         model.setRoll(facing)
         doAfter(WALL_DURATION[level-1]) ->
-            doPeriodicallyCounted(0.05, 20, (CallbackCounted cb) -> begin
+            doPeriodicallyCounted(0.05, 20) (CallbackCounted cb) ->
                 model.setAlpha((12.75 * cb.getCount()).round() )
-            end)
             addEffect(Abilities.mirrorImageDeathCaster, pos).destr()
             model.destr()
             wall.kill()
@@ -304,9 +303,8 @@ public class HeroDestroyer extends HeroTemplate
             model = addEffect(modelPath, newPos)
             model.setRoll(facing)
             doAfter(WALL_DURATION[level-1]) ->
-                doPeriodicallyCounted(0.05, 20, (CallbackCounted cb) -> begin
+                doPeriodicallyCounted(0.05, 20) (CallbackCounted cb) ->
                     model.setAlpha((12.75 * cb.getCount()).round() )
-                end)
                 addEffect(Abilities.mirrorImageDeathCaster, newPos).destr()
                 model.destr()
                 wall.kill()
@@ -317,9 +315,8 @@ public class HeroDestroyer extends HeroTemplate
             model = addEffect(modelPath, newPos)
             model.setRoll(facing)
             doAfter(WALL_DURATION[level-1]) ->
-                doPeriodicallyCounted(0.05, 20, (CallbackCounted cb) -> begin
+                doPeriodicallyCounted(0.05, 20) (CallbackCounted cb) ->
                     model.setAlpha((12.75 * cb.getCount()).round() )
-                end)
                 addEffect(Abilities.mirrorImageDeathCaster, newPos).destr()
                 model.destr()
                 wall.kill()
@@ -367,7 +364,7 @@ public class HeroDestroyer extends HeroTemplate
 
         BUFF_PREY_TARGET.setPeriodicTime(0.2)
 
-        BUFF_PREY_TARGET.addPeriodicFunction( (Buff whichBuff) -> (begin
+        BUFF_PREY_TARGET.addPeriodicFunction() (Buff whichBuff) ->
             let caster = whichBuff.getCaster()
             let target = whichBuff.getTarget()
             let direction = caster.getPos().angleTo(target.getPos())
@@ -388,7 +385,7 @@ public class HeroDestroyer extends HeroTemplate
                     whichBuff.setData(0)
                     caster.wrapper().modMoveSpeedRelative( -PREY_MOVE_SPEED[whichBuff.getLevel()-1]*10)
                 
-        end))
+        
         BUFF_PREY_TARGET.addLevelFunction() (Buff thisBuff, int factor) ->
             if factor == -1
                 let caster = thisBuff.getCaster()
@@ -410,7 +407,7 @@ public class HeroDestroyer extends HeroTemplate
             let level = thisBuff.getLevel()
             thisBuff.getCaster().wrapper().modAttackSpeed( IMMOLATION_ATTACK_SPEED[level-1])
 
-        buffImmolation.addPeriodicFunction((Buff whichBuff) -> (begin
+        buffImmolation.addPeriodicFunction() (Buff whichBuff) ->
             let caster = whichBuff.getCaster()
             let owner = caster.getOwner()
             let level = whichBuff.getData()
@@ -432,7 +429,7 @@ public class HeroDestroyer extends HeroTemplate
                             caster.dealDamage(u, dmg, ReductionType.MAGIC)
             else
                 whichBuff.dispel()
-        end))
+        
     
 init
     initialize()

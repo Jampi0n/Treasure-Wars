@@ -131,14 +131,12 @@ public class HeroPythonWarrioress extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceStats(POISON_SPIT_DOT_BONUS)
-        tooltip.setLearnString("Spits poison at the target area. Enemies within the area of effect are slowed, have reduced armor and take damage over time.",
-        (int lvl) -> (begin
+        tooltip.setLearnString("Spits poison at the target area. Enemies within the area of effect are slowed, have reduced armor and take damage over time.") (int lvl) ->
             return "{0}{I0} damage per second, {1} slow, {2} armor, lasts {3} seconds.".format(
             POISON_SPIT_DOT[lvl-1].str(), 
             POISON_SPIT_SLOW_MS[lvl-1].str()+"%",
             POISON_SPIT_ARMOR_REDUCTION[lvl-1].str(),
             POISON_SPIT_DURATION[lvl-1].str())
-        end) )
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, "Spits poison at the target area. Enemies within the area of effect are slowed by {0}, have their armor reduced by {1} and take {2}{I0} damage per second.|nLasts {3} seconds.".format(
                 POISON_SPIT_SLOW_MS[lvl-1].str()+"%", POISON_SPIT_ARMOR_REDUCTION[lvl-1].str(), POISON_SPIT_DOT[lvl-1].str(), POISON_SPIT_DURATION[lvl-1].str()))
@@ -345,22 +343,21 @@ public class HeroPythonWarrioress extends HeroTemplate
 
     override function onInitDelayed(IHeroType heroType)
         BUFF_ENVENOMED_BLADES.setPeriodicTime(1)
-        BUFF_ENVENOMED_BLADES.addPeriodicFunction((Buff thisBuff)-> (begin
+        BUFF_ENVENOMED_BLADES.addPeriodicFunction() (Buff thisBuff)->
             let target = thisBuff.getTarget()
             let caster = thisBuff.getCaster()
             if target.isTargetableEnemy(caster)
                 caster.dealDamage(target, 
                 (ENVENOMED_BLADES_DAMAGE[thisBuff.getLevel()-1]).bonus(caster.getHeroInt(), ENVENOMED_BLADES_DAMAGE_BONUS)
                 , ReductionType.MAGIC)
-        end) )
         
 
         //Poison Spit
-        BUFF_POISON_SPIT.addApplyFunction( (Buff thisBuff) -> (begin
+        BUFF_POISON_SPIT.addApplyFunction() (Buff thisBuff) ->
             thisBuff.getCaster().dealDamage(thisBuff.getTarget(), 
             (POISON_SPIT_DOT[thisBuff.getLevel()-1]).bonus(thisBuff.getCaster().getHeroInt(), POISON_SPIT_DOT_BONUS)/4
             , ReductionType.MAGIC)
-        end) )
+        
         BUFF_POISON_SPIT.addLevelFunction() (Buff thisBuff, int factor) ->
             let wrapper = thisBuff.getTarget().wrapper()
             wrapper.modMoveSpeedRelative( -factor * POISON_SPIT_SLOW_MS[thisBuff.getLevel()-1]*10 )

@@ -115,10 +115,10 @@ init
             ..modMoveSpeedRelative(ACID_BREATH_SLOW*10)
             ..modArmor(ACID_BREATH_ARMOR * stacks)
 
-    BUFF_ACID_BREATH.addStackFunction( (Buff whichBuff) -> (begin
+    BUFF_ACID_BREATH.addStackFunction() (Buff whichBuff) ->
         let stacks = whichBuff.getData() + 1
         whichBuff.setData(stacks)
         whichBuff.getTarget().wrapper()
         ..modArmor(-ACID_BREATH_ARMOR)
-    end))
+    
 

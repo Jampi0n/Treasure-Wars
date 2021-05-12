@@ -386,15 +386,15 @@ public class HeroTrollManHunter extends HeroTemplate
             if factor == 1
                 thisBuff.setData(1)
 
-        BUFF_BLEEDING_WOUND.addStackFunction( (Buff whichBuff) -> (begin
+        BUFF_BLEEDING_WOUND.addStackFunction() (Buff whichBuff) ->
             whichBuff.setData(whichBuff.getData()+1)
-        end))
+        
 
         BUFF_BLEEDING_WOUND.setPeriodicTime(0.25)
-        BUFF_BLEEDING_WOUND.addPeriodicFunction( (Buff whichBuff) -> (begin
+        BUFF_BLEEDING_WOUND.addPeriodicFunction() (Buff whichBuff) ->
             let level = whichBuff.getLevel()
             whichBuff.getCaster().dealDamage(whichBuff.getTarget(), 1.0/16.0 * whichBuff.getData() * BLEEDING_WOUND_DMG[level-1], ReductionType.PHYSICAL)
-        end))
+        
         BUFF_SHADOW_STRIKE.addLevelFunction() (Buff thisBuff, int factor) ->
             thisBuff.getTarget().wrapper().modMoveSpeedRelative( -factor * SHADOW_STRIKE_SLOW * 10)
 
@@ -417,7 +417,7 @@ public class HeroTrollManHunter extends HeroTemplate
             ..modAgility( factor * DEATH_SPIN_DEFENSE[level-1])
 
         BUFF_DEATH_SPIN.setPeriodicTime(0.25)
-        BUFF_DEATH_SPIN.addPeriodicFunction( (Buff whichBuff) -> (begin
+        BUFF_DEATH_SPIN.addPeriodicFunction() (Buff whichBuff) ->
             let caster = whichBuff.getCaster()
             let instance = TrollManHunterInstance.fromUnit(caster)
             let g = CreateGroup()
@@ -435,7 +435,7 @@ public class HeroTrollManHunter extends HeroTemplate
                         u.addBuffReduced(caster, BLEEDING_WOUND_DURATION, BUFF_BLEEDING_WOUND, bleedingWoundLevel)
                     caster.dealDamage(u, 0.25 * DEATH_SPIN_DAMAGE[level-1].bonus(caster.getHeroStr(), DEATH_SPIN_DAMAGE_BONUS), ReductionType.PHYSICAL)
             g.destr()
-        end))
+        
         
         // store number of stacks of bleeding wound
         BUFF_CRIPPLING_PAIN.addSetupFunction() (Buff thisBuff, int factor) ->

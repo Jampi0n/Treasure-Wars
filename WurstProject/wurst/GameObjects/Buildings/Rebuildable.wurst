@@ -43,7 +43,7 @@ public abstract class Rebuildable extends Building
 
 	function rebuild(unit building)
 		let repairSoundPos = building.getPos3Zero()
-		doPeriodicallyCounted(1, 5, (CallbackCounted cb) -> begin
+		doPeriodicallyCounted(1, 5) (CallbackCounted cb) -> 
 			let r = GetRandomInt(1, 3)
 			if r == 1
 				SOUND_REPAIR_1.playOnPoint(repairSoundPos).snd.setVolume(350)
@@ -51,7 +51,6 @@ public abstract class Rebuildable extends Building
 				SOUND_REPAIR_2.playOnPoint(repairSoundPos).snd.setVolume(350)
 			else
 				SOUND_REPAIR_3.playOnPoint(repairSoundPos).snd.setVolume(350)
-		end)
 		
 		this.onRebuildStart(building)
 

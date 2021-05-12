@@ -438,7 +438,7 @@ public class HeroWarBeetle extends HeroTemplate
         let heroUnit = hero.toUnit()
         CreateTrigger()
         ..registerUnitEvent(heroUnit, EVENT_UNIT_HERO_SKILL)
-        ..addAction(() -> (begin
+        ..addAction() () ->
             let u = GetTriggerUnit()
             if GetLearnedSkill() == HeroWarBeetle.instance.ABILITY_ID_PASSIVE
                 let newLevel = u.getAbilityLevel(HeroWarBeetle.instance.ABILITY_ID_PASSIVE)
@@ -446,7 +446,7 @@ public class HeroWarBeetle extends HeroTemplate
                     u.wrapper().modArmor( -HARD_SHELL_ARMOR[newLevel-2])
 
                 u.wrapper().modArmor( HARD_SHELL_ARMOR[newLevel-1])
-        end))
+        
 
 
 

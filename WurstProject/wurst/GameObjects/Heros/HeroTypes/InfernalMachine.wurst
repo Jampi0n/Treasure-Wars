@@ -477,22 +477,22 @@ public class HeroInfernalMachine extends HeroTemplate
 
         CreateTrigger()
         ..registerUnitEvent(heroUnit, EVENT_UNIT_DEATH)
-        ..addAction(() -> (begin
+        ..addAction() () ->
             if GetTriggerUnit().getTypeId() == HERO_INFERNAL_MACHINE_MORPH
                 let u = GetTriggerUnit()
                 onRapidEnd(u, u.getAbilityLevel(HeroInfernalMachine.instance.ABILITY_ID_R))
-        end))
+        
 
         CreateTrigger()
         ..registerUnitEvent(heroUnit, EVENT_UNIT_HERO_SKILL)
-        ..addAction(() -> (begin
+        ..addAction() () ->
             let u = GetTriggerUnit()
 
             if GetLearnedSkill() == HeroInfernalMachine.instance.ABILITY_ID_R and u.getTypeId() == HERO_INFERNAL_MACHINE_MORPH
                 let newLevel = u.getAbilityLevel(HeroInfernalMachine.instance.ABILITY_ID_R)
                 onRapidEndStats(u, newLevel - 1)
                 onRapidStats(u, newLevel)
-        end))
+        
     override function onInit(IHeroType heroType)
         heroType.setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean advanced) ->
             if target.isTargetableEnemyUnit(source)
@@ -522,17 +522,17 @@ public class HeroInfernalMachine extends HeroTemplate
             wrapper.modAgility( factor * INNER_FIRE_DEF[level-1].bonus(intel, INNER_FIRE_DEF_BONUS).toInt() )
 
         BUFF_FLAME_THROWER.setPeriodicTime(0.25)
-        BUFF_FLAME_THROWER.addPeriodicFunction((Buff whichBuff) -> (begin
+        BUFF_FLAME_THROWER.addPeriodicFunction() (Buff whichBuff) ->
             let caster = whichBuff.getCaster()
             let target = whichBuff.getTarget()
             if target.isTargetableEnemy(caster)
                 caster.dealDamage(target, 0.25 * FLAME_THROWER_DOT[whichBuff.getLevel()-1].bonus(caster.getHeroInt(), FLAME_THROWER_DOT_BONUS), ReductionType.MAGIC)
-        end))
+        
 
 
         CreateTrigger()
         ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
-        ..addAction(() -> (begin
+        ..addAction() () ->
             var killer = GetKillingUnit()
             if killer != null
                 let killingHero = killer.wrapper().getOwningHero()
@@ -549,7 +549,7 @@ public class HeroInfernalMachine extends HeroTemplate
                                 if u.isTargetableEnemyUnit(killer)
                                     killer.dealDamage(u, dmg, ReductionType.MAGIC)
                             g.destr()
-        end))
+        
 
 
 init

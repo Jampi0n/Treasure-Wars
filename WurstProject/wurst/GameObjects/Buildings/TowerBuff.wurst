@@ -28,12 +28,12 @@ init
 			let stacks = thisBuff.getData()
 			thisBuff.getTarget().wrapper().modArmorRelative(TOWER_FOCUS_ARMOR * 10 * stacks)
 
-	BUFF_TOWER_FOCUS.addStackFunction( (Buff whichBuff) -> (begin
+	BUFF_TOWER_FOCUS.addStackFunction() (Buff whichBuff) ->
 		let stacks = whichBuff.getData() + 1
 		if stacks <= TOWER_FOCUS_MAX_STACKS
 			whichBuff.setData(stacks)
 			whichBuff.getTarget().wrapper().modArmorRelative(-TOWER_FOCUS_ARMOR * 10)
-	end))
+	
 
 
 	let g = CreateGroup()

@@ -122,7 +122,8 @@ public class HeroImpl implements IHero
             SetPlayerTechResearched(players[i], ATTACK_ANIMATION_OFFSET, 1)
 
         CreateTrigger()
-        ..addAction(() -> (begin
+        ..registerAnyUnitEvent(EVENT_PLAYER_HERO_SKILL)
+        ..addAction() ->
             let heroUnit = GetTriggerUnit()
             
             if unitToHero.has(heroUnit)
@@ -131,10 +132,6 @@ public class HeroImpl implements IHero
                     if hero.skillIds[i] == GetLearnedSkill()
                         hero.defaultCooldown[i] = BlzGetUnitAbilityCooldown(heroUnit, hero.skillIds[i], GetLearnedSkillLevel()-1)
                 hero.updateCooldowns()
-
-        end))
-        ..registerAnyUnitEvent(EVENT_PLAYER_HERO_SKILL)
-
 
     private function setup(IHero owningHero)
         this.instanceIndex = numInstances
@@ -190,10 +187,9 @@ public class HeroImpl implements IHero
 
         if this.heroType.getUsesHeroGlow()
             this.heroGlow = createUnit(this.hero.getOwner(), 'n00H', this.hero.getPos(), angle(0))
-            doPeriodically(0.03, (CallbackPeriodic _) ->(begin
+            doPeriodically(0.03) (CallbackPeriodic _) ->
                 if this.hero.isAlive()
                     this.heroGlow.setXY(this.hero.getPos())
-            end))
         defaultAttackCooldown = wrapper.getBaseAttackCooldown()
         wrapper.modManaRegen(this.heroType.getBase(Stat.MR) * 1 )
         wrapper.modHealthRegen(this.heroType.getBase(Stat.HR) * 3 )

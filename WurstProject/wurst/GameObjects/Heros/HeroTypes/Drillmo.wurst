@@ -423,7 +423,7 @@ public class HeroDrillmo extends HeroTemplate
         new DrillmoInstance()
         CreateTrigger()
         ..registerUnitEvent(hero.toUnit(), EVENT_UNIT_HERO_SKILL)
-        ..addAction(() -> (begin
+        ..addAction() () ->
             let u = GetTriggerUnit()
             if GetLearnedSkill() == instance.ABILITY_ID_PASSIVE
                 let newLevel = u.getAbilityLevel(instance.ABILITY_ID_PASSIVE)
@@ -431,7 +431,7 @@ public class HeroDrillmo extends HeroTemplate
                     u.wrapper().modAttackSpeed( -OVERCHARGE_ATTACK_SPEED[newLevel-2])
     
                 u.wrapper().modAttackSpeed( OVERCHARGE_ATTACK_SPEED[newLevel-1])
-        end))
+        
 
     override function onInitDelayed(IHeroType heroType)
         onImpact(ROCKET_BUFF_ID) (unit source, unit target) ->
@@ -454,11 +454,11 @@ public class HeroDrillmo extends HeroTemplate
                 destroy data castTo Pull
             
         BUFF_SPIKE_BALL.setPeriodicTime(0.25)
-        BUFF_SPIKE_BALL.addPeriodicFunction((Buff whichBuff) -> (begin
+        BUFF_SPIKE_BALL.addPeriodicFunction() (Buff whichBuff) ->
             let caster = whichBuff.getCaster()
             let level = whichBuff.getLevel()
             caster.dealDamage(whichBuff.getTarget(), 0.25 * SPIKE_BALL_DOT_DMG[level-1].bonus(caster.getHeroStr(), SPIKE_BALL_DOT_DMG_BONUS) / SPIKE_BALL_DOT_DURATION[level-1] , ReductionType.PHYSICAL)
-        end))
+        
 
         BUFF_SPEED_BOOST.addSetupFunction() (Buff thisBuff, int factor) ->
             AddUnitAnimationProperties(thisBuff.getTarget(), "fast", factor == 1)

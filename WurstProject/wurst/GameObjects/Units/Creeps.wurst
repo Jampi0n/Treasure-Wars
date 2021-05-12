@@ -52,17 +52,15 @@ public constant REVENANT_SLOW_BUFF = compiletime(setupBuff("Death Curse", "This 
 
 function initCreepBuffs()
     JUNGLE_STALKER_BUFF.setPeriodicTime(0.25)
-    JUNGLE_STALKER_BUFF.addPeriodicFunction((Buff whichBuff) -> begin
+    JUNGLE_STALKER_BUFF.addPeriodicFunction() (Buff whichBuff) ->
         let target = whichBuff.getTarget()
         target.healHP(target, 0.25 * JUNGLE_STALKER_HP_REG)
-    end)
 
     SEA_ELEMENTAL_BUFF.setPeriodicTime(0.25)
-    SEA_ELEMENTAL_BUFF.addPeriodicFunction((Buff whichBuff) -> begin
+    SEA_ELEMENTAL_BUFF.addPeriodicFunction() (Buff whichBuff) ->
         let target = whichBuff.getTarget()
         target.healMana(target, 0.25 * SEA_ELEMENTAL_MP_REG)
-    end)
-
+        
     TURTLE_BUFF.addSetupFunction() (Buff thisBuff, int factor) ->
         if factor == 1
             let pointer = DamageEventUnit.fromUnit(thisBuff.getTarget()).attackHitNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->

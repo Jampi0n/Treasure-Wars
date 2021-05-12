@@ -162,25 +162,23 @@ public class HeroVoodooArcher extends HeroTemplate
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceStats(0)
         tooltip.setLearnString(
-            (
-                "Summons an immobile serpentine ward to attack nearby enemies for {0} seconds. " +
-                "Attacked targets have their armor and movement speed reduced. " + 
-                "Stacks up to {1} times, but the first attack applies {2} stacks."
+        (
+            "Summons an immobile serpentine ward to attack nearby enemies for {0} seconds. " +
+            "Attacked targets have their armor and movement speed reduced. " + 
+            "Stacks up to {1} times, but the first attack applies {2} stacks."
+        ).format(
+            SERPENT_WARD_DURATION.str(),
+            SERPENT_POSION_MAX_STACKS.toString(),
+            SERPENT_POISON_FIRST_ATTACK_FACTOR.toString()
+        )) (int lvl) ->
+            return (
+                "{0} armor, {1}% movement speed per attack, {2} seconds."
             ).format(
-                SERPENT_WARD_DURATION.str(),
-                SERPENT_POSION_MAX_STACKS.toString(),
-                SERPENT_POISON_FIRST_ATTACK_FACTOR.toString()
-            ),
-            (int lvl) -> (begin
-                return (
-                    "{0} armor, {1}% movement speed per attack, {2} seconds."
-                ).format(
-                    (SERPENT_POISON_ARMOR*SERPENT_POISON_STACKS[lvl-1]/10).str(),
-                    (SERPENT_POISON_SLOW*SERPENT_POISON_STACKS[lvl-1]/10).str(),
-                    SERPENT_POISON_DURATION[lvl-1].str()
-                )
-            end)
-        )
+                (SERPENT_POISON_ARMOR*SERPENT_POISON_STACKS[lvl-1]/10).str(),
+                (SERPENT_POISON_SLOW*SERPENT_POISON_STACKS[lvl-1]/10).str(),
+                SERPENT_POISON_DURATION[lvl-1].str()
+            )
+
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, 
                 (
@@ -264,17 +262,14 @@ public class HeroVoodooArcher extends HeroTemplate
             let mOffset = vec2(0,0).polarOffset(angle(angleStep*i), 250)
             let facing = angle(angleStep*i+bj_PI)
             let fx = new Fx((target.getPos()+mOffset).withZ(110), facing, "Models\\LujkaArrow.mdl")
-            doPeriodicallyTimed(0.03, 0.99, (CallbackCounted cb)-> begin
+            doPeriodicallyTimed(0.03, 0.99) (CallbackCounted cb) ->
                 fx.setXY(target.getPos()+mOffset)
                 fx.setXYAngle(facing)
-            end)
-            doAfter(1, -> begin
-                doPeriodicallyTimed(0.03, 0.3, (CallbackCounted cb)-> begin
+            doAfter(1) ->
+                doPeriodicallyTimed(0.03, 0.3) (CallbackCounted cb) ->
                     fx.setXY(target.getPos()+mOffset*(cb.getCount()/10))
                     if cb.isLast()
                         destroy fx
-                end)
-            end)
         doAfter(1.25) ->
             caster.dealDamage(target, GHOST_ARROWS_DAMAGE[level-1].bonus(caster.getHeroStr(), GHOST_ARROWS_DAMAGE_BONUS), ReductionType.PHYSICAL)
         
@@ -309,7 +304,7 @@ public class HeroVoodooArcher extends HeroTemplate
         let level = caster.getAbilityLevel(spellId)
         let fx = caster.addEffect(Abilities.voodooAura, "origin")
         let enemyList = Teams.HERO_PLAYERS[Teams.invert(Players.team(caster.getOwner().getId()))]
-        doPeriodically(0.1, (cb) -> begin
+        doPeriodically(0.1) (cb) ->
             if not caster.isAlive() or caster.getCurrentOrder() != OrderId("tranquility")
                 destroy cb
                 fx.destr()
@@ -320,8 +315,6 @@ public class HeroVoodooArcher extends HeroTemplate
                         if target.isTargetableEnemy(caster)
                             caster.dealDamage(target, 0.1 * BBV_DAMAGE[level-1].bonus(caster.getHeroInt(), BBV_DAMAGE_BONUS), ReductionType.NONE)
                             target.addEffect(Abilities.vengeanceMissile, "overhead").destr()
-                    
-        end)
 
     override function retreatAI(IHeroAI _ai)
 
@@ -339,12 +332,11 @@ public class HeroVoodooArcher extends HeroTemplate
 
     override function onInitDelayed(IHeroType heroType)
         BUFF_MIND_CURSE_TARGET.setPeriodicTime(0.25)
-        BUFF_MIND_CURSE_TARGET.addPeriodicFunction((whichBuff) -> begin
+        BUFF_MIND_CURSE_TARGET.addPeriodicFunction() (whichBuff) ->
             let target = whichBuff.getTarget()
             let caster = whichBuff.getCaster()
             let level = whichBuff.getLevel()
             caster.damageMana(target, 0.25 * MIND_CURSE_MANA_DRAIN[level-1].bonus(caster.getHeroInt(), MIND_CURSE_MANA_DRAIN_BONUS), ReductionType.MAGIC)
-        end)
         /*
             About stacks:
             Stacks are used, so the buff is level independent.
@@ -369,7 +361,7 @@ public class HeroVoodooArcher extends HeroTemplate
             target.modMoveSpeedRelative( -factor * 10 * SERPENT_POISON_SLOW * (stacks))
             target.modArmor( -factor * SERPENT_POISON_ARMOR * (stacks))
 
-        BUFF_SERPENT_POISON.addStackFunction( (Buff whichBuff) -> (begin
+        BUFF_SERPENT_POISON.addStackFunction() (Buff whichBuff) ->
             let level = whichBuff.getLevel()
             let prevStacks = whichBuff.getData()
             let newStacks = min(prevStacks + SERPENT_POISON_STACKS[level-1], SERPENT_POISON_STACKS[level-1]*SERPENT_POSION_MAX_STACKS)
@@ -378,7 +370,7 @@ public class HeroVoodooArcher extends HeroTemplate
             whichBuff.getTarget().wrapper()
                 ..modMoveSpeedRelative( -10 * SERPENT_POISON_SLOW * stackDiff) 
                 ..modArmor( -SERPENT_POISON_ARMOR * stackDiff)
-        end))
+        
 
 
     

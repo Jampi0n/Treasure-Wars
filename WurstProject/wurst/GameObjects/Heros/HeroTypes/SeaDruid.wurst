@@ -342,18 +342,16 @@ public class HeroSeaDruid extends HeroTemplate
                     Knockback2d.knockback(target, caster.getPos().polarOffset(caster.getPos().angleTo(target.getPos()), 500), 1000)
                     target.cancelChannel()
 
-                new Missile(caster, caster.getPos().withZ(80), 900, caster.getPos().angleTo(target.getPos()), Abilities.crushingWaveMissile)
-                    ..hitOnce()
-                    ..setSize(125)
-                    ..setHitCondition((Missile missile, unit target) -> (begin
+                let missile = new Missile(caster, caster.getPos().withZ(80), 900, caster.getPos().angleTo(target.getPos()), Abilities.crushingWaveMissile)
+                ..hitOnce()
+                ..setSize(125)
+                ..setMaxRange(500)
+                missile.setHitCondition() (Missile missile, unit target) ->
                     return target.isTargetableEnemyUnit(missile.getOwner())
-                end) )
-                    ..setHitFunction((Missile missile, unit target) -> (begin
+                
+                missile.setHitFunction() (Missile missile, unit target) ->
                     let missileCaster = missile.getOwner()
                     missileCaster.dealDamage(target, (TIDAL_FURY_WAVE_DMG[level-1]).bonus(missileCaster.getHeroInt(), TIDAL_FURY_WAVE_DMG_BONUS), ReductionType.MAGIC)
-        
-                end) )
-                    ..setMaxRange(500)
         nearby.destr()
 
     override static function castW()
@@ -502,7 +500,7 @@ public class HeroSeaDruid extends HeroTemplate
 
     override function onInit(IHeroType heroType)
         heroType
-        ..setBonusCalculation((unit u, Stat whichStat) -> (begin
+        ..setBonusCalculation() (unit u, Stat whichStat) ->
             let whichWrapper = u.wrapper()
             let lvl = u.getAbilityLevel(ABILITY_ID_PASSIVE)
             if lvl == 0
@@ -519,7 +517,7 @@ public class HeroSeaDruid extends HeroTemplate
                     whichWrapper.applyMana()
                 else //else calculate default values
                     whichWrapper.defaultBonusCalcualtion(whichStat)
-        end))
+        
     override function onInitDelayed(IHeroType heroType)
         BUFF_FISH.addLevelFunction() (Buff thisBuff, int factor) ->
             let level = thisBuff.getLevel()
@@ -530,11 +528,11 @@ public class HeroSeaDruid extends HeroTemplate
 
         buffManaShield = new BuffType(true, DispelLevel.BREAK) // the actual effect is in OnAttack
             ..setPeriodicTime(0.1)
-        buffManaShield.addPeriodicFunction( (Buff whichBuff) -> (begin
+        buffManaShield.addPeriodicFunction() (Buff whichBuff) ->
             let caster = whichBuff.getCaster()
             if not caster.hasAbility(MANA_SHIELD_BUFF_ID)
                 whichBuff.dispel()
-        end))
+        
 
         RITUAL_BUFF.addLevelFunction() (Buff thisBuff, int factor) ->
             thisBuff.getTarget().wrapper().modMoveSpeedRelative( -factor * RITUAL_MOVEMENT_SLOW[thisBuff.getLevel()-1]*10)

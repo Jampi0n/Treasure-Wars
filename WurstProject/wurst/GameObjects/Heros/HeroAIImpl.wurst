@@ -409,12 +409,11 @@ public class HeroAIImpl implements IHeroAI
 
         updateTimer.startPeriodic(UPDATE_INTERVAL, function updateStatic)
         CreateTrigger()
-            ..registerAnyUnitEvent(EVENT_PLAYER_HERO_LEVEL)
-            ..addAction(() ->(begin
+        ..registerAnyUnitEvent(EVENT_PLAYER_HERO_LEVEL)
+        ..addAction() ->
             let ai = getAI(GetTriggerUnit())
             if ai != null
                 ai.levelUp()
-        end))
 
     construct(IHero hero, aidifficulty diff)
         this.owningPlayer =  hero.toUnit().getOwner()

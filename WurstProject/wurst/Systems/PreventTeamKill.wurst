@@ -12,7 +12,7 @@ init
     for i = 0 to MAX_HERO_COUNT-1
         trg.registerPlayerUnitEvent(Player(i), EVENT_PLAYER_UNIT_ISSUED_UNIT_ORDER, null)
 
-    trg.addAction(() ->(begin
+    trg.addAction() ->
         if GetIssuedOrderId() == ATTACK_ORDER
             let attacker = GetTriggerUnit()
             let target = GetOrderTargetUnit()
@@ -20,7 +20,4 @@ init
                 doAfter(0) () ->
                     if not attacker.issuePointOrder("attack", target.getPos())
                         attacker.issueImmediateOrder("stop")
-                
-    end))
-
 

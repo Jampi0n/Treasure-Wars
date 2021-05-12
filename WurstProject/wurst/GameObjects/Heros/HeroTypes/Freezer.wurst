@@ -565,7 +565,7 @@ public class HeroFreezer extends HeroTemplate
                 wrapper.modAgility( -FREEZE_DEF)
 
         BUFF_FREEZE.setPeriodicTime(0.05)
-        BUFF_FREEZE.addPeriodicFunction( (Buff whichBuff) -> (begin
+        BUFF_FREEZE.addPeriodicFunction() (Buff whichBuff) ->
             let target = whichBuff.getTarget()
             let caster = whichBuff.getCaster()
             let level = whichBuff.getLevel()
@@ -576,7 +576,7 @@ public class HeroFreezer extends HeroTemplate
                 caster.dealDamage(target, 0.05 * FREEZE_DMG[level-1].bonus(caster.getHeroInt(), FREEZE_DMG_BONUS), ReductionType.MAGIC)
             else
                 whichBuff.dispel()
-        end))
+        
 
 
    

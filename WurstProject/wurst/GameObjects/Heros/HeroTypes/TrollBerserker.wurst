@@ -397,23 +397,23 @@ public class HeroTrollBerserker extends HeroTemplate
         let heroUnit = hero.toUnit()
         CreateTrigger()
         ..registerUnitEvent(heroUnit, EVENT_UNIT_DEATH)
-        ..addAction(() -> (begin
+        ..addAction() () ->
             if GetTriggerUnit().getTypeId() == HERO_TROLL_BERSERKER_MELEE
                 let u = GetTriggerUnit()
                 onSwitchToRanged(u, u.getAbilityLevel(HeroTrollBerserker.instance.ABILITY_ID_E))
 
-        end))
+        
 
         CreateTrigger()
         ..registerUnitEvent(heroUnit, EVENT_UNIT_HERO_SKILL)
-        ..addAction(() -> (begin
+        ..addAction() () ->
             let u = GetTriggerUnit()
 
             if GetLearnedSkill() == HeroTrollBerserker.instance.ABILITY_ID_E and u.getTypeId() == HERO_TROLL_BERSERKER_MELEE
                 let newLevel = u.getAbilityLevel(HeroTrollBerserker.instance.ABILITY_ID_E)
                 onRangedStats(u, newLevel - 1)
                 onMeleeStats(u, newLevel)
-        end))
+        
 
     override function onInit(IHeroType heroType)
         heroType.setOnAttackFunc() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean advanced) ->
