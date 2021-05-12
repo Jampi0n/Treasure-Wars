@@ -121,22 +121,6 @@ public class BuffType
         let target = whichBuff.getTarget()
         target.removeAbility(buffType.buffId)
 
-
-    static function addAuraAbility(Buff whichBuff)
-        let buffType = whichBuff.getBuffType()
-        let target = whichBuff.getTarget()
-        buffType.abilities.forEach( (int abilityId ) -> (begin
-            target.addAbility(abilityId)
-            target.setAbilityLevel(abilityId, whichBuff.getLevel())
-            target.makeAbilityPermanent(abilityId, true)
-        end) )
-
-    static function removeAuraAbility(Buff whichBuff)
-        let buffType = whichBuff.getBuffType()
-        let target = whichBuff.getTarget()
-        buffType.abilities.forEach( (int abilityId ) -> target.removeAbility(abilityId))
-        target.removeAbility(buffType.buffId)
-
     function setPeriodicTime(real newTime)
         this.periodicTime = newTime
 
@@ -305,6 +289,8 @@ public class Buff
         if this.buffType.abilities != null
             for abil in this.buffType.abilities
                 target.addAbility(abil)
+                target.setAbilityLevel(abil, level)
+                target.makeAbilityPermanent(abil, true)
         if this.onSetup != null
             for BuffFunction cb in this.onSetup
                 cb.run(this, 1)
@@ -398,6 +384,11 @@ public class Buff
         this.caster = newCaster
         // remove old level
         if this.onLevel != null
+            if this.buffType.abilities != null
+                for abil in this.buffType.abilities
+                    target.addAbility(abil)
+                    target.setAbilityLevel(abil, level)
+                    target.makeAbilityPermanent(abil, true)
             for BuffFunction cb in this.onLevel
                 cb.run(this, -1)
         this.level = newLevel
