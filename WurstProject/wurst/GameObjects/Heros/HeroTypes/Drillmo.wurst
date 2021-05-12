@@ -140,7 +140,7 @@ public class HeroDrillmo extends HeroTemplate
                 ..setupIcon("PASMechanism")
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceStrength(0)
+        tooltip.setReplaceStats(0)
         tooltip.setLearnString("Increases the hero's attack speed.") (int lvl) ->
             return "{0}% bonus attack speed.".format(
                 OVERCHARGE_ATTACK_SPEED[lvl-1].str())
@@ -177,7 +177,7 @@ public class HeroDrillmo extends HeroTemplate
 
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceStrength(PULL_DAMAGE_BONUS)
+        tooltip.setReplaceStats(PULL_DAMAGE_BONUS)
         tooltip.setLearnString(CHANNELING_SPELL + "Sends out his hand to damage and pull an enemy to him. While being pulled, the target is stunned, but cannot be targeted.|nThe first target hit once the hand returns will be pulled.") (int lvl) ->
             return "{0}{S0} damage, {1} seconds cooldown.".format(
                 PULL_DAMAGE[lvl-1].str(), COOLDOWN.data(lvl).str()
@@ -219,7 +219,7 @@ public class HeroDrillmo extends HeroTemplate
 
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceStrength(SPIKE_BALL_DMG_BONUS, SPIKE_BALL_DOT_DMG_BONUS)
+        tooltip.setReplaceStats(SPIKE_BALL_DMG_BONUS, SPIKE_BALL_DOT_DMG_BONUS)
         tooltip.setLearnString(CHANNELING_SPELL + "Slams the ground with a massive spike ball, dealing damage stunning targets in an area in front of the hero. After that targets will be bleeding and take additional damage.") (int lvl) ->
             return "{0}{S0} instant damage, {1} seconds stun, {2}{S1} damage over {3} seconds.".format(
                 SPIKE_BALL_DMG[lvl-1].str(),
@@ -269,7 +269,7 @@ public class HeroDrillmo extends HeroTemplate
 
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceIntelligence(SPEED_BOOST_BONUS.toReal())
+        tooltip.setReplaceStats(SPEED_BOOST_BONUS.toReal())
         tooltip.setLearnString("Temporarily increases the hero's movement speed.") (int lvl) ->
             return "{0}{I0}% speed bonus, {1} seconds.".format(
                 SPEED_BOOST[lvl-1].toString(),
@@ -309,7 +309,7 @@ public class HeroDrillmo extends HeroTemplate
                 aDef.setCastRange(lvl, ROCKET_RANGE[lvl-1])
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceStrength(ROCKET_DMG_BONUS)
+        tooltip.setReplaceStats(ROCKET_DMG_BONUS)
         tooltip.setLearnString("Fires a rocket at the target enemy unit, dealing damage in an area around the target.") (int lvl) ->
             return "{0}{S0} damage, {1} range, {2} seconds cooldown.".format(
                 ROCKET_DMG[lvl-1].str(),

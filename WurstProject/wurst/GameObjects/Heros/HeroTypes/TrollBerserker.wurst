@@ -57,7 +57,7 @@ public class HeroTrollBerserker extends HeroTemplate
                 ..setupWithHotKey("Focus", "D")
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceStrength(0)
+        tooltip.setReplaceStats(0)
         tooltip.setLearnString("Every attack increases the Troll Berserker's strength by {0} for a short time.".format(FOCUS_BONUS.str())) (int lvl) ->
             return "{0} seconds.".format(
                 FOCUS_DURATION[lvl-1].str()
@@ -103,7 +103,7 @@ public class HeroTrollBerserker extends HeroTemplate
                     ..setDurationHero(lvl, 0.01)
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceStrength(0)
+        tooltip.setReplaceStats(0)
         tooltip.setLearnString("Increases the attack damage of the next attack.") (int lvl) ->
             return "{0}% damage increase.".format(
                 CRITICAL_DAMAGE_MULT[lvl-1].str()
@@ -140,7 +140,7 @@ public class HeroTrollBerserker extends HeroTemplate
                     ..setMaximumRange(lvl, BLINK_MAX_RANGE[lvl-1])
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceStrength(0)
+        tooltip.setReplaceStats(0)
         tooltip.setLearnString("Teleports the Troll Berserker a short distance.") (int lvl) ->
             return "{0} range, {1} seconds cooldown".format(
                 BLINK_MAX_RANGE[lvl-1].str(),
@@ -178,7 +178,7 @@ public class HeroTrollBerserker extends HeroTemplate
                     ..setDurationNormal(lvl, SWITCH_DURATION)
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceStrength(0)
+        tooltip.setReplaceStats(0)
         tooltip.setLearnString("Turnes the Troll Berserker into a melee fighter, increasing attack damage and movement speed.") (int lvl) ->
             return "+{0} attack damage, +{1} movement speed.".format(
                 SWITCH_DMG[lvl-1].str(), SWITCH_MOVE_SPEED[lvl-1].str()
@@ -245,7 +245,7 @@ public class HeroTrollBerserker extends HeroTemplate
                 ..setSkillData(COOLDOWN, MANA, 0)
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceIntelligence(GROWTH_HP_BONUS)
+        tooltip.setReplaceStats(GROWTH_HP_BONUS)
         tooltip.setLearnString("Increases the Troll Berserker's maximum hit points and hit point regeneration. When activated, the Troll Berserker petrifies nearby enemies making them unable to move for a short time.") (int lvl) ->
             return "{0}{I0} hit points, {1} hit point regeneration per second, lasts {2} seconds, {3} seconds fear.".format(
                 GROWTH_HP[lvl-1].str(), GROWTH_HP_REGEN[lvl-1].str(), GROWTH_DURATION[lvl-1].str(), GROWTH_FEAR_DURATION[lvl-1].str())

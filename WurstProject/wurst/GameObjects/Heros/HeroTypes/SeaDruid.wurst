@@ -107,7 +107,7 @@ public class HeroSeaDruid extends HeroTemplate
                 ..setupWithHotKey("Ancient Knowledge", "D")
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceIntelligence(0)
+        tooltip.setReplaceStats(0)
         tooltip.setSummary("Increases hit points by a portion of his maximum mana points and vice versa.")
         tooltip.setLearnString("Increases his maximum hit points for a portion of his maximum mana ponits and increases his maximum mana points by "+
         "a portion of his maximum hit points.") (int lvl) ->
@@ -147,8 +147,8 @@ public class HeroSeaDruid extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip
-            ..setReplaceStrength(TIDAL_FURY_HIT_DMG_BONUS)
-            ..setReplaceIntelligence(TIDAL_FURY_WAVE_DMG_BONUS)
+            ..setReplaceStats(TIDAL_FURY_HIT_DMG_BONUS)
+            ..setReplaceStats(TIDAL_FURY_WAVE_DMG_BONUS)
         tooltip.setLearnString("Knocks enemies next to the Sea Druid back, dealing damage and releasing a crushing wave for every enemy unit hit. The wave deals damage to every enemy it passes through.") (int lvl) ->
             return "{0}{S0} knockback damage, {1}{I1} wave damage.".format(
             TIDAL_FURY_HIT_DMG[lvl-1].str(), TIDAL_FURY_WAVE_DMG[lvl-1].str())
@@ -202,7 +202,7 @@ public class HeroSeaDruid extends HeroTemplate
                     ..setAreaofEffect(lvl, FISH_AOE[lvl-1])
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceIntelligence(FISH_DAMAGE_BONUS)
+        tooltip.setReplaceStats(FISH_DAMAGE_BONUS)
         tooltip.setLearnString("Throws a giant fish at the target location, damaging and slowing enemies in the area.") (int lvl) ->
             return "{0}{I0} damage, {1}% attack speed. {2}% movement speed, {3} seconds.".format(
                 FISH_DAMAGE[lvl-1].str(), FISH_ATTACK_SPEED[lvl-1].str(), FISH_MOVE_SPEED[lvl-1].str(), FISH_SLOW_DURATION[lvl-1].str())
@@ -245,7 +245,7 @@ public class HeroSeaDruid extends HeroTemplate
                     ..setManaDrainedperSecond(lvl, MANA_PER_SECOND[lvl-1])
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceIntelligence(0)
+        tooltip.setReplaceStats(0)
         tooltip.setLearnString("Reduces incoming damage at the cost of mana. Also drains mana while activated.") (int lvl) ->
             return "{0}% reduction, {1} mana points per blocked damage point.".format(
                 (MANA_SHIELD_REDUCTION[lvl-1]*100).str(), MANA_PER_DAMAGE[lvl-1].str()
@@ -299,7 +299,7 @@ public class HeroSeaDruid extends HeroTemplate
                     ..setEffects(lvl, "X000")
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceIntelligence(RITUAL_HP_DRAIN_BONUS, RITUAL_MANA_DRAIN_BONUS)
+        tooltip.setReplaceStats(RITUAL_HP_DRAIN_BONUS, RITUAL_MANA_DRAIN_BONUS)
         tooltip.setLearnString(CHANNELING_SPELL + "Sends out magical energy, that drains hit points and mana from nearby enemies and slows their movement speed.|nThe Sea Druid gets {0}% of the hit points and {1}% of the mana drained from enemy heroes.".format(
             RITUAL_HP_RATIO.str(), RITUAL_MANA_RATIO.str())) (int lvl) ->
             return "{0}{I0} damage, {1}{I1} mana, {2}% slow, lasts for {3} waves.".format(

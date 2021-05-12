@@ -106,7 +106,7 @@ public class HeroPaladin extends HeroTemplate
                 ..setupWithHotKey("Heavy Armored", "D")
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceStrength(0)
+        tooltip.setReplaceStats(0)
         tooltip.setLearnString("Reduces damage from incoming attacks.") (int lvl) ->
             return "{0} damage reduction.".format(
             HEAVY_ARMOED_REDUCTION[lvl-1].str())
@@ -140,7 +140,7 @@ public class HeroPaladin extends HeroTemplate
 
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceStrength(SHIELD_BASH_DMG_BONUS)
+        tooltip.setReplaceStats(SHIELD_BASH_DMG_BONUS)
         tooltip.setLearnString("Bashes enemies in front of him with his shield, dealing physical damage and stunning them.") (int lvl) ->
             return "{0}{S0} damage, {1} seconds stun.".format(
             SHIELD_BASH_DMG[lvl-1].str(),
@@ -178,7 +178,7 @@ public class HeroPaladin extends HeroTemplate
 
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceIntelligence(BATTLE_ROAR_DURATION_BONUS)
+        tooltip.setReplaceStats(BATTLE_ROAR_DURATION_BONUS)
         tooltip.setLearnString("Increases nearby units' attack and movement speed.") (int lvl) ->
             return "{0} attack speed, {1} movement speed, {2}{I0} seconds".format(
             BATTLE_ROAR_AS[lvl-1].str()+"%",
@@ -221,7 +221,7 @@ public class HeroPaladin extends HeroTemplate
                     ..setTargetType(lvl, 1)
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceIntelligence(HOLY_SHIELD_DURATION_BONUS)
+        tooltip.setReplaceStats(HOLY_SHIELD_DURATION_BONUS)
         tooltip.setLearnString("Turns the target frendly hero untargetable.") (int lvl) ->
             return "{0}{I0} seconds, {1} seconds cooldown.".format(
             HOLY_SHIELD_DURATION[lvl-1].str(), COOLDOWN.data(lvl).str())
@@ -258,7 +258,7 @@ public class HeroPaladin extends HeroTemplate
                     ..setEffects(lvl, "X000")
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceIntelligence(DIVINE_PUNISHMENT_DMG_BONUS)
+        tooltip.setReplaceStats(DIVINE_PUNISHMENT_DMG_BONUS)
         tooltip.setLearnString(CHANNELING_SPELL + "Calls upon the power of the gods. After two seconds of channeling nearby enemies will be struck by divine magic.") (int lvl) ->
             return "{0}{I0} damage.".format(
             DIVINE_PUNISHMENT_DMG[lvl-1].str())

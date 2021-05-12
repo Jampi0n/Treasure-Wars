@@ -48,7 +48,7 @@ public class HeroDestroyer extends HeroTemplate
 
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceIntelligence(0)
+        tooltip.setReplaceStats(0)
         tooltip.setLearnString("The Destroyer deals increased damage from all sources, the more injured he becomes.") (int lvl) ->
             return "up to {0}% increased damage.".format(
                 DEATH_FRENZY_BONUS[lvl-1].str())
@@ -96,7 +96,7 @@ public class HeroDestroyer extends HeroTemplate
                     ..setAreaofEffect(lvl, 100)
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceIntelligence(BREATH_DAMAGE_BONUS)
+        tooltip.setReplaceStats(BREATH_DAMAGE_BONUS)
         tooltip.setLearnString("Breathes a cone of fire at enemy units, dealing magic damage. The heat melts the target's armor, reducing it for {0} seconds.".format(
             BREATH_DURATION.str()
         )) (int lvl) ->
@@ -149,7 +149,7 @@ public class HeroDestroyer extends HeroTemplate
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setSummary("Damages nearby enemy units and increases the Destroyer's attack speed at the cost of mana and health. Can be turned off.")
-        tooltip.setReplaceIntelligence(IMMOLATION_DAMAGE_BONUS)
+        tooltip.setReplaceStats(IMMOLATION_DAMAGE_BONUS)
         tooltip.setLearnString("Engulfs the Destroyer in flames, damaging nearby enemies and the Destroyer himself. Heroes take double damage. Also increases the Destroyer's attack speed.|nDrains mana until deactivated.") (int lvl) ->
             return "{0}{I0} damage per second, {1}% attack speed.".format(
             IMMOLATION_DAMAGE[lvl-1].str(),
@@ -180,7 +180,7 @@ public class HeroDestroyer extends HeroTemplate
                 ..setSkillData(COOLDOWN, MANA, RANGE)
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceIntelligence(0)
+        tooltip.setReplaceStats(0)
         tooltip.setLearnString("Summons a wall of bones at the target location, blocking the way for the Destroyer's victims to flee. The wall gets bigger on higher levels.") (int lvl) ->
             return "Lasts {0} seconds.".format(
                 WALL_DURATION[lvl-1].str())
@@ -230,7 +230,7 @@ public class HeroDestroyer extends HeroTemplate
 
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceIntelligence(0)
+        tooltip.setReplaceStats(0)
         tooltip.setSummary("Increases the Destroyer's movement speed when chasing the targeted unit and causes his attacks against the target to deal more damage and slow.")
         tooltip.setLearnString("Marks the target enemy unit as his prey. The Destroyer will have increased movmement speed when moving towards the prey. Every attack against the prey deals bonus damage and slows the prey. Lasts {0} seconds.".format(PREY_DURATION.str())) (int lvl) ->
             return "{0} damage, {1}% movement speed".format(

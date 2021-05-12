@@ -85,7 +85,7 @@ public class HeroDeadEye extends HeroTemplate
                 ..setupWithHotKey("Black Arrow", "D")
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceStrength(0)
+        tooltip.setReplaceStats(0)
         tooltip.setLearnString("Increases the damage of killing attacks against enemies and spawns a skeleton.") (int lvl) ->
             return "{0} damage, lasts {1} seconds.".format(
             BLACK_ARROW_THRESHOLD[lvl-1].str(), 
@@ -123,7 +123,7 @@ public class HeroDeadEye extends HeroTemplate
                     ..setBaseOrderID(lvl, "channel")
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceStrength(PIERCING_SHOT_DAMAGE_BONUS)
+        tooltip.setReplaceStats(PIERCING_SHOT_DAMAGE_BONUS)
         tooltip.setLearnString("Shoots an arrow towards the target direction, dealing damage to enemies it strikes through.") (int lvl) ->
             return "{0}{S0} damage.".format(
             PIERCING_SHOT_DAMAGE[lvl-1].str())
@@ -146,7 +146,7 @@ public class HeroDeadEye extends HeroTemplate
                 ..setSkillData(COOLDOWN, MANA, 0)
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceIntelligence(TERROR_DURATION_BONUS)
+        tooltip.setReplaceStats(TERROR_DURATION_BONUS)
         tooltip.setLearnString("Terrifies nearby enemies, making them miss on their attacks.") (int lvl) ->
             return "{0}{I0} seconds, {1} area of effect.".format(
             TERROR_DURATION[lvl-1].str(),
@@ -178,7 +178,7 @@ public class HeroDeadEye extends HeroTemplate
                     ..setTargetsAllowed(lvl, "nonsapper,player")
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceIntelligence(TERROR_DURATION_BONUS)
+        tooltip.setReplaceStats(TERROR_DURATION_BONUS)
         tooltip.setLearnString("Swaps position with one of his skeletons.") (lvl) ->
             return "{0} range, {1} seconds cooldown.".format( RANGE.data(lvl).str(), COOLDOWN.data(lvl).str())
         
@@ -222,7 +222,7 @@ public class HeroDeadEye extends HeroTemplate
 
 
         var tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceIntelligence(DEATH_COIL_DMG_BASE_BONUS, DEATH_COIL_DMG_FACTOR_BONUS)
+        tooltip.setReplaceStats(DEATH_COIL_DMG_BASE_BONUS, DEATH_COIL_DMG_FACTOR_BONUS)
         tooltip.setLearnString("Sacrifices all his skeletons to unlock the power of Death Coil for "+DEATH_COIL_DURATION.str()+" seconds.|nDeath Coil deals massive magic damage at the target enemy hero. Sacrificing more skeletons increases the damage of Death Coil.") (int lvl) ->
             return "{0}{I0} base damage, {1}{I1} damage per sacrificed skeleton.".format(
             DEATH_COIL_DMG_BASE[lvl-1].str(),
@@ -237,7 +237,7 @@ public class HeroDeadEye extends HeroTemplate
         addDynamicTooltipIntelligence(heroType, tooltip)
 
         tooltip = new DynamicTooltip(ABILITY_DEATH_COIL)
-        tooltip.setReplaceIntelligence(DEATH_COIL_DMG_BASE_BONUS, DEATH_COIL_DMG_FACTOR_BONUS)
+        tooltip.setReplaceStats(DEATH_COIL_DMG_BASE_BONUS, DEATH_COIL_DMG_FACTOR_BONUS)
         tooltip.setLearnString("", (lvl) -> "" )
         for lvl = 1 to 5
             tooltip.setNormalString(true, lvl, "Deals {0}{I0} magic damage and additional {1}{I1} magic damage for every sacrificed skeleton to the target enemy hero.".format(

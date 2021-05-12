@@ -46,7 +46,7 @@ public class HeroVoodooArcher extends HeroTemplate
 
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceStrength(0)
+        tooltip.setReplaceStats(0)
         tooltip.setLearnString("Each attack deals additional void damage.") (int lvl) ->
             return "{0} damage.".format(
                 VOODOO_ARROW_DAMAGE[lvl-1].str())
@@ -78,7 +78,7 @@ public class HeroVoodooArcher extends HeroTemplate
                 ..setSkillData(COOLDOWN, MANA, RANGE)
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceStrength(GHOST_ARROWS_DAMAGE_BONUS)
+        tooltip.setReplaceStats(GHOST_ARROWS_DAMAGE_BONUS)
         tooltip.setLearnString("Summons Ghost Arrows to pierce the target enemy unit dealing damage.") (int lvl) ->
             return "{0}{S0} damage.".format(
                 GHOST_ARROWS_DAMAGE[lvl-1].str())
@@ -117,7 +117,7 @@ public class HeroVoodooArcher extends HeroTemplate
 
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceIntelligence(MIND_CURSE_MANA_DRAIN_BONUS, MIND_CURSE_DURATION_BONUS)
+        tooltip.setReplaceStats(MIND_CURSE_MANA_DRAIN_BONUS, MIND_CURSE_DURATION_BONUS)
         tooltip.setLearnString("Burns mana of the target enemy unit over time and silences it.") (int lvl) ->
             return "{0}{I0} mana per second, {1}{I1} seconds.".format(
             MIND_CURSE_MANA_DRAIN[lvl-1].str(),
@@ -160,7 +160,7 @@ public class HeroVoodooArcher extends HeroTemplate
 
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceIntelligence(0)
+        tooltip.setReplaceStats(0)
         tooltip.setLearnString(
             (
                 "Summons an immobile serpentine ward to attack nearby enemies for {0} seconds. " +
@@ -227,7 +227,7 @@ public class HeroVoodooArcher extends HeroTemplate
                     ..setEffects(lvl, "X000")
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceIntelligence(BBV_DAMAGE_BONUS)
+        tooltip.setReplaceStats(BBV_DAMAGE_BONUS)
         tooltip.setLearnString("Deals void damage to all enemy heroes while channeling.".format(BBV_DURATION.str())) (int lvl) ->
             return "{0}{I0} damage per second.".format(
             BBV_DAMAGE[lvl-1].str())

@@ -47,7 +47,7 @@ public class HeroPythonWarrioress extends HeroTemplate
                 ..setupWithHotKey("Envenomed Blades", "D")
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceIntelligence(ENVENOMED_BLADES_DAMAGE_BONUS)
+        tooltip.setReplaceStats(ENVENOMED_BLADES_DAMAGE_BONUS)
         tooltip.setLearnString("Attacks deal poison damage every second.") (int lvl) ->
             return "{0}{I0} damage, {1} seconds.".format(
             ENVENOMED_BLADES_DAMAGE[lvl-1].str(), 
@@ -84,7 +84,7 @@ public class HeroPythonWarrioress extends HeroTemplate
 
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceIntelligence(MISTWALK_DURATION_BONUS)
+        tooltip.setReplaceStats(MISTWALK_DURATION_BONUS)
         tooltip.setLearnString("Turns the Python Warrioress invisibile.") (int lvl) ->
             return "{0}{I0} seconds.".format( MISTWALK_DURATION[lvl-1].str())
         
@@ -130,7 +130,7 @@ public class HeroPythonWarrioress extends HeroTemplate
                     ..setAreaofEffect(lvl, POISON_SPIT_AOE[lvl-1])
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceIntelligence(POISON_SPIT_DOT_BONUS)
+        tooltip.setReplaceStats(POISON_SPIT_DOT_BONUS)
         tooltip.setLearnString("Spits poison at the target area. Enemies within the area of effect are slowed, have reduced armor and take damage over time.",
         (int lvl) -> (begin
             return "{0}{I0} damage per second, {1} slow, {2} armor, lasts {3} seconds.".format(
@@ -171,7 +171,7 @@ public class HeroPythonWarrioress extends HeroTemplate
                     ..setDurationNormal(lvl, 0.1)
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceStrength(EMPOWERED_STRIKE_DAMAGE_BONUS)
+        tooltip.setReplaceStats(EMPOWERED_STRIKE_DAMAGE_BONUS)
         tooltip.setLearnString("Strikes the target enemy unit with a powerful melee attack dealing physical damage.") (int lvl) ->
             return "{0}{S0} damage.".format( EMPOWERED_STRIKE_DAMAGE[lvl-1].str())
         
@@ -211,7 +211,7 @@ public class HeroPythonWarrioress extends HeroTemplate
                     ..setNumberofTargetsHit(lvl, 0)
                     
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceIntelligence(PARALYZING_STRIKE_DAMAGE_BONUS, PARALYZING_STRIKE_DURATION_BONUS)
+        tooltip.setReplaceStats(PARALYZING_STRIKE_DAMAGE_BONUS, PARALYZING_STRIKE_DURATION_BONUS)
         tooltip.setLearnString("Deals massive magical damage to the target, stunning it and teleports the Python Warrioress behind the target.") (int lvl) ->
             return "{0}{I0} damage, {1}{I1} seconds stun.".format(
             PARALYZING_STRIKE_DAMAGE[lvl-1].str(),

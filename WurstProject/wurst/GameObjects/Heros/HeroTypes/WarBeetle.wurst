@@ -100,7 +100,7 @@ public class HeroWarBeetle extends HeroTemplate
 
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceIntelligence(0)
+        tooltip.setReplaceStats(0)
         tooltip.setLearnString("Increases the War Beetle's armor.") (int lvl) ->
             return "{0} extra armor".format(
                 HARD_SHELL_ARMOR[lvl-1].str())
@@ -148,7 +148,7 @@ public class HeroWarBeetle extends HeroTemplate
                     ..setDurationNormal(lvl, 0.1)
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceIntelligence(BITE_DAMAGEL_BONUS, BITE_SLOW_DURATION_BONUS)
+        tooltip.setReplaceStats(BITE_DAMAGEL_BONUS, BITE_SLOW_DURATION_BONUS)
         tooltip.setLearnString("Sends out a venomous beetle to bite the target enemy unit, dealing damage and slowing it.") (int lvl) ->
             return "{0}{I0} damage, lasts {1}{I1} seconds.".format(
                 BITE_DAMAGE[lvl-1].str(),
@@ -183,7 +183,7 @@ public class HeroWarBeetle extends HeroTemplate
                 ..setSkillData(COOLDOWN, MANA, 0)
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceStrength(WAR_STOMP_DAMAGE_BONUS, WAR_STOMP_DURATION_BONUS)
+        tooltip.setReplaceStats(WAR_STOMP_DAMAGE_BONUS, WAR_STOMP_DURATION_BONUS)
         tooltip.setLearnString("Slams the ground, stunning and damaging nearby enemy land units.") (int lvl) ->
             return "{0}{S0} damage, {1}{S1} second.".format( WAR_STOMP_DAMAGE[lvl-1].str(), WAR_STOMP_DURATION[lvl-1].str() )
         
@@ -219,7 +219,7 @@ public class HeroWarBeetle extends HeroTemplate
                     ..setCastRange(lvl, JUMP_RANGE[lvl-1])
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceIntelligence(0)
+        tooltip.setReplaceStats(0)
         tooltip.setLearnString("Dashes towards the target point.") (int lvl) ->
             return "{0} range, {1} mana, {2} seconds cooldown".format( 
                 JUMP_RANGE[lvl-1].str(), JUMP_MANA[lvl-1].str(), JUMP_COOLDOWN[lvl-1].str()
@@ -272,7 +272,7 @@ public class HeroWarBeetle extends HeroTemplate
                     ..setBuffs(lvl, UNBREAKABLE_DUMMY_BUFF.toRawCode())
 
         let tooltip = new DynamicTooltip(abilityId)
-        tooltip.setReplaceIntelligence(0)
+        tooltip.setReplaceStats(0)
         tooltip.setLearnString("Increases the War Beetle's strength, armor, willpower and hit points for {0} seconds.".format(UNBREAKABLE_DURATION.str())) (int lvl) ->
             return "{0} strength, {1} armor and willpower, {2} hit points".format( 
                 UNBREAKABLE_STR[lvl-1].str(), UNBREAKABLE_DEF[lvl-1].str(), UNBREAKABLE_HP[lvl-1].str()

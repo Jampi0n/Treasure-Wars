@@ -137,23 +137,9 @@ public class DynamicTooltip
     function getUseTurnOff() returns boolean
         return this.useTurnOff
 
-    function writeData2()
-
-    
     function setReplaceStats(vararg real replacements)
         for replacement in replacements
             replaceStats.add(replacement)
-
-    @deprecated
-    function setReplaceIntelligence(vararg real replacements)
-        for replacement in replacements
-            replaceStats.add(replacement)
-
-    @deprecated
-    function setReplaceStrength(vararg real replacements)
-        for replacement in replacements
-            replaceStats.add(replacement)
-        
 
     function setSummary(string summary)
         this.summary = summary

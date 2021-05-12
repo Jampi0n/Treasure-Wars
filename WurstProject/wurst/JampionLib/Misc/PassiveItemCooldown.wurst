@@ -7,9 +7,8 @@
     The item will not be able to be used by any unit during the cooldown.
     
     Note:
-    Cooldowns are per unit, not per item. This is a limitation of the ability cooldown functions.
+    Cooldowns are applied per unit, not per item. This is a limitation of the ability cooldown functions.
     This means, if a unit picks up the same item type, once with cooldown and once without cooldown, both items will have cooldown and the unit will also get the cooldown.
-
 **/
 package PassiveItemCooldown
 
