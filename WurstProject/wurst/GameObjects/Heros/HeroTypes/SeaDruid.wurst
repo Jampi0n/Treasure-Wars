@@ -150,11 +150,11 @@ public class HeroSeaDruid extends HeroTemplate
             ..setReplaceStrength(TIDAL_FURY_HIT_DMG_BONUS)
             ..setReplaceIntelligence(TIDAL_FURY_WAVE_DMG_BONUS)
         tooltip.setLearnString("Knocks enemies next to the Sea Druid back, dealing damage and releasing a crushing wave for every enemy unit hit. The wave deals damage to every enemy it passes through.") (int lvl) ->
-            return "{0}{S0} knockback damage, {1}{I0} wave damage.".format(
+            return "{0}{S0} knockback damage, {1}{I1} wave damage.".format(
             TIDAL_FURY_HIT_DMG[lvl-1].str(), TIDAL_FURY_WAVE_DMG[lvl-1].str())
         
         for lvl = 1 to 5
-            tooltip.setNormalString(true, lvl, "Knocks enemies next to the Sea Druid back, dealing {0}{S0} damage and releasing a crushing wave for every enemy unit hit. The wave deals {1}{I0} damage to every enemy it passes through.".format(
+            tooltip.setNormalString(true, lvl, "Knocks enemies next to the Sea Druid back, dealing {0}{S0} damage and releasing a crushing wave for every enemy unit hit. The wave deals {1}{I1} damage to every enemy it passes through.".format(
                 TIDAL_FURY_HIT_DMG[lvl-1].str(), TIDAL_FURY_WAVE_DMG[lvl-1].str()))
         addDynamicTooltipBoth(heroType, tooltip)
 

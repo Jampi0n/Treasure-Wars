@@ -3,7 +3,7 @@ package HeroObjectEditing
 import AbilityObjEditing
 import HashMap
 import ObjectIds
-
+import AbilityPresets
 
 /*
 You cannot add learnable abilities to hero with code, it must be done with object data.
@@ -51,9 +51,6 @@ public function skillData.data(int level) returns real
 public function createSkillData(real data) returns skillData
     return skillData(data, data, data, data, data)
 
-public interface LevelString
-    function getString(int level) returns string
-
 public function AbilityDefinition.setLearnString(string intro, LevelString levelString)
     string learnString = intro+"\n"
     for i = 1 to 5
@@ -69,9 +66,6 @@ public function AbilityDefinition.setDescriptionString(boolean showCooldown, int
         this.setTooltipNormalExtended(lvl, description+ "\n" + "Cooldown: " + "<" + this.getNewId().toRawCode() + ",Cool"+lvl.toString()+">" + "\n ")
     else
         this.setTooltipNormalExtended(lvl, description+ "\n ")
-
-public function getLevelString(int level) returns string
-    return " \n|cffffcc00Level "+level.toString()+"|r - "
 
 public function int.getBonusString() returns string
     if(this==0)

@@ -1,0 +1,236 @@
+package DynamicTooltips
+
+import LinkedList
+import HashMap
+import AbilityPresets
+import ObjectIds
+import JString
+
+
+public interface GetStatFunction
+    function getStat(unit u) returns real
+
+abstract class DynamicElement
+    function evaluate(unit _u, real _cooldown, bool _const) returns string
+        return ""
+
+class DynamicText extends DynamicElement
+    string message
+
+    construct(string message)
+        this.message = message
+
+    override function evaluate(unit u, real cooldown, bool const) returns string
+        return this.message
+
+class DynamicStat extends DynamicElement
+    real factor
+    DynamicStatType dynamicStatType
+    color highlightColor
+    string statName
+    GetStatFunction getStatFunction
+    construct(DynamicStatType dynamicStatType, real factor)
+        this.factor = factor
+        this.dynamicStatType = dynamicStatType
+        this.highlightColor = dynamicStatType.highlightColor
+        this.statName = dynamicStatType.statName
+        this.getStatFunction = dynamicStatType.getStatFunction
+
+    override function evaluate(unit u, real cooldown, bool const) returns string
+        if const
+            return highlightColor.toColorString()+" (+"+(factor).str()+"% " + statName + ")|r "
+        else
+            return highlightColor.toColorString()+" (+"+(getStatFunction.getStat(u) * factor/100).str()+")|r "
+
+
+class DynamicCooldown extends DynamicElement
+    construct()
+
+    override function evaluate(unit u, real cooldown, bool const) returns string
+        return cooldown.str()
+
+public class DynamicStatType
+    protected static constant allTypes = new LinkedList<DynamicStatType>()
+
+    string character
+    color highlightColor
+    string statName
+    GetStatFunction getStatFunction
+
+    construct(string character, color highlightColor, string statName, GetStatFunction getStatFunction)
+        allTypes.add(this)
+        this.character = character
+        this.highlightColor = highlightColor
+        this.statName = statName
+        this.getStatFunction = getStatFunction
+
+public class DynamicTooltip
+    
+    private int abilityTypeId
+
+    private string learnIntro
+    private LinkedList<DynamicElement> array[5] normalList
+    private LinkedList<DynamicElement> array[5] turnOffList
+    private LinkedList<DynamicElement> array[5] learnLevelList
+    private LinkedList<DynamicElement> learnList
+
+    /*A short summary of the skill. Defaults to learnIntro. If learnIntro is too long, it is recommended to add
+    a short summary, to keep tavern tooltips short.*/
+    private string summary = ""
+
+    private boolean useTurnOff
+
+    private static constant idToTooltip = new HashMap<int,DynamicTooltip>
+
+    private constant replaceStats = new LinkedList<real>
+
+    function getAbilityTypeId() returns int
+        return this.abilityTypeId
+
+    static function getDynamicTooltip(int abilityTypeId) returns DynamicTooltip
+        return idToTooltip.get(abilityTypeId)
+
+    construct(int abilityTypeId)
+        this.abilityTypeId = abilityTypeId
+        this.useTurnOff = false
+        idToTooltip.put(abilityTypeId, this)
+
+
+    private function evaluateList(LinkedList<DynamicElement> list, unit u, real cooldown, bool const) returns string
+        string s = ""
+        for elem in list
+            s+=elem.evaluate(u, cooldown, const)
+        return s
+
+    /*
+    **  Dynamic Tooltips are list based, because iterating through a list is a lot faster compared to replacing substrings.
+    */
+    private function convertToList(string tooltip) returns LinkedList<DynamicElement>
+        let list = new LinkedList<DynamicElement>()
+        int current = 0
+        int i = 0
+        let l = tooltip.length()
+        while i<l
+            let substr = tooltip.charAt(i)
+            if(substr=="{")
+                list.add(new DynamicText(tooltip.substring(current, i)))
+                let keyword = tooltip.substring(i+1, i+3)
+                if keyword =="CD"
+                    list.add(new DynamicCooldown())
+                else 
+                    let referenceType = tooltip.charAt(i+1)
+                    for dynamicStatType in DynamicStatType.allTypes
+                        if(referenceType==dynamicStatType.character)
+                            let id = S2I(tooltip.charAt(i+2))
+                            if replaceStats.size() <= id
+                                if compiletime
+                                    compileError("Replace int list missing entry: "+I2S(id)+ " for tooltip:\""+tooltip+"\"")
+                            list.add(new DynamicStat(dynamicStatType, (replaceStats.get(id))))
+                
+                i+=3
+                current = i+1
+            i++
+
+        list.add(new DynamicText(tooltip.substring(current)))
+        return list
+
+    function getUseTurnOff() returns boolean
+        return this.useTurnOff
+
+    function writeData2()
+
+    
+    function setReplaceStats(vararg real replacements)
+        for replacement in replacements
+            replaceStats.add(replacement)
+
+    @deprecated
+    function setReplaceIntelligence(vararg real replacements)
+        for replacement in replacements
+            replaceStats.add(replacement)
+
+    @deprecated
+    function setReplaceStrength(vararg real replacements)
+        for replacement in replacements
+            replaceStats.add(replacement)
+        
+
+    function setSummary(string summary)
+        this.summary = summary
+
+    function setLearnString(string intro, LevelString levelString)
+        string newString = intro + "\n"
+        this.learnIntro = intro
+        for i = 1 to 5
+            newString += getLevelString(i) + levelString.getString(i)
+            this.learnLevelList[i-1] = this.convertToList(levelString.getString(i))
+
+        destroy levelString
+        newString += "\n "
+        this.learnList = this.convertToList(newString)
+
+
+    function setNormalString(boolean showCooldown, int level, string normalString)
+        string newString = normalString
+
+        if showCooldown
+            if compiletime
+                newString += "\n" + "Cooldown: " + "<" + this.getAbilityTypeId().toRawCode() + ",Cool"+level.toString()+">" + " seconds\n "
+            else
+                newString += "\n" + "Cooldown: " + "{CD}" + " seconds\n "
+        else
+            newString += "\n "
+
+        this.normalList[level - 1] = this.convertToList(newString)
+
+
+    function setTurnOffString(boolean showCooldown, int level, string turnOffString)
+        this.useTurnOff = true
+        string newString = turnOffString
+
+        if showCooldown
+            if compiletime
+                newString += "\n" + "Cooldown: " + "<" + this.getAbilityTypeId().toRawCode() + ",Cool"+level.toString()+">" + " seconds\n "
+            else
+                newString += "\n" + "Cooldown: " + "{CD}" + " seconds\n "
+        else
+            newString += "\n "
+            
+        this.turnOffList[level - 1] = this.convertToList(newString)
+
+
+    function getLearnIntro() returns string
+        return this.learnIntro
+
+    function getSummary() returns string
+        if this.summary == ""
+            return this.getLearnIntro()
+        else
+            return this.summary
+    
+    function evaluateLearnStringLevel(int level, unit u, bool const) returns string
+        return this.evaluateList(this.learnLevelList[level-1], u, -1, const)
+
+    function evaluateLearnString(unit u, bool const) returns string
+        return this.evaluateList(this.learnList, u, -1, const)
+
+    function evaluateNormalString(int level, unit u, bool const) returns string
+        string ret = ""
+        if level != 0
+            let cooldown = BlzGetUnitAbilityCooldown(u, this.abilityTypeId, level-1)
+            ret = this.evaluateList(this.normalList[level-1], u, cooldown, const)
+        return ret
+
+    function evaluateTurnOffString(int level, unit u, bool const) returns string
+        string ret = ""
+        if level != 0
+            let cooldown = BlzGetUnitAbilityCooldown(u, this.abilityTypeId, level-1)
+            ret = this.evaluateList(this.turnOffList[level-1], u, cooldown, const)
+        return ret
+
+    function update(unit whichUnit)
+        let lvl = whichUnit.getAbilityLevel(abilityTypeId)
+        BlzSetAbilityExtendedTooltip(abilityTypeId, evaluateNormalString(lvl, whichUnit, false), lvl-1)
+        BlzSetAbilityResearchExtendedTooltip(abilityTypeId, evaluateLearnString(whichUnit, false), 0)
+        if getUseTurnOff()
+            BlzSetAbilityActivatedExtendedTooltip(abilityTypeId, evaluateTurnOffString(lvl, whichUnit, false), lvl-1)

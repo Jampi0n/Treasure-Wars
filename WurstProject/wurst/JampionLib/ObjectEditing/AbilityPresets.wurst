@@ -7,6 +7,16 @@ import ObjectIds
 import ObjectIdGenerator
 import Wurstunit
 import String
+import Integer
+import Annotations
+
+public interface LevelString
+    function getString(int level) returns string
+
+
+@configurable
+public function getLevelString(int level) returns string
+    return " \n|cffffcc00Level "+level.toString()+"|r - "
 
 public function AbilityDefinition.hideIcon()
     this..setButtonPositionNormalX(0)

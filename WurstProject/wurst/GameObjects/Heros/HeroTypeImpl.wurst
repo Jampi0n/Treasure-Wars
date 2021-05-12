@@ -221,26 +221,15 @@ public class HeroTypeImpl implements IHeroType
     override function updateTooltipsStr(unit whichUnit)
         if whichUnit == null or whichUnit.getTypeId() == 0
             error("no unit")
-        if DYNAMIC_TOOLTIPS
-            for dynamicTooltip in dynamicStrength
-                let abilityTypeId = dynamicTooltip.getAbilityTypeId()
-                let lvl = whichUnit.getAbilityLevel(abilityTypeId)-1
-                BlzSetAbilityExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateNormalString(whichUnit), lvl)
-                BlzSetAbilityResearchExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateLearnString(whichUnit), 0)
-                if dynamicTooltip.getUseTurnOff()
-                    BlzSetAbilityActivatedExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateTurnOffString(whichUnit), lvl)
+        for dynamicTooltip in dynamicStrength
+            dynamicTooltip.update(whichUnit)
+
 
     override function updateTooltipsInt(unit whichUnit)
         if whichUnit == null or whichUnit.getTypeId() == 0
             error("no unit")
-        if DYNAMIC_TOOLTIPS
-            for dynamicTooltip in dynamicIntelligence
-                let abilityTypeId = dynamicTooltip.getAbilityTypeId()
-                let lvl = whichUnit.getAbilityLevel(abilityTypeId)-1
-                BlzSetAbilityExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateNormalString(whichUnit), lvl)
-                BlzSetAbilityResearchExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateLearnString(whichUnit), 0)
-                if dynamicTooltip.getUseTurnOff()
-                    BlzSetAbilityActivatedExtendedTooltip(abilityTypeId, dynamicTooltip.evaluateTurnOffString(whichUnit), lvl)
+        for dynamicTooltip in dynamicIntelligence
+            dynamicTooltip.update(whichUnit)
 
     override function getAbilityId(AbilitySlot slot) returns int
         return getAbilityOffset(this.heroId) + SLOT_ID[slot castTo int]
@@ -254,21 +243,15 @@ public class HeroTypeImpl implements IHeroType
     static function addDynamicTooltipStrength(IHeroType herotype, DynamicTooltip tooltip)
         if herotype!=null
             (herotype castTo HeroTypeImpl).dynamicStrength.add(tooltip)
-        if compiletime
-            tooltip.writeData()
             
     static function addDynamicTooltipIntelligence(IHeroType herotype, DynamicTooltip tooltip)
         if(herotype!=null)
             (herotype castTo HeroTypeImpl).dynamicIntelligence.add(tooltip)
-        if compiletime
-            tooltip.writeData()
 
     static function addDynamicTooltipBoth(IHeroType herotype, DynamicTooltip tooltip)
         if(herotype!=null)
             (herotype castTo HeroTypeImpl).dynamicIntelligence.add(tooltip)
             (herotype castTo HeroTypeImpl).dynamicStrength.add(tooltip)
-        if compiletime
-            tooltip.writeData()
 
     static function getAbilityOffset(int heroId) returns int
         var id = 1090519040 //A
@@ -746,3 +729,7 @@ function initialize()
 
 init
     initialize()
+    new DynamicStatType("S", C_STR, "strength") (unit u) ->
+        return u.getStr(true).toReal()
+    new DynamicStatType("I", C_INT, "intelligence") (unit u) ->
+        return u.getInt(true).toReal()
