@@ -331,7 +331,7 @@ public class HeroInfernalMachine extends HeroTemplate
         while not nearby.isEmpty()
             let target = FirstOfGroup(nearby)
             nearby.removeUnit(target)
-            if target.isTargetableEnemyUnit(caster)
+            if target.isTargetableAlliedUnit(caster)
                 target.addBuff( caster, INNER_FIRE_DURATION, BUFF_INNER_FIRE, level)
 
         nearby.destr()

@@ -71,7 +71,9 @@ public module UnitBuffs
             //delay, so in case the unit dies inside a BuffEventClosure, the buff does not get destroyed.
             let u = GetTriggerUnit()
             nullTimer() ->
-                let bList = fromUnit(u).buffList
-                if bList != null
-                    for Buff b in bList.getLinkedList()
-                        b.dispel()
+                let w = UnitWrapper.tryGetWrapper(u) castTo int castTo thistype
+                if w != null
+                    let bList = w.buffList
+                    if bList != null
+                        for Buff b in bList.getLinkedList()
+                            b.dispel()

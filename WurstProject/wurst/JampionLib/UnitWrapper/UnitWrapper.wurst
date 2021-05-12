@@ -105,6 +105,12 @@ public abstract class UnitWrapper
             error("The unit " + u.getName() + "(" + u.getTypeId().toRawCode() + ") has no wrapper.")
         return w
 
+    static function tryGetWrapper(unit u) returns thistype
+        if u == null or u.getTypeId() == 0
+            return null
+        let w = toWrapper.get(u)
+        return w
+
     function destroyWrapper()
         toWrapper.remove(this.assocUnit)
 
