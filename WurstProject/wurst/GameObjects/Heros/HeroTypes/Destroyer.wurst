@@ -43,7 +43,7 @@ public class HeroDestroyer extends HeroTemplate
     override function setupPassive(int abilityId, IHeroType heroType)
         if compiletime
             createNoEffectAbiltiy(abilityId)
-                ..setupIcon("PASbloodpresence")
+                ..setupIcon("PAS_BloodPresence")
                 ..setupWithHotKey("Death Frenzy", "D")
 
 

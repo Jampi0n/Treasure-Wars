@@ -408,6 +408,14 @@ This is especially useful for triggers, because they cannot capture the instance
     */
 int currentHeroUnitTypeId = -1
 
+public interface OnHeroCast
+    function onCast()
+
+constant onHeroCastList = new LinkedList<OnHeroCast>()
+
+public function registerOnHeroCast(OnHeroCast onHeroCast)
+    onHeroCastList.add(onHeroCast)
+
 public interface SetupOnCastTrigger
     function setupForUnit(unit u) returns trigger
 
@@ -442,6 +450,8 @@ public module HeroTemplateModule
                 case 'R'
                     castR()
                 default
+            for onHeroCast in onHeroCastList
+                onHeroCast.onCast()
         return onCastTrigger
 
 

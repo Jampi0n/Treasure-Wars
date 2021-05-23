@@ -406,6 +406,21 @@ init
             for IHero hero in Players.heroList(0)
                 hero.toUnit().setXY(gg_rct_CenterMid.getCenter())
 
+        // teleport heroes home
+        CreateTrigger()
+        ..registerPlayerChatEvent(players[0], "home ", false)
+        ..addAction() ->
+            let i = GetEventPlayerChatString().substring(4).toInt()
+            for IHero hero in Players.heroList(i)
+                let pos = i <= 4?gg_rct_GreenAltar.getCenter():gg_rct_BrownAltar.getCenter()
+                hero.toUnit().setXY(pos)
+
+        CreateTrigger()
+        ..registerPlayerChatEvent(players[0], "home", true)
+        ..addAction() ->
+            for IHero hero in Players.heroList(0)
+                hero.toUnit().setXY(gg_rct_GreenAltar.getCenter())
+
         CreateTrigger()
         ..registerPlayerChatEvent(players[0], "g", true)
         ..addAction() ->

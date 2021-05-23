@@ -17,6 +17,10 @@ public enum ReductionType
     MAGIC
     NONE
 
+ReductionType damageReductionType = ReductionType.NONE
+
+public function getDamageReductionType() returns ReductionType
+    return damageReductionType
 
 public function unit.isBuilding() returns boolean
     return IsUnitType(this, UNIT_TYPE_STRUCTURE)
@@ -121,7 +125,7 @@ public function unit.addBuffReduced(unit caster, real duration, BuffType buffTyp
     return ret
 
 
-public function unit.dealDamageAlways(unit target, real amount, ReductionType reductionType)
+function unit.dealDamageAlways(unit target, real amount, ReductionType reductionType)
     let damageType = reductionType == ReductionType.PHYSICAL ? DAMAGE_TYPE_NORMAL : DAMAGE_TYPE_UNIVERSAL
     real newAmount
     if reductionType == ReductionType.MAGIC
@@ -129,8 +133,11 @@ public function unit.dealDamageAlways(unit target, real amount, ReductionType re
         newAmount = amount.reduceMagic(wp)
     else
         newAmount = amount
-
+    let prevReductionType = damageReductionType
+    damageReductionType = reductionType
     UnitDamageTarget(this, target, newAmount, false, true, ATTACK_TYPE_NORMAL, damageType, WEAPON_TYPE_WHOKNOWS)
+    damageReductionType = prevReductionType
+
 
 public function unit.dealDamage(unit target, real amount, ReductionType reductionType)
     if not target.isType(UNIT_TYPE_ANCIENT)

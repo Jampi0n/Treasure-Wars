@@ -42,17 +42,24 @@ function itemGemOfMana()
     onEither() (int factor) ->
         modMana(mp)
 
-
+function scepterOfTheTides()
+    setupItem(ITEM_ID_SCEPTER_OF_THE_TIDES, CATEGORY, 1500)
+function ringOfregeneration()
+    setupItem(ITEM_ID_RING_OF_REGENERATION, CATEGORY, 1500)
+function sapphireAmulet()
+    setupItem(ITEM_ID_SAPPHIRE_AMULET, CATEGORY, 1500)
+function ringOfDarkness()
+    setupItem(ITEM_ID_RING_OF_DARKNESS, CATEGORY, 1500)   
 function cursedMask()
-    setupItem(ITEM_ID_CURSED_MASK, CATEGORY, 3000)
+    setupItem(ITEM_ID_CURSED_MASK, CATEGORY, 1500)
+function wandOfDeath()
+    setupItem(ITEM_ID_WAND_OF_DEATH, CATEGORY, 1500)
+function wandOfBlood()
+    setupItem(ITEM_ID_WAND_OF_BLOOD, CATEGORY, 1500)
 function nerubianScepter()
     setupItem(ITEM_ID_NERUBIAN_SCEPTER, CATEGORY, 3000)
 function arcaniteRing()
     setupItem(ITEM_ID_ARCANITE_RING, CATEGORY, 3000)
-function wandOfDeath()
-    setupItem(ITEM_ID_WAND_OF_DEATH, CATEGORY, 3000)
-function wandOfBlood()
-    setupItem(ITEM_ID_WAND_OF_BLOOD, CATEGORY, 3000)
 function arcaneNecklace()
     setupItem(ITEM_ID_ARCANE_NECKLACE, CATEGORY, 3000)
 function gobletOfVampires()
@@ -65,6 +72,16 @@ function emeraldPendant()
     setupItem(ITEM_ID_EMERALD_PENDANT, CATEGORY, 3000)
 function scrollOfConjuration()
     setupItem(ITEM_ID_SCROLL_OF_CONJURATION, CATEGORY, 3000)   
+function gobletOfFire()
+    setupItem(ITEM_ID_GOBLET_OF_FIRE, CATEGORY, 3000)
+function seerStaff()
+    setupItem(ITEM_ID_SEER_STAFF, CATEGORY, 3000)
+function demonicSpellTome()
+    setupItem(ITEM_ID_DEMONIC_SPELL_TOME, CATEGORY, 3000)
+
+
+
+
 
 
 @compiletime
@@ -75,25 +92,29 @@ function initItems1()
     itemGemOfMana()
 
 
-
 @compiletime
 function initItems2()
-
-
+    sapphireAmulet()
+    scepterOfTheTides()
+    ringOfregeneration()
+    ringOfDarkness()
+    cursedMask()
+    wandOfDeath()
+    wandOfBlood()
 
 @compiletime
 function initItems3()
-    cursedMask()
     nerubianScepter()
     arcaniteRing()
-    wandOfDeath()
-    wandOfBlood()
     arcaneNecklace()
     gobletOfVampires()
     bracerOfAbjuration()
     blessedGoblet()
     emeraldPendant()
     scrollOfConjuration()
+    gobletOfFire()
+    seerStaff()
+    demonicSpellTome()
 
 init
     execute() ->

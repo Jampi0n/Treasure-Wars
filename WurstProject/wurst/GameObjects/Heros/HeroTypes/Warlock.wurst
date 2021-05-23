@@ -23,7 +23,7 @@ public class HeroWarlock extends HeroTemplate
     static constant real SOUL_BURN_DAMAGE_BONUS = 20
     static constant real array SOUL_BURN_SILENCE = [2, 2.25, 2.5, 2.75, 3]
     static constant real SOUL_BURN_AOE = 700
-    static constant BUFF_SOUL_BURN = compiletime(setupBuff("Soul Burn", "This unit is under the effect of Soulburn; it takes damage over time.", "BTNSoulBurn2", false, 5, Abilities.immolationDamage, "head", DispelLevel.DISPEL))
+    static constant BUFF_SOUL_BURN = compiletime(setupBuff("Soul Burn", "This unit is under the effect of Soulburn; it takes damage over time.", "BTNSoulBurn", false, 5, Abilities.immolationDamage, "head", DispelLevel.DISPEL))
 
     static constant BUFF_ID_RAY_OF_DEATH = compiletime(createBasicBuff("Ray of Death", "This unit is under the effect of Ray of Death; it is disabled and takes damage over time.", "BTNNetherBolt", "", ""))
     static constant real array RAY_OF_DEATH_DURATION = [2, 2.25, 2.5, 2.75, 3]
@@ -168,7 +168,7 @@ public class HeroWarlock extends HeroTemplate
             let RANGE = skillData(700, 700, 700, 700, 700)
 
             new AbilityDefinitionIllidanChannel(abilityId)
-                ..setupIcon("BTNSoulBurn2")
+                ..setupIcon("BTNSoulBurn")
                 ..setupWithHotKey("Soul Burn", "E")
                 ..setArtCaster("")
                 ..setArtEffect("")

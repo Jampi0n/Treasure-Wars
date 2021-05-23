@@ -12,6 +12,11 @@ import UnitColor
 import UnitStats
 import BonusMod
 import Buff
+import FastDamageEvent
+import initlater UnitLib
+import Assets
+import ClosureTimers
+import DamageIds
 
 class IUnitSingleton extends UnitWrapperSingleton
     override function createNew(unit u)
@@ -30,6 +35,11 @@ public class IUnit extends UnitWrapper
     bool isHero
     real scaleAttackAnimation
     bool allowItemPickUp = true
+    int lifeSteal = 0
+    int attackEventPointer = 0
+    int armorReduction = 0
+    int armorReductionRelative = 0
+    int calculateArmorReduction = 0
 
     ondestroy
         destroyBuffs()
@@ -37,6 +47,8 @@ public class IUnit extends UnitWrapper
         destroyColor()
         destroyInfo()
         destroyWrapper()
+        if attackEventPointer != 0
+            DamageEventUnit.fromUnit(this.toUnit()).attackDamageNoBuilding.remove(attackEventPointer)
 
     construct(unit u)
         super(u)
@@ -51,6 +63,21 @@ public class IUnit extends UnitWrapper
             this.heroType = HeroType.get(this.getTypeId())
             if this.heroType == null
                 error("HeroType could not be resolved: " + u.getName())
+
+            attackEventPointer = DamageEventUnit.fromUnit(u).attackDamageNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean alternate) ->
+                if lifeSteal > 0
+                    source.healHP(source, damage * lifeSteal / 100.0)
+                    source.addEffect(Abilities.vampiricAuraTarget, "origin").destr()
+                if calculateArmorReduction > 0
+                    target.addEffect(Abilities.bloodElfSpellThiefMISSILE, "chest").destr()
+                    let targetWrapper = target.wrapper()
+                    let targetArmor = targetWrapper.getArmor()
+                    let reduction = min(targetArmor, calculateArmorReduction) * 0 + 1000
+                    targetWrapper.modArmor(-reduction)
+                    nullTimer() -> 
+                        targetWrapper.modArmor(reduction)
+
+                
 
     function setAllowItemPickup(bool flag)
         allowItemPickUp = flag
@@ -104,7 +131,14 @@ public class IUnit extends UnitWrapper
                 UnitShareVision(this.toUnit(), players[Teams.army2()], false)
             else if this.team == TEAM_2
                 UnitShareVision(this.toUnit(), players[Teams.army1()], false)
-                
+
+    function modLifesteal(int modifier)
+        this.lifeSteal += modifier
+
+    function modArmorReductionRelative(int modifier)
+        this.armorReductionRelative += modifier
+        DamageEventUnit.fromUnit(this.toUnit()).saveIntFast(D_ARMOR_REDUCTION_RELATIVE, this.armorReductionRelative)
+
     override function applyDamage()
     override function applyArmor()
         this.toUnit().setBonusArmor(this.getArmorBonus())

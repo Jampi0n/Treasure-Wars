@@ -53,13 +53,14 @@ function leatherArmor()
     onEither() (int factor) ->
         modArmor(ar)
         modHealth(hp)
-
+function heavyArmor()
+    setupItem(ITEM_ID_HEAVY_ARMOR, CATEGORY, 1500)
+function voidArmor()
+    setupItem(ITEM_ID_VOID_ARMOR, CATEGORY, 1500)
 function arcaneShield()
     setupItem(ITEM_ID_ARCANE_SHIELD, CATEGORY, 3000)
 function enchantedArmor()
     setupItem(ITEM_ID_ENCHANTED_ARMOR, CATEGORY, 3000)
-function voidArmor()
-    setupItem(ITEM_ID_VOID_ARMOR, CATEGORY, 3000)
 function armorOfCourage()
     setupItem(ITEM_ID_ARMOR_OF_COURAGE, CATEGORY, 3000)
 function spikedArmor()
@@ -91,9 +92,10 @@ function heartAmulet()
         damageEventInt(D_HEART_AMULET)
 
             
-    
 function dragonRing()
     setupItem(ITEM_ID_DRAGON_RING, CATEGORY, 3000)
+function wardensHelmet()
+    setupItem(ITEM_ID_WARDENS_HELMET, CATEGORY, 3000)
 
 @compiletime
 function initItems1()
@@ -107,6 +109,7 @@ function initItems1()
 
 @compiletime
 function initItems2()
+    heavyArmor()
 
 
 @compiletime
@@ -120,6 +123,7 @@ function initItems3()
     fireHandGauntlet()
     heartAmulet()
     dragonRing()
+    wardensHelmet()
 
 
 

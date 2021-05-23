@@ -7,13 +7,16 @@
 * BTNAxeOfAshes by Hellx-Magnus
 * BTNAzureCrystalHammerV2 by Hellx-Magnus
 * BTNBarbarianBrutalSlasher by PeeKay
+* BTNBeatstickV4 by Pyramidhe@d
 * BTNBless by PeeKay
+* BTNBloodPresence by Blizzard, LordMelganis
 * BTNBloodSpike by Kwah
 * BTNBloodStinger by PeeKay
 * BTNBoneDagger by NFWar
 * BTNBook by ~Nightmare
 * BTNBracerOfAbjuration by Apheraz Lucent
 * BTNCloakOfResistance by PrinceYaser
+* BTNColdFireRing by PeeKay
 * BTNCRBLOOD by CRAZYRUSSIAN
 * BTNDeepseaMurloc by M0rbid
 * BTNDemonArrow by Darkfang
@@ -23,8 +26,10 @@
 * BTNEnchantWeaponGreen by StaberFire
 * BTNFierySoul by 4eNNightmare
 * BTNFireBoot by PeeKay
+* BTNFireBow by The Panda
 * BTNFistofFire by Solu9
 * BTNFlameBurst by The Panda
+* BTNgobletoffire by PeeKay
 * BTNGobletOfVampires by PeeKay
 * BTNGoblinRocketBoots by LoDown
 * BTNGoldenWoodBow by NFWar
@@ -34,12 +39,17 @@
 * BTNHeroTrollManhunter by -Grendel
 * BTNHolyArmor by Mc !
 * BTNHolyBan by PeeKay
+* BTNInfernalbow by PeeKay
+* BTNINV_Axe_09 by Blizzard Entertainment, Blizzard Entertainment
 * BTNINV_Axe_15 by Blizzard Entertainment, Blizzard Entertainment
 * BTNINV_Axe_18 by Blizzard Entertainment, Blizzard Entertainment
 * BTNINV_Chest_Plate09 by Blizzard Entertainment, Blizzard Entertainment
+* BTNINV_Hammer_10 by Blizzard Entertainment, Blizzard Entertainment
 * BTNINV_Hammer_15 by Blizzard Entertainment, Blizzard Entertainment
+* BTNINV_Helmet_21 by Blizzard Entertainment, Blizzard Entertainment
 * BTNINV_Jewelry_Ring_09 by Blizzard Entertainment, Blizzard Entertainment
 * BTNINV_Jewelry_Ring_10 by Blizzard Entertainment, Blizzard Entertainment
+* BTNINV_Jewelry_Ring_15 by Blizzard Entertainment, Blizzard Entertainment
 * BTNINV_Misc_Gem_Ruby_02 by Blizzard Entertainment, Blizzard Entertainment
 * BTNINV_Misc_Gem_Sapphire_02 by Blizzard Entertainment, Blizzard Entertainment
 * BTNINV_ThrowingKnife_04 by Blizzard Entertainment, Blizzard Entertainment
@@ -51,6 +61,7 @@
 * BTNLightningblade by kola
 * BTNLugubriousMask by Marcos DAB
 * BTNMechanism by NFWar
+* BTNMercurialScimtar by PeeKay
 * BTNMeteor by 67chrome
 * BTNMysticDagger by PeeKay
 * BTNNatureSlippers by PeeKay
@@ -60,12 +71,19 @@
 * BTNNoxiousFumes by Lelling
 * BTNPlatedGauntlet2 by NFWar
 * BTNPlateGauntlet by PeeKay
+* BTNRavenSword by kola
+* BTNRedCrystal by Marcos DAB
 * BTNRing by ~Nightmare
 * BTNRuinedShield by NFWar
 * BTNRunestoneBreastplate by Blood Raven
 * BTNRunicBladeCR by CRAZYRUSSIAN
+* BTNRustySword by NFWar
 * BTNSandalZ3 by NFWar
+* BTNSapphireAmulet by PeeKay
 * BTNScarabusEdgeV2 by Apheraz Lucent
+* BTNScepterOfTheTides by Blood Raven
+* BTNSeaHeavyArmor by PeeKay
+* BTNSeerStaff by PeeKay
 * BTNSkullSpirits by -Berz-
 * BTNSlowSpellGreen by NFWar
 * BTNSoulBurn by Infinitynexus
@@ -81,6 +99,7 @@
 * BTNTitansGrip by Blizzard Entertainment
 * BTNTorment by PeeKay
 * BTNWalkersofDarkness by PeeKay
+* BTNWeaver03 by PeeKay
 * ChaosOrb by (Blizzard Entertainment), Darkfang
 * Grim Rupture by ~Nightmare
 * Guardian of the Sea by BLazeKraze
@@ -90,3 +109,4 @@
 * Poison Arrow Blade Knive by Darkfang
 * Sea Druid by BLazeKraze
 * Sea Druidism by BLazeKraze
+* Witch Doctor Ritual by BLazeKraze

@@ -13,7 +13,7 @@
 package PassiveItemCooldown
 
 import ClosureTimers
-import JHandles
+//import JHandles
 import AbilityObjEditing
 import GameTimer
 import ObjectIdGenerator
@@ -43,10 +43,16 @@ public class PassiveItemCooldown
     If the abiltiy is still on cooldown false is returned.
     **/
     static function tryStartCooldown(unit u, int itm, int abil, real cd) returns bool
-        if u.getAbilityCooldownRemaining(abil) == 0.0
-            lockUnit(u, itm, abil, cd)
+        if getRemainingCooldown(u, abil) <= 0.0
+            startCooldown(u, itm, abil, cd)
             return true
         return false
+
+    static function startCooldown(unit u, int itm, int abil, real cd)
+        lockUnit(u, itm, abil, cd)
+
+    static function getRemainingCooldown(unit u, int abil) returns real
+        return u.getAbilityCooldownRemaining(abil)
 
     /**
     This function should be run when an item is picked up and will process potential cooldowns.
@@ -116,7 +122,7 @@ public class PassiveItemCooldown
             var itmInSlot = u.itemInSlot(i)
             if itmInSlot.getTypeId() == itm
                 u.removeItem(itmInSlot)
-                u.addItemHandleToSlot(itmInSlot, i)
+                //u.addItemHandleToSlot(itmInSlot, i)
                 itmInSlot = u.itemInSlot(i)
                 lockItem(itmInSlot, abil, cd)
         if toggleItemTriggers != null

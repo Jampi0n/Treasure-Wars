@@ -3,6 +3,8 @@ package ItemEffectPreset
 import ItemEffect
 import FastDamageEvent
 import Reference
+import ItemConfigurationCompiletime
+import HashMap
 
 /**
 Adds a trigger which is active while the item is carried by the hero.
@@ -115,3 +117,82 @@ public function modHealthRegenRelative(int modifier)
     getItemUnitWrapper().modHealthRegenRelative(modifier * getItemSign())
 public function modManaRegenRelative(int modifier)
     getItemUnitWrapper().modManaRegenRelative(modifier * getItemSign())
+
+    
+public function modLifeSteal(int modifier)
+    getItemUnitWrapper().modLifesteal(modifier * getItemSign())
+public function modArmorReductionRelative(int modifier)
+    getItemUnitWrapper().modArmorReductionRelative(modifier * getItemSign())
+
+
+public enum ItemStat
+    STR
+    AGI
+    INT
+    AR
+    AS
+    MS
+    HP
+    HR
+    MP
+    MR
+    CD
+    AP
+    LS
+
+enum ItemStatPercentage
+    EITHER
+    ALWAYS
+    NEVER
+
+
+public class ItemStatLine
+    protected static constant map = new HashMap<ItemStat, ItemStatLine>()
+    protected string name
+    protected ItemStatPercentage percentage
+
+    private function setup(ItemStat itemStat, string name, ItemStatPercentage percentage)
+        this.percentage = percentage
+        this.name = name
+        map.put(itemStat, this)
+
+    construct(ItemStat itemStat, string name, bool percentage)
+        if percentage
+            setup(itemStat, name, ItemStatPercentage.ALWAYS)
+        else
+            setup(itemStat, name, ItemStatPercentage.NEVER)
+
+    construct(ItemStat itemStat, string name)
+        setup(itemStat, name, ItemStatPercentage.EITHER)
+        
+            
+
+public function addStatLine(ItemStat whichStat, int modifier)
+    addStatLine(whichStat, modifier, false)
+public function addStatLine(ItemStat whichStat, int modifier, bool percentage)
+    let itemStatLine = ItemStatLine.map.get(whichStat)
+    var newPercentage = percentage
+    if itemStatLine.percentage == ItemStatPercentage.ALWAYS
+        newPercentage = true
+    if itemStatLine.percentage == ItemStatPercentage.NEVER
+        newPercentage = false
+    addStatLine(itemStatLine.name, modifier, newPercentage)
+
+@compiletime
+function initStatLine()
+    new ItemStatLine(ItemStat.STR, "Strength")
+    new ItemStatLine(ItemStat.AGI, "Magic Resistance")
+    new ItemStatLine(ItemStat.INT, "Intelligence")
+    new ItemStatLine(ItemStat.AS, "Attack Speed")
+    new ItemStatLine(ItemStat.AR, "Armor", true)
+    new ItemStatLine(ItemStat.MS, "Movement Speed")
+    new ItemStatLine(ItemStat.HP, "Health Points")
+    new ItemStatLine(ItemStat.HR, "Health Regeneration")
+    new ItemStatLine(ItemStat.MP, "Mana Points")
+    new ItemStatLine(ItemStat.MR, "Mana Regeneration")
+    new ItemStatLine(ItemStat.CD, "Cooldown Recovery", true)
+    new ItemStatLine(ItemStat.AP, "Armor Penetration", true)
+    new ItemStatLine(ItemStat.LS, "Lifesteal", true)
+
+init
+    initStatLine()

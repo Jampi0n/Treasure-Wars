@@ -20,21 +20,7 @@ public enum DispelLevel
     BREAK // cannot be dispelled, but can be stopped (e.g. turning the target invulnerable): Aerial Shackles, Life Drain
     NONE // cannot be removed at all
 
-
-
-/*
-    configuration: useNativeBuffListAllocation
-    autoamtically allocates buff lists when units are created and removes the list when the unit is removed
-    If you use this method, setGetBuffListFunction must not be used by the user.
-*/
-
-constant unitToBuffList = new HashMap<unit, BuffList>()
-
-/*
-    configuration: dispelBuffsOnDeath
-    autoamtically dispels buffs when a unit dies
-*/
-        
+constant unitToBuffList = new HashMap<unit, BuffList>()  
 
 public interface BuffEventClosure
     function run(Buff whichBuff)

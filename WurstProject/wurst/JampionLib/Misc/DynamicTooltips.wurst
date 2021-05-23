@@ -55,6 +55,11 @@ import JString
 public interface GetStatFunction
     function getStat(unit u) returns real
 
+public function bonusStringFactor(color highlightColor, real factor, string statName) returns string
+    return highlightColor.toColorString()+" (+"+(factor).str()+"% " + statName + ")|r "
+public function bonusStringValue(color highlightColor, real value) returns string
+    return highlightColor.toColorString()+" (+"+(value).str()+")|r "
+
 abstract class DynamicElement
     function evaluate(unit _u, real _cooldown, bool _const) returns string
         return ""
@@ -83,10 +88,9 @@ class DynamicStat extends DynamicElement
 
     override function evaluate(unit u, real cooldown, bool const) returns string
         if const
-            return highlightColor.toColorString()+" (+"+(factor).str()+"% " + statName + ")|r "
+            return bonusStringFactor(highlightColor, factor, statName)
         else
-            return highlightColor.toColorString()+" (+"+(getStatFunction.getStat(u) * factor/100).str()+")|r "
-
+            return bonusStringValue(highlightColor, getStatFunction.getStat(u) * factor/100)
 
 class DynamicCooldown extends DynamicElement
     construct()

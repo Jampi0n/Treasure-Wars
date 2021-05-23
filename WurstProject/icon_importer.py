@@ -41,7 +41,7 @@ def clean(import_path):
         except FileNotFoundError:
             pass
 
-def copy(icon_path, import_path, used_icons:list, used_folders:list):
+def copy(icon_path, import_path, preview_path, used_icons:list, used_folders:list):
     button_paths = ["CommandButtons", "CommandButtonsDisabled"]
     for path in button_paths:
         os.mkdir(os.path.join(os.getcwd(), import_path, "ReplaceableTextures", path))
@@ -60,6 +60,8 @@ def copy(icon_path, import_path, used_icons:list, used_folders:list):
                         shutil.copyfile(path, os.path.join(os.getcwd(), import_path, "ReplaceableTextures", "CommandButtonsDisabled", newName))
                         if root not in used_folders:
                             used_folders.append(root)
+                if name.lower().startswith("btn"):
+                    shutil.copyfile(path, os.path.join(preview_path, newName))
 
 class HiveUser:
     users = {}
@@ -173,8 +175,11 @@ def createSummary(used_folders:list):
             thread_ids.append(thread_id)
         else:
             try:
-                with open(os.path.join(used_folder, "readme.html")) as readme:
-                    lines = readme.readlines()
+                with open(os.path.join(used_folder, "readme.html"), encoding='utf-8') as readme:
+                    try:
+                        lines = readme.readlines()
+                    except UnicodeDecodeError:
+                        print(os.path.join(used_folder, "readme.html"))
                     assert lines[0][0:4] == "<h1>", "|" + lines[0][0:4] + "|"
                     assert lines[1][0:16] == "<p>Submitted by ", "|" + lines[1][0:17] + "|"
                     title = lines[0][4:-6]
@@ -201,6 +206,7 @@ def createSummary(used_folders:list):
 
 def main():
     icon_path = os.path.join(str(Path.home()), "Downloads", "HiveDownloads")
+    preview_path = os.path.join(str(Path.home()), "Downloads", "HiveDownloads - Preview")
     import_path = "imports"
     used_icons = []
     print("Collecting used icons...")
@@ -212,7 +218,7 @@ def main():
     clean(import_path)
     used_folders = []
     print("Copying...")
-    copy(icon_path, import_path, used_icons, used_folders)
+    copy(icon_path, import_path, preview_path, used_icons, used_folders)
     print("Creating summary...")
     createSummary(used_folders)
 

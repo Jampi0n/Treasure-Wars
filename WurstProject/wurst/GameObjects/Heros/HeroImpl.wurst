@@ -20,6 +20,7 @@ import UnitStats
 
 constant HP_PER_LEVEL = 15
 constant STRENGTH_BONUS = 45
+constant ARMOR_BONUS = 30
 
 constant int array ASSIST_BOUNTY = [0, 60, 40, 30, 24]
 constant int array KILL_BOUNTY = [240, 180, 160, 150, 144]
@@ -196,7 +197,7 @@ public class HeroImpl implements IHero
         wrapper.modHealth(this.heroType.getBase(Stat.HP) * 15 + HP_PER_LEVEL )
         wrapper.modMana(this.heroType.getBase(Stat.MP) * 10 )
         wrapper.modMoveSpeed(this.heroType.getBase(Stat.MS) )
-        wrapper.setStatBaseInternal(Stat.AR, this.heroType.getBase(Stat.AR))
+        wrapper.setStatBaseInternal(Stat.AR, this.heroType.getBase(Stat.AR) + ARMOR_BONUS)
         wrapper.setBaseAttackCooldown(convertAttackSpeed(defaultAttackCooldown, this.heroType.getBase(Stat.AS)))
         wrapper.setStatBaseInternal(Stat.STR, this.heroType.getBase(Stat.STR) + STRENGTH_BONUS)
         wrapper.setStatBaseInternal(Stat.AGI, this.heroType.getBase(Stat.AGI))
