@@ -102,7 +102,7 @@ public function unit.getHeroInt() returns int
 
 public function unit.addBuff(unit caster, real duration, BuffType buffType, int level) returns Buff
     Buff ret = null
-    if (duration <= 0 and duration > -0.5) or duration > 600
+    if (duration > 600 or duration < 0) and not duration == -1
         error("addBuff add buff with unusual duration: " + duration.toString())
     if this.isAlive()
         execute() () ->
@@ -116,7 +116,7 @@ public function unit.addBuffReduced(unit caster, real duration, BuffType buffTyp
     if this.hasItemById(ITEM_ID_ARCANE_SHIELD)
         realDuration = realDuration * 0.85
     Buff ret = null
-    if (realDuration <= 0 and realDuration > -0.5) or realDuration > 600
+    if (realDuration > 600 or realDuration < 0) and not realDuration == -1
         error("addBuffReduced add buff with unusual duration: " + realDuration.toString() + " " + (buffType castTo int).toString())
     if this.isAlive()
         execute() () ->

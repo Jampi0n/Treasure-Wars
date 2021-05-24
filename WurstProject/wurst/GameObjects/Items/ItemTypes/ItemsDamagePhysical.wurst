@@ -55,33 +55,44 @@ function magmaCrystal()
     setupItem(ITEM_ID_MAGMA_CRYSTAL, CATEGORY, 500)
     addLine("Attacks deal {0} additional magic damage.".format(dmg.toString()))
     setInfo("Magma Crystal")
+    onEither() (int factor) ->
+        attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean alternate) ->
+            source.dealDamage(target, dmg * 1.0, ReductionType.MAGIC)
+            target.addEffect(Abilities.fireBallMissile, "chest").destr()
         
 function bloodSword()
     let str = 12
     let steal = 8
     setupItem(ITEM_ID_BRUTAL_SLASHER, CATEGORY, 1200)
     addStatLine(ItemStat.STR, str)
-    addStatLine("lifesteal", steal, true)
+    addStatLine(ItemStat.LS, steal)
     setInfo("Vampiric Sword")
     addRequirements(ITEM_ID_IRON_SWORD)
     onEither() (int factor) ->
         modLifeSteal(steal)
+        modStrength(str)
+
 function skullCrusher()
     let str = 1
     setupItem(ITEM_ID_SKULL_CRUSHER, CATEGORY, 1500)
     setInfo("Orcish Warhammer", "+ {0} strength".format(str.toString()))
     addRequirements(ITEM_ID_HAMMER_OF_STRENGTH, ITEM_ID_WAR_AXE)
+
 function woodenClub()
     let str = 1
     setupItem(ITEM_ID_WOODEB_CLUB, CATEGORY, 1300)
     setInfo("Giant Club", "+ {0} strength".format(str.toString()))
     addRequirements(ITEM_ID_HAMMER_OF_STRENGTH, ITEM_ID_GEM_OF_HEALTH)
+
 function skullAxe()
     let str = 30
     setupItem(ITEM_ID_SKULL_AXE, CATEGORY, 1500)
     addStatLine(ItemStat.STR, str)
     setInfo("Skull Axe")
     addRequirements(ITEM_ID_WAR_AXE, ITEM_ID_IRON_SWORD)
+    onEither() (int factor) ->
+        modStrength(str)
+
 function ravenSword()
     let str = 20
     let as = 15
@@ -90,27 +101,38 @@ function ravenSword()
     addStatLine(ItemStat.AS, as)
     setInfo("Raven Sword")
     addRequirements(ITEM_ID_IRON_SWORD, ITEM_ID_DAGGER)
+    onEither() (int factor) ->
+        modAttackSpeed(as)
+        modStrength(str)
+
 
 function blazingBow()
     let str = 12
+    let strPercentage = 5
+    let dmg = 15
     setupItem(ITEM_ID_BLAZING_BOW, CATEGORY, 2200)
-    setInfo("Blazing Bow", "+ {0} strength".format(str.toString()))
+    addStatLine(ItemStat.STR, str)
+    addStatLine(ItemStat.STR, strPercentage, true)
+    addLine("Attacks deal {0} additional magic damage.".format(dmg.toString()))
+    setInfo("Blazing Bow")
     addRequirements(ITEM_ID_BOW, ITEM_ID_MAGMA_CRYSTAL)
     onEither() (int factor) ->
         modStrength(str)
+        modStrengthRelative(strPercentage)
+        attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean alternate) ->
+            source.dealDamage(target, dmg * 1.0, ReductionType.MAGIC)
+            target.addEffect(Abilities.fireBallMissile, "chest").destr()
 
-constant ARMOR_BREAKER_BUFF = compiletime(setupBuff("Armor Breaker", "This unit's armor is broken; it has reduced armor.", "BTNAzureCrystalHammerV2", false, 1, "", "", DispelLevel.DISPEL))
 constant HAMMER_SLAM_BUFF = compiletime(setupBuff("Slam", "This unit has been hit by Slam; its movement speed and attack rate are reduced.", "BTNAzureCrystalHammerV2", false, 1, Abilities.stasisTotemTarget, "overhead", DispelLevel.DISPEL))
 
 constant SLAM_DURATION = 3
+constant SLAM_DAMAGE = 150.0
             
 constant ABILITY_ARMOR_BREAKER_SLAM = compiletime(ABIL_ID_GEN.next())
 
 function itemArmorBreaker()
     let str = 20
-    let armorDmg = 30
-    let armorDuration = 4
-    let activeDmg = 150
+    let dmgPerXArmor = 5
     let activeSlow = 50
     let cooldown = 45
 
@@ -124,23 +146,17 @@ function itemArmorBreaker()
 
     setupItem(ITEM_ID_ARMOR_BREAKER, CATEGORY, 4500)
     setActiveAbilities(ABILITY_ARMOR_BREAKER_SLAM)
-    addUnique("Attacks reduce the target's armor by {0}% for {1} seconds.".format(armorDmg.str(), armorDuration.str()))
-    addActive("Slam", "Slams the ground, dealing {0} damage and slowing enemy units by {1}% for {2} seconds.".format(activeDmg.str(), activeSlow.str(), SLAM_DURATION.str()))
+    addUnique("Attacks deal 1 additional damage for every {0} points of armor of the target.".format(dmgPerXArmor.str()))
+    addActive("Slam", "Slams the ground, dealing {0} damage and slowing enemy units by {1}% for {2} seconds.".format(SLAM_DAMAGE.str(), activeSlow.str(), SLAM_DURATION.str()))
     setInfo("Armor Breaker")
     addRequirements(ITEM_ID_SKULL_CRUSHER, ITEM_ID_WOODEB_CLUB)
 
     if not compiletime
-        ARMOR_BREAKER_BUFF.addLevelFunction() (Buff thisBuff, int factor) ->
-            thisBuff.getTarget().wrapper().modArmorRelative(-factor * armorDmg*10)
-        HAMMER_SLAM_BUFF.addLevelFunction() (Buff thisBuff, int factor) ->
-            thisBuff.getTarget().wrapper()..modMoveSpeedRelative(-factor * activeSlow*10)
-            ..modAttackSpeed(-factor * activeSlow)
         onEither() (int factor) ->
             modStrength(str)
             attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
-                target.addBuffReduced( source, armorDuration.toReal(), ARMOR_BREAKER_BUFF, 1)
-                target.addEffect(Abilities.bloodElfSpellThiefMISSILE, "chest").destr()
-
+                source.dealDamage(target, target.wrapper().getArmor() / 5, ReductionType.NONE)
+                
             let trg = itemTrigger(-1)
             if trg != null
                 trg.registerUnitEvent(getItemUnit(), EVENT_UNIT_SPELL_EFFECT)
@@ -154,6 +170,7 @@ function itemArmorBreaker()
                         let p = caster.getOwner()
                         for u from g
                             if u.isTargetableEnemyUnit(p)
+                                caster.dealDamage(u, SLAM_DAMAGE, ReductionType.PHYSICAL)
                                 u.addBuffReduced(caster, SLAM_DURATION.toReal(), HAMMER_SLAM_BUFF, 1)
 
 
@@ -193,15 +210,53 @@ function axeOfEmbers()
                 if u.isTargetableEnemyUnit(source)
                     source.dealDamage(u, aoeDmg * 1.0, ReductionType.MAGIC)
                     u.addEffect(Abilities.fireBallMissile, "chest").destr()
+
+constant ABILITY_RUNE_BLADE_BURN = compiletime(ABIL_ID_GEN.next())
+
+constant RUNE_BLADE_BUFF = compiletime(setupBuff("Rune Blade Shield", "Magic resistance is increased.", "BTN_RunicBlade_CR", false, 1, Abilities.antiMagicShell, "chest", DispelLevel.DISPEL))
+
+constant RUNE_BLADE_BURN = 25
+constant RUNE_BLADE_SHIELD_DUR = 8
+int runeBladeManaBurnt = -1
+
 function runeBlade()
     let str = 1
     let lifesteal = 10
     let manasteal = 5
+    let agi = 1
+    let cooldown = 75
+
+    if compiletime
+        new AbilityDefinitionFarseerChainLightning(ABILITY_RUNE_BLADE_BURN)
+        ..setCooldown(1, cooldown.toReal())
+        ..targetEnemyHeroes()
+        ..setMissileArt("")
+        ..setArtTarget("")
+        ..setLightningEffects(LIGHTNING_MANA_BURN)
+        ..setManaCost(1, 0)
+        ..setDamageperTarget(1, 0)
+        ..setDamageReductionperTarget(1, 0)
+        ..setNumberofTargetsHit(1, 1)
+    else
+        RUNE_BLADE_BUFF.addSetupFunction() (Buff thisBuff, int factor) ->
+            int burnt
+            if factor == 1
+                thisBuff.setData(runeBladeManaBurnt)
+                burnt = runeBladeManaBurnt
+            else
+                burnt = thisBuff.getData()
+            thisBuff.getTarget().wrapper().modAgility(factor * burnt)
+
+
+
     setupItem(ITEM_ID_RUNE_BLADE, CATEGORY, 4500)
+    setActiveAbilities(ABILITY_RUNE_BLADE_BURN)
     addRequirements(ITEM_ID_BRUTAL_SLASHER, ITEM_ID_VOID_CRYSTAL, ITEM_ID_SKULL_AXE)
     addStatLine(ItemStat.STR, str)
-    addStatLine("lifesteal", lifesteal, true)
+    addStatLine(ItemStat.AGI, agi)
+    addStatLine(ItemStat.LS, lifesteal)
     addUnique("Attacks steal {0}% of the damage as mana.".format(manasteal.str()))
+    addActive("Mana Burn", "Burns {0}% of the target's maximum mana. For every point burnt, the target takes 1 damage and the hero's magic resistance is increased by 1 points for {1} seconds.".format(RUNE_BLADE_BURN.str(), RUNE_BLADE_SHIELD_DUR.str()))
     setInfo("Runic Blade")
     onEither() (int factor) ->
         modLifeSteal(lifesteal)
@@ -209,8 +264,21 @@ function runeBlade()
             var amount = (manasteal * damage / 100.0).reduceMagic(target.getUnitWp())
             amount = min(amount, target.getMana())
             source.damageMana(target, amount, ReductionType.NONE)
-            source.healMana(target, amount)
+            source.healMana(source, amount)
             target.addEffect(Abilities.arcaneTowerAttack, "chest").destr()
+
+        let trg = itemTrigger(-1)
+        if trg != null
+            trg.registerUnitEvent(getItemUnit(), EVENT_UNIT_SPELL_EFFECT)
+            trg.addAction() ->
+                if GetSpellAbilityId() == ABILITY_RUNE_BLADE_BURN
+                    let caster = GetTriggerUnit()
+                    let target = GetSpellTargetUnit()
+                    let maxMana = target.getMaxMana()
+                    runeBladeManaBurnt = min(maxMana * RUNE_BLADE_BURN / 100, target.getMana()).trunc()
+                    caster.damageMana(target, runeBladeManaBurnt * 1.0, ReductionType.NONE)
+                    caster.addBuff(caster, RUNE_BLADE_SHIELD_DUR * 1.0, RUNE_BLADE_BUFF, 1)
+                    createManaBurnTextTag(target, runeBladeManaBurnt)
 
 
 function cursedSword()
@@ -219,7 +287,7 @@ function cursedSword()
     setupItem(ITEM_ID_SOUL_TORMENTOR, CATEGORY, 4500)
     addRequirements(ITEM_ID_BRUTAL_SLASHER, ITEM_ID_IRON_SWORD, ITEM_ID_RAVEN_SWORD)
     addStatLine(ItemStat.STR, str)
-    addStatLine("lifesteal", steal, true)
+    addStatLine(ItemStat.LS, steal)
     setInfo("Cursed Sword")
     onEither() (int factor) ->
         modLifeSteal(steal)
@@ -231,22 +299,31 @@ function axeOfDecay()
 
 constant ARCANE_BLADE_BUFF = compiletime(setupBuff("Arcane Blade", "This is under the effect of Arcane Blade; its next attack will deal additional magic damage.", "BTNScarabusEdgeV2", true, 1, "","", DispelLevel.DISPEL))
 
+constant ARCANE_BLADE_DEBUFF = compiletime(setupBuff("Arcane Blade", "This is under the effect of Arcane Blade; it has reduced magic resistance.", "BTNScarabusEdgeV2", true, 1, "","", DispelLevel.DISPEL))
+
 constant ARCANE_BLADE_DURATION = 4.0
 
 function arcaneBlade()
     let dmg = 35
-    let dmgInt = 15.0
+    let dmgInt = 25.0
+    let mrReduce = 30
+    let mrReduceDur = 5.0
     setupItem(ITEM_ID_ARCANE_BLADE, CATEGORY, 4500)
     addRequirements(ITEM_ID_RAVEN_SWORD, ITEM_ID_GEM_OF_MANA, ITEM_ID_SCEPTER_OF_THE_TIDES)
+    addUnique("Attacks reduce the target's magic resistance by {0} for {1} seconds".format(mrReduce.str(), mrReduceDur.str()))
     addUnique("After casting a spell, the next attack within {0} seconds deals {1} additional magic damage.".format(ARCANE_BLADE_DURATION.str(), dmg.str() + bonusStringFactor(C_INT, dmgInt, "Intelligence")))
+    
     setInfo("Arcane Blade")
     if not compiletime
+        ARCANE_BLADE_DEBUFF.addLevelFunction() (Buff thisBuff, int factor) ->
+            thisBuff.getTarget().wrapper().modAgilityRelative(-mrReduce * 10 * factor)
         registerOnHeroCast() -> 
             let hero = GetTriggerUnit()
             if hero.hasItemById(ITEM_ID_ARCANE_BLADE)
                 hero.addBuff(hero, ARCANE_BLADE_DURATION, ARCANE_BLADE_BUFF, 1)
         onEither() (int factor) ->
             attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
+                target.addBuffReduced(source, mrReduceDur, ARCANE_BLADE_DEBUFF, 1)
                 let b = source.wrapper().getBuffOfType(ARCANE_BLADE_BUFF)
                 if b != null
                     b.dispel()
@@ -261,7 +338,7 @@ function bloodStinger()
     setupItem(ITEM_ID_BLOOD_STINGER, CATEGORY, 4500)
     addRequirements(ITEM_ID_DAGGER, ITEM_ID_BRUTAL_SLASHER, ITEM_ID_BRUTAL_SLASHER, ITEM_ID_IRON_SWORD)
     addStatLine(ItemStat.STR, str)
-    addStatLine("lifesteal", steal, true)
+    addStatLine(ItemStat.LS, steal)
     setInfo("Sacrificial Dagger")
     onEither() (int factor) ->
         modLifeSteal(steal)
@@ -277,40 +354,21 @@ function moonLightScimitar()
     addUnique("Attacks reduce the target's armor by {0} points for {1} seconds. This effect stacks.".format(armor.str(), dur.str()))
     setInfo("Moon Light Scimitar")
 
-    if not compiletime
-        SCIMITAR_BUFF.addSetupFunction() (Buff thisBuff, int factor) ->
-            if factor == 1
-                thisBuff.getTarget().wrapper()
-                ..modArmor(-armor)
-                thisBuff.setData(1)
-            else
-                let stacks = thisBuff.getData()
-                thisBuff.getTarget().wrapper()
-                ..modArmor(armor * stacks)
-
-        SCIMITAR_BUFF.addStackFunction() (Buff whichBuff) ->
-            let stacks = whichBuff.getData() + 1
-            whichBuff.setData(stacks)
-            whichBuff.getTarget().wrapper()
-            ..modArmor(-armor)
-
-        onEither() (int factor) ->
-            attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
-                target.addBuff(source, dur.toReal(), SCIMITAR_BUFF, 1)
-
-
-
 function infernalBow()
     let str = 12
     let dps = 20
     let healing = 25
     let dur = 6
+    let strPercentage = 10
     setupItem(ITEM_ID_INFERNAL_BOW, CATEGORY, 4500)
     setInfo("Infernal Bow", "+ {0} strength".format(str.toString()))
     addRequirements(ITEM_ID_BLAZING_BOW, ITEM_ID_MAGMA_CRYSTAL)
+    addStatLine(ItemStat.STR, str)
+    addStatLine(ItemStat.STR, strPercentage, true)
     addUnique("Attacks deal {0} magic damage per second and reduce healing by {1}% for {2} seconds.".format(dps.str(), healing.str(), dur.str()))
     onEither() (int factor) ->
         modStrength(str)
+        modStrengthRelative(strPercentage)
             
 
 @compiletime

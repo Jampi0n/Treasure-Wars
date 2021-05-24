@@ -10,6 +10,7 @@ import HashMap
 import ErrorHandling
 import Execute
 import AbilityPresets
+import Maths
 
 int buffCount = 0
 int buffListCount = 0
@@ -246,8 +247,8 @@ public class Buff
        
         this.expireTimer = getTimer()
             ..setData(this castTo int)
-        if duration > -0.5
-            this.expireTimer.start(duration, function expireStatic)
+        if duration != -1
+            this.expireTimer.start(max(0, duration), function expireStatic)
 
         this.caster = caster
         this.target = target
@@ -388,12 +389,12 @@ public class Buff
         if this.onStack!=null
             for BuffEventClosure cb in this.onStack
                 cb.run(this)
-        if newDuration < -0.5 or newDuration > this.expireTimer.getRemaining()
+        if newDuration == -1 or newDuration > this.expireTimer.getRemaining()
             this.expireTimer.release()
             this.expireTimer = getTimer()
                 ..setData(this castTo int)
-            if newDuration > -0.5
-                this.expireTimer.start(newDuration, function expireStatic)
+            if newDuration != -1
+                this.expireTimer.start(max(0, newDuration), function expireStatic)
 
     function getDispelLevel() returns DispelLevel
         return this.dispelLevel

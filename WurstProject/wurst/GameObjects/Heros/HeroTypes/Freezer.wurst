@@ -386,8 +386,8 @@ public class HeroFreezer extends HeroTemplate
 
         let wrapper = instance.frostWyrm.wrapper()
         wrapper.setOwningHero(caster.toHero())
-        wrapper.modAttackSpeed( caster.wrapper().getAttackSpeedBonus())
-        wrapper.modHealth( caster.wrapper().getHealthBonus() + FROST_WYRM_HP[level-1] )
+        wrapper.modAttackSpeed(caster.wrapper().getAttackSpeedBonus())
+        wrapper.modHealth(caster.wrapper().getHealthBonus() + FROST_WYRM_HP[level-1] )
         wrapper.modStrength( ( (FROST_WYRM_INT_FACTOR/100) * caster.getHeroInt() ).toInt()  + FROST_WYRM_DMG[level-1] )
 
         DamageEventUnit.fromUnit(instance.frostWyrm).attackDamageNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
@@ -514,14 +514,15 @@ public class HeroFreezer extends HeroTemplate
             if factor == 1
                 let target = thisBuff.getTarget()
                 let level = thisBuff.getLevel()
-                let intel = thisBuff.getCaster().getHeroInt()
+                let caster = thisBuff.getCaster()
+                let intel = caster.getHeroInt()
                 let forstArmor = new FrostArmor()
+                let slowDuration = ARMOR_SLOW_DURATION[level-1].bonus(intel, ARMOR_SLOW_DURATION_BONUS)
                 target.wrapper().modArmor( ARMOR_AR[level - 1].bonus(intel, ARMOR_AR_BONUS).round())
                 forstArmor.intelligence = intel
                 forstArmor.damageEventPointer = DamageEventUnit.fromUnit(target).attackHitNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
                     if source.isTargetableEnemy(target)
-                        let armorBuff = target.wrapper().getBuffOfType(BUFF_FROST_ARMOR)
-                        source.addBuffReduced(armorBuff.getCaster(), ARMOR_SLOW_DURATION[level-1].bonus(armorBuff.getData(), ARMOR_SLOW_DURATION_BONUS), BUFF_FROST_ARMOR_SLOW, level)
+                        source.addBuffReduced(caster, slowDuration, BUFF_FROST_ARMOR_SLOW, level)
                 thisBuff.setData(forstArmor castTo int)
             else
                 let target = thisBuff.getTarget()
