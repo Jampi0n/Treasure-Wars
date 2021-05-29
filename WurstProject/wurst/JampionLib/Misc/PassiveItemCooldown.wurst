@@ -13,7 +13,7 @@
 package PassiveItemCooldown
 
 import ClosureTimers
-//import JHandles
+import JHandles
 import AbilityObjEditing
 import GameTimer
 import ObjectIdGenerator
@@ -122,7 +122,7 @@ public class PassiveItemCooldown
             var itmInSlot = u.itemInSlot(i)
             if itmInSlot.getTypeId() == itm
                 u.removeItem(itmInSlot)
-                //u.addItemHandleToSlot(itmInSlot, i)
+                u.addItemHandleToSlot(itmInSlot, i)
                 itmInSlot = u.itemInSlot(i)
                 lockItem(itmInSlot, abil, cd)
         if toggleItemTriggers != null
