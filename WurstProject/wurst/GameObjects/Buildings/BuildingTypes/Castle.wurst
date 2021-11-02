@@ -45,7 +45,7 @@ function setVictoryState(VictoryState newState)
 				u = FirstOfGroup(g)
 				if u == null
 					break
-				g.removeUnit(u)
+				g.remove(u)
 				u.pause()
 
 		g.destr()

@@ -354,7 +354,7 @@ public class HeroFreezer extends HeroTemplate
 
         while(not nearby.isEmpty())
             let u = FirstOfGroup(nearby)
-            nearby.removeUnit(u)
+            nearby.remove(u)
             if u.isTargetableEnemyUnit(caster)
                 caster.dealDamage(u, dmg, ReductionType.MAGIC)
                 u.addBuffReduced(caster, dur, BUFF_FROST_NOVA, level)
@@ -401,7 +401,7 @@ public class HeroFreezer extends HeroTemplate
 
             while(not nearby.isEmpty())
                 let u = FirstOfGroup(nearby)
-                nearby.removeUnit(u)
+                nearby.remove(u)
                 if u.isTargetableEnemyUnit(source) and u != target
                     u.addBuffReduced(source, FROST_BREATH_DUR[level-1], BUFF_FROST_BREATH, level)
                     source.dealDamage(u, dmg, ReductionType.PHYSICAL)
@@ -460,7 +460,7 @@ public class HeroFreezer extends HeroTemplate
                 u = FirstOfGroup(g)
                 if u == null
                     break
-                g.removeUnit(u)
+                g.remove(u)
                 if u.isTargetableEnemy(hero)
                     if u.isType(UNIT_TYPE_HERO)
                         count++

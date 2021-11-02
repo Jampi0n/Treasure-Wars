@@ -35,7 +35,7 @@ public class Blacksmith extends Building
                     u = FirstOfGroup(g)
                     if u == null
                         break
-                    g.removeUnit(u)
+                    g.remove(u)
                     if not u.isType(UNIT_TYPE_STRUCTURE)
                         // the unit stats are already applied by upgrades
                         // only base value stats need to be updated and bonuses need to be recalculated

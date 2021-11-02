@@ -121,10 +121,10 @@ public class Missile
 
                 let target = FirstOfGroup(nearby)
                 
-                nearby.removeUnit(target)
+                nearby.remove(target)
                 let targetPos = target.getPos()
                 let distance = newPos.distanceTo(targetPos)
-                if (not hitOnce or not hitUnits.contains(target)) and distance <= this.size + target.getHitBox() and target != this.getOwner()
+                if (not hitOnce or not hitUnits.has(target)) and distance <= this.size + target.getHitBox() and target != this.getOwner()
                     currentMissile = this
                     currentTarget = target
                     if this.onHitFilter==null or this.onHitFilter.missileCheck(this, target)
@@ -132,7 +132,7 @@ public class Missile
                             if this.onHitFunction != null
                                 this.onHitFunction.missileHit(this, target)
                             if hitOnce
-                                this.hitUnits.addUnit(target)
+                                this.hitUnits.add(target)
             nearby.destr()
     
     static function moveStatic()

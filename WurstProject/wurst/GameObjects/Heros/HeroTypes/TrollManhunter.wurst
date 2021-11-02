@@ -312,7 +312,7 @@ public class HeroTrollManHunter extends HeroTemplate
             u = FirstOfGroup(g)
             if u == null
                 break
-            g.removeUnit(u)
+            g.remove(u)
             if u.wrapper().hasBuffOfType(BUFF_BLEEDING_WOUND)
                 let bleedingWound = u.wrapper().getBuffOfType(BUFF_BLEEDING_WOUND)
                 let stacks = bleedingWound.getData() div 4
@@ -428,7 +428,7 @@ public class HeroTrollManHunter extends HeroTemplate
                 u = FirstOfGroup(g)
                 if u == null
                     break
-                g.removeUnit(u)
+                g.remove(u)
                 if u.isTargetableEnemyUnit(instance.owner)
                     let bleedingWoundLevel = caster.getAbilityLevel(this.ABILITY_ID_PASSIVE)
                     if bleedingWoundLevel > 0

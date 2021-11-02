@@ -53,7 +53,7 @@ public class TowerAI
             u = FirstOfGroup(g)
             if u == null
                 break
-            g.removeUnit(u)
+            g.remove(u)
             let id = u.getTypeId()
             
             if id == BASE_TOWER or id == GATE_TOWER or id == OUTER_TOWER
@@ -65,7 +65,7 @@ public class TowerAI
             u = FirstOfGroup(g)
             if u == null
                 break
-            g.removeUnit(u)
+            g.remove(u)
             let id = u.getTypeId()
             
             if id == BASE_TOWER or id == GATE_TOWER or id == OUTER_TOWER
@@ -76,14 +76,14 @@ public class TowerAI
     @inline
     static function onAttackStart(unit attacker, unit _target)
         if attacker.isType(UNIT_TYPE_STRUCTURE)
-            if towerGroup.contains(attacker)
+            if towerGroup.has(attacker)
                 towerMap.get(attacker).onAttack(GetTriggerUnit())
 
 
     construct(unit tower)
         this.tower = tower
         towerList.add(this)
-        towerGroup.addUnit(tower)
+        towerGroup.add(tower)
         towerMap.put(tower, this)
 
         this.pos = new TowerPos(tower.getX(), tower.getY(), this)
@@ -94,10 +94,10 @@ public class TowerAI
         ..registerUnitEvent(this.tower, EVENT_UNIT_DEATH)
         ..addAction() ->
             let u = GetTriggerUnit()
-            if towerGroup.contains(u)
+            if towerGroup.has(u)
                 destroy towerMap.get(u)
     ondestroy
-        towerGroup.removeUnit(this.tower)
+        towerGroup.remove(this.tower)
         towerList.remove(this)
         towerMap.remove(this.tower)
         towerPos[Players.team(tower.getOwner().getId())].remove(this.pos)

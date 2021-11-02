@@ -262,7 +262,7 @@ public class HeroWarlock extends HeroTemplate
 
             while(not nearby.isEmpty())
                 let target = FirstOfGroup(nearby)
-                nearby.removeUnit(target)
+                nearby.remove(target)
                 if target.isTargetableEnemyUnit(caster)
                     caster.dealDamage(target, dmg, ReductionType.MAGIC)
                     target.addBuffReduced(caster, METEOR_STUN_DURATION[level-1], STUNNED, 1).setDispelLevel(DispelLevel.DISPEL)
@@ -363,7 +363,7 @@ public class HeroWarlock extends HeroTemplate
 
             while(not nearby.isEmpty())
                 let target = FirstOfGroup(nearby)
-                nearby.removeUnit(target)
+                nearby.remove(target)
                 if target.isTargetableEnemyUnit(caster)
                     caster.dealDamage(target, dmg, ReductionType.MAGIC)
         
@@ -408,7 +408,7 @@ public class HeroWarlock extends HeroTemplate
 
                     while(not nearby.isEmpty())
                         let target = FirstOfGroup(nearby)
-                        nearby.removeUnit(target)
+                        nearby.remove(target)
                         if target.isTargetableEnemyUnit(caster) and not target.wrapper().hasBuffOfType(BUFF_SOUL_BURN)
                             target.addBuffReduced(caster, dur, BUFF_SOUL_BURN, level)
                 

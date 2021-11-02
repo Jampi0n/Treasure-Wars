@@ -319,7 +319,7 @@ public class HeroTrollBerserker extends HeroTemplate
 
         while(not nearby.isEmpty())
             let target = FirstOfGroup(nearby)
-            nearby.removeUnit(target)
+            nearby.remove(target)
             if target.isTargetableEnemyUnit(caster)
 
                 target.addBuffReduced(caster, GROWTH_FEAR_DURATION[level-1], BUFF_GROWTH_FEAR, level)
@@ -368,7 +368,7 @@ public class HeroTrollBerserker extends HeroTemplate
                 u = FirstOfGroup(g)
                 if u == null
                     break
-                g.removeUnit(u)
+                g.remove(u)
                 if u.isTargetableEnemy(hero)
                     if u.isType(UNIT_TYPE_HERO)
                         count++

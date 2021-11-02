@@ -301,7 +301,7 @@ public class HeroWarBeetle extends HeroTemplate
 
         while(not nearby.isEmpty())
             let target = FirstOfGroup(nearby)
-            nearby.removeUnit(target)
+            nearby.remove(target)
             if target.isTargetableEnemyUnit(caster)
                 caster.dealDamage(target, dmg, ReductionType.PHYSICAL)
                 target.addBuffReduced( caster, dur, STUNNED, 1).setDispelLevel(DispelLevel.DISPEL)
@@ -355,7 +355,7 @@ public class HeroWarBeetle extends HeroTemplate
                 u = FirstOfGroup(g)
                 if u == null
                     break
-                g.removeUnit(u)
+                g.remove(u)
                 if u.isTargetableEnemyUnit(hero)
                     if u.isType(UNIT_TYPE_HERO)
                         count += 3
@@ -390,7 +390,7 @@ public class HeroWarBeetle extends HeroTemplate
             u = FirstOfGroup(g)
             if u == null
                 break
-            g.removeUnit(u)
+            g.remove(u)
             if u.isTargetableEnemy(hero)
                 if u.isType(UNIT_TYPE_HERO)
                     count++

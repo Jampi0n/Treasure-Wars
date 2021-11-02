@@ -43,7 +43,7 @@ public function unit.findAreaTarget(real range, real aoe, int heroValue) returns
     let owner = this.getOwner()
     unit u
     g.enumUnitsInRange(pos, range)
-    let targetUnit = g.getRandomUnit()
+    let targetUnit = g.getRandom()
     let unitPos = targetUnit.getPos()
     if targetUnit != null
         if not targetUnit.isType(UNIT_TYPE_STRUCTURE) and targetUnit.isAlive() and targetUnit.isVisible(owner) and IsUnitEnemy(targetUnit, owner)
@@ -53,7 +53,7 @@ public function unit.findAreaTarget(real range, real aoe, int heroValue) returns
                 u = FirstOfGroup(nearby)
                 if u == null
                     break
-                nearby.removeUnit(u)
+                nearby.remove(u)
             
                 if not u.isType(UNIT_TYPE_STRUCTURE) and u.isAlive() and u.isVisible(owner) and IsUnitEnemy(u, owner)
                     if u.isType(UNIT_TYPE_HERO)
@@ -83,7 +83,7 @@ public function unit.findTarget(real range, AbilityTargetFocus focus, AbilityTar
         u = FirstOfGroup(g)
         if u == null
             break
-        g.removeUnit(u)
+        g.remove(u)
         newPrio = 0
         valid = false
         if not u.isType(UNIT_TYPE_STRUCTURE) and u.isAlive() and u.isVisible(this.getOwner())
@@ -392,7 +392,7 @@ public class HeroAIImpl implements IHeroAI
                 u = FirstOfGroup(g)
                 if u == null
                     break
-                g.removeUnit(u)
+                g.remove(u)
                 if IsUnitAlly(u, owner)
                     if not u.isType(UNIT_TYPE_HERO)
                         count++
@@ -713,7 +713,7 @@ public class HeroAIImpl implements IHeroAI
                         u = FirstOfGroup(g)
                         if u == null
                             break
-                        g.removeUnit(u)
+                        g.remove(u)
                         if u.isTargetableEnemy(this.getOwningPlayer())
                             if u.isType(UNIT_TYPE_HERO)
                                 heroNearby = true
@@ -873,7 +873,7 @@ function determineWinChance(int team, vec2 pos) returns real
         u = FirstOfGroup(g)
         if u == null
             break
-        g.removeUnit(u)
+        g.remove(u)
 
         if u.isAlive()
             let p = u.getOwner().getId()

@@ -273,7 +273,7 @@ public class HeroDeadEye extends HeroTemplate
 
         while(not nearby.isEmpty())
             let target = FirstOfGroup(nearby)
-            nearby.removeUnit(target)
+            nearby.remove(target)
             if target.isTargetableEnemyUnit(caster)
                 target.addBuffReduced( caster, dur, MISS, 1).setDispelLevel(DispelLevel.DISPEL)
                 target.addBuffReduced( caster, dur, BUFF_TERROR, level)
@@ -300,7 +300,7 @@ public class HeroDeadEye extends HeroTemplate
         var skeleton = FirstOfGroup(instance.skeletons)
         var count = 0
         while(skeleton!=null)
-            instance.skeletons.removeUnit(skeleton)
+            instance.skeletons.remove(skeleton)
             if(skeleton.isAlive())
                 skeleton.addEffect("Abilities\\Spells\\Undead\\DeathPact\\DeathPactTarget.mdl", "origin").destr()
                 skeleton.kill()
@@ -355,7 +355,7 @@ public class HeroDeadEye extends HeroTemplate
             u = FirstOfGroup(g)
             if u == null
                 break
-            g.removeUnit(u)
+            g.remove(u)
             if u.isTargetableEnemy(hero)
                 if u.isType(UNIT_TYPE_HERO)
                     count++
@@ -384,7 +384,7 @@ public class HeroDeadEye extends HeroTemplate
                             let skeleton = createUnit(source.getOwner(), 'n00B'+level, pos, source.getPos().angleTo(target.getPos()))
                             skeleton.wrapper().setOwningHero(source.toHero())
                             skeleton.setTimedLife(BLACK_ARROW_DURATION[level-1])
-                            instance.skeletons.addUnit(skeleton)
+                            instance.skeletons.add(skeleton)
                             SOUND_BLACK_ARROW.playOnPoint(pos.toVec3()).snd.setVolume(150)
                             
     override function onInitDelayed(IHeroType heroType)
@@ -405,7 +405,7 @@ public class HeroDeadEye extends HeroTemplate
             if owningHero != null
                 let instance = DeadEyInstance.fromUnit(owningHero.toUnit())
                 if instance != null
-                    instance.skeletons.removeUnit(u)
+                    instance.skeletons.remove(u)
 
 init
     initialize()

@@ -213,7 +213,7 @@ public class CreepCamp
     
     private function addUnitInit(unit creepUnit)
         SetUnitAcquireRange(creepUnit, 200)
-        allCreeps.addUnit(creepUnit)
+        allCreeps.add(creepUnit)
         alive++
         unitToCamp.put(creepUnit, this)
         creepTypes.add(new Creep(creepUnit))
@@ -228,7 +228,7 @@ public class CreepCamp
     
     private function addUnitRespawn(unit creepUnit)
         SetUnitAcquireRange(creepUnit, 200)
-        allCreeps.addUnit(creepUnit)
+        allCreeps.add(creepUnit)
         alive++
         unitToCamp.put(creepUnit, this)
         creepUnit.wrapper().modStrengthRelative( campLevel*200)
@@ -275,7 +275,7 @@ public class CreepCamp
             let camp = unitToCamp.get(u)
             if camp != null
                 unitToCamp.remove(u)
-                allCreeps.removeUnit(u)
+                allCreeps.remove(u)
                 camp.alive--
                 if camp.alive == 0
                     if camp.iconUnit != null
@@ -294,7 +294,7 @@ public class CreepCamp
 
     private static function initCreep(unit creepUnit, CreepCamp camp) returns CreepCamp
         CreepCamp ret = null
-        if not allCreeps.contains(creepUnit)
+        if not allCreeps.has(creepUnit)
 
             let newCamp = camp == null ? new CreepCamp : camp
             newCamp.addUnitInit(creepUnit)
@@ -307,7 +307,7 @@ public class CreepCamp
                 u = FirstOfGroup(g)
                 if u == null
                     break
-                g.removeUnit(u)
+                g.remove(u)
                 initCreep(u, newCamp)
 
             
@@ -324,7 +324,7 @@ public class CreepCamp
             u = FirstOfGroup(ENUM_GROUP)
             if u == null
                 break
-            ENUM_GROUP.removeUnit(u)
+            ENUM_GROUP.remove(u)
             if u.getTypeId() != HYDRA and u.getTypeId() != DRAGON_TURTLE
                 let initializedCamp = initCreep(u, null)
                 if initializedCamp != null

@@ -36,7 +36,7 @@ class RitualOfTheSeas
 
             while(not nearby.isEmpty())
                 let target = FirstOfGroup(nearby)
-                nearby.removeUnit(target)
+                nearby.remove(target)
                 if target.isTargetableEnemyUnit(this.caster.getOwner()) and target.isVisible(this.caster)
                     doAfter(target.getPos().distanceTo(caster.getPos())/1000 ) () ->
 
@@ -335,7 +335,7 @@ public class HeroSeaDruid extends HeroTemplate
 
         while(not nearby.isEmpty())
             let target = FirstOfGroup(nearby)
-            nearby.removeUnit(target)
+            nearby.remove(target)
             if target.isTargetableEnemyUnit(caster)
                 caster.dealDamage(target, hitDmg, ReductionType.PHYSICAL)
                 if target.isMovable() and not target.isType(UNIT_TYPE_FLYING)
@@ -365,7 +365,7 @@ public class HeroSeaDruid extends HeroTemplate
 
             while(not nearby.isEmpty())
                 let target = FirstOfGroup(nearby)
-                nearby.removeUnit(target)
+                nearby.remove(target)
                 if target.isTargetableEnemyUnit(detectionUnit)
 
                     caster.dealDamage(target, dmg, ReductionType.MAGIC)
@@ -414,7 +414,7 @@ public class HeroSeaDruid extends HeroTemplate
                 u = FirstOfGroup(g)
                 if u == null
                     break
-                g.removeUnit(u)
+                g.remove(u)
                 if u.isTargetableEnemyUnit(hero)
                     if u.isType(UNIT_TYPE_HERO)
                         count += 3
@@ -450,7 +450,7 @@ public class HeroSeaDruid extends HeroTemplate
             u = FirstOfGroup(g)
             if u == null
                 break
-            g.removeUnit(u)
+            g.remove(u)
             if u.isTargetableEnemy(hero)
                 if u.isType(UNIT_TYPE_HERO)
                     count++
@@ -466,7 +466,7 @@ public class HeroSeaDruid extends HeroTemplate
             u = FirstOfGroup(g)
             if u == null
                 break
-            g.removeUnit(u)
+            g.remove(u)
             if u.isTargetableEnemy(hero)
                 if u.isType(UNIT_TYPE_HERO)
                     count++

@@ -62,7 +62,7 @@ class Pull
                 
                     while(not nearby.isEmpty())
                         let target = FirstOfGroup(nearby)
-                        nearby.removeUnit(target)
+                        nearby.remove(target)
                         if target.isTargetableEnemyUnit(caster) and target.isMovable()
                             let distance = target.getPos().distanceTo(pos)
                             if distance < minDistance
@@ -348,7 +348,7 @@ public class HeroDrillmo extends HeroTemplate
 
                 while(not nearby.isEmpty())
                     let target = FirstOfGroup(nearby)
-                    nearby.removeUnit(target)
+                    nearby.remove(target)
                     if target.isTargetableEnemyUnit(caster)
                         caster.dealDamage(target, dmg, ReductionType.PHYSICAL)
                         target.addBuffReduced( caster, SPIKE_BALL_STUN[level-1], STUNNED, 1).setDispelLevel(DispelLevel.DISPEL)
@@ -443,7 +443,7 @@ public class HeroDrillmo extends HeroTemplate
 
             while(not nearby.isEmpty())
                 let target = FirstOfGroup(nearby)
-                nearby.removeUnit(target)
+                nearby.remove(target)
                 if target.isTargetableEnemyUnit(source)
                     source.dealDamage(target, dmg, ReductionType.PHYSICAL)
             nearby.destr()

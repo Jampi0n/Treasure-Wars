@@ -330,7 +330,7 @@ public class HeroInfernalMachine extends HeroTemplate
 
         while not nearby.isEmpty()
             let target = FirstOfGroup(nearby)
-            nearby.removeUnit(target)
+            nearby.remove(target)
             if target.isTargetableAlliedUnit(caster)
                 target.addBuff( caster, INNER_FIRE_DURATION, BUFF_INNER_FIRE, level)
 
@@ -357,7 +357,7 @@ public class HeroInfernalMachine extends HeroTemplate
             let dmg = (FLAME_THROWER_DAMAGE[level-1]).bonus(caster.getHeroInt(), FLAME_THROWER_DAMAGE_BONUS)
             while not nearby.isEmpty()
                 let target = FirstOfGroup(nearby)
-                nearby.removeUnit(target)
+                nearby.remove(target)
                 if target.isTargetableEnemyUnit(impact)
 
                     caster.dealDamage(target, dmg, ReductionType.MAGIC)

@@ -353,9 +353,9 @@ public class HeroDestroyer extends HeroTemplate
     override function onInitDelayed(IHeroType heroType)
         onImpact(BUFF_ID_ON_BREATH) (unit source, unit target) ->
             let instance = DestroyerInstance.fromUnit(source)
-            if target.isTargetableEnemy(source) and not instance.hitByBreath.contains(target)
+            if target.isTargetableEnemy(source) and not instance.hitByBreath.has(target)
                 let level = source.getAbilityLevel(ABILITY_ID_Q)
-                instance.hitByBreath.addUnit(target)
+                instance.hitByBreath.add(target)
                 source.dealDamage(target, BREATH_DAMAGE[level-1].bonus(source.getHeroInt(), BREATH_DAMAGE_BONUS), ReductionType.MAGIC)
                 target.addBuffReduced(source, BREATH_DURATION, BUFF_MELTING_BREATH, level)
             
@@ -421,7 +421,7 @@ public class HeroDestroyer extends HeroTemplate
                     let u = FirstOfGroup(g)
                     if u == null
                         break
-                    g.removeUnit(u)
+                    g.remove(u)
                     if u.isTargetableEnemyUnit(owner)
                         if u.isType(UNIT_TYPE_HERO)
                             caster.dealDamage(u, 2 * dmg, ReductionType.MAGIC)

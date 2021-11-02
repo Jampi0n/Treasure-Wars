@@ -259,7 +259,7 @@ public class HeroPythonWarrioress extends HeroTemplate
             
                 while(not nearby.isEmpty())
                     let target = FirstOfGroup(nearby)
-                    nearby.removeUnit(target)
+                    nearby.remove(target)
                     if target.isTargetableEnemyUnit(caster)
                         target.addBuff( caster, 0.5, BUFF_POISON_SPIT, level)
             

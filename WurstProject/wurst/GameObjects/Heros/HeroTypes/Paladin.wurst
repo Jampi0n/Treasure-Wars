@@ -39,7 +39,7 @@ class DivinePunishment
 
             while(not nearby.isEmpty())
                 let target = FirstOfGroup(nearby)
-                nearby.removeUnit(target)
+                nearby.remove(target)
                 if target.isTargetableEnemyUnit(this.caster.getOwner()) and target.isVisible(this.caster)
                     
                     target.addEffect("Abilities\\Spells\\Human\\Resurrect\\ResurrectTarget.mdl", "origin").destr()
@@ -297,7 +297,7 @@ public class HeroPaladin extends HeroTemplate
 
         while(not nearby.isEmpty())
             let target = FirstOfGroup(nearby)
-            nearby.removeUnit(target)
+            nearby.remove(target)
             if target.isTargetableEnemyUnit(caster)
                 caster.dealDamage(target, dmg, ReductionType.PHYSICAL)
                 target.addBuffReduced( caster, dur, STUNNED, 1).setDispelLevel(DispelLevel.DISPEL)
@@ -315,7 +315,7 @@ public class HeroPaladin extends HeroTemplate
 
         while(not nearby.isEmpty())
             let target = FirstOfGroup(nearby)
-            nearby.removeUnit(target)
+            nearby.remove(target)
             if target.isTargetableAlliedUnit(caster)
                 target.addBuff( caster, dur, BATTLE_ROAR, level)
 
@@ -352,7 +352,7 @@ public class HeroPaladin extends HeroTemplate
                 u = FirstOfGroup(g)
                 if u == null
                     break
-                g.removeUnit(u)
+                g.remove(u)
                 if u.isTargetableEnemyUnit(hero)
                     if u.isType(UNIT_TYPE_HERO)
                         count += 5
@@ -394,7 +394,7 @@ public class HeroPaladin extends HeroTemplate
             u = FirstOfGroup(g)
             if u == null
                 break
-            g.removeUnit(u)
+            g.remove(u)
             if u.isTargetableEnemy(hero)
                 if u.isType(UNIT_TYPE_HERO)
                     count++
@@ -410,7 +410,7 @@ public class HeroPaladin extends HeroTemplate
             u = FirstOfGroup(g)
             if u == null
                 break
-            g.removeUnit(u)
+            g.remove(u)
             if u.isTargetableEnemy(hero)
                 if u.isType(UNIT_TYPE_HERO)
                     count++

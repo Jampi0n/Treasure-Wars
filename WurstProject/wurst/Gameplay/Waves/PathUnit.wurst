@@ -147,8 +147,8 @@ function attackMoveGroup()
         if pathUnit.direction
             if gg_rct_BrownBase.contains(pos)
                 pathUnit.state = PathStateNew.SIEGE_MOVE
-                attackMoveGroup[index].removeUnit(u)
-                siegeMoveGroup[index].addUnit(u)
+                attackMoveGroup[index].remove(u)
+                siegeMoveGroup[index].add(u)
 
             if not pathUnit.attacking
                 u.issuePointOrder("attack", targetPoint[stage*2+1])
@@ -157,8 +157,8 @@ function attackMoveGroup()
         else
             if gg_rct_GreenBase.contains(pos)
                 pathUnit.state = PathStateNew.SIEGE_MOVE
-                attackMoveGroup[index].removeUnit(u)
-                siegeMoveGroup[index].addUnit(u)
+                attackMoveGroup[index].remove(u)
+                siegeMoveGroup[index].add(u)
 
             if not pathUnit.attacking
                 u.issuePointOrder("attack", targetPoint[stage*2])
@@ -170,8 +170,8 @@ function attackMoveGroup()
         else
             u.issuePointOrder("move", targetPoint[stage*2])
         pathUnit.state = PathStateNew.RETURN_MOVE
-        attackMoveGroup[index].removeUnit(u)
-        returnMoveGroup[index].addUnit(u)
+        attackMoveGroup[index].remove(u)
+        returnMoveGroup[index].add(u)
 
 
 
@@ -192,22 +192,22 @@ function returnMoveGroup()
         if pathUnit.direction
             if gg_rct_BrownBase.contains(pos)
                 pathUnit.state = PathStateNew.SIEGE_MOVE
-                returnMoveGroup[index].removeUnit(u)
-                siegeMoveGroup[index].addUnit(u)
+                returnMoveGroup[index].remove(u)
+                siegeMoveGroup[index].add(u)
             else
                 pathUnit.state = PathStateNew.ATTACK_MOVE
-                returnMoveGroup[index].removeUnit(u)
-                attackMoveGroup[index].addUnit(u)
+                returnMoveGroup[index].remove(u)
+                attackMoveGroup[index].add(u)
             u.issuePointOrder("attack", targetPoint[stage*2+1])
         else
             if gg_rct_GreenBase.contains(pos)
                 pathUnit.state = PathStateNew.SIEGE_MOVE
-                returnMoveGroup[index].removeUnit(u)
-                siegeMoveGroup[index].addUnit(u)
+                returnMoveGroup[index].remove(u)
+                siegeMoveGroup[index].add(u)
             else
                 pathUnit.state = PathStateNew.ATTACK_MOVE
-                returnMoveGroup[index].removeUnit(u)
-                attackMoveGroup[index].addUnit(u)
+                returnMoveGroup[index].remove(u)
+                attackMoveGroup[index].add(u)
             u.issuePointOrder("attack", targetPoint[stage*2])
     else
         if pathUnit.direction
@@ -249,10 +249,10 @@ function initMovement()
             let pathUnit = PathUnitNew.unitToPathUnit.get(u)
             if pathUnit != null
                 let index = pathUnit.index
-                attackMoveGroup[index].removeUnit(u)
-                returnMoveGroup[index].removeUnit(u)
-                passiveMoveGroup[index].removeUnit(u)
-                siegeMoveGroup[index].removeUnit(u)
+                attackMoveGroup[index].remove(u)
+                returnMoveGroup[index].remove(u)
+                passiveMoveGroup[index].remove(u)
+                siegeMoveGroup[index].remove(u)
                 destroy pathUnit
 
 
@@ -284,7 +284,7 @@ public class PathUnitNew
             this.currentLineSegment = addLightning(LIGHTNING_MAGIC_LEASH, false, vec2(0, 0), vec2(0,0))
         
         let stage = getPathStage(path, whichUnit.getPos())
-        attackMoveGroup[this.index].addUnit(whichUnit)
+        attackMoveGroup[this.index].add(whichUnit)
         unitToPathUnit.put(whichUnit, this)
         this.direction = path == AssignedPath.GREEN_TOP or path == AssignedPath.GREEN_MID or path == AssignedPath.GREEN_BOT
         if this.direction

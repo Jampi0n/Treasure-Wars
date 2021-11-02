@@ -270,9 +270,9 @@ public function enumUnitsInHitBoxRange(vec2 pos, real range) returns group
         let u = FirstOfGroup(g)
         if u == null
             break
-        g.removeUnit(u)
+        g.remove(u)
         if u.hitBoxDistanceTo(pos) <= range
-            returnGroup.addUnit(u)
+            returnGroup.add(u)
     
     g.destr()
     return returnGroup
