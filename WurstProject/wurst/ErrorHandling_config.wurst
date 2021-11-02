@@ -1,0 +1,62 @@
+package ErrorHandling_config
+
+import NoWurst
+import public Printing
+import public Real
+import public Integer
+import public String
+import public MagicFunctions
+import Annotations
+import ErrorHandling
+
+@configurable public var MUTE_ERROR_DURATION = 60
+
+
+abstract class ErrorLog
+	private static bool autoSave = true
+	private static string fileName = "ErrorLog.txt"
+	private static string array lines
+	private static int numLines = 0
+
+	static function writeLine(string line)
+		lines[numLines] = line
+		numLines++
+		if autoSave
+			writePreload()
+
+	static function writeLines(string lines)
+		string currentLine = ""
+		for c in lines
+			if c == "\n"
+				writeLine(currentLine)
+				currentLine = ""
+			else
+				currentLine += c
+		if currentLine != ""
+			writeLine(currentLine)
+
+
+	static function clear()
+		numLines = 0
+		if autoSave
+			writePreload()
+
+	static function writePreload()
+		PreloadGenClear()
+		PreloadGenStart()
+		for i = 0 to numLines - 1
+			Preload(lines[i])
+
+		PreloadGenEnd(fileName)
+
+@config public function error(string msg)
+	if compiletime
+		compileError("ERROR: " + msg)
+	else
+		Log.error("! Error !")
+		Log.error("Message: " + msg + getStackTraceString())
+		ErrorLog.writeLines("Message: " + msg + getStackTraceString())
+		// crash the thread:
+		lastError = msg
+		I2S(1 div 0)
+
