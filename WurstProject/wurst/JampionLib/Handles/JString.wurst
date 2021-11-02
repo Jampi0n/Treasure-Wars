@@ -23,30 +23,29 @@ function LinkedList<string>.sortAlphabetically()
 
 
 function string.op_minus(string other) returns int
+    if other == this
+        return 0
     let aCharList = this.toLowerCase().toCharList()
     let bCharList = other.toLowerCase().toCharList()
-    int i = 0
     int ret = 0
     while true
-
-        if aCharList.size() <= i
-            if bCharList.size() <= i
+        if aCharList.isEmpty()
+            if bCharList.isEmpty()
                 ret = 0
             else
                 ret = -1
             break
-        if bCharList.size() <= i
+        if bCharList.isEmpty()
             ret = 1
             break
-        let aInt = aCharList.get(i).toInt()
-        let bInt = bCharList.get(i).toInt()
+        let aInt = aCharList.dequeue().toInt()
+        let bInt = bCharList.dequeue().toInt()
         if aInt != bInt
             if aInt > bInt
                 ret = 1
             if aInt < bInt
                 ret = -1
             break
-        i++
     destroy aCharList
     destroy bCharList
     return ret

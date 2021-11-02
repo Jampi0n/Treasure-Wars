@@ -8,6 +8,7 @@ import StandardTextTags
 import TeamUtil
 import initlater ItemEffect
 import PlayerControl
+import JString
 
 constant BUY_RANGE = 900
 
@@ -54,12 +55,18 @@ constant SHOP_POSITION = [gg_rct_GreenAltar.getCenter(), gg_rct_BrownAltar.getCe
             ScoreTable.maximize()
 
 @config public function shopConfig_sortItems(ItemInShop a, ItemInShop b, int _page) returns int
-    return a.getTotalCost() - b.getTotalCost()
+    let costDiff = a.getTotalCost() - b.getTotalCost()
+    if costDiff != 0
+        return costDiff
+    return a.getName() - b.getName()
 
 /**
 Sort items in the builds into list.
 **/
 @config public function shopConfig_sortBuildsInto(ItemInShop a, ItemInShop b) returns int
-    return a.getTotalCost() - b.getTotalCost()
+    let costDiff = a.getTotalCost() - b.getTotalCost()
+    if costDiff != 0
+        return costDiff
+    return a.getName() - b.getName()
 
 @config public constant PRIORITIZE_DIRECT_PARENTS = true

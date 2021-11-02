@@ -1,0 +1,122 @@
+package CompiletimeMap
+
+import NoWurst
+import HashMap
+import MagicFunctions
+
+/*
+CompiletimeMap keeps objects referenced by it when migrating compiletime data.
+After migration, the map can be converted to a normal HashMap:
+compiletime(new CompiletimeMap).toRuntime()
+*/
+
+public class CompiletimeMap<K,V> extends HashMap<K,V>
+    private let _list = new PairList<K,V>
+    private let _keyMap = new HashMap<K,PairListNode<K,V>>
+
+    override function put(K key, V value)
+        if compiletime
+            this.remove(key)
+            super.put(key, value)
+            let elem = this._list.add(key, value)
+            this._keyMap.put(key, elem)
+        else
+            super.put(key, value)
+
+    override function remove(K key)
+        if compiletime
+            if has(key)
+                super.remove(key)
+                let node = this._keyMap.getAndRemove(key)
+                node.remove()
+                destroy node
+        else
+            super.remove(key)
+
+    override function flush()
+        super.flush()
+        if compiletime
+            this._list.clear()
+
+    function toRuntime() returns HashMap<K,V>
+        destroy this._list
+        return this
+
+    ondestroy
+        destroy this._list
+
+class Pair<K,V>
+    K key
+    V value
+    construct(K key, V value)
+        this.key = key
+        this.value = value
+
+class PairListNode<K,V>
+    PairListNode<K,V> next
+    PairListNode<K,V> prev
+    Pair<K,V> elem
+    PairList<K,V> list
+
+    construct(Pair<K,V> elem, PairList<K,V> list)
+        this.elem = elem
+        this.list = list
+
+    function remove()
+        if this.list.first == this
+            this.list.first = this.next
+            if this.list.first == this
+                this.list.first = null
+
+        this.next.prev = this.prev
+        this.prev.next = this.next
+
+    ondestroy
+        destroy elem
+
+class PairList<K,V>
+    PairListNode<K,V> first
+    PairListNode<K,V> current
+    bool iteratorState
+
+    construct()
+        first = null
+
+    function add(K key, V value) returns PairListNode<K,V>
+        let node = new PairListNode<K,V>(new Pair<K,V>(key, value), this)
+        if this.first != null
+            this.first.prev.next = node
+            this.first.prev = node
+            node.next = this.first
+            node.prev = this.first.prev
+        else
+            this.first = node
+            node.next = node
+            node.prev = node
+        return node
+
+    function clear()
+        for node in this
+            destroy node
+
+    function iterator() returns PairList<K,V>
+        this.current = first
+        this.iteratorState = true
+        return this
+
+    function hasNext() returns bool
+        return this.current != this.first or this.iteratorState
+
+    function next() returns PairListNode<K,V>
+        this.iteratorState = false
+        let tmp = this.current
+        this.current = this.current.next
+        return tmp
+
+    function close()
+
+    ondestroy
+        clear()
+
+        
+
