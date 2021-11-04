@@ -111,7 +111,7 @@ public class HeroTypeImpl implements IHeroType
             preloadAbility(this.getAbilityId(AbilitySlot.PASSIVE))
             preloadUnit(this.getUnitId())
 
-            this.recommendedItems = new RecommendedItems(unitId)
+            this.recommendedItems = new RecommendedItems(this.heroId)
             let recommendedItemList = new LinkedList<int>()
             template.recommendedItems(recommendedItemList)
             this.recommendedItems.addList(recommendedItemList)

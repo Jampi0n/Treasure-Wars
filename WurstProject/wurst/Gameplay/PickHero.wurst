@@ -71,7 +71,10 @@ function setupCreatedHero(IHero hero)
 
     heroUnit.setPos(pos)
     getGUI(owner.getId())
-    ..start(heroUnit)
+    ..setInventoryUnit(heroUnit)
+    ..setRecommended(hero.getHeroType().getHeroId())
+    ..selectFirstRecommended()
+    ..setCanBeOpened(true)
     if GetLocalPlayer() == owner
         ClearTextMessages()
     printTimedToPlayer("You can now open/close the shop by pressing escape.", 25, owner)

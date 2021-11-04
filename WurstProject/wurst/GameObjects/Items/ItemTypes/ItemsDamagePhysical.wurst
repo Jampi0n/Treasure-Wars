@@ -5,15 +5,15 @@ import ItemInclude
 constant CATEGORY = 3
 
 function itemHammerOfStrength()
-    let str = 6
-    let ap = 5
+    let str = 5
+    let hp = 40
     setupItem(ITEM_ID_HAMMER_OF_STRENGTH, CATEGORY, 500)
     addStatLine(ItemStat.STR, str)
-    addStatLine(ItemStat.AP, ap)
+    addStatLine(ItemStat.HP, hp)
     setInfo("Hammer of Strength")
     onEither() (int factor) ->
         modStrength(str)
-        modArmorReductionRelative(ap * 10)
+        modHealth(hp)
 
 function ironSword()
     let str = 8
@@ -255,7 +255,7 @@ function runeBlade()
     addStatLine(ItemStat.STR, str)
     addStatLine(ItemStat.AGI, agi)
     addStatLine(ItemStat.LS, lifesteal)
-    addUnique("Attacks steal {0}% of the damage as mana.".format(manasteal.str()))
+    addUnique("Attacks steal mana equal to {0}% of the damage dealt.".format(manasteal.str()))
     addActive("Mana Burn", "Burns {0}% of the target's maximum mana. For every point burnt, the target takes 1 damage and the hero's magic resistance is increased by 1 points for {1} seconds.".format(RUNE_BLADE_BURN.str(), RUNE_BLADE_SHIELD_DUR.str()))
     setInfo("Runic Blade")
     onEither() (int factor) ->

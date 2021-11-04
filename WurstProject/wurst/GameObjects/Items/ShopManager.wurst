@@ -21,7 +21,7 @@ init
         ..registerPlayerKeyPress(players[i], OSKEY_ESCAPE, OSKEY_META.NONE, true)
         ..addAction() ->
             let id = GetTriggerPlayer().getId()
-            if playerShopUI[id].isEnabled()
+            if playerShopUI[id].isCurrentlyOpen()
                 playerShopUI[id].closeShop()
                 let mainHero = Players.heroList(id).getFirst().toUnit()
                 if GetLocalPlayer().getId() == id
