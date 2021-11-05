@@ -302,7 +302,7 @@ public class HeroElementalMage extends HeroTemplate
         let behindCaster = casterPos.polarOffset(casterAngle, -1000)
         let targetPos = vec2(GetSpellTargetX(), GetSpellTargetY())
         ArtilleryDetection.fireArtillery(caster, FF_FROST_ARTILLERY, behindCaster.polarOffset(casterAngle - angle(bj_PI/2), 600), targetPos) (unit impact, unit caster, int data) ->
-        
+            skip
         ArtilleryDetection.fireArtillery(caster, FF_FLAME_ARTILLERY, behindCaster.polarOffset(casterAngle + angle(bj_PI/2), 600), targetPos) (unit impact, unit caster, int data) ->
             let nearby = CreateGroup()
             let level = caster.getAbilityLevel(instance.ABILITY_ID_R)

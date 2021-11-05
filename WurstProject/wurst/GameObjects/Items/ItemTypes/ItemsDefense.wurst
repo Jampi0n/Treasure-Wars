@@ -76,6 +76,7 @@ function fireHandGauntlet()
     setInfo("Fire Hand Gauntlet")
     setPassiveAbilities(FIRE_HAND_GAUNTLET_PASSIVE)
     onEither() (int factor) ->
+        skip
 
 public constant HEART_AMULET_PASSIVE = compiletime(generateCooldownAbility())
 public constant HEART_AMULET_COOLDOWN = 30

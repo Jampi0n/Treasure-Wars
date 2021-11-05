@@ -780,6 +780,7 @@ public class HeroAIImpl implements IHeroAI
                         retreatCounter--
                         if this.state == AIState.RETREAT_TEMP_AI
                             if not casting
+                                skip
                                 //this.heroType.retreatAI(this)
                         if this.heroUnit.getCurrentOrder() != OrderId("move") and not casting
                             updateRetreatLoc()

@@ -543,7 +543,7 @@ public class HeroFreezer extends HeroTemplate
 
         BUFF_FROST_BREATH.addSetupFunction() (Buff thisBuff, int factor) ->
             thisBuff.getTarget().wrapper().modBlue(factor)
-            BUFF_FROST_BREATH.addLevelFunction() (Buff thisBuff, int factor) ->
+        BUFF_FROST_BREATH.addLevelFunction() (Buff thisBuff, int factor) ->
             let level = thisBuff.getLevel()
             thisBuff.getTarget().wrapper()
             ..modMoveSpeedRelative( -factor * FROST_BREATH_SLOW[level - 1]*10)
