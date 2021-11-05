@@ -317,7 +317,7 @@ function arcaneBlade()
     if not compiletime
         ARCANE_BLADE_DEBUFF.addLevelFunction() (Buff thisBuff, int factor) ->
             thisBuff.getTarget().wrapper().modAgilityRelative(-mrReduce * 10 * factor)
-        registerOnHeroCast() -> 
+        registerOnHeroCast() (_id,_slot) -> 
             let hero = GetTriggerUnit()
             if hero.hasItemById(ITEM_ID_ARCANE_BLADE)
                 hero.addBuff(hero, ARCANE_BLADE_DURATION, ARCANE_BLADE_BUFF, 1)

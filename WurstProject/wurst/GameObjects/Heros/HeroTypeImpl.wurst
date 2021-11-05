@@ -407,9 +407,10 @@ init
 This is especially useful for triggers, because they cannot capture the instance.
     */
 int currentHeroUnitTypeId = -1
+int currentHeroIndex = -1
 
 public interface OnHeroCast
-    function onCast()
+    function onCast(int abilityId, AbilitySlot abilitySlot)
 
 constant onHeroCastList = new LinkedList<OnHeroCast>()
 
@@ -420,10 +421,25 @@ public interface SetupOnCastTrigger
     function setupForUnit(unit u) returns trigger
 
 public constant setupOnCastTriggerMap = new HashMap<int, SetupOnCastTrigger>()
+
 public module HeroTemplateModule
+    static int _ABILITY_ID_Q 
+    static int _ABILITY_ID_W
+    static int _ABILITY_ID_E
+    static int _ABILITY_ID_R
+    static int _ABILITY_ID_PASSIVE
     static thistype instance
     static int UNIT_TYPE_ID = compiletime(HERO_ID_GEN.next())
+    static int HERO_INDEX
     construct()
+        HERO_INDEX = currentHeroIndex
+        let heroOffset = HeroType.getAbilityOffset(HERO_INDEX) 
+        _ABILITY_ID_Q = heroOffset + SLOT_ID[AbilitySlot.Q castTo int]
+        _ABILITY_ID_W = heroOffset + SLOT_ID[AbilitySlot.W castTo int]
+        _ABILITY_ID_E = heroOffset+ SLOT_ID[AbilitySlot.E castTo int]
+        _ABILITY_ID_R = heroOffset + SLOT_ID[AbilitySlot.R castTo int]
+        _ABILITY_ID_PASSIVE = heroOffset + SLOT_ID[AbilitySlot.PASSIVE castTo int]
+
         currentHeroUnitTypeId = UNIT_TYPE_ID
         if currentHeroUnitTypeId == -1
             error("")
@@ -439,19 +455,25 @@ public module HeroTemplateModule
         ..registerUnitEvent(hero, EVENT_UNIT_SPELL_EFFECT)
         ..addAction() ->
             let abilityId = GetSpellAbilityId()
-            let lastChar = abilityId mod 256
-            switch lastChar
-                case 'Q'
+            var abilitySlot = AbilitySlot.NONE
+            switch abilityId
+                case _ABILITY_ID_Q
                     castQ()
-                case 'W'
+                    abilitySlot = AbilitySlot.Q
+                case _ABILITY_ID_W
                     castW()
-                case 'E'
+                    abilitySlot = AbilitySlot.W
+                case _ABILITY_ID_E
                     castE()
-                case 'R'
+                    abilitySlot = AbilitySlot.E
+                case _ABILITY_ID_R
                     castR()
+                    abilitySlot = AbilitySlot.R
                 default
+
             for onHeroCast in onHeroCastList
-                onHeroCast.onCast()
+                onHeroCast.onCast(abilityId, abilitySlot)
+            
         return onCastTrigger
 
 
@@ -518,6 +540,7 @@ public abstract class HeroTemplate
 
     construct()
         this.HERO_INDEX = numInstances
+        currentHeroIndex = this.HERO_INDEX
         numInstances++
         let heroOffset = HeroType.getAbilityOffset(this.HERO_INDEX) 
         this.ABILITY_ID_Q = heroOffset + SLOT_ID[AbilitySlot.Q castTo int]
