@@ -18,7 +18,7 @@ function ringOfHealth()
     setInfo("Ring of Health", "+ {0} hit point regeneration per second"
     .format(hr.toString()))
     onEither() (int factor) ->
-        modHealthRegen(hr*10)
+        modHealthRegen(hr*100)
 
 function voidCrystal()
     let wp = 12

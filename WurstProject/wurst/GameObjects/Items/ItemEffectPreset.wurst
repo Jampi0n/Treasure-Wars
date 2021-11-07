@@ -140,6 +140,8 @@ public enum ItemStat
     AP
     LS
 
+public constant NUM_ITEM_STATS = 13
+
 enum ItemStatPercentage
     EITHER
     ALWAYS
@@ -150,33 +152,39 @@ public class ItemStatLine
     protected static constant map = new HashMap<ItemStat, ItemStatLine>()
     protected string name
     protected ItemStatPercentage percentage
+    protected real factor
 
-    private function setup(ItemStat itemStat, string name, ItemStatPercentage percentage)
+    private function setup(ItemStat itemStat, string name, ItemStatPercentage percentage, real factor)
         this.percentage = percentage
         this.name = name
+        this.factor = factor
         map.put(itemStat, this)
 
-    construct(ItemStat itemStat, string name, bool percentage)
+    construct(ItemStat itemStat, string name, real factor, bool percentage)
         if percentage
-            setup(itemStat, name, ItemStatPercentage.ALWAYS)
+            setup(itemStat, name, ItemStatPercentage.ALWAYS, factor)
         else
-            setup(itemStat, name, ItemStatPercentage.NEVER)
+            setup(itemStat, name, ItemStatPercentage.NEVER, factor)
 
     construct(ItemStat itemStat, string name)
-        setup(itemStat, name, ItemStatPercentage.EITHER)
+        setup(itemStat, name, ItemStatPercentage.EITHER, 1.0)
+    construct(ItemStat itemStat, string name, real factor)
+        setup(itemStat, name, ItemStatPercentage.EITHER, factor)
         
-            
-
-public function addStatLine(ItemStat whichStat, int modifier)
-    addStatLine(whichStat, modifier, false)
-public function addStatLine(ItemStat whichStat, int modifier, bool percentage)
+public function addStatLine(ItemStat whichStat, real modifier, bool percentage)
     let itemStatLine = ItemStatLine.map.get(whichStat)
     var newPercentage = percentage
     if itemStatLine.percentage == ItemStatPercentage.ALWAYS
         newPercentage = true
     if itemStatLine.percentage == ItemStatPercentage.NEVER
         newPercentage = false
-    addStatLine(itemStatLine.name, modifier, newPercentage)
+    addStatLine(itemStatLine.name, modifier * itemStatLine.factor, newPercentage)
+public function addStatLine(ItemStat whichStat, int modifier, bool percentage)
+    addStatLine(whichStat, modifier.toReal(), percentage)
+public function addStatLine(ItemStat whichStat, real modifier)
+    addStatLine(whichStat, modifier, false)
+public function addStatLine(ItemStat whichStat, int modifier)
+    addStatLine(whichStat, modifier, false)
 
 @compiletime
 function initStatLine()
@@ -184,15 +192,15 @@ function initStatLine()
     new ItemStatLine(ItemStat.AGI, "Magic Resistance")
     new ItemStatLine(ItemStat.INT, "Intelligence")
     new ItemStatLine(ItemStat.AS, "Attack Speed")
-    new ItemStatLine(ItemStat.AR, "Armor", true)
+    new ItemStatLine(ItemStat.AR, "Armor", 1.0, true)
     new ItemStatLine(ItemStat.MS, "Movement Speed")
     new ItemStatLine(ItemStat.HP, "Health Points")
-    new ItemStatLine(ItemStat.HR, "Health Regeneration")
+    new ItemStatLine(ItemStat.HR, "Health Regeneration per second", 0.01)
     new ItemStatLine(ItemStat.MP, "Mana Points")
-    new ItemStatLine(ItemStat.MR, "Mana Regeneration")
-    new ItemStatLine(ItemStat.CD, "Cooldown Recovery", true)
-    new ItemStatLine(ItemStat.AP, "Armor Penetration", true)
-    new ItemStatLine(ItemStat.LS, "Lifesteal", true)
+    new ItemStatLine(ItemStat.MR, "Mana Regeneration per second", 0.01)
+    new ItemStatLine(ItemStat.CD, "Cooldown Recovery", 1.0, true)
+    new ItemStatLine(ItemStat.AP, "Armor Penetration", 1.0, true)
+    new ItemStatLine(ItemStat.LS, "Lifesteal", 1.0, true)
 
 init
     initStatLine()

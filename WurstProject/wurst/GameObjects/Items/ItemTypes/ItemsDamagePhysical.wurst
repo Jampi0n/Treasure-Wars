@@ -5,8 +5,10 @@ import ItemInclude
 constant CATEGORY = 3
 
 function itemHammerOfStrength()
-    let str = 5
-    let hp = 40
+    ItemBalance.stats(ItemStat.STR, ItemStat.HP)
+    ItemBalance.values(325,175)
+    let str = ItemBalance.str()
+    let hp = ItemBalance.hp()
     setupItem(ITEM_ID_HAMMER_OF_STRENGTH, CATEGORY, 500)
     addStatLine(ItemStat.STR, str)
     addStatLine(ItemStat.HP, hp)
@@ -16,7 +18,7 @@ function itemHammerOfStrength()
         modHealth(hp)
 
 function ironSword()
-    let str = 8
+    let str = ItemBalance.str(500)
     setupItem(ITEM_ID_IRON_SWORD, CATEGORY, 500)
     addStatLine(ItemStat.STR, str)
     setInfo("Iron Sword")
@@ -24,15 +26,15 @@ function ironSword()
         modStrength(str)
 
 function warAxe()
-    let str = 12
-    setupItem(ITEM_ID_WAR_AXE, CATEGORY, 750)
+    let str = ItemBalance.str(800)
+    setupItem(ITEM_ID_WAR_AXE, CATEGORY, 800)
     addStatLine(ItemStat.STR, str)
     setInfo("War Axe")
     onEither() (int factor) ->
         modStrength(str)
 
 function dagger()
-    let as = 12
+    let as = ItemBalance.as(500)
     setupItem(ITEM_ID_DAGGER, CATEGORY, 500)
     addStatLine(ItemStat.AS, as, true)
     setInfo("Dagger")
@@ -40,7 +42,7 @@ function dagger()
         modAttackSpeed(as)
 
 function woodenBow()
-    let str = 9
+    let str = ItemBalance.str(600)
     let strPercentage = 5
     setupItem(ITEM_ID_BOW, CATEGORY, 900)
     addStatLine(ItemStat.STR, str)
@@ -61,8 +63,10 @@ function magmaCrystal()
             target.addEffect(Abilities.fireBallMissile, "chest").destr()
         
 function bloodSword()
-    let str = 12
-    let steal = 8
+    ItemBalance.stats(ItemStat.STR, ItemStat.LS)
+    ItemBalance.values(750,450)
+    let str = ItemBalance.str()
+    let steal = ItemBalance.ls()
     setupItem(ITEM_ID_BRUTAL_SLASHER, CATEGORY, 1200)
     addStatLine(ItemStat.STR, str)
     addStatLine(ItemStat.LS, steal)
@@ -256,7 +260,7 @@ function runeBlade()
     addStatLine(ItemStat.AGI, agi)
     addStatLine(ItemStat.LS, lifesteal)
     addUnique("Attacks steal mana equal to {0}% of the damage dealt.".format(manasteal.str()))
-    addActive("Mana Burn", "Burns {0}% of the target's maximum mana. For every point burnt, the target takes 1 damage and the hero's magic resistance is increased by 1 points for {1} seconds.".format(RUNE_BLADE_BURN.str(), RUNE_BLADE_SHIELD_DUR.str()))
+    addActive("Mana Burn", "Burns {0}% of the target's maximum mana. For every point burnt, the target takes 1 damage and the hero's magic resistance is increased by 1 for {1} seconds.".format(RUNE_BLADE_BURN.str(), RUNE_BLADE_SHIELD_DUR.str()))
     setInfo("Runic Blade")
     onEither() (int factor) ->
         modLifeSteal(lifesteal)
@@ -317,7 +321,7 @@ function arcaneBlade()
     if not compiletime
         ARCANE_BLADE_DEBUFF.addLevelFunction() (Buff thisBuff, int factor) ->
             thisBuff.getTarget().wrapper().modAgilityRelative(-mrReduce * 10 * factor)
-        registerOnHeroCast() (_id,_slot) -> 
+        HeroCast.register() -> 
             let hero = GetTriggerUnit()
             if hero.hasItemById(ITEM_ID_ARCANE_BLADE)
                 hero.addBuff(hero, ARCANE_BLADE_DURATION, ARCANE_BLADE_BUFF, 1)
@@ -361,11 +365,11 @@ function infernalBow()
     let dur = 6
     let strPercentage = 10
     setupItem(ITEM_ID_INFERNAL_BOW, CATEGORY, 4500)
-    setInfo("Infernal Bow", "+ {0} strength".format(str.toString()))
     addRequirements(ITEM_ID_BLAZING_BOW, ITEM_ID_MAGMA_CRYSTAL)
     addStatLine(ItemStat.STR, str)
     addStatLine(ItemStat.STR, strPercentage, true)
     addUnique("Attacks deal {0} magic damage per second and reduce healing by {1}% for {2} seconds.".format(dps.str(), healing.str(), dur.str()))
+    setInfo("Infernal Bow")
     onEither() (int factor) ->
         modStrength(str)
         modStrengthRelative(strPercentage)

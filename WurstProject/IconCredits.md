@@ -63,6 +63,7 @@
 * BTNMechanism by NFWar
 * BTNMercurialScimtar by PeeKay
 * BTNMeteor by 67chrome
+* BTNmonsterbook2 by PeeKay
 * BTNMysticDagger by PeeKay
 * BTNNatureSlippers by PeeKay
 * BTNNecromancy by viiva
@@ -90,6 +91,7 @@
 * BTNSpell_Frost_ChillingArmor by Blizzard Entertainment, Blizzard Entertainment
 * BTNSpell_Shadow_ShadowWard by Numeror
 * BTNSpikedArmor by PeeKay
+* BTNStickStaff by NFWar
 * BTNSultanCharmV2 by Apheraz Lucent
 * BTNSuperiorMageRobe by NFWar
 * BTNSupernova by bloodyroadkill
@@ -100,6 +102,7 @@
 * BTNTorment by PeeKay
 * BTNWalkersofDarkness by PeeKay
 * BTNWeaver03 by PeeKay
+* BTNWizardsHat by NFWar
 * ChaosOrb by (Blizzard Entertainment), Darkfang
 * Grim Rupture by ~Nightmare
 * Guardian of the Sea by BLazeKraze

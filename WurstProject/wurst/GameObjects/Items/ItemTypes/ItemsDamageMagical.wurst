@@ -8,7 +8,8 @@ constant CATEGORY = 4
 function itemMageAmulet()
     let cd = 8
     setupItem(ITEM_ID_MAGE_AMULET, CATEGORY, 500)
-    setInfo("Mage Amulet", "+ {0}% cooldown recovery".format(cd.toString()))
+    addStatLine(ItemStat.CD, cd)
+    setInfo("Mage Amulet")
     onEither() (int factor) ->
         modCooldown(cd)
 
@@ -16,10 +17,11 @@ function itemManaRing()
     let mr = 1
     
     setupItem(ITEM_ID_MANA_RING, CATEGORY, 500)
-    setInfo("Ring of Mana", "+ {0} mana point regeneration per second".format(mr.toString()))
+    addStatLine(ItemStat.MR, mr)
+    setInfo("Ring of Mana")
 
     onEither() (int factor) ->
-        modManaRegen(mr*10)
+        modManaRegen(mr*100)
 
 
 
@@ -27,57 +29,157 @@ function itemSpellTome()
     let intel = 8
     
     setupItem(ITEM_ID_SPELL_TOME, CATEGORY, 500)
-    setInfo("Spell Tome", "+ {0} intelligence".format(intel.toString()))
+    addStatLine(ItemStat.INT, intel)
+    setInfo("Spell Tome")
     
     onEither() (int factor) ->
         modIntelligence(intel)
 
-            
+function itemBasicWand()
+    let intel = 12
+    
+    setupItem(ITEM_ID_BASIC_WAND, CATEGORY, 750)
+    addStatLine(ItemStat.INT, intel)
+    setInfo("Spell Tome")
+    
+    onEither() (int factor) ->
+        modIntelligence(intel)
+
 function itemGemOfMana()
     let mp = 75
     
     setupItem(ITEM_ID_GEM_OF_MANA, CATEGORY, 500)
-    setInfo("Gem of Mana", "+ {0} mana points".format(mp.toString()))
+    addStatLine(ItemStat.MP, mp)
+    setInfo("Gem of Mana")
     
     onEither() (int factor) ->
         modMana(mp)
 
+
 function scepterOfTheTides()
+    let intel = 15
+    let mp = 90
     setupItem(ITEM_ID_SCEPTER_OF_THE_TIDES, CATEGORY, 1500)
+    addRequirements(ITEM_ID_BASIC_WAND, ITEM_ID_GEM_OF_MANA)
+    addStatLine(ItemStat.INT, intel)
+    addStatLine(ItemStat.MP, mp)
+    setInfo("Scepter of the Tides")
+    onEither() (int factor) ->
+        modIntelligence(intel)
+        modMana(mp)
+
+function wandOfDeath()
+    let intel = 22
+    setupItem(ITEM_ID_WAND_OF_DEATH, CATEGORY, 1350)
+    addRequirements(ITEM_ID_BASIC_WAND, ITEM_ID_SPELL_TOME)
+    addStatLine(ItemStat.INT, intel)
+    setInfo("Wand of Death")
+    onEither() (int factor) ->
+        modIntelligence(intel)
+
+function wandOfBlood()
+    let intel = 15
+    let hp = 120
+    setupItem(ITEM_ID_WAND_OF_BLOOD, CATEGORY, 1500)
+    addRequirements(ITEM_ID_BASIC_WAND, ITEM_ID_GEM_OF_HEALTH)
+    addStatLine(ItemStat.INT, intel)
+    addStatLine(ItemStat.HP, hp)
+    setInfo("Wand of Blood")
+    onEither() (int factor) ->
+        modIntelligence(intel)
+        modHealth(hp)
+
 function ringOfregeneration()
     setupItem(ITEM_ID_RING_OF_REGENERATION, CATEGORY, 1500)
 function sapphireAmulet()
-    setupItem(ITEM_ID_SAPPHIRE_AMULET, CATEGORY, 1500)
+    let cd = 12
+    let mp = 100
+    setupItem(ITEM_ID_SAPPHIRE_AMULET, CATEGORY, 1400)
+    addRequirements(ITEM_ID_MAGE_AMULET, ITEM_ID_GEM_OF_MANA)
+    addStatLine(ItemStat.CD, cd)
+    addStatLine(ItemStat.MP, mp)
+    setInfo("Sapphire Amulet")
+    onEither() (int factor) ->
+        modCooldown(cd)
+        modMana(mp)
+
 function ringOfDarkness()
     setupItem(ITEM_ID_RING_OF_DARKNESS, CATEGORY, 1500)   
 function cursedMask()
     setupItem(ITEM_ID_CURSED_MASK, CATEGORY, 1500)
-function wandOfDeath()
-    setupItem(ITEM_ID_WAND_OF_DEATH, CATEGORY, 1500)
-function wandOfBlood()
-    setupItem(ITEM_ID_WAND_OF_BLOOD, CATEGORY, 1500)
+function monsterBook()
+    let intel = 16
+    setupItem(ITEM_ID_MONSTER_BOOK, CATEGORY, 1000)
+    addRequirements(ITEM_ID_SPELL_TOME)
+    addStatLine(ItemStat.INT, intel)
+    setInfo("Monster Book")
+    onEither() (int factor) ->
+        modIntelligence(intel)
+
+function wizardsHat()
+    setupItem(ITEM_ID_WIZARDS_HAT, CATEGORY, 1500)
+
 function nerubianScepter()
-    setupItem(ITEM_ID_NERUBIAN_SCEPTER, CATEGORY, 3000)
+    let intel = 40
+    let intBonus = 20
+    let mp = 150
+    setupItem(ITEM_ID_NERUBIAN_SCEPTER, CATEGORY, 3800)
+    addRequirements(ITEM_ID_WAND_OF_DEATH, ITEM_ID_SCEPTER_OF_THE_TIDES)
+    addStatLine(ItemStat.INT, intel)
+    addStatLine(ItemStat.MP, mp)
+    addUnique("Increases intelligence by {0}%.".format(intBonus.str()))
+    setInfo("Archmage's Staff")
+    onEither() (int factor) ->
+        modIntelligence(intel)
+        modMana(mp)
+        if isUnique()
+            modIntelligenceRelative(intBonus * 10)
+        
 function arcaniteRing()
     setupItem(ITEM_ID_ARCANITE_RING, CATEGORY, 3000)
 function arcaneNecklace()
     setupItem(ITEM_ID_ARCANE_NECKLACE, CATEGORY, 3000)
-function gobletOfVampires()
-    setupItem(ITEM_ID_GOBLET_OF_VAMPIRES, CATEGORY, 3000)
 function bracerOfAbjuration()
     setupItem(ITEM_ID_BRACER_OF_ABJURATION, CATEGORY, 3000)
-function blessedGoblet()
-    setupItem(ITEM_ID_BLESSED_GOBLET, CATEGORY, 3000)
 function emeraldPendant()
     setupItem(ITEM_ID_EMERALD_PENDANT, CATEGORY, 3000)
 function scrollOfConjuration()
     setupItem(ITEM_ID_SCROLL_OF_CONJURATION, CATEGORY, 3000)   
 function gobletOfFire()
     setupItem(ITEM_ID_GOBLET_OF_FIRE, CATEGORY, 3000)
+    addUnique("Dealing magic damage incinerates enemies, causing them to take {0}% damage over {1} seconds.")
+    setInfo("Flaming Goblet")
+function gobletOfVampires()
+    let lifeSteal = 20
+    setupItem(ITEM_ID_GOBLET_OF_VAMPIRES, CATEGORY, 3000)
+    addUnique("Restores health equal to {0}% of the magic damage you deal.".format(lifeSteal.str()))
+    setInfo("Vampiric Goblet")
+
+constant BLESSED_GOBLET_BUFF = compiletime(setupBuff("Ever-Filled Chalice", "Mana regenerates much faster.", "BTNBless", true, 1, Abilities.aNrlTarget,"origin", DispelLevel.DISPEL))
+
+function blessedGoblet()
+    let regenMultiplier = 3
+    let dur = 6.0
+    setupItem(ITEM_ID_BLESSED_GOBLET, CATEGORY, 3000)
+    addUnique("After casting a spell, mana regenerates {0} times as fast for {1} seconds.".format(regenMultiplier.str(), dur.str()))
+    setInfo("Ever-Filled Chalice")
+    if not compiletime
+        BLESSED_GOBLET_BUFF.addLevelFunction() (Buff thisBuff, int factor) ->
+            thisBuff.getTarget().wrapper().modManaRegenRelative(1000 * factor * (regenMultiplier - 1))
+        HeroCast.register() ->
+            let caster = GetTriggerUnit()
+            caster.addBuff(caster, dur, BLESSED_GOBLET_BUFF, 1)
+        
 function seerStaff()
+    let dur = 4.0
     setupItem(ITEM_ID_SEER_STAFF, CATEGORY, 3000)
+    addRequirements(ITEM_ID_WAND_OF_DEATH, ITEM_ID_WAND_OF_BLOOD)
+    addUnique("Damaging an enemy reveals them for {0} seconds.".format(dur.str()))
+    setInfo("Wand of Vision")
 function demonicSpellTome()
     setupItem(ITEM_ID_DEMONIC_SPELL_TOME, CATEGORY, 3000)
+    addUnique("")
+    setInfo("Tome of Ancient Rituals")
 
 
 
@@ -90,6 +192,7 @@ function initItems1()
     itemManaRing()
     itemSpellTome()
     itemGemOfMana()
+    itemBasicWand()
 
 
 @compiletime
@@ -101,6 +204,8 @@ function initItems2()
     cursedMask()
     wandOfDeath()
     wandOfBlood()
+    monsterBook()
+    wizardsHat()
 
 @compiletime
 function initItems3()

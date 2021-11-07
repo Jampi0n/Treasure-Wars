@@ -466,8 +466,8 @@ public class HeroAIImpl implements IHeroAI
             wrapper.modAgilityRelative(100)
             wrapper.modIntelligenceRelative(100)
 
-            wrapper.modHealthRegen(30)
-            wrapper.modManaRegen(20)
+            wrapper.modHealthRegen(300)
+            wrapper.modManaRegen(200)
 
             
         else if diff == AI_DIFFICULTY_INSANE
@@ -482,8 +482,8 @@ public class HeroAIImpl implements IHeroAI
             wrapper.modAgilityRelative(200)
             wrapper.modIntelligenceRelative(200)
 
-            wrapper.modHealthRegen(60)
-            wrapper.modManaRegen(40)
+            wrapper.modHealthRegen(600)
+            wrapper.modManaRegen(400)
 
 
         //should not happen for everyone at the same time (lag)

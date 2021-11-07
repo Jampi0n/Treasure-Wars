@@ -410,12 +410,17 @@ int currentHeroUnitTypeId = -1
 int currentHeroIndex = -1
 
 public interface OnHeroCast
-    function onCast(int abilityId, AbilitySlot abilitySlot)
+    function onCast()
 
-constant onHeroCastList = new LinkedList<OnHeroCast>()
 
-public function registerOnHeroCast(OnHeroCast onHeroCast)
-    onHeroCastList.add(onHeroCast)
+
+class HeroCast
+    protected static AbilitySlot abilitySlot = AbilitySlot.NONE
+    protected static constant onHeroCastList = new LinkedList<OnHeroCast>()
+    static function register(OnHeroCast onHeroCast)
+        onHeroCastList.add(onHeroCast)
+    static function getAbilitySlot() returns AbilitySlot
+        return abilitySlot
 
 public interface SetupOnCastTrigger
     function setupForUnit(unit u) returns trigger
@@ -455,24 +460,24 @@ public module HeroTemplateModule
         ..registerUnitEvent(hero, EVENT_UNIT_SPELL_EFFECT)
         ..addAction() ->
             let abilityId = GetSpellAbilityId()
-            var abilitySlot = AbilitySlot.NONE
+            HeroCast.abilitySlot = AbilitySlot.NONE
             switch abilityId
                 case _ABILITY_ID_Q
                     castQ()
-                    abilitySlot = AbilitySlot.Q
+                    HeroCast.abilitySlot = AbilitySlot.Q
                 case _ABILITY_ID_W
                     castW()
-                    abilitySlot = AbilitySlot.W
+                    HeroCast.abilitySlot = AbilitySlot.W
                 case _ABILITY_ID_E
                     castE()
-                    abilitySlot = AbilitySlot.E
+                    HeroCast.abilitySlot = AbilitySlot.E
                 case _ABILITY_ID_R
                     castR()
-                    abilitySlot = AbilitySlot.R
+                    HeroCast.abilitySlot = AbilitySlot.R
                 default
-
-            for onHeroCast in onHeroCastList
-                onHeroCast.onCast(abilityId, abilitySlot)
+            if HeroCast.abilitySlot != AbilitySlot.NONE
+                for onHeroCast in HeroCast.onHeroCastList
+                    onHeroCast.onCast()
             
         return onCastTrigger
 

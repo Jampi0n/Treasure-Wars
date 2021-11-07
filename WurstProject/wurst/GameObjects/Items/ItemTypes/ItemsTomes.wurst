@@ -8,15 +8,16 @@ constant CATEGORY = 6
 @compiletime
 function initItems1()
     let tomeCost = 1000
-    let str = ItemBalance.STRENGTH
-    let wp = ItemBalance.WILLPOWER
-    let intel = ItemBalance.INTELLIGENCE
-    let ar = ItemBalance.ARMOR
-    let as = ItemBalance.ATTACK_SPEED
-    let hp = ItemBalance.HEALTH
-    let hpReg = ItemBalance.HEALTH_REG
-    let mp = ItemBalance.MANA
-    let mpReg = ItemBalance.MANA_REG
+    let tomeStatValue = 200
+    let str = ItemBalance.str(tomeStatValue)
+    let wp = ItemBalance.agi(tomeStatValue)
+    let intel = ItemBalance.intel(tomeStatValue)
+    let ar = ItemBalance.ar(tomeStatValue)
+    let as = ItemBalance.as(tomeStatValue)
+    let hp = ItemBalance.hp(tomeStatValue)
+    let hpReg = ItemBalance.hr(tomeStatValue)
+    let mp = ItemBalance.mp(tomeStatValue)
+    let mpReg = ItemBalance.mr(tomeStatValue)
     setupItem(ITEM_ID_TOME_STRENGTH, CATEGORY, tomeCost)
     setInfo("Tome of Strength", "+{0} strength".format(str.toString()))
     tomeModStat(Stat.STR, str)
