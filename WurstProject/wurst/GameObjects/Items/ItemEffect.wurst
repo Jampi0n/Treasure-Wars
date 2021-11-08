@@ -10,6 +10,16 @@ import ItemIdDefinitions
 import ItemConfiguration
 import PassiveItemCooldown
 import UnitWrapper
+import ClosureTimers
+import JUnit
+import JItem
+
+constant ALLOW_ITEM_DROP = false
+constant ALLOW_ITEM_GIVE = false
+
+function debugPrint(string msg)
+    skip
+    //print(msg)
 
 public interface ItemDropOrPickUp
     function dropOrPickUp(int factor)
@@ -47,6 +57,8 @@ public class ItemEffect
     private static trigger onItemPickUp = CreateTrigger()
     private static trigger onItemDrop = CreateTrigger()
     protected ItemDropOrPickUp onDropOrPickUp = null
+    protected static constant itemOwnerMap = new HashMap<item, unit>
+    protected static constant itemSlotMap = new HashMap<item, int>
 
     private int useCount = 0
 
@@ -69,36 +81,99 @@ public class ItemEffect
             ..addAction(function onItemDrop)
             ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DROP_ITEM)
 
+    static function printInventory()
+        for i = 0 to 5
+            let itm = triggerUnit.itemInSlot(i)
+            if itm != null
+                string savedSlot = "None"
+                if itemSlotMap.has(itm)
+                    savedSlot = "Slot " + itemSlotMap.get(itm).toString()
+                debugPrint(i.toString() + ": " + itm.getName() + " (" + GetHandleId(itm).toString() + ")" + savedSlot)
+            else
+                debugPrint(i.toString() + ": empty")
+
     static function onItemPickUp()
-        triggerItem = GetManipulatedItem()
-        triggerUnit = GetTriggerUnit()
-        let itemTypeId = triggerItem.getTypeId()
-        if triggerUnit.wrapper().getAllowItemPickup()
-            PassiveItemCooldown.onItemPickUp(triggerUnit, triggerItem, itemTypeId)
-            if doItemEvents
-                if itemIdToEffect.has(itemTypeId)
-                    triggerWrapper = triggerUnit.wrapper()
-                    inventoryChangeDirection = 1
-                    let itemType = itemIdToEffect.get(itemTypeId)
-                    itemType.useCount++
-                    if itemType.onDropOrPickUp != null
-                        itemType.onDropOrPickUp.dropOrPickUp(1)
-        else
-            doItemEvents = false
-            triggerUnit.removeItem(triggerItem)
-            doItemEvents = true
+        let localItem = GetManipulatedItem()
+        let itemTypeId = localItem.getTypeId()
+        if itemTypeId == PLACE_HOLDER_ITEM
+            return
+        let localUnit = GetTriggerUnit()
+        triggerItem = localItem
+        triggerUnit = localUnit
+        bool thief = false
+        if itemOwnerMap.has(localItem)
+            let owningUnit = itemOwnerMap.get(localItem)
+            if localUnit.getOwner() != owningUnit.getOwner()
+                if not ALLOW_ITEM_GIVE
+                    printTimedToPlayer("Items cannot be given to other players.", 10, localUnit.getOwner())
+                    thief = true
+                    nullTimer() -> 
+                        doItemEvents = false
+                        localUnit.removeItem(localItem)
+                        doItemEvents = true
+                        let slot = itemSlotMap.get(localItem)
+                        debugPrint("slot=" + slot.toString() + " (" + GetHandleId(localItem).toString() + ")")
+                        owningUnit.addItemHandleToSlot(localItem, slot)
+
+        if not thief
+            itemOwnerMap.put(localItem, localUnit)
+            nullTimer() -> 
+                let slot = localUnit.getItemSlot(localItem)
+                debugPrint("save slot="+slot.toString() + " (" + GetHandleId(localItem).toString() + ")")
+                itemSlotMap.put(localItem, slot)
+            if localUnit.wrapper().getAllowItemPickup()
+                PassiveItemCooldown.onItemPickUp(localUnit, localItem, itemTypeId)
+                if doItemEvents
+                    if itemIdToEffect.has(itemTypeId)
+                        triggerWrapper = localUnit.wrapper()
+                        inventoryChangeDirection = 1
+                        let itemType = itemIdToEffect.get(itemTypeId)
+                        itemType.useCount++
+                        if itemType.onDropOrPickUp != null
+                            itemType.onDropOrPickUp.dropOrPickUp(1)
+            else
+                doItemEvents = false
+                localUnit.removeItem(localItem)
+                doItemEvents = true
+        doAfter(0.1) -> 
+            printInventory()
 
     static function onItemDrop()
+        let localItem = GetManipulatedItem()
+        let itemTypeId = localItem.getTypeId()
+        if itemTypeId == PLACE_HOLDER_ITEM
+            return
+        let localUnit = GetTriggerUnit()
+        triggerItem = localItem
+        triggerUnit = localUnit
+        let slot = localUnit.getItemSlot(localItem)
+        if itemOwnerMap.has(localItem)
+            if itemOwnerMap.get(localItem) == localUnit
+                itemSlotMap.put(localItem, slot)
         if doItemEvents
-            triggerItem = GetManipulatedItem()
-            if itemIdToEffect.has(triggerItem.getTypeId())
-                triggerUnit = GetTriggerUnit()
-                triggerWrapper = triggerUnit.wrapper()
+            if itemIdToEffect.has(localItem.getTypeId())
+                triggerWrapper = localUnit.wrapper()
                 inventoryChangeDirection = -1
-                let itemType = itemIdToEffect.get(triggerItem.getTypeId())
+                let itemType = itemIdToEffect.get(localItem.getTypeId())
                 itemType.useCount--
                 if itemType.onDropOrPickUp != null
                     itemType.onDropOrPickUp.dropOrPickUp(-1)
+        nullTimer() -> 
+            if localItem != null
+                if localItem.isAlive()
+                    if not localItem.isOwned()
+                        if not ALLOW_ITEM_DROP
+                            localUnit.addItemHandleToSlot(localItem, slot)
+                            printTimedToPlayer("Items cannot be dropped on the ground.", 10, localUnit.getOwner())
+                else
+                    debugPrint("item sold")
+                    itemOwnerMap.remove(localItem)
+                    itemSlotMap.remove(localItem)
+
+        doAfter(0.1) -> 
+            printInventory()
+                    
+            
 
 public function onEither(ItemDropOrPickUp onDropOrPickUp)
     if compiletime
