@@ -6,29 +6,29 @@ constant CATEGORY = 4
 
 
 function itemMageAmulet()
-    let cd = 8
-    setupItem(ITEM_ID_MAGE_AMULET, CATEGORY, 500)
+    let cd = ItemBalance.cd(500)
+    setupItem(ITEM_ID_MAGE_AMULET, CATEGORY)
     addStatLine(ItemStat.CD, cd)
     setInfo("Mage Amulet")
     onEither() (int factor) ->
         modCooldown(cd)
 
 function itemManaRing()
-    let mr = 1
+    let mr = ItemBalance.mr(500)
     
-    setupItem(ITEM_ID_MANA_RING, CATEGORY, 500)
+    setupItem(ITEM_ID_MANA_RING, CATEGORY)
     addStatLine(ItemStat.MR, mr)
     setInfo("Ring of Mana")
 
     onEither() (int factor) ->
-        modManaRegen(mr*100)
+        modManaRegen(mr)
 
 
 
 function itemSpellTome()
-    let intel = 8
+    let intel = ItemBalance.intel(500)
     
-    setupItem(ITEM_ID_SPELL_TOME, CATEGORY, 500)
+    setupItem(ITEM_ID_SPELL_TOME, CATEGORY)
     addStatLine(ItemStat.INT, intel)
     setInfo("Spell Tome")
     
@@ -36,19 +36,19 @@ function itemSpellTome()
         modIntelligence(intel)
 
 function itemBasicWand()
-    let intel = 12
+    let intel = ItemBalance.intel(750)
     
-    setupItem(ITEM_ID_BASIC_WAND, CATEGORY, 750)
+    setupItem(ITEM_ID_BASIC_WAND, CATEGORY)
     addStatLine(ItemStat.INT, intel)
-    setInfo("Spell Tome")
+    setInfo("Apprentice's Wand")
     
     onEither() (int factor) ->
         modIntelligence(intel)
 
 function itemGemOfMana()
-    let mp = 75
+    let mp = ItemBalance.mp(500)
     
-    setupItem(ITEM_ID_GEM_OF_MANA, CATEGORY, 500)
+    setupItem(ITEM_ID_GEM_OF_MANA, CATEGORY)
     addStatLine(ItemStat.MP, mp)
     setInfo("Gem of Mana")
     
@@ -57,9 +57,11 @@ function itemGemOfMana()
 
 
 function scepterOfTheTides()
-    let intel = 15
-    let mp = 90
-    setupItem(ITEM_ID_SCEPTER_OF_THE_TIDES, CATEGORY, 1500)
+    ItemBalance.stats(ItemStat.INT, ItemStat.MP)
+    ItemBalance.values(875,625)
+    let intel = ItemBalance.intel()
+    let mp = ItemBalance.mp()
+    setupItem(ITEM_ID_SCEPTER_OF_THE_TIDES, CATEGORY)
     addRequirements(ITEM_ID_BASIC_WAND, ITEM_ID_GEM_OF_MANA)
     addStatLine(ItemStat.INT, intel)
     addStatLine(ItemStat.MP, mp)
@@ -69,8 +71,8 @@ function scepterOfTheTides()
         modMana(mp)
 
 function wandOfDeath()
-    let intel = 22
-    setupItem(ITEM_ID_WAND_OF_DEATH, CATEGORY, 1350)
+    let intel = ItemBalance.intel(1350)
+    setupItem(ITEM_ID_WAND_OF_DEATH, CATEGORY)
     addRequirements(ITEM_ID_BASIC_WAND, ITEM_ID_SPELL_TOME)
     addStatLine(ItemStat.INT, intel)
     setInfo("Wand of Death")
@@ -78,8 +80,10 @@ function wandOfDeath()
         modIntelligence(intel)
 
 function wandOfBlood()
-    let intel = 15
-    let hp = 120
+    ItemBalance.stats(ItemStat.INT, ItemStat.HP)
+    ItemBalance.values(875,625)
+    let intel = ItemBalance.intel()
+    let hp = ItemBalance.hp()
     setupItem(ITEM_ID_WAND_OF_BLOOD, CATEGORY, 1500)
     addRequirements(ITEM_ID_BASIC_WAND, ITEM_ID_GEM_OF_HEALTH)
     addStatLine(ItemStat.INT, intel)
@@ -90,11 +94,26 @@ function wandOfBlood()
         modHealth(hp)
 
 function ringOfregeneration()
-    setupItem(ITEM_ID_RING_OF_REGENERATION, CATEGORY, 1500)
+    ItemBalance.stats(ItemStat.MR, ItemStat.HR)
+    ItemBalance.values(950,620)
+    let mr = ItemBalance.mr()
+    let hr = ItemBalance.hr()
+    setupItem(ITEM_ID_RING_OF_REGENERATION, CATEGORY)
+    addRequirements(ITEM_ID_MANA_RING, ITEM_ID_RING_OF_HEALTH)
+    addStatLine(ItemStat.MR, mr)
+    addStatLine(ItemStat.HR, hr)
+    setInfo("Ring of Regeneration")
+    onEither() (int factor) ->
+        modManaRegen(mr)
+        modHealthRegen(hr)
+
+
 function sapphireAmulet()
-    let cd = 12
-    let mp = 100
-    setupItem(ITEM_ID_SAPPHIRE_AMULET, CATEGORY, 1400)
+    ItemBalance.stats(ItemStat.CD, ItemStat.MP)
+    ItemBalance.values(720,680)
+    let cd = ItemBalance.cd()
+    let mp = ItemBalance.mp()
+    setupItem(ITEM_ID_SAPPHIRE_AMULET, CATEGORY)
     addRequirements(ITEM_ID_MAGE_AMULET, ITEM_ID_GEM_OF_MANA)
     addStatLine(ItemStat.CD, cd)
     addStatLine(ItemStat.MP, mp)
@@ -104,12 +123,26 @@ function sapphireAmulet()
         modMana(mp)
 
 function ringOfDarkness()
-    setupItem(ITEM_ID_RING_OF_DARKNESS, CATEGORY, 1500)   
+    ItemBalance.stats(ItemStat.MR, ItemStat.INT)
+    ItemBalance.values(720,560)
+    let mr = ItemBalance.mr()
+    let intel = ItemBalance.intel()
+    setupItem(ITEM_ID_RING_OF_DARKNESS, CATEGORY)
+    addRequirements(ITEM_ID_MANA_RING, ITEM_ID_SPELL_TOME)
+    addStatLine(ItemStat.MR, mr)
+    addStatLine(ItemStat.INT, intel)
+    setInfo("Ring of Darkness")
+    onEither() (int factor) ->
+        modManaRegen(mr)
+        modIntelligence(intel)
+
 function cursedMask()
     setupItem(ITEM_ID_CURSED_MASK, CATEGORY, 1500)
+
+    
 function monsterBook()
-    let intel = 16
-    setupItem(ITEM_ID_MONSTER_BOOK, CATEGORY, 1000)
+    let intel = ItemBalance.intel(1050)
+    setupItem(ITEM_ID_MONSTER_BOOK, CATEGORY)
     addRequirements(ITEM_ID_SPELL_TOME)
     addStatLine(ItemStat.INT, intel)
     setInfo("Monster Book")
@@ -117,13 +150,26 @@ function monsterBook()
         modIntelligence(intel)
 
 function wizardsHat()
-    setupItem(ITEM_ID_WIZARDS_HAT, CATEGORY, 1500)
+    ItemBalance.stats(ItemStat.INT, ItemStat.CD)
+    ItemBalance.values(920,580)
+    let intel = ItemBalance.intel()
+    let cd = ItemBalance.cd()
+    setupItem(ITEM_ID_WIZARDS_HAT, CATEGORY)
+    addRequirements(ITEM_ID_SPELL_TOME, ITEM_ID_MAGE_AMULET)
+    addStatLine(ItemStat.INT, intel)
+    addStatLine(ItemStat.CD, cd)
+    setInfo("Wizard's Hat")
+    onEither() (int factor) ->
+        modIntelligence(intel)
+        modCooldown(cd)
 
 function nerubianScepter()
-    let intel = 40
+    ItemBalance.stats(ItemStat.INT, ItemStat.MP)
+    ItemBalance.values(2000,1250)
+    let intel = ItemBalance.intel()
+    let mp = ItemBalance.mp()
     let intBonus = 20
-    let mp = 150
-    setupItem(ITEM_ID_NERUBIAN_SCEPTER, CATEGORY, 3800)
+    setupItem(ITEM_ID_NERUBIAN_SCEPTER, CATEGORY, 4300)
     addRequirements(ITEM_ID_WAND_OF_DEATH, ITEM_ID_SCEPTER_OF_THE_TIDES)
     addStatLine(ItemStat.INT, intel)
     addStatLine(ItemStat.MP, mp)
@@ -134,11 +180,52 @@ function nerubianScepter()
         modMana(mp)
         if isUnique()
             modIntelligenceRelative(intBonus * 10)
+
+constant SEER_STAFF_BUFF = compiletime(setupBuff("Wand of Vision", "This unit is revealed.", "BTNSeerStaff", true, 1, Abilities.possessionTarget,"overhead", DispelLevel.DISPEL))
+
+function seerStaff()
+    ItemBalance.stats(ItemStat.INT, ItemStat.HP)
+    ItemBalance.values(2350,1100)
+    let intel = ItemBalance.intel()
+    let hp = ItemBalance.hp()
+    let dur = 8.0
+    setupItem(ITEM_ID_SEER_STAFF, CATEGORY, 4100)
+    addRequirements(ITEM_ID_WAND_OF_DEATH, ITEM_ID_WAND_OF_BLOOD)
+    addStatLine(ItemStat.INT, intel)
+    addStatLine(ItemStat.HP, hp)
+    addUnique("Damaging an enemy hero reveals them for {0} seconds.".format(dur.str()))
+    setInfo("Wand of Vision")
+    SEER_STAFF_BUFF.addSetupFunction() (Buff thisBuff, int factor) ->
+        thisBuff.getTarget().wrapper().modReveal(factor)
+    onEither() (int factor) ->
+        modIntelligence(intel)
+        modHealth(hp)
+        anyDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean alternate) ->
+            if damage > 0 and target.isEnemyOf(source) and target.isType(UNIT_TYPE_HERO)
+                target.addBuffReduced(source, dur, SEER_STAFF_BUFF, 1)
         
 function arcaniteRing()
     setupItem(ITEM_ID_ARCANITE_RING, CATEGORY, 3000)
+
 function arcaneNecklace()
-    setupItem(ITEM_ID_ARCANE_NECKLACE, CATEGORY, 3000)
+    ItemBalance.stats(ItemStat.CD, ItemStat.INT, ItemStat.MP)
+    ItemBalance.values(1800, 1400, 1000)
+    let intel = ItemBalance.intel()
+    let cd = ItemBalance.cd()
+    let mp = ItemBalance.mp()
+    setupItem(ITEM_ID_ARCANE_NECKLACE, CATEGORY, 3950)
+    addRequirements(ITEM_ID_WIZARDS_HAT, ITEM_ID_SAPPHIRE_AMULET)
+    addStatLine(ItemStat.INT, intel)
+    addStatLine(ItemStat.MP, mp)
+    addUnique("")
+    addStatLine(ItemStat.CD, cd)
+    setInfo("Arcane Necklace")
+    onEither() (int factor) ->
+        modIntelligence(intel)
+        modMana(mp)
+        if isUnique()
+            modCooldown(cd)
+
 function bracerOfAbjuration()
     setupItem(ITEM_ID_BRACER_OF_ABJURATION, CATEGORY, 3000)
 function emeraldPendant()
@@ -170,12 +257,6 @@ function blessedGoblet()
             let caster = GetTriggerUnit()
             caster.addBuff(caster, dur, BLESSED_GOBLET_BUFF, 1)
         
-function seerStaff()
-    let dur = 4.0
-    setupItem(ITEM_ID_SEER_STAFF, CATEGORY, 3000)
-    addRequirements(ITEM_ID_WAND_OF_DEATH, ITEM_ID_WAND_OF_BLOOD)
-    addUnique("Damaging an enemy reveals them for {0} seconds.".format(dur.str()))
-    setInfo("Wand of Vision")
 function demonicSpellTome()
     setupItem(ITEM_ID_DEMONIC_SPELL_TOME, CATEGORY, 3000)
     addUnique("")

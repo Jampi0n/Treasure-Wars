@@ -53,7 +53,7 @@ function woodenBow()
         modStrengthRelative(strPercentage * 10)
 
 function magmaCrystal()
-    let dmg = 10
+    let dmg = 15
     setupItem(ITEM_ID_MAGMA_CRYSTAL, CATEGORY, 500)
     addLine("Attacks deal {0} additional magic damage.".format(dmg.toString()))
     setInfo("Magma Crystal")
@@ -83,10 +83,18 @@ function skullCrusher()
     addRequirements(ITEM_ID_HAMMER_OF_STRENGTH, ITEM_ID_WAR_AXE)
 
 function woodenClub()
-    let str = 1
+    ItemBalance.stats(ItemStat.STR, ItemStat.HP)
+    ItemBalance.values(615,710)
+    let str = ItemBalance.str()
+    let hp = ItemBalance.hp()
     setupItem(ITEM_ID_WOODEB_CLUB, CATEGORY, 1300)
-    setInfo("Giant Club", "+ {0} strength".format(str.toString()))
-    addRequirements(ITEM_ID_HAMMER_OF_STRENGTH, ITEM_ID_GEM_OF_HEALTH)
+    addRequirements(ITEM_ID_GEM_OF_HEALTH, ITEM_ID_HAMMER_OF_STRENGTH)
+    addStatLine(ItemStat.STR, str)
+    addStatLine(ItemStat.HP, hp)
+    setInfo("Giant's Club")
+    onEither() (int factor) ->
+        modStrength(str)
+        modHealth(hp)
 
 function skullAxe()
     let str = 30
@@ -98,9 +106,11 @@ function skullAxe()
         modStrength(str)
 
 function ravenSword()
-    let str = 20
-    let as = 15
-    setupItem(ITEM_ID_RAVEN_SWORD, CATEGORY, 1400)
+    ItemBalance.stats(ItemStat.STR, ItemStat.AS)
+    ItemBalance.values(750,600)
+    let str = ItemBalance.str()
+    let as = ItemBalance.as()
+    setupItem(ITEM_ID_RAVEN_SWORD, CATEGORY, 1350)
     addStatLine(ItemStat.STR, str)
     addStatLine(ItemStat.AS, as)
     setInfo("Raven Sword")

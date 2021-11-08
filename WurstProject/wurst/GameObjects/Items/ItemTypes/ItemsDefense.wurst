@@ -5,51 +5,54 @@ import ItemInclude
 constant CATEGORY = 5
 
 function gemOfHealth()
-    let hp = 100
-    setupItem(ITEM_ID_GEM_OF_HEALTH, CATEGORY, 500)
-    setInfo("Gem Of Health","+ {0} hit points"
-    .format(hp.toString()))
+    let hp = ItemBalance.hp(500)
+    setupItem(ITEM_ID_GEM_OF_HEALTH, CATEGORY)
+    addStatLine(ItemStat.HP, hp)
+    setInfo("Gem Of Health")
     onEither() (int factor) ->
         modHealth(hp)
 
 function ringOfHealth()
-    let hr = 3
-    setupItem(ITEM_ID_RING_OF_HEALTH, CATEGORY, 500)
-    setInfo("Ring of Health", "+ {0} hit point regeneration per second"
-    .format(hr.toString()))
+    let hr = ItemBalance.hr(500)
+    setupItem(ITEM_ID_RING_OF_HEALTH, CATEGORY)
+    addStatLine(ItemStat.HR, hr)
+    setInfo("Ring of Health")
     onEither() (int factor) ->
-        modHealthRegen(hr*100)
+        modHealthRegen(hr)
 
 function voidCrystal()
-    let wp = 12
-    setupItem(ITEM_ID_VOID_CRYSTAL, CATEGORY, 500)
-    setInfo("Void Crystal","+ {0} magic resistance"
-    .format(wp.toString()))
+    let wp = ItemBalance.agi(500)
+    setupItem(ITEM_ID_VOID_CRYSTAL, CATEGORY)
+    addStatLine(ItemStat.AGI, wp)
+    setInfo("Void Crystal")
     onEither() (int factor) ->
         modAgility(wp)
 
 function basicShield()
-    let ar = 12
-    setupItem(ITEM_ID_SHIELD, CATEGORY, 500)
-    setInfo("Wooden Shield","+ {0} armor"
-    .format(ar.toString()))
+    let ar =  ItemBalance.ar(500)
+    setupItem(ITEM_ID_SHIELD, CATEGORY)
+    addStatLine(ItemStat.AR, ar)
+    setInfo("Wooden Shield")
     onEither() (int factor) ->
         modArmor(ar)
 
 function heavyGauntlets()
-    let ar = 18
-    setupItem(ITEM_ID_PLATED_GAUNTLETS, CATEGORY, 750)
-    setInfo("Plated Gauntlets","+ {0} armor"
-    .format(ar.toString()))
+    let ar = ItemBalance.ar(800)
+    setupItem(ITEM_ID_PLATED_GAUNTLETS, CATEGORY)
+    addStatLine(ItemStat.AR, ar)
+    setInfo("Plated Gauntlets")
     onEither() (int factor) ->
         modArmor(ar)
 
 function leatherArmor()
-    let ar = 10
-    let hp = 85
-    setupItem(ITEM_ID_LEATHER_ARMOR, CATEGORY, 800)
-    setInfo("Leather Armor","+ {0} armor|n + {1} hit points"
-    .format(ar.toString(), hp.toString()))
+    ItemBalance.stats(ItemStat.AR, ItemStat.HP)
+    ItemBalance.values(450, 350)
+    let ar = ItemBalance.ar()
+    let hp = ItemBalance.hp()
+    setupItem(ITEM_ID_LEATHER_ARMOR, CATEGORY)
+    addStatLine(ItemStat.AR, ar)
+    addStatLine(ItemStat.HP, hp)
+    setInfo("Leather Armor")
     onEither() (int factor) ->
         modArmor(ar)
         modHealth(hp)

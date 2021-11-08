@@ -3,6 +3,13 @@ package ItemBalance
 import ItemEffectPreset
 import LinkedList
 import ErrorHandling
+import ItemConfiguration
+
+public function roundGold(int gold) returns int
+    return (gold/25).round()*25
+
+public function setupItem(int itemId, int category)
+    setupItem(itemId, category, roundGold(ItemBalance.gold()))
 
 class StatValuePair
     ItemStat stat
@@ -14,22 +21,26 @@ class StatValuePair
 public abstract class ItemBalance
     private static constant STRENGTH = 2
     private static constant ATTACK_SPEED = 3
-    private static constant INTELLIGENCE = 2 
+    private static constant INTELLIGENCE = 2
     private static constant HEALTH = 30
-    private static constant HEALTH_REG = 100
+    private static constant HEALTH_REG = 40
     private static constant MANA = 20
-    private static constant MANA_REG = 25
+    private static constant MANA_REG = 10
     private static constant WILLPOWER = 3
     private static constant ARMOR = 3
     private static constant COOLDOWN = 2
     private static constant MOVEMENT_SPEED = 10
     private static constant LIFESTEAL = 2
-    protected static int array PER_100
+    protected static real array PER_100
     protected static int array ROUND
     protected static real array result
     private static bool initialized = false
     private static LinkedList<ItemStat> statList = null
     private static LinkedList<int> valueList = null
+    private static int gold = 0
+
+    static function gold() returns int
+        return gold
 
     static function str() returns int
         return getRoundedResult(ItemStat.STR)
@@ -145,10 +156,9 @@ public abstract class ItemBalance
         statValueList.sortWith() (StatValuePair o1, StatValuePair o2) ->
             return (o2.value * 100).round() - (o1.value * 100).round()
 
+        real totalValue = 0.0
         real remainingValue = 0.0
         while statValueList.size() > 0
-            /*statValueList.sortWith() (StatValuePair o1, StatValuePair o2) ->
-                return (o2.value * 100).round() - (o1.value * 100).round()*/
             bool anyGain = false
             for pair in statValueList
                 let stat = pair.stat castTo int
@@ -157,21 +167,19 @@ public abstract class ItemBalance
                 print(PER_100[stat])
                 print(ROUND[stat])
                 let gain = ((value/100) * PER_100[stat] / ROUND[stat]).floor() * ROUND[stat]
-                //print("gain=" + gain.toString())
                 if gain > 0.0
                     anyGain = true
+                   
                 updateResult(stat, result[stat] + gain)
                 let usedValue = gain / PER_100[stat] * 100
                 pair.value -= usedValue
-                //print("used=" + usedValue.toString())
-                //print("value=" + pair.value.toString())
+                totalValue += usedValue
                 if pair.value <= 0
                     statValueList.remove(pair)
 
             if not anyGain
                 if statValueList.size() == 1
                     remainingValue = statValueList.getFirst().value
-                    //print("remainingValue=" + remainingValue.toString())
                     break
                 else
                     let last = statValueList.pop()
@@ -193,21 +201,20 @@ public abstract class ItemBalance
                     minGain = gain
 
             updateResult(minStat, result[minStat] + minGain)
-            //let win = minCost - remainingValue
-            //print("win=" + win.toString())
-        else
-            skip
-            //print("win=0")
+            totalValue += minCost
 
         destroy statList
         destroy valueList
         statList = null
         valueList = null
+        gold = totalValue.floor()
 
 
-    private static function registerStat(ItemStat stat, int per100, int round)
+    private static function registerStat(ItemStat stat, real per100, int round)
         PER_100[stat castTo int] = per100
         ROUND[stat castTo int] = round
+    private static function registerStat(ItemStat stat, int per100, int round)
+        registerStat(stat, per100.toReal(), round)
 
     protected static function classInit() returns bool
         print("init")
