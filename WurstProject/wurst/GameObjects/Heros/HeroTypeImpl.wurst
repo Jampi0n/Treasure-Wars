@@ -599,7 +599,7 @@ public abstract class HeroTemplate
     **/
     function defaultUnit(int id) returns UnitDefinition
         let def = new UnitDefinition(id, 'hfoo')
-        ..setNormalAbilities("A008,ACrk")
+        ..setNormalAbilities("ACrk")
         ..setAcquisitionRange(600.0)
         ..setAttack1DamageBase(-1)
         ..setAttack1DamageNumberofDice(1)
@@ -624,7 +624,7 @@ public abstract class HeroTemplate
     function defaultHero(int id) returns HeroDefinition
         let def = new HeroDefinition(id, 'Hmkg')
         ..setHeroAbilities(commaList(ABILITY_ID_PASSIVE, ABILITY_ID_Q, ABILITY_ID_W, ABILITY_ID_E, ABILITY_ID_R))
-        ..setNormalAbilities("A008,AInv")
+        ..setNormalAbilities("AInv")
         ..setAcquisitionRange(600.0)
         ..setAttack1DamageBase(-1)
         ..setAttack1DamageNumberofDice(1)

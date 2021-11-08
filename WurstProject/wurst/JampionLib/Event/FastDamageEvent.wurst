@@ -70,15 +70,11 @@ import Maths
 public interface DamageFunction
     function damage(unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool active, bool alternate)
 
-/** This ability is used during regular attacks and every attacking unit should have it. **/
-@configurable public var ON_HIT_ABILITY = 0
 /** This ability is used during special attacks. **/
 @configurable public var ON_HIT_ABILITY_ALTERNATE = 0
 
 // It is recommended to use the ON_HIT_BUFF_ARROW buff for all arrow abilities. Then arrow abilities can easily be detected.
 
-/** This buff is used to detect regular attacks **/
-@configurable public var ON_HIT_BUFF = 0
 /** This buff is used to detect special attacks **/
 @configurable public var ON_HIT_BUFF_ARROW = 0
 /** This buff is used to detect special attacks **/
@@ -274,20 +270,16 @@ public abstract class DamageEvent
         let source = GetEventDamageSource()
         let target = GetTriggerUnit()
         real damage = GetEventDamage()
-        bool attack = false
+        let attack = BlzGetEventWeaponType() != WEAPON_TYPE_WHOKNOWS
         bool alternate = false
         bool arrow = false
-        if(target.hasAbility(ON_HIT_BUFF))
-            target.removeAbility(ON_HIT_BUFF)
-            attack = true
+
         if(target.hasAbility(ON_HIT_BUFF_ALTERNATE))
             target.removeAbility(ON_HIT_BUFF_ALTERNATE)
-            attack = true
             alternate = true
         if(target.hasAbility(ON_HIT_BUFF_ARROW))
             target.removeAbility(ON_HIT_BUFF_ARROW)
             arrow = true
-            attack = true
 
         let sourceTypeId = source.getTypeId()
         let sourceWrapper = DamageEventUnit.get(source)
@@ -310,12 +302,10 @@ public abstract class DamageEvent
     static function useAlternate(unit whichUnit, boolean advanced)
         if advanced
             whichUnit
-                ..removeAbility(ON_HIT_ABILITY)
                 ..addAbility(ON_HIT_ABILITY_ALTERNATE)
         else
             whichUnit
                 ..removeAbility(ON_HIT_ABILITY_ALTERNATE)
-                ..addAbility(ON_HIT_ABILITY)
         
 init
     DamageEventUnit.classInit()
