@@ -163,9 +163,6 @@ public abstract class ItemBalance
             for pair in statValueList
                 let stat = pair.stat castTo int
                 let value = pair.value
-                print(stat)
-                print(PER_100[stat])
-                print(ROUND[stat])
                 let gain = ((value/100) * PER_100[stat] / ROUND[stat]).floor() * ROUND[stat]
                 if gain > 0.0
                     anyGain = true
@@ -217,7 +214,6 @@ public abstract class ItemBalance
         registerStat(stat, per100.toReal(), round)
 
     protected static function classInit() returns bool
-        print("init")
         registerStat(ItemStat.STR, ItemBalance.STRENGTH, 1)
         registerStat(ItemStat.INT, ItemBalance.INTELLIGENCE, 1)
         registerStat(ItemStat.AGI, ItemBalance.WILLPOWER, 1)
