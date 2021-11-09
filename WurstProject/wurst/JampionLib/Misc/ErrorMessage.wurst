@@ -1,0 +1,10 @@
+package ErrorMessage
+
+import SoundUtils
+
+constant SOUND_ERROR = new SoundDefinition(Sounds.error, false, false)
+
+public function player.errorMessage(string message)
+    SOUND_ERROR.playForPlayer(this)
+    ClearTextMessages()
+    DisplayTimedTextToPlayer(this, 0.52, 0.96, 2, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n|cffffcc00"+message+"|r")

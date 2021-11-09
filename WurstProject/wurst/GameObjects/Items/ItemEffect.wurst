@@ -13,13 +13,10 @@ import UnitWrapper
 import ClosureTimers
 import JUnit
 import JItem
+import ErrorMessage
 
 constant ALLOW_ITEM_DROP = false
 constant ALLOW_ITEM_GIVE = false
-
-function debugPrint(string msg)
-    skip
-    //print(msg)
 
 public interface ItemDropOrPickUp
     function dropOrPickUp(int factor)
@@ -81,16 +78,6 @@ public class ItemEffect
             ..addAction(function onItemDrop)
             ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DROP_ITEM)
 
-    static function printInventory()
-        for i = 0 to 5
-            let itm = triggerUnit.itemInSlot(i)
-            if itm != null
-                string savedSlot = "None"
-                if itemSlotMap.has(itm)
-                    savedSlot = "Slot " + itemSlotMap.get(itm).toString()
-                debugPrint(i.toString() + ": " + itm.getName() + " (" + GetHandleId(itm).toString() + ")" + savedSlot)
-            else
-                debugPrint(i.toString() + ": empty")
 
     static function onItemPickUp()
         let localItem = GetManipulatedItem()
@@ -105,21 +92,19 @@ public class ItemEffect
             let owningUnit = itemOwnerMap.get(localItem)
             if localUnit.getOwner() != owningUnit.getOwner()
                 if not ALLOW_ITEM_GIVE
-                    printTimedToPlayer("Items cannot be given to other players.", 10, owningUnit.getOwner())
+                    owningUnit.getOwner().errorMessage("Items cannot be given to other players.")
                     thief = true
                     nullTimer() -> 
                         doItemEvents = false
                         localUnit.removeItem(localItem)
                         doItemEvents = true
                         let slot = itemSlotMap.get(localItem)
-                        debugPrint("slot=" + slot.toString() + " (" + GetHandleId(localItem).toString() + ")")
                         owningUnit.addItemHandleToSlot(localItem, slot)
 
         if not thief
             itemOwnerMap.put(localItem, localUnit)
             nullTimer() -> 
                 let slot = localUnit.getItemSlot(localItem)
-                debugPrint("save slot="+slot.toString() + " (" + GetHandleId(localItem).toString() + ")")
                 itemSlotMap.put(localItem, slot)
             if localUnit.wrapper().getAllowItemPickup()
                 PassiveItemCooldown.onItemPickUp(localUnit, localItem, itemTypeId)
@@ -135,8 +120,6 @@ public class ItemEffect
                 doItemEvents = false
                 localUnit.removeItem(localItem)
                 doItemEvents = true
-        doAfter(0.1) -> 
-            printInventory()
 
     static function onItemDrop()
         let localItem = GetManipulatedItem()
@@ -164,15 +147,10 @@ public class ItemEffect
                     if not localItem.isOwned()
                         if not ALLOW_ITEM_DROP
                             localUnit.addItemHandleToSlot(localItem, slot)
-                            printTimedToPlayer("Items cannot be dropped on the ground.", 10, localUnit.getOwner())
+                            localUnit.getOwner().errorMessage("Items cannot be dropped on the ground.")
                 else
-                    debugPrint("item sold")
                     itemOwnerMap.remove(localItem)
-                    itemSlotMap.remove(localItem)
-
-        doAfter(0.1) -> 
-            printInventory()
-                    
+                    itemSlotMap.remove(localItem)                 
             
 
 public function onEither(ItemDropOrPickUp onDropOrPickUp)
