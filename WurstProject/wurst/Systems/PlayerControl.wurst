@@ -126,14 +126,8 @@ public abstract class PlayerWrapper
     static function getAssists(int id) returns int
         return assists[id]
 
-    @deprecated static function getFullColoredName(int id) returns string
-        return Players.coloredName(id)
-
     static function toString(int id) returns string
         return "Player = " + players[id].getName()
-
-    /*@deprecated("Use Players.TEAM instead") static function getTeam(int id) returns int
-        return team[id]*/
 
     static function getPlayerType(int id) returns PlayerType
         return playerType[id]

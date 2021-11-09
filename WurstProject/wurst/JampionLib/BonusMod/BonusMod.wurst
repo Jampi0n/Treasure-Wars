@@ -147,12 +147,7 @@ public function unit.setBonusDispatchStat(Stat whichStat, int bonus)
         else
             //INT
             this.setBonusIntelligence(bonus)
-        
-@deprecated("Dispatching the stat is slower than directly modifying a stat. Use setBonusDispatchStat if it is on purpose.")
-public function unit.setBonus(Stat whichStat, int bonus)
-    this.setBonusDispatchStat(whichStat, bonus)
-
-            
+   
 function unit.setBonus(int abilityIndex, int maxBonus, int minBonus, int maxLevel, int bonus)
     if(bonus > maxBonus)
         print("Error. This Bonus is too high." + bonus.toString() + "/" + maxBonus.toString())
