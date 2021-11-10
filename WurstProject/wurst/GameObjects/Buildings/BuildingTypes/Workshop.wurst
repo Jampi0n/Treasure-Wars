@@ -8,32 +8,25 @@ constant SOUND_MORTAR_TEAM = new SoundDefinition(Sounds.mortarTeamReady1, false,
 public unit array workshop = [udg_GreenWorkShop[0], udg_GreenWorkShop[1], udg_BrownWorkShop[0], udg_BrownWorkShop[1]]
 public boolean array workshopAlive = [true, true, true, true]
 
-public class Workshop extends Rebuildable
+public class Workshop extends Building
 	construct()
-		super(WORKSHOP, 150, 150, -1, WORKSHOP_REBUILD)
+		super(HU_SIEGE, UD_SIEGE, 150, 150)
 
-	override function onDestroy(unit building, unit killer, unit newBuilding)
+	override function onDeath(unit building, unit killer)
 		for i=0 to 3
 			if(building==workshop[i])
-				workshop[i] = newBuilding
+				workshop[i] = null
 				workshopAlive[i] = false
 				workshopSpawner[i].disable()
-	override function onRebuildFinish(unit building)
-		for i=0 to 3	
-			if(building==workshop[i])
-				workshopAlive[i] = true
-				workshopSpawner[i].enable()
 
 	override function onCast(unit building, int itemId, unit hero)
 		let heroPos = hero.getPos3Zero()
 		let team = Players.team(building.getOwner().getId())
-		if itemId == 'I000' // rebuild
-			this.rebuild(building)
-		else if itemId == 'I001' //Siege Engine
+		if itemId == 'I001' or itemId == 'I00C' //Siege Engine
 			SOUND_SIEGE_ENGINE.playOnPoint(heroPos).snd.setVolume(150)
 			for i = 0 to 3
 				if building == workshop[i]
-					let tank = workshopSpawner[i].spawn(TANK)
+					let tank = workshopSpawner[i].spawn(team == TEAM_1 ? TANK_1 : TANK_2)
 					DamageEventUnit.fromUnit(tank).anyDamage.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
 						if attack
 							let nearby = CreateGroup()
@@ -47,7 +40,7 @@ public class Workshop extends Rebuildable
 
 							nearby.destr()
 					break
-		else if itemId == 'I007' //Mortar Team
+		else if itemId == 'I007' or itemId == 'I00B' //Mortar Team
 			SOUND_MORTAR_TEAM.playOnPoint(heroPos).snd.setVolume(150)
 			for i = 0 to 3
 				if building == workshop[i]

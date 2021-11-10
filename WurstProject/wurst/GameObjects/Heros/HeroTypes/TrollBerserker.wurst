@@ -204,7 +204,7 @@ public class HeroTrollBerserker extends HeroTemplate
 
     static constant int GROWTH_ABILITY_ID = compiletime(ABIL_ID_GEN.next())
 
-    static constant real GROWTH_SCALE = 1.7
+    static constant real GROWTH_SCALE = 1.35
 
     static constant BUFF_GROWTH = compiletime(setupBuff("Berserk", "This unit's maximum hit points and hit point regeneration are increased.", "BTNDireGrowth", true, GROWTH_ABILITY_ID, DispelLevel.BREAK))
     static constant BUFF_GROWTH_FEAR = compiletime(setupBuff("Berserk- Fear", "This unit is under the effect of Fear; it cannot move.", "BTNDireGrowth", false, 5, "FearEffect2.mdx", "overhead", DispelLevel.DISPEL))
@@ -262,11 +262,8 @@ public class HeroTrollBerserker extends HeroTemplate
 
     static function onSwitchToMelee(unit caster, int level) // add bonus
         doAfter(0) () ->
-            caster.toHero().morph()
+            caster.wrapper().morph()
             onMeleeStats(caster, level)
-            if caster.wrapper().hasBuffOfType(BUFF_GROWTH)
-                caster.setScale(GROWTH_SCALE)
-        
 
     static function onRangedStats(unit caster, int level) // remove bonus
         caster.wrapper().modStrength( -SWITCH_DMG[level-1])
@@ -275,13 +272,8 @@ public class HeroTrollBerserker extends HeroTemplate
 
     static function onSwitchToRanged(unit caster, int level) // remove bonus
         doAfter(0) () ->
-            caster.toHero().morph()
+            caster.wrapper().morph()
             onRangedStats(caster, level)
-            if caster.wrapper().hasBuffOfType(BUFF_GROWTH)
-                caster.setScale(GROWTH_SCALE)
-        
-
-
 
     function onAttack(unit attacker, unit _target, boolean _isActive)
         let level = attacker.getAbilityLevel(ABILITY_ID_PASSIVE)
@@ -432,10 +424,10 @@ public class HeroTrollBerserker extends HeroTemplate
             if factor == 1
                 hpBonus = GROWTH_HP[level-1].bonus(caster.getHeroInt(), GROWTH_HP_BONUS).toInt()
                 thisBuff.setData(hpBonus)
-                target.setScale(GROWTH_SCALE)
+                target.wrapper().scale(GROWTH_SCALE)
             else
                 hpBonus = thisBuff.getData()
-                target.setScale(1.3)
+                target.wrapper().scale(1/GROWTH_SCALE)
             target.wrapper()
             ..modHealth( factor * hpBonus)
             ..modHealthRegen( factor * GROWTH_HP_REGEN[level-1]*100)

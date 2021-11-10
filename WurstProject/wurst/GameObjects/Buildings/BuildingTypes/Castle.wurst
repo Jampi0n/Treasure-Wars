@@ -81,7 +81,7 @@ function setVictoryState(VictoryState newState)
 
 public class Castle extends Building
 	construct()
-		super(CASTLE, 0, 0)
+		super(HU_MAIN, UD_MAIN, 0, 0)
 
 	override function onDeath(unit building, unit killer)
 		if victoryState == VictoryState.UNDECIDED

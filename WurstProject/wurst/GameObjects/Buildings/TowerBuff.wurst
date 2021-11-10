@@ -40,7 +40,7 @@ init
 	g.enumUnitsAll(null)
 	for u in g
 		let id = u.getTypeId()
-		if id == HERO_TOWER or id == BASE_TOWER or id == GATE_TOWER or id == OUTER_TOWER
+		if id == HU_HERO_TOWER or id == HU_BASE_TOWER or id == HU_GATE_TOWER or id == HU_OUTER_TOWER or id == UD_HERO_TOWER or id == UD_BASE_TOWER or id == UD_GATE_TOWER or id == UD_OUTER_TOWER
 			DamageEventUnit.fromUnit(u).attackDamageNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, bool attack, bool arrow, bool alternate) ->
 				if target.isType(UNIT_TYPE_HERO)
 					target.addBuffReduced(source, TOWER_FOCUS_DUR, BUFF_TOWER_FOCUS, 1)

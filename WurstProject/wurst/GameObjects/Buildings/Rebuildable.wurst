@@ -19,9 +19,11 @@ public abstract class Rebuildable extends Building
 	private int rebuildTime
 	private int rebuildType
 	private bool autoRebuild = false
+	private int unitTypeId
 
 	construct(int unitTypeId, int bounty, int teamBounty, int rebuildTime, int rebuildType)
 		super(unitTypeId, bounty, teamBounty)
+		this.unitTypeId = unitTypeId
 		this.rebuildTime = rebuildTime
 		this.rebuildType = rebuildType
 

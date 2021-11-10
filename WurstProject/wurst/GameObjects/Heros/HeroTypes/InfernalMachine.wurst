@@ -373,7 +373,7 @@ public class HeroInfernalMachine extends HeroTemplate
 
     static function onRapid(unit caster, int level) // add bonus
         doAfter(0) () ->
-            caster.toHero().morph()
+            caster.wrapper().morph()
             onRapidStats(caster, level)
             DamageEvent.useAlternate(caster, true)
             let track = AttackOrderTrack.getAttackTrack(caster)
@@ -395,7 +395,7 @@ public class HeroInfernalMachine extends HeroTemplate
 
     static function onRapidEnd(unit caster, int level) // remove bonus
         doAfter(0) () ->
-            caster.toHero().morph()
+            caster.wrapper().morph()
             onRapidEndStats(caster, level)
             DamageEvent.useAlternate(caster, false)
         

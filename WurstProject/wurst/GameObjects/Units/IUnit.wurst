@@ -34,6 +34,8 @@ public class IUnit extends UnitWrapper
     int team
     bool isHero
     real scaleAttackAnimation
+    real baseScale
+    real scaleMultiplier = 1.0
     bool allowItemPickUp = true
     int lifeSteal = 0
     int attackEventPointer = 0
@@ -56,6 +58,7 @@ public class IUnit extends UnitWrapper
         this.setStatBaseInternal(Stat.AD, 0)
         this.applyBaseStats()
         this.team = Players.team(this.getOwnerId())
+        this.baseScale = u.getField(UNIT_RF_SCALING_VALUE)
 
         this.isHero = u.isType(UNIT_TYPE_HERO)
         if this.isHero
@@ -102,6 +105,14 @@ public class IUnit extends UnitWrapper
 
     function setOwningHero(IHero owningHero)
         this.owningHero = owningHero
+
+    function morph()
+        this.scale(1)
+        this.applyBaseStats()
+
+    function scale(real multiplier)
+        this.scaleMultiplier *= multiplier
+        this.toUnit().setScale(this.baseScale * this.scaleMultiplier)
 
     function incReveal()
         revealCount++

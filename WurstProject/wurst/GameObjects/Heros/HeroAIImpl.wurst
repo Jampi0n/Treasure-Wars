@@ -380,7 +380,7 @@ public class HeroAIImpl implements IHeroAI
             currentRetreatLoc = this.homeLoc
 
     override function attackedByTower(unit tower)
-        if tower.getTypeId() == HERO_TOWER
+        if tower.getTypeId() == HU_HERO_TOWER or tower.getTypeId() == UD_HERO_TOWER
             this.retreatTemporarily(25, false)
         else if this.state == AIState.ATTACK or this.state == AIState.RETREAT_TEMP
             let g = CreateGroup()
@@ -883,14 +883,14 @@ function determineWinChance(int team, vec2 pos) returns real
             let uType = u.getTypeId()
 
             if u.isType(UNIT_TYPE_STRUCTURE)
-                if uType == HERO_TOWER
+                if uType == HU_HERO_TOWER or uType == UD_HERO_TOWER
                     if uTeam1
                         towerStrength1 += 100000
                     else
                         towerStrength2 += 100000
                 else
                     if u.isType(UNIT_TYPE_ATTACKS_GROUND) // tower
-                        if uType == OUTER_TOWER
+                        if uType == HU_OUTER_TOWER or uType == UD_OUTER_TOWER
                             if uTeam1
                                 if team == TEAM_1
                                     towerStrength1 += 100
@@ -901,7 +901,7 @@ function determineWinChance(int team, vec2 pos) returns real
                                     towerStrength2 += 600
                                 else
                                     towerStrength2 += 100
-                        else if uType == GATE_TOWER or uType == BASE_TOWER
+                        else if uType == HU_GATE_TOWER or uType == HU_BASE_TOWER or uType == UD_GATE_TOWER or uType == UD_BASE_TOWER
                             if uTeam1
                                 if team == TEAM_1
                                     towerStrength1 += 150

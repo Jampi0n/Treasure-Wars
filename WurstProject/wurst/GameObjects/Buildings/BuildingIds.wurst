@@ -1,19 +1,30 @@
 package BuildingIds
 
-public constant int ALTAR = 'h002'
-public constant int ARCANE_SANCTUM = 'h008'
-public constant int ARCANE_VAULT = 'h005'
-public constant int BARRACKS = 'h003'
-public constant int BARRACKS_REBUILD = 'h01E'
-public constant int BASE_TOWER = 'h009'
-public constant int BLACKSMITH = 'h004'
-public constant int CASTLE = 'h001'
-public constant int FARM = 'h007'
-public constant int OUTER_TOWER = 'h016'
-public constant int GATE_TOWER = 'h006'
-public constant int HERO_TOWER = 'n000'
-public constant int WORKSHOP = 'h00A'
-public constant int WORKSHOP_REBUILD = 'h01A'
+public constant int HU_ALTAR = 'h002'
+public constant int HU_BARRACKS = 'h003'
+public constant int HU_BASE_TOWER = 'h009'
+public constant int HU_TECH = 'h004'
+public constant int HU_MAIN = 'h001'
+public constant int HU_FARM = 'h007'
+public constant int HU_OUTER_TOWER = 'h016'
+public constant int HU_GATE_TOWER = 'h006'
+public constant int HU_HERO_TOWER = 'n000'
+public constant int HU_SIEGE = 'h00A'
 
-public int array UPGRADES = ['R000', 'R001', 'R002', 'R003']
-public int array UPGRADE_ITEMS = ['I002', 'I003', 'I004', 'I005']
+public constant int UD_ALTAR = 'h01N'
+public constant int UD_BARRACKS = 'h01O'
+public constant int UD_BASE_TOWER = 'h01S'
+public constant int UD_TECH = 'h01R'
+public constant int UD_MAIN = 'h01P'
+public constant int UD_FARM = 'h01Q'
+public constant int UD_OUTER_TOWER = 'h01V'
+public constant int UD_GATE_TOWER = 'h01T'
+public constant int UD_HERO_TOWER = 'n011'
+public constant int UD_SIEGE = 'h01U'
+
+public int array HU_UPGRADES = ['R000', 'R001', 'R002', 'R003']
+public int array HU_UPGRADE_ITEMS = ['I002', 'I003', 'I004', 'I005']
+
+public int array UD_UPGRADES = ['R005', 'R006', 'R007', 'R008']
+public int array UD_UPGRADE_ITEMS = ['I009', 'I00A', 'I000', 'I008']
+

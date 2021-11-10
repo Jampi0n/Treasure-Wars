@@ -12,7 +12,6 @@ import StandardTextTags
 import BuildingProtection
 
 public abstract class Building
-	protected int unitTypeId = 0
 	protected int bounty = 0
 	protected int teamBounty = 0
 	private static trigger onDeathTrigger = CreateTrigger()
@@ -44,7 +43,12 @@ public abstract class Building
 
 	construct(int unitTypeId, int bounty, int teamBounty)
 		unitTypeToBuilding.put(unitTypeId, this)
-		this.unitTypeId = unitTypeId
+		this.bounty = bounty
+		this.teamBounty = teamBounty
+
+	construct(int unitTypeId1, int unitTypeId2, int bounty, int teamBounty)
+		unitTypeToBuilding.put(unitTypeId1, this)
+		unitTypeToBuilding.put(unitTypeId2, this)
 		this.bounty = bounty
 		this.teamBounty = teamBounty
 

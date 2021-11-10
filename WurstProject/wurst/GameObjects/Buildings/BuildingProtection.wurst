@@ -77,7 +77,7 @@ function LinkedList<unit>.addFarmsFromRect(rect rec)
     let g = CreateGroup()
     g.enumUnitsInRect(rec)
     for u in g
-        if u.getTypeId() == FARM
+        if u.getTypeId() == UD_FARM or u.getTypeId() == HU_FARM
             this.add(u)
     g.destr()
 

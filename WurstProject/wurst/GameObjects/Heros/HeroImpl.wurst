@@ -484,9 +484,6 @@ public class HeroImpl implements IHero
                 heroType.updateTooltipsStr(heroUnit)
                 heroType.updateTooltipsInt(heroUnit)
 
-    override function morph()
-        this.hero.wrapper().applyBaseStats()
-
     override function disableSkills(bool flag, bool hide)
         for i = 0 to 3
             this.hero.disableAbility(this.skillIds[i], flag, hide)

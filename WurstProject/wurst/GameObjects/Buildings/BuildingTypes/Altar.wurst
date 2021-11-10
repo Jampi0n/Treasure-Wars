@@ -32,7 +32,7 @@ function homeInvulnerability()
 
 public class Altar extends Building
 	construct()
-		super(ALTAR, 0, 0)
+		super(HU_ALTAR, UD_ALTAR, 0, 0)
 
 init
 	CreateTrigger()

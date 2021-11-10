@@ -6,7 +6,7 @@ int array numberOfFarms = [26, 26]
 
 public class Farm extends Building
     construct()
-        super(FARM, 50, 50)
+        super(HU_FARM, UD_FARM, 50, 50)
 
     override function onDeath(unit building, unit killer)
         numberOfFarms[Players.team(building.getOwner().getId())]--

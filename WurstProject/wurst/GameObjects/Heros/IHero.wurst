@@ -52,7 +52,6 @@ public interface IHero
     function destroyTimer()
     function updateCooldowns()
     function toUnit() returns unit
-    function morph() // some unit natives need to be updated whenever the unit type changes, such as weapon field modifications
     function disableSkills(bool flag, bool hide)
     function duplicate(bool disableInventory, bool disableSpells) returns IHero
     function duplicate() returns IHero

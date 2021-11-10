@@ -56,7 +56,7 @@ public class TowerAI
             g.remove(u)
             let id = u.getTypeId()
             
-            if id == BASE_TOWER or id == GATE_TOWER or id == OUTER_TOWER
+            if id == HU_BASE_TOWER or id == HU_GATE_TOWER or id == HU_OUTER_TOWER or id == UD_BASE_TOWER or id == UD_GATE_TOWER or id == UD_OUTER_TOWER
                 new TowerAI(u)
 
         GroupEnumUnitsOfPlayer(g, players[Teams.army2()], null)
@@ -68,7 +68,7 @@ public class TowerAI
             g.remove(u)
             let id = u.getTypeId()
             
-            if id == BASE_TOWER or id == GATE_TOWER or id == OUTER_TOWER
+            if id == HU_BASE_TOWER or id == HU_GATE_TOWER or id == HU_OUTER_TOWER or id == UD_BASE_TOWER or id == UD_GATE_TOWER or id == UD_OUTER_TOWER
                 new TowerAI(u)
 
         g.destr()

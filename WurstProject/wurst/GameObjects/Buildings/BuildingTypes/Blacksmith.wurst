@@ -3,15 +3,32 @@ package Blacksmith
 import BuildingsInclude
 import Stats
 
-
 public unit array blacksmith = [udg_GreenBlacksmith[0], udg_GreenBlacksmith[1], udg_BrownBlacksmith[0], udg_BrownBlacksmith[1]]
 public boolean array blacksmithAlive = [true, true, true, true]
 
 constant SOUND_UPGRADE = new SoundDefinition(Sounds.blacksmithWhat1, false, true)
 
+function getUpgrade(player armyPlayer, int index) returns int
+    let p = armyPlayer.getId()
+    if Players.isArmy1(p)
+        return HU_UPGRADES[index]
+    if Players.isArmy1(p)
+        return UD_UPGRADES[index]
+    return -1
+
+function getUpgradeItem(player armyPlayer, int index) returns int
+    let p = armyPlayer.getId()
+    if Players.isArmy1(p)
+        return HU_UPGRADE_ITEMS[index]
+    if Players.isArmy1(p)
+        return UD_UPGRADE_ITEMS[index]
+    return -1
+
+
+
 public class Blacksmith extends Building
     construct()
-        super(BLACKSMITH, 50, 50)
+        super(HU_TECH, UD_TECH, 50, 50)
 
     override function onDeath(unit building, unit killer)
         for i = 0 to 3
@@ -20,16 +37,17 @@ public class Blacksmith extends Building
 
     override function onCast(unit building, int itemId, unit hero)
         let heroPos = hero.getPos3Zero()
+        let p = building.getOwner()
         for i = 0 to 3
-            if itemId == UPGRADE_ITEMS[i]
+            if itemId == getUpgradeItem(p, i)
                 SOUND_UPGRADE.playOnPoint(heroPos).snd.setVolume(150)
-                let current = GetPlayerTechCount(building.getOwner(), UPGRADES[i], true)
+                let current = GetPlayerTechCount(p, getUpgrade(p, i), true)
                 if current == 4
-                    SetPlayerTechMaxAllowed(building.getOwner(), itemId, 0)
-                SetPlayerTechResearched(building.getOwner(), UPGRADES[i], current + 1)
+                    SetPlayerTechMaxAllowed(p, itemId, 0)
+                SetPlayerTechResearched(p, getUpgrade(p, i), current + 1)
 
                 let g = CreateGroup()
-                GroupEnumUnitsOfPlayer(g, building.getOwner(), null)
+                GroupEnumUnitsOfPlayer(g, p, null)
                 unit u
                 while(true)
                     u = FirstOfGroup(g)
@@ -47,6 +65,7 @@ public class Blacksmith extends Building
                         ..modStrength(0)
                         ..modAgility(0)
                 g.destr()
+    
 
     static function findNextUpgrade(int team) returns int
 
@@ -55,14 +74,14 @@ public class Blacksmith extends Building
         int max = 5
         int index = -1
         for i = 0 to 3
-            upgrades[i] = GetPlayerTechCount(teamPlayer, UPGRADES[i], true)
+            upgrades[i] = GetPlayerTechCount(teamPlayer, getUpgrade(teamPlayer, i), true)
             if upgrades[i] < max
                 max = upgrades[i]
                 index = i
 
         int ret = -1
         if index != -1
-            ret = UPGRADE_ITEMS[index]
+            ret = getUpgradeItem(teamPlayer, index)
 
         return ret
 

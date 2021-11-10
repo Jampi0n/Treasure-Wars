@@ -46,10 +46,6 @@ rect gg_rct_CornerTopGreen= null
 rect gg_rct_CornerTopBrown= null
 rect gg_rct_CornerBotGreen= null
 rect gg_rct_CornerBotBrown= null
-rect gg_rct_GreenShops1= null
-rect gg_rct_GreenShops2= null
-rect gg_rct_BrownShops1= null
-rect gg_rct_BrownShops2= null
 rect gg_rct_GreenWorkShopTop= null
 rect gg_rct_GreenWorkShopBot= null
 rect gg_rct_BrownWorkShopTop= null
@@ -88,33 +84,29 @@ rect gg_rct_GreenFarmsBot= null
 rect gg_rct_BrownFarmsBot= null
 rect gg_rct_BrownFarmsMid= null
 rect gg_rct_BrownFarmsTop= null
-camerasetup gg_cam_Camera_001= null
-camerasetup gg_cam_Camera_002= null
-camerasetup gg_cam_Camera_003= null
-camerasetup gg_cam_LoadingScreen= null
 trigger gg_trg_Init= null
 trigger gg_trg_FogOfWar= null
 unit gg_unit_h016_0154= null
 unit gg_unit_h016_0153= null
 unit gg_unit_h00A_0013= null
 unit gg_unit_h004_0014= null
-unit gg_unit_h016_0157= null
+unit gg_unit_h01V_0151= null
 unit gg_unit_h004_0017= null
 unit gg_unit_h003_0019= null
-unit gg_unit_h009_0037= null
-unit gg_unit_h016_0152= null
+unit gg_unit_h01S_0018= null
+unit gg_unit_h01V_0105= null
 unit gg_unit_h003_0023= null
 unit gg_unit_h003_0025= null
 unit gg_unit_h006_0026= null
 unit gg_unit_n000_0027= null
-unit gg_unit_h016_0151= null
+unit gg_unit_h01V_0156= null
 unit gg_unit_h016_0150= null
 unit gg_unit_h009_0015= null
-unit gg_unit_h016_0156= null
+unit gg_unit_h01V_0152= null
 unit gg_unit_h009_0041= null
 unit gg_unit_h016_0155= null
 unit gg_unit_h00A_0045= null
-unit gg_unit_h009_0091= null
+unit gg_unit_h01S_0037= null
 unit gg_unit_h001_0047= null
 unit gg_unit_n00I_0048= null
 unit gg_unit_h006_0049= null
@@ -123,31 +115,31 @@ unit gg_unit_h009_0002= null
 unit gg_unit_h006_0052= null
 unit gg_unit_h006_0053= null
 unit gg_unit_h006_0054= null
-unit gg_unit_h00A_0064= null
-unit gg_unit_h004_0065= null
-unit gg_unit_h009_0066= null
-unit gg_unit_h004_0068= null
-unit gg_unit_h003_0070= null
+unit gg_unit_h01P_0082= null
+unit gg_unit_n011_0104= null
+unit gg_unit_h01R_0068= null
+unit gg_unit_h01S_0087= null
 unit gg_unit_h009_0016= null
-unit gg_unit_h003_0074= null
-unit gg_unit_h003_0076= null
-unit gg_unit_h006_0077= null
-unit gg_unit_h009_0018= null
-unit gg_unit_h009_0057= null
-unit gg_unit_h009_0087= null
-unit gg_unit_h016_0158= null
-unit gg_unit_h016_0159= null
-unit gg_unit_h00A_0095= null
-unit gg_unit_h001_0097= null
-unit gg_unit_h006_0099= null
-unit gg_unit_h006_0100= null
-unit gg_unit_h006_0102= null
-unit gg_unit_h006_0103= null
-unit gg_unit_h006_0104= null
-unit gg_unit_n000_0105= null
-unit gg_unit_n00K_0007= null
-unit gg_unit_h009_0042= null
+unit gg_unit_h01O_0070= null
+unit gg_unit_h01O_0074= null
+unit gg_unit_h01T_0103= null
+unit gg_unit_h01S_0091= null
+unit gg_unit_h01R_0065= null
 unit gg_unit_h009_0003= null
+unit gg_unit_h01U_0095= null
+unit gg_unit_h016_0159= null
+unit gg_unit_h01U_0064= null
+unit gg_unit_h01O_0076= null
+unit gg_unit_h01T_0077= null
+unit gg_unit_h01T_0101= null
+unit gg_unit_h01T_0100= null
+unit gg_unit_h01S_0066= null
+unit gg_unit_h01T_0099= null
+unit gg_unit_h01S_0057= null
+unit gg_unit_n00K_0007= null
+unit gg_unit_h01V_0157= null
+unit gg_unit_h01T_0102= null
+unit gg_unit_h009_0042= null
 
 
 //JASSHelper struct globals:
@@ -258,58 +250,58 @@ function CreateBuildingsForPlayer11 takes nothing returns nothing
     local trigger t
     local real life
 
-    set gg_unit_h009_0018=BlzCreateUnitWithSkin(p, 'h009', 6016.0, 7936.0, 270.000, 'h009')
-    set gg_unit_h009_0037=BlzCreateUnitWithSkin(p, 'h009', 7040.0, 7552.0, 270.000, 'h009')
-    set u=BlzCreateUnitWithSkin(p, 'h007', 5888.0, 7424.0, 270.000, 'h007')
-    set u=BlzCreateUnitWithSkin(p, 'h007', 5632.0, 4864.0, 270.000, 'h007')
-    set gg_unit_h009_0057=BlzCreateUnitWithSkin(p, 'h009', 7936.0, 6016.0, 270.000, 'h009')
-    set u=BlzCreateUnitWithSkin(p, 'h007', 6528.0, 5760.0, 270.000, 'h007')
-    set u=BlzCreateUnitWithSkin(p, 'h007', 5632.0, 4480.0, 270.000, 'h007')
-    set u=BlzCreateUnitWithSkin(p, 'h007', 5888.0, 4864.0, 270.000, 'h007')
-    set u=BlzCreateUnitWithSkin(p, 'h007', 8448.0, 6144.0, 270.000, 'h007')
-    set u=BlzCreateUnitWithSkin(p, 'h007', 5760.0, 5248.0, 270.000, 'h007')
-    set gg_unit_h00A_0064=BlzCreateUnitWithSkin(p, 'h00A', 4928.0, 8256.0, 270.000, 'h00A')
-    set gg_unit_h004_0065=BlzCreateUnitWithSkin(p, 'h004', 7232.0, 4928.0, 270.000, 'h004')
-    set gg_unit_h009_0066=BlzCreateUnitWithSkin(p, 'h009', 6272.0, 6016.0, 270.000, 'h009')
-    set gg_unit_h004_0068=BlzCreateUnitWithSkin(p, 'h004', 4928.0, 7232.0, 270.000, 'h004')
-    set gg_unit_h003_0070=BlzCreateUnitWithSkin(p, 'h003', 6208.0, 6208.0, 270.000, 'h003')
-    set u=BlzCreateUnitWithSkin(p, 'h007', 7424.0, 6144.0, 270.000, 'h007')
-    set u=BlzCreateUnitWithSkin(p, 'h007', 7424.0, 5888.0, 270.000, 'h007')
-    set u=BlzCreateUnitWithSkin(p, 'h007', 7040.0, 4608.0, 270.000, 'h007')
-    set gg_unit_h003_0074=BlzCreateUnitWithSkin(p, 'h003', 6208.0, 8128.0, 270.000, 'h003')
-    set u=BlzCreateUnitWithSkin(p, 'h007', 4864.0, 5632.0, 270.000, 'h007')
-    set gg_unit_h003_0076=BlzCreateUnitWithSkin(p, 'h003', 8128.0, 6208.0, 270.000, 'h003')
-    set gg_unit_h006_0077=BlzCreateUnitWithSkin(p, 'h006', 4544.0, 7360.0, 270.000, 'h006')
-    set u=BlzCreateUnitWithSkin(p, 'h007', 8320.0, 5632.0, 270.000, 'h007')
-    set u=BlzCreateUnitWithSkin(p, 'h007', 6272.0, 5504.0, 270.000, 'h007')
-    set u=BlzCreateUnitWithSkin(p, 'h007', 7296.0, 5248.0, 270.000, 'h007')
-    set u=BlzCreateUnitWithSkin(p, 'h007', 8448.0, 5888.0, 270.000, 'h007')
-    set u=BlzCreateUnitWithSkin(p, 'h007', 5504.0, 6272.0, 270.000, 'h007')
-    set u=BlzCreateUnitWithSkin(p, 'h007', 5760.0, 6528.0, 270.000, 'h007')
-    set u=BlzCreateUnitWithSkin(p, 'h007', 6144.0, 7424.0, 270.000, 'h007')
-    set u=BlzCreateUnitWithSkin(p, 'h007', 5248.0, 7296.0, 270.000, 'h007')
-    set gg_unit_h009_0087=BlzCreateUnitWithSkin(p, 'h009', 6016.0, 6272.0, 270.000, 'h009')
-    set u=BlzCreateUnitWithSkin(p, 'h007', 5248.0, 5760.0, 270.000, 'h007')
-    set u=BlzCreateUnitWithSkin(p, 'h007', 4864.0, 5888.0, 270.000, 'h007')
-    set gg_unit_h009_0091=BlzCreateUnitWithSkin(p, 'h009', 7552.0, 7040.0, 270.000, 'h009')
-    set u=BlzCreateUnitWithSkin(p, 'h007', 4480.0, 5632.0, 270.000, 'h007')
-    set u=BlzCreateUnitWithSkin(p, 'h007', 4608.0, 7040.0, 270.000, 'h007')
-    set gg_unit_h00A_0095=BlzCreateUnitWithSkin(p, 'h00A', 8256.0, 4928.0, 270.000, 'h00A')
-    set u=BlzCreateUnitWithSkin(p, 'h007', 5632.0, 8320.0, 270.000, 'h007')
-    set gg_unit_h001_0097=BlzCreateUnitWithSkin(p, 'h001', 7296.0, 7296.0, 270.000, 'h001')
-    set gg_unit_h006_0099=BlzCreateUnitWithSkin(p, 'h006', 5312.0, 4672.0, 270.000, 'h006')
-    set gg_unit_h006_0100=BlzCreateUnitWithSkin(p, 'h006', 4672.0, 5312.0, 270.000, 'h006')
-    set u=BlzCreateUnitWithSkin(p, 'h007', 5888.0, 8448.0, 270.000, 'h007')
-    set gg_unit_h006_0102=BlzCreateUnitWithSkin(p, 'h006', 7360.0, 4544.0, 270.000, 'h006')
-    set gg_unit_h006_0103=BlzCreateUnitWithSkin(p, 'h006', 4544.0, 8128.0, 270.000, 'h006')
-    set gg_unit_h006_0104=BlzCreateUnitWithSkin(p, 'h006', 8128.0, 4544.0, 270.000, 'h006')
-    set gg_unit_n000_0105=BlzCreateUnitWithSkin(p, 'n000', 8640.0, 8640.0, 270.000, 'n000')
-    set gg_unit_h016_0151=BlzCreateUnitWithSkin(p, 'h016', 6912.0, - 768.0, 270.000, 'h016')
-    set gg_unit_h016_0152=BlzCreateUnitWithSkin(p, 'h016', - 896.0, 6912.0, 270.000, 'h016')
-    set gg_unit_h016_0156=BlzCreateUnitWithSkin(p, 'h016', 1344.0, 7232.0, 270.000, 'h016')
-    set gg_unit_h016_0157=BlzCreateUnitWithSkin(p, 'h016', 7488.0, 1600.0, 270.000, 'h016')
-    set gg_unit_h016_0158=BlzCreateUnitWithSkin(p, 'h016', 3072.0, 3072.0, 270.000, 'h016')
-    set u=BlzCreateUnitWithSkin(p, 'h007', 6144.0, 8448.0, 270.000, 'h007')
+    set gg_unit_h01S_0018=BlzCreateUnitWithSkin(p, 'h01S', 6016.0, 7936.0, 270.000, 'h01S')
+    set gg_unit_h01S_0037=BlzCreateUnitWithSkin(p, 'h01S', 7040.0, 7552.0, 270.000, 'h01S')
+    set u=BlzCreateUnitWithSkin(p, 'h01Q', 6144.0, 8448.0, 270.000, 'h01Q')
+    set u=BlzCreateUnitWithSkin(p, 'h01Q', 5888.0, 8448.0, 270.000, 'h01Q')
+    set gg_unit_h01S_0057=BlzCreateUnitWithSkin(p, 'h01S', 7936.0, 6016.0, 270.000, 'h01S')
+    set u=BlzCreateUnitWithSkin(p, 'h01Q', 5632.0, 8320.0, 270.000, 'h01Q')
+    set u=BlzCreateUnitWithSkin(p, 'h01Q', 5888.0, 7424.0, 270.000, 'h01Q')
+    set u=BlzCreateUnitWithSkin(p, 'h01Q', 6144.0, 7424.0, 270.000, 'h01Q')
+    set u=BlzCreateUnitWithSkin(p, 'h01Q', 5248.0, 7296.0, 270.000, 'h01Q')
+    set u=BlzCreateUnitWithSkin(p, 'h01Q', 5504.0, 6272.0, 270.000, 'h01Q')
+    set gg_unit_h01U_0064=BlzCreateUnitWithSkin(p, 'h01U', 4928.0, 8256.0, 270.000, 'h01U')
+    set gg_unit_h01R_0065=BlzCreateUnitWithSkin(p, 'h01R', 7232.0, 4928.0, 270.000, 'h01R')
+    set gg_unit_h01S_0066=BlzCreateUnitWithSkin(p, 'h01S', 6272.0, 6016.0, 270.000, 'h01S')
+    set gg_unit_h01R_0068=BlzCreateUnitWithSkin(p, 'h01R', 4928.0, 7232.0, 270.000, 'h01R')
+    set gg_unit_h01O_0070=BlzCreateUnitWithSkin(p, 'h01O', 8128.0, 6208.0, 270.000, 'h01O')
+    set u=BlzCreateUnitWithSkin(p, 'h01Q', 5760.0, 6528.0, 270.000, 'h01Q')
+    set u=BlzCreateUnitWithSkin(p, 'h01Q', 4608.0, 7040.0, 270.000, 'h01Q')
+    set u=BlzCreateUnitWithSkin(p, 'h01Q', 4864.0, 5888.0, 270.000, 'h01Q')
+    set gg_unit_h01O_0074=BlzCreateUnitWithSkin(p, 'h01O', 6208.0, 6208.0, 270.000, 'h01O')
+    set u=BlzCreateUnitWithSkin(p, 'h01Q', 5248.0, 5760.0, 270.000, 'h01Q')
+    set gg_unit_h01O_0076=BlzCreateUnitWithSkin(p, 'h01O', 6208.0, 8128.0, 270.000, 'h01O')
+    set gg_unit_h01T_0077=BlzCreateUnitWithSkin(p, 'h01T', 4544.0, 8128.0, 270.000, 'h01T')
+    set u=BlzCreateUnitWithSkin(p, 'h01Q', 4864.0, 5632.0, 270.000, 'h01Q')
+    set u=BlzCreateUnitWithSkin(p, 'h01Q', 4480.0, 5632.0, 270.000, 'h01Q')
+    set u=BlzCreateUnitWithSkin(p, 'h01Q', 5760.0, 5248.0, 270.000, 'h01Q')
+    set u=BlzCreateUnitWithSkin(p, 'h01Q', 5632.0, 4864.0, 270.000, 'h01Q')
+    set gg_unit_h01P_0082=BlzCreateUnitWithSkin(p, 'h01P', 7296.0, 7296.0, 270.000, 'h01P')
+    set u=BlzCreateUnitWithSkin(p, 'h01Q', 5888.0, 4864.0, 270.000, 'h01Q')
+    set u=BlzCreateUnitWithSkin(p, 'h01Q', 5632.0, 4480.0, 270.000, 'h01Q')
+    set u=BlzCreateUnitWithSkin(p, 'h01Q', 6272.0, 5504.0, 270.000, 'h01Q')
+    set u=BlzCreateUnitWithSkin(p, 'h01Q', 6528.0, 5760.0, 270.000, 'h01Q')
+    set gg_unit_h01S_0087=BlzCreateUnitWithSkin(p, 'h01S', 6016.0, 6272.0, 270.000, 'h01S')
+    set u=BlzCreateUnitWithSkin(p, 'h01Q', 7040.0, 4608.0, 270.000, 'h01Q')
+    set u=BlzCreateUnitWithSkin(p, 'h01Q', 7296.0, 5248.0, 270.000, 'h01Q')
+    set u=BlzCreateUnitWithSkin(p, 'h01Q', 7424.0, 5888.0, 270.000, 'h01Q')
+    set gg_unit_h01S_0091=BlzCreateUnitWithSkin(p, 'h01S', 7552.0, 7040.0, 270.000, 'h01S')
+    set u=BlzCreateUnitWithSkin(p, 'h01Q', 7424.0, 6144.0, 270.000, 'h01Q')
+    set u=BlzCreateUnitWithSkin(p, 'h01Q', 8320.0, 5632.0, 270.000, 'h01Q')
+    set gg_unit_h01U_0095=BlzCreateUnitWithSkin(p, 'h01U', 8256.0, 4928.0, 270.000, 'h01U')
+    set u=BlzCreateUnitWithSkin(p, 'h01Q', 8448.0, 5888.0, 270.000, 'h01Q')
+    set u=BlzCreateUnitWithSkin(p, 'h01Q', 8448.0, 6144.0, 270.000, 'h01Q')
+    set gg_unit_h01T_0099=BlzCreateUnitWithSkin(p, 'h01T', 4672.0, 5312.0, 270.000, 'h01T')
+    set gg_unit_h01T_0100=BlzCreateUnitWithSkin(p, 'h01T', 5312.0, 4672.0, 270.000, 'h01T')
+    set gg_unit_h01T_0101=BlzCreateUnitWithSkin(p, 'h01T', 4544.0, 7360.0, 270.000, 'h01T')
+    set gg_unit_h01T_0102=BlzCreateUnitWithSkin(p, 'h01T', 7360.0, 4544.0, 270.000, 'h01T')
+    set gg_unit_h01T_0103=BlzCreateUnitWithSkin(p, 'h01T', 8128.0, 4544.0, 270.000, 'h01T')
+    set gg_unit_n011_0104=BlzCreateUnitWithSkin(p, 'n011', 8640.0, 8640.0, 270.000, 'n011')
+    set gg_unit_h01V_0105=BlzCreateUnitWithSkin(p, 'h01V', 3072.0, 3072.0, 270.000, 'h01V')
+    set gg_unit_h01V_0151=BlzCreateUnitWithSkin(p, 'h01V', 6912.0, - 768.0, 270.000, 'h01V')
+    set gg_unit_h01V_0152=BlzCreateUnitWithSkin(p, 'h01V', - 1024.0, 6912.0, 270.000, 'h01V')
+    set gg_unit_h01V_0156=BlzCreateUnitWithSkin(p, 'h01V', 1344.0, 7232.0, 270.000, 'h01V')
+    set gg_unit_h01V_0157=BlzCreateUnitWithSkin(p, 'h01V', 7488.0, 1600.0, 270.000, 'h01V')
 endfunction
 
 //===========================================================================
@@ -324,48 +316,48 @@ function CreateNeutralHostile takes nothing returns nothing
     call SetUnitAcquireRange(gg_unit_n00K_0007, 200.0)
     set gg_unit_n00I_0048=BlzCreateUnitWithSkin(p, 'n00I', - 3845.2, 7821.4, 336.110, 'n00I')
     call SetUnitAcquireRange(gg_unit_n00I_0048, 200.0)
-    set u=BlzCreateUnitWithSkin(p, 'n00Z', 2858.4, 5404.5, 179.346, 'n00Z')
+    set u=BlzCreateUnitWithSkin(p, 'n00V', 2858.4, 5404.5, 179.350, 'n00V')
     set u=BlzCreateUnitWithSkin(p, 'n00Y', 3074.3, 5227.0, 260.730, 'n00Y')
-    set u=BlzCreateUnitWithSkin(p, 'n00P', - 1185.3, 986.8, 69.996, 'n00P')
+    set u=BlzCreateUnitWithSkin(p, 'n00J', - 1185.3, 986.8, 69.996, 'n00J')
     set u=BlzCreateUnitWithSkin(p, 'n00W', 3585.7, - 1500.7, 13.868, 'n00W')
     set u=BlzCreateUnitWithSkin(p, 'n00X', 3698.9, - 1364.4, 347.250, 'n00X')
     set u=BlzCreateUnitWithSkin(p, 'n00X', 3735.1, - 1609.7, 3.375, 'n00X')
     set u=BlzCreateUnitWithSkin(p, 'n00S', 5707.9, - 500.9, 136.050, 'n00S')
     set u=BlzCreateUnitWithSkin(p, 'n00S', 5595.1, - 609.6, 112.971, 'n00S')
     set u=BlzCreateUnitWithSkin(p, 'n00Q', 5740.6, - 634.3, 107.400, 'n00Q')
-    set u=BlzCreateUnitWithSkin(p, 'n00P', 5563.0, 3034.1, 248.588, 'n00P')
+    set u=BlzCreateUnitWithSkin(p, 'n00J', 5563.0, 3034.1, 248.588, 'n00J')
     set u=BlzCreateUnitWithSkin(p, 'n00R', 5415.2, 3109.1, 238.390, 'n00R')
     set u=BlzCreateUnitWithSkin(p, 'n00L', 3782.3, 1572.2, 289.339, 'n00L')
     set u=BlzCreateUnitWithSkin(p, 'n00M', 4926.2, 425.0, 69.605, 'n00M')
     set u=BlzCreateUnitWithSkin(p, 'n00T', 1943.0, 3873.6, 126.910, 'n00T')
-    set u=BlzCreateUnitWithSkin(p, 'n00J', 2048.3, 4096.2, 130.664, 'n00J')
-    set u=BlzCreateUnitWithSkin(p, 'n00J', 1743.9, 3853.1, 123.732, 'n00J')
+    set u=BlzCreateUnitWithSkin(p, 'n012', 2050.7, 28.5, 310.869, 'n012')
+    set u=BlzCreateUnitWithSkin(p, 'n012', 2330.7, 242.0, 300.171, 'n012')
     set u=BlzCreateUnitWithSkin(p, 'n00U', 1701.6, 4023.8, 124.147, 'n00U')
     set u=BlzCreateUnitWithSkin(p, 'n00U', 1899.4, 4184.1, 129.885, 'n00U')
     set u=BlzCreateUnitWithSkin(p, 'n00M', - 665.6, 3528.9, 239.985, 'n00M')
     set u=BlzCreateUnitWithSkin(p, 'n00M', - 799.5, 3667.5, 249.605, 'n00M')
     set u=BlzCreateUnitWithSkin(p, 'n00L', 324.4, 2547.2, 109.339, 'n00L')
     set u=BlzCreateUnitWithSkin(p, 'n00L', 544.4, 2607.9, 98.639, 'n00L')
-    set u=BlzCreateUnitWithSkin(p, 'n00V', 485.4, 2418.6, 104.255, 'n00V')
+    set u=BlzCreateUnitWithSkin(p, 'n00P', 485.4, 2418.6, 104.255, 'n00P')
     set u=BlzCreateUnitWithSkin(p, 'n00Y', 1052.3, - 1134.6, 80.730, 'n00Y')
     set u=BlzCreateUnitWithSkin(p, 'n00R', - 1395.8, 987.6, 70.191, 'n00R')
-    set u=BlzCreateUnitWithSkin(p, 'n00P', - 1519.4, 1129.8, 63.990, 'n00P')
+    set u=BlzCreateUnitWithSkin(p, 'n00J', - 1519.4, 1129.8, 63.990, 'n00J')
     set u=BlzCreateUnitWithSkin(p, 'n00Q', - 1614.0, 4726.7, 287.400, 'n00Q')
     set u=BlzCreateUnitWithSkin(p, 'n00S', - 1468.5, 4702.1, 292.971, 'n00S')
     set u=BlzCreateUnitWithSkin(p, 'n00S', - 1581.3, 4593.4, 316.050, 'n00S')
     set u=BlzCreateUnitWithSkin(p, 'n00X', 391.5, 5702.2, 183.375, 'n00X')
     set u=BlzCreateUnitWithSkin(p, 'n00X', 427.7, 5456.9, 167.250, 'n00X')
     set u=BlzCreateUnitWithSkin(p, 'n00W', 540.9, 5593.1, 193.868, 'n00W')
-    set u=BlzCreateUnitWithSkin(p, 'n00V', 3621.3, 1700.9, 284.255, 'n00V')
+    set u=BlzCreateUnitWithSkin(p, 'n00P', 3621.3, 1700.9, 284.255, 'n00P')
     set u=BlzCreateUnitWithSkin(p, 'n00L', 3562.3, 1511.6, 278.639, 'n00L')
     set u=BlzCreateUnitWithSkin(p, 'n00T', 2183.6, 218.9, 306.910, 'n00T')
-    set u=BlzCreateUnitWithSkin(p, 'n00J', 2078.3, - 3.7, 310.664, 'n00J')
-    set u=BlzCreateUnitWithSkin(p, 'n00J', 2382.7, 239.4, 303.732, 'n00J')
+    set u=BlzCreateUnitWithSkin(p, 'n012', 2039.1, 4087.2, 130.869, 'n012')
+    set u=BlzCreateUnitWithSkin(p, 'n012', 1759.0, 3873.7, 120.171, 'n012')
     set u=BlzCreateUnitWithSkin(p, 'n00U', 2425.0, 68.7, 304.147, 'n00U')
     set u=BlzCreateUnitWithSkin(p, 'n00U', 2227.2, - 91.7, 309.885, 'n00U')
     set u=BlzCreateUnitWithSkin(p, 'n00M', 4792.3, 563.6, 59.985, 'n00M')
-    set u=BlzCreateUnitWithSkin(p, 'n00Z', 1268.3, - 1312.0, 359.346, 'n00Z')
-    set u=BlzCreateUnitWithSkin(p, 'n00P', 5178.5, 3110.5, 251.083, 'n00P')
+    set u=BlzCreateUnitWithSkin(p, 'n00V', 1268.3, - 1312.0, 359.346, 'n00V')
+    set u=BlzCreateUnitWithSkin(p, 'n00J', 5178.5, 3110.5, 251.083, 'n00J')
 endfunction
 
 //===========================================================================
@@ -419,10 +411,6 @@ function CreateRegions takes nothing returns nothing
     set gg_rct_CornerTopBrown=Rect(- 1664.0, 6400.0, - 1280.0, 6784.0)
     set gg_rct_CornerBotGreen=Rect(5376.0, - 2688.0, 5760.0, - 2304.0)
     set gg_rct_CornerBotBrown=Rect(6400.0, - 1664.0, 6784.0, - 1280.0)
-    set gg_rct_GreenShops1=Rect(- 4608.0, - 4096.0, - 4480.0, - 3328.0)
-    set gg_rct_GreenShops2=Rect(- 4096.0, - 4608.0, - 3328.0, - 4480.0)
-    set gg_rct_BrownShops1=Rect(8576.0, 7424.0, 8704.0, 8192.0)
-    set gg_rct_BrownShops2=Rect(7424.0, 8576.0, 8192.0, 8704.0)
     set gg_rct_GreenWorkShopTop=Rect(- 4032.0, - 960.0, - 3776.0, - 704.0)
     set gg_rct_GreenWorkShopBot=Rect(- 960.0, - 4032.0, - 704.0, - 3776.0)
     set gg_rct_BrownWorkShopTop=Rect(4800.0, 7872.0, 5056.0, 8128.0)
@@ -445,10 +433,10 @@ function CreateRegions takes nothing returns nothing
     set gg_rct_BrownBotHome=Rect(7232.0, 3584.0, 8256.0, 4352.0)
     set gg_rct_BrownMidHome=Rect(4096.0, 4096.0, 5120.0, 5120.0)
     set gg_rct_BrownTopHome=Rect(3584.0, 7232.0, 4352.0, 8256.0)
-    set gg_rct_GreenBaseVision1=Rect(- 8192.0, - 8192.0, - 1024.0, - 128.0)
-    set gg_rct_GreenBaseVision2=Rect(- 1024.0, - 8192.0, - 128.0, - 1024.0)
-    set gg_rct_BrownBaseVision1=Rect(5120.0, 4256.0, 12288.0, 12288.0)
-    set gg_rct_BrownBaseVision2=Rect(4096.0, 5120.0, 5120.0, 12288.0)
+    set gg_rct_GreenBaseVision1=Rect(- 6144.0, - 6144.0, - 1024.0, - 128.0)
+    set gg_rct_GreenBaseVision2=Rect(- 1024.0, - 6144.0, - 128.0, - 1024.0)
+    set gg_rct_BrownBaseVision1=Rect(5120.0, 4256.0, 10240.0, 10240.0)
+    set gg_rct_BrownBaseVision2=Rect(4096.0, 5120.0, 5120.0, 10240.0)
     set gg_rct_BrownHeroTower=Rect(7168.0, 7168.0, 8768.0, 8768.0)
     set gg_rct_GreenHeroTower=Rect(- 4672.0, - 4672.0, - 3072.0, - 3072.0)
     set gg_rct_GreenTopFirst=Rect(- 3840.0, 512.0, - 3328.0, 1024.0)
@@ -465,72 +453,6 @@ endfunction
 
 //***************************************************************************
 //*
-//*  Cameras
-//*
-//***************************************************************************
-
-function CreateCameras takes nothing returns nothing
-
-    set gg_cam_Camera_001=CreateCameraSetup()
-    call CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_ZOFFSET, 0.0, 0.0)
-    call CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_ROTATION, 90.0, 0.0)
-    call CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_ANGLE_OF_ATTACK, 270.0, 0.0)
-    call CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_TARGET_DISTANCE, 17424.0, 0.0)
-    call CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_ROLL, 0.0, 0.0)
-    call CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_FIELD_OF_VIEW, 70.0, 0.0)
-    call CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_FARZ, 10000.0, 0.0)
-    call CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_NEARZ, 100.0, 0.0)
-    call CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_LOCAL_PITCH, 0.0, 0.0)
-    call CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_LOCAL_YAW, 0.0, 0.0)
-    call CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_LOCAL_ROLL, 0.0, 0.0)
-    call CameraSetupSetDestPosition(gg_cam_Camera_001, 0.0, 0.0, 0.0)
-
-    set gg_cam_Camera_002=CreateCameraSetup()
-    call CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_ZOFFSET, 200.0, 0.0)
-    call CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_ROTATION, 25.6, 0.0)
-    call CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_ANGLE_OF_ATTACK, 342.9, 0.0)
-    call CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_TARGET_DISTANCE, 4209.4, 0.0)
-    call CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_ROLL, 0.0, 0.0)
-    call CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_FIELD_OF_VIEW, 70.0, 0.0)
-    call CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_FARZ, 10000.0, 0.0)
-    call CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_NEARZ, 100.0, 0.0)
-    call CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_LOCAL_PITCH, 0.0, 0.0)
-    call CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_LOCAL_YAW, 0.0, 0.0)
-    call CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_LOCAL_ROLL, 0.0, 0.0)
-    call CameraSetupSetDestPosition(gg_cam_Camera_002, - 3445.2, - 1297.2, 0.0)
-
-    set gg_cam_Camera_003=CreateCameraSetup()
-    call CameraSetupSetField(gg_cam_Camera_003, CAMERA_FIELD_ZOFFSET, 0.0, 0.0)
-    call CameraSetupSetField(gg_cam_Camera_003, CAMERA_FIELD_ROTATION, 228.4, 0.0)
-    call CameraSetupSetField(gg_cam_Camera_003, CAMERA_FIELD_ANGLE_OF_ATTACK, 357.3, 0.0)
-    call CameraSetupSetField(gg_cam_Camera_003, CAMERA_FIELD_TARGET_DISTANCE, 6892.5, 0.0)
-    call CameraSetupSetField(gg_cam_Camera_003, CAMERA_FIELD_ROLL, 0.0, 0.0)
-    call CameraSetupSetField(gg_cam_Camera_003, CAMERA_FIELD_FIELD_OF_VIEW, 70.0, 0.0)
-    call CameraSetupSetField(gg_cam_Camera_003, CAMERA_FIELD_FARZ, 10000.0, 0.0)
-    call CameraSetupSetField(gg_cam_Camera_003, CAMERA_FIELD_NEARZ, 100.0, 0.0)
-    call CameraSetupSetField(gg_cam_Camera_003, CAMERA_FIELD_LOCAL_PITCH, 0.0, 0.0)
-    call CameraSetupSetField(gg_cam_Camera_003, CAMERA_FIELD_LOCAL_YAW, 0.0, 0.0)
-    call CameraSetupSetField(gg_cam_Camera_003, CAMERA_FIELD_LOCAL_ROLL, 0.0, 0.0)
-    call CameraSetupSetDestPosition(gg_cam_Camera_003, - 4957.1, - 5788.1, 0.0)
-
-    set gg_cam_LoadingScreen=CreateCameraSetup()
-    call CameraSetupSetField(gg_cam_LoadingScreen, CAMERA_FIELD_ZOFFSET, 0.0, 0.0)
-    call CameraSetupSetField(gg_cam_LoadingScreen, CAMERA_FIELD_ROTATION, 38.7, 0.0)
-    call CameraSetupSetField(gg_cam_LoadingScreen, CAMERA_FIELD_ANGLE_OF_ATTACK, 0.6, 0.0)
-    call CameraSetupSetField(gg_cam_LoadingScreen, CAMERA_FIELD_TARGET_DISTANCE, 3800.0, 0.0)
-    call CameraSetupSetField(gg_cam_LoadingScreen, CAMERA_FIELD_ROLL, 0.0, 0.0)
-    call CameraSetupSetField(gg_cam_LoadingScreen, CAMERA_FIELD_FIELD_OF_VIEW, 70.0, 0.0)
-    call CameraSetupSetField(gg_cam_LoadingScreen, CAMERA_FIELD_FARZ, 10000.0, 0.0)
-    call CameraSetupSetField(gg_cam_LoadingScreen, CAMERA_FIELD_NEARZ, 100.0, 0.0)
-    call CameraSetupSetField(gg_cam_LoadingScreen, CAMERA_FIELD_LOCAL_PITCH, 0.0, 0.0)
-    call CameraSetupSetField(gg_cam_LoadingScreen, CAMERA_FIELD_LOCAL_YAW, 0.0, 0.0)
-    call CameraSetupSetField(gg_cam_LoadingScreen, CAMERA_FIELD_LOCAL_ROLL, 0.0, 0.0)
-    call CameraSetupSetDestPosition(gg_cam_LoadingScreen, 5807.7, 6415.8, 0.0)
-
-endfunction
-
-//***************************************************************************
-//*
 //*  Custom Script Code
 //*
 //***************************************************************************
@@ -542,7 +464,7 @@ function CreateAltars takes nothing returns nothing
     call CreateUnit(Player(10), 'h002', x, y, 90)
     set x=GetRectCenterX(gg_rct_BrownAltar)
     set y=GetRectCenterY(gg_rct_BrownAltar)
-    call CreateUnit(Player(11), 'h002', x, y, 270)
+    call CreateUnit(Player(11), 'h01N', x, y, 270)
 endfunction
 //***************************************************************************
 //*
@@ -563,19 +485,19 @@ function Trig_Init_Actions takes nothing returns nothing
     set udg_GreenBarracks[0]=gg_unit_h003_0025
     set udg_GreenBarracks[1]=gg_unit_h003_0019
     set udg_GreenBarracks[2]=gg_unit_h003_0023
-    set udg_BrownBarracks[0]=gg_unit_h003_0074
-    set udg_BrownBarracks[1]=gg_unit_h003_0070
-    set udg_BrownBarracks[2]=gg_unit_h003_0076
+    set udg_BrownBarracks[0]=gg_unit_h01O_0076
+    set udg_BrownBarracks[1]=gg_unit_h01O_0074
+    set udg_BrownBarracks[2]=gg_unit_h01O_0070
     set udg_GreenWorkShop[0]=gg_unit_h00A_0045
     set udg_GreenWorkShop[1]=gg_unit_h00A_0013
-    set udg_BrownWorkShop[0]=gg_unit_h00A_0064
-    set udg_BrownWorkShop[1]=gg_unit_h00A_0095
+    set udg_BrownWorkShop[0]=gg_unit_h01U_0064
+    set udg_BrownWorkShop[1]=gg_unit_h01U_0095
     set udg_GreenHeroTower=gg_unit_n000_0027
-    set udg_BrownHeroTower=gg_unit_n000_0105
+    set udg_BrownHeroTower=gg_unit_n011_0104
     set udg_GreenBlacksmith[0]=gg_unit_h004_0014
     set udg_GreenBlacksmith[1]=gg_unit_h004_0017
-    set udg_BrownBlacksmith[0]=gg_unit_h004_0068
-    set udg_BrownBlacksmith[1]=gg_unit_h004_0065
+    set udg_BrownBlacksmith[0]=gg_unit_h01R_0068
+    set udg_BrownBlacksmith[1]=gg_unit_h01R_0065
     set udg_GreenTowersTop[0]=gg_unit_h016_0153
     set udg_GreenTowersTop[1]=gg_unit_h016_0154
     set udg_GreenTowersTop[2]=gg_unit_h006_0052
@@ -593,25 +515,25 @@ function Trig_Init_Actions takes nothing returns nothing
     set udg_GreenTowersBot[2]=gg_unit_h006_0053
     set udg_GreenTowersBot[3]=gg_unit_h006_0026
     set udg_GreenTowersBot[4]=gg_unit_h009_0041
-    set udg_BrownTowersTop[0]=gg_unit_h016_0152
-    set udg_BrownTowersTop[1]=gg_unit_h016_0156
-    set udg_BrownTowersTop[2]=gg_unit_h006_0103
-    set udg_BrownTowersTop[3]=gg_unit_h006_0077
-    set udg_BrownTowersTop[4]=gg_unit_h009_0018
-    set udg_BrownTowersMid[0]=gg_unit_h016_0158
-    set udg_BrownTowersMid[1]=gg_unit_h006_0100
-    set udg_BrownTowersMid[2]=gg_unit_h006_0099
-    set udg_BrownTowersMid[3]=gg_unit_h009_0087
-    set udg_BrownTowersMid[4]=gg_unit_h009_0066
-    set udg_BrownTowersMid[5]=gg_unit_h009_0037
-    set udg_BrownTowersMid[6]=gg_unit_h009_0091
-    set udg_BrownTowersBot[0]=gg_unit_h016_0151
-    set udg_BrownTowersBot[1]=gg_unit_h016_0157
-    set udg_BrownTowersBot[2]=gg_unit_h006_0102
-    set udg_BrownTowersBot[3]=gg_unit_h006_0104
-    set udg_BrownTowersBot[4]=gg_unit_h009_0057
+    set udg_BrownTowersTop[0]=gg_unit_h01V_0152
+    set udg_BrownTowersTop[1]=gg_unit_h01V_0156
+    set udg_BrownTowersTop[2]=gg_unit_h01T_0077
+    set udg_BrownTowersTop[3]=gg_unit_h01T_0101
+    set udg_BrownTowersTop[4]=gg_unit_h01S_0018
+    set udg_BrownTowersMid[0]=gg_unit_h01V_0105
+    set udg_BrownTowersMid[1]=gg_unit_h01T_0099
+    set udg_BrownTowersMid[2]=gg_unit_h01T_0100
+    set udg_BrownTowersMid[3]=gg_unit_h01S_0087
+    set udg_BrownTowersMid[4]=gg_unit_h01S_0066
+    set udg_BrownTowersMid[5]=gg_unit_h01S_0037
+    set udg_BrownTowersMid[6]=gg_unit_h01S_0091
+    set udg_BrownTowersBot[0]=gg_unit_h01V_0151
+    set udg_BrownTowersBot[1]=gg_unit_h01V_0157
+    set udg_BrownTowersBot[2]=gg_unit_h01T_0102
+    set udg_BrownTowersBot[3]=gg_unit_h01T_0103
+    set udg_BrownTowersBot[4]=gg_unit_h01S_0057
     set udg_GreenCastle=gg_unit_h001_0047
-    set udg_BrownCastle=gg_unit_h001_0097
+    set udg_BrownCastle=gg_unit_h01P_0082
     set bj_forLoopAIndex=0
     set bj_forLoopAIndexEnd=5
     loop
@@ -640,23 +562,8 @@ function InitTrig_Init takes nothing returns nothing
 endfunction
 
 //===========================================================================
-// Trigger: FogOfWar
-//===========================================================================
-function Trig_FogOfWar_Actions takes nothing returns nothing
-    call FogEnableOn()
-endfunction
-
-//===========================================================================
-function InitTrig_FogOfWar takes nothing returns nothing
-    set gg_trg_FogOfWar=CreateTrigger()
-    call TriggerRegisterTimerEventSingle(gg_trg_FogOfWar, 0.00)
-    call TriggerAddAction(gg_trg_FogOfWar, function Trig_FogOfWar_Actions)
-endfunction
-
-//===========================================================================
 function InitCustomTriggers takes nothing returns nothing
     call InitTrig_Init()
-    call InitTrig_FogOfWar()
 endfunction
 
 //===========================================================================
@@ -974,7 +881,7 @@ endfunction
 
 //===========================================================================
 function main takes nothing returns nothing
-    call SetCameraBounds(- 6144.0 + GetCameraMargin(CAMERA_MARGIN_LEFT), - 6144.0 + GetCameraMargin(CAMERA_MARGIN_BOTTOM), 10240.0 - GetCameraMargin(CAMERA_MARGIN_RIGHT), 10240.0 - GetCameraMargin(CAMERA_MARGIN_TOP), - 6144.0 + GetCameraMargin(CAMERA_MARGIN_LEFT), 10240.0 - GetCameraMargin(CAMERA_MARGIN_TOP), 10240.0 - GetCameraMargin(CAMERA_MARGIN_RIGHT), - 6144.0 + GetCameraMargin(CAMERA_MARGIN_BOTTOM))
+    call SetCameraBounds(- 5632.0 + GetCameraMargin(CAMERA_MARGIN_LEFT), - 5632.0 + GetCameraMargin(CAMERA_MARGIN_BOTTOM), 9728.0 - GetCameraMargin(CAMERA_MARGIN_RIGHT), 9728.0 - GetCameraMargin(CAMERA_MARGIN_TOP), - 5632.0 + GetCameraMargin(CAMERA_MARGIN_LEFT), 9728.0 - GetCameraMargin(CAMERA_MARGIN_TOP), 9728.0 - GetCameraMargin(CAMERA_MARGIN_RIGHT), - 5632.0 + GetCameraMargin(CAMERA_MARGIN_BOTTOM))
     call SetDayNightModels("Environment\\DNC\\DNCLordaeron\\DNCLordaeronTerrain\\DNCLordaeronTerrain.mdl", "Environment\\DNC\\DNCLordaeron\\DNCLordaeronUnit\\DNCLordaeronUnit.mdl")
     call SetTerrainFogEx(0, 3000.0, 8000.0, 0.500, 0.588, 0.686, 0.078)
     call NewSoundEnvironment("Default")
@@ -982,13 +889,12 @@ function main takes nothing returns nothing
     call SetAmbientNightSound("SunkenRuinsNight")
     call SetMapMusic("Music", true, 0)
     call CreateRegions()
-    call CreateCameras()
     call CreateAllUnits()
     call InitBlizzard()
 
 
     call InitGlobals()
-    call InitCustomTriggers()
+    call InitTrig_Init() // INLINED!!
     call ConditionalTriggerExecute(gg_trg_Init) // INLINED!!
 
 endfunction
