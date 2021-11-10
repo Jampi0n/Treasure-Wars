@@ -270,7 +270,7 @@ public abstract class DamageEvent
         let source = GetEventDamageSource()
         let target = GetTriggerUnit()
         real damage = GetEventDamage()
-        let attack = BlzGetEventWeaponType() != WEAPON_TYPE_WHOKNOWS
+        let attack = BlzGetEventDamageType() == DAMAGE_TYPE_NORMAL
         bool alternate = false
         bool arrow = false
 

@@ -61,6 +61,8 @@ function onHydraDeath()
             printTimed("Team "+teamName+" has killed a Hydra. Their heroes gain 3 stat upgrades for every stat. The Hydra will respawn in "+REVIVE_TIME.toInt().toString()+" seconds.", 10)
             PingMinimap(target.getX(), target.getY(), 3)
             PlayerWrapper.statHydrasKilled[killerId]++
+            for hero in Teams.HEROES[killingTeam]
+                hero.toUnit().hydraBonus()
 
         doAfter(REVIVE_TIME) ->
             udg_Hydra = createUnit(players[CREEP_NORMAL_OWNER], HYDRA, spawnPos, facing)
@@ -84,8 +86,7 @@ function unit.hydraBonus()
     ..modManaRegen(30)
 
 
-init
- 
+init 
     spawnPos = udg_Hydra.getPos() + vec2(-1,1) * 800
     hydraIcon = createUnit(players[CREEP_ICON_OWNER], HYDRA_ICON, spawnPos, angle(0))
     SetAltMinimapIcon("UI\\Minimap\\minimap-hydra.blp")

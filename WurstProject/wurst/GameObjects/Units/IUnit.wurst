@@ -16,7 +16,6 @@ import FastDamageEvent
 import initlater UnitLib
 import Assets
 import ClosureTimers
-import DamageIds
 
 class IUnitSingleton extends UnitWrapperSingleton
     override function createNew(unit u)
@@ -145,10 +144,6 @@ public class IUnit extends UnitWrapper
 
     function modLifesteal(int modifier)
         this.lifeSteal += modifier
-
-    function modArmorReductionRelative(int modifier)
-        this.armorReductionRelative += modifier
-        DamageEventUnit.fromUnit(this.toUnit()).saveIntFast(D_ARMOR_REDUCTION_RELATIVE, this.armorReductionRelative)
 
     override function applyDamage()
     override function applyArmor()

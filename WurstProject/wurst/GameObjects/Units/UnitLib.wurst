@@ -17,6 +17,12 @@ public enum ReductionType
     MAGIC
     NONE
 
+public abstract class DamageType
+    static constant ATTACK = DAMAGE_TYPE_NORMAL         // only used by attacks
+    static constant PHYSICAL = DAMAGE_TYPE_ENHANCED     // ReductionType.PHYSICAL
+    static constant MAGIC = DAMAGE_TYPE_MAGIC           // ReductionType.MAGIC
+    static constant UNIVERSAL = DAMAGE_TYPE_UNIVERSAL   // ReductionType.NONE
+
 ReductionType damageReductionType = ReductionType.NONE
 
 public function getDamageReductionType() returns ReductionType
@@ -126,17 +132,12 @@ public function unit.addBuffReduced(unit caster, real duration, BuffType buffTyp
 
 
 function unit.dealDamageAlways(unit target, real amount, ReductionType reductionType)
-    let damageType = reductionType == ReductionType.PHYSICAL ? DAMAGE_TYPE_NORMAL : DAMAGE_TYPE_UNIVERSAL
-    real newAmount
     if reductionType == ReductionType.MAGIC
-        let wp = target.getUnitWp()
-        newAmount = amount.reduceMagic(wp)
+        UnitDamageTarget(this, target, amount.reduceMagic(target.getUnitWp()), false, true, ATTACK_TYPE_NORMAL, DamageType.MAGIC, WEAPON_TYPE_WHOKNOWS)
+    else if reductionType == ReductionType.PHYSICAL
+        UnitDamageTarget(this, target, amount.reduceArmor(target.getArmor().round()), false, true, ATTACK_TYPE_NORMAL, DamageType.PHYSICAL, WEAPON_TYPE_WHOKNOWS)
     else
-        newAmount = amount
-    let prevReductionType = damageReductionType
-    damageReductionType = reductionType
-    UnitDamageTarget(this, target, newAmount, false, true, ATTACK_TYPE_NORMAL, damageType, WEAPON_TYPE_WHOKNOWS)
-    damageReductionType = prevReductionType
+        UnitDamageTarget(this, target, amount, false, true, ATTACK_TYPE_NORMAL, DamageType.UNIVERSAL, WEAPON_TYPE_WHOKNOWS)
 
 
 public function unit.dealDamage(unit target, real amount, ReductionType reductionType)

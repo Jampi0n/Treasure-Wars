@@ -17,7 +17,7 @@ import ItemsDefense
 import ClosureTimers
 import StandardBuffs
 import IUnit
-import Constants
+
 /*
 Optimized damage modification function.
 Items are handled by using DamageIds.
@@ -26,7 +26,7 @@ Heroes can generally be filtered by type ids.
 
 public abstract class ModDamage
     @inline
-    static function modDamage(unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, int sourceTypeId, int targetTypeId, real originalDamage, bool attack, bool _active, bool advanced) returns real
+    static function modDamage(unit source, unit target, DamageEventUnit _sourceWrapper, DamageEventUnit targetWrapper, int sourceTypeId, int targetTypeId, real originalDamage, bool attack, bool _active, bool advanced) returns real
         real currentDamage = originalDamage
         if originalDamage.abs() >= 0.000001 //damage very small, just ignore
             /*
@@ -53,13 +53,6 @@ public abstract class ModDamage
                     let deathFrenzyLevel = source.getAbilityLevel(HeroDestroyer.instance.ABILITY_ID_PASSIVE)
                     if deathFrenzyLevel > 0
                         currentDamage *= 1 + HeroDestroyer.DEATH_FRENZY_BONUS[deathFrenzyLevel-1]/100 * (1-source.getLife()/GetUnitState(source, UNIT_STATE_MAX_LIFE))
-
-                if BlzGetEventDamageType() == DAMAGE_TYPE_NORMAL
-                    if sourceWrapper.loadIntFast(D_ARMOR_REDUCTION_RELATIVE) > 0
-                        let beforeArmor = target.wrapper().getArmor()
-                        let afterArmor = beforeArmor * (1 - ARMOR_REDUCTION * 0.1 * sourceWrapper.loadIntFast(D_ARMOR_REDUCTION_RELATIVE))
-                        let armorFactor = (1 + ARMOR_REDUCTION * beforeArmor)/(1 + ARMOR_REDUCTION * afterArmor)
-                        currentDamage *= armorFactor
 
                 // the following effects manage damage taken (target based)
 

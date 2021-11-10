@@ -121,9 +121,6 @@ public function modManaRegenRelative(int modifier)
     
 public function modLifeSteal(int modifier)
     getItemUnitWrapper().modLifesteal(modifier * getItemSign())
-public function modArmorReductionRelative(int modifier)
-    getItemUnitWrapper().modArmorReductionRelative(modifier * getItemSign())
-
 
 public enum ItemStat
     STR
