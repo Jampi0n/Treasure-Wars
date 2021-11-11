@@ -2,6 +2,7 @@ package Castle
 
 import BuildingsInclude
 import TimerUtils
+import PathUnit
 
 constant SOUND_CALL_TO_ARMS = new SoundDefinition(Sounds.humanCallToArmsWhat1, false, true)
 
@@ -97,8 +98,10 @@ public class Castle extends Building
 		let team = Players.team(building.getOwner().getId())
 		if itemId == 'I006' //Call to Arms
 			SOUND_CALL_TO_ARMS.playOnPoint(heroPos).snd.setVolume(350)
+			let unitType = team == 0 ? MILITIA_DEFEND : MILITIA_DEFEND_2
 			for i = 0 to 15
-				let spawnedUnit = spawnUnit(TEAM_1, MILITIA_DEFEND, militaSpawn[team])
+				let spawnedUnit = spawnUnit(team, unitType, militaSpawn[team])
+				spawnedUnit.addBuff(spawnedUnit, -1, DEFEND_HOME_BASE, 1)
 				militia[team].add(spawnedUnit)
 			doAfter(45) () ->
 				removeMilitaTimer[team].startPeriodic(0.1, ()->onMilitiaDespawn())

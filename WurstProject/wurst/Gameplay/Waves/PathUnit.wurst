@@ -2,14 +2,17 @@ package PathUnit
 
 import HashMap
 import ClosureTimers
-import TeamUtil
+import UnitLib
+import IUnit
+import Buff
 import OnUnitEnterLeave
 import ErrorHandling
+import Icons
 
 constant DEBUG_LINES = false
 constant DEBUG_TEXT = false
-constant UPDATE_INTERVAL = 2.0
-constant NUM_GROUPS = 8
+constant UPDATE_INTERVAL = 1.5
+constant NUM_GROUPS = 6
 
 enum PathState
     HOME_TOWN
@@ -79,11 +82,12 @@ function getPathStage(AssignedPath path, vec2 pos) returns int
 
 group array attackMoveGroup
 group array returnMoveGroup
-group array passiveMoveGroup
 group array siegeMoveGroup
 
 vec2 array targetPoint
 vec2 array finalPoint
+
+vec2 array homeCastle
 
 function initTargetPoints()
     targetPoint[0] = gg_rct_GreenCastle.getCenter() + vec2(-500, -500)
@@ -127,8 +131,60 @@ function initTargetPoints()
     targetPoint[32] = gg_rct_BrownCastle.getCenter() + vec2(500, 500)
     targetPoint[33] = gg_rct_BrownCastle.getCenter() + vec2(500, 500)
 
-    finalPoint[Teams.army1()] = gg_rct_BrownCastle.getCenter() + vec2(500, 500)
-    finalPoint[Teams.army2()] = gg_rct_GreenCastle.getCenter() + vec2(-500, -500)
+    finalPoint[0] = gg_rct_BrownCastle.getCenter() + vec2(500, 500)
+    finalPoint[1] = gg_rct_GreenCastle.getCenter() + vec2(-500, -500)
+
+    homeCastle[0] = gg_rct_GreenCastle.getCenter()
+    homeCastle[1] = gg_rct_BrownCastle.getCenter()
+
+public constant DEFEND_HOME_BASE = compiletime(setupBuff("Home Base", "This unit has greatly increased combat stats.", Icons.bTNCallToArms, false, 1, "", "", DispelLevel.NONE))
+public constant DEFEND_HOME_SIDE = compiletime(setupBuff("Home Side", "This unit has slightly increased combat stats.", Icons.bTNCallToArms, false, 1, "", "", DispelLevel.NONE))
+
+function initBuffs()
+    DEFEND_HOME_BASE.addLevelFunction() (Buff thisBuff, int factor) ->
+        let target = thisBuff.getTarget().wrapper()
+        target.modAttackSpeed(35 * factor)
+        target.modStrengthRelative(250 * factor)
+        target.modArmor(25 * factor)
+    DEFEND_HOME_SIDE.addLevelFunction() (Buff thisBuff, int factor) ->
+        let target = thisBuff.getTarget().wrapper()
+        target.modAttackSpeed(15 * factor)
+        target.modStrengthRelative(100 * factor)
+        target.modArmor(10 * factor)
+
+
+function updatePositionalEffects(PathUnitNew u, vec2 pos)
+    // base:
+    // lInf distance to castle < 3040 &&    (rectangular corner around base)
+    // l1 distance to castle < 3529         (diagonal line for mid)
+    // defend:
+    // l1 distance to castle < 6833         (diagonal line close to center of the map)
+    let xDist = (pos.x - homeCastle[u.team].x).abs()
+    let yDist = (pos.y - homeCastle[u.team].y).abs()
+    let lInf = max(xDist, yDist)
+    let l1 = xDist + yDist
+    let target = u.whichUnit
+    if lInf < 3040 and l1 < 4400 //3529
+        target.addBuff(target, -1, DEFEND_HOME_BASE, 1)
+        let b = target.wrapper().getBuffOfType(DEFEND_HOME_SIDE)
+        if b != null
+            b.dispel()
+        //u.whichUnit.setVertexColor(0, 255, 0, 255)
+    else if l1 < 8800 //6833
+        target.addBuff(target, -1, DEFEND_HOME_SIDE, 1)
+        let b = target.wrapper().getBuffOfType(DEFEND_HOME_BASE)
+        if b != null
+            b.dispel()
+        //u.whichUnit.setVertexColor(127, 255, 127, 255)
+    else
+        var b = target.wrapper().getBuffOfType(DEFEND_HOME_BASE)
+        if b != null
+            b.dispel()
+        b = target.wrapper().getBuffOfType(DEFEND_HOME_SIDE)
+        if b != null
+            b.dispel()
+        //u.whichUnit.setVertexColor(255, 255, 255, 255)
+
 
 function attackMoveGroup()
     let u = GetEnumUnit()
@@ -138,13 +194,14 @@ function attackMoveGroup()
     if pathUnit == null
         return
     let pos = u.getPos()
+    updatePositionalEffects(pathUnit, pos)
     let stage = getPathStage(pathUnit.path, pos)
-    let dist = pathUnit.direction?pos.distanceToSegmentSq(targetPoint[stage*2-1], targetPoint[stage*2+1]):pos.distanceToSegmentSq(targetPoint[stage*2+2], targetPoint[stage*2])
+    let dist = pathUnit.team==0?pos.distanceToSegmentSq(targetPoint[stage*2-1], targetPoint[stage*2+1]):pos.distanceToSegmentSq(targetPoint[stage*2+2], targetPoint[stage*2])
     let index = pathUnit.index
 
     if dist <= DISTANCE_THRESHOLD
         pathUnit.lastValidPos = pos
-        if pathUnit.direction
+        if pathUnit.team==0
             if gg_rct_BrownBase.contains(pos)
                 pathUnit.state = PathStateNew.SIEGE_MOVE
                 attackMoveGroup[index].remove(u)
@@ -165,10 +222,7 @@ function attackMoveGroup()
             else
                 pathUnit.attacking = false
     else
-        if pathUnit.direction
-            u.issuePointOrder("move", targetPoint[stage*2+1])
-        else
-            u.issuePointOrder("move", targetPoint[stage*2])
+        u.issuePointOrder("move", targetPoint[stage*2+1 - pathUnit.team])
         pathUnit.state = PathStateNew.RETURN_MOVE
         attackMoveGroup[index].remove(u)
         returnMoveGroup[index].add(u)
@@ -183,13 +237,14 @@ function returnMoveGroup()
     if pathUnit == null
         return
     let pos = u.getPos()
+    updatePositionalEffects(pathUnit, pos)
     let stage = getPathStage(pathUnit.path, pos)
-    let dist = pathUnit.direction?pos.distanceToSegmentSq(targetPoint[stage*2-1], targetPoint[stage*2+1]):pos.distanceToSegmentSq(targetPoint[stage*2+2], targetPoint[stage*2])
+    let dist = pathUnit.team == 0?pos.distanceToSegmentSq(targetPoint[stage*2-1], targetPoint[stage*2+1]):pos.distanceToSegmentSq(targetPoint[stage*2+2], targetPoint[stage*2])
     let index = pathUnit.index
 
     if dist <= DISTANCE_THRESHOLD
         pathUnit.lastValidPos = pos
-        if pathUnit.direction
+        if pathUnit.team == 0
             if gg_rct_BrownBase.contains(pos)
                 pathUnit.state = PathStateNew.SIEGE_MOVE
                 returnMoveGroup[index].remove(u)
@@ -210,12 +265,10 @@ function returnMoveGroup()
                 attackMoveGroup[index].add(u)
             u.issuePointOrder("attack", targetPoint[stage*2])
     else
-        if pathUnit.direction
+        if pathUnit.team == 0
             u.issuePointOrder("move", targetPoint[stage*2+1])
         else
             u.issuePointOrder("move", targetPoint[stage*2])
-
-function passiveMoveGroup()
 
 function siegeMoveGroup()
     let u = GetEnumUnit()
@@ -224,8 +277,9 @@ function siegeMoveGroup()
     let pathUnit = PathUnitNew.unitToPathUnit.get(u)
     if pathUnit == null
         return
+    updatePositionalEffects(pathUnit, u.getPos())
     if not pathUnit.attacking
-        u.issuePointOrder("attack", finalPoint[u.getOwner().getId()])
+        u.issuePointOrder("attack", finalPoint[pathUnit.team])
     else
         pathUnit.attacking = false
 
@@ -233,14 +287,12 @@ function initMovement()
     for i = 0 to NUM_GROUPS - 1
         attackMoveGroup[i] = CreateGroup()
         returnMoveGroup[i] = CreateGroup()
-        passiveMoveGroup[i] = CreateGroup()
         siegeMoveGroup[i] = CreateGroup()
 
         doAfter(UPDATE_INTERVAL*(i/NUM_GROUPS)) () ->
             doPeriodically(UPDATE_INTERVAL) (CallbackPeriodic cb) ->
                 ForGroup(attackMoveGroup[i], function attackMoveGroup)
                 ForGroup(returnMoveGroup[i], function returnMoveGroup)
-                ForGroup(passiveMoveGroup[i], function passiveMoveGroup)
                 ForGroup(siegeMoveGroup[i], function siegeMoveGroup)
 
     onLeave() ->
@@ -251,7 +303,6 @@ function initMovement()
                 let index = pathUnit.index
                 attackMoveGroup[index].remove(u)
                 returnMoveGroup[index].remove(u)
-                passiveMoveGroup[index].remove(u)
                 siegeMoveGroup[index].remove(u)
                 destroy pathUnit
 
@@ -265,7 +316,7 @@ public class PathUnitNew
     protected PathStateNew state
     protected vec2 lastValidPos
     protected static constant unitToPathUnit = new HashMap<unit,PathUnitNew>
-    protected bool direction
+    protected int team
     protected bool attacking = false
     protected texttag info
     protected static PathUnitNew array allPathUnits
@@ -286,13 +337,15 @@ public class PathUnitNew
         let stage = getPathStage(path, whichUnit.getPos())
         attackMoveGroup[this.index].add(whichUnit)
         unitToPathUnit.put(whichUnit, this)
-        this.direction = path == AssignedPath.GREEN_TOP or path == AssignedPath.GREEN_MID or path == AssignedPath.GREEN_BOT
-        if this.direction
+        this.team = path == AssignedPath.GREEN_TOP or path == AssignedPath.GREEN_MID or path == AssignedPath.GREEN_BOT ? 0 : 1
+        if this.team == 0
             whichUnit.issuePointOrder("attack", targetPoint[stage*2+1])
             this.lastValidPos = targetPoint[stage*2]
         else
             whichUnit.issuePointOrder("attack", targetPoint[stage*2])
             this.lastValidPos = targetPoint[stage*2+1]
+
+        updatePositionalEffects(this, whichUnit.getPos())
 
         staticArrayIndex = numPathUnits
         allPathUnits[staticArrayIndex] = this
@@ -317,6 +370,7 @@ public class PathUnitNew
 init
     initTargetPoints()
     initMovement()
+    initBuffs()
     if DEBUG_TEXT or DEBUG_LINES
         doPeriodically(0.02) (CallbackPeriodic cb) ->
             for i = 0 to PathUnitNew.numPathUnits-1
@@ -325,11 +379,11 @@ init
                 p.info.setPos(p.whichUnit.getPos3with(10))
                 if DEBUG_TEXT
                     let pos = p.whichUnit.getPos()
-                    let dist = (p.direction?pos.distanceToSegmentSq(targetPoint[stage*2-1], targetPoint[stage*2+1]):pos.distanceToSegmentSq(targetPoint[stage*2+2], targetPoint[stage*2])).round()
+                    let dist = (p.team == 0?pos.distanceToSegmentSq(targetPoint[stage*2-1], targetPoint[stage*2+1]):pos.distanceToSegmentSq(targetPoint[stage*2+2], targetPoint[stage*2])).round()
                     p.info.setText(stage.toString() + " " + (p.state castTo int).toString() + " " + dist.toString(), 10)
                 if DEBUG_LINES
-                    let start = p.direction?targetPoint[stage*2-1]:targetPoint[stage*2+2]
-                    let _end = p.direction?targetPoint[stage*2+1]:targetPoint[stage*2]
+                    let start = p.team==0?targetPoint[stage*2-1]:targetPoint[stage*2+2]
+                    let _end = p.team==0?targetPoint[stage*2+1]:targetPoint[stage*2]
                     p.currentLineSegment.move(false, start, _end)
     
 
