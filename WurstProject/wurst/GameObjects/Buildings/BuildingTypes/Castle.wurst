@@ -96,7 +96,7 @@ public class Castle extends Building
 	override function onCast(unit building, int itemId, unit hero)
 		let heroPos = hero.getPos3Zero()
 		let team = Players.team(building.getOwner().getId())
-		if itemId == 'I006' //Call to Arms
+		if itemId == 'I006' or itemId == 'I00D' //Call to Arms
 			SOUND_CALL_TO_ARMS.playOnPoint(heroPos).snd.setVolume(350)
 			let unitType = team == 0 ? MILITIA_DEFEND : MILITIA_DEFEND_2
 			for i = 0 to 15
