@@ -137,8 +137,8 @@ function initTargetPoints()
     homeCastle[0] = gg_rct_GreenCastle.getCenter()
     homeCastle[1] = gg_rct_BrownCastle.getCenter()
 
-public constant DEFEND_HOME_BASE = compiletime(setupBuff("Home Base", "This unit has greatly increased combat stats.", Icons.bTNCallToArms, false, 1, "", "", DispelLevel.NONE))
-public constant DEFEND_HOME_SIDE = compiletime(setupBuff("Home Side", "This unit has slightly increased combat stats.", Icons.bTNCallToArms, false, 1, "", "", DispelLevel.NONE))
+public constant DEFEND_HOME_BASE = compiletime(setupBuff("Home Base", "This unit has greatly increased combat stats.", Icons.bTNCallToArms, true, 1, "", "", DispelLevel.NONE))
+public constant DEFEND_HOME_SIDE = compiletime(setupBuff("Home Side", "This unit has slightly increased combat stats.", Icons.bTNCallToArms, true, 1, "", "", DispelLevel.NONE))
 
 function initBuffs()
     DEFEND_HOME_BASE.addLevelFunction() (Buff thisBuff, int factor) ->
