@@ -187,20 +187,27 @@ function initPlayers()
     for i=PLAYER_NEUTRAL_AGGRESSIVE+1 to PLAYER_NEUTRAL_PASSIVE
         PlayerWrapper.createPlayerWrapper(i, PlayerType.NEUTRAL)
 
-    for i=0 to Teams.army2()
-        for j=0 to Teams.army2()
-
-            if i < MAX_HERO_COUNT or i == Teams.army1() or i == Teams.army2()
-                if j < MAX_HERO_COUNT or j == Teams.army1() or j == Teams.army2()
-
-                    if i!=j and Players.team(i) == Players.team(j)
-                        SetPlayerAllianceStateBJ(players[i],players[j], bj_ALLIANCE_ALLIED_VISION)
+    for i=0 to Teams.ignoreHero2()
+        for j=0 to Teams.ignoreHero2()
+            if i!=j and Players.team(i) == Players.team(j)
+                SetPlayerAllianceStateBJ(players[i],players[j], bj_ALLIANCE_ALLIED_VISION)
                 
     //armies do not fight vs creeps
     SetPlayerAlliance(players[Teams.army1()], players[PLAYER_NEUTRAL_AGGRESSIVE], ALLIANCE_PASSIVE, true)
     SetPlayerAlliance(players[Teams.army2()], players[PLAYER_NEUTRAL_AGGRESSIVE], ALLIANCE_PASSIVE, true)
     SetPlayerAlliance(players[PLAYER_NEUTRAL_AGGRESSIVE], players[Teams.army1()], ALLIANCE_PASSIVE, true)
     SetPlayerAlliance(players[PLAYER_NEUTRAL_AGGRESSIVE], players[Teams.army2()], ALLIANCE_PASSIVE, true)
+
+    SetPlayerAlliance(players[Teams.ignoreHero1()], players[PLAYER_NEUTRAL_AGGRESSIVE], ALLIANCE_PASSIVE, true)
+    SetPlayerAlliance(players[Teams.ignoreHero2()], players[PLAYER_NEUTRAL_AGGRESSIVE], ALLIANCE_PASSIVE, true)
+    SetPlayerAlliance(players[PLAYER_NEUTRAL_AGGRESSIVE], players[Teams.ignoreHero1()], ALLIANCE_PASSIVE, true)
+    SetPlayerAlliance(players[PLAYER_NEUTRAL_AGGRESSIVE], players[Teams.ignoreHero2()], ALLIANCE_PASSIVE, true)
+
+    //ignore hero players
+    for i = Teams.first1() to Teams.last1()
+        SetPlayerAlliance(players[Teams.ignoreHero2()], players[i], ALLIANCE_PASSIVE, true)
+    for i = Teams.first2() to Teams.last2()
+        SetPlayerAlliance(players[Teams.ignoreHero1()], players[i], ALLIANCE_PASSIVE, true)
 
 public class StatTable
 

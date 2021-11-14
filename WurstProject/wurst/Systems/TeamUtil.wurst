@@ -33,6 +33,7 @@ public constant TEAM_NEUTRAL = 2
 public abstract class Teams
     // basic types use inline functions with compiletime evaluation
     protected static constant ARMY = [10, 11, -1]
+    protected static constant IGNORE_HERO_ARMY = [12, 13, -1]
     protected static constant FROM = [0, 5, -1]
     protected static constant TO = [4, 9, -1]
     protected static constant FROM_1 = FROM[TEAM_1]
@@ -41,6 +42,8 @@ public abstract class Teams
     protected static constant TO_2 = TO[TEAM_2]
     protected static constant ARMY_1 = ARMY[TEAM_1]
     protected static constant ARMY_2 = ARMY[TEAM_2]
+    protected static constant IGNORE_HERO_1 = IGNORE_HERO_ARMY[TEAM_1]
+    protected static constant IGNORE_HERO_2 = IGNORE_HERO_ARMY[TEAM_2]
     // advanced types are accessed directly
     static constant NAME = ["Green","Brown","Neutral"]
     static constant COLOR = [
@@ -97,6 +100,16 @@ public abstract class Teams
     @inline static function army2() returns int
         return compiletime(ARMY_2)
 
+    @inline static function ignoreHero(int team) returns int
+        isValidArmyTeamIndex(team)
+        return IGNORE_HERO_ARMY[team]
+
+    @inline static function ignoreHero1() returns int
+        return compiletime(IGNORE_HERO_1)
+    
+    @inline static function ignoreHero2() returns int
+        return compiletime(IGNORE_HERO_2)
+
     @inline static function invert(int team) returns int
         isValidArmyTeamIndex(team)
         return 1 - team
@@ -131,7 +144,7 @@ public abstract class Teams
 
 
 public abstract class Players
-    protected static constant TEAM = [0,0,0,0,0,1,1,1,1,1,0,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]
+    protected static constant TEAM = [0,0,0,0,0,1,1,1,1,1,0,1,0,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]
     protected static string array NAME
     protected static string array COLOR
     protected static string array COLORED_NAME

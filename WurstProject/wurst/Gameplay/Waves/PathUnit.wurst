@@ -8,6 +8,8 @@ import Buff
 import OnUnitEnterLeave
 import ErrorHandling
 import Icons
+import TeamUtil
+import JVectors
 
 constant DEBUG_LINES = false
 constant DEBUG_TEXT = false
@@ -88,8 +90,18 @@ vec2 array targetPoint
 vec2 array finalPoint
 
 vec2 array homeCastle
+rect array baseRect
 
 function initTargetPoints()
+    /*
+        targetPoints:
+        green uses odd increasing numbers
+        brown uses even decreasing numbers
+
+        two target points are added to the start and end of every lane for functions that require a next and previous target point
+    */
+
+    // top
     targetPoint[0] = gg_rct_GreenCastle.getCenter() + vec2(-500, -500)
     targetPoint[1] = gg_rct_GreenCastle.getCenter() + vec2(-500, -500)
 
@@ -107,13 +119,17 @@ function initTargetPoints()
     targetPoint[12] = gg_rct_BrownCastle.getCenter() + vec2(500, 500)
     targetPoint[13] = gg_rct_BrownCastle.getCenter() + vec2(500, 500)
 
+    // mid
     targetPoint[14] = gg_rct_GreenCastle.getCenter() + vec2(-500, -500)
     targetPoint[15] = gg_rct_GreenCastle.getCenter() + vec2(-500, -500)
+
     targetPoint[16] = gg_rct_GreenCastle.getCenter() + vec2(-500, -500)
     targetPoint[17] = gg_rct_BrownCastle.getCenter() + vec2(500, 500)
+
     targetPoint[18] = gg_rct_BrownCastle.getCenter() + vec2(500, 500)
     targetPoint[19] = gg_rct_BrownCastle.getCenter() + vec2(500, 500)
 
+    // bot
     targetPoint[20] = gg_rct_GreenCastle.getCenter() + vec2(-500, -500)
     targetPoint[21] = gg_rct_GreenCastle.getCenter() + vec2(-500, -500)
 
@@ -136,6 +152,10 @@ function initTargetPoints()
 
     homeCastle[0] = gg_rct_GreenCastle.getCenter()
     homeCastle[1] = gg_rct_BrownCastle.getCenter()
+
+    baseRect[0] = gg_rct_GreenBase
+    baseRect[1] = gg_rct_BrownBase
+
 
 public constant DEFEND_HOME_BASE = compiletime(setupBuff("Home Base", "This unit has greatly increased combat stats.", Icons.bTNCallToArms, true, 1, "", "", DispelLevel.NONE))
 public constant DEFEND_HOME_SIDE = compiletime(setupBuff("Home Side", "This unit has slightly increased combat stats.", Icons.bTNCallToArms, true, 1, "", "", DispelLevel.NONE))
@@ -194,35 +214,29 @@ function attackMoveGroup()
     if pathUnit == null
         return
     let pos = u.getPos()
+    let team = pathUnit.team
     updatePositionalEffects(pathUnit, pos)
     let stage = getPathStage(pathUnit.path, pos)
-    let dist = pathUnit.team==0?pos.distanceToSegmentSq(targetPoint[stage*2-1], targetPoint[stage*2+1]):pos.distanceToSegmentSq(targetPoint[stage*2+2], targetPoint[stage*2])
+    let dist = pos.distanceToSegmentSq(targetPoint[stage*2-1+team], targetPoint[stage*2+1+team])
     let index = pathUnit.index
 
     if dist <= DISTANCE_THRESHOLD
         pathUnit.lastValidPos = pos
-        if pathUnit.team==0
-            if gg_rct_BrownBase.contains(pos)
-                pathUnit.state = PathStateNew.SIEGE_MOVE
-                attackMoveGroup[index].remove(u)
-                siegeMoveGroup[index].add(u)
-
-            if not pathUnit.attacking
-                u.issuePointOrder("attack", targetPoint[stage*2+1])
-            else
-                pathUnit.attacking = false
+        if baseRect[Teams.invert(team)].contains(pos)
+            pathUnit.state = PathStateNew.SIEGE_MOVE
+            attackMoveGroup[index].remove(u)
+            siegeMoveGroup[index].add(u)
+        if not pathUnit.attacking
+            if pathUnit.stage != stage
+                pathUnit.stage = stage
+                u.issuePointOrder("attack", targetPoint[stage*2+Teams.invert(team)])
         else
-            if gg_rct_GreenBase.contains(pos)
-                pathUnit.state = PathStateNew.SIEGE_MOVE
-                attackMoveGroup[index].remove(u)
-                siegeMoveGroup[index].add(u)
-
-            if not pathUnit.attacking
-                u.issuePointOrder("attack", targetPoint[stage*2])
-            else
-                pathUnit.attacking = false
+            pathUnit.attacking = false
     else
-        u.issuePointOrder("move", targetPoint[stage*2+1 - pathUnit.team])
+        pathUnit.stage = stage
+        u.setOwner(players[Teams.ignoreHero(team)], false)
+        u.issuePointOrder("attack", pos.nearestOnSegment(targetPoint[stage*2-1+team], targetPoint[stage*2+1+team]))
+        pathUnit.returned = false
         pathUnit.state = PathStateNew.RETURN_MOVE
         attackMoveGroup[index].remove(u)
         returnMoveGroup[index].add(u)
@@ -237,38 +251,39 @@ function returnMoveGroup()
     if pathUnit == null
         return
     let pos = u.getPos()
+    let team = pathUnit.team
     updatePositionalEffects(pathUnit, pos)
     let stage = getPathStage(pathUnit.path, pos)
-    let dist = pathUnit.team == 0?pos.distanceToSegmentSq(targetPoint[stage*2-1], targetPoint[stage*2+1]):pos.distanceToSegmentSq(targetPoint[stage*2+2], targetPoint[stage*2])
+    let dist = pos.distanceToSegmentSq(targetPoint[stage*2-1+team], targetPoint[stage*2+1+team])
     let index = pathUnit.index
 
-    if dist <= DISTANCE_THRESHOLD
+    if dist <= DISTANCE_THRESHOLD * 0.5
         pathUnit.lastValidPos = pos
-        if pathUnit.team == 0
-            if gg_rct_BrownBase.contains(pos)
-                pathUnit.state = PathStateNew.SIEGE_MOVE
-                returnMoveGroup[index].remove(u)
-                siegeMoveGroup[index].add(u)
-            else
-                pathUnit.state = PathStateNew.ATTACK_MOVE
-                returnMoveGroup[index].remove(u)
-                attackMoveGroup[index].add(u)
-            u.issuePointOrder("attack", targetPoint[stage*2+1])
+        if baseRect[Teams.invert(team)].contains(pos)
+            pathUnit.state = PathStateNew.SIEGE_MOVE
+            returnMoveGroup[index].remove(u)
+            u.setOwner(players[Teams.army(team)], false)
+            siegeMoveGroup[index].add(u)
         else
-            if gg_rct_GreenBase.contains(pos)
-                pathUnit.state = PathStateNew.SIEGE_MOVE
-                returnMoveGroup[index].remove(u)
-                siegeMoveGroup[index].add(u)
-            else
-                pathUnit.state = PathStateNew.ATTACK_MOVE
-                returnMoveGroup[index].remove(u)
-                attackMoveGroup[index].add(u)
-            u.issuePointOrder("attack", targetPoint[stage*2])
+            if not pathUnit.returned
+                pathUnit.stage = -1 // when the path unit returned, force a new order
+                pathUnit.returned = true
+                doAfter(5) -> 
+                    if u.isAlive()
+                        pathUnit.state = PathStateNew.ATTACK_MOVE
+                        returnMoveGroup[index].remove(u)
+                        u.setOwner(players[Teams.army(team)], false)
+                        attackMoveGroup[index].add(u)
+                        let newStage = getPathStage(pathUnit.path, pos)
+                        u.issuePointOrder("attack", targetPoint[newStage*2+Teams.invert(team)])
+                        pathUnit.stage = stage
+        if pathUnit.stage != stage
+            pathUnit.stage = stage
+            u.issuePointOrder("attack", targetPoint[stage*2+Teams.invert(team)])
     else
-        if pathUnit.team == 0
-            u.issuePointOrder("move", targetPoint[stage*2+1])
-        else
-            u.issuePointOrder("move", targetPoint[stage*2])
+        if pathUnit.stage != stage
+            pathUnit.stage = stage
+            u.issuePointOrder("attack", pos.nearestOnSegment(targetPoint[stage*2-1+team], targetPoint[stage*2+1+team]))
 
 function siegeMoveGroup()
     let u = GetEnumUnit()
@@ -323,6 +338,8 @@ public class PathUnitNew
     protected static int numPathUnits = 0
     protected int staticArrayIndex
     protected lightning currentLineSegment
+    protected int stage = -1
+    protected bool returned = false
 
     construct(unit whichUnit, AssignedPath path)
         this.index = (this castTo int) mod NUM_GROUPS
@@ -338,12 +355,8 @@ public class PathUnitNew
         attackMoveGroup[this.index].add(whichUnit)
         unitToPathUnit.put(whichUnit, this)
         this.team = path == AssignedPath.GREEN_TOP or path == AssignedPath.GREEN_MID or path == AssignedPath.GREEN_BOT ? 0 : 1
-        if this.team == 0
-            whichUnit.issuePointOrder("attack", targetPoint[stage*2+1])
-            this.lastValidPos = targetPoint[stage*2]
-        else
-            whichUnit.issuePointOrder("attack", targetPoint[stage*2])
-            this.lastValidPos = targetPoint[stage*2+1]
+        whichUnit.issuePointOrder("attack", targetPoint[stage*2 + Teams.invert(team)])
+        this.lastValidPos = targetPoint[stage*2 + team]
 
         updatePositionalEffects(this, whichUnit.getPos())
 
