@@ -165,8 +165,8 @@ public function unit.damageMana(unit target, real amount, ReductionType reductio
 
 public function unit.healHP(unit target, real amount)
     real realAmount = amount
-    //if this.hasItemById(ITEM_ID_BRACER_OF_POWER)
-    //  realAmount *= 1.15
+    if this.hasItemById(ITEM_ID_BRACER_OF_ABJURATION)
+        realAmount *= 1.25
 
     realAmount = min(realAmount, target.getMaxHP()-target.getHP())
     target.setHP(target.getHP() + realAmount)
@@ -176,8 +176,8 @@ public function unit.healHP(unit target, real amount)
 
 public function unit.healMana(unit target, real amount)
     real realAmount = amount
-    //if this.hasItemById(ITEM_ID_BRACER_OF_POWER)
-    //  realAmount *= 1.15
+    if this.hasItemById(ITEM_ID_BRACER_OF_ABJURATION)
+        realAmount *= 1.25
 
     realAmount = min(realAmount, target.getMaxMana()-target.getMana())
     target.setMana(target.getMana() + realAmount)
@@ -234,11 +234,7 @@ triggers need to be set up to update items when they are picked up or dropped.
 If this is required, a new system using IHero or IUnit should be implemented instead.
 */
 function unit.toggleItemDrop(bool flag)
-    for i = 0 to 5
-        let itm = this.itemInSlot(i)
-        if itm != null
-            itm.setDroppable(flag)
-            itm.setPawnable(flag)
+    this.wrapper().setAllowItemDrop(flag)
 
 function unit.toggleItemPickup(bool flag)
     this.wrapper().setAllowItemPickup(flag)

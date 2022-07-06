@@ -233,6 +233,7 @@ public class Buff
     private timer periodicTimer = null
     protected DispelLevel dispelLevel
 
+    private boolean infiniteDur = false
     private boolean toBeRemoved = false
     private boolean reapplyAfterRemoval = false
     private unit reapplyCaster
@@ -247,7 +248,8 @@ public class Buff
        
         this.expireTimer = getTimer()
             ..setData(this castTo int)
-        if duration != -1
+        this.infiniteDur = duration == -1
+        if not infiniteDur
             this.expireTimer.start(max(0, duration), function expireStatic)
 
         this.caster = caster
@@ -389,11 +391,24 @@ public class Buff
         if this.onStack!=null
             for BuffEventClosure cb in this.onStack
                 cb.run(this)
-        if newDuration == -1 or newDuration > this.expireTimer.getRemaining()
+
+        bool updateTimer = false
+        if this.infiniteDur and newDuration == -1
+            // keep infinite duration
+            updateTimer = false 
+        else if this.infiniteDur or newDuration == -1
+            // always update if only one is infinte duration
+            // usually the longer duration is kept, but in the case of infinte -> finite, it is assumed the infinite duration was used for technical reasons and needs to be overridden
+            updateTimer = true
+        else if newDuration > this.expireTimer.getRemaining()
+            // only update if new duration is longer than remaining duration
+            updateTimer = true
+        if updateTimer
+            this.infiniteDur = newDuration == -1
             this.expireTimer.release()
             this.expireTimer = getTimer()
                 ..setData(this castTo int)
-            if newDuration != -1
+            if not infiniteDur
                 this.expireTimer.start(max(0, newDuration), function expireStatic)
 
     function getDispelLevel() returns DispelLevel

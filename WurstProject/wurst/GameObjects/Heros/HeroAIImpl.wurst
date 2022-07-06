@@ -458,6 +458,7 @@ public class HeroAIImpl implements IHeroAI
             PlayerWrapper.addGoldEx(this.ownerId, gold )
 
             wrapper.modAttackSpeed(10)
+            wrapper.modArmorRelative(100)
             wrapper.modHealthRelative(100)
             wrapper.modHealthRegenRelative(100)
             wrapper.modManaRelative(100)
@@ -474,6 +475,7 @@ public class HeroAIImpl implements IHeroAI
             let gold = 1500
             PlayerWrapper.addGoldEx(this.ownerId, gold )
             wrapper.modAttackSpeed(20)
+            wrapper.modArmorRelative(200)
             wrapper.modHealthRelative(200)
             wrapper.modHealthRegenRelative(200)
             wrapper.modManaRelative(200)

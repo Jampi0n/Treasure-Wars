@@ -288,7 +288,7 @@ public class HeroDestroyer extends HeroTemplate
         var wall = createUnit(caster.getOwner(), WALL, pos, angle(0))
         wall.setXY(pos)
         var model = addEffect(modelPath, pos)
-        model.setRoll(facing)
+        model.setOrientation(facing, angle(0), angle(0))
         doAfter(WALL_DURATION[level-1]) ->
             doPeriodicallyCounted(0.05, 20) (CallbackCounted cb) ->
                 model.setAlpha((12.75 * cb.getCount()).round() )
@@ -301,7 +301,7 @@ public class HeroDestroyer extends HeroTemplate
             wall = createUnit(caster.getOwner(), WALL, newPos, angle(0))
             wall.setXY(newPos)
             model = addEffect(modelPath, newPos)
-            model.setRoll(facing)
+            model.setOrientation(facing, angle(0), angle(0))
             doAfter(WALL_DURATION[level-1]) ->
                 doPeriodicallyCounted(0.05, 20) (CallbackCounted cb) ->
                     model.setAlpha((12.75 * cb.getCount()).round() )
@@ -313,7 +313,7 @@ public class HeroDestroyer extends HeroTemplate
             wall = createUnit(caster.getOwner(), WALL, newPos, angle(0))
             wall.setXY(newPos)
             model = addEffect(modelPath, newPos)
-            model.setRoll(facing)
+            model.setOrientation(facing, angle(0), angle(0))
             doAfter(WALL_DURATION[level-1]) ->
                 doPeriodicallyCounted(0.05, 20) (CallbackCounted cb) ->
                     model.setAlpha((12.75 * cb.getCount()).round() )

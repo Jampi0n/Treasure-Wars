@@ -3,7 +3,6 @@ package BonusMod
 import NoWurst
 import AbilityObjEditing
 import ObjectIdGenerator
-import public Stats
 import Preloader
 import Annotations
 import Maths
@@ -19,43 +18,35 @@ based on the work of
     weaaddar
 */
 
+/* API */
+
+/*
+    The valid bonus values are -(2^MAX_LEVEL) to (2^MAX_LEVEL)-1
+*/
 @configurable constant int MAX_LEVEL_ATTRIBUTE = 10
 @configurable constant int MAX_LEVEL_DAMAGE = 10
 @configurable constant int MAX_LEVEL_ARMOR = 10
 @configurable constant int MAX_LEVEL_ATTACK_SPEED = 10
+
 /*
-0...MAX_LEVEL-1 positive -> MAX_LEVEL positive abilities
-MAX_LEVEL negative
+    Only setter functions are provided. If required, you need to keep track of the current values yourself.
 */
-constant int MAX_BONUS_ATTRIBUTE = (2).pow(MAX_LEVEL_ATTRIBUTE)-1
-constant int MIN_BONUS_ATTRIBUTE = -MAX_BONUS_ATTRIBUTE-1
-constant int MAX_BONUS_DAMAGE = (2).pow(MAX_LEVEL_DAMAGE)-1
-constant int MIN_BONUS_DAMAGE = -MAX_BONUS_DAMAGE-1
-constant int MAX_BONUS_ARMOR = (2).pow(MAX_LEVEL_ARMOR)-1
-constant int MIN_BONUS_ARMOR = -MAX_BONUS_ARMOR-1
-constant int MAX_BONUS_ATTACK_SPEED = (2).pow(MAX_LEVEL_ATTACK_SPEED)-1
-constant int MIN_BONUS_ATTACK_SPEED = -MAX_BONUS_ATTACK_SPEED-1
+@inline public function unit.setBonusDamage(int bonus)
+    this.setBonus(BonusMod.indexAD, BonusMod.MAX_BONUS_DAMAGE, BonusMod.MIN_BONUS_DAMAGE, MAX_LEVEL_DAMAGE, bonus)
+@inline public function unit.setBonusAttackSpeed(int bonus)
+    this.setBonus(BonusMod.indexAS, BonusMod.MAX_BONUS_ATTACK_SPEED, BonusMod.MIN_BONUS_ATTACK_SPEED, MAX_LEVEL_ATTACK_SPEED, bonus)
+@inline public function unit.setBonusArmor(int bonus)
+    this.setBonus(BonusMod.indexAR, BonusMod.MAX_BONUS_ARMOR, BonusMod.MIN_BONUS_ARMOR, MAX_LEVEL_ARMOR, bonus)
+@inline public function unit.setBonusStrength(int bonus)
+    this.setBonus(BonusMod.indexSTR, BonusMod.MAX_BONUS_ATTRIBUTE, BonusMod.MIN_BONUS_ATTRIBUTE, MAX_LEVEL_ATTRIBUTE, bonus)
+@inline public function unit.setBonusAgility(int bonus)
+    this.setBonus(BonusMod.indexAGI, BonusMod.MAX_BONUS_ATTRIBUTE, BonusMod.MIN_BONUS_ATTRIBUTE, MAX_LEVEL_ATTRIBUTE, bonus)
+@inline public function unit.setBonusIntelligence(int bonus)
+    this.setBonus(BonusMod.indexINT, BonusMod.MAX_BONUS_ATTRIBUTE, BonusMod.MIN_BONUS_ATTRIBUTE, MAX_LEVEL_ATTRIBUTE, bonus)
 
-//movement speed is also handled via trigger
-constant BM_ATTACK_SPEED = compiletime(generateIds(MAX_LEVEL_ATTACK_SPEED))
-constant BM_ATTACK_DAMAGE = compiletime(generateIds(MAX_LEVEL_DAMAGE))
-constant BM_ARMOR = compiletime(generateIds(MAX_LEVEL_ARMOR))
-
-constant BM_STRENGTH = compiletime(generateIds(MAX_LEVEL_ATTRIBUTE))
-constant BM_AGILITY = compiletime(generateIds(MAX_LEVEL_ATTRIBUTE))
-constant BM_INTELLIGENCE = compiletime(generateIds(MAX_LEVEL_ATTRIBUTE))
+/* Implementation */
 
 int array abilityIds
-
-int indexAD
-int indexAS
-int indexAR
-
-int indexSTR
-int indexAGI
-int indexINT
-
-
 int array powersOfTwo
 
 int offset = 0
@@ -68,13 +59,41 @@ function fillArray(int baseId, int maxLevel) returns int
     destroy gen
     return offset - maxLevel - 1
 
-function createAbilityIdArray()
-    indexAD = fillArray(BM_ATTACK_DAMAGE, MAX_LEVEL_DAMAGE)
-    indexAS = fillArray(BM_ATTACK_SPEED, MAX_LEVEL_ATTACK_SPEED)
-    indexAR = fillArray(BM_ARMOR, MAX_LEVEL_ARMOR)
-    indexSTR = fillArray(BM_STRENGTH, MAX_LEVEL_ATTRIBUTE)
-    indexAGI = fillArray(BM_AGILITY, MAX_LEVEL_ATTRIBUTE)
-    indexINT = fillArray(BM_INTELLIGENCE, MAX_LEVEL_ATTRIBUTE)
+//movement speed is also handled via trigger
+constant BM_ATTACK_SPEED = compiletime(generateIds(MAX_LEVEL_ATTACK_SPEED))
+constant BM_ATTACK_DAMAGE = compiletime(generateIds(MAX_LEVEL_DAMAGE))
+constant BM_ARMOR = compiletime(generateIds(MAX_LEVEL_ARMOR))
+
+constant BM_STRENGTH = compiletime(generateIds(MAX_LEVEL_ATTRIBUTE))
+constant BM_AGILITY = compiletime(generateIds(MAX_LEVEL_ATTRIBUTE))
+constant BM_INTELLIGENCE = compiletime(generateIds(MAX_LEVEL_ATTRIBUTE))
+
+// Use a class to define globals below public API
+class BonusMod
+    /*
+    0...MAX_LEVEL-1 positive -> MAX_LEVEL positive abilities
+    MAX_LEVEL negative
+    */
+    static int MAX_BONUS_ATTRIBUTE = (2).pow(MAX_LEVEL_ATTRIBUTE)-1
+    static int MIN_BONUS_ATTRIBUTE = -MAX_BONUS_ATTRIBUTE-1
+    static int MAX_BONUS_DAMAGE = (2).pow(MAX_LEVEL_DAMAGE)-1
+    static int MIN_BONUS_DAMAGE = -MAX_BONUS_DAMAGE-1
+    static int MAX_BONUS_ARMOR = (2).pow(MAX_LEVEL_ARMOR)-1
+    static int MIN_BONUS_ARMOR = -MAX_BONUS_ARMOR-1
+    static int MAX_BONUS_ATTACK_SPEED = (2).pow(MAX_LEVEL_ATTACK_SPEED)-1
+    static int MIN_BONUS_ATTACK_SPEED = -MAX_BONUS_ATTACK_SPEED-1
+
+    static constant indexAD = fillArray(BM_ATTACK_DAMAGE, MAX_LEVEL_DAMAGE)
+    static constant indexAS = fillArray(BM_ATTACK_SPEED, MAX_LEVEL_ATTACK_SPEED)
+    static constant indexAR = fillArray(BM_ARMOR, MAX_LEVEL_ARMOR)
+
+    static constant indexSTR = fillArray(BM_STRENGTH, MAX_LEVEL_ATTRIBUTE)
+    static constant indexAGI = fillArray(BM_AGILITY, MAX_LEVEL_ATTRIBUTE)
+    static constant indexINT = fillArray(BM_INTELLIGENCE, MAX_LEVEL_ATTRIBUTE)
+
+    static function initialize()
+
+
 
 function generateIds(int maxLevel) returns int
     let first = ABIL_ID_GEN.next()
@@ -83,70 +102,6 @@ function generateIds(int maxLevel) returns int
 
     return first
 
-
-function statToBonusAbiltiy(Stat whichStat) returns integer
-    
-    switch whichStat.toInt()
-        case Stat.AD.toInt()
-            return indexAD
-        case Stat.AS.toInt()
-            return indexAS
-        case Stat.AR.toInt()
-            return indexAR
-        case Stat.STR.toInt()
-            return indexSTR
-        case Stat.AGI.toInt()
-            return indexAGI
-        case Stat.INT.toInt()
-            return indexINT
-        default
-            print("Error. This stat does not use abilities.")
-            return -1
-            
-
-@inline public function unit.setBonusDamage(int bonus)
-    this.setBonus(indexAD, MAX_BONUS_DAMAGE, MIN_BONUS_DAMAGE, MAX_LEVEL_DAMAGE, bonus)
-@inline public function unit.setBonusAttackSpeed(int bonus)
-    this.setBonus(indexAS, MAX_BONUS_ATTACK_SPEED, MIN_BONUS_ATTACK_SPEED, MAX_LEVEL_ATTACK_SPEED, bonus)
-@inline public function unit.setBonusArmor(int bonus)
-    this.setBonus(indexAR, MAX_BONUS_ARMOR, MIN_BONUS_ARMOR, MAX_LEVEL_ARMOR, bonus)
-@inline public function unit.setBonusStrength(int bonus)
-    this.setBonus(indexSTR, MAX_BONUS_ATTRIBUTE, MIN_BONUS_ATTRIBUTE, MAX_LEVEL_ATTRIBUTE, bonus)
-@inline public function unit.setBonusAgility(int bonus)
-    this.setBonus(indexAGI, MAX_BONUS_ATTRIBUTE, MIN_BONUS_ATTRIBUTE, MAX_LEVEL_ATTRIBUTE, bonus)
-@inline public function unit.setBonusIntelligence(int bonus)
-    this.setBonus(indexINT, MAX_BONUS_ATTRIBUTE, MIN_BONUS_ATTRIBUTE, MAX_LEVEL_ATTRIBUTE, bonus)
-
-public function unit.setBonusDispatchStat(Stat whichStat, int bonus)
-    //AD
-    //AS
-    //AR
-    //STR
-    //AGI
-    //INT
-    // Binary search to find the correct stat
-    if whichStat.toInt() <= Stat.STR.toInt()
-        if whichStat.toInt() <= Stat.AS.toInt()
-            if whichStat.toInt() == Stat.AD.toInt()
-                //AD
-                this.setBonusDamage(bonus)
-            else
-                //AS
-                this.setBonusAttackSpeed(bonus)
-        else
-            if whichStat.toInt() == Stat.AR.toInt()
-                //AR
-                this.setBonusArmor(bonus)
-            else
-                //STR
-                this.setBonusStrength(bonus)
-    else
-        if whichStat.toInt() == Stat.AGI.toInt()
-            //AGI
-            this.setBonusAgility(bonus)
-        else
-            //INT
-            this.setBonusIntelligence(bonus)
    
 function unit.setBonus(int abilityIndex, int maxBonus, int minBonus, int maxLevel, int bonus)
     if(bonus > maxBonus)
@@ -283,4 +238,4 @@ function generateIntelligenceBonus()
     destroy gen
 
 init
-    createAbilityIdArray()
+    BonusMod.initialize()

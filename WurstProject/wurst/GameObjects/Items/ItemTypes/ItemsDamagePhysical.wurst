@@ -9,7 +9,7 @@ function itemHammerOfStrength()
     ItemBalance.values(325,175)
     let str = ItemBalance.str()
     let hp = ItemBalance.hp()
-    setupItem(ITEM_ID_HAMMER_OF_STRENGTH, CATEGORY, 500)
+    setupItem(ITEM_ID_HAMMER_OF_STRENGTH, CATEGORY)
     addStatLine(ItemStat.STR, str)
     addStatLine(ItemStat.HP, hp)
     setInfo("Hammer of Strength")
@@ -19,7 +19,7 @@ function itemHammerOfStrength()
 
 function ironSword()
     let str = ItemBalance.str(500)
-    setupItem(ITEM_ID_IRON_SWORD, CATEGORY, 500)
+    setupItem(ITEM_ID_IRON_SWORD, CATEGORY)
     addStatLine(ItemStat.STR, str)
     setInfo("Iron Sword")
     onEither() (int factor) ->
@@ -27,7 +27,7 @@ function ironSword()
 
 function warAxe()
     let str = ItemBalance.str(800)
-    setupItem(ITEM_ID_WAR_AXE, CATEGORY, 800)
+    setupItem(ITEM_ID_WAR_AXE, CATEGORY)
     addStatLine(ItemStat.STR, str)
     setInfo("War Axe")
     onEither() (int factor) ->
@@ -35,7 +35,7 @@ function warAxe()
 
 function dagger()
     let as = ItemBalance.as(500)
-    setupItem(ITEM_ID_DAGGER, CATEGORY, 500)
+    setupItem(ITEM_ID_DAGGER, CATEGORY)
     addStatLine(ItemStat.AS, as, true)
     setInfo("Dagger")
     onEither() (int factor) ->
@@ -44,7 +44,7 @@ function dagger()
 function woodenBow()
     let str = ItemBalance.str(600)
     let strPercentage = 5
-    setupItem(ITEM_ID_BOW, CATEGORY, 900)
+    setupItem(ITEM_ID_BOW, CATEGORY)
     addStatLine(ItemStat.STR, str)
     addStatLine(ItemStat.STR, strPercentage, true)
     setInfo("Wooden Bow")
@@ -54,7 +54,7 @@ function woodenBow()
 
 function magmaCrystal()
     let dmg = 15
-    setupItem(ITEM_ID_MAGMA_CRYSTAL, CATEGORY, 500)
+    setupItem(ITEM_ID_MAGMA_CRYSTAL, CATEGORY)
     addLine("Attacks deal {0} additional magic damage.".format(dmg.toString()))
     setInfo("Magma Crystal")
     onEither() (int factor) ->
@@ -67,7 +67,7 @@ function bloodSword()
     ItemBalance.values(750,450)
     let str = ItemBalance.str()
     let steal = ItemBalance.ls()
-    setupItem(ITEM_ID_BRUTAL_SLASHER, CATEGORY, 1200)
+    setupItem(ITEM_ID_BRUTAL_SLASHER, CATEGORY)
     addStatLine(ItemStat.STR, str)
     addStatLine(ItemStat.LS, steal)
     setInfo("Vampiric Sword")
@@ -78,7 +78,7 @@ function bloodSword()
 
 function skullCrusher()
     let str = 1
-    setupItem(ITEM_ID_SKULL_CRUSHER, CATEGORY, 1500)
+    setupItem(ITEM_ID_SKULL_CRUSHER, CATEGORY)
     setInfo("Orcish Warhammer", "+ {0} strength".format(str.toString()))
     addRequirements(ITEM_ID_HAMMER_OF_STRENGTH, ITEM_ID_WAR_AXE)
 
@@ -87,7 +87,7 @@ function woodenClub()
     ItemBalance.values(615,710)
     let str = ItemBalance.str()
     let hp = ItemBalance.hp()
-    setupItem(ITEM_ID_WOODEB_CLUB, CATEGORY, 1300)
+    setupItem(ITEM_ID_WOODEB_CLUB, CATEGORY)
     addRequirements(ITEM_ID_GEM_OF_HEALTH, ITEM_ID_HAMMER_OF_STRENGTH)
     addStatLine(ItemStat.STR, str)
     addStatLine(ItemStat.HP, hp)
@@ -98,7 +98,7 @@ function woodenClub()
 
 function skullAxe()
     let str = 30
-    setupItem(ITEM_ID_SKULL_AXE, CATEGORY, 1500)
+    setupItem(ITEM_ID_SKULL_AXE, CATEGORY)
     addStatLine(ItemStat.STR, str)
     setInfo("Skull Axe")
     addRequirements(ITEM_ID_WAR_AXE, ITEM_ID_IRON_SWORD)
@@ -110,7 +110,7 @@ function ravenSword()
     ItemBalance.values(750,600)
     let str = ItemBalance.str()
     let as = ItemBalance.as()
-    setupItem(ITEM_ID_RAVEN_SWORD, CATEGORY, 1350)
+    setupItem(ITEM_ID_RAVEN_SWORD, CATEGORY)
     addStatLine(ItemStat.STR, str)
     addStatLine(ItemStat.AS, as)
     setInfo("Raven Sword")
@@ -124,7 +124,7 @@ function blazingBow()
     let str = 12
     let strPercentage = 5
     let dmg = 15
-    setupItem(ITEM_ID_BLAZING_BOW, CATEGORY, 2200)
+    setupItem(ITEM_ID_BLAZING_BOW, CATEGORY)
     addStatLine(ItemStat.STR, str)
     addStatLine(ItemStat.STR, strPercentage, true)
     addLine("Attacks deal {0} additional magic damage.".format(dmg.toString()))
@@ -158,7 +158,7 @@ function itemArmorBreaker()
         ..setArtCaster("")
         ..setManaCost(1, 0)
 
-    setupItem(ITEM_ID_ARMOR_BREAKER, CATEGORY, 4500)
+    setupItem(ITEM_ID_ARMOR_BREAKER, CATEGORY)
     setActiveAbilities(ABILITY_ARMOR_BREAKER_SLAM)
     addUnique("Attacks deal 1 additional damage for every {0} points of armor of the target.".format(dmgPerXArmor.str()))
     addActive("Slam", "Slams the ground, dealing {0} damage and slowing enemy units by {1}% for {2} seconds.".format(SLAM_DAMAGE.str(), activeSlow.str(), SLAM_DURATION.str()))
@@ -194,10 +194,10 @@ function itemChillingBlade()
     let str = 20
     let slowAmount = 30
     let slowDuration = 2
-    setupItem(ITEM_ID_CHILLING_DAGGER, CATEGORY, 4500)
+    setupItem(ITEM_ID_CHILLING_DAGGER, CATEGORY)
     addUnique("Attacks reduce the target's movement speed by {0}% for {1} seconds.".format(slowAmount.str(), slowDuration.str()))
     setInfo("Chilling Blade")
-    addRequirements(ITEM_ID_IRON_SWORD, ITEM_ID_RAVEN_SWORD, ITEM_ID_IRON_SWORD)
+    addRequirements(ITEM_ID_IRON_SWORD, ITEM_ID_RAVEN_SWORD, ITEM_ID_WAR_AXE)
 
     if not compiletime
         CHILLING_BLADE_BUFF.addSetupFunction() (Buff thisBuff, int factor) ->
@@ -212,7 +212,7 @@ function itemChillingBlade()
 function axeOfEmbers()
     let aoeDmg = 30
     let aoeRange = 150.0
-    setupItem(ITEM_ID_AXE_OF_EMBERS, CATEGORY, 4500)
+    setupItem(ITEM_ID_AXE_OF_EMBERS, CATEGORY)
     addUnique("Attacks deal " + aoeDmg.toString() + " magic damage to enemy units around the target.")
     addRequirements(ITEM_ID_SKULL_AXE, ITEM_ID_MAGMA_CRYSTAL, ITEM_ID_WOODEB_CLUB)
     setInfo("Axe of Embers")
@@ -263,7 +263,7 @@ function runeBlade()
 
 
 
-    setupItem(ITEM_ID_RUNE_BLADE, CATEGORY, 4500)
+    setupItem(ITEM_ID_RUNE_BLADE, CATEGORY)
     setActiveAbilities(ABILITY_RUNE_BLADE_BURN)
     addRequirements(ITEM_ID_BRUTAL_SLASHER, ITEM_ID_VOID_CRYSTAL, ITEM_ID_SKULL_AXE)
     addStatLine(ItemStat.STR, str)
@@ -298,7 +298,7 @@ function runeBlade()
 function cursedSword()
     let str = 1
     let steal = 10
-    setupItem(ITEM_ID_SOUL_TORMENTOR, CATEGORY, 4500)
+    setupItem(ITEM_ID_SOUL_TORMENTOR, CATEGORY)
     addRequirements(ITEM_ID_BRUTAL_SLASHER, ITEM_ID_IRON_SWORD, ITEM_ID_RAVEN_SWORD)
     addStatLine(ItemStat.STR, str)
     addStatLine(ItemStat.LS, steal)
@@ -307,7 +307,7 @@ function cursedSword()
         modLifeSteal(steal)
 
 function axeOfDecay()
-    setupItem(ITEM_ID_AXE_OF_DECAY, CATEGORY, 4500)
+    setupItem(ITEM_ID_AXE_OF_DECAY, CATEGORY)
     addRequirements(ITEM_ID_SKULL_AXE, ITEM_ID_SKULL_CRUSHER)
     setInfo("Axe of Decay")
 
@@ -322,7 +322,7 @@ function arcaneBlade()
     let dmgInt = 25.0
     let mrReduce = 30
     let mrReduceDur = 5.0
-    setupItem(ITEM_ID_ARCANE_BLADE, CATEGORY, 4500)
+    setupItem(ITEM_ID_ARCANE_BLADE, CATEGORY)
     addRequirements(ITEM_ID_RAVEN_SWORD, ITEM_ID_GEM_OF_MANA, ITEM_ID_SCEPTER_OF_THE_TIDES)
     addUnique("Attacks reduce the target's magic resistance by {0} for {1} seconds".format(mrReduce.str(), mrReduceDur.str()))
     addUnique("After casting a spell, the next attack within {0} seconds deals {1} additional magic damage.".format(ARCANE_BLADE_DURATION.str(), dmg.str() + bonusStringFactor(C_INT, dmgInt, "Intelligence")))
@@ -349,8 +349,8 @@ function arcaneBlade()
 function bloodStinger()
     let str = 1
     let steal = 25
-    setupItem(ITEM_ID_BLOOD_STINGER, CATEGORY, 4500)
-    addRequirements(ITEM_ID_DAGGER, ITEM_ID_BRUTAL_SLASHER, ITEM_ID_BRUTAL_SLASHER, ITEM_ID_IRON_SWORD)
+    setupItem(ITEM_ID_BLOOD_STINGER, CATEGORY)
+    addRequirements(ITEM_ID_DAGGER, ITEM_ID_BRUTAL_SLASHER, ITEM_ID_BRUTAL_SLASHER)
     addStatLine(ItemStat.STR, str)
     addStatLine(ItemStat.LS, steal)
     setInfo("Sacrificial Dagger")
@@ -360,13 +360,27 @@ function bloodStinger()
 
 constant SCIMITAR_BUFF = compiletime(setupBuff("Moon Light Scimitar", "Armor is reduced.", "BTNMercurialScimtar", false, 1, Abilities.orbCorruptionSpecialArt, "chest", DispelLevel.DISPEL))
 
+
 function moonLightScimitar()
-    let armor = 10
-    let dur = 5
-    setupItem(ITEM_ID_MOON_LIGHT_SCIMITAR, CATEGORY, 4500)
-    addRequirements(ITEM_ID_DAGGER, ITEM_ID_RAVEN_SWORD, ITEM_ID_DAGGER)
-    addUnique("Attacks reduce the target's armor by {0} points for {1} seconds. This effect stacks.".format(armor.str(), dur.str()))
+    let attacks = 5
+    setupItem(ITEM_ID_MOON_LIGHT_SCIMITAR, CATEGORY)
+    addRequirements(ITEM_ID_DAGGER, ITEM_ID_RAVEN_SWORD, ITEM_ID_IRON_SWORD)
+    addUnique("Every {0}th attack applies on-hit effects twice.".format(attacks.str()))
     setInfo("Moon Light Scimitar")
+    onEither() (int factor) ->
+        DamageEventUnit.fromUnit(getItemUnit()).saveIntSlow(D_MOON_LIGHT_SCIMITAR_ATTACK_COUNTER, 0)
+        attackDamageFunction() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean active, boolean alternate) ->
+            let counter = sourceWrapper.loadIntSlow(D_MOON_LIGHT_SCIMITAR_ATTACK_COUNTER) + 1
+            if counter >= attacks
+                sourceWrapper.saveIntSlow(D_MOON_LIGHT_SCIMITAR_ATTACK_COUNTER, -1)
+                //print("Moon Light Scimitar")
+                sourceWrapper.attackDamageNoBuilding.runEvents(source, target, sourceWrapper, targetWrapper, damage, attack, active, alternate)
+            else
+                sourceWrapper.saveIntSlow(D_MOON_LIGHT_SCIMITAR_ATTACK_COUNTER, counter)
+
+            
+
+
 
 function infernalBow()
     let str = 12
@@ -374,7 +388,7 @@ function infernalBow()
     let healing = 25
     let dur = 6
     let strPercentage = 10
-    setupItem(ITEM_ID_INFERNAL_BOW, CATEGORY, 4500)
+    setupItem(ITEM_ID_INFERNAL_BOW, CATEGORY)
     addRequirements(ITEM_ID_BLAZING_BOW, ITEM_ID_MAGMA_CRYSTAL)
     addStatLine(ItemStat.STR, str)
     addStatLine(ItemStat.STR, strPercentage, true)

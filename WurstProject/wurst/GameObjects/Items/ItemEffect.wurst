@@ -196,8 +196,18 @@ public function isFirstBoots() returns bool
 
 init
     ItemEffect.classInit()
-    PassiveItemCooldown.setup() (bool flag) ->
-        ItemEffect.doItemEvents = flag
+    PassiveItemCooldown.setup() (unit u, LockInternalFunction lock) ->
+        ItemEffect.doItemEvents = false
+        let drop = u.wrapper().getAllowItemDrop()
+        let pickup = u.wrapper().getAllowItemPickup()
+        u.wrapper().setAllowItemDrop(true)
+        u.wrapper().setAllowItemPickup(true)
+        lock.lock()
+        ItemEffect.doItemEvents = true
+        u.wrapper().setAllowItemDrop(drop)
+        u.wrapper().setAllowItemPickup(pickup)
+
+
     /*
     Drop items before the unit wrapper is destroyed.
     The item drop event for removed units happens after the unit removal event, so if there are still items left when the unit wrapper is destroyed, the onDrop functions can no longer access the unit wrapper. To fix this, all items are dropped before the unit wrapper is destroyed.

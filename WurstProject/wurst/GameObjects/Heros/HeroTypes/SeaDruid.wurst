@@ -307,8 +307,8 @@ public class HeroSeaDruid extends HeroTemplate
         
         
         for lvl = 1 to 5
-            tooltip.setNormalString(true, lvl, CHANNELING_SPELL + "Sends out magical energy, that drain {0}{I0} hit points and {1}{I1} mana from nearby enemies and slows their movement speed by {2}%.|nLasts for {3} waves.|nThe Sea Druid gets {4}% of the hit points and {4}% of the mana drained from enemy heroes.".format(
-                RITUAL_HP_DRAIN[lvl-1].str(), RITUAL_MANA_DRAIN[lvl-1].str(), RITUAL_WAVE_COUNT[lvl-1].str(), RITUAL_MOVEMENT_SLOW[lvl-1].str(),RITUAL_HP_RATIO.str(), RITUAL_MANA_RATIO.str()))
+            tooltip.setNormalString(true, lvl, CHANNELING_SPELL + "Sends out magical energy, that drain {0}{I0} hit points and {1}{I1} mana from nearby enemies and slows their movement speed by {2}%.|nLasts for {3} waves.|nThe Sea Druid gets {4}% of the hit points and {5}% of the mana drained from enemy heroes.".format(
+                RITUAL_HP_DRAIN[lvl-1].str(), RITUAL_MANA_DRAIN[lvl-1].str(), RITUAL_MOVEMENT_SLOW[lvl-1].str(), RITUAL_WAVE_COUNT[lvl-1].str(),RITUAL_HP_RATIO.str(), RITUAL_MANA_RATIO.str()))
         addDynamicTooltipIntelligence(heroType, tooltip)
 
     override function stats()

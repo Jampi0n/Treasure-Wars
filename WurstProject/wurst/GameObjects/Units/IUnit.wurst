@@ -10,6 +10,7 @@ import UnitInfo
 import UnitBuffs
 import UnitColor
 import UnitStats
+import Stats
 import BonusMod
 import Buff
 import FastDamageEvent
@@ -36,6 +37,7 @@ public class IUnit extends UnitWrapper
     real baseScale
     real scaleMultiplier = 1.0
     bool allowItemPickUp = true
+    bool allowItemDrop = true
     int lifeSteal = 0
     int attackEventPointer = 0
     int armorReduction = 0
@@ -86,6 +88,17 @@ public class IUnit extends UnitWrapper
 
     function getAllowItemPickup() returns bool
         return allowItemPickUp
+
+    function setAllowItemDrop(bool flag)
+        allowItemDrop = flag
+        for i = 0 to 5
+            let itm = this.toUnit().itemInSlot(i)
+            if itm != null
+                itm.setDroppable(flag)
+                itm.setPawnable(flag)
+
+    function getAllowItemDrop() returns bool
+        return allowItemDrop
 
     function setHero(IHero hero)
         this.hero = hero

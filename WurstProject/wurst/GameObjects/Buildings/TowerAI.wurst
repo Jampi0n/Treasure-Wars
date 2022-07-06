@@ -105,7 +105,7 @@ public class TowerAI
 
 
     static function onDamage(unit source, unit _target, real damage)
-        if damage > 0.1
+        if damage > 0.1 and source != null and source.getTypeId() != 0
             let offendingHero = source.wrapper().getOwningHero()
             if offendingHero != null
                 let offendingUnit = offendingHero.toUnit()

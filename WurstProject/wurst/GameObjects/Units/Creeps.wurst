@@ -64,7 +64,8 @@ function initCreepBuffs()
     TURTLE_BUFF.addSetupFunction() (Buff thisBuff, int factor) ->
         if factor == 1
             let pointer = DamageEventUnit.fromUnit(thisBuff.getTarget()).attackHitNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
-                target.dealDamage(source, damage * 0.1, ReductionType.PHYSICAL)
+                if damage > 1 and source.getAbilityLevel('Aloc') == 0
+                    target.dealDamage(source, damage * 0.1, ReductionType.PHYSICAL)
             thisBuff.setData(pointer)
         else
             DamageEventUnit.fromUnit(thisBuff.getTarget()).attackHitNoBuilding.remove(thisBuff.getData())
@@ -231,8 +232,11 @@ public class CreepCamp
         allCreeps.add(creepUnit)
         alive++
         unitToCamp.put(creepUnit, this)
-        creepUnit.wrapper().modStrengthRelative( campLevel*200)
-        creepUnit.wrapper().modHealthRelative( campLevel*200)
+        creepUnit.wrapper().modStrengthRelative( campLevel*400)
+        creepUnit.wrapper().modHealthRelative( campLevel*250)
+        creepUnit.wrapper().modArmor(campLevel * 5)
+        creepUnit.wrapper().modAgility(campLevel * 5)
+        creepUnit.wrapper().modAttackSpeed(campLevel * 10)
 
     private function respawn()
         if campLevel < MAX_CAMP_LEVEL

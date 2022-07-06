@@ -18,9 +18,11 @@ import AbilityObjEditing
 import GameTimer
 import ObjectIdGenerator
 
+public interface LockInternalFunction
+    function lock()
 
-public interface ToggleItemTriggers
-    function toggle(bool enable)
+public interface LockUserFunction
+    function lock(unit u, LockInternalFunction lock)
 
 public function generateCooldownAbility() returns int
     let id = ABIL_ID_GEN.next()
@@ -34,7 +36,7 @@ public class PassiveItemCooldown
     protected static constant ITEM_ABILITY_ID = 1
     protected static constant UNIT_NUM_LOCKS = 0
     protected static constant ITEM_TYPE_ABILITY_ID = 0
-    protected static ToggleItemTriggers toggleItemTriggers = null
+    protected static LockUserFunction lockUserFunction = null
 
     /**
     Attempts to start the cooldown of ability abil for item itm and unit u.
@@ -84,8 +86,8 @@ public class PassiveItemCooldown
     PassiveCooldown has to drop and pick up items to apply cooldowns.
     If you configure a function that toggles your item triggers, the item triggers will not for these drop and pickup events.
     **/
-    static function setup(ToggleItemTriggers toggleItemTriggers)
-        PassiveItemCooldown.toggleItemTriggers = toggleItemTriggers
+    static function setup(LockUserFunction lockUserFunction)
+        PassiveItemCooldown.lockUserFunction = lockUserFunction
 
     private static function lockItem(item itm, int abil, real cd)
         let h = itm.getHandleId()
@@ -106,6 +108,7 @@ public class PassiveItemCooldown
     private static function unlockItem(int h)
         PassiveItemCooldown.table.flushChild(h)
 
+
     private static function lockUnit(unit u, int itm, int abil, real cd)
         BlzStartUnitAbilityCooldown(u, abil, cd)
 
@@ -116,17 +119,14 @@ public class PassiveItemCooldown
         table.saveReal(h, itm, max(current, getElapsedGameTime() + cd))
         table.saveInt(itm, ITEM_TYPE_ABILITY_ID, abil)
 
-        if toggleItemTriggers != null
-            toggleItemTriggers.toggle(false)
-        for i = 0 to 5
-            var itmInSlot = u.itemInSlot(i)
-            if itmInSlot.getTypeId() == itm
-                u.removeItem(itmInSlot)
-                u.addItemHandleToSlot(itmInSlot, i)
-                itmInSlot = u.itemInSlot(i)
-                lockItem(itmInSlot, abil, cd)
-        if toggleItemTriggers != null
-            toggleItemTriggers.toggle(true)
+        lockUserFunction.lock(u) -> 
+            for i = 0 to 5
+                var itmInSlot = u.itemInSlot(i)
+                if itmInSlot.getTypeId() == itm
+                    u.removeItem(itmInSlot)
+                    u.addItemHandleToSlot(itmInSlot, i)
+                    itmInSlot = u.itemInSlot(i)
+                    lockItem(itmInSlot, abil, cd)
 
         doAfter(cd + 1) -> 
             checkLockUnit(h, itm)

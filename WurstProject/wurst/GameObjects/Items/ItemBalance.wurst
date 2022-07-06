@@ -4,12 +4,36 @@ import ItemEffectPreset
 import LinkedList
 import ErrorHandling
 import ItemConfiguration
+import ItemConfigurationCompiletime
+import FileLog
+
+int exactGold = 0
 
 public function roundGold(int gold) returns int
     return (gold/25).round()*25
 
+public function updateGoldCost(int newValue)
+    exactGold = newValue
+    if compiletime
+        currentItemDefinition.setGoldCost(roundGold(exactGold))
+    else
+        currentItemInShop.setTotalCost(roundGold(exactGold))
+
 public function setupItem(int itemId, int category)
-    setupItem(itemId, category, roundGold(ItemBalance.gold()))
+    exactGold = ItemBalance.gold()
+    setupItem(itemId, category, roundGold(exactGold))
+
+public function addPassive(string name, string desc, int gold)
+    updateGoldCost(exactGold + gold)
+    addPassive(name, desc)
+
+public function addUnique(string desc, int gold)
+    updateGoldCost(exactGold + gold)
+    addUnique(desc)
+
+public function addActive(string name, string desc, int gold)
+    updateGoldCost(exactGold + gold)
+    addActive(name, desc)
 
 class StatValuePair
     ItemStat stat
@@ -20,7 +44,7 @@ class StatValuePair
 
 public abstract class ItemBalance
     private static constant STRENGTH = 2
-    private static constant ATTACK_SPEED = 3
+    private static constant ATTACK_SPEED = 2.5
     private static constant INTELLIGENCE = 2
     private static constant HEALTH = 30
     private static constant HEALTH_REG = 40
@@ -69,68 +93,86 @@ public abstract class ItemBalance
 
 
     static function str(int value) returns int
+        FILE_LOG.writeLine("str" + value.toString())
         ItemBalance.values(value)
         ItemBalance.stats(ItemStat.STR)
         return getRoundedResult(ItemStat.STR)
     static function intel(int value) returns int
+        FILE_LOG.writeLine("intel" + value.toString())
         ItemBalance.values(value)
         ItemBalance.stats(ItemStat.INT)
         return getRoundedResult(ItemStat.INT)
     static function agi(int value) returns int
+        FILE_LOG.writeLine("agi" + value.toString())
         ItemBalance.values(value)
         ItemBalance.stats(ItemStat.AGI)
         return getRoundedResult(ItemStat.AGI)
     static function hp(int value) returns int
+        FILE_LOG.writeLine("hp" + value.toString())
         ItemBalance.values(value)
         ItemBalance.stats(ItemStat.HP)
         return getRoundedResult(ItemStat.HP)
     static function hr(int value) returns int
+        FILE_LOG.writeLine("hr" + value.toString())
         ItemBalance.values(value)
         ItemBalance.stats(ItemStat.HR)
         return getRoundedResult(ItemStat.HR)
     static function mp(int value) returns int
+        FILE_LOG.writeLine("mp" + value.toString())
         ItemBalance.values(value)
         ItemBalance.stats(ItemStat.MP)
         return getRoundedResult(ItemStat.MP)
     static function mr(int value) returns int
+        FILE_LOG.writeLine("mr" + value.toString())
         ItemBalance.values(value)
         ItemBalance.stats(ItemStat.MR)    
         return getRoundedResult(ItemStat.MR)
     static function ms(int value) returns int
+        FILE_LOG.writeLine("ms" + value.toString())
         ItemBalance.values(value)
         ItemBalance.stats(ItemStat.MS)
         return getRoundedResult(ItemStat.MS)
     static function as(int value) returns int
+        FILE_LOG.writeLine("as" + value.toString())
         ItemBalance.values(value)
         ItemBalance.stats(ItemStat.AS)
         return getRoundedResult(ItemStat.AS)
     static function cd(int value) returns int
+        FILE_LOG.writeLine("cd" + value.toString())
         ItemBalance.values(value)
         ItemBalance.stats(ItemStat.CD)
         return getRoundedResult(ItemStat.CD)
     static function ar(int value) returns int
+        FILE_LOG.writeLine("ar" + value.toString())
         ItemBalance.values(value)
         ItemBalance.stats(ItemStat.AR)
         return getRoundedResult(ItemStat.AR)
     static function ls(int value) returns int
+        FILE_LOG.writeLine("ls" + value.toString())
         ItemBalance.values(value)
         ItemBalance.stats(ItemStat.LS)
         return getRoundedResult(ItemStat.LS)
 
     static function stats(vararg ItemStat stats)
+        FILE_LOG.writeLine("stats(")
         statList = new LinkedList<ItemStat>()
         for i in stats
             statList.add(i)
+            FILE_LOG.writeLine((i castTo int).toString() + ",")
         if valueList != null
             calculateStatValues()
+        FILE_LOG.writeLine(")")
 
 
     static function values(vararg int values)
+        FILE_LOG.writeLine("values(")
         valueList = new LinkedList<int>()
         for i in values
             valueList.add(i)
+            FILE_LOG.writeLine(i.toString() + ",")
         if statList != null
             calculateStatValues()
+        FILE_LOG.writeLine(")")
 
     private static function updateResult(int stat, real value)
         result[stat] = value

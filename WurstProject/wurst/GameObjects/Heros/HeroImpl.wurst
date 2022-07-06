@@ -13,7 +13,7 @@ import HeroTypeImpl
 import TeamUtil
 import UnitLib
 import PlayerControl
-import BonusMod
+import Stats
 import FastDamageEvent
 import TowerAI
 import UnitStats
@@ -21,6 +21,11 @@ import UnitStats
 constant HP_PER_LEVEL = 15
 constant STRENGTH_BONUS = 45
 constant ARMOR_BONUS = 30
+
+constant HR_FACTOR = 8
+constant MR_FACTOR = 3
+constant HP_FACTOR = 15
+constant MP_FACTOR = 10
 
 constant int array ASSIST_BOUNTY = [0, 60, 40, 30, 24]
 constant int array KILL_BOUNTY = [240, 180, 160, 150, 144]
@@ -192,10 +197,10 @@ public class HeroImpl implements IHero
                 if this.hero.isAlive()
                     this.heroGlow.setXY(this.hero.getPos())
         defaultAttackCooldown = wrapper.getBaseAttackCooldown()
-        wrapper.modManaRegen(this.heroType.getBase(Stat.MR) * 10 )
-        wrapper.modHealthRegen(this.heroType.getBase(Stat.HR) * 30 )
-        wrapper.modHealth(this.heroType.getBase(Stat.HP) * 15 + HP_PER_LEVEL )
-        wrapper.modMana(this.heroType.getBase(Stat.MP) * 10 )
+        wrapper.modManaRegen(this.heroType.getBase(Stat.MR) * MR_FACTOR )
+        wrapper.modHealthRegen(this.heroType.getBase(Stat.HR) * HR_FACTOR )
+        wrapper.modHealth(this.heroType.getBase(Stat.HP) * HP_FACTOR + HP_PER_LEVEL )
+        wrapper.modMana(this.heroType.getBase(Stat.MP) * MP_FACTOR )
         wrapper.modMoveSpeed(this.heroType.getBase(Stat.MS) )
         wrapper.setStatBaseInternal(Stat.AR, this.heroType.getBase(Stat.AR) + ARMOR_BONUS)
         wrapper.setBaseAttackCooldown(convertAttackSpeed(defaultAttackCooldown, this.heroType.getBase(Stat.AS)))
@@ -277,10 +282,10 @@ public class HeroImpl implements IHero
         let newLvl = GetHeroLevel(this.hero)
         let wrapper = this.hero.wrapper()
         wrapper.setBaseAttackCooldown(convertAttackSpeed(defaultAttackCooldown, this.heroType.calculateStat(Stat.AS, newLvl)))
-        wrapper.modHealth( (this.heroType.calculateStat(Stat.HP, newLvl) - this.heroType.calculateStat(Stat.HP, this.level)) * 15 )
-        wrapper.modMana( (this.heroType.calculateStat(Stat.MP, newLvl) - this.heroType.calculateStat(Stat.MP, this.level)) * 10 )
-        wrapper.modManaRegen( (this.heroType.calculateStat(Stat.MR, newLvl) - this.heroType.calculateStat(Stat.MR, this.level)) * 10 )
-        wrapper.modHealthRegen( (this.heroType.calculateStat(Stat.HR, newLvl) - this.heroType.calculateStat(Stat.HR, this.level)) * 30 )
+        wrapper.modHealth( (this.heroType.calculateStat(Stat.HP, newLvl) - this.heroType.calculateStat(Stat.HP, this.level)) * HP_FACTOR )
+        wrapper.modMana( (this.heroType.calculateStat(Stat.MP, newLvl) - this.heroType.calculateStat(Stat.MP, this.level)) * MP_FACTOR )
+        wrapper.modManaRegen( (this.heroType.calculateStat(Stat.MR, newLvl) - this.heroType.calculateStat(Stat.MR, this.level)) * MR_FACTOR )
+        wrapper.modHealthRegen( (this.heroType.calculateStat(Stat.HR, newLvl) - this.heroType.calculateStat(Stat.HR, this.level)) * HR_FACTOR )
         wrapper.modHealth( (newLvl - this.level) * HP_PER_LEVEL )
         wrapper.modMoveSpeed( this.heroType.calculateStat(Stat.MS, newLvl) - this.heroType.calculateStat(Stat.MS, this.level))
         wrapper.setStatBaseInternal(Stat.AR, this.heroType.getBase(Stat.AR))

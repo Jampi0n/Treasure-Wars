@@ -461,10 +461,10 @@ function CreateAltars takes nothing returns nothing
     local real y
     set x=GetRectCenterX(gg_rct_GreenAltar)
     set y=GetRectCenterY(gg_rct_GreenAltar)
-    call CreateUnit(Player(10), 'h002', x, y, 90)
+    call CreateUnit(Player(10), 'h002', x, y, 70)
     set x=GetRectCenterX(gg_rct_BrownAltar)
     set y=GetRectCenterY(gg_rct_BrownAltar)
-    call CreateUnit(Player(11), 'h01N', x, y, 270)
+    call CreateUnit(Player(11), 'h01N', x, y, 242)
 endfunction
 //***************************************************************************
 //*

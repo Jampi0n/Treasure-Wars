@@ -5,11 +5,17 @@ import ErrorHandling
 
 int counter = 0
 function getDamageId() returns int
-    counter = counter + 1
+    counter += 1
     if counter >= FAST_DATA_SIZE
         error("Too many damage ids")
     return counter - 1
 
+int counterSlow = 0
+function getDamageIdSlow() returns int
+    counterSlow += 1
+    return counterSlow - 1
+
 public constant D_ARMOR_REDUCTION_RELATIVE = getDamageId()
 public constant D_HEART_AMULET = getDamageId()
 
+public constant D_MOON_LIGHT_SCIMITAR_ATTACK_COUNTER = getDamageIdSlow()

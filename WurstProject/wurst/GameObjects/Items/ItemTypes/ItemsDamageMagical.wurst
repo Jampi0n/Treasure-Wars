@@ -1,6 +1,7 @@
 package ItemsDamageMagical
 
 import ItemInclude
+import ClosureForGroups
 
 constant CATEGORY = 4
 
@@ -84,7 +85,7 @@ function wandOfBlood()
     ItemBalance.values(875,625)
     let intel = ItemBalance.intel()
     let hp = ItemBalance.hp()
-    setupItem(ITEM_ID_WAND_OF_BLOOD, CATEGORY, 1500)
+    setupItem(ITEM_ID_WAND_OF_BLOOD, CATEGORY)
     addRequirements(ITEM_ID_BASIC_WAND, ITEM_ID_GEM_OF_HEALTH)
     addStatLine(ItemStat.INT, intel)
     addStatLine(ItemStat.HP, hp)
@@ -123,22 +124,34 @@ function sapphireAmulet()
         modMana(mp)
 
 function ringOfDarkness()
-    ItemBalance.stats(ItemStat.MR, ItemStat.INT)
-    ItemBalance.values(720,560)
+    ItemBalance.stats(ItemStat.MR, ItemStat.MP)
+    ItemBalance.values(620,560)
+    let mr = ItemBalance.mr()
+    let mp = ItemBalance.mp()
+    let levelUpMana = 35
+    setupItem(ITEM_ID_RING_OF_DARKNESS, CATEGORY)
+    addRequirements(ITEM_ID_MANA_RING, ITEM_ID_GEM_OF_MANA)
+    addStatLine(ItemStat.MR, mr)
+    addStatLine(ItemStat.MP, mp)
+    addPassive("Sorcerer", "Restores {0}% of maximum mana on level up.".format(levelUpMana.str()), 150)
+    setInfo("Ring of the Sorcerer")
+    onEither() (int factor) ->
+        modManaRegen(mr)
+        modMana(mp)
+
+function cursedMask()
+    ItemBalance.stats(ItemStat.INT, ItemStat.MR)
+    ItemBalance.values(775,675)
     let mr = ItemBalance.mr()
     let intel = ItemBalance.intel()
-    setupItem(ITEM_ID_RING_OF_DARKNESS, CATEGORY)
-    addRequirements(ITEM_ID_MANA_RING, ITEM_ID_SPELL_TOME)
-    addStatLine(ItemStat.MR, mr)
+    setupItem(ITEM_ID_CURSED_MASK, CATEGORY)
+    addRequirements(ITEM_ID_SPELL_TOME, ITEM_ID_MANA_RING)
     addStatLine(ItemStat.INT, intel)
-    setInfo("Ring of Darkness")
+    addStatLine(ItemStat.MR, mr)
+    setInfo("Cursed Mask")
     onEither() (int factor) ->
         modManaRegen(mr)
         modIntelligence(intel)
-
-function cursedMask()
-    setupItem(ITEM_ID_CURSED_MASK, CATEGORY, 1500)
-
     
 function monsterBook()
     let intel = ItemBalance.intel(1050)
@@ -169,11 +182,11 @@ function nerubianScepter()
     let intel = ItemBalance.intel()
     let mp = ItemBalance.mp()
     let intBonus = 20
-    setupItem(ITEM_ID_NERUBIAN_SCEPTER, CATEGORY, 4300)
+    setupItem(ITEM_ID_NERUBIAN_SCEPTER, CATEGORY)
     addRequirements(ITEM_ID_WAND_OF_DEATH, ITEM_ID_SCEPTER_OF_THE_TIDES)
     addStatLine(ItemStat.INT, intel)
     addStatLine(ItemStat.MP, mp)
-    addUnique("Increases intelligence by {0}%.".format(intBonus.str()))
+    addUnique("Increases intelligence by {0}%.".format(intBonus.str()), 1300)
     setInfo("Archmage's Staff")
     onEither() (int factor) ->
         modIntelligence(intel)
@@ -189,11 +202,13 @@ function seerStaff()
     let intel = ItemBalance.intel()
     let hp = ItemBalance.hp()
     let dur = 8.0
-    setupItem(ITEM_ID_SEER_STAFF, CATEGORY, 4100)
+    let wardDur = 120
+    setupItem(ITEM_ID_SEER_STAFF, CATEGORY)
     addRequirements(ITEM_ID_WAND_OF_DEATH, ITEM_ID_WAND_OF_BLOOD)
     addStatLine(ItemStat.INT, intel)
     addStatLine(ItemStat.HP, hp)
-    addUnique("Damaging an enemy hero reveals them for {0} seconds.".format(dur.str()))
+    addUnique("Damaging an enemy hero reveals them for {0} seconds.".format(dur.str()), 250)
+    addActive("Vision Ward", "Places an invisible ward at the target location that provides vision in an area and reveals invisible units. Lasts {0} seconds.".format(wardDur.str()), 350)
     setInfo("Wand of Vision")
     SEER_STAFF_BUFF.addSetupFunction() (Buff thisBuff, int factor) ->
         thisBuff.getTarget().wrapper().modReveal(factor)
@@ -205,15 +220,32 @@ function seerStaff()
                 target.addBuffReduced(source, dur, SEER_STAFF_BUFF, 1)
         
 function arcaniteRing()
-    setupItem(ITEM_ID_ARCANITE_RING, CATEGORY, 3000)
-
+    ItemBalance.stats(ItemStat.MR, ItemStat.HR, ItemStat.MP)
+    ItemBalance.values(2200,750,750)
+    let mr = ItemBalance.mr()
+    let hr = ItemBalance.hr()
+    let mp = ItemBalance.mp()
+    let levelUpMana = 50
+    setupItem(ITEM_ID_ARCANITE_RING, CATEGORY)
+    addRequirements(ITEM_ID_RING_OF_DARKNESS, ITEM_ID_RING_OF_REGENERATION)
+    addStatLine(ItemStat.MR, mr)
+    addStatLine(ItemStat.HR, hr)
+    addStatLine(ItemStat.MP, mp)
+    addUnique("?")
+    addPassive("Sorcerer", "Restores {0}% of maximum mana on level up.".format(levelUpMana.str()), 150)
+    setInfo("Ring of Eternal Night")
+    onEither() (int factor) ->
+        modManaRegen(mr)
+        modHealthRegen(hr)
+        modMana(mp)
+    
 function arcaneNecklace()
     ItemBalance.stats(ItemStat.CD, ItemStat.INT, ItemStat.MP)
     ItemBalance.values(1800, 1400, 1000)
     let intel = ItemBalance.intel()
     let cd = ItemBalance.cd()
     let mp = ItemBalance.mp()
-    setupItem(ITEM_ID_ARCANE_NECKLACE, CATEGORY, 3950)
+    setupItem(ITEM_ID_ARCANE_NECKLACE, CATEGORY)
     addRequirements(ITEM_ID_WIZARDS_HAT, ITEM_ID_SAPPHIRE_AMULET)
     addStatLine(ItemStat.INT, intel)
     addStatLine(ItemStat.MP, mp)
@@ -227,40 +259,196 @@ function arcaneNecklace()
             modCooldown(cd)
 
 function bracerOfAbjuration()
-    setupItem(ITEM_ID_BRACER_OF_ABJURATION, CATEGORY, 3000)
+    ItemBalance.stats(ItemStat.MR, ItemStat.HR)
+    ItemBalance.values(1800,1400)
+    let mr = ItemBalance.mr()
+    let hr = ItemBalance.hr()
+    let restoreBonus = 25
+    setupItem(ITEM_ID_BRACER_OF_ABJURATION, CATEGORY)
+    addRequirements(ITEM_ID_MANA_RING, ITEM_ID_RING_OF_REGENERATION, ITEM_ID_RING_OF_HEALTH)
+    addStatLine(ItemStat.MR, mr)
+    addStatLine(ItemStat.HR, hr)
+    addUnique("Health and Mana restoring effects (including regeneration) targeting the hero are {0}% stronger.".format(restoreBonus.str()), 1250)
+    setInfo("Ring of Rejuvenation")
+    onEither() (int factor) ->
+        modManaRegen(mr)
+        modHealthRegen(hr)
+
 function emeraldPendant()
-    setupItem(ITEM_ID_EMERALD_PENDANT, CATEGORY, 3000)
-function scrollOfConjuration()
-    setupItem(ITEM_ID_SCROLL_OF_CONJURATION, CATEGORY, 3000)   
+    ItemBalance.stats(ItemStat.MP, ItemStat.CD, ItemStat.MR, ItemStat.INT)
+    ItemBalance.values(900, 750, 700, 950)
+    let mp = ItemBalance.mp()
+    let mr = ItemBalance.mr()
+    let intel = ItemBalance.intel()
+    let cd = ItemBalance.cd()
+    setupItem(ITEM_ID_EMERALD_PENDANT, CATEGORY)
+    addRequirements(ITEM_ID_SAPPHIRE_AMULET, ITEM_ID_CURSED_MASK)
+    addStatLine(ItemStat.INT, intel)
+    addStatLine(ItemStat.MP, mp)
+    addStatLine(ItemStat.MR, mr)
+    addStatLine(ItemStat.CD, cd)
+    addUnique("?")
+    setInfo("Emerald Pendant")
+    onEither() (int factor) ->
+        modManaRegen(mr)
+        modIntelligence(intel)
+        modCooldown(cd)
+        modMana(mp)
+
+
 function gobletOfFire()
-    setupItem(ITEM_ID_GOBLET_OF_FIRE, CATEGORY, 3000)
-    addUnique("Dealing magic damage incinerates enemies, causing them to take {0}% damage over {1} seconds.")
+    ItemBalance.stats(ItemStat.INT, ItemStat.MR)
+    ItemBalance.values(2250,1150)
+    let intel = ItemBalance.intel()
+    let mr = ItemBalance.mr()
+    let dmg = 10
+    let dmgInt = 5.0
+    let dur = 3.0
+    setupItem(ITEM_ID_GOBLET_OF_FIRE, CATEGORY)
+    addRequirements(ITEM_ID_WAND_OF_DEATH, ITEM_ID_MAGMA_CRYSTAL, ITEM_ID_CURSED_MASK)
+    addStatLine(ItemStat.INT, intel)
+    addStatLine(ItemStat.MR, mr)
+    addUnique("Attacks deal {0} magic damage per second for {1} seconds. This effect stacks.".format(dmg.str() + bonusStringFactor(C_INT, dmgInt, "Intelligence"), dur.str()))
     setInfo("Flaming Goblet")
+    onEither() (int factor) ->
+        modManaRegen(mr)
+        modIntelligence(intel)
+
 function gobletOfVampires()
     let lifeSteal = 20
-    setupItem(ITEM_ID_GOBLET_OF_VAMPIRES, CATEGORY, 3000)
-    addUnique("Restores health equal to {0}% of the magic damage you deal.".format(lifeSteal.str()))
+    ItemBalance.stats(ItemStat.INT, ItemStat.HP, ItemStat.HR)
+    ItemBalance.values(2040, 820, 740)
+    let intel = ItemBalance.intel()
+    let hp = ItemBalance.hp()
+    let hr =ItemBalance.hr()
+    setupItem(ITEM_ID_GOBLET_OF_VAMPIRES, CATEGORY)
+    addRequirements(ITEM_ID_WAND_OF_BLOOD, ITEM_ID_RING_OF_HEALTH, ITEM_ID_MONSTER_BOOK)
+    addStatLine(ItemStat.INT, intel)
+    addStatLine(ItemStat.HP, hp)
+    addStatLine(ItemStat.HR, hr)
+    addUnique("Restores health equal to {0}% of the magic damage you deal.".format(lifeSteal.str()), 850)
     setInfo("Vampiric Goblet")
+    onEither() (int factor) ->
+        modIntelligence(intel)
+        modHealthRegen(hr)
+        modHealth(hp)
 
 constant BLESSED_GOBLET_BUFF = compiletime(setupBuff("Ever-Filled Chalice", "Mana regenerates much faster.", "BTNBless", true, 1, Abilities.aNrlTarget,"origin", DispelLevel.DISPEL))
 
 function blessedGoblet()
     let regenMultiplier = 3
     let dur = 6.0
-    setupItem(ITEM_ID_BLESSED_GOBLET, CATEGORY, 3000)
-    addUnique("After casting a spell, mana regenerates {0} times as fast for {1} seconds.".format(regenMultiplier.str(), dur.str()))
+    let levelUpMana = 50
+    ItemBalance.stats(ItemStat.INT, ItemStat.MP, ItemStat.MR)
+    ItemBalance.values(975, 1250, 1250)
+    let intel = ItemBalance.intel()
+    let mp = ItemBalance.mp()
+    let mr =ItemBalance.mr()
+    setupItem(ITEM_ID_BLESSED_GOBLET, CATEGORY)
+    addRequirements(ITEM_ID_SCEPTER_OF_THE_TIDES, ITEM_ID_MANA_RING, ITEM_ID_RING_OF_DARKNESS)
+    addStatLine(ItemStat.INT, intel)
+    addStatLine(ItemStat.MP, mp)
+    addStatLine(ItemStat.MR, mr)
+    addUnique("After casting a spell, mana regenerates {0} times as fast for {1} seconds.".format(regenMultiplier.str(), dur.str()), 600)
+    addPassive("Sorcerer", "Restores {0}% of maximum mana on level up.".format(levelUpMana.str()), 150)
     setInfo("Ever-Filled Chalice")
     if not compiletime
         BLESSED_GOBLET_BUFF.addLevelFunction() (Buff thisBuff, int factor) ->
             thisBuff.getTarget().wrapper().modManaRegenRelative(1000 * factor * (regenMultiplier - 1))
         HeroCast.register() ->
             let caster = GetTriggerUnit()
-            caster.addBuff(caster, dur, BLESSED_GOBLET_BUFF, 1)
+            if caster.hasItemById(ITEM_ID_BLESSED_GOBLET)
+                caster.addBuff(caster, dur, BLESSED_GOBLET_BUFF, 1)
+
+    onEither() (int factor) ->
+        modIntelligence(intel)
+        modManaRegen(mr)
+        modMana(mp)
         
+constant SCROLL_OF_CONJURATION_BUFF = compiletime(setupBuff("Scroll of Conjuration", "Attack Speed and Hit Points are increased.", "BTNAdept003", true, 1, Abilities.generalAuraTarget ,"origin", DispelLevel.DISPEL))
+
+function scrollOfConjuration()
+    ItemBalance.stats(ItemStat.INT, ItemStat.CD)
+    ItemBalance.values(2250, 1150)
+    let intel = ItemBalance.intel()
+    let cd = ItemBalance.cd()
+    let summonBonus = 25
+    let itemBearerGroup = CreateGroup()
+    setupItem(ITEM_ID_SCROLL_OF_CONJURATION, CATEGORY)
+    addRequirements(ITEM_ID_WIZARDS_HAT, ITEM_ID_MONSTER_BOOK)
+    addStatLine(ItemStat.INT, intel)
+    addStatLine(ItemStat.CD, cd)
+    addUnique("Increases Hit Points and Attack Speed of your nearby non-hero units by {0}%.".format(summonBonus.str()), 650)
+    setInfo("Scroll of Conjuration")
+    onEither() (int factor) ->
+        modIntelligence(intel)
+        modCooldown(cd)
+        if isUnique()
+            if factor == 1
+                itemBearerGroup.add(getItemUnit())
+            else
+                itemBearerGroup.remove(getItemUnit())
+
+    if not compiletime
+        SCROLL_OF_CONJURATION_BUFF.addLevelFunction() (Buff thisBuff, int factor) ->
+            thisBuff.getTarget().wrapper()
+            ..modAttackSpeed(summonBonus * factor)
+            ..modHealthRelative(summonBonus * factor * 10)
+        doPeriodically(0.25) (CallbackPeriodic cb) ->
+            ForGroup(itemBearerGroup) () ->
+                let bearer = GetEnumUnit()
+                let bearerPlayer = bearer.getOwner()
+                forUnitsInRange(bearer.getPos(), 900) (unit u) ->
+                    if u.getOwner() == bearerPlayer and not u.isType(UNIT_TYPE_HERO) and u.isTargetable()
+                        u.addBuff(bearer, 1, SCROLL_OF_CONJURATION_BUFF, 1)
+                    
+
+constant DEMONIC_SPELL_TOME_BUFF = compiletime(setupBuff("Tome of Ancient Rituals", "Armor and Magic Resistance are increased.", "BTNWeaver03", true, 1,"SoulArmorCrimson_opt.mdx" ,"chest", DispelLevel.DISPEL))
+
 function demonicSpellTome()
-    setupItem(ITEM_ID_DEMONIC_SPELL_TOME, CATEGORY, 3000)
-    addUnique("")
+    ItemBalance.stats(ItemStat.HP, ItemStat.INT, ItemStat.AGI, ItemStat.AR)
+    ItemBalance.values(700, 1325, 850, 850)
+    let hp = ItemBalance.hp()
+    let intel = ItemBalance.intel()
+    let agi = ItemBalance.agi()
+    let ar =  ItemBalance.ar()
+    let defenseBonus = 40
+    setupItem(ITEM_ID_DEMONIC_SPELL_TOME, CATEGORY)
+    addRequirements(ITEM_ID_GEM_OF_HEALTH, ITEM_ID_MONSTER_BOOK, ITEM_ID_SHIELD, ITEM_ID_VOID_CRYSTAL)
+    addStatLine(ItemStat.INT, intel)
+    addStatLine(ItemStat.HP, hp)
+    addStatLine(ItemStat.AR, ar)
+    addStatLine(ItemStat.AGI, agi)
+    addUnique("Increases Armor and Magic Resistance by {0} while casting spells.".format(defenseBonus.str()), 600)
     setInfo("Tome of Ancient Rituals")
+    if not compiletime
+        DEMONIC_SPELL_TOME_BUFF.addLevelFunction() (Buff thisBuff, int factor) ->
+            thisBuff.getTarget().wrapper()
+            ..modArmor(defenseBonus * factor)
+            ..modAgility(defenseBonus * factor)
+    onEither() (int factor) ->
+        modIntelligence(intel)
+        modHealth(hp)
+        modArmor(ar)
+        modAgility(agi)
+        var trg = itemTrigger(1)
+        if trg != null
+            trg.registerUnitEvent(getItemUnit(), EVENT_UNIT_SPELL_CHANNEL)
+            trg.addAction() ->
+                let caster = GetTriggerUnit()
+                caster.addBuff(caster, -1, DEMONIC_SPELL_TOME_BUFF, 1)
+        trg = itemTrigger(-1)
+        if trg != null
+            trg.registerUnitEvent(getItemUnit(), EVENT_UNIT_SPELL_ENDCAST)
+            trg.addAction() ->
+                let w = GetTriggerUnit().wrapper()
+                if w.hasBuffOfType(DEMONIC_SPELL_TOME_BUFF)
+                    w.getBuffOfType(DEMONIC_SPELL_TOME_BUFF).dispel()
+        if factor == -1
+            let w = getItemUnit().wrapper()
+            if w.hasBuffOfType(DEMONIC_SPELL_TOME_BUFF)
+                w.getBuffOfType(DEMONIC_SPELL_TOME_BUFF).dispel()
+
 
 
 

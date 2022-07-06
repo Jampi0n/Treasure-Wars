@@ -11,6 +11,7 @@ package FileLog
 import NoWurst
 import LinkedList
 import TypeCasting
+import MagicFunctions
 
 public constant FILE_LOG = new FileLog("FileLog.txt", true)
 
@@ -41,12 +42,13 @@ public class FileLog
             writePreload()
 
     function writePreload()
-        PreloadGenClear()
-        PreloadGenStart()
-        for line in this.lines
-            Preload(line)
+        if not compiletime
+            PreloadGenClear()
+            PreloadGenStart()
+            for line in this.lines
+                Preload(line)
 
-        PreloadGenEnd(fileName)
+            PreloadGenEnd(fileName)
 
 init
     realToIndex(0)
