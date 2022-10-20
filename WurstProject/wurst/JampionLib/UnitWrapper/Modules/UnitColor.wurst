@@ -28,16 +28,19 @@ public module UnitColor
             wrapper().toUnit().setVertexColor(this.defaultColor)
 
     function incBlue()
+        wrapper().checkValid()
         blueCount++
         if blueCount == 1
             wrapper().toUnit().setVertexColor(140, 220, 255, 255)
 
     function decBlue()
+        wrapper().checkValid()
         blueCount--
         if blueCount == 0
             wrapper().toUnit().setVertexColor(this.defaultColor)
 
     function modBlue(int value)
+        wrapper().checkValid()
         blueCount += value
         if blueCount > 0
             wrapper().toUnit().setVertexColor(140, 220, 255, 255)

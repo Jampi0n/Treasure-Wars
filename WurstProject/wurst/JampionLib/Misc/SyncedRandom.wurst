@@ -1,0 +1,19 @@
+package SyncedRandom
+
+import GameTimer
+
+public function MyRandomReal() returns real
+    let t = getElapsedGameTime()
+    var y = (Sin(t * 10000) * Cos(t * 10000) * 0.5 + Sin(t * t * 10000) * 0.5) * 0.5 + 0.5
+    if y < 0
+        y = 0
+    if y > 1
+        y = 1
+    return y
+
+public function MyRandomReal(real lower, real upper) returns real
+    return (upper - lower) *  MyRandomReal() + lower
+
+
+public function MyRandomInt(int lower, int upper) returns int
+    return ((upper - lower + 1) *  MyRandomReal() + lower - 0.5).round()

@@ -41,24 +41,28 @@ public module UnitBuffs
         return this.buffList
 
     function hasBuff(Buff b) returns bool
+        wrapper().checkValid()
         if this.buffList != null
             return this.buffList.hasBuff(b)
         else
             return false
 
     function hasBuffOfType(BuffType bType) returns bool
+        wrapper().checkValid()
         if this.buffList != null
             return this.buffList.hasBuffOfType(bType)
         else
             return false
 
     function getBuffOfType(BuffType bType) returns Buff
+        wrapper().checkValid()
         if this.buffList != null
             return this.buffList.getBuffOfType(bType)
         else
             return null
 
     function addBuff(unit caster, BuffType buffType, real duration, int level) returns Buff
+        wrapper().checkValid()
         if this.buffList == null
             this.createBuffList()
         Buff.addBuff(this.buffList, wrapper().toUnit(), caster, buffType, duration, level)

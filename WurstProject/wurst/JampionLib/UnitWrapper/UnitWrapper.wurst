@@ -88,6 +88,7 @@ public abstract class UnitWrapperSingleton
 public abstract class UnitWrapper
     private unit assocUnit
     private static constant toWrapper = new HashMap<unit, UnitWrapper>()
+    private bool invalid = false
 
     function toUnit() returns unit
         return this.assocUnit
@@ -95,14 +96,27 @@ public abstract class UnitWrapper
     private construct(unit u)
         this.assocUnit = u
         toWrapper.put(u, this)
+        if u.getAbilityLevel(LOCUST_ID) > 0
+            this.invalid = true
+
+    function checkValid()
+        if this.invalid
+            Log.error("using invalid wrapper. " + getStackTraceString())
 
     static function getWrapper(unit u) returns thistype
         if u == null or u.getTypeId() == 0
             error("Requesting wrapper for null unit.")
             return null
+        if u.getAbilityLevel(LOCUST_ID) > 0
+            Log.error("Requesting wrapper for dummy. " + getStackTraceString())
         let w = toWrapper.get(u)
         if w == null
-            error("The unit " + u.getName() + "(" + u.getTypeId().toRawCode() + ") has no wrapper.")
+            Log.error("The unit " + u.getName() + "(" + u.getTypeId().toRawCode() + ") has no wrapper. " + getStackTraceString())
+            UnitWrapperSingleton.singleton.createNew(u)
+            let wNew = toWrapper.get(u)
+            if wNew == null
+                Log.error("Newly created wrapper is null. " + getStackTraceString())
+            return wNew
         return w
 
     static function tryGetWrapper(unit u) returns thistype

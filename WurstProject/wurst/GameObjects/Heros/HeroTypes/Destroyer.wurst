@@ -94,6 +94,8 @@ public class HeroDestroyer extends HeroTemplate
                     ..setFinalArea(lvl, 175)
                     ..setMaxDamage(lvl, 99999)
                     ..setAreaofEffect(lvl, 100)
+                    ..setDurationHero(lvl, 0.1)
+                    ..setDurationNormal(lvl, 0.1)
 
         let tooltip = new DynamicTooltip(abilityId)
         tooltip.setReplaceStats(BREATH_DAMAGE_BONUS)
@@ -353,7 +355,7 @@ public class HeroDestroyer extends HeroTemplate
     override function onInitDelayed(IHeroType heroType)
         onImpact(BUFF_ID_ON_BREATH) (unit source, unit target) ->
             let instance = DestroyerInstance.fromUnit(source)
-            if target.isTargetableEnemy(source) and not instance.hitByBreath.has(target)
+            if instance != null and target.isTargetableEnemy(source) and not instance.hitByBreath.has(target)
                 let level = source.getAbilityLevel(ABILITY_ID_Q)
                 instance.hitByBreath.add(target)
                 source.dealDamage(target, BREATH_DAMAGE[level-1].bonus(source.getHeroInt(), BREATH_DAMAGE_BONUS), ReductionType.MAGIC)

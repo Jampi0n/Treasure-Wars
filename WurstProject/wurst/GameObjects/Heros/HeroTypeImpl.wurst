@@ -8,7 +8,6 @@ import AbilityObjEditing
 import LinkedList
 import RecommendedItems
 import Preloader
-import Stats
 import DynamicTooltips
 import IHero
 import ErrorHandling
@@ -737,6 +736,13 @@ public module HeroInstance
         return fromUnit(GetTriggerUnit())
 
     static function fromUnit(unit u) returns thistype
+        if instanceMap.has(u)
+            return instanceMap.get(u)
+        else
+            Log.error("No hero instance for unit: " + u.getName() + ", " + u.getTypeId().toString() + ": " + getStackTraceString())
+            return null
+
+    static function tryFromUnit(unit u) returns thistype
         if instanceMap.has(u)
             return instanceMap.get(u)
         else

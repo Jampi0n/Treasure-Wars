@@ -1,7 +1,6 @@
 package UnitStats
 
 import NoWurst
-import Stats
 import BonusMod
 import UnitWrapper
 import Unit
@@ -9,6 +8,44 @@ import Integer
 import Printing
 import Annotations
 
+public constant STAT_COUNT = 11
+
+string array nameArray
+
+public enum Stat
+    HP
+    HR
+    MP
+    MR
+    AD
+    AS
+    AR
+    MS
+    STR
+    AGI
+    INT
+
+public function Stat.toInt() returns int
+    return this castTo int
+
+public function intToStat(int i) returns Stat
+    return i castTo Stat
+
+public function Stat.toString() returns string
+    return nameArray[this castTo int]
+
+init
+    nameArray[Stat.HP.toInt()] = "HP"
+    nameArray[Stat.HR.toInt()] = "HR"
+    nameArray[Stat.MP.toInt()] = "MP"
+    nameArray[Stat.MR.toInt()] = "MR"
+    nameArray[Stat.AD.toInt()] = "AD"
+    nameArray[Stat.AS.toInt()] = "AS"
+    nameArray[Stat.AR.toInt()] = "AR"
+    nameArray[Stat.MS.toInt()] = "MS"
+    nameArray[Stat.STR.toInt()] = "STR"
+    nameArray[Stat.AGI.toInt()] = "AGI"
+    nameArray[Stat.INT.toInt()] = "INT"
 
 public interface CalculateTotalBonus
     function calculate(unit u, Stat whichStat)
@@ -75,7 +112,6 @@ public module UnitStats
         statBaseValue_static[this.arrayOffset + Stat.MR.toInt()] = 0
         statBaseValue_static[this.arrayOffset + Stat.HP.toInt()] = this.assocUnit.getMaxHP().toInt()
         statBaseValue_static[this.arrayOffset + Stat.MP.toInt()] = this.assocUnit.getMaxMana().toInt()
-        statBaseValue_static[this.arrayOffset + Stat.CD.toInt()] = 0
         applyBaseStats()
 
     @inline
@@ -153,7 +189,6 @@ public module UnitStats
         ..applyAttackSpeed()
         ..applyArmor()
         ..applyMoveSpeed()
-        ..applyCooldown()
 
     function applyStatDispatch(Stat whichStat)
         switch whichStat
@@ -175,8 +210,6 @@ public module UnitStats
                 this.applyHealth()
             case MP
                 this.applyMana()
-            case CD
-                this.applyCooldown()
             default
 
     @inline function applyDamage()
@@ -190,7 +223,6 @@ public module UnitStats
     @inline function applyMana()
     @inline function applyHealthRegen()
     @inline function applyManaRegen()
-    @inline function applyCooldown()
 
     function updateAll()
         this
@@ -205,9 +237,9 @@ public module UnitStats
         ..updateAttackSpeed()
         ..updateArmor()
         ..updateMoveSpeed()
-        ..updateCooldown()
 
     function updateStat(Stat whichStat)
+        wrapper().checkValid()
         if this.bonusCalculation != null
             this.bonusCalculation.calculate(this.assocUnit, whichStat)
         else
@@ -235,8 +267,6 @@ public module UnitStats
         updateStat(Stat.HR)
     @inline function updateManaRegen()
         updateStat(Stat.MR)
-    @inline function updateCooldown()
-        updateStat(Stat.CD)
 
     @inline private function modStatHelper(Stat whichStat, int modifier)
         setStatAbsoluteBonusInternal(whichStat, getStatAbsoluteBonus(whichStat) + modifier)
@@ -288,10 +318,6 @@ public module UnitStats
         modStatHelper(Stat.MR, modifier)
         updateManaRegen()
         applyManaRegen()
-    @inline function modCooldown(int modifier)
-        modStatHelper(Stat.CD, modifier)
-        updateCooldown()
-        applyCooldown()
 
     @inline private function modStatRelativeHelper(Stat whichStat, int modifier)
         setStatRelativeBonusInternal(whichStat, getStatRelativeBonus(whichStat) + modifier)
@@ -343,10 +369,6 @@ public module UnitStats
         modStatRelativeHelper(Stat.MR, modifier)
         updateManaRegen()
         applyManaRegen()
-    @inline function modCooldownRelative(int modifier)
-        modStatRelativeHelper(Stat.CD, modifier)
-        updateCooldown()
-        applyCooldown()
 
     private function modStatFractionHelper(Stat whichStat, int modifier)
         let arrayIndex = this.arrayOffset + whichStat.toInt()
@@ -402,12 +424,9 @@ public module UnitStats
         modStatFractionHelper(Stat.MR, modifier)
         updateManaRegen()
         applyManaRegen()
-    @inline function modCooldownFraction(int modifier)
-        modStatFractionHelper(Stat.CD, modifier)
-        updateCooldown()
-        applyCooldown()
 
     @inline function getStat(Stat whichStat) returns int
+        wrapper().checkValid()
         return this.getStatBase(whichStat) + this.getStatBonus(whichStat)
     @inline function getDamage() returns int
         return this.getDamageBase() + this.getDamageBonus()
@@ -431,10 +450,9 @@ public module UnitStats
         return this.getHealthRegenBase() + this.getHealthRegenBonus()
     @inline function getManaRegen() returns int
         return this.getManaRegenBase() + this.getManaRegenBonus()
-    @inline function getCooldown() returns int
-        return this.getCooldownBase() + this.getCooldownBonus()
 
     @inline function getStatBonus(Stat whichStat) returns int
+        wrapper().checkValid()
         return statsTotalBonus_static[this.arrayOffset + whichStat.toInt()]
     @inline function getDamageBonus() returns int
         return getStatBonus(Stat.AD)
@@ -458,10 +476,9 @@ public module UnitStats
         return getStatBonus(Stat.HR)
     @inline function getManaRegenBonus() returns int
         return getStatBonus(Stat.MR)
-    @inline function getCooldownBonus() returns int
-        return getStatBonus(Stat.CD)
 
     @inline function getStatBase(Stat whichStat) returns int
+        wrapper().checkValid()
         return statBaseValue_static[this.arrayOffset + whichStat.toInt()]
     @inline function getDamageBase() returns int
         return getStatBase(Stat.AD)
@@ -485,10 +502,9 @@ public module UnitStats
         return getStatBase(Stat.HR)
     @inline function getManaRegenBase() returns int
         return getStatBase(Stat.MR)
-    @inline function getCooldownBase() returns int
-        return getStatBase(Stat.CD)
 
     @inline function getStatAbsoluteBonus(Stat whichStat) returns int
+        wrapper().checkValid()
         return statsAbsoluteBonus_static[this.arrayOffset + whichStat.toInt()]
     @inline function getDamageAbsoluteBonus() returns int
         return getStatAbsoluteBonus(Stat.AD)
@@ -512,10 +528,9 @@ public module UnitStats
         return getStatAbsoluteBonus(Stat.HR)
     @inline function getManaRegenAbsoluteBonus() returns int
         return getStatAbsoluteBonus(Stat.MR)
-    @inline function getCooldownAbsoluteBonus() returns int
-        return getStatAbsoluteBonus(Stat.CD)
 
     @inline function getStatRelativeBonus(Stat whichStat) returns int
+        wrapper().checkValid()
         return statsRelativeBonus_static[this.arrayOffset + whichStat.toInt()]
     @inline function getDamageRelativeBonus() returns int
         return getStatRelativeBonus(Stat.AD)
@@ -539,8 +554,6 @@ public module UnitStats
         return getStatRelativeBonus(Stat.HR)
     @inline function getManaRegenRelativeBonus() returns int
         return getStatRelativeBonus(Stat.MR)
-    @inline function getCooldownRelativeBonus() returns int
-        return getStatRelativeBonus(Stat.CD)
 
     @inline function setStatBonusInternal(Stat whichStat, int value)
         statsTotalBonus_static[this.arrayOffset + whichStat.toInt()] = value

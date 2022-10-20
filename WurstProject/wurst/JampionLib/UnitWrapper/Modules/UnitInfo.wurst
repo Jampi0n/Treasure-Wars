@@ -24,20 +24,25 @@ public module UnitInfo
         this.unitTypeId = wrapper().toUnit().getTypeId()
 
     function getOwner() returns player
+        wrapper().checkValid()
         return this.owner
 
     function getOwnerId() returns int
+        wrapper().checkValid()
         return this.ownerId
 
     function getTypeId() returns int
+        wrapper().checkValid()
         return this.unitTypeId
 
     function setOwner(player p, bool changeColor)
+        wrapper().checkValid()
         this.owner = p
         this.ownerId = p.getId()
         wrapper().toUnit().setOwner(p, changeColor)
 
     function setOwnerId(int id, bool changeColor)
+        wrapper().checkValid()
         setOwner(players[id], changeColor)
 
     function destroyInfo()

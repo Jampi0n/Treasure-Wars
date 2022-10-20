@@ -6,7 +6,6 @@ import Unit
 import TimerUtils
 import LinkedList
 import InstantDummyCaster
-import HashMap
 import ErrorHandling
 import Execute
 import AbilityPresets
@@ -20,8 +19,6 @@ public enum DispelLevel
     DISPEL // standard dispel is enough: Curse, Faerie Fire, Slow, ...
     BREAK // cannot be dispelled, but can be stopped (e.g. turning the target invulnerable): Aerial Shackles, Life Drain
     NONE // cannot be removed at all
-
-constant unitToBuffList = new HashMap<unit, BuffList>()  
 
 public interface BuffEventClosure
     function run(Buff whichBuff)

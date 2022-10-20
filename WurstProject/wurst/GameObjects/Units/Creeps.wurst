@@ -64,7 +64,7 @@ function initCreepBuffs()
     TURTLE_BUFF.addSetupFunction() (Buff thisBuff, int factor) ->
         if factor == 1
             let pointer = DamageEventUnit.fromUnit(thisBuff.getTarget()).attackHitNoBuilding.add() (unit source, unit target, DamageEventUnit sourceWrapper, DamageEventUnit targetWrapper, real damage, boolean attack, boolean _active, boolean advanced) ->
-                if damage > 1 and source.getAbilityLevel('Aloc') == 0
+                if damage > 1// and not source.isDummy()
                     target.dealDamage(source, damage * 0.1, ReductionType.PHYSICAL)
             thisBuff.setData(pointer)
         else

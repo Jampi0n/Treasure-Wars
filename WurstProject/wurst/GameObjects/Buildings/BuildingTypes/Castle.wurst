@@ -3,6 +3,7 @@ package Castle
 import BuildingsInclude
 import TimerUtils
 import PathUnit
+import Artillery
 
 constant SOUND_CALL_TO_ARMS = new SoundDefinition(Sounds.humanCallToArmsWhat1, false, true)
 
@@ -68,6 +69,7 @@ function setVictoryState(VictoryState newState)
 		StatTable.create()
 
 		printTimed("You can now view player stats on the Stats-Multiboard.", 60)
+		ArtilleryDetection.enable(false)
 
 		if false
 			doAfter(5) ->

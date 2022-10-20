@@ -337,13 +337,13 @@ constant BLESSED_GOBLET_BUFF = compiletime(setupBuff("Ever-Filled Chalice", "Man
 
 function blessedGoblet()
     let regenMultiplier = 3
-    let dur = 6.0
+    let dur = 7.0
     let levelUpMana = 50
     ItemBalance.stats(ItemStat.INT, ItemStat.MP, ItemStat.MR)
     ItemBalance.values(975, 1250, 1250)
     let intel = ItemBalance.intel()
     let mp = ItemBalance.mp()
-    let mr =ItemBalance.mr()
+    let mr = ItemBalance.mr()
     setupItem(ITEM_ID_BLESSED_GOBLET, CATEGORY)
     addRequirements(ITEM_ID_SCEPTER_OF_THE_TIDES, ITEM_ID_MANA_RING, ITEM_ID_RING_OF_DARKNESS)
     addStatLine(ItemStat.INT, intel)
@@ -412,7 +412,7 @@ function demonicSpellTome()
     let intel = ItemBalance.intel()
     let agi = ItemBalance.agi()
     let ar =  ItemBalance.ar()
-    let defenseBonus = 40
+    let defenseBonus = 50
     setupItem(ITEM_ID_DEMONIC_SPELL_TOME, CATEGORY)
     addRequirements(ITEM_ID_GEM_OF_HEALTH, ITEM_ID_MONSTER_BOOK, ITEM_ID_SHIELD, ITEM_ID_VOID_CRYSTAL)
     addStatLine(ItemStat.INT, intel)

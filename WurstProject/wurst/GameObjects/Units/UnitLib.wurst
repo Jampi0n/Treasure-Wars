@@ -273,3 +273,6 @@ public function enumUnitsInHitBoxRange(vec2 pos, real range) returns group
     
     g.destr()
     return returnGroup
+
+public function unit.isDummy() returns bool
+    return this.getAbilityLevel('Aloc') > 0

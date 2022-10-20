@@ -3,6 +3,7 @@ package GeneralEvents
 import HashMap
 import ErrorHandling
 import DamageDetection
+import ObjectIds
 
 //  Animation Speed
 
@@ -42,6 +43,13 @@ function onImpactTrigger()
     for i = 0 to impactCounter
         if target.hasAbility(impactBuffId[i])
             target.removeAbility(impactBuffId[i])
+            int counter = 1
+            while target.hasAbility(impactBuffId[i])
+                target.removeAbility(impactBuffId[i])
+                counter++
+                if counter > 10
+                    Log.error("cannot remove impact: " + source.getName() + " -> " + target.getName() + ":" + GetEventDamage().toString() + ", " +  toRawCode(impactBuffId[i]))
+                    break
             impactFunction[i].onImpact(source, target)
 
 

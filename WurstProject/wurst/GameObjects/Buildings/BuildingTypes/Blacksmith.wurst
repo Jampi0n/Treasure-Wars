@@ -1,7 +1,6 @@
 package Blacksmith
 
 import BuildingsInclude
-import Stats
 
 public unit array blacksmith = [udg_GreenBlacksmith[0], udg_GreenBlacksmith[1], udg_BrownBlacksmith[0], udg_BrownBlacksmith[1]]
 public boolean array blacksmithAlive = [true, true, true, true]
@@ -54,7 +53,7 @@ public class Blacksmith extends Building
                     if u == null
                         break
                     g.remove(u)
-                    if not u.isType(UNIT_TYPE_STRUCTURE)
+                    if not u.isType(UNIT_TYPE_STRUCTURE)// and not u.isDummy()
                         // the unit stats are already applied by upgrades
                         // only base value stats need to be updated and bonuses need to be recalculated
                         u.wrapper()

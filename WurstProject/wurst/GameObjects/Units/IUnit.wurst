@@ -9,8 +9,7 @@ import UnitWrapper
 import UnitInfo
 import UnitBuffs
 import UnitColor
-import UnitStats
-import Stats
+import public UnitStats
 import BonusMod
 import Buff
 import FastDamageEvent
@@ -39,6 +38,7 @@ public class IUnit extends UnitWrapper
     bool allowItemPickUp = true
     bool allowItemDrop = true
     int lifeSteal = 0
+    int cooldownRecovery = 0
     int attackEventPointer = 0
     int armorReduction = 0
     int armorReductionRelative = 0
@@ -84,12 +84,15 @@ public class IUnit extends UnitWrapper
                 
 
     function setAllowItemPickup(bool flag)
+        checkValid()
         allowItemPickUp = flag
 
     function getAllowItemPickup() returns bool
+        checkValid()
         return allowItemPickUp
 
     function setAllowItemDrop(bool flag)
+        checkValid()
         allowItemDrop = flag
         for i = 0 to 5
             let itm = this.toUnit().itemInSlot(i)
@@ -98,35 +101,45 @@ public class IUnit extends UnitWrapper
                 itm.setPawnable(flag)
 
     function getAllowItemDrop() returns bool
+        checkValid()
         return allowItemDrop
 
     function setHero(IHero hero)
+        checkValid()
         this.hero = hero
 
     function getHeroType() returns IHeroType
+        checkValid()
         return this.heroType
 
     function toHero() returns IHero
+        checkValid()
         return this.hero
 
     function isHero() returns bool
+        checkValid()
         return this.isHero
 
     function getOwningHero() returns IHero
+        checkValid()
         return this.owningHero
 
     function setOwningHero(IHero owningHero)
+        checkValid()
         this.owningHero = owningHero
 
     function morph()
+        checkValid()
         this.scale(1)
         this.applyBaseStats()
 
     function scale(real multiplier)
+        checkValid()
         this.scaleMultiplier *= multiplier
         this.toUnit().setScale(this.baseScale * this.scaleMultiplier)
 
     function incReveal()
+        checkValid()
         revealCount++
         if revealCount == 1
             if this.team == TEAM_1
@@ -135,6 +148,7 @@ public class IUnit extends UnitWrapper
                 UnitShareVision(this.toUnit(), players[Teams.army1()], true)
 
     function decReveal()
+        checkValid()
         revealCount--
         if revealCount == 0
             if this.team == TEAM_1
@@ -143,6 +157,7 @@ public class IUnit extends UnitWrapper
                 UnitShareVision(this.toUnit(), players[Teams.army1()], false)
 
     function modReveal(int value)
+        checkValid()
         revealCount += value
         if revealCount > 0
             if this.team == TEAM_1
@@ -154,9 +169,6 @@ public class IUnit extends UnitWrapper
                 UnitShareVision(this.toUnit(), players[Teams.army2()], false)
             else if this.team == TEAM_2
                 UnitShareVision(this.toUnit(), players[Teams.army1()], false)
-
-    function modLifesteal(int modifier)
-        this.lifeSteal += modifier
 
     override function applyDamage()
     override function applyArmor()
@@ -185,12 +197,32 @@ public class IUnit extends UnitWrapper
         this.toUnit().setMaxMana(this.getMana(), true)
     override function applyHealthRegen()
     override function applyManaRegen()
-    override function applyCooldown()
+
+
+    // special stats
+
+    function modLifesteal(int modifier)
+        checkValid()
+        this.lifeSteal += modifier
+
+    function modCooldown(int cd)
+        checkValid()
+        this.cooldownRecovery += cd
+        this.applyCooldown()
+
+    function getCooldown() returns int
+        checkValid()
+        return this.cooldownRecovery
+
+    function applyCooldown()
+        checkValid()
         if this.isHero
             if this.hero != null // when the hero us created, the unit wrapper exists before the hero, so hero may still be null
                 this.hero.updateCooldowns()
 
 public function unit.wrapper() returns IUnit
+    if this.getTypeId() == 'x01x'
+        Log.error("acid spray wrapper. " + getStackTraceString())
     return IUnit.getWrapper(this) castTo IUnit
 
 init

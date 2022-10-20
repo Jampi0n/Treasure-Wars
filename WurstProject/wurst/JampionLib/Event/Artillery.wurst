@@ -84,6 +84,11 @@ public class ArtilleryDetection
     private static ArtilleryDetection array indexToObject
     private int index
 
+    private static bool enabled = true
+
+    static function enable(bool flag)
+        enabled = flag
+
     construct(unit caster, int data, OnArtilleryHit onHit)
         this.index = alloc.allocate()
         indexToObject[this.index] = this
@@ -101,7 +106,8 @@ public class ArtilleryDetection
     
             doAfter(MAX_ARTILLERY_AIR_TIME) -> 
                 if this.random == random
-                    Log.warn("Artillery detection expired")
+                    if enabled
+                        Log.warn("Artillery detection expired")
                     destroy this
 
     function getIndex() returns int
@@ -119,14 +125,15 @@ public class ArtilleryDetection
         alloc.deallocate(this.index)
 
     private static function onImpact()
-        let key = getEnterLeaveUnit().getTypeId()
-        if artilleryTypeIdToIndex.has(key)
-            let id = artilleryTypeIdToIndex.get(key)
-            let artilleryDetection = indexToObject[id]
-            if artilleryDetection != null
-                artilleryDetection.impact(getEnterLeaveUnit())
-            else
-                Log.warn("index error for ArtilleryDetection")
+        if enabled
+            let key = getEnterLeaveUnit().getTypeId()
+            if artilleryTypeIdToIndex.has(key)
+                let id = artilleryTypeIdToIndex.get(key)
+                let artilleryDetection = indexToObject[id]
+                if artilleryDetection != null
+                    artilleryDetection.impact(getEnterLeaveUnit())
+                else
+                    Log.warn("index error for ArtilleryDetection")
 
     protected static function classInit()
         for i = 0 to MAX_ARTILLERY_MISSILES
